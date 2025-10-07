@@ -1,9 +1,5 @@
-const Home = () => {
-    return (
-        <div>
-            <h1>Prueba</h1>
-        </div>
-    )
-}
+import PaymentMethodUI from './payment/interface/PaymentMethodUI';
 
-export default Home;
+export default function PaymentPage() {
+  return <PaymentMethodUI />;
+}
