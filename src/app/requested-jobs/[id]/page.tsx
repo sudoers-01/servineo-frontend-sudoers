@@ -1,7 +1,6 @@
 "use client";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Check, X } from "lucide-react";
 
 interface Job {
   id: string;
@@ -10,61 +9,55 @@ interface Job {
   horario: string;
 }
 
-const MOCK_JOBS: Job[] = [
-  {
-    id: "1",
-    cliente: "Fulanito de Tal",
-    descripcion:
-      "La tubería de lava platos de la cocina, en la parte de la pared presenta fugas.",
-    horario: "De 09:00 a 10:00",
-  },
-  {
-    id: "2",
-    cliente: "María Pérez",
-    descripcion: "Revisión del sistema eléctrico en la oficina principal.",
-    horario: "De 14:00 a 16:00",
-  },
-];
-
 export default function JobDetailsPage() {
   const { id } = useParams();
-  const router = useRouter();
   const [job, setJob] = useState<Job | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const found = MOCK_JOBS.find((j) => j.id === id);
-    setJob(found || null);
+    if (!id) return;
+
+    const fetchJob = async () => {
+      try {
+        const res = await fetch(`/api/requested-jobs/${id}`);
+        if (!res.ok) throw new Error("No se encontró el trabajo");
+        const data = await res.json();
+        setJob(data);
+      } catch (error) {
+        console.error("Error al obtener el trabajo:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchJob();
   }, [id]);
+
+  if (loading) {
+    return (
+      <main className="h-screen flex items-center justify-center text-gray-500">
+        Cargando detalles del trabajo...
+      </main>
+    );
+  }
 
   if (!job) {
     return (
       <main className="h-screen flex items-center justify-center text-gray-500">
-        Cargando detalles del trabajo...</main>
+        No se encontró el trabajo solicitado.
+      </main>
     );
   }
 
+  const handleRegisterJob = () => {
+    // aqui actualizaremos cuando se tenga lo del modal (hay que conectarlo)
+  };
+
   return (
     <main className="min-h-screen bg-gray-50 flex flex-col">
-
       <header className="w-full bg-white shadow-sm p-4 flex justify-between items-center border-b">
-  <h1 className="text-2xl font-semibold text-gray-800">Servineo</h1>
-  <div className="flex gap-3">
-    <button
-      className="p-2 bg-red-600 text-white rounded-full hover:bg-red-700 shadow-md transition"
-      title="Cancelar"
-    >
-      <X size={20} />
-    </button>
-
-    <button
-      className="p-2 bg-green-600 text-white rounded-full hover:bg-green-700 shadow-md transition"
-      title="Aceptar"
-    >
-      <Check size={20} />
-    </button>
-  </div>
-</header>
-
+        <h1 className="text-2xl font-semibold text-gray-800">Servineo</h1>
+      </header>
 
       <section className="flex-1 p-6">
         <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">
@@ -93,7 +86,7 @@ export default function JobDetailsPage() {
 
       <footer className="w-full bg-white border-t p-4 flex justify-end">
         <button
-          onClick={() => alert("Trabajo registrado")}
+          onClick={handleRegisterJob}
           className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-blue-700"
         >
           Registrar trabajo
