@@ -1,6 +1,6 @@
-"use client";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+'use client';
+import { useParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 interface Job {
   id: string;
@@ -20,11 +20,11 @@ export default function JobDetailsPage() {
     const fetchJob = async () => {
       try {
         const res = await fetch(`/api/requested-jobs/${id}`);
-        if (!res.ok) throw new Error("No se encontró el trabajo");
+        if (!res.ok) throw new Error('No se encontró el trabajo');
         const data = await res.json();
         setJob(data);
       } catch (error) {
-        console.error("Error al obtener el trabajo:", error);
+        console.error('Error al obtener el trabajo:', error);
       } finally {
         setLoading(false);
       }
@@ -60,9 +60,7 @@ export default function JobDetailsPage() {
       </header>
 
       <section className="flex-1 p-6">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">
-          Detalle de Cita
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Detalle de Cita</h2>
 
         <div className="flex items-center mb-6">
           <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-white mr-3">
@@ -77,9 +75,7 @@ export default function JobDetailsPage() {
         </div>
 
         <div className="mb-12">
-          <p className="font-semibold text-gray-700 mb-1">
-            Horario de la cita establecida:
-          </p>
+          <p className="font-semibold text-gray-700 mb-1">Horario de la cita establecida:</p>
           <p className="text-gray-600">{job.horario}</p>
         </div>
       </section>
