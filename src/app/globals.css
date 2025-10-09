@@ -1,26 +1,100 @@
 @import 'tailwindcss';
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ====== Neutros (PDF) ====== */
+  --background: #F9FAFB;     /* Fondo claro principal */
+  --foreground: #111827;     /* Texto principal oscuro */
+  --surface-card: #FFFFFF;   /* Superficie tarjetas */
+  --surface-border: #D1D5DB; /* Borde tarjeta/inputs */
+  --text-muted:  #64748B;    /* Gris medio */
+
+  /* ====== Paleta Servineo (PDF) ====== */
+  --primary-light:  #1AA7ED; /* Ateneo Blue */
+  --primary:        #2B31E0; /* Main Blue */
+  --primary-medium: #2B6AE0; /* Hover/active primario */
+
+  --accent:         #2BDDE0; /* CTA secundario */
+  --accent-hover:   #5E2BE0; /* Activo/hover acento */
+
+  --highlight:      #759AE0; /* Badges / estrellas */
+
+  /* ====== Estados (PDF) ====== */
+  --success:   #16A34A;
+  --warning:   #F59E0B;
+  --error:     #EF4444;
+
+  /* ====== Disponibilidad (PDF) ====== */
+  --available: #16A34A;
+  --busy:      #64748B;
+  --pending:   #FFC857;
+  --blocked:   #E6EDF3;
 }
 
 @theme inline {
+  /* mapeo para Tailwind v4 */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+  --color-surface-card: var(--surface-card);
+  --color-surface-border: var(--surface-border);
+  --color-text-muted: var(--text-muted);
+
+  --color-primary:        var(--primary);
+  --color-primary-light:  var(--primary-light);
+  --color-primary-medium: var(--primary-medium);
+
+  --color-accent:       var(--accent);
+  --color-accent-hover: var(--accent-hover);
+
+  --color-highlight: var(--highlight);     /* ⭐ usaremos esto para estrellas */
+  --color-success:   var(--success);
+  --color-warning:   var(--warning);
+  --color-error:     var(--error);
+
+  --color-available: var(--available);
+  --color-busy:      var(--busy);
+  --color-pending:   var(--pending);
+  --color-blocked:   var(--blocked);
+
+  /* Tipografía global: Roboto (del layout) */
+  --font-sans: var(--font-roboto);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+/* Variables de colores en modo oscuro */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0a0a0a;   /* Fondo oscuro */
+    --foreground: #F9FAFB;    /* Texto claro (más visible en modo oscuro) */
+
+    /* Opcional: ajusta colores para mejorar la visibilidad */
+    --surface-card: #111214;  /* Fondo tarjetas */
+    --text-muted: #9ca3af;    /* Gris claro (para textos menos importantes) */
   }
+}
+
+
+/* en globals.css */
+a:hover, button:hover {
+  background-color: var(--color-primary-light);  /* cambio de fondo al pasar */
+  outline: none; /* Quitamos el borde predeterminado del navegador */
+  transition: background-color 0.3s ease;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-roboto), system-ui, sans-serif;
+}
+
+/* globals.css */
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.transition-height {
+  transition: max-height 0.3s ease-in-out;
 }
