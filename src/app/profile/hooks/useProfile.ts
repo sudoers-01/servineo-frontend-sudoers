@@ -24,20 +24,7 @@ export const useProfile = () => {
         },
       });
       const result = await response.json();
-      const totalSum = result.ratings[1] + result.ratings[2] + result.ratings[3];
-      const rating = {
-        1: Math.trunc((result.ratings[1] / totalSum) * 100),
-        2: Math.trunc((result.ratings[2] / totalSum) * 100),
-        3: Math.trunc((result.ratings[3] / totalSum) * 100),
-      };
-      const averageRating: number = Number(
-        (totalSum === 0
-          ? 0
-          : (1 * result.ratings[1] + 2 * result.ratings[2] + 3 * result.ratings[3]) / totalSum
-        ).toFixed(1),
-      );
-
-      setData({ ...result, ratings: rating, average_rating: averageRating });
+      setData(result);
     };
     fetchData();
   }, []);
