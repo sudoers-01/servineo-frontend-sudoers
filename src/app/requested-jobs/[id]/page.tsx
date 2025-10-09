@@ -4,10 +4,25 @@ import { useEffect, useState } from 'react';
 
 interface Job {
   id: string;
-  cliente: string;
-  descripcion: string;
-  horario: string;
+  client: string;
+  description: string;
+  schedule: string;
 }
+
+const MOCK_JOBS: Job[] = [
+  {
+    id: '1',
+    client: 'Fulanito de Tal',
+    description: 'La tubería de lava platos de la cocina, en la parte de la pared presenta fugas.',
+    schedule: 'De 09:00 a 10:00',
+  },
+  {
+    id: '2',
+    client: 'María Pérez',
+    description: 'Revisión del sistema eléctrico en la oficina principal.',
+    schedule: 'De 14:00 a 16:00',
+  },
+];
 
 export default function JobDetailsPage() {
   const { id } = useParams();
@@ -17,40 +32,42 @@ export default function JobDetailsPage() {
   useEffect(() => {
     if (!id) return;
 
+    const foundJob = MOCK_JOBS.find((job) => job.id === id);
+    setJob(foundJob || null);
+    setLoading(false);
+
+    /*
     const fetchJob = async () => {
       try {
         const res = await fetch(`/api/requested-jobs/${id}`);
-        if (!res.ok) throw new Error('No se encontró el trabajo');
+        if (!res.ok) throw new Error('Job not found');
         const data = await res.json();
         setJob(data);
       } catch (error) {
-        console.error('Error al obtener el trabajo:', error);
+        console.error('Error fetching job:', error);
       } finally {
         setLoading(false);
       }
     };
 
     fetchJob();
+    */
   }, [id]);
 
   if (loading) {
     return (
       <main className="h-screen flex items-center justify-center text-gray-500">
-        Cargando detalles del trabajo...
+        Loading job details...
       </main>
     );
   }
 
-  if (!job) {
-    return (
-      <main className="h-screen flex items-center justify-center text-gray-500">
-        No se encontró el trabajo solicitado.
-      </main>
-    );
-  }
+  const client = job?.client ?? '—';
+  const description = job?.description ?? 'No description available.';
+  const schedule = job?.schedule ?? 'Not defined.';
 
   const handleRegisterJob = () => {
-    // aqui actualizaremos cuando se tenga lo del modal (hay que conectarlo)
+    // this will be updated later when the modal is ready (to be connected)
   };
 
   return (
@@ -60,23 +77,25 @@ export default function JobDetailsPage() {
       </header>
 
       <section className="flex-1 p-6">
-        <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">Detalle de Cita</h2>
+        <h2 className="text-lg font-semibold text-gray-700 mb-4 border-b pb-2">
+          Appointment Details
+        </h2>
 
         <div className="flex items-center mb-6">
           <div className="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center text-white mr-3">
             👤
           </div>
-          <p className="font-medium text-gray-700 text-lg">{job.cliente}</p>
+          <p className="font-medium text-gray-700 text-lg">{client}</p>
         </div>
 
         <div className="mb-6">
-          <p className="font-semibold text-gray-700 mb-1">Descripción:</p>
-          <p className="text-gray-600">{job.descripcion}</p>
+          <p className="font-semibold text-gray-700 mb-1">Description:</p>
+          <p className="text-gray-600">{description}</p>
         </div>
 
         <div className="mb-12">
-          <p className="font-semibold text-gray-700 mb-1">Horario de la cita establecida:</p>
-          <p className="text-gray-600">{job.horario}</p>
+          <p className="font-semibold text-gray-700 mb-1">Scheduled appointment time:</p>
+          <p className="text-gray-600">{schedule}</p>
         </div>
       </section>
 
@@ -85,7 +104,7 @@ export default function JobDetailsPage() {
           onClick={handleRegisterJob}
           className="bg-blue-600 text-white font-medium px-6 py-2 rounded-lg hover:bg-blue-700"
         >
-          Registrar trabajo
+          Register job
         </button>
       </footer>
     </main>
