@@ -5,6 +5,31 @@ import Tabs from '@/Components/Tabs/Tabs';
 import TabsList from '@/Components/Tabs/TabsList';
 import TabsTrigger from '@/Components/Tabs/TabsTrigger';
 import TabsContent from '@/Components/Tabs/TabsContent';
+import FixerRegisterForm, { type FormFieldConfig } from '@/Components/Form/FixerRegisterForm';
+
+const registerFields: FormFieldConfig[] = [
+  {
+    id: 'name',
+    label: 'Nombre',
+    type: 'text',
+    placeholder: 'tu nombres completo',
+  },
+  {
+    id: 'specialty',
+    label: 'Especialidad',
+    type: 'select',
+    placeholder: 'Selecciona tu especialidad',
+    options: [
+      { label: 'Electricidad', value: 'electricidad' },
+      { label: 'Plomería', value: 'plomeria' },
+      { label: 'Albañilería', value: 'albanileria' },
+      { label: 'Pintura', value: 'pintura' },
+    ],
+  },
+  { id: 'phone', label: 'Telefono', type: 'phone', placeholder: '+591 70341618' },
+  { id: 'email', label: 'Email', type: 'email', placeholder: 'Tu@gmail.com' },
+  { id: 'certificate', label: 'Titulo/Certificacion', type: 'file', placeholder: 'Subir titulo o certificacion' },
+];
 
 const BecomeFixerPage = () => {
   const [activeTab, setActiveTab] = useState('register');
@@ -26,7 +51,7 @@ const BecomeFixerPage = () => {
         
         <div className="mt-2">
           <TabsContent value="register" activeTab={activeTab}>
-            <p>Component form Register</p>
+            <FixerRegisterForm fields={registerFields} />
           </TabsContent>
           
           <TabsContent value="newOffer" activeTab={activeTab}>
