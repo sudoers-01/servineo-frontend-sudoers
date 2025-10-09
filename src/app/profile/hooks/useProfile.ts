@@ -9,6 +9,7 @@ type ProfileData = {
     3: number;
   };
   average_rating: number;
+  rating_count: number;
 };
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export const useProfile = () => {
