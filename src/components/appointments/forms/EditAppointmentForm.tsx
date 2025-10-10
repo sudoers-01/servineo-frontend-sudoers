@@ -1,4 +1,4 @@
-// components/appointments/forms/AppointmentForm.tsx
+// components/appointments/forms/EditAppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 
 export type AppointmentPayload = {
@@ -11,8 +11,12 @@ export type AppointmentPayload = {
   meetingLink?: string;
 };
 
-export type AppointmentFormHandle = {
-  open: (datetimeISO: string, meta?: { eventId?: string; title?: string }) => void;
+export type ExistingAppointment = AppointmentPayload & {
+  id: string;
+};
+
+export type EditAppointmentFormHandle = {
+  open: (appointmentData: ExistingAppointment) => void;
   close: () => void;
 };
 
@@ -21,8 +25,9 @@ function genMeetingLink(datetimeISO: string) {
   return `https://meet.example.com/${id}?t=${encodeURIComponent(datetimeISO)}`;
 }
 
-const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
+const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) => {
   const [open, setOpen] = useState(false);
+  const [appointmentId, setAppointmentId] = useState<string>("");
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
   const [contact, setContact] = useState<string>("+591 ");
@@ -32,16 +37,29 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
   const [meetingLink, setMeetingLink] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
-  const [meta, setMeta] = useState<{ eventId?: string; title?: string } | null>(null);
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
+  // Validación de 24 horas
+  const canEditAppointment = (appointmentDateTime: string): boolean => {
+    const appointmentDate = new Date(appointmentDateTime);
+    const now = new Date();
+    const timeDiff = appointmentDate.getTime() - now.getTime();
+    const hoursDiff = timeDiff / (1000 * 3600);
+    return hoursDiff > 24;
+  };
+
   useImperativeHandle(ref, () => ({
-    open: (dt: string, m?: { eventId?: string; title?: string }) => {
-      setDatetime(dt);
-      setMeta(m || null);
-      setMeetingLink(genMeetingLink(dt));
+    open: (appointmentData: ExistingAppointment) => {
+      setAppointmentId(appointmentData.id);
+      setDatetime(appointmentData.datetime);
+      setClient(appointmentData.client);
+      setContact(appointmentData.contact);
+      setModality(appointmentData.modality);
+      setDescription(appointmentData.description || "");
+      setPlace(appointmentData.place || "");
+      setMeetingLink(appointmentData.meetingLink || "");
       setOpen(true);
       setTimeout(() => firstFieldRef.current?.focus(), 40);
     },
@@ -58,6 +76,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
 
   function handleClose() {
     setOpen(false);
+    setAppointmentId("");
     setClient("");
     setContact("+591 ");
     setModality("virtual");
@@ -73,7 +92,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
     if (!client.trim()) return setMsg("Ingresa el nombre del cliente.");
     if (!contact.trim()) return setMsg("Ingresa un contacto válido.");
 
-    const phoneRegex = /^[67]\d{7}$/; // empieza con 6 o 7 y 8 dígitos
+    const phoneRegex = /^[67]\d{7}$/;
     const phone = contact.replace(/\D/g, "").slice(-8);
     if (!phoneRegex.test(phone)) return setMsg("Teléfono debe iniciar con 6 o 7 y tener 8 dígitos.");
 
@@ -90,35 +109,20 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
 
     setLoading(true);
     try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
+      const res = await fetch(`/api/appointments/${appointmentId}`, {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          datetime: payload.datetime,
-          name: payload.client,
-          phone: payload.contact,
-          note: `${payload.modality === "virtual" ? "Virtual" : "Presencial"} - ${payload.description || ""}`.trim(),
-          meta: {
-            modality: payload.modality,
-            place: payload.place,
-            meetingLink: payload.meetingLink,
-            eventId: meta?.eventId,
-            eventTitle: meta?.title
-          }
-        })
+        body: JSON.stringify(payload)
       });
 
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
-        setMsg(data?.error || data?.message || "Error al guardar");
+        setMsg(data?.error || data?.message || "Error al actualizar");
         setLoading(false);
         return;
       }
 
-      const bookingId = data?.id || data?.insertedId || String(Date.now());
-      window.dispatchEvent(new CustomEvent("booking:created", { detail: { datetime: payload.datetime, id: bookingId, meta: payload } }));
-
-      setMsg("¡Cita creada!");
+      setMsg("¡Cita actualizada!");
       setTimeout(() => { setLoading(false); handleClose(); }, 700);
     } catch (err: any) {
       console.error(err);
@@ -129,15 +133,38 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
 
   if (!open) return null;
 
+  // Validación de 24 horas - muestra mensaje si no se puede editar
+  if (!canEditAppointment(datetime)) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
+        <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
+          <h3 className="text-lg font-semibold text-red-600 mb-4">No se puede editar</h3>
+          <p className="text-gray-700 mb-4">
+            Las citas solo se pueden editar hasta 24 horas antes de la cita programada.
+          </p>
+          <div className="flex justify-end">
+            <button 
+              onClick={handleClose}
+              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center  justify-center px-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="appointment-title"
+      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="edit-appointment-title"
         className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto" style={{ maxHeight: "90vh" }}>
         <div className="p-4 sm:p-6">
           <div className="flex items-start justify-between">
-            <h3 id="appointment-title" className="text-lg font-semibold text-black">
-              Agendar cita {meta?.title ? `- ${meta.title}` : ""}
+            <h3 id="edit-appointment-title" className="text-lg font-semibold text-black">
+              Editar cita
             </h3>
             <button aria-label="Cerrar" className="text-gray-500 hover:text-gray-700" onClick={handleClose}>✕</button>
           </div>
@@ -162,36 +189,60 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <label className="block">
                 <span className="text-sm font-medium">Cliente *</span>
-                <input ref={firstFieldRef} value={client} onChange={(e) => setClient(e.target.value)}
-                  placeholder="Nombre del cliente" className="mt-1 block w-full border rounded px-3 py-2 bg-white" required />
+                <input 
+                  ref={firstFieldRef} 
+                  value={client} 
+                  onChange={(e) => setClient(e.target.value)}
+                  placeholder="Nombre del cliente" 
+                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                  required 
+                />
               </label>
               <label className="block">
                 <span className="text-sm font-medium">Contacto *</span>
-                <input value={contact} onChange={(e) => setContact(e.target.value)}
-                  placeholder="+591 77777777" className="mt-1 block w-full border rounded px-3 py-2 bg-white" required />
+                <input 
+                  value={contact} 
+                  onChange={(e) => setContact(e.target.value)}
+                  placeholder="+591 77777777" 
+                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                  required 
+                />
               </label>
             </div>
 
             <label className="block">
               <span className="text-sm font-medium">Descripción del trabajo</span>
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)}
-                placeholder="Breve descripción de lo que se requiere" className="mt-1 block w-full border rounded px-3 py-2 bg-white" rows={3} />
+              <textarea 
+                value={description} 
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Breve descripción de lo que se requiere" 
+                className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                rows={3} 
+              />
             </label>
 
             {modality === "presencial" ? (
               <label className="block">
                 <span className="text-sm font-medium">Lugar / Dirección</span>
-                <input value={place} onChange={(e) => setPlace(e.target.value)}
-                  placeholder="Ej. Campus FCyT - Aula 12" className="mt-1 block w-full border rounded px-3 py-2 bg-white" />
+                <input 
+                  value={place} 
+                  onChange={(e) => setPlace(e.target.value)}
+                  placeholder="Ej. Campus FCyT - Aula 12" 
+                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                />
               </label>
             ) : (
               <div className="space-y-2">
                 <label className="block">
-                  <span className="text-sm font-medium">Enlace de reunión (opcional)</span>
-                  <input value={meetingLink} onChange={(e) => setMeetingLink(e.target.value)}
-                    placeholder="https://meet.example.com/abcd" className="mt-1 block w-full border rounded px-3 py-2 bg-white" />
+                  <span className="text-sm font-medium">Enlace de reunión</span>
+                  <input 
+                    value={meetingLink} 
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    placeholder="https://meet.example.com/abcd" 
+                    className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                  />
                 </label>
-                <p className="text-xs text-black-600">Si no ingresa enlace, se generará uno automáticamente.</p>
+                <p className="text-xs text-gray-600">Si no ingresa enlace, se generará uno automáticamente.</p>
               </div>
             )}
 
@@ -200,7 +251,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
             <div className="flex items-center justify-end gap-2 pt-2">
               <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
               <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60">
-                {loading ? "Guardando..." : "Añadir"}
+                {loading ? "Actualizando..." : "Actualizar"}
               </button>
             </div>
           </form>
@@ -210,4 +261,4 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
   );
 });
 
-export default AppointmentForm;
+export default EditAppointmentForm;
