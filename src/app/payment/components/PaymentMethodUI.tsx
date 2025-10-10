@@ -1,10 +1,13 @@
-export default function CashPaymentModal() {
+"use client"
+
+export default function PaymentMethodUI({ trabajo, onClose }) {
   return (
-    <div className="min-h-screen bg-white">
-      <div className="w-full h-full">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl">
         {/* Header */}
-        <div className="bg-black text-white px-6 py-4 flex items-center justify-between">
+        <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
           <h1 className="text-xl font-semibold">Metodo de pago Efectivo</h1>
+          <button onClick={onClose} className="hover:bg-blue-700 px-3 py-1 rounded text-xl">✕</button>
         </div>
 
         {/* Content */}
@@ -28,7 +31,7 @@ export default function CashPaymentModal() {
               </label>
               <input
                 type="text"
-                value="COD-1234"
+                value={`COD-${trabajo?.id || '0000'}`}
                 readOnly
                 className="flex-1 px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-500 text-lg"
               />
@@ -41,7 +44,7 @@ export default function CashPaymentModal() {
               </label>
               <input
                 type="text"
-                value="XXXXXX Bs."
+                value={`${trabajo?.monto || 0} Bs.`}
                 readOnly
                 className="flex-1 px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-500 text-lg"
               />
@@ -65,7 +68,10 @@ export default function CashPaymentModal() {
             <button className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors">
               Continuar
             </button>
-            <button className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors">
+            <button 
+              onClick={onClose}
+              className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors"
+            >
               Volver
             </button>
           </div>
