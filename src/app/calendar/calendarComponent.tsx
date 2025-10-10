@@ -8,6 +8,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm";
 import { generateAvailableSlots, SlotEvent } from "../../utils/generateAvailableSlots";
+import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "../../components/appointments/forms/EditAppointmentForm";
 
 moment.locale('es');
 const localizer = momentLocalizer(moment);
@@ -24,6 +25,7 @@ export default function MyCalendarPage() {
   const [events, setEvents] = useState<MyEvent[]>([]);
 
   const formRef = useRef<AppointmentFormHandle | null>(null);
+  const editFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
   // pre-generar slots de disponibilidad para 30 días
   useEffect(() => {
@@ -34,10 +36,13 @@ export default function MyCalendarPage() {
     setEvents(slots.map(s => ({ ...s })));
   }, []);
 
-  function handleSelectEvent(ev: MyEvent) {
-    if (ev.booked) return;
-    formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title });
-  }
+   function handleSelectEvent(ev: MyEvent) {
+      if (ev.booked) {
+        handleEditExistingAppointment(ev); // ← Editar cita existente
+      } else {
+        formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title }); // ← Crear nueva
+      }
+    }
 
   function handleSelectSlot(slotInfo: SlotInfo) {
     const start = slotInfo.start;
@@ -54,6 +59,23 @@ export default function MyCalendarPage() {
       existing = newEvent;
     }
     formRef.current?.open(dtISO, { eventId: existing.id, title: existing.title });
+  }
+
+  function handleEditExistingAppointment(event: MyEvent) {
+    if (!event.booked) return; // Solo editar citas ya reservadas
+    
+    // Esto es temporal - luego vendrá de tu base de datos
+    const existingAppointment: ExistingAppointment = {
+      id: event.id,
+      datetime: event.start.toISOString(),
+      client: "Cliente Ejemplo", // Esto vendrá de tu DB
+      contact: "+591 77777777",  // Esto vendrá de tu DB
+      modality: "virtual",       // Esto vendrá de tu DB
+      description: event.title,
+      meetingLink: "https://meet.example.com/abc123"
+    };
+    
+    editFormRef.current?.open(existingAppointment);
   }
 
   useEffect(() => {
@@ -100,7 +122,6 @@ export default function MyCalendarPage() {
       }
     };
   }
-
   return (
     <div className="max-w-6xl mx-auto p-4">
       <h1 className="text-2xl font-semibold mb-4">Mi Calendario</h1>
@@ -122,6 +143,7 @@ export default function MyCalendarPage() {
         />
       </div>
       <AppointmentForm ref={formRef} />
+      <EditAppointmentForm ref={editFormRef} />
     </div>
   );
 }

@@ -18,7 +18,7 @@ export default function Home() {
           </Link>
           
           <Link 
-            href="/appointments" 
+            href="/components/appointments/forms" 
             className="block bg-green-500 hover:bg-green-600 text-white px-6 py-4 rounded-lg font-medium transition-colors"
           >
             📋 Ver Citas

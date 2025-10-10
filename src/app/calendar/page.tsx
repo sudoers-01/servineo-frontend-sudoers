@@ -10,7 +10,7 @@ export default function CalendarPage() {
       <div className="flex items-center">
         <button
           onClick={() => router.back()}
-          className="p-2 m-4 text-gray-600 hover:text-black transition-colors self-start">
+          className="p-2 m-4 text-gray-600 hover:text-black hover:bg-gray-100 transition-colors self-start">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
