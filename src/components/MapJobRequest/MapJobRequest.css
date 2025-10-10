@@ -1,0 +1,24 @@
+.map-container {
+  width: 100%;
+  height: 300px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-top: 10px;
+}
+
+.map-disabled {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+@media (max-width: 768px) {
+  .map-container {
+    height: 250px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-container {
+    height: 200px;
+  }
+}
