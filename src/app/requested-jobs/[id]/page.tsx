@@ -4,25 +4,10 @@ import { useEffect, useState } from 'react';
 
 interface Job {
   id: string;
-  client: string;
+  client: string;       
   description: string;
-  schedule: string;
+  schedule: string;     
 }
-
-const MOCK_JOBS: Job[] = [
-  {
-    id: '1',
-    client: 'Fulanito de Tal',
-    description: 'La tubería de lava platos de la cocina, en la parte de la pared presenta fugas.',
-    schedule: 'De 09:00 a 10:00',
-  },
-  {
-    id: '2',
-    client: 'María Pérez',
-    description: 'Revisión del sistema eléctrico en la oficina principal.',
-    schedule: 'De 14:00 a 16:00',
-  },
-];
 
 export default function JobDetailsPage() {
   const { id } = useParams();
@@ -30,28 +15,50 @@ export default function JobDetailsPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!id) return;
+    if (!id) {
+      // Si no hay id, inicializamos con campos vacíos
+      setJob({
+        id: '',
+        client: '',
+        description: '',
+        schedule: '',
+      });
+      setLoading(false);
+      return;
+    }
 
-    const foundJob = MOCK_JOBS.find((job) => job.id === id);
-    setJob(foundJob || null);
-    setLoading(false);
-
-    /*
     const fetchJob = async () => {
       try {
-        const res = await fetch(`/api/requested-jobs/${id}`);
+        const res = await fetch(`http://localhost:3000/api/requested-jobs/${id}`);
         if (!res.ok) throw new Error('Job not found');
         const data = await res.json();
-        setJob(data);
+
+        const mappedJob: Job = {
+          id: data._id ?? '',
+          client: data.title ?? '',
+          description: data.description ?? '',
+          schedule: data.createdAt
+            ? new Date(data.createdAt).toLocaleTimeString()
+            : '',
+        };
+
+        setJob(mappedJob);
       } catch (error) {
         console.error('Error fetching job:', error);
+
+        // Mantener la misma lógica que antes: campos vacíos
+        setJob({
+          id: '',
+          client: '',
+          description: '',
+          schedule: '',
+        });
       } finally {
         setLoading(false);
       }
     };
 
     fetchJob();
-    */
   }, [id]);
 
   if (loading) {
@@ -62,12 +69,12 @@ export default function JobDetailsPage() {
     );
   }
 
-  const client = job?.client ?? '—';
-  const description = job?.description ?? 'No description available.';
-  const schedule = job?.schedule ?? 'Not defined.';
+  const client = job?.client || '—';
+  const description = job?.description || 'No description available.';
+  const schedule = job?.schedule || 'Not defined.';
 
   const handleRegisterJob = () => {
-    // this will be updated later when the modal is ready (to be connected)
+    // Lógica futura para registrar el trabajo
   };
 
   return (
