@@ -4,9 +4,9 @@ import { useEffect, useState } from 'react';
 
 interface Job {
   id: string;
-  client: string;       
+  client: string;
   description: string;
-  schedule: string;     
+  schedule: string;
 }
 
 export default function JobDetailsPage() {
@@ -37,9 +37,7 @@ export default function JobDetailsPage() {
           id: data._id ?? '',
           client: data.title ?? '',
           description: data.description ?? '',
-          schedule: data.createdAt
-            ? new Date(data.createdAt).toLocaleTimeString()
-            : '',
+          schedule: data.createdAt ? new Date(data.createdAt).toLocaleTimeString() : '',
         };
 
         setJob(mappedJob);
