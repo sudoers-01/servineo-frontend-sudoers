@@ -1,4 +1,5 @@
 "use client"
+import RegistroModal from "./components/modales/registroModal"
 
 export default function HomePage() {
   return (
@@ -7,9 +8,7 @@ export default function HomePage() {
         <h1 className="text-3xl font-extrabold text-[#2B31E0] tracking-tight">
           Servineo
         </h1>
-        <button className="px-6 py-2 bg-[#2B31E0] text-white font-semibold rounded-full shadow">
-          Registrarse
-        </button>
+       <RegistroModal />
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 pt-24">
