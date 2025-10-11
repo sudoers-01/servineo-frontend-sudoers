@@ -15,12 +15,12 @@ export default function GoogleButton() {
   });
 
   return (
-    <Button
-      onClick={() => login()}
-      className="flex items-center justify-center gap-2 bg-white text-black border hover:bg-gray-100"
-    >
-      <FcGoogle size={24} />
-      Continuar con Google
-    </Button>
+    <button
+        onClick={() => login()}
+        className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 font-semibold py-2 px-4 rounded-lg shadow-sm text-black !important transition-colors"
+        >
+        <FcGoogle size={24} />
+        Continuar con Google
+    </button>
   );
 }
