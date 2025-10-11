@@ -31,7 +31,7 @@ const GrillaTrabajos = () => {
   }
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 py-8 bg-white">
+    <div className="flex flex-col items-center justify-center w-full min-h-screen bg-white py-8 px-4">
       <h1 className="text-3xl font-handwritten text-center mb-8 text-black">Servineo</h1>
 
       <div className="border rounded-lg p-3 inline-block mb-6">
@@ -39,32 +39,34 @@ const GrillaTrabajos = () => {
       </div>
 
       {jobs.length === 0 ? (
-        <div className="text-center text-gray-500 italic py-10 border rounded-lg">
+        <div className="text-center text-gray-500 italic py-10 border rounded-lg w-full max-w-3xl">
           No completed jobs found.
         </div>
       ) : (
-        <div className="flex flex-col gap-4 overflow-y-auto max-h-[70vh]">
-          {jobs.map((job) => (
-            <div
-              key={job.id}
-              className="flex justify-between items-center border rounded-xl p-4 bg-white shadow-sm border-green-500"
-            >
-              <div>
-                <p className="italic font-medium text-black">{job.name}</p>
-                <p className="italic text-sm text-gray-500 mt-1">Date: {job.date}</p>
-              </div>
+        <div className="w-full max-w-3xl border rounded-lg p-4 bg-white shadow-inner overflow-y-auto max-h-[70vh] scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-transparent">
+          <div className="flex flex-col gap-4">
+            {jobs.map((job) => (
+              <div
+                key={job.id}
+                className="flex justify-between items-center border rounded-xl p-4 bg-white shadow-sm border-green-500"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="italic font-medium text-black truncate">{job.name}</p>
+                  <p className="italic text-sm text-gray-500 mt-1">Date: {job.date}</p>
+                </div>
 
-              <div className="text-center flex-1">
-                <p className="text-green-500 font-semibold capitalize">{job.status}</p>
-              </div>
+                <div className="flex-shrink-0 mx-4 text-center">
+                  <p className="text-green-500 font-semibold capitalize">{job.status}</p>
+                </div>
 
-              <div className="flex items-center justify-end">
-                <button className="border rounded-lg px-4 py-2 text-white bg-[#1AA7ED] hover:bg-[#178AC3] transition-colors">
-                  Rate job
-                </button>
+                <div className="flex-shrink-0">
+                  <button className="border rounded-lg px-4 py-2 text-white bg-[#1AA7ED] hover:bg-[#178AC3] transition-colors">
+                    Rate job
+                  </button>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       )}
     </div>
