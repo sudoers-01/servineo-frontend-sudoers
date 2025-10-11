@@ -12,13 +12,13 @@ export default function GoogleButton({ onLoginSuccess }: GoogleButtonProps) {
   return (
     <div className="relative inline-block">
       <button
-          className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 font-semibold py-2 px-4 rounded-lg shadow-sm text-black !important transition-colors"
+          className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 font-semibold py-2 px-4 rounded-lg shadow-sm text-black transition-colors"
           >
           <FcGoogle size={24} />
           Continuar con Google
       </button>
 
-      <div className="absolute inset-0 opacity-0 cursor pointer">
+      <div className="absolute inset-0 opacity-0 cursor-pointer">
         <GoogleLogin
           onSuccess={onLoginSuccess}
           onError={() => console.log("Error al iniciar sesión con Google")}
