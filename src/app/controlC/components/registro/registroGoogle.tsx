@@ -1,17 +1,26 @@
 "use client"
 
-import { GoogleLogin } from "@react-oauth/google"
 import GoogleButton from "../UI/buttonGoogle";
+import { enviarTokenGoogle } from "../../services/conexionBackend";
 
-export default function RegistroGoogle({ onSuccess }: { onSuccess?: (data: any) => void }) {
-  const handleLoginSuccess = (credentialResponse: any) => {
-    if (onSuccess) onSuccess(credentialResponse)
-    console.log("Login Google:", credentialResponse)
-  }
-
+export default function RegistroGoogle() {
+  const handleLoginSuccess = async(credentialResponse: any) => {
+    const token = credentialResponse?.credential;
+    if (!token) {
+      console.error("No se recibió el token de Google");
+      return;
+    }
+    try {
+      const data = await enviarTokenGoogle(token);
+      console.log("Respuesta del backend:", data);
+    } catch (error) {
+      console.error("Error al enviar el token al backend:", error);
+    }
+    };
   return (
     <div className="flex justify-center">
-      <GoogleButton />
+      <GoogleButton onLoginSuccess={handleLoginSuccess}/>
     </div>
-  )
+  );
 }
+
