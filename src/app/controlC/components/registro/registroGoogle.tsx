@@ -1,6 +1,7 @@
 "use client"
 
 import { GoogleLogin } from "@react-oauth/google"
+import GoogleButton from "../UI/buttonGoogle";
 
 export default function RegistroGoogle({ onSuccess }: { onSuccess?: (data: any) => void }) {
   const handleLoginSuccess = (credentialResponse: any) => {
@@ -10,10 +11,7 @@ export default function RegistroGoogle({ onSuccess }: { onSuccess?: (data: any) 
 
   return (
     <div className="flex justify-center">
-      <GoogleLogin
-        onSuccess={handleLoginSuccess}
-        onError={() => console.log("Login Google fallido")}
-      />
+      <GoogleButton />
     </div>
   )
 }
