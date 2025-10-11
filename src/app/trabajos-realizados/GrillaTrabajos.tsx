@@ -3,7 +3,7 @@ import React from 'react';
 
 const jobs = [
   { id: 1, name: 'Pipe repair', date: '10/12/2025', status: 'Completed' },
-  { id: 2, name: 'Facade painting', date: '10/20/2025', status: 'Completed' },
+  { id: 2, name: 'Facade painting', date: '10/23/2025', status: 'Completed' },
   { id: 3, name: 'Electrical installation', date: '10/14/2025', status: 'Completed' },
   { id: 4, name: 'Garden maintenance', date: '10/10/2025', status: 'Completed' },
 ];
