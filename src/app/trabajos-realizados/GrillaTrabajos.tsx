@@ -1,11 +1,11 @@
 // src/app/trabajos-realizados/GrillaTrabajos.tsx
 import React from 'react';
 
-const trabajos = [
-  { id: 1, nombre: 'Reparación de tubería', fecha: '12/10/2025', estado: 'Completado' },
-  { id: 2, nombre: 'Pintura de fachada', fecha: '13/10/2025', estado: 'Completado' },
-  { id: 3, nombre: 'Instalación eléctrica', fecha: '14/10/2025', estado: 'Completado' },
-  { id: 4, nombre: 'Mantenimiento de jardín', fecha: '15/10/2025', estado: 'Completado' },
+const jobs = [
+  { id: 1, name: 'Pipe repair', date: '10/12/2025', status: 'Completed' },
+  { id: 2, name: 'Facade painting', date: '10/13/2025', status: 'Completed' },
+  { id: 3, name: 'Electrical installation', date: '10/14/2025', status: 'Completed' },
+  { id: 4, name: 'Garden maintenance', date: '10/15/2025', status: 'Completed' },
 ];
 
 const GrillaTrabajos = () => {
@@ -15,34 +15,34 @@ const GrillaTrabajos = () => {
 
       <div className="border rounded-lg p-3 inline-block mb-6">
         <span className="italic font-semibold text-lg text-black">
-          Grilla de trabajos realizados
+          Completed jobs grid
         </span>
       </div>
 
       <div className="flex flex-col gap-4 overflow-y-auto max-h-[70vh]">
-        {trabajos.map((trabajo) => (
+        {jobs.map((job) => (
           <div
-            key={trabajo.id}
+            key={job.id}
             className="flex justify-between items-center border rounded-xl p-4 bg-white shadow-sm border-green-500"
           >
-            {/* Columna izquierda: nombre y fecha */}
+            {/* Left column: job name and date */}
             <div>
-              <p className="italic font-medium text-black">Nombre del trabajo</p>
-              <p className="italic text-black">{trabajo.nombre}</p>
+              <p className="italic font-medium text-black">Job name</p>
+              <p className="italic text-black">{job.name}</p>
               <p className="italic text-sm text-gray-500 mt-1">
-                Fecha: {trabajo.fecha}
+                Date: {job.date}
               </p>
             </div>
 
-            {/* Columna central: estado */}
+            {/* Center column: status */}
             <div className="text-center flex-1">
-              <p className="text-green-500 font-semibold">{trabajo.estado}</p>
+              <p className="text-green-500 font-semibold">{job.status}</p>
             </div>
 
-            {/* Columna derecha: botón */}
+            {/* Right column: button */}
             <div className="flex items-center justify-end">
               <button className="border rounded-lg px-4 py-2 text-white bg-[#1AA7ED] hover:bg-[#178AC3] transition-colors">
-                Calificar trabajo
+                Rate job
               </button>
             </div>
           </div>
