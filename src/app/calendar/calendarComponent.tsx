@@ -9,7 +9,7 @@ import 'react-big-calendar/lib/css/react-big-calendar.css';
 import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm";
 import { generateAvailableSlots, SlotEvent } from "../../utils/generateAvailableSlots";
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "../../components/appointments/forms/EditAppointmentForm";
-
+import MultiStepAppointment,{ MultiStepAppointmentHandle } from "../../components/appointments/forms/MultiStepAppointmentForm";
 moment.locale('es');
 const localizer = momentLocalizer(moment);
 
@@ -24,7 +24,7 @@ interface MyEvent {
 export default function MyCalendarPage() {
   const [events, setEvents] = useState<MyEvent[]>([]);
 
-  const formRef = useRef<AppointmentFormHandle | null>(null);
+  const formRef = useRef<MultiStepAppointmentHandle | null>(null);
   const editFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
   // pre-generar slots de disponibilidad para 30 días
@@ -142,7 +142,7 @@ export default function MyCalendarPage() {
           popup
         />
       </div>
-      <AppointmentForm ref={formRef} />
+      <MultiStepAppointment ref={formRef} />
       <EditAppointmentForm ref={editFormRef} />
     </div>
   );
