@@ -16,12 +16,16 @@ export type AppointmentFormHandle = {
   close: () => void;
 };
 
+interface AppointmentFormProps {
+  onNextStep?: (appointmentData: Partial<AppointmentPayload>) => void;
+}
+
 function genMeetingLink(datetimeISO: string) {
   const id = Math.random().toString(36).slice(2, 9);
   return `https://meet.example.com/${id}?t=${encodeURIComponent(datetimeISO)}`;
 }
 
-const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
+const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ onNextStep }, ref) => {
   const [open, setOpen] = useState(false);
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
@@ -68,16 +72,16 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setMsg(null);
+      setMsg(null);
 
     if (!client.trim()) return setMsg("Ingresa el nombre del cliente.");
     if (!contact.trim()) return setMsg("Ingresa un contacto válido.");
 
-    const phoneRegex = /^[67]\d{7}$/; // empieza con 6 o 7 y 8 dígitos
+    const phoneRegex = /^[67]\d{7}$/;
     const phone = contact.replace(/\D/g, "").slice(-8);
     if (!phoneRegex.test(phone)) return setMsg("Teléfono debe iniciar con 6 o 7 y tener 8 dígitos.");
 
-    const payload: AppointmentPayload = {
+    const payload: Partial<AppointmentPayload> = {
       datetime,
       client: client.trim(),
       contact: contact.trim(),
@@ -85,27 +89,47 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
       description: description.trim(),
     };
 
+    if (onNextStep) {
+      if (modality === "presencial") {
+          // Presencial: Ir al siguiente paso (selección de ubicación)
+        onNextStep(payload);
+        handleClose();
+      } else {
+          // Virtual: Cerrar todo directamente (no necesita ubicación)
+          // Combinar datos faltantes para virtual
+        const completePayload: AppointmentPayload = {
+           ...payload,
+          datetime: datetime!,
+          meetingLink: meetingLink.trim() || genMeetingLink(datetime)
+        } as AppointmentPayload;
+          
+          // Enviar directamente al backend
+        await submitAppointment(completePayload);
+      }
+        return; 
+    }
+
     if (modality === "presencial") payload.place = place.trim();
     else payload.meetingLink = meetingLink.trim() || genMeetingLink(datetime);
 
     setLoading(true);
     try {
       const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          datetime: payload.datetime,
-          name: payload.client,
-          phone: payload.contact,
-          note: `${payload.modality === "virtual" ? "Virtual" : "Presencial"} - ${payload.description || ""}`.trim(),
-          meta: {
-            modality: payload.modality,
-            place: payload.place,
-            meetingLink: payload.meetingLink,
-            eventId: meta?.eventId,
-            eventTitle: meta?.title
-          }
-        })
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            datetime: payload.datetime,
+            name: payload.client,
+            phone: payload.contact,
+            note: `${payload.modality === "virtual" ? "Virtual" : "Presencial"} - ${payload.description || ""}`.trim(),
+            meta: {
+              modality: payload.modality,
+              place: payload.place,
+              meetingLink: payload.meetingLink,
+              eventId: meta?.eventId,
+              eventTitle: meta?.title
+            }
+          })
       });
 
       const data = await res.json().catch(() => ({}));
@@ -126,6 +150,54 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
       setLoading(false);
     }
   }
+  async function submitAppointment(payload: AppointmentPayload) {
+  setLoading(true);
+  try {
+    const res = await fetch("/api/bookings", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        datetime: payload.datetime,
+        name: payload.client,
+        phone: payload.contact,
+        note: `${payload.modality === "virtual" ? "Virtual" : "Presencial"} - ${payload.description || ""}`.trim(),
+        meta: {
+          modality: payload.modality,
+          place: payload.place,
+          meetingLink: payload.meetingLink,
+          eventId: meta?.eventId,
+          eventTitle: meta?.title
+        }
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      setMsg(data?.error || data?.message || "Error al guardar");
+      setLoading(false);
+      return;
+    }
+
+    const bookingId = data?.id || data?.insertedId || String(Date.now());
+    window.dispatchEvent(new CustomEvent("booking:created", { 
+      detail: { 
+        datetime: payload.datetime, 
+        id: bookingId, 
+        meta: payload 
+      } 
+    }));
+
+    setMsg("¡Cita creada!");
+    setTimeout(() => { 
+      setLoading(false); 
+      handleClose(); 
+    }, 700);
+  } catch (err: any) {
+    console.error(err);
+    setMsg("Error en la conexión.");
+    setLoading(false);
+  }
+}
 
   if (!open) return null;
 
@@ -179,11 +251,11 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
             </label>
 
             {modality === "presencial" ? (
-              <label className="block">
-                <span className="text-sm font-medium">Lugar / Dirección</span>
-                <input value={place} onChange={(e) => setPlace(e.target.value)}
-                  placeholder="Ej. Campus FCyT - Aula 12" className="mt-1 block w-full border rounded px-3 py-2 bg-white" />
-              </label>
+              <div className="text-center py-3 border border-gray-300 rounded-lg bg-gray-50">
+                <p className="text-sm font-medium text-gray-700">
+                  Seleccione la ubicación a continuación
+                </p>
+              </div>
             ) : (
               <div className="space-y-2">
                 <label className="block">
@@ -198,9 +270,24 @@ const AppointmentForm = forwardRef<AppointmentFormHandle>((_props, ref) => {
             {msg && <p className="text-sm text-red-600">{msg}</p>}
 
             <div className="flex items-center justify-end gap-2 pt-2">
-              <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
-              <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60">
-                {loading ? "Guardando..." : "Añadir"}
+              <button 
+                type="button" 
+                onClick={handleClose} 
+                className="px-4 py-2 rounded bg-gray-300 text-sm"
+              >
+                Cancelar
+              </button>
+              
+              <button 
+                type="submit" 
+                disabled={loading} 
+                className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60"
+              >
+                {loading ? "Guardando..." : 
+                onNextStep ? (
+                  modality === "presencial" ? "Siguiente →" : "Confirmar"
+                ) : "Añadir"
+                }
               </button>
             </div>
           </form>
