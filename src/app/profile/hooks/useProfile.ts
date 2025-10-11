@@ -14,19 +14,43 @@ type ProfileData = {
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export const useProfile = () => {
   const [data, setData] = useState<ProfileData | null>(null);
+  const [errors, setErrors] = useState<string | null>(null);
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(`${BASE_URL}/profile`, {
-        //BASE_URL is http://localhost:3000/api in .env.local
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      const result = await response.json();
-      setData(result);
+      try {
+        const response = await fetch(`${BASE_URL}/profile/68e87a9cdae3b73d8040102f`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+        if (response.ok) {
+          const result = await response.json();
+          setData(result);
+        } else {
+          switch (response.status) {
+            case 400:
+              setErrors('Falta el ID del usuario');
+              break;
+            case 422:
+              setErrors('Formato de ID de usuario inválido');
+              break;
+            case 404:
+              setErrors('Usuario no encontrado');
+              break;
+            case 500:
+              setErrors('Error del servidor');
+              break;
+            default:
+              setErrors('Error desconocido :oo');
+          }
+        }
+      } catch (error) {
+        console.error('Crash: Error fetching profile data:', error);
+        setErrors('Error desconocido :oo, los desarrolladores ya fueron notificados');
+      }
     };
     fetchData();
   }, []);
-  return { data };
+  return { data, errors };
 };
