@@ -1,7 +1,6 @@
 "use client";
 import { useState } from "react";
-import RateJobButton from '../components/RateJobButton';
-
+import RateJobModal from "./RateJobModal";
 
 export default function RateJobButton() {
   const [isOpen, setIsOpen] = useState(false);

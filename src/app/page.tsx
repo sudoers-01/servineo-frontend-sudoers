@@ -50,7 +50,7 @@ export default function Home() {
           </a>
         </div>
 
-        {/* 👇 NUEVO BLOQUE AGREGADO, sin tocar nada más */}
+        {/* 👇👇 AÑADIDO: tu botón Rate Job debajo de los otros botones */}
         <div className="mt-10 flex justify-center w-full">
           <RateJobButton />
         </div>

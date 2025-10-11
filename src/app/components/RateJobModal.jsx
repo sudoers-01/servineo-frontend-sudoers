@@ -2,31 +2,63 @@
 import { useState } from "react";
 
 export default function RateJobModal({ isOpen, onClose }) {
-  if (!isOpen) return null;
-
+  // -----------------------------
+  // 🔹 Estados para estrellas y comentario
+  // -----------------------------
   const [selectedStars, setSelectedStars] = useState(0);
   const [comment, setComment] = useState("");
 
-  const handleStarClick = (stars) => setSelectedStars(stars);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (comment.length < 10) return;
-    console.log("Review enviada:", { estrellas: selectedStars, comentario: comment });
-    onClose();
+  // -----------------------------
+  // 🔹 1. Función que limpia los datos del formulario
+  // -----------------------------
+  const resetForm = () => {
+    setSelectedStars(0); // Reinicia estrellas
+    setComment("");      // Limpia el comentario
   };
 
+  // -----------------------------
+  // 🔹 2. Función para cerrar y limpiar
+  // -----------------------------
+  const handleClose = () => {
+    resetForm(); // Limpia los datos ingresados
+    onClose();   // Cierra el modal
+  };
+
+  // -----------------------------
+  // 🔹 3. Función de envío (Submit)
+  // -----------------------------
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (comment.length < 10) return;
+
+    console.log("💬 Review enviada:", {
+      estrellas: selectedStars,
+      comentario: comment,
+    });
+
+    resetForm(); // Limpia datos después de enviar
+    onClose();   // Cierra el modal
+  };
+
+  // -----------------------------
+  // 🔹 4. Si el modal no está abierto, no renderizar
+  // -----------------------------
+  if (!isOpen) return null;
+
+  // -----------------------------
+  // 🔹 5. Estructura visual del modal
+  // -----------------------------
   return (
     <div className="fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50">
       <div className="bg-white rounded-2xl shadow-lg p-6 w-96">
         <h2 className="text-xl font-bold text-[#2B31E0] mb-4">Rate Job</h2>
 
-        {/* Estrellas */}
+        {/* ⭐ Sección de estrellas */}
         <div className="flex justify-center mb-4">
           {[1, 2, 3].map((num) => (
             <span
               key={num}
-              onClick={() => handleStarClick(num)}
+              onClick={() => setSelectedStars(num)}
               className={`cursor-pointer text-4xl mx-1 ${
                 num <= selectedStars ? "text-yellow-400" : "text-gray-300"
               }`}
@@ -42,7 +74,7 @@ export default function RateJobModal({ isOpen, onClose }) {
           <span>Excelente</span>
         </div>
 
-        {/* Comentario */}
+        {/* 📝 Campo de comentario */}
         <textarea
           className="w-full border rounded-md p-2 mb-3 text-gray-700"
           placeholder="Escribe tu comentario (mínimo 10 caracteres)"
@@ -50,14 +82,17 @@ export default function RateJobModal({ isOpen, onClose }) {
           onChange={(e) => setComment(e.target.value)}
         ></textarea>
 
-        {/* Botones */}
+        {/* 🔘 Botones */}
         <div className="flex justify-end space-x-2">
+          {/* Botón Cancelar */}
           <button
-            onClick={onClose}
+            onClick={handleClose}
             className="px-3 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700"
           >
             Cancelar
           </button>
+
+          {/* Botón Enviar */}
           <button
             onClick={handleSubmit}
             disabled={comment.length < 10}
