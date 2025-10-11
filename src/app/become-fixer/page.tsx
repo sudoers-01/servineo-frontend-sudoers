@@ -6,6 +6,7 @@ import TabsList from '@/Components/Tabs/TabsList';
 import TabsTrigger from '@/Components/Tabs/TabsTrigger';
 import TabsContent from '@/Components/Tabs/TabsContent';
 import FixerRegisterForm, { type FormFieldConfig } from '@/Components/Form/FixerRegisterForm';
+import NewOfferForm from './NewOfferForm';
 
 const registerFields: FormFieldConfig[] = [
   {
@@ -55,7 +56,7 @@ const BecomeFixerPage = () => {
           </TabsContent>
           
           <TabsContent value="newOffer" activeTab={activeTab}>
-            <p>Component form New Offer</p>
+            <NewOfferForm />
           </TabsContent>
           
           <TabsContent value="myOffer" activeTab={activeTab}>
