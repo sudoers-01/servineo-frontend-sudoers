@@ -1,26 +1,29 @@
 "use client";
 
-import { useGoogleLogin } from "@react-oauth/google";
+import { GoogleLogin } from "@react-oauth/google";
 import { FcGoogle } from "react-icons/fc"; 
 import  Button  from "./button"; 
 
-export default function GoogleButton() {
-  const login = useGoogleLogin({
-    onSuccess: (tokenResponse) => {
-      console.log("Token de Google:", tokenResponse.access_token);
-    },
-    onError: () => {
-      console.error("Error al iniciar sesión con Google");
-    },
-  });
+interface GoogleButtonProps {
+  onLoginSuccess: (credentialResponse: any) => void;
+}
 
+export default function GoogleButton({ onLoginSuccess }: GoogleButtonProps) {
   return (
-    <button
-        onClick={() => login()}
-        className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 font-semibold py-2 px-4 rounded-lg shadow-sm text-black !important transition-colors"
-        >
-        <FcGoogle size={24} />
-        Continuar con Google
-    </button>
+    <div className="relative inline-block">
+      <button
+          className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 font-semibold py-2 px-4 rounded-lg shadow-sm text-black !important transition-colors"
+          >
+          <FcGoogle size={24} />
+          Continuar con Google
+      </button>
+
+      <div className="absolute inset-0 opacity-0 cursor pointer">
+        <GoogleLogin
+          onSuccess={onLoginSuccess}
+          onError={() => console.log("Error al iniciar sesión con Google")}
+        />
+      </div>
+    </div>
   );
 }
