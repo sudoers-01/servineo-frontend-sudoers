@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import MapJobRequest from "./MapJobRequest";
 import "./JobRequestModal.css";
 
-const API_URL = "http://localhost:5000";
+const API_URL = "http://localhost:3000";
 
 const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
