@@ -15,15 +15,8 @@ export default function RegistroModal() {
   }, [])
 
   useEffect(() => {
-    if (open) {
-      document.body.style.overflow = "hidden"
-    } else {
-      document.body.style.overflow = ""
-    }
-
-    return () => {
-      document.body.style.overflow = ""
-    }
+      document.body.style.overflow = open ? "hidden" : ""
+      return () => { document.body.style.overflow = "" }
   }, [open])
 
   if (!mounted) return null
@@ -44,7 +37,7 @@ export default function RegistroModal() {
               </button>
 
               <ModalLayout>
-                <ContenedorRegistro />
+                <ContenedorRegistro onSuccessClose={() => setOpen(false)} />
               </ModalLayout>
             </div>
           </div>,
