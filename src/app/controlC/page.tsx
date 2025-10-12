@@ -1,14 +1,17 @@
 "use client"
 import RegistroModal from "./components/modales/registroModal"
+import UserMenu from "./components/UI/menuUsuario";
+import { useAuth } from "./hooks/usoAutentificacion";
 
 export default function HomePage() {
+    const { user } = useAuth();
   return (
     <div className="min-h-screen w-full bg-white flex flex-col relative">
       <header className="w-full flex justify-between items-center px-10 py-6 bg-white/90 backdrop-blur-md shadow-md fixed top-0 left-0 z-30">
         <h1 className="text-3xl font-extrabold text-[#2B31E0] tracking-tight">
           Servineo
         </h1>
-       <RegistroModal />
+       {user ? <UserMenu /> : <RegistroModal />}
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 pt-24">
