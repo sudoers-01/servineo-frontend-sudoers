@@ -1,37 +1,44 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import L from "leaflet";
 
-//Ícono personalizado
-const customIcon = new L.Icon({
-  iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-  iconSize: [35, 35],
-  iconAnchor: [17, 35],
-});
+// Cargamos react-leaflet dinámicamente
+const { MapContainer, TileLayer, Marker, Circle, Popup, useMap } = require("react-leaflet");
+let L: any = null;
 
-// Mueve el mapa cuando cambia la ubicación
+// Mueve el mapa al cambiar posición
 function MoveMapToPosition({ position }: { position: [number, number] }) {
   const map = useMap();
   useEffect(() => {
-    if (position) {
-      map.setView(position, 14); // centramos automáticamente
-    }
+    if (position) map.setView(position, 15);
   }, [position, map]);
   return null;
 }
 
 export default function MapaLeaflet() {
-  if (typeof window === "undefined") return null;
-
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [showPrompt, setShowPrompt] = useState(true);
   const [denied, setDenied] = useState(false);
+  const [customIcon, setCustomIcon] = useState<any>(null);
 
   const defaultPos: [number, number] = [-17.3895, -66.1568]; // Cochabamba
 
-  // permitir acceso a la ubicación
+  // Cargar Leaflet solo en cliente
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      import("leaflet").then((leaflet) => {
+        L = leaflet;
+        const icon = new L.Icon({
+          iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
+          iconSize: [35, 35],
+          iconAnchor: [17, 35],
+        });
+        setCustomIcon(icon);
+      });
+    }
+  }, []);
+
+  // Permitir acceso a ubicación (mejor precisión)
   const handleAllow = () => {
     setShowPrompt(false);
     if ("geolocation" in navigator) {
@@ -39,9 +46,15 @@ export default function MapaLeaflet() {
         (pos) => {
           setPosition([pos.coords.latitude, pos.coords.longitude]);
         },
-        () => {
+        (err) => {
+          console.warn("Error al obtener ubicación:", err);
           setDenied(true);
           setPosition(defaultPos);
+        },
+        {
+          enableHighAccuracy: true, 
+          timeout: 10000, 
+          maximumAge: 0, 
         }
       );
     } else {
@@ -50,7 +63,7 @@ export default function MapaLeaflet() {
     }
   };
 
-  //Denegar acceso
+  // Denegar acceso
   const handleDeny = () => {
     setShowPrompt(false);
     setDenied(true);
@@ -58,128 +71,63 @@ export default function MapaLeaflet() {
   };
 
   return (
-    <div style={{ position: "relative" }}>
-      <MapContainer
-        center={position || defaultPos}
-        zoom={13}
-        style={{ height: "80vh", width: "100%" }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
-        />
+    <div className="relative w-full h-[80vh] rounded-2xl overflow-hidden shadow-lg">
+      {customIcon && (
+        <MapContainer
+          center={position || defaultPos}
+          zoom={14}
+          style={{ height: "100%", width: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
+          />
 
-        {/* Centramos el mapa automáticamente */}
-        {position && <MoveMapToPosition position={position} />}
+          {position && <MoveMapToPosition position={position} />}
 
-        {position && (
-          <Marker position={position} icon={customIcon}>
-            <Popup>
-              {denied
-                ? "Ubicación por defecto (Cochabamba)"
-                : "Tu ubicación actual"}
-            </Popup>
-          </Marker>
-        )}
-      </MapContainer>
+          {position && (
+            <>
+              <Marker position={position} icon={customIcon}>
+                <Popup>
+                  {denied
+                    ? "Ubicación por defecto (Cochabamba)"
+                    : "Tu ubicación actual"}
+                </Popup>
+              </Marker>
+              <Circle
+                center={position}
+                radius={1000} 
+                pathOptions={{
+                  color: "#3B82F6",
+                  fillColor: "#3B82F6",
+                  fillOpacity: 0.25,
+                }}
+              />
+            </>
+          )}
+        </MapContainer>
+      )}
 
       {/*Ventana emergente de permiso */}
       {showPrompt && (
-        <div
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            height: "80vh",
-            width: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)", // Fondo más oscuro
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            zIndex: 1000,
-            backdropFilter: "blur(4px)", // Efecto difuminado
-          }}
-        >
-          <div
-            style={{
-              background: "rgba(255,255,255,0.95)", // Blanco más sólido
-              padding: "2rem",
-              borderRadius: "1rem",
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
-              width: "320px",
-              color: "#222",
-            }}
-          >
-            <h2
-              style={{
-                marginBottom: "1rem",
-                fontSize: "1.3rem",
-                fontWeight: "600",
-                color: "#111",
-              }}
-            >
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex justify-center items-center z-[1000]">
+          <div className="bg-white/95 p-6 rounded-2xl shadow-xl text-center max-w-sm w-full mx-4">
+            <h2 className="text-xl font-semibold text-gray-900 mb-3">
               Permitir ubicación
             </h2>
-
-            <p
-              style={{
-                fontSize: "1rem",
-                lineHeight: "1.4",
-                color: "#333",
-              }}
-            >
+            <p className="text-gray-700 mb-6">
               ¿Deseas permitir el acceso a tu ubicación actual?
             </p>
-
-            <div
-              style={{
-                marginTop: "1.5rem",
-                display: "flex",
-                gap: "1rem",
-                justifyContent: "center",
-              }}
-            >
+            <div className="flex justify-center gap-4">
               <button
                 onClick={handleAllow}
-                style={{
-                  padding: "0.7rem 1.4rem",
-                  backgroundColor: "#4CAF50",
-                  color: "white",
-                  fontWeight: "600",
-                  border: "none",
-                  borderRadius: "0.5rem",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#43A047")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#4CAF50")
-                }
+                className="px-5 py-2.5 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition"
               >
                 Permitir
               </button>
-
               <button
                 onClick={handleDeny}
-                style={{
-                  padding: "0.7rem 1.4rem",
-                  backgroundColor: "#F44336",
-                  color: "white",
-                  fontWeight: "600",
-                  border: "none",
-                  borderRadius: "0.5rem",
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                }}
-                onMouseEnter={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#D32F2F")
-                }
-                onMouseLeave={(e) =>
-                  (e.currentTarget.style.backgroundColor = "#F44336")
-                }
+                className="px-5 py-2.5 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition"
               >
                 Denegar
               </button>
