@@ -4,6 +4,7 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
+//Ícono personalizado
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [35, 35],
@@ -30,7 +31,7 @@ export default function MapaLeaflet() {
 
   const defaultPos: [number, number] = [-17.3895, -66.1568]; // Cochabamba
 
-  // Permitir acceso a la ubicación
+  // permitir acceso a la ubicación
   const handleAllow = () => {
     setShowPrompt(false);
     if ("geolocation" in navigator) {
@@ -49,7 +50,7 @@ export default function MapaLeaflet() {
     }
   };
 
-  // Denegar acceso
+  //Denegar acceso
   const handleDeny = () => {
     setShowPrompt(false);
     setDenied(true);
@@ -91,25 +92,46 @@ export default function MapaLeaflet() {
             left: 0,
             height: "80vh",
             width: "100%",
-            backgroundColor: "rgba(0,0,0,0.5)",
+            backgroundColor: "rgba(0,0,0,0.6)", // Fondo más oscuro
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
             zIndex: 1000,
+            backdropFilter: "blur(4px)", // Efecto difuminado
           }}
         >
           <div
             style={{
-              background: "white",
+              background: "rgba(255,255,255,0.95)", // Blanco más sólido
               padding: "2rem",
               borderRadius: "1rem",
               textAlign: "center",
-              boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+              boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
               width: "320px",
+              color: "#222",
             }}
           >
-            <h2 style={{ marginBottom: "1rem" }}>Permitir ubicación</h2>
-            <p>¿Deseas permitir el acceso a tu ubicación actual?</p>
+            <h2
+              style={{
+                marginBottom: "1rem",
+                fontSize: "1.3rem",
+                fontWeight: "600",
+                color: "#111",
+              }}
+            >
+              Permitir ubicación
+            </h2>
+
+            <p
+              style={{
+                fontSize: "1rem",
+                lineHeight: "1.4",
+                color: "#333",
+              }}
+            >
+              ¿Deseas permitir el acceso a tu ubicación actual?
+            </p>
+
             <div
               style={{
                 marginTop: "1.5rem",
@@ -121,26 +143,43 @@ export default function MapaLeaflet() {
               <button
                 onClick={handleAllow}
                 style={{
-                  padding: "0.6rem 1.2rem",
-                  backgroundColor: "#4caf50",
+                  padding: "0.7rem 1.4rem",
+                  backgroundColor: "#4CAF50",
                   color: "white",
+                  fontWeight: "600",
                   border: "none",
                   borderRadius: "0.5rem",
                   cursor: "pointer",
+                  transition: "all 0.2s",
                 }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#43A047")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#4CAF50")
+                }
               >
                 Permitir
               </button>
+
               <button
                 onClick={handleDeny}
                 style={{
-                  padding: "0.6rem 1.2rem",
-                  backgroundColor: "#f44336",
+                  padding: "0.7rem 1.4rem",
+                  backgroundColor: "#F44336",
                   color: "white",
+                  fontWeight: "600",
                   border: "none",
                   borderRadius: "0.5rem",
                   cursor: "pointer",
+                  transition: "all 0.2s",
                 }}
+                onMouseEnter={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#D32F2F")
+                }
+                onMouseLeave={(e) =>
+                  (e.currentTarget.style.backgroundColor = "#F44336")
+                }
               >
                 Denegar
               </button>
