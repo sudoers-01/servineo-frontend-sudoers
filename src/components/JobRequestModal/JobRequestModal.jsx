@@ -1,44 +1,44 @@
-import React, { useState, useEffect } from "react";
-import MapJobRequest from "./MapJobRequest";
-import "./JobRequestModal.css";
+import React, { useState, useEffect } from 'react';
+import MapJobRequest from './MapJobRequest';
+import './JobRequestModal.css';
 
-const API_URL = "http://localhost:3000";
+const API_URL = 'http://localhost:3000';
 
 const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
   const [formData, setFormData] = useState({
-    jobMotive: "",
-    jobDescription: "",
-    locationOption: "keep",
-    startTime: "",
-    endTime: "",
-    suggestedRate: "",
+    jobMotive: '',
+    jobDescription: '',
+    locationOption: 'keep',
+    startTime: '',
+    endTime: '',
+    suggestedRate: '',
   });
 
   const [initialLocation, setInitialLocation] = useState(null);
   const [newLocation, setNewLocation] = useState(null);
   const [currentMapLocation, setCurrentMapLocation] = useState(null); // ✅ Nuevo estado para controlar la ubicación del mapa
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
 
   const getAuthToken = () => {
-    return localStorage.getItem("token");
+    return localStorage.getItem('token');
   };
 
   useEffect(() => {
     if (isOpen) {
       const fetchUserLocation = async () => {
         setLoading(true);
-        setError("");
+        setError('');
         try {
           const token = getAuthToken();
-          if (!token) throw new Error("No se encontró token de autenticación.");
+          if (!token) throw new Error('No se encontró token de autenticación.');
 
           const res = await fetch(`${API_URL}/api/profile/location`, {
             headers: { Authorization: `Bearer ${token}` },
           });
 
           const data = await res.json();
-          if (!res.ok) throw new Error(data.msg || "Error al cargar la ubicación.");
+          if (!res.ok) throw new Error(data.msg || 'Error al cargar la ubicación.');
 
           const userLocation = {
             lat: data.coordinates[1],
@@ -47,9 +47,8 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
 
           setInitialLocation(userLocation);
           setCurrentMapLocation(userLocation); // ✅ Inicializar la ubicación actual del mapa
-
         } catch (err) {
-          console.error("Error al obtener ubicación:", err);
+          console.error('Error al obtener ubicación:', err);
           setError(err.message);
         } finally {
           setLoading(false);
@@ -59,12 +58,12 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
       fetchUserLocation();
 
       setFormData({
-        jobMotive: "",
-        jobDescription: "",
-        locationOption: "keep",
-        startTime: "",
-        endTime: "",
-        suggestedRate: "",
+        jobMotive: '',
+        jobDescription: '',
+        locationOption: 'keep',
+        startTime: '',
+        endTime: '',
+        suggestedRate: '',
       });
       setNewLocation(null);
     }
@@ -72,14 +71,14 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
 
   // ✅ NUEVO EFFECT: Actualizar la ubicación del mapa cuando cambia la opción de ubicación
   useEffect(() => {
-    if (formData.locationOption === "keep" && initialLocation) {
+    if (formData.locationOption === 'keep' && initialLocation) {
       // Cuando selecciona "mantener ubicación", resetear a la ubicación inicial
       setCurrentMapLocation(initialLocation);
       setNewLocation(null); // Limpiar cualquier ubicación modificada
-    } else if (formData.locationOption === "modify" && newLocation) {
+    } else if (formData.locationOption === 'modify' && newLocation) {
       // Cuando selecciona "modificar" y ya hay una ubicación modificada, usar esa
       setCurrentMapLocation(newLocation);
-    } else if (formData.locationOption === "modify" && initialLocation) {
+    } else if (formData.locationOption === 'modify' && initialLocation) {
       // Cuando selecciona "modificar" por primera vez, empezar con la ubicación inicial
       setCurrentMapLocation(initialLocation);
     }
@@ -93,25 +92,25 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
+    setError('');
 
     try {
       const token = getAuthToken();
-      if (!token) throw new Error("No se encontró token de autenticación.");
+      if (!token) throw new Error('No se encontró token de autenticación.');
 
       let finalLocation;
-      if (formData.locationOption === "modify" && newLocation) {
+      if (formData.locationOption === 'modify' && newLocation) {
         finalLocation = {
-          type: "Point",
+          type: 'Point',
           coordinates: [newLocation.lng, newLocation.lat],
         };
       } else if (initialLocation) {
         finalLocation = {
-          type: "Point",
+          type: 'Point',
           coordinates: [initialLocation.lng, initialLocation.lat],
         };
       } else {
-        throw new Error("No se ha definido una ubicación para el trabajo.");
+        throw new Error('No se ha definido una ubicación para el trabajo.');
       }
 
       const payload = {
@@ -124,22 +123,21 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
       };
 
       const res = await fetch(`${API_URL}/api/jobrequests`, {
-        method: "POST",
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(payload),
       });
 
       const data = await res.json();
-      if (!res.ok) throw new Error(data.msg || "Error al guardar la solicitud.");
+      if (!res.ok) throw new Error(data.msg || 'Error al guardar la solicitud.');
 
       onSubmit(data);
       onClose();
-
     } catch (err) {
-      console.error("Error al enviar solicitud:", err);
+      console.error('Error al enviar solicitud:', err);
       setError(err.message);
     } finally {
       setLoading(false);
@@ -152,7 +150,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
 
   if (!isOpen) return null;
 
-  const isMapEnabled = formData.locationOption === "modify";
+  const isMapEnabled = formData.locationOption === 'modify';
 
   return (
     <div className="modal" onClick={handleOverlayClick}>
@@ -163,7 +161,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
 
         <div className="task-body">
           <form onSubmit={handleSubmit}>
-            {error && <p style={{ color: "red", textAlign: "center" }}>{error}</p>}
+            {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
             <div className="job-motive-section">
               <label htmlFor="jobMotive">Motivo del trabajo:</label>
@@ -199,7 +197,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
                   type="radio"
                   name="locationOption"
                   value="keep"
-                  checked={formData.locationOption === "keep"}
+                  checked={formData.locationOption === 'keep'}
                   onChange={handleInputChange}
                   disabled={loading}
                 />
@@ -210,7 +208,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
                   type="radio"
                   name="locationOption"
                   value="modify"
-                  checked={formData.locationOption === "modify"}
+                  checked={formData.locationOption === 'modify'}
                   onChange={handleInputChange}
                   disabled={loading}
                 />
@@ -221,7 +219,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
             <div className="map-job-location">
               <label>Mapa de ubicación:</label>
               {loading && !initialLocation ? (
-                <p style={{ color: "#777", fontSize: "14px" }}>Cargando mapa...</p>
+                <p style={{ color: '#777', fontSize: '14px' }}>Cargando mapa...</p>
               ) : (
                 <MapJobRequest
                   isEnabled={isMapEnabled}
@@ -286,7 +284,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
                 Cancelar
               </button>
               <button type="submit" className="save-request-btn" disabled={loading}>
-                {loading ? "Guardando..." : "Guardar"}
+                {loading ? 'Guardando...' : 'Guardar'}
               </button>
             </div>
           </form>
