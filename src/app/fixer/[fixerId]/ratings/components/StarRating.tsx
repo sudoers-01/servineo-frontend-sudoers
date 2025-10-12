@@ -1,11 +1,11 @@
 'use client'
 
-type Props = { value: 1 | 2 | 3 | 4 | 5; size?: number; srLabel?: string }
+type Props = { value: 1 | 2 | 3; size?: number; srLabel?: string }
 
 export default function StarRating({ value, size = 18, srLabel }: Props) {
   return (
-    <div className="inline-flex gap-1" aria-label={srLabel ?? `${value} de 5 estrellas`}>
-      {Array.from({ length: 5 }).map((_, i) => {
+    <div className="inline-flex gap-1" aria-label={srLabel ?? `${value} de 3 estrellas`}>
+      {Array.from({ length: 3 }).map((_, i) => {
         const filled = i < value
         return (
           <svg

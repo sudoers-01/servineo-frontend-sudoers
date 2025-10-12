@@ -3,7 +3,7 @@ import RatingDetailsList from './components/RatingDetailsList'
 
 export default function RatingsPage() {
   const simulateError = false // cambia a true para probar el mensaje
-  const errorMsg = simulateError ? 'fallo' : undefined
+  const errorMsg = simulateError ? 'failed' : undefined
 
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-4">

@@ -85,7 +85,7 @@ export default function RatingDetailsList({ ratings, error }: Props) {
                   onClick={() => toggleComment(r.id)}
                   aria-expanded={expandedCommentId === r.id}
                 >
-                  {expandedCommentId === r.id ? 'Ver menos' : 'Ver más'}
+                  {expandedCommentId === r.id ? 'See less' : 'See more'}
                 </button>
               )}
             </div>
