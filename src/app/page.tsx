@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import RequesterEditForm from '../controlC/RequesterEditForm'
+import RequesterEditForm from '../controlC/components/RequesterEditForm'
 
 export default function Home() {
   const [loggedIn, setLoggedIn] = useState(false)

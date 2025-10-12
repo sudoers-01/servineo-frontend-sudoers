@@ -34,7 +34,6 @@ export default function RequesterEditForm({ requesterId, initialPhone = '', init
 
       setLoading(false)
       onSaved?.()
-      // opcional: mostrar toast o mensaje
     } catch (err: any) {
       setLoading(false)
       setError(err.message || 'Error desconocido')
@@ -42,31 +41,47 @@ export default function RequesterEditForm({ requesterId, initialPhone = '', init
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
+    <form onSubmit={handleSubmit} className="space-y-4 max-w-md mx-auto">
+      {/* telefono*/}
       <div>
-        <label className="block text-sm font-medium">Teléfono</label>
+        <label className="block text-sm font-medium text-gray-700">Teléfono</label>
         <input
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
           placeholder="+591 7xxxxxxx"
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
+      {/*ubicacion */}
       <div>
-        <label className="block text-sm font-medium">Ubicación</label>
+        <label className="block text-sm font-medium text-gray-700">Ubicación</label>
         <input
           value={location}
           onChange={(e) => setLocation(e.target.value)}
           placeholder="Ciudad, Dirección"
-          className="mt-1 block w-full rounded-md border px-3 py-2"
+          className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
       </div>
 
+      {/* MAPA ESPACIO RESERVADO */}
+      <div>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Mapa</label>
+        <div className="w-full h-48 border border-gray-300 rounded-md flex items-center justify-center text-gray-500 bg-gray-50">
+          <span>mapita (en construccion)</span>
+        </div>
+      </div>
+
+      {/* Error */}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
+      {}
       <div>
-        <button type="submit" disabled={loading} className="rounded bg-blue-600 px-4 py-2 text-white">
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full rounded-md bg-blue-600 px-4 py-2 text-white font-medium hover:bg-blue-700 disabled:bg-gray-400"
+        >
           {loading ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>
