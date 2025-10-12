@@ -2,7 +2,7 @@
 
 import RegistroGoogle from "./registroGoogle"
 
-export default function ContenedorRegistro() {
+export default function ContenedorRegistro({ onSuccessClose }: { onSuccessClose?: () => void }) {
   return (
     <div className="flex flex-col items-center w-full">
       <h2 className="text-xl font-bold text-center mb-2">Crear cuenta</h2>
@@ -12,7 +12,7 @@ export default function ContenedorRegistro() {
       
       <div className="text-center my-4 text-gray-400">— o —</div>
 
-      <RegistroGoogle />
+      <RegistroGoogle onSuccessClose={onSuccessClose} />
     </div>
   )
 }
