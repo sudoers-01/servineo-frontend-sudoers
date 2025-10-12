@@ -1,8 +1,8 @@
+
 "use client";
 import dynamic from "next/dynamic";
 import React from "react";
 
-// Importamos MapaLeaflet de forma dinámica, y desactivamos el SSR
 const MapaLeaflet = dynamic(() => import("./MapaLeaflet"), {
   ssr: false,
 });
