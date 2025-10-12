@@ -12,7 +12,7 @@ export default function Home() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
       >
-        Bienvenido a <span className="text-yellow-300">SERVINEO</span>
+        Bienvenido a <span className="text-yellow-300">SERVINEO modo requester </span>
       </motion.h1>
 
       <motion.p
@@ -21,9 +21,8 @@ export default function Home() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5, duration: 1 }}
       >
-        Administra, organiza y gestiona todas tus solicitudes fácilmente desde el modo{" "}
-        <span className="font-semibold text-yellow-300">Requester</span>.  
-        Aquí podrás visualizar usuarios, controlar tareas y acceder a las funciones principales de{" "}
+ 
+        Aquí podrás acceder a las funciones principales de{" "}
         <span className="font-semibold">User Management</span> en un entorno intuitivo y moderno.
       </motion.p>
 
