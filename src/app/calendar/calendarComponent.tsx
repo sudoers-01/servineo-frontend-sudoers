@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useRef, useState, useEffect } from "react";
-import { Calendar, momentLocalizer, Views, SlotInfo, Event as RBCEvent } from 'react-big-calendar';
+import { Calendar, momentLocalizer, Views, SlotInfo, Event as RBCEvent, View } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -23,6 +23,7 @@ interface MyEvent {
 
 export default function MyCalendarPage() {
   const [events, setEvents] = useState<MyEvent[]>([]);
+  const [currentView, setCurrentView] = useState<View>(Views.MONTH);
 
   const formRef = useRef<MultiStepAppointmentHandle | null>(null);
   const editFormRef = useRef<EditAppointmentFormHandle | null>(null);
@@ -36,15 +37,20 @@ export default function MyCalendarPage() {
     setEvents(slots.map(s => ({ ...s })));
   }, []);
 
-   function handleSelectEvent(ev: MyEvent) {
-      if (ev.booked) {
-        handleEditExistingAppointment(ev); // ← Editar cita existente
-      } else {
-        formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title }); // ← Crear nueva
-      }
+  function handleSelectEvent(ev: MyEvent) {
+    if (ev.booked) {
+      handleEditExistingAppointment(ev); // ← Editar cita existente
+    } else {
+      formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title }); // ← Crear nueva
     }
+  }
 
   function handleSelectSlot(slotInfo: SlotInfo) {
+    // No permitir hacer clic en slots en vistas MONTH y WEEK
+    if (currentView === Views.MONTH || currentView === Views.WEEK) {
+      return;
+    }
+
     const start = slotInfo.start;
     const day = start.getDay();
     const hour = start.getHours();
@@ -122,6 +128,49 @@ export default function MyCalendarPage() {
       }
     };
   }
+
+  // Función para aplicar estilos a los días
+  const dayPropGetter = (date: Date) => {
+    const day = date.getDay();
+    const isWeekend = day === 0 || day === 6; // 0 = domingo, 6 = sábado
+    const today = new Date();
+    const isToday = date.getDate() === today.getDate() && 
+                   date.getMonth() === today.getMonth() && 
+                   date.getFullYear() === today.getFullYear();
+    
+    // Solo aplicar el color azul al día actual en la vista MONTH
+    if (isToday && currentView === Views.MONTH) {
+      return {
+        style: {
+          backgroundColor: '#2B6AE0',
+          color: '#fff'
+        }
+      };
+    }
+    
+    if (isWeekend) {
+      return {
+        style: {
+          backgroundColor: '#f0f0f0',
+          color: '#999',
+          cursor: 'default'
+        }
+      };
+    }
+    
+    return {
+      style: {
+        backgroundColor: '#fff',
+        color: '#333'
+      }
+    };
+  };
+
+  // Manejar cambio de vista
+  const handleViewChange = (view: View) => {
+    setCurrentView(view);
+  };
+
   return (
     <div className="max-w-6xl mx-auto p-4">
       <h1 className="text-2xl font-semibold mb-4">Mi Calendario</h1>
@@ -139,7 +188,11 @@ export default function MyCalendarPage() {
           onSelectEvent={(event) => handleSelectEvent(event as MyEvent)}
           onSelectSlot={(slotInfo) => handleSelectSlot(slotInfo)}
           eventPropGetter={(event) => eventStyleGetter(event as MyEvent)}
+          dayPropGetter={dayPropGetter}
+          min={new Date(0, 0, 0, 8, 0, 0)} 
+          max={new Date(0, 0, 0, 18, 0, 0)} 
           popup
+          onView={handleViewChange}
         />
       </div>
       <MultiStepAppointment ref={formRef} />
