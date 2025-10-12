@@ -1,15 +1,25 @@
 "use client";
 import { useEffect, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 
-// Ícono personalizado
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [35, 35],
   iconAnchor: [17, 35],
 });
+
+// Mueve el mapa cuando cambia la ubicación
+function MoveMapToPosition({ position }: { position: [number, number] }) {
+  const map = useMap();
+  useEffect(() => {
+    if (position) {
+      map.setView(position, 14); // centramos automáticamente
+    }
+  }, [position, map]);
+  return null;
+}
 
 export default function MapaLeaflet() {
   if (typeof window === "undefined") return null;
@@ -20,7 +30,7 @@ export default function MapaLeaflet() {
 
   const defaultPos: [number, number] = [-17.3895, -66.1568]; // Cochabamba
 
-  // Solicitar ubicación si el usuario permite
+  // Permitir acceso a la ubicación
   const handleAllow = () => {
     setShowPrompt(false);
     if ("geolocation" in navigator) {
@@ -39,6 +49,7 @@ export default function MapaLeaflet() {
     }
   };
 
+  // Denegar acceso
   const handleDeny = () => {
     setShowPrompt(false);
     setDenied(true);
@@ -47,7 +58,6 @@ export default function MapaLeaflet() {
 
   return (
     <div style={{ position: "relative" }}>
-      {/* 🧭 Mapa */}
       <MapContainer
         center={position || defaultPos}
         zoom={13}
@@ -57,6 +67,10 @@ export default function MapaLeaflet() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
         />
+
+        {/* Centramos el mapa automáticamente */}
+        {position && <MoveMapToPosition position={position} />}
+
         {position && (
           <Marker position={position} icon={customIcon}>
             <Popup>
@@ -68,7 +82,7 @@ export default function MapaLeaflet() {
         )}
       </MapContainer>
 
-      {/* 🌟 Ventana emergente */}
+      {/*Ventana emergente de permiso */}
       {showPrompt && (
         <div
           style={{
@@ -96,7 +110,14 @@ export default function MapaLeaflet() {
           >
             <h2 style={{ marginBottom: "1rem" }}>Permitir ubicación</h2>
             <p>¿Deseas permitir el acceso a tu ubicación actual?</p>
-            <div style={{ marginTop: "1.5rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
+            <div
+              style={{
+                marginTop: "1.5rem",
+                display: "flex",
+                gap: "1rem",
+                justifyContent: "center",
+              }}
+            >
               <button
                 onClick={handleAllow}
                 style={{
