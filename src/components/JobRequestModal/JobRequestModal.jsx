@@ -153,50 +153,50 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
   const isMapEnabled = formData.locationOption === 'modify';
 
   return (
-    <div className="modal" onClick={handleOverlayClick}>
-      <div className="modal-content">
-        <div className="task-header">
+    <div className='modal' onClick={handleOverlayClick}>
+      <div className='modal-content'>
+        <div className='task-header'>
           <h2>Formulario de solicitud</h2>
         </div>
 
-        <div className="task-body">
+        <div className='task-body'>
           <form onSubmit={handleSubmit}>
             {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
-            <div className="job-motive-section">
-              <label htmlFor="jobMotive">Motivo del trabajo:</label>
+            <div className='job-motive-section'>
+              <label htmlFor='jobMotive'>Motivo del trabajo:</label>
               <input
-                type="text"
-                id="jobMotive"
-                name="jobMotive"
+                type='text'
+                id='jobMotive'
+                name='jobMotive'
                 value={formData.jobMotive}
                 onChange={handleInputChange}
-                placeholder="Ingrese el motivo del trabajo..."
+                placeholder='Ingrese el motivo del trabajo...'
                 required
                 disabled={loading}
               />
             </div>
 
-            <div className="job-description-section">
-              <label htmlFor="jobDescription">Descripción:</label>
+            <div className='job-description-section'>
+              <label htmlFor='jobDescription'>Descripción:</label>
               <textarea
-                id="jobDescription"
-                name="jobDescription"
+                id='jobDescription'
+                name='jobDescription'
                 value={formData.jobDescription}
                 onChange={handleInputChange}
-                placeholder="Describa el trabajo a realizar..."
+                placeholder='Describa el trabajo a realizar...'
                 required
                 disabled={loading}
               />
             </div>
 
-            <fieldset className="job-selection-location">
+            <fieldset className='job-selection-location'>
               <legend>Ubicación del trabajo:</legend>
               <label>
                 <input
-                  type="radio"
-                  name="locationOption"
-                  value="keep"
+                  type='radio'
+                  name='locationOption'
+                  value='keep'
                   checked={formData.locationOption === 'keep'}
                   onChange={handleInputChange}
                   disabled={loading}
@@ -205,9 +205,9 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
               </label>
               <label>
                 <input
-                  type="radio"
-                  name="locationOption"
-                  value="modify"
+                  type='radio'
+                  name='locationOption'
+                  value='modify'
                   checked={formData.locationOption === 'modify'}
                   onChange={handleInputChange}
                   disabled={loading}
@@ -216,7 +216,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
               </label>
             </fieldset>
 
-            <div className="map-job-location">
+            <div className='map-job-location'>
               <label>Mapa de ubicación:</label>
               {loading && !initialLocation ? (
                 <p style={{ color: '#777', fontSize: '14px' }}>Cargando mapa...</p>
@@ -233,14 +233,14 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
               )}
             </div>
 
-            <div className="time-availability">
+            <div className='time-availability'>
               <label>Disponibilidad horaria:</label>
-              <div className="time-inputs">
+              <div className='time-inputs'>
                 <label>
                   De:
                   <input
-                    type="time"
-                    name="startTime"
+                    type='time'
+                    name='startTime'
                     value={formData.startTime}
                     onChange={handleInputChange}
                     required
@@ -250,8 +250,8 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
                 <label>
                   Hasta:
                   <input
-                    type="time"
-                    name="endTime"
+                    type='time'
+                    name='endTime'
                     value={formData.endTime}
                     onChange={handleInputChange}
                     required
@@ -261,29 +261,29 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
               </div>
             </div>
 
-            <div className="suggested-rate">
-              <label htmlFor="suggestedRate">Tarifa sugerida (opcional):</label>
+            <div className='suggested-rate'>
+              <label htmlFor='suggestedRate'>Tarifa sugerida (opcional):</label>
               <input
-                type="number"
-                id="suggestedRate"
-                name="suggestedRate"
+                type='number'
+                id='suggestedRate'
+                name='suggestedRate'
                 value={formData.suggestedRate}
                 onChange={handleInputChange}
-                placeholder="Ingrese una tarifa en bs."
+                placeholder='Ingrese una tarifa en bs.'
                 disabled={loading}
               />
             </div>
 
-            <div className="modal-buttons">
+            <div className='modal-buttons'>
               <button
-                type="button"
-                className="cancel-request-btn"
+                type='button'
+                className='cancel-request-btn'
                 onClick={onClose}
                 disabled={loading}
               >
                 Cancelar
               </button>
-              <button type="submit" className="save-request-btn" disabled={loading}>
+              <button type='submit' className='save-request-btn' disabled={loading}>
                 {loading ? 'Guardando...' : 'Guardar'}
               </button>
             </div>

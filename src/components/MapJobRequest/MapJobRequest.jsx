@@ -98,7 +98,7 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
     mapRef.current.classList.add('map-disabled');
   };
 
-  return <div ref={mapRef} className="map-container" />;
+  return <div ref={mapRef} className='map-container' />;
 };
 
 export default MapJobRequest;
