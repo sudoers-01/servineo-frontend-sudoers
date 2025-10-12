@@ -1,17 +1,14 @@
 
 "use client";
 import dynamic from "next/dynamic";
-import React from "react";
 
-const MapaLeaflet = dynamic(() => import("./MapaLeaflet"), {
-  ssr: false,
-});
+const MapaLeaflet = dynamic(() => import("./MapaLeaflet"), { ssr: false });
 
 export default function PageUbicacion() {
   return (
-    <div className="w-full h-screen">
-      <h1 className="text-2xl font-bold text-center my-4">Ubicación</h1>
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50">
       <MapaLeaflet />
     </div>
   );
 }
+
