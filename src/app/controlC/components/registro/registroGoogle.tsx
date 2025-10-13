@@ -22,20 +22,22 @@ export default function RegistroGoogle({ onSuccessClose }: { onSuccessClose?: ()
 
       if (onSuccessClose) onSuccessClose();
 
+      if (data.firstTime) {
+        sessionStorage.setItem("google_token_temp", token);
+        router.push("/controlC/ubicacion");
+        return; 
+      }
+
       if (data.token) {
         localStorage.setItem("servineo_token", data.token);
       }
       if (data.user) {
         localStorage.setItem("servineo_user", JSON.stringify(data.user));
-        setUser(data.user); 
+        setUser(data.user);
       }
 
-      if (data.firstTime) {
-        sessionStorage.setItem("google_token_temp", token);
-        router.push("/controlC/ubicacion");
-      } else {
-        router.push("/controlC");
-      }
+      router.push("/controlC");
+
     } catch (error) {
       console.error("Error al enviar el token al backend:", error);
     }
