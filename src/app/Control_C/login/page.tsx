@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { api, ApiResponse } from '@/app/Control_C/lib/api';
 import { Eye, EyeOff } from 'lucide-react'; // para el icono de mostrar/ocultar password
+import LoginGoogle from "@/app/Control_C/components/auth/LoginGoogle";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -93,16 +94,9 @@ export default function LoginPage() {
         </div>
 
         {/* Botón Google */}
-        <button className="w-full flex items-center justify-center border border-gray-300 rounded-lg p-3 hover:bg-gray-50 transition">
-          <img
-            src="https://www.svgrepo.com/show/355037/google.svg"
-            alt="Google"
-            className="w-5 h-5 mr-2"
-          />
-          <span className="text-sm font-medium text-gray-600">
-            Continuar con Google
-          </span>
-        </button>
+        <div className="mt-6">
+          <LoginGoogle />
+        </div>
 
         {/* Mensaje de error o éxito */}
         {mensaje && (

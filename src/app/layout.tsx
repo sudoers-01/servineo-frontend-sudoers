@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Roboto } from 'next/font/google';
 import './globals.css';
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -18,11 +19,16 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  
   return (
     <html lang="es">
       <body className={`${roboto.variable} font-sans antialiased`}>
-        {children}
+        {/* 🌍 Provider global para toda la app */}
+        <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
+          {children}
+        </GoogleOAuthProvider>
       </body>
     </html>
   );
+
 }
