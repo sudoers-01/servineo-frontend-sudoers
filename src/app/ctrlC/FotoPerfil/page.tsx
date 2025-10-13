@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Trash2 } from "lucide-react"; // ✅ icono de basura
+import { Trash2 } from "lucide-react";
 
 export default function FotoPerfil() {
   const [foto, setFoto] = useState<string | null>(null);
@@ -17,12 +17,15 @@ export default function FotoPerfil() {
 
   const eliminarFoto = () => setFoto(null);
 
+  const continuar = () => {
+    if (!foto) return;
+    alert("Foto seleccionada correctamente");
+  };
+
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#2BDDE0]">
       <div className="bg-white p-6 rounded-2xl shadow-lg w-[400px] text-center">
-        <h2 className="text-xl font-semibold mb-2 text-black">
-          Foto de perfil
-        </h2>
+        <h2 className="text-xl font-semibold mb-2 text-black">Foto de perfil</h2>
         <p className="text-sm text-gray-600 mb-4">
           Sube una foto tuya para que otros te reconozcan.
         </p>
@@ -71,10 +74,9 @@ export default function FotoPerfil() {
             {foto && (
               <button
                 onClick={eliminarFoto}
-                className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 flex items-center justify-center"
-                title="Eliminar foto"
+                className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600"
               >
-                <Trash2 size={18} /> {/* 🗑️ Ícono de basura */}
+                <Trash2 size={18} />
               </button>
             )}
           </div>
@@ -85,7 +87,15 @@ export default function FotoPerfil() {
             Cancelar
           </button>
 
-          <button className="px-4 py-2 bg-[#1AA7ED] text-white rounded-full hover:bg-[#1491cc] transition-colors">
+          <button
+            onClick={continuar}
+            disabled={!foto} 
+            className={`px-4 py-2 rounded-full text-white transition-colors ${
+              foto
+                ? "bg-[#1AA7ED] hover:bg-[#1491cc]"
+                : "bg-gray-400 cursor-not-allowed"
+            }`}
+          >
             Continuar
           </button>
         </div>
