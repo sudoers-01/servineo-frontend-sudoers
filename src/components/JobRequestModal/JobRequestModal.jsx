@@ -16,14 +16,17 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
 
   const [initialLocation, setInitialLocation] = useState(null);
   const [newLocation, setNewLocation] = useState(null);
-  const [currentMapLocation, setCurrentMapLocation] = useState(null); // ✅ Nuevo estado para controlar la ubicación del mapa
+  const [currentMapLocation, setCurrentMapLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-
+  // funcion para obtener el token del localStorage (cambiar a token que se guarda en la bd)
+  // El token se usa para obtener la ubicación del usuario logueado, y mostrarla en el mapa
+  // y para enviar la solicitud de trabajo con la ubicación correcta si se mantiene la opción "mantener ubicación"
   const getAuthToken = () => {
     return localStorage.getItem('token');
   };
-
+  //inicia datos necesarios que el modal necesita
+  //Cargar la ubicación del usuario logueado al abrir el modal, por eso se necesita el token que el usuario logueado genera
   useEffect(() => {
     if (isOpen) {
       const fetchUserLocation = async () => {
@@ -46,7 +49,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
           };
 
           setInitialLocation(userLocation);
-          setCurrentMapLocation(userLocation); // ✅ Inicializar la ubicación actual del mapa
+          setCurrentMapLocation(userLocation);
         } catch (err) {
           console.error('Error al obtener ubicación:', err);
           setError(err.message);
@@ -56,7 +59,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
       };
 
       fetchUserLocation();
-
+      //resetear el formulario cada vez que se abre el modal
       setFormData({
         jobMotive: '',
         jobDescription: '',
@@ -69,17 +72,14 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
     }
   }, [isOpen]);
 
-  // ✅ NUEVO EFFECT: Actualizar la ubicación del mapa cuando cambia la opción de ubicación
+  //Actualizar la ubicación del mapa cuando cambia la opción de ubicación "modificar o mantener"
   useEffect(() => {
     if (formData.locationOption === 'keep' && initialLocation) {
-      // Cuando selecciona "mantener ubicación", resetear a la ubicación inicial
       setCurrentMapLocation(initialLocation);
-      setNewLocation(null); // Limpiar cualquier ubicación modificada
+      setNewLocation(null);
     } else if (formData.locationOption === 'modify' && newLocation) {
-      // Cuando selecciona "modificar" y ya hay una ubicación modificada, usar esa
       setCurrentMapLocation(newLocation);
     } else if (formData.locationOption === 'modify' && initialLocation) {
-      // Cuando selecciona "modificar" por primera vez, empezar con la ubicación inicial
       setCurrentMapLocation(initialLocation);
     }
   }, [formData.locationOption, initialLocation, newLocation]);
@@ -89,6 +89,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // maneja el envio del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -143,7 +144,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
       setLoading(false);
     }
   };
-
+  // si se da click fuera del modal, se cierra
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
@@ -223,11 +224,10 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
               ) : (
                 <MapJobRequest
                   isEnabled={isMapEnabled}
-                  // ✅ PASAMOS la ubicación actual que debe mostrar el mapa
                   initialLocationObject={currentMapLocation}
                   onPositionChange={(pos) => {
                     setNewLocation({ lat: pos.lat, lng: pos.lng });
-                    setCurrentMapLocation({ lat: pos.lat, lng: pos.lng }); // ✅ Actualizar también la ubicación actual
+                    setCurrentMapLocation({ lat: pos.lat, lng: pos.lng });
                   }}
                 />
               )}
