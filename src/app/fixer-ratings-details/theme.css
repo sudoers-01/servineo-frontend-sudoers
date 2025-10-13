@@ -1,0 +1,44 @@
+:root {
+  --background: #F9FAFB;
+  --foreground: #111827;
+
+  --surface-card: #FFFFFF;
+  --surface-border: #D1D5DB;
+  --text-muted:  #64748B;
+
+  --primary-light:  #1AA7ED;
+  --primary:        #2B31E0;
+  --primary-medium: #2B6AE0;
+
+  --accent:       #2BDDE0;
+  --accent-hover: #5E2BE0;
+  --highlight:    #759AE0;
+
+  --success: #16A34A;
+  --warning: #F59E0B;
+  --error:   #EF4444;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #F9FAFB;
+    --surface-card: #111214;
+    --text-muted: #9ca3af;
+  }
+}
+
+.line-clamp-2 {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.transition-height { transition: max-height 0.3s ease-in-out; }
+
+/* caja de error local (equiv. border-error + bg-error/10 + text-error) */
+.error-box {
+  border: 1px solid var(--error);
+  color: var(--error);
+  background: color-mix(in srgb, var(--error) 10%, transparent);
+}
