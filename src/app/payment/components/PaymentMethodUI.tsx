@@ -34,7 +34,7 @@ export default function PaymentMethodUI({ trabajo, onClose }) {
       <div className="bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl">
         {/* Header */}
         <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
-          <h1 className="text-xl font-semibold">Metodo de pago Efectivo</h1>
+          <h1 className="text-xl font-semibold">Metodo de pago Efectivo - Vista REQUESTER</h1>
           <button onClick={onClose} className="hover:bg-blue-700 px-3 py-1 rounded text-xl">✕</button>
         </div>
 
