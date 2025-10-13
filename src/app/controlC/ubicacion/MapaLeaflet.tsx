@@ -3,12 +3,14 @@ import { useEffect, useState } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { enviarUbicacion } from "../services/ubicacion";
 
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [35, 35],
   iconAnchor: [17, 35],
 });
+
 
 function MoveMapToPosition({ position }: { position: [number, number] }) {
   const map = useMap();
@@ -20,30 +22,42 @@ function MoveMapToPosition({ position }: { position: [number, number] }) {
 
 export default function MapaLeaflet() {
   const [position, setPosition] = useState<[number, number] | null>(null);
-  const [denied, setDenied] = useState(false);
-  const defaultPos: [number, number] = [-17.3895, -66.1568]; // Cochabamba
+  const [ubicacionPermitida, setUbicacionPermitida] = useState<boolean | null>(null);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          setPosition([pos.coords.latitude, pos.coords.longitude]);
+          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
+          setPosition(coords);
+          setUbicacionPermitida(true);
         },
         () => {
-          setDenied(true);
-          setPosition(defaultPos);
+          setUbicacionPermitida(false);
+          setPosition(null);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
-      setDenied(true);
-      setPosition(defaultPos);
+      setUbicacionPermitida(false);
+      setPosition(null);
     }
   }, []);
 
+  const manejarEnvio = async () => {
+    try {
+      if (ubicacionPermitida && position) {
+        await enviarUbicacion(position[0], position[1]);
+      } else {
+        await enviarUbicacion(0, 0);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <div style={{ position: "relative", width: "100%" }}>
-      {}
       <div
         style={{
           background: "white",
@@ -57,7 +71,6 @@ export default function MapaLeaflet() {
           alignItems: "center",
         }}
       >
-        {}
         <h2
           style={{
             width: "100%",
@@ -73,7 +86,6 @@ export default function MapaLeaflet() {
           Ubicación
         </h2>
 
-        {}
         <div
           style={{
             width: "100%",
@@ -84,8 +96,8 @@ export default function MapaLeaflet() {
           }}
         >
           <MapContainer
-            center={position || defaultPos}
-            zoom={14}
+            center={position || [-17.3895, -66.1568]}
+            zoom={position ? 14 : 5}
             style={{ height: "100%", width: "100%" }}
           >
             <TileLayer
@@ -93,29 +105,27 @@ export default function MapaLeaflet() {
               attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
             />
 
-            {position && <MoveMapToPosition position={position} />}
+            {position && ubicacionPermitida && <MoveMapToPosition position={position} />}
 
-            {position && (
+            {position && ubicacionPermitida && (
               <>
                 <Marker position={position} icon={customIcon}>
-                  <Popup>
-                    {denied
-                      ? "Ubicación por defecto (Cochabamba)"
-                      : "Tu ubicación actual"}
-                  </Popup>
+                  <Popup>Tu ubicación actual</Popup>
                 </Marker>
-
                 <Circle
                   center={position}
                   radius={1000}
-                  pathOptions={{ color: "#2B6AE0", fillColor: "#cce0ff", fillOpacity: 0.3 }}
+                  pathOptions={{
+                    color: "#2B6AE0",
+                    fillColor: "#cce0ff",
+                    fillOpacity: 0.3,
+                  }}
                 />
               </>
             )}
           </MapContainer>
         </div>
 
-        {}
         <button
           style={{
             backgroundColor: "#2B6AE0",
@@ -135,6 +145,7 @@ export default function MapaLeaflet() {
           onMouseLeave={(e) =>
             (e.currentTarget.style.backgroundColor = "#2B6AE0")
           }
+          onClick={manejarEnvio}
         >
           Finalizar registro
         </button>
@@ -142,7 +153,4 @@ export default function MapaLeaflet() {
     </div>
   );
 }
-
-
-
 
