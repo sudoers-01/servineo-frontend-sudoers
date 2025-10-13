@@ -24,7 +24,14 @@ export default function FotoPerfil() {
 
   return (
     <div className="flex justify-center items-center min-h-screen bg-[#759AE0]">
-        <div className="bg-[#FFF8E7] p-6 rounded-2xl shadow-lg w-[400px] text-center">
+        <div
+        className="
+         bg-gradient-to-br from-[#FFF8E7] to-[#F1E7C8]
+        p-6 rounded-2xl 
+        shadow-[0_10px_25px_rgba(0,0,0,0.25)]
+        w-[400px] text-center 
+        transform transition-all duration-300
+        hover:scale-[1.03] hover:shadow-[0_15px_35px_rgba(0,0,0,0.35)]">
         <h2 className="text-xl font-semibold mb-2 text-black">Foto de perfil</h2>
         <p className="text-sm text-gray-600 mb-4">
           Sube una foto tuya para que otros te reconozcan.
