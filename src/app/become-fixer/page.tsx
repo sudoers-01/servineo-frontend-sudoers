@@ -40,7 +40,7 @@ const BecomeFixerPage = () => {
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <div className="flex justify-center">
-          <TabsList className="mb-4">
+          <TabsList className="flex mb-4 gap-[0.1px]">
             <TabsTrigger value="register">Registro</TabsTrigger>
             <TabsTrigger value="newOffer">Nueva Oferta</TabsTrigger>
             <TabsTrigger value="myOffer">Mis Ofertas</TabsTrigger>
