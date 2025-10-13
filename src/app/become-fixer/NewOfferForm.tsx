@@ -1,9 +1,9 @@
 'use client';
 
 import { Field, Input, Select, Textarea } from '@/Components/Form';
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from 'react';
 import { createNewOffer, NewOfferData } from './api/services';
+import { Modal } from '@/Components/Modal';
 
 const NewOfferForm = () => {
   const [title, setTitle] = useState('');
@@ -51,21 +51,16 @@ const NewOfferForm = () => {
 
   return (
     <div className="relative">
-      {/* Ventana temporal */}
-      <AnimatePresence>
-        {toast && (
-          <motion.div
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 50 }}
-            className={`fixed top-4 right-4 z-50 rounded-lg px-4 py-2 shadow-lg text-white ${
-              toast.success ? 'bg-green-500' : 'bg-red-500'
-            }`}
-          >
-            {toast.message}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Toast básico sin animaciones */}
+      {toast && (
+        <div
+          className={`fixed top-4 right-4 z-50 rounded-lg px-4 py-2 shadow-lg text-white ${
+            toast.success ? 'bg-green-500' : 'bg-red-500'
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
 
       {/* Formulario */}
       <div className="mx-auto w-full max-w-md rounded-xl border border-black bg-white p-6 sm:p-8">
