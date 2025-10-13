@@ -130,7 +130,9 @@ export default function FixerProfile({ isOpen, onClose }: FixerProfileProps) {
                       {data ? (
                         <div
                           className="h-full bg-black rounded-full transition-all duration-300"
-                          style={{ width: `${data?.ratings?.[rating as 1 | 2 | 3]}%` }}
+                          style={{
+                            width: `${(data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100}%`,
+                          }}
                         />
                       ) : (
                         <div
@@ -140,7 +142,7 @@ export default function FixerProfile({ isOpen, onClose }: FixerProfileProps) {
                       )}
                     </div>
                     <span className="text-xs font-medium w-8">
-                      {data?.ratings?.[rating as 1 | 2 | 3]}%
+                      {(data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100}%
                     </span>
                   </div>
                 ))}
@@ -149,7 +151,9 @@ export default function FixerProfile({ isOpen, onClose }: FixerProfileProps) {
               <div className="mt-4 pt-1">
                 <p className="text-xs ">
                   PROMEDIO DE CALIFICACIONES
-                  {data && <span className="font-bold ">{`${data?.average_rating}`}</span>}
+                  {data && (
+                    <span className="font-bold ">{` ${Number(data?.average_rating).toFixed(1)}`}</span>
+                  )}
                 </p>
               </div>
             </div>
