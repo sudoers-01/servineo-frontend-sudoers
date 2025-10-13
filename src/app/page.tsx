@@ -51,7 +51,7 @@ export default function Home() {
         </div>
 
         {/* 👇👇 AÑADIDO: tu botón Rate Job debajo de los otros botones */}
-        <div className="mt-10 flex justify-center w-full">
+        <div className='mt-10 flex justify-center w-full'>
           <RateJobButton />
         </div>
       </main>
