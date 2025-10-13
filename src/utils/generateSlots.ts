@@ -153,7 +153,7 @@ export async function generateAvailableSlotsFromAPI(
         end,
         booked: false,
         // TODO: devolver el id cuando ya este listo desde la BD
-        id: `fixer-${fixerId}-{requesterId}`,
+        id: `fixer-${fixerId}-${start.toISOString()}`,
       };
 
       // 🔹 Determinar estado basado en el schedule
