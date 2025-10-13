@@ -1,34 +1,6 @@
 "use client"
 
-import { useState } from 'react';
-import PaymentMethodCashFixer from './PaymentMethodCashFixer'; // ← Importar el componente
-
-export default function PaymentMethodUI({ trabajo, onClose }) {
-  // Estado para controlar qué ventana mostrar
-  const [showFixerView, setShowFixerView] = useState(false);
-
-  // Función para ir a la ventana de confirmación del proveedor
-  const handleContinuar = () => {
-    setShowFixerView(true);
-  };
-
-  // Función para volver
-  const handleVolver = () => {
-    setShowFixerView(false);
-  };
-
-  // Si showFixerView es true, mostrar el componente del proveedor
-  if (showFixerView) {
-    return (
-      <PaymentMethodCashFixer 
-        trabajo={trabajo} 
-        onClose={onClose}
-        onBack={handleVolver} // ← Pasar función para volver
-      />
-    );
-  }
-
-  // Vista inicial (código de trabajo)
+export default function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl">
@@ -43,10 +15,7 @@ export default function PaymentMethodUI({ trabajo, onClose }) {
           {/* Title */}
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-gray-900">
-              Muestra este código al proveedor
-            </h2>
-            <h2 className="text-2xl font-bold text-gray-900">
-              para confirmar tu pago
+              Confirmacion del Pago Recibido
             </h2>
           </div>
 
@@ -93,15 +62,12 @@ export default function PaymentMethodUI({ trabajo, onClose }) {
 
           {/* Buttons */}
           <div className="flex justify-center gap-6 mt-12">
-            <button 
-              onClick={handleContinuar}
-              className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors"
-            >
-              Continuar
+            <button className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-400 transition-colors">
+              Confirmar Pago Recibido
             </button>
             <button 
-              onClick={onClose}
-              className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors"
+              onClick={onBack}
+              className="px-12 py-3 bg-gray-300 text-gray-700 text-lg font-semibold rounded-md hover:bg-gray-400 transition-colors"
             >
               Volver
             </button>
