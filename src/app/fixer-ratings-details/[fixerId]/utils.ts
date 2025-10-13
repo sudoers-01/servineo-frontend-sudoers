@@ -1,4 +1,3 @@
-// ✅ SOLO cosas “server-safe” aquí (tipos, mocks, fetcher)
 export type FixerRating = {
   id: string;
   requester: string;

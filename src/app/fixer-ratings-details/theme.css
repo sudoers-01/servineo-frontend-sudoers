@@ -36,7 +36,6 @@
 }
 .transition-height { transition: max-height 0.3s ease-in-out; }
 
-/* caja de error local (equiv. border-error + bg-error/10 + text-error) */
 .error-box {
   border: 1px solid var(--error);
   color: var(--error);

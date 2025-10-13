@@ -1,19 +1,16 @@
-// src/app/fixer-ratings-details/[fixerId]/page.tsx
-
 import { mockRatings } from './utils';
 import { ClientRatings, RatingDetailsList } from './components';
 
 type Params = { fixerId: string };
 
-// 👇 OJO: params ahora es Promise<Params>
 export default async function RatingsPage({
   params,
 }: {
   params: Promise<Params>;
 }) {
-  const { fixerId } = await params; // ✅ esperar antes de leer props
+  const { fixerId } = await params; 
 
-  const useBackend = false; // cámbialo a true cuando tu backend responda
+  const useBackend = false; 
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-4" style={{ color: 'var(--foreground)' }}>
       <header className="flex items-center justify-between">

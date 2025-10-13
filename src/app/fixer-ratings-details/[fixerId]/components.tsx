@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { jsonFetcher, type FixerRating } from './utils';
 
-/* ---------- Hook sin SWR (polling 5s) ---------- */
 function useFixerRatings(fixerId: string) {
   const [ratings, setRatings] = useState<FixerRating[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,7 +32,6 @@ function useFixerRatings(fixerId: string) {
     return () => {
       if (timerRef.current) window.clearInterval(timerRef.current);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url]);
 
   const refresh = () => {
@@ -44,7 +42,6 @@ function useFixerRatings(fixerId: string) {
   return { ratings, isLoading, error, refresh };
 }
 
-/* ---------- UI: StarRating ---------- */
 export function StarRating({ value, size = 18, srLabel }: { value: 1|2|3; size?: number; srLabel?: string }) {
   return (
     <div className="inline-flex gap-1" aria-label={srLabel ?? `${value} of 3 stars`}>
@@ -61,7 +58,6 @@ export function StarRating({ value, size = 18, srLabel }: { value: 1|2|3; size?:
   );
 }
 
-/* ---------- UI: RatingDetailsList ---------- */
 export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; error?: string }) {
   const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
@@ -131,7 +127,6 @@ export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; 
   );
 }
 
-/* ---------- Componente cliente para integrar en page.tsx ---------- */
 export function ClientRatings({ fixerId }: { fixerId: string }) {
   const { ratings, isLoading, error } = useFixerRatings(fixerId);
   if (isLoading) return <div className="p-4 text-sm">Loading...</div>;
