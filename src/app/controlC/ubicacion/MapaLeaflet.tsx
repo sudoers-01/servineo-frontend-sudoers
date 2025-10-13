@@ -1,9 +1,13 @@
 "use client";
-import { useEffect, useState } from "react";
+
+import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import { enviarUbicacion } from "../services/ubicacion";
+
 
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
@@ -24,40 +28,59 @@ export default function MapaLeaflet() {
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [ubicacionPermitida, setUbicacionPermitida] = useState<boolean | null>(null);
 
+  
+  const ejecutado = useRef(false);
+
   useEffect(() => {
+    if (ejecutado.current) return;
+    ejecutado.current = true;
+
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          const coords: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-          setPosition(coords);
+          const { latitude, longitude } = pos.coords;
+
+          
+          setPosition([latitude, longitude]);
           setUbicacionPermitida(true);
+          toast.success("📍 Ubicación detectada correctamente", { toastId: "ubicacion-exitosa" });
         },
-        () => {
+        (error) => {
+          console.warn("No se pudo obtener la ubicación:", error.message);
+          toast.error("No se permitió el acceso a la ubicación.", { toastId: "ubicacion-denegada" });
           setUbicacionPermitida(false);
           setPosition(null);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
+      console.warn("El navegador no soporta geolocalización.");
+      toast.error(" El navegador no soporta geolocalización.", { toastId: "ubicacion-no-soportada" });
       setUbicacionPermitida(false);
       setPosition(null);
     }
   }, []);
 
+ 
   const manejarEnvio = async () => {
     try {
       if (ubicacionPermitida && position) {
         await enviarUbicacion(position[0], position[1]);
+        toast.success("Ubicación registrada correctamente.", { toastId: "envio-exitoso" });
       } else {
         await enviarUbicacion(0, 0);
+        toast.warning("No se proporcionó ubicación. Se guardó como 'SIN UBICACIÓN'.", { toastId: "envio-sin-ubicacion" });
       }
     } catch (error) {
       console.error(error);
+      toast.error("Error al enviar la ubicación al servidor.", { toastId: "error-envio" });
     }
   };
 
   return (
     <div style={{ position: "relative", width: "100%" }}>
+      <ToastContainer position="bottom-right" autoClose={4000} />
+
       <div
         style={{
           background: "white",
@@ -139,12 +162,8 @@ export default function MapaLeaflet() {
             transition: "0.2s",
             boxShadow: "0 3px 10px rgba(43,106,224,0.3)",
           }}
-          onMouseEnter={(e) =>
-            (e.currentTarget.style.backgroundColor = "#1AA7ED")
-          }
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.backgroundColor = "#2B6AE0")
-          }
+          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#1AA7ED")}
+          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2B6AE0")}
           onClick={manejarEnvio}
         >
           Finalizar registro
