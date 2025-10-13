@@ -1,6 +1,6 @@
 // components/appointments/forms/AppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
-import LocationModal from "./LocationModal";
+import LocationModal from "./LocationModal"; // Cambiar la importación
 
 export type AppointmentPayload = {
   datetime: string;
@@ -10,6 +10,10 @@ export type AppointmentPayload = {
   description?: string;
   place?: string;
   meetingLink?: string;
+  coordinates?: { // Agregar coordenadas al payload
+    lat: number;
+    lng: number;
+  };
 };
 
 export type AppointmentFormHandle = {
@@ -70,8 +74,16 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     setModality("virtual");
     setDescription("");
     setPlace("");
+    setLocation(null);
     setMsg(null);
   }
+
+  // Función para manejar la confirmación de ubicación
+  const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
+    setLocation(locationData);
+    setPlace(locationData.address);
+    setShowLocationModal(false);
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -92,6 +104,15 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       description: description.trim(),
     };
 
+    // Si es presencial y tenemos ubicación, agregar datos de ubicación
+    if (modality === "presencial" && location) {
+      payload.place = location.address;
+      payload.coordinates = {
+        lat: location.lat,
+        lng: location.lon
+      };
+    }
+
     if (onNextStep) {
       if (modality === "presencial") {
         // Presencial: Ir al siguiente paso (selección de ubicación)
@@ -99,60 +120,33 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
         handleClose();
       } else {
         // Virtual: Cerrar todo directamente (no necesita ubicación)
-        // Combinar datos faltantes para virtual
         const completePayload: AppointmentPayload = {
           ...payload,
           datetime: datetime!,
           meetingLink: meetingLink.trim() || genMeetingLink(datetime)
         } as AppointmentPayload;
 
-        // Enviar directamente al backend
         await submitAppointment(completePayload);
       }
       return;
     }
 
-    if (modality === "presencial") payload.place = place.trim();
-    else payload.meetingLink = meetingLink.trim() || genMeetingLink(datetime);
-
-    setLoading(true);
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          datetime: payload.datetime,
-          name: payload.client,
-          phone: payload.contact,
-          note: `${payload.modality === "virtual" ? "Virtual" : "Presencial"} - ${payload.description || ""}`.trim(),
-          meta: {
-            modality: payload.modality,
-            place: payload.place,
-            meetingLink: payload.meetingLink,
-            eventId: meta?.eventId,
-            eventTitle: meta?.title
-          }
-        })
-      });
-
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setMsg(data?.error || data?.message || "Error al guardar");
-        setLoading(false);
-        return;
+    // Si no hay onNextStep (flujo directo)
+    if (modality === "presencial") {
+      payload.place = place.trim();
+      if (location) {
+        payload.coordinates = {
+          lat: location.lat,
+          lng: location.lon
+        };
       }
-
-      const bookingId = data?.id || data?.insertedId || String(Date.now());
-      window.dispatchEvent(new CustomEvent("booking:created", { detail: { datetime: payload.datetime, id: bookingId, meta: payload } }));
-
-      setMsg("¡Cita creada!");
-      setTimeout(() => { setLoading(false); handleClose(); }, 700);
-    } catch (err: any) {
-      console.error(err);
-      setMsg("Error en la conexión.");
-      setLoading(false);
+    } else {
+      payload.meetingLink = meetingLink.trim() || genMeetingLink(datetime);
     }
+
+    await submitAppointment(payload as AppointmentPayload);
   }
+
   async function submitAppointment(payload: AppointmentPayload) {
     setLoading(true);
     try {
@@ -168,6 +162,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
             modality: payload.modality,
             place: payload.place,
             meetingLink: payload.meetingLink,
+            coordinates: payload.coordinates,
             eventId: meta?.eventId,
             eventTitle: meta?.title
           }
@@ -206,7 +201,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center  justify-center px-4">
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
         <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
         <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="appointment-title"
           className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto" style={{ maxHeight: "90vh" }}>
@@ -261,13 +256,13 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                     className="text-center py-3 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
                   >
                     <p className="text-sm font-medium text-gray-700">
-                      📍 Seleccione la ubicación a continuación
+                      📍 {place ? "Editar ubicación" : "Seleccionar ubicación"}
                     </p>
                   </div>
 
                   {place && (
                     <p className="text-sm text-green-700 px-2">
-                      📌 Ubicación guardada: {place}
+                      📌 Ubicación: {place}
                     </p>
                   )}
                 </div>
@@ -285,14 +280,9 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
               <LocationModal
                 open={showLocationModal}
                 onClose={() => setShowLocationModal(false)}
-                onConfirm={(loc) => {
-                  setLocation(loc);
-                  setPlace(loc.address); // opcional, si quieres mantener place separado
-                  setShowLocationModal(false);
-                }}
+                onConfirm={handleLocationConfirm}
                 initialCoords={location}
               />
-
 
               {msg && <p className="text-sm text-red-600">{msg}</p>}
 
@@ -307,8 +297,8 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
 
                 <button
                   type="submit"
-                  disabled={loading}
-                  className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60"
+                  disabled={loading || (modality === "presencial" && !place)}
+                  className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? "Guardando..." :
                     onNextStep ? (
@@ -321,9 +311,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
           </div>
         </div>
       </div>
-
-
-
     </>
   );
 });

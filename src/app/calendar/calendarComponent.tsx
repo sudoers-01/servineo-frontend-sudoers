@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-import MultiStepAppointment,{ MultiStepAppointmentHandle } from "../../components/appointments/forms/MultiStepAppointmentForm";
+import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm"; // Importar directamente AppointmentForm
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "../../components/appointments/forms/EditAppointmentForm";
 import { generateAvailableSlotsFromAPI , SlotEvent } from "../../utils/generateSlots";
 
@@ -30,11 +30,11 @@ export default function MyCalendarPage() {
   const [loading, setLoading] = useState(true);
   const [currentDate, setCurrentDate] = useState(new Date());
 
-  const formRef = useRef<MultiStepAppointmentHandle | null>(null);
+  const formRef = useRef<AppointmentFormHandle | null>(null); // Cambiar el tipo de ref
   const editFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
   // 🔹 ID del fixer - deberías obtenerlo de tu contexto/auth
-  const FIXER_ID = "fixer_user_001"; // Reemplaza con el ID real del fixer
+  const FIXER_ID = "fixer_user_001";
   const REQUESTER_ID = "req_user_001"
 
   // 🔹 Cargar slots desde la API cuando cambie el mes
@@ -74,11 +74,10 @@ export default function MyCalendarPage() {
 
   function handleSelectEvent(ev: MyEvent) {
     if (ev.booked && ev.editable) {
-      handleEditExistingAppointment(ev); // ← Editar cita existente
+      handleEditExistingAppointment(ev);
     } else if (!ev.booked) {
-      formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title }); // ← Crear nueva
+      formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title });
     }
-    // No hacer nada para eventos ocupados o cancelados no editables
   }
 
   function handleSelectSlot(slotInfo: SlotInfo) {
@@ -95,7 +94,6 @@ export default function MyCalendarPage() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       
-      // Si la fecha que se está viendo es anterior a hoy, no permitir interacción
       if (viewedDate < today) {
         return;
       }
@@ -130,7 +128,6 @@ export default function MyCalendarPage() {
         color: "#16A34A"
       };
       
-      // Agregar temporalmente para mostrar en el calendario
       setEvents(prev => [...prev, newEvent]);
       existing = newEvent;
     }
@@ -144,13 +141,12 @@ export default function MyCalendarPage() {
   function handleEditExistingAppointment(event: MyEvent) {
     if (!event.booked || !event.editable) return;
     
-    // ! Esto es temporal - debe venir de la base de datos (placeholder)
     const existingAppointment: ExistingAppointment = {
       id: event.id,
       datetime: event.start.toISOString(),
-      client: "Cliente Ejemplo", // Esto vendrá de tu DB
-      contact: "+591 77777777",  // Esto vendrá de tu DB
-      modality: "virtual",       // Esto vendrá de tu DB
+      client: "Cliente Ejemplo",
+      contact: "+591 77777777",
+      modality: "virtual",
       description: event.title,
       meetingLink: "https://meet.example.com/abc123"
     };
@@ -168,7 +164,6 @@ export default function MyCalendarPage() {
       const { datetime, id, meta } = ev.detail || {};
       if (!datetime) return;
       
-      // 🔹 CORREGIR: Usar moment para parsear manteniendo el huso horario
       const normalized = moment(datetime).toDate();
       const normalizedISO = normalized.toISOString();
 
@@ -182,7 +177,7 @@ export default function MyCalendarPage() {
               booked: true, 
               id: id || item.id, 
               title: meta?.description || "Cita reservada",
-              color: "#F59E0B", // Color para reservado
+              color: "#F59E0B",
               editable: true
             };
           }
@@ -203,7 +198,6 @@ export default function MyCalendarPage() {
         return next;
       });
       
-      // Recargar slots después de crear una cita
       setTimeout(() => loadSlotsFromAPI(), 1000);
     };
 
@@ -212,7 +206,6 @@ export default function MyCalendarPage() {
   }, []);
 
   function eventStyleGetter(event: MyEvent) {
-    // Usar el color de la API para mantener consistencia
     const backgroundColor = event.color || "#10B981";
     
     return {
@@ -227,16 +220,14 @@ export default function MyCalendarPage() {
     };
   }
 
-  // Función para aplicar estilos a los días
   const dayPropGetter = (date: Date) => {
     const day = date.getDay();
-    const isWeekend = day === 0 || day === 6; // 0 = domingo, 6 = sábado
+    const isWeekend = day === 0 || day === 6;
     const today = new Date();
     const isToday = date.getDate() === today.getDate() && 
                    date.getMonth() === today.getMonth() && 
                    date.getFullYear() === today.getFullYear();
     
-    // 🔹 En vista DAY: si la fecha es anterior a hoy, aplicar estilo deshabilitado
     if (currentView === Views.DAY) {
       const viewedDate = new Date(date);
       viewedDate.setHours(0, 0, 0, 0);
@@ -255,7 +246,6 @@ export default function MyCalendarPage() {
       }
     }
     
-    // Solo aplicar el color azul al día actual en la vista MONTH
     if (isToday && currentView === Views.MONTH) {
       return {
         style: {
@@ -283,7 +273,6 @@ export default function MyCalendarPage() {
     };
   };
 
-  // Manejar cambio de vista
   const handleViewChange = (view: View) => {
     setCurrentView(view);
   };
@@ -320,8 +309,7 @@ export default function MyCalendarPage() {
           onNavigate={handleNavigate}
         />
       </div>
-      
-      <MultiStepAppointment ref={formRef} />
+      <AppointmentForm ref={formRef} />
       <EditAppointmentForm ref={editFormRef} />
     </div>
   );
