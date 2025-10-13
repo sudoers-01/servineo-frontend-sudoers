@@ -50,21 +50,22 @@ export default function JobCommentsPage() {
             >
               <div className="flex justify-between items-center mb-2">
                 <p className="text-sm font-medium text-[#111827]">
-                  {comment.name} – {comment.job}
+                  {comment.name} - {comment.job}
                 </p>
                 <p className="text-xs text-gray-500">Date: {comment.date}</p>
               </div>
 
               <p className="text-sm text-[#111827] mb-3">{comment.text}</p>
 
+              {/* Solo 3 estrellas */}
               <div className="flex">
-                {[...Array(5)].map((_, i) => (
+                {[...Array(3)].map((_, i) => (
                   <Star
                     key={i}
                     size={18}
                     className={
                       i < comment.rating
-                        ? 'text-[#F59E0B] fill-[#F59E0B]'
+                        ? 'text-[#FACC15] fill-[#FACC15]'
                         : 'text-gray-300'
                     }
                   />
