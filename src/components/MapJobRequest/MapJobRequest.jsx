@@ -3,7 +3,6 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapJobRequest.css';
 
-// Fix de iconos de Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon-2x.png',
@@ -17,17 +16,16 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
   const markerRef = useRef(null);
 
   const initialPosition = useMemo(() => {
-    if (!initialLocationObject) return [-16.5, -68.15]; // [lat, lng]
+    if (!initialLocationObject) return [-16.5, -68.15];
 
     return [initialLocationObject.lat, initialLocationObject.lng];
   }, [initialLocationObject]);
 
   useEffect(() => {
     if (mapRef.current && !mapInstanceRef.current) {
-      const map = L.map(mapRef.current).setView(initialPosition, 15); // zoom mapa
+      const map = L.map(mapRef.current).setView(initialPosition, 15);
       mapInstanceRef.current = map;
 
-      // Capa base
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
       }).addTo(map);
@@ -35,13 +33,11 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
       const marker = L.marker(initialPosition, { draggable: false }).addTo(map);
       markerRef.current = marker;
 
-      // Evento al mover marcador
       marker.on('dragend', () => {
         const { lat, lng } = marker.getLatLng();
         onPositionChange({ lat, lng });
       });
 
-      // Por defecto deshabilitado
       disableMap();
     }
 
@@ -57,10 +53,9 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
     if (!mapInstanceRef.current || !markerRef.current || !initialPosition) return;
 
     markerRef.current.setLatLng(initialPosition);
-    mapInstanceRef.current.setView(initialPosition, 15); // zoom mapa
+    mapInstanceRef.current.setView(initialPosition, 15);
   }, [initialPosition]);
 
-  // Activar o desactivar edición del mapa
   useEffect(() => {
     if (!mapInstanceRef.current) return;
     if (isEnabled) {

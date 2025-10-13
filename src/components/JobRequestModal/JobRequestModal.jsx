@@ -19,14 +19,11 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
   const [currentMapLocation, setCurrentMapLocation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  // funcion para obtener el token del localStorage (cambiar a token que se guarda en la bd)
-  // El token se usa para obtener la ubicación del usuario logueado, y mostrarla en el mapa
-  // y para enviar la solicitud de trabajo con la ubicación correcta si se mantiene la opción "mantener ubicación"
+
   const getAuthToken = () => {
     return localStorage.getItem('token');
   };
-  //inicia datos necesarios que el modal necesita
-  //Cargar la ubicación del usuario logueado al abrir el modal, por eso se necesita el token que el usuario logueado genera
+
   useEffect(() => {
     if (isOpen) {
       const fetchUserLocation = async () => {
@@ -59,7 +56,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
       };
 
       fetchUserLocation();
-      //resetear el formulario cada vez que se abre el modal
+
       setFormData({
         jobMotive: '',
         jobDescription: '',
@@ -72,7 +69,6 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
     }
   }, [isOpen]);
 
-  //Actualizar la ubicación del mapa cuando cambia la opción de ubicación "modificar o mantener"
   useEffect(() => {
     if (formData.locationOption === 'keep' && initialLocation) {
       setCurrentMapLocation(initialLocation);
@@ -89,7 +85,6 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // maneja el envio del formulario
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -144,7 +139,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
       setLoading(false);
     }
   };
-  // si se da click fuera del modal, se cierra
+  
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
