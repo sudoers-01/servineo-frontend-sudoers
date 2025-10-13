@@ -6,15 +6,15 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { enviarUbicacion } from "../services/ubicacion";
-
+import { useRouter } from "next/navigation";
+import { useAuth } from "../hooks/usoAutentificacion";
+import { enviarUbicacion, enviarTokenGoogle } from "../services/conexionBackend";
 
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [35, 35],
   iconAnchor: [17, 35],
 });
-
 
 function MoveMapToPosition({ position }: { position: [number, number] }) {
   const map = useMap();
@@ -27,9 +27,9 @@ function MoveMapToPosition({ position }: { position: [number, number] }) {
 export default function MapaLeaflet() {
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [ubicacionPermitida, setUbicacionPermitida] = useState<boolean | null>(null);
-
-  
+  const router = useRouter();
   const ejecutado = useRef(false);
+  const { user, setUser } = useAuth();
 
   useEffect(() => {
     if (ejecutado.current) return;
@@ -39,8 +39,6 @@ export default function MapaLeaflet() {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const { latitude, longitude } = pos.coords;
-
-          
           setPosition([latitude, longitude]);
           setUbicacionPermitida(true);
           toast.success("📍 Ubicación detectada correctamente", { toastId: "ubicacion-exitosa" });
@@ -55,22 +53,44 @@ export default function MapaLeaflet() {
       );
     } else {
       console.warn("El navegador no soporta geolocalización.");
-      toast.error(" El navegador no soporta geolocalización.", { toastId: "ubicacion-no-soportada" });
+      toast.error("El navegador no soporta geolocalización.", { toastId: "ubicacion-no-soportada" });
       setUbicacionPermitida(false);
       setPosition(null);
     }
   }, []);
 
- 
   const manejarEnvio = async () => {
     try {
-      if (ubicacionPermitida && position) {
-        await enviarUbicacion(position[0], position[1]);
-        toast.success("Ubicación registrada correctamente.", { toastId: "envio-exitoso" });
-      } else {
-        await enviarUbicacion(0, 0);
-        toast.warning("No se proporcionó ubicación. Se guardó como 'SIN UBICACIÓN'.", { toastId: "envio-sin-ubicacion" });
+      let token = localStorage.getItem("servineo_token");
+
+      // Primera vez: usamos token temporal de Google
+      if (!token) {
+        const googleToken = sessionStorage.getItem("google_token_temp");
+        if (!googleToken) {
+          toast.error("No se encontró usuario logeado. Vuelve a iniciar sesión.");
+          return;
+        }
+
+        const data = await enviarTokenGoogle(googleToken);
+        if (data.token && data.user) {
+          token = data.token;
+          localStorage.setItem("servineo_token", token);
+          localStorage.setItem("servineo_user", JSON.stringify(data.user));
+          setUser(data.user);
+          sessionStorage.removeItem("google_token_temp");
+        } else {
+          toast.error("Error al autenticar usuario con Google.");
+          return;
+        }
       }
+
+      // Enviamos la ubicación al backend
+      await enviarUbicacion(position?.[0] || 0, position?.[1] || 0);
+
+      toast.success("Ubicación registrada correctamente.", { toastId: "envio-exitoso" });
+
+      // Redirigimos al home logeado
+      router.push("/controlC");
     } catch (error) {
       console.error(error);
       toast.error("Error al enviar la ubicación al servidor.", { toastId: "error-envio" });
@@ -127,9 +147,7 @@ export default function MapaLeaflet() {
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
               attribution='&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a>'
             />
-
             {position && ubicacionPermitida && <MoveMapToPosition position={position} />}
-
             {position && ubicacionPermitida && (
               <>
                 <Marker position={position} icon={customIcon}>
