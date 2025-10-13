@@ -1,18 +1,19 @@
 "use client";
 
 import { useState } from "react";
+import { Trash2 } from "lucide-react"; // ✅ icono de basura
 
 export default function FotoPerfil() {
   const [foto, setFoto] = useState<string | null>(null);
 
-interface ManejarCambioEvent extends React.ChangeEvent<HTMLInputElement> {}
+  interface ManejarCambioEvent extends React.ChangeEvent<HTMLInputElement> {}
 
-const manejarCambio = (e: ManejarCambioEvent) => {
+  const manejarCambio = (e: ManejarCambioEvent) => {
     const archivo: File | undefined = e.target.files?.[0];
     if (archivo) {
-        setFoto(URL.createObjectURL(archivo));
+      setFoto(URL.createObjectURL(archivo));
     }
-};
+  };
 
   const eliminarFoto = () => setFoto(null);
 
@@ -66,12 +67,14 @@ const manejarCambio = (e: ManejarCambioEvent) => {
             >
               {foto ? "Cambiar foto" : "Subir foto"}
             </label>
+
             {foto && (
               <button
                 onClick={eliminarFoto}
-                className="px-3 py-1.5 bg-red-500 text-white rounded-full hover:bg-red-600"
+                className="p-2 bg-red-500 text-white rounded-full hover:bg-red-600 flex items-center justify-center"
+                title="Eliminar foto"
               >
-                Eliminar foto
+                <Trash2 size={18} /> {/* 🗑️ Ícono de basura */}
               </button>
             )}
           </div>
