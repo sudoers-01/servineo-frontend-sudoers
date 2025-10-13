@@ -108,7 +108,7 @@ export default function MapaLeaflet() {
                 <Circle
                   center={position}
                   radius={1000}
-                  pathOptions={{ color: "blue", fillColor: "#cce5ff", fillOpacity: 0.3 }}
+                  pathOptions={{ color: "#2B6AE0", fillColor: "#cce0ff", fillOpacity: 0.3 }}
                 />
               </>
             )}
@@ -116,59 +116,33 @@ export default function MapaLeaflet() {
         </div>
 
         {}
-        <div
+        <button
           style={{
-            display: "flex",
-            justifyContent: "center",
-            gap: "1rem",
-            flexWrap: "wrap",
+            backgroundColor: "#2B6AE0",
+            color: "white",
+            padding: "0.8rem 1.8rem",
+            border: "none",
+            borderRadius: "0.6rem",
+            fontWeight: "600",
+            fontSize: "1rem",
+            cursor: "pointer",
+            transition: "0.2s",
+            boxShadow: "0 3px 10px rgba(43,106,224,0.3)",
           }}
+          onMouseEnter={(e) =>
+            (e.currentTarget.style.backgroundColor = "#1AA7ED")
+          }
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.backgroundColor = "#2B6AE0")
+          }
         >
-          <button
-            style={{
-              backgroundColor: "#4CAF50",
-              color: "white",
-              padding: "0.7rem 1.5rem",
-              border: "none",
-              borderRadius: "0.5rem",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "0.2s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#43A047")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#4CAF50")
-            }
-          >
-            Finalizar registro
-          </button>
-
-          <button
-            style={{
-              backgroundColor: "#f0f0f0",
-              color: "#333",
-              padding: "0.7rem 1.5rem",
-              border: "1px solid #ccc",
-              borderRadius: "0.5rem",
-              fontWeight: "600",
-              cursor: "pointer",
-              transition: "0.2s",
-            }}
-            onMouseEnter={(e) =>
-              (e.currentTarget.style.backgroundColor = "#e0e0e0")
-            }
-            onMouseLeave={(e) =>
-              (e.currentTarget.style.backgroundColor = "#f0f0f0")
-            }
-          >
-            Cancelar
-          </button>
-        </div>
+          Finalizar registro
+        </button>
       </div>
     </div>
   );
 }
+
+
 
 
