@@ -47,7 +47,7 @@ export default function MapaLeaflet() {
           console.warn("No se pudo obtener la ubicación:", error.message);
           toast.error("No se permitió el acceso a la ubicación.", { toastId: "ubicacion-denegada" });
           setUbicacionPermitida(false);
-          setPosition(null);
+          setPosition([0, 0]);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
@@ -55,7 +55,7 @@ export default function MapaLeaflet() {
       console.warn("El navegador no soporta geolocalización.");
       toast.error("El navegador no soporta geolocalización.", { toastId: "ubicacion-no-soportada" });
       setUbicacionPermitida(false);
-      setPosition(null);
+      setPosition([0, 0]);
     }
   }, []);
 
