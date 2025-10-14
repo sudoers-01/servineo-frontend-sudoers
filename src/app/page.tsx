@@ -20,7 +20,7 @@ export default function Home() {
   }
 
   return (
-    <main className="p-8 max-w-md mx-auto space-y-6">
+    <main className="p-5 max-w-xl mx-auto space-y-6">
       {!loggedIn && (
         <form onSubmit={handleLogin} className="space-y-3 border p-4 rounded shadow">
           <h2 className="text-xl font-semibold">Login</h2>

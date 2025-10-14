@@ -54,7 +54,7 @@ export default function RequesterEditForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 max-w-2xl mx-auto bg-white shadow-md rounded-2xl "
+      className="space-y-6 max-w-xl mx-auto bg-white shadow-md rounded-2xl "
     >
       {/* Telefono */}
       <div>
