@@ -1,10 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
-//Uso de postman
-const API = process.env.NEXT_PUBLIC_API_BASE_URL; 
+const API = process.env.NEXT_PUBLIC_BACKEND as string; 
 
 export interface Schedule {
   _id: string;
@@ -92,23 +90,56 @@ function getDayName(date: Date): string {
   return date.toLocaleDateString('es-ES', { weekday: 'long' });
 }
 
-export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId = "req_user_001", selectedDate}: MobileWeekViewProps) {
-    const month = selectedDate ? selectedDate.getMonth() + 1 : null;
+function combineAllSchedules(
+  currentRequesterSchedules: Array<{ schedules: Schedule[] }>,
+  otherRequesterSchedules: Array<{ schedules: Schedule[] }>
+): Schedule[] {
+  // Aplanar y combinar ambos arrays
+  const combined = [
+    ...currentRequesterSchedules.flatMap(item => item.schedules),
+    ...otherRequesterSchedules.flatMap(item => item.schedules)
+  ];
+
+  // Ordenar por starting_time ascendente (con Z)
+  combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
+
+  // Convertir a formato sin Z después del sort
+  const schedulesWithoutZ = combined.map(schedule => ({
+    ...schedule,
+    starting_time: schedule.starting_time.replace('Z', ''),
+    finishing_time: schedule.finishing_time.replace('Z', '')
+  }));
+
+  return schedulesWithoutZ;
+}
+
+export default function MobileWeekView({ fixerId, requesterId, selectedDate}: MobileWeekViewProps) {
+    const month = selectedDate ? selectedDate.getMonth() : new Date().getMonth(); 
     const [schedulesByDay, setSchedulesByDay] = useState<Schedule[][]>([[], [], [], [], [], [], []]);
     const [loading, setLoading] = useState(true);
-    const router = useRouter();
 
     async function fetchWeekSchedule(){
         try {
             setLoading(true);
-            //TODO reemplazar luego por el endpoint de Gabo
-            const response = await fetch(`${API}/bookings/fixer/${fixerId}/schedules/${month}`);
+            
+            //const response = await fetch(`${API}/bookings/fixer/${fixerId}/schedules/${month}`);
+            const currentRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
+            const otherRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
 
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
+            //console.log(currentRequesterResponse);
+            //console.log(otherRequesterResponse);
+            
+            if (!currentRequesterResponse.ok) {
+                throw new Error(`Error: ${currentRequesterResponse.status}`);
+            }
+            if (!otherRequesterResponse.ok) {
+                throw new Error(`Error: ${otherRequesterResponse.status}`);
             }
 
-            const fixerSchedules : Schedule[] = await response.json();
+            const currentRequesterFixerSchedules = await currentRequesterResponse.json();
+            const otherRequesterFixerSchedules = await otherRequesterResponse.json();
+
+            const fixerSchedules : Schedule[] = combineAllSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
             const fixerSchedulesByWeek = groupSchedulesByWeek(fixerSchedules);
             
             console.log("Schedules grouped by week:", fixerSchedulesByWeek);
@@ -125,7 +156,7 @@ export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId
     function getDayStatus(dayIndex: number): { text: string; color: string; available: boolean } {
         const daySchedules = schedulesByDay[dayIndex] || [];
         
-        if (daySchedules.length >= 6) {
+        if (daySchedules.length >= 5) {
             return { text: "Ocupado", color: "text-slate-400", available: false };
         } else {
             return { text: "Horarios Disponibles", color: "text-emerald-600", available: true };
@@ -157,11 +188,6 @@ export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId
                 <label className="block text-sm mb-1 text-black">Fecha</label>
                 <input
                 type="date"
-                onChange={(e) => {
-                    const d = e.target.value;
-                    //setDate(d);
-                    //fetchDay(d);
-                }}
                 className="w-full rounded-lg border p-2 text-black bg-white"
                 />
             </div>
