@@ -9,7 +9,7 @@ type FixerProfileProps = {
 
 export default function FixerProfile({ isOpen, onClose }: FixerProfileProps) {
   const { data, errors } = useProfile();
-
+  //
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       {data ? (
