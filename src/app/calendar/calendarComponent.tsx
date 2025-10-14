@@ -25,7 +25,17 @@ interface MyEvent {
     editable?: boolean;
 }
 
-export default function MyCalendarPage() {
+interface PropList {
+    fixerId: string,
+    requesterId: string
+    selectedDate: Date | null;
+}
+
+export default function MyCalendarPage({
+  fixerId,
+  requesterId,
+  selectedDate
+} : PropList) {
     const [events, setEvents] = useState<MyEvent[]>([]);
     const [currentView, setCurrentView] = useState<View>(Views.MONTH);
     const [loading, setLoading] = useState(true);
@@ -33,10 +43,6 @@ export default function MyCalendarPage() {
 
     const formRef = useRef<AppointmentFormHandle | null>(null); // Cambiar el tipo de ref
     const editFormRef = useRef<EditAppointmentFormHandle | null>(null);
-
-    // 🔹 ID del fixer - deberías obtenerlo de tu contexto/auth
-    const FIXER_ID = "fixer_user_001";
-    const REQUESTER_ID = "req_user_001"
 
     // 🔹 Cargar slots desde la API cuando cambie el mes
     useEffect(() => {
@@ -47,9 +53,9 @@ export default function MyCalendarPage() {
         try {
             setLoading(true);
             const currentMonth = currentDate.getMonth();
-            console.log(`Cargando slots para fixer ${FIXER_ID}, mes ${currentMonth}`);
+            console.log(`Cargando slots para fixer ${fixerId}, mes ${currentMonth}`);
 
-            const slots: SlotEvent[] = await generateAvailableSlotsFromAPI(FIXER_ID, REQUESTER_ID, currentMonth);
+            const slots: SlotEvent[] = await generateAvailableSlotsFromAPI(fixerId, requesterId, currentDate);
 
             // Convertir SlotEvent a MyEvent
             const myEvents: MyEvent[] = slots.map(slot => ({

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from 'next/navigation';
 import MyCalendarPage from './calendarComponent';
 import MobileCalendar from "@/components/calendar/mobile/MobileCalendar";
+import MobileList from "@/components/list/MobileList";
 
 export default function CalendarPage() {
     const router = useRouter();
@@ -38,7 +39,11 @@ export default function CalendarPage() {
             </div>
 
             <div className="flex justify-center md:block hidden">
-                <MyCalendarPage />
+                <MyCalendarPage 
+                    selectedDate={selectedDate}
+                    fixerId={"fixer_user_001"}
+                    requesterId={"req_user_001"}
+                />
             </div>
 
             <div className="flex md:hidden justify-center">
@@ -46,6 +51,12 @@ export default function CalendarPage() {
                     selectedDate={selectedDate}
                     onSelectDate={setSelectedDate}
                     events={events} />
+                <div></div>
+                <MobileList
+                    selectedDate={selectedDate}
+                    fixerId={"fixer_user_001"}
+                    requesterId={"req_user_001"}
+                />
             </div>
 
         </div>

@@ -17,7 +17,7 @@ export interface Schedule {
 interface MobileWeekViewProps {
   fixerId: string;
   requesterId: string;
-  month: number;
+  selectedDate : Date | null;
 }
 
 function groupSchedulesByWeek(fixerSchedules: Schedule[]): Schedule[][]{
@@ -92,7 +92,8 @@ function getDayName(date: Date): string {
   return date.toLocaleDateString('es-ES', { weekday: 'long' });
 }
 
-export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId = "req_user_001", month = 8 }: MobileWeekViewProps) {
+export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId = "req_user_001", selectedDate}: MobileWeekViewProps) {
+    const month = selectedDate ? selectedDate.getMonth() + 1 : null;
     const [schedulesByDay, setSchedulesByDay] = useState<Schedule[][]>([[], [], [], [], [], [], []]);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
@@ -130,22 +131,6 @@ export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId
             return { text: "Horarios Disponibles", color: "text-emerald-600", available: true };
         }
     }
-
-    // Función para manejar el click en los horarios disponibles
-    const handleAvailableHoursClick = (day: Date, dayIndex: number) => {
-        const dayString = day.toISOString().split('T')[0];
-        
-        // Navegar a la página de horarios del día específico
-        router.push(`/horarios?day=${dayString}&fixerId=${fixerId}`);
-        
-        // O si prefieres navegar a la página de la semana completa:
-        // const weekStart = new Date(day);
-        // weekStart.setDate(day.getDate() - day.getDay() + 1); // Ir al lunes de esa semana
-        // const weekStartString = weekStart.toISOString().split('T')[0];
-        // router.push(`/horarios?week=${weekStartString}&fixerId=${fixerId}`);
-        
-        console.log("Ver horarios para el día:", dayString);
-    };
 
     useEffect(() => {
         fetchWeekSchedule();
@@ -210,8 +195,8 @@ export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId
                                         
                                         {dayStatus.available ? (
                                             <button
-                                                onClick={() => handleAvailableHoursClick(day, dayIndex)}
-                                                className={`font-bold ${dayStatus.color} hover:underline cursor-pointer`}
+                                                className={`font-bold ${dayStatus.color} cursor-default`}
+                                                disabled
                                             >
                                                 {dayStatus.text}
                                             </button>
