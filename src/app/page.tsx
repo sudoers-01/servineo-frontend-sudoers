@@ -1,9 +1,5 @@
-const Home = () => {
-    return (
-        <div>
-            <h1>Prueba</h1>
-        </div>
-    )
-}
+import PaymentDemo from './payment/components/PaymentDemo';
 
-export default Home;
+export default function PaymentPage() {
+  return <PaymentDemo />;
+}
