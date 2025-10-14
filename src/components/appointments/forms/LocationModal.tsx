@@ -1,7 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import MapView from "@/components/maps/location/MapView";
+import dynamic from "next/dynamic";
+
+// Importar MapView dinámicamente solo en el cliente
+const MapView = dynamic(
+  () => import("@/components/maps/location/MapView"),
+  {
+    ssr: false,
+    loading: () => (
+      <div 
+        style={{ height: 400, width: "100%" }} 
+        className="flex items-center justify-center bg-gray-100"
+      >
+        <p>Cargando mapa...</p>
+      </div>
+    )
+  }
+);
 
 interface LocationModalProps {
   open: boolean;

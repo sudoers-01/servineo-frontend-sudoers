@@ -11,18 +11,6 @@ interface MapViewProps {
   markerPosition?: { lat: number; lon: number } | null;
 }
 
-function LocationMarker({ onSelect } : MapViewProps) {
-  const [position, setPosition] = useState<[number, number] | null>(null);
-  useMapEvents({
-    click(e) {
-      const { lat, lng } = e.latlng;
-      setPosition([lat, lng]);
-      onSelect(lat, lng);
-    },
-  })
-  return position ? <Marker position={position} /> : null;
-}
-
 export default function MapView({ onSelect, markerPosition }: MapViewProps) {
   return (
     <MapContainer center={[markerPosition?.lat || -17.39, markerPosition?.lon || -66.15]} zoom={13} style={{ height: 400, width: "100%" }}>
