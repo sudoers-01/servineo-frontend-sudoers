@@ -1,38 +1,30 @@
 "use client"
 
-import PaymentMethodUI from './PaymentMethodUI';
-//import React, { useState } from 'react';
-//import React, { useState, useEffect } from 'react';
-//Mis imports para que me funcione
-import React, { useState, useEffect } from 'react'; 
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import PaymentMethodUI from './PaymentMethodUI';
-
-import { useRouter } from 'next/navigation';
 
 export default function PaymentDemo() {
-
-  //Aquí estoy agregando cosas para redirigir a Registro de Cuenta Bancaria
   const router = useRouter();
-  const [hasAccount, setHasAccount] = useState(false); 
-  useEffect(() => {
-    // Es crucial verificar el 'window' porque Next.js renderiza en el servidor primero.
-    if (typeof window !== 'undefined') {
-        const hasBankAcct = sessionStorage.getItem('hasBankAccount') === 'true';
-        setHasAccount(hasBankAcct);
-    }
-}, []);
-  const handleAgregarCuenta = () => {
-    router.push('/registro-cuenta'); 
-};
-  //Hasta acá la parte que agregué
+  const [hasAccount, setHasAccount] = useState(false);
   
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const hasBankAcct = sessionStorage.getItem('hasBankAccount') === 'true';
+      setHasAccount(hasBankAcct);
+    }
+  }, []);
+  
+  const handleAgregarCuenta = () => {
+    router.push('/registro-cuenta');
+  };
+
   const [trabajos, setTrabajos] = useState([
     { id: 1, estado: 'Sin Pagar', monto: 500 },
     { id: 2, estado: 'Sin Pagar', monto: 100 },
     { id: 3, estado: 'Sin Pagar', monto: 200 },
   ]);
-  
+
   const [showPaymentSelector, setShowPaymentSelector] = useState(false);
   const [showCashPayment, setShowCashPayment] = useState(false);
   const [selectedTrabajo, setSelectedTrabajo] = useState(null);
@@ -40,7 +32,7 @@ export default function PaymentDemo() {
   const agregarTrabajo = () => {
     const nuevoId = trabajos.length > 0 ? Math.max(...trabajos.map(t => t.id)) + 1 : 1;
     const montoAleatorio = Math.floor(Math.random() * (500 - 100 + 1)) + 100;
-    
+
     setTrabajos([...trabajos, {
       id: nuevoId,
       estado: 'Sin Pagar',
@@ -54,18 +46,18 @@ export default function PaymentDemo() {
   };
 
   const handleSelectPaymentMethod = (method) => {
-  if (method === 'cash') {
-    setShowPaymentSelector(false);
-    setShowCashPayment(true);
-  } else {
-    setShowPaymentSelector(false);
-  }
-};
+    if (method === 'cash') {
+      setShowPaymentSelector(false);
+      setShowCashPayment(true);
+    } else {
+      setShowPaymentSelector(false);
+    }
+  };
 
-const handleCloseCashPayment = () => {
-  setShowCashPayment(false);
-  setSelectedTrabajo(null);
-};
+  const handleCloseCashPayment = () => {
+    setShowCashPayment(false);
+    setSelectedTrabajo(null);
+  };
 
   return (
     <div className="min-h-screen bg-white">
@@ -84,26 +76,18 @@ const handleCloseCashPayment = () => {
           Agregar Trabajo
         </button>
 
-   
-       
-   
-    
         <button
-                 onClick={handleAgregarCuenta}
-    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
->
-    <span className="text-2xl">🏦</span>
-    Agregar cuenta bancaria
-</button>
-        
-                 
-      
-      <div className="ml-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium">
-    {/* Lógica condicional: si hasAccount es true, muestra CCB, sino SCB */}
-    Estado: {hasAccount ? 'CCB' : 'SCB'}
-</div>
-      
-       
+          onClick={handleAgregarCuenta}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
+        >
+          <span className="text-2xl">🏦</span>
+          Agregar cuenta bancaria
+        </button>
+
+        <div className="ml-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium">
+          Estado: {hasAccount ? 'CCB' : 'SCB'}
+        </div>
+      </div>
 
       {/* Table */}
       <div className="px-6">
@@ -138,7 +122,7 @@ const handleCloseCashPayment = () => {
 
       {/* Payment Method Selector Modal */}
       {showPaymentSelector && (
-        <PaymentMethodSelector 
+        <PaymentMethodSelector
           onSelectMethod={handleSelectPaymentMethod}
           onClose={() => setShowPaymentSelector(false)}
           trabajo={selectedTrabajo}
@@ -147,14 +131,13 @@ const handleCloseCashPayment = () => {
 
       {/* Cash Payment Modal */}
       {showCashPayment && (
-        <PaymentMethodUI 
+        <PaymentMethodUI
           trabajo={selectedTrabajo}
           onClose={handleCloseCashPayment}
         />
       )}
     </div>
-  );
-}
+  ); 
 
 function PaymentMethodSelector({ onSelectMethod, onClose, trabajo }) {
   return (
@@ -182,7 +165,7 @@ function PaymentMethodSelector({ onSelectMethod, onClose, trabajo }) {
               Pago QR
             </button>
 
-            <button 
+            <button
               onClick={() => onSelectMethod('cash')}
               className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
             >
@@ -202,5 +185,5 @@ function PaymentMethodSelector({ onSelectMethod, onClose, trabajo }) {
         </div>
       </div>
     </div>
-  );
-}
+  ); 
+} 

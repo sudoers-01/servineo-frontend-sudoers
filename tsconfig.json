@@ -22,6 +22,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/payment/components/PaymentMethodUI.js", "src/app/payment/components/PaymentMethodCashFixer.js", "src/app/payment/components/PaymentDemo.js"],
   "exclude": ["node_modules"]
 }

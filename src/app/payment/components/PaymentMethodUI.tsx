@@ -20,8 +20,8 @@ export default function PaymentMethodUI({ trabajo, onClose }) {
   // Si showFixerView es true, mostrar el componente del proveedor
   if (showFixerView) {
     return (
-      <PaymentMethodCashFixer 
-        trabajo={trabajo} 
+      <PaymentMethodCashFixer
+        trabajo={trabajo}
         onClose={onClose}
         onBack={handleVolver} // ← Pasar función para volver
       />
@@ -93,13 +93,13 @@ export default function PaymentMethodUI({ trabajo, onClose }) {
 
           {/* Buttons */}
           <div className="flex justify-center gap-6 mt-12">
-            <button 
+            <button
               onClick={handleContinuar}
               className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors"
             >
               Continuar
             </button>
-            <button 
+            <button
               onClick={onClose}
               className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors"
             >
