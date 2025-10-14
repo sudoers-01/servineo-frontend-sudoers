@@ -7,7 +7,7 @@ interface AppointmentSummaryModalProps {
     name: string;
     date: string;
     time: string;
-    modality: "virtual" | "presencial";
+    modality: "virtual" | "presential";
     locationOrLink: string;
     description?: string;
   };
@@ -52,23 +52,8 @@ const AppointmentSummaryModal: React.FC<AppointmentSummaryModalProps> = ({ open,
         </div>
 
         <div className="mt-6 flex justify-between gap-2">
-          <button className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
-            Cancelar
-          </button>
-          <button className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
-            Editar
-          </button>
-          <button className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
+          <button onClick={onClose} className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
             Aceptar
-          </button>
-        </div>
-
-        <div className="mt-4 text-center">
-          <button
-            onClick={onClose}
-            className="text-sm text-gray-500 hover:text-gray-700 underline"
-          >
-            Cerrar resumen
           </button>
         </div>
       </div>
