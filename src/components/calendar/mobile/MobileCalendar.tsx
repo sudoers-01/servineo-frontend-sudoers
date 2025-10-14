@@ -18,7 +18,6 @@ export default function MobileCalendar({
     const today = selectedDate || new Date();
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth());
-    const [showText, setShowText] = useState(false);
     const [message, setMessage] = useState("");
 
     const handleSelectedClick = () => {
