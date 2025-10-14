@@ -1,5 +1,6 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { apiUrl } from '@/config/api';
 
 interface Job {
   id: string;
@@ -13,7 +14,7 @@ const JobsGrid = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/jobs/completed')
+    fetch(apiUrl('api/jobs/completed'))
       .then((res) => res.json())
       .then((data) => {
         setJobs(data);
