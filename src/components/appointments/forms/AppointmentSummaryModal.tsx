@@ -1,0 +1,80 @@
+import React from "react";
+
+interface AppointmentSummaryModalProps {
+  open: boolean;
+  onClose: () => void;
+  data: {
+    name: string;
+    date: string;
+    time: string;
+    modality: "virtual" | "presencial";
+    locationOrLink: string;
+    description?: string;
+  };
+}
+
+const AppointmentSummaryModal: React.FC<AppointmentSummaryModalProps> = ({ open, onClose, data }) => {
+  if (!open) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+      <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
+      <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-auto p-6 z-10">
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Resumen de la cita</h2>
+
+        <div className="space-y-3 text-sm text-gray-700">
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-500">👤 Nombre:</span>
+            <span>{data.name}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-500">📅 Fecha:</span>
+            <span>{data.date}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-500">⏰ Hora:</span>
+            <span>{data.time}</span>
+          </div>
+          <div className="flex justify-between">
+            <span className="font-medium text-gray-500">📡 Modalidad:</span>
+            <span>{data.modality === "virtual" ? "Virtual" : "Presencial"}</span>
+          </div>
+          <div className="flex justify-between items-start">
+            <span className="font-medium text-gray-500">
+              {data.modality === "virtual" ? "🔗 Enlace:" : "📍 Ubicación:"}
+            </span>
+            <span className="text-right break-words max-w-[60%]">{data.locationOrLink}</span>
+          </div>
+          <div>
+            <span className="font-medium text-gray-500 block mb-1">📝 Descripción:</span>
+            <p className="bg-gray-100 rounded p-2 text-sm">{data.description}</p>
+          </div>
+        </div>
+
+        <div className="mt-6 flex justify-between gap-2">
+          <button className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
+            Cancelar
+          </button>
+          <button className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
+            Editar
+          </button>
+          <button className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
+            Aceptar
+          </button>
+        </div>
+
+        <div className="mt-4 text-center">
+          <button
+            onClick={onClose}
+            className="text-sm text-gray-500 hover:text-gray-700 underline"
+          >
+            Cerrar resumen
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AppointmentSummaryModal;
+

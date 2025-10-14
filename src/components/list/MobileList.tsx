@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from "react";
+
 import DaySchedule  from '../calendar/mobile/MobileDayliView'
 import WeekSchedule  from '../calendar/mobile/MobileWeekView'
 
@@ -8,13 +9,16 @@ interface MobileListProps {
     selectedDate: Date | null;
     fixerId: string,
     requesterId: string
+
 }
 
 
 export default function MobileList({
     selectedDate,
+
     fixerId,
     requesterId
+
 }: MobileListProps) {
     const today = selectedDate;
     const [type, setType] = useState<'day' | 'week'>('day');
@@ -22,6 +26,7 @@ export default function MobileList({
 
 
     return (
+
         <div>
             <div className="flex flex-col bg-gray-200 rounded-full p-1 w-fit mx-auto cursor-pointer">
                 <div>
@@ -57,5 +62,6 @@ export default function MobileList({
                 }
             </div>
         </div>
+
     )
 }

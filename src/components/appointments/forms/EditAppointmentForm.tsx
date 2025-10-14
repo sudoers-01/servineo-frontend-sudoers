@@ -1,5 +1,6 @@
 // components/appointments/forms/EditAppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
+import LocationModal from "./LocationModal";
 
 export type AppointmentPayload = {
   datetime: string;
@@ -9,6 +10,7 @@ export type AppointmentPayload = {
   description?: string;
   place?: string;
   meetingLink?: string;
+  location?: { lat: number; lon: number; address: string };
 };
 
 export type ExistingAppointment = AppointmentPayload & {
@@ -34,9 +36,11 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [modality, setModality] = useState<"virtual" | "presencial">("virtual");
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>(""); 
+  const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
   const [meetingLink, setMeetingLink] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const [showLocationModal, setShowLocationModal] = useState(false);
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
@@ -59,6 +63,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setModality(appointmentData.modality);
       setDescription(appointmentData.description || "");
       setPlace(appointmentData.place || "");
+      setLocation(appointmentData.location || null);
       setMeetingLink(appointmentData.meetingLink || "");
       setOpen(true);
       setTimeout(() => firstFieldRef.current?.focus(), 40);
@@ -82,21 +87,36 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setModality("virtual");
     setDescription("");
     setPlace("");
+    setLocation(null);
+    setMeetingLink("");
     setMsg(null);
   }
+
+  // Función para manejar la confirmación de ubicación
+  const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
+    setLocation(locationData);
+    setPlace(locationData.address);
+    setShowLocationModal(false);
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
 
     if (!client.trim()) return setMsg("Ingresa el nombre del cliente.");
-    if (!contact.trim()) return setMsg("Ingresa un contacto válido.");
+    const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+    if (!nameRegex.test(client.trim())) return setMsg("Ingrese un nombre válido.");
 
+    if (!contact.trim()) return setMsg("Ingresa un contacto válido.");
     const phoneRegex = /^[67]\d{7}$/;
     const phone = contact.replace(/\D/g, "").slice(-8);
     if (!phoneRegex.test(phone)) return setMsg("Teléfono debe iniciar con 6 o 7 y tener 8 dígitos.");
 
-    const payload: AppointmentPayload = {
+    if (!description.trim()) return setMsg("Ingrese una descripción.");
+    const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]+$/;
+    if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
+
+    const payload: any = {
       datetime,
       client: client.trim(),
       contact: contact.trim(),
@@ -104,8 +124,20 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       description: description.trim(),
     };
 
-    if (modality === "presencial") payload.place = place.trim();
-    else payload.meetingLink = meetingLink.trim() || genMeetingLink(datetime);
+    if (modality === "presencial") {
+      if (!place) return setMsg("Selecciona una ubicación.");
+      payload.place = place.trim();
+      if (location) {
+        payload.location = location;
+      }
+    } else {
+      const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
+      if (meetingLink.trim()) {
+        const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
+        if (!urlRegex.test(meetingLink.trim())) return setMsg("Ingrese un enlace válido.");
+      }
+      payload.meetingLink = linkToUse;
+    }
 
     setLoading(true);
     try {
@@ -157,107 +189,127 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
-      <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="edit-appointment-title"
-        className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto" style={{ maxHeight: "90vh" }}>
-        <div className="p-4 sm:p-6">
-          <div className="flex items-start justify-between">
-            <h3 id="edit-appointment-title" className="text-lg font-semibold text-black">
-              Editar cita
-            </h3>
-            <button aria-label="Cerrar" className="text-gray-500 hover:text-gray-700" onClick={handleClose}>✕</button>
-          </div>
-
-          <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
-              <label className="block">
-                <span className="text-sm font-medium">Fecha y hora</span>
-                <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
-              </label>
-
-              <label className="block">
-                <span className="text-sm font-medium">Modalidad</span>
-                <select value={modality} onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
-                  className="mt-1 block w-full border rounded px-3 py-2 text-sm">
-                  <option value="virtual">Virtual</option>
-                  <option value="presencial">Presencial</option>
-                </select>
-              </label>
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
+        <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="edit-appointment-title"
+          className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto" style={{ maxHeight: "90vh" }}>
+          <div className="p-4 sm:p-6">
+            <div className="flex items-start justify-between">
+              <h3 id="edit-appointment-title" className="text-lg font-semibold text-black">
+                Editar cita
+              </h3>
+              <button aria-label="Cerrar" className="text-gray-500 hover:text-gray-700" onClick={handleClose}>✕</button>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label className="block">
-                <span className="text-sm font-medium">Cliente *</span>
-                <input 
-                  ref={firstFieldRef} 
-                  value={client} 
-                  onChange={(e) => setClient(e.target.value)}
-                  placeholder="Nombre del cliente" 
-                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                  required 
-                />
-              </label>
-              <label className="block">
-                <span className="text-sm font-medium">Contacto *</span>
-                <input 
-                  value={contact} 
-                  onChange={(e) => setContact(e.target.value)}
-                  placeholder="+591 77777777" 
-                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                  required 
-                />
-              </label>
-            </div>
-
-            <label className="block">
-              <span className="text-sm font-medium">Descripción del trabajo</span>
-              <textarea 
-                value={description} 
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Breve descripción de lo que se requiere" 
-                className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                rows={3} 
-              />
-            </label>
-
-            {modality === "presencial" ? (
-              <label className="block">
-                <span className="text-sm font-medium">Lugar / Dirección</span>
-                <input 
-                  value={place} 
-                  onChange={(e) => setPlace(e.target.value)}
-                  placeholder="Ej. Campus FCyT - Aula 12" 
-                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                />
-              </label>
-            ) : (
-              <div className="space-y-2">
+            <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
                 <label className="block">
-                  <span className="text-sm font-medium">Enlace de reunión</span>
+                  <span className="text-sm font-medium">Fecha y hora</span>
+                  <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
+                </label>
+
+                <label className="block">
+                  <span className="text-sm font-medium">Modalidad</span>
+                  <select value={modality} onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
+                    className="mt-1 block w-full border rounded px-3 py-2 text-sm">
+                    <option value="virtual">Virtual</option>
+                    <option value="presencial">Presencial</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <label className="block">
+                  <span className="text-sm font-medium">Cliente *</span>
                   <input 
-                    value={meetingLink} 
-                    onChange={(e) => setMeetingLink(e.target.value)}
-                    placeholder="https://meet.example.com/abcd" 
+                    ref={firstFieldRef} 
+                    value={client} 
+                    onChange={(e) => setClient(e.target.value)}
+                    placeholder="Nombre del cliente" 
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                    required 
                   />
                 </label>
-                <p className="text-xs text-gray-600">Si no ingresa enlace, se generará uno automáticamente.</p>
+                <label className="block">
+                  <span className="text-sm font-medium">Contacto *</span>
+                  <input 
+                    value={contact} 
+                    onChange={(e) => setContact(e.target.value)}
+                    placeholder="+591 77777777" 
+                    className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                    required 
+                  />
+                </label>
               </div>
-            )}
 
-            {msg && <p className="text-sm text-red-600">{msg}</p>}
+              <label className="block">
+                <span className="text-sm font-medium">Descripción del trabajo</span>
+                <textarea 
+                  value={description} 
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Breve descripción de lo que se requiere" 
+                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                  rows={3} 
+                />
+              </label>
 
-            <div className="flex items-center justify-end gap-2 pt-2">
-              <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
-              <button type="submit" disabled={loading} className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60">
-                {loading ? "Actualizando..." : "Actualizar"}
-              </button>
-            </div>
-          </form>
+              {modality === "presencial" ? (
+                <div className="flex flex-col gap-1">
+                  <div
+                    onClick={() => setShowLocationModal(true)}
+                    className="text-center py-3 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                  >
+                    <p className="text-sm font-medium text-gray-700">
+                      📍 {place ? "Editar ubicación" : "Seleccionar ubicación"}
+                    </p>
+                  </div>
+
+                  {place && (
+                    <p className="text-sm text-green-700 px-2">
+                      📌 Ubicación: {place}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  <label className="block">
+                    <span className="text-sm font-medium">Enlace de reunión</span>
+                    <input 
+                      value={meetingLink} 
+                      onChange={(e) => setMeetingLink(e.target.value)}
+                      placeholder="https://meet.example.com/abcd" 
+                      className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
+                    />
+                  </label>
+                  <p className="text-xs text-gray-600">Si no ingresa enlace, se generará uno automáticamente.</p>
+                </div>
+              )}
+
+              <LocationModal
+                open={showLocationModal}
+                onClose={() => setShowLocationModal(false)}
+                onConfirm={handleLocationConfirm}
+                initialCoords={location}
+              />
+
+              {msg && <p className="text-sm text-red-600">{msg}</p>}
+
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
+                <button 
+                  type="submit" 
+                  disabled={loading || (modality === "presencial" && !place)} 
+                  className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {loading ? "Actualizando..." : "Actualizar"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 });
 

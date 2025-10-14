@@ -6,6 +6,7 @@ import MyCalendarPage from './calendarComponent';
 import MobileCalendar from "@/components/calendar/mobile/MobileCalendar";
 import MobileList from "@/components/list/MobileList";
 
+
 export default function CalendarPage() {
     const router = useRouter();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -46,7 +47,7 @@ export default function CalendarPage() {
                 />
             </div>
 
-            <div className="flex md:hidden justify-center">
+            <div className="flex flex-col md:hidden justify-center gap-4" >
                 <MobileCalendar
                     selectedDate={selectedDate}
                     onSelectDate={setSelectedDate}
@@ -54,10 +55,13 @@ export default function CalendarPage() {
                 <div></div>
                 <MobileList
                     selectedDate={selectedDate}
+
                     fixerId={"fixer_user_001"}
                     requesterId={"req_user_001"}
+
                 />
             </div>
+
 
         </div>
     );
