@@ -33,12 +33,13 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
 
   const [showSummary, setShowSummary] = useState(false);
   const [summaryData, setSummaryData] = useState<{
-  name: string;
-  date: string;
-  time: string;
-  modality: "virtual" | "presencial";
-  locationOrLink: string;
-  description?: string;} | null>(null);
+    name: string;
+    date: string;
+    time: string;
+    modality: "virtual" | "presencial";
+    locationOrLink: string;
+    description?: string;
+  } | null>(null);
 
 
   useImperativeHandle(ref, () => ({
@@ -72,14 +73,14 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   }
 
   function parseDatetime(datetimeISO: string) {
-  const start = new Date(datetimeISO);
-  const end = new Date(start.getTime() + 60 * 60 * 1000); // +1 hora
+    const start = new Date(datetimeISO);
+    const end = new Date(start.getTime() + 60 * 60 * 1000); // +1 hora
 
-  return {
-    selected_date: start.toISOString().split("T")[0], // solo la fecha
-    starting_time: start.toISOString(),
-    finishing_time: end.toISOString()
-  };
+    return {
+      selected_date: start.toISOString().split("T")[0], // solo la fecha
+      starting_time: start.toISOString(),
+      finishing_time: end.toISOString()
+    };
   }
 
 
@@ -103,10 +104,10 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     const phoneRegex = /^[67]\d{7}$/;
     if (!phoneRegex.test(contact.trim())) return setMsg("Ingrese un teléfono válido.");
 
-    if (!description.trim()) return setMsg("Ingrese una descripción."); 
+    if (!description.trim()) return setMsg("Ingrese una descripción.");
     const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]+$/;
     if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
-    
+
 
     const { selected_date, starting_time, finishing_time } = parseDatetime(datetime); //nuevo
 
@@ -121,12 +122,11 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       appointment_type: modality,
       appointment_description: description.trim()
     };
-
     // Si es presencial y tenemos ubicación, agregar datos de ubicación
     if (modality === "presencial") {
       if (!place) return setMsg("Selecciona una ubicación.");
       payload.place_id = location?.address || place;
-    } 
+    }
     if (modality === "virtual") {
       if (!meetingLink.trim()) return setMsg("Ingrese un enlace de reunión.");
       const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
@@ -331,59 +331,59 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   {loading
                     ? "Guardando..."
                     : onNextStep
-                    ? modality === "presencial"
-                      ? "Siguiente →"
-                      : "Confirmar"
-                    : "Añadir"}
+                      ? modality === "presencial"
+                        ? "Siguiente →"
+                        : "Confirmar"
+                      : "Añadir"}
                 </button>
 
-<button
-  type="button"
-  onClick={() => {
-    setSummaryData({
-      name: "Alejandro",
-      date: "13/10/2025",
-      time: "10:00",
-      modality: "virtual",
-      locationOrLink: "https://meet.example.com/test123",
-      description: "Consulta técnica"
-    });
-    setShowSummary(true);
-  }}
-  className="px-4 py-2 bg-green-600 text-white rounded text-sm"
->
-  Probar virtual
-</button>
-<button
-  type="button"
-  onClick={() => {
-    setSummaryData({
-      name: "Alejandro",      
-      date: "13/10/2025",
-      time: "08:30",
-      modality: "presencial",
-      locationOrLink: "Av. América y Melchor Pérez",
-      description: "Instalación de equipo"
-    });
-    setShowSummary(true);
-  }}
-  className="px-4 py-2 bg-purple-600 text-white rounded text-sm"
->
-  Probar presencial
-</button>
-               
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSummaryData({
+                      name: "Alejandro",
+                      date: "13/10/2025",
+                      time: "10:00",
+                      modality: "virtual",
+                      locationOrLink: "https://meet.example.com/test123",
+                      description: "Consulta técnica"
+                    });
+                    setShowSummary(true);
+                  }}
+                  className="px-4 py-2 bg-green-600 text-white rounded text-sm"
+                >
+                  Probar virtual
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSummaryData({
+                      name: "Alejandro",
+                      date: "13/10/2025",
+                      time: "08:30",
+                      modality: "presencial",
+                      locationOrLink: "Av. América y Melchor Pérez",
+                      description: "Instalación de equipo"
+                    });
+                    setShowSummary(true);
+                  }}
+                  className="px-4 py-2 bg-purple-600 text-white rounded text-sm"
+                >
+                  Probar presencial
+                </button>
+
               </div>
             </form>
           </div>
         </div>
       </div>
       <AppointmentSummaryModal
-      open={showSummary}
-      onClose={() => setShowSummary(false)}
-      data={summaryData!} />
+        open={showSummary}
+        onClose={() => setShowSummary(false)}
+        data={summaryData!} />
     </>
   );
-  
+
 });
 
 export default AppointmentForm;
