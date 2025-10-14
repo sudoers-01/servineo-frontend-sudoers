@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaApple } from "react-icons/fa";
@@ -10,6 +10,7 @@ export default function RegistroForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmarPassword, setConfirmarPassword] = useState("");
+  const [formCompleto, setFormCompleto] = useState(false);
 
   const contrasenasCoinciden = password === confirmarPassword;
   const longitudValida = password.length >= 8;
@@ -158,6 +159,7 @@ export default function RegistroForm() {
           )}
 
           {/* Botón Únete */}
+          <Link href="/ctrlC/FotoPerfil">
           <button
             type="submit"
             disabled={!formularioValido}
@@ -169,6 +171,7 @@ export default function RegistroForm() {
           >
             Únete
           </button>
+          </Link>
         </form>
 
         {}
