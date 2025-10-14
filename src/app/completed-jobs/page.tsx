@@ -1,11 +1,10 @@
-// src/app/trabajos-realizados/page.tsx
 import React from 'react';
-import GrillaTrabajos from './GrillaTrabajos';
+import JobsGrid from './JobsGrid';
 
 const Page = () => {
   return (
     <div className="bg-white">
-      <GrillaTrabajos />
+      <JobsGrid />
     </div>
   );
 };

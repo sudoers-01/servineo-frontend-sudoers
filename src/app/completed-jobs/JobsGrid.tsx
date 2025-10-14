@@ -8,7 +8,7 @@ interface Job {
   status: string;
 }
 
-const GrillaTrabajos = () => {
+const JobsGrid = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,4 +73,4 @@ const GrillaTrabajos = () => {
   );
 };
 
-export default GrillaTrabajos;
+export default JobsGrid;
