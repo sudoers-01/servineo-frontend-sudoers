@@ -23,7 +23,9 @@ export default async function Page({ params }: PageProps) {
   return (
     <div className='min-h-screen bg-white'>
       <div className='mx-auto w-full max-w-5xl p-4 sm:p-6'>
-        <h1 className={`${roboto.className} text-2xl sm:text-3xl font-semibold text-gray-900 mb-4 text-center`}>
+        <h1
+          className={`${roboto.className} text-2xl sm:text-3xl font-semibold text-gray-900 mb-4 text-center`}
+        >
           Appointments
         </h1>
         <JobsList jobs={jobs} />
