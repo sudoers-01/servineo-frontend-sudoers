@@ -42,7 +42,7 @@ export default function FotoPerfil() {
           Puedes elegir desde tu dispositivo.
         </p>
 
-        {/*Area de la foto */}
+        {/* Area de la foto */}
         <div className="flex flex-col items-center gap-4">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
             {foto ? (
