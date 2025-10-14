@@ -8,7 +8,7 @@ const MapView = dynamic(
   () => import("@/components/maps/location/MapView"),
   {
     ssr: false,
-    loading: () => (
+    loading: () => (  
       <div 
         style={{ height: 400, width: "100%" }} 
         className="flex items-center justify-center bg-gray-100"
@@ -40,7 +40,7 @@ export default function LocationModal({ open, onClose, onConfirm, initialCoords}
 
   async function fetchAddress(lat: number, lon: number) {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/location/reverse?lat=${lat}&lon=${lon}`);
+      const res = await fetch(`${process.env.BACKEND}/api/location/reverse?lat=${lat}&lon=${lon}`);
       const data = await res.json();
       setAddress(data.display_name || "Dirección no disponible");
     } catch {
