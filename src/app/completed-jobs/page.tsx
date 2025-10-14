@@ -3,7 +3,7 @@ import JobsGrid from './JobsGrid';
 
 const Page = () => {
   return (
-    <div className="bg-white">
+    <div className='bg-white'>
       <JobsGrid />
     </div>
   );
