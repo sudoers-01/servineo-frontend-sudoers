@@ -141,7 +141,10 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
     setLoading(true);
     try {
-      const res = await fetch(`/api/appointments/${appointmentId}`, {
+        const dateObj = new Date(datetime);
+        const fechaUTC = dateObj.toISOString().split('T')[0];
+        const horaNumero = dateObj.getUTCHours();
+        const res = await fetch(`/api/appointments/${appointmentId}?fixerId=TU_FIXER_ID&fecha=${fechaUTC}&hora=${horaNumero}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

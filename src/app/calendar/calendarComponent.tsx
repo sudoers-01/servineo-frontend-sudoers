@@ -153,20 +153,40 @@ export default function MyCalendarPage({
         }
     }
 
-    function handleEditExistingAppointment(event: MyEvent) {
+    async function handleEditExistingAppointment(event: MyEvent) {
         if (!event.booked || !event.editable) return;
 
-        const existingAppointment: ExistingAppointment = {
-            id: event.id,
-            datetime: event.start.toISOString(),
-            client: "Cliente Ejemplo",
-            contact: "+591 77777777",
-            modality: "virtual",
-            description: event.title,
-            meetingLink: "https://meet.example.com/abc123"
-        };
+        try {
+            const API = process.env.NEXT_PUBLIC_BACKEND;
+            const dateObj = new Date(event.start);
+            const appointment_date = dateObj.toISOString().split('T')[0];
+            const start_hour = dateObj.getUTCHours();
+            const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date}&start_hour=${start_hour}`;
+            console.log('Intentando fetch a:', url);
+            const res = await fetch(url);
+            if (!res.ok) {
+                let errorText = await res.text();
+                console.error('Respuesta no OK:', res.status, errorText);
+                throw new Error(`Error al cargar de BD: ${res.status} - ${errorText}`);
+            }
+            const data = await res.json();
+            const existingAppointment: ExistingAppointment = {
+                id: data.id,
+                datetime: data.datetime,
+                client: data.client,
+                contact: data.contact,
+                modality: data.modality,
+                description: data.description,
+                place: data.place,
+                meetingLink: data.meetingLink,
+                location: data.location
+            };
 
-        editFormRef.current?.open(existingAppointment);
+            editFormRef.current?.open(existingAppointment);
+        } catch (err) {
+            alert("Error al cargar los datos de la cita para editar. Revisa la consola para más detalles.");
+            console.error('Error en handleEditExistingAppointment:', err);
+        }
     }
 
     // Manejar cambio de navegación en el calendario
