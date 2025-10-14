@@ -1,9 +1,32 @@
 "use client"
 
 import PaymentMethodUI from './PaymentMethodUI';
-import React, { useState } from 'react';
+//import React, { useState } from 'react';
+//import React, { useState, useEffect } from 'react';
+//Mis imports para que me funcione
+import React, { useState, useEffect } from 'react'; 
+import { useRouter } from 'next/navigation';
+import PaymentMethodUI from './PaymentMethodUI';
+
+import { useRouter } from 'next/navigation';
 
 export default function PaymentDemo() {
+
+  //Aquí estoy agregando cosas para redirigir a Registro de Cuenta Bancaria
+  const router = useRouter();
+  const [hasAccount, setHasAccount] = useState(false); 
+  useEffect(() => {
+    // Es crucial verificar el 'window' porque Next.js renderiza en el servidor primero.
+    if (typeof window !== 'undefined') {
+        const hasBankAcct = sessionStorage.getItem('hasBankAccount') === 'true';
+        setHasAccount(hasBankAcct);
+    }
+}, []);
+  const handleAgregarCuenta = () => {
+    router.push('/registro-cuenta'); 
+};
+  //Hasta acá la parte que agregué
+  
   const [trabajos, setTrabajos] = useState([
     { id: 1, estado: 'Sin Pagar', monto: 500 },
     { id: 2, estado: 'Sin Pagar', monto: 100 },
@@ -60,18 +83,27 @@ const handleCloseCashPayment = () => {
           <span className="text-2xl">🔧</span>
           Agregar Trabajo
         </button>
-        
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
-        >
-          <span className="text-2xl">🏦</span>
-          Agregar cuenta bancaria
-        </button>
 
-        <div className="ml-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium">
-          Estado: SCB
-        </div>
-      </div>
+   
+       
+   
+    
+        <button
+                 onClick={handleAgregarCuenta}
+    className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
+>
+    <span className="text-2xl">🏦</span>
+    Agregar cuenta bancaria
+</button>
+        
+                 
+      
+      <div className="ml-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium">
+    {/* Lógica condicional: si hasAccount es true, muestra CCB, sino SCB */}
+    Estado: {hasAccount ? 'CCB' : 'SCB'}
+</div>
+      
+       
 
       {/* Table */}
       <div className="px-6">
