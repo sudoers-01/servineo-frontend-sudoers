@@ -3,7 +3,11 @@ import { useState, useEffect } from 'react';
 import { getUserLocation, createJobRequest } from '@/services/job-requests';
 import { JobRequestFormData, UserLocation, CreateJobRequestPayload } from '@/types/job-request';
 
-export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (data: unknown) => void) {
+export function useJobRequest(
+  isOpen: boolean,
+  onClose: () => void,
+  onSubmit: (data: unknown) => void,
+) {
   const [formData, setFormData] = useState<JobRequestFormData>({
     jobMotive: '',
     jobDescription: '',

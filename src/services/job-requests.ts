@@ -18,7 +18,7 @@ export async function getUserLocation(token: string): Promise<UserLocation> {
 
 export async function createJobRequest(
   payload: CreateJobRequestPayload,
-  token: string
+  token: string,
 ): Promise<unknown> {
   const res = await fetch(`${API_URL}/api/jobrequests`, {
     method: 'POST',
