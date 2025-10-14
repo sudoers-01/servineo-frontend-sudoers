@@ -3,7 +3,7 @@
   height: 200px;
   border-radius: 8px;
   overflow: hidden;
-  border: 2px solid #000; /* Agregado para que coincida con tu estilo */
+  border: 2px solid #000;
 }
 
 .map-disabled {

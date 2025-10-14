@@ -21,7 +21,6 @@ export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (d
 
   const getAuthToken = (): string | null => localStorage.getItem('token');
 
-  // 🔹 Resetear formulario
   const resetForm = () => {
     setFormData({
       jobMotive: '',
@@ -34,7 +33,6 @@ export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (d
     setNewLocation(null);
   };
 
-  // 🔹 Cargar ubicación del usuario (EFECTO ORIGINAL)
   useEffect(() => {
     if (isOpen) {
       const fetchUserLocation = async () => {
@@ -60,7 +58,6 @@ export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (d
     }
   }, [isOpen]);
 
-  // 🔹 Sincronizar ubicación del mapa (EFECTO ORIGINAL)
   useEffect(() => {
     if (formData.locationOption === 'keep' && initialLocation) {
       setCurrentMapLocation(initialLocation);
@@ -72,19 +69,16 @@ export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (d
     }
   }, [formData.locationOption, initialLocation, newLocation]);
 
-  // 🔹 Manejar cambios en inputs (FUNCIÓN ORIGINAL)
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🔹 Manejar cambio de posición en el mapa
   const handlePositionChange = (pos: { lat: number; lng: number }) => {
     setNewLocation({ lat: pos.lat, lng: pos.lng });
     setCurrentMapLocation({ lat: pos.lat, lng: pos.lng });
   };
 
-  // 🔹 Enviar formulario (LÓGICA ORIGINAL COMPLETA)
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
