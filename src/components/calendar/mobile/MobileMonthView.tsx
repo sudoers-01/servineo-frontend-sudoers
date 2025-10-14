@@ -1,6 +1,6 @@
 'use client';
 import React from "react";
-
+import DayCell from "./DayCell/DayCell"
 interface Event {
     title: string;
     date: Date;
@@ -45,30 +45,18 @@ export default function MobileMonthView({
     // Agregar los días del mes
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
-        const hasEvent = events.some((e) => isSameDay(e.date, date));
         const isToday = isSameDay(date, today);
         const isSelected = selectedDate && isSameDay(date, selectedDate);
 
         days.push(
-            <button
+            <DayCell
                 key={day}
-                onClick={() => onSelectDate(date)}
-                className={`
-          relative flex items-center justify-center w-10 h-10 mx-auto rounded-full
-          transition-all duration-200 select-none
-          ${isSelected
-                        ? 'bg-blue-500 text-white'
-                        : isToday
-                            ? 'border-2 border-blue-400 text-blue-500'
-                            : 'text-gray-800 hover:bg-blue-100'
-                    }
-        `}
-            >
-                {day}
-                {hasEvent && (
-                    <div className="absolute bottom-1 w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-                )}
-            </button>
+                date={date}
+                selectedDate={selectedDate}
+                onSelectDate={onSelectDate}
+                today={today}
+
+            />
         );
     }
 
