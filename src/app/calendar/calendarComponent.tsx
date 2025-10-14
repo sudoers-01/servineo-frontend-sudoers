@@ -1,5 +1,3 @@
-'use client';
-
 import React, { useRef, useState, useEffect } from "react";
 import { Calendar, momentLocalizer, Views, SlotInfo, Event as RBCEvent, View } from 'react-big-calendar';
 import moment from 'moment';
@@ -28,13 +26,11 @@ interface MyEvent {
 interface PropList {
     fixerId: string,
     requesterId: string
-    selectedDate: Date | null;
 }
 
 export default function MyCalendarPage({
   fixerId,
   requesterId,
-  selectedDate
 } : PropList) {
     const [events, setEvents] = useState<MyEvent[]>([]);
     const [currentView, setCurrentView] = useState<View>(Views.MONTH);
@@ -47,7 +43,7 @@ export default function MyCalendarPage({
     // 🔹 Cargar slots desde la API cuando cambie el mes
     useEffect(() => {
         loadSlotsFromAPI();
-    }, [currentDate.getMonth(), currentDate.getFullYear()]);
+    }, [currentDate.getMonth(), currentDate.getUTCFullYear(), fixerId, requesterId]);
 
     async function loadSlotsFromAPI() {
         try {
@@ -93,7 +89,7 @@ export default function MyCalendarPage({
             return;
         }
 
-        // 🔹 En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
+        // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
         if (currentView === Views.DAY) {
             const viewedDate = new Date(currentDate);
             viewedDate.setHours(0, 0, 0, 0);
@@ -261,7 +257,7 @@ export default function MyCalendarPage({
         const today = new Date();
         const isToday = date.getDate() === today.getDate() &&
             date.getMonth() === today.getMonth() &&
-            date.getFullYear() === today.getFullYear();
+            date.getUTCFullYear() === today.getUTCFullYear();
 
         if (currentView === Views.DAY) {
             const viewedDate = new Date(date);

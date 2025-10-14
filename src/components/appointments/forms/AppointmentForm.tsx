@@ -20,7 +20,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
   const [contact, setContact] = useState<string>("");
-  const [modality, setModality] = useState<"virtual" | "presencial">("virtual");
+  const [modality, setModality] = useState<"virtual" | "presential">("virtual");
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>("");
   const [meetingLink, setMeetingLink] = useState<string>("");
@@ -36,7 +36,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     name: string;
     date: string;
     time: string;
-    modality: "virtual" | "presencial";
+    modality: "virtual" | "presential";
     locationOrLink: string;
     description?: string;
   } | null>(null);
@@ -86,8 +86,12 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
 
   // Función para manejar la confirmación de ubicación
   const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
-    setLocation(locationData);
-    setPlace(locationData.address);
+    setLocation({
+      lat: locationData.lat,
+      lon: locationData.lon,
+      address: locationData.address
+    });
+    setPlace(locationData.address); // para mostrar en UI
     setShowLocationModal(false);
   };
 
@@ -108,29 +112,32 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]+$/;
     if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
 
+    const { selected_date, starting_time, finishing_time } = parseDatetime(datetime);
 
-    const { selected_date, starting_time, finishing_time } = parseDatetime(datetime); //nuevo
+    if (modality === "presential" && !place) return setMsg("Selecciona una ubicación.");
 
     const payload: any = {
-      id_fixer: "fixer123", // ← reemplaza con valor dinámico 
-      id_requester: "requester456", // ← reemplaza con valor dinámico 
+      id_fixer: "uuid-fixer-2026",
+      id_requester: "uuid-user-8899",
       selected_date,
       starting_time,
-      finishing_time,
+      appointment_type: modality === "presential" ? "presential" : "virtual",
+      appointment_description: description.trim(),
       current_requester_name: client.trim(),
       current_requester_phone: contact.trim(),
-      appointment_type: modality,
-      appointment_description: description.trim()
+      link_id: modality === "virtual" ? meetingLink.trim() : "",
+      display_name: modality === "presential" ? place : "",
+      lat: modality === "presential" ? location?.lat ?? null : null,
+      lon: modality === "presential" ? location?.lon ?? null : null
     };
-    // Si es presencial y tenemos ubicación, agregar datos de ubicación
-    if (modality === "presencial") {
-      if (!place) return setMsg("Selecciona una ubicación.");
-      payload.place_id = location?.address || place;
-    }
+
     if (modality === "virtual") {
       if (!meetingLink.trim()) return setMsg("Ingrese un enlace de reunión.");
-      const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
-      if (!urlRegex.test(meetingLink.trim())) return setMsg("Ingrese un enlace válido.");
+      const meetRegex = /^https:\/\/meet\.google\.com\/[a-zA-Z0-9\-]+$/;
+      if (!meetRegex.test(meetingLink.trim())) {
+        return setMsg("Ingrese un enlace válido de Google Meet.");
+      }
+      payload.link_id = meetingLink.trim();
     }
 
     await submitAppointment(payload);
@@ -139,44 +146,53 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   async function submitAppointment(payload: any) {
     setLoading(true);
     try {
-      const res = await fetch("https://servineo-back.vercel.app/api/bookings", { //usar ruta real con back
+      // Ruta local solicitada
+      const res = await fetch("http://localhost:3000/api/crud_create/appointments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
 
+      // parseamos el body
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setMsg(data?.error || data?.message || "Error al guardar");
-        setLoading(false);
+
+      // Si el backend responde con created: true mostramos summary
+      if (data && data.created === true) {
+        // Dispatch evento global (opcional)
+        const bookingId = (data as any).id || String(Date.now());
+        window.dispatchEvent(new CustomEvent("booking:created", {
+          detail: {
+            datetime: payload.starting_time,
+            id: bookingId,
+            meta: payload
+          }
+        }));
+
+        setMsg("¡Cita creada!");
+        setSummaryData({
+          name: client.trim(),
+          date: new Date(payload.starting_time).toLocaleDateString(),
+          time: new Date(payload.starting_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          modality: payload.appointment_type,
+          locationOrLink: payload.appointment_type === "virtual" ? payload.link_id : payload.display_name,
+          description: payload.appointment_description
+        });
+        setShowSummary(true);
+
+        // pequeño delay visual y reset
+        setTimeout(() => {
+          setLoading(false);
+          handleClose();
+        }, 700);
+
         return;
       }
 
-      const bookingId = data?.id || data?.insertedId || String(Date.now());
-      window.dispatchEvent(new CustomEvent("booking:created", {
-        detail: {
-          datetime: payload.starting_time,
-          id: bookingId,
-          meta: payload
-        }
-      }));
-
-      setMsg("¡Cita creada!");
-      setTimeout(() => {
-        setLoading(false);
-        handleClose();
-      }, 700);
-      setSummaryData({
-        name: client.trim(),
-        date: new Date(payload.starting_time).toLocaleDateString(),
-        time: new Date(payload.starting_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        modality: payload.appointment_type,
-        locationOrLink: payload.appointment_type === "virtual" ? payload.link_id : payload.place_id,
-        description: payload.appointment_description
-      });
-
-      setShowSummary(true);
-
+      // Si no fue creado correctamente, mostramos el mensaje del backend o un error genérico
+      const backendMsg = data?.message || data?.error || "No se pudo crear la cita.";
+      setMsg(backendMsg);
+      setLoading(false);
+      return;
     } catch (err: any) {
       console.error(err);
       setMsg("Error en la conexión.");
@@ -185,6 +201,23 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   }
 
   if (!open) return null;
+
+  //Esto esta solo para probar el modal summary borrar
+  function handleTest(mod: "virtual" | "presential") {
+  const testData = {
+    name: "Valery",
+    date: "2025-10-14",
+    time: "10:00 AM",
+    modality: mod,
+    locationOrLink:
+      mod === "virtual"
+        ? "https://meet.google.com/example"
+        : "Av. Siempre Viva 742, Cochabamba",
+    description: mod === "virtual" ? "Reunión virtual de prueba" : "Cita presencial de prueba",
+  };
+  setSummaryData(testData);
+  setShowSummary(true);
+}
 
   return (
     <>
@@ -227,11 +260,11 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   <span className="text-sm font-medium">Modalidad</span>
                   <select
                     value={modality}
-                    onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
+                    onChange={(e) => setModality(e.target.value as "virtual" | "presential")}
                     className="mt-1 block w-full border rounded px-3 py-2 text-sm"
                   >
                     <option value="virtual">Virtual</option>
-                    <option value="presencial">Presencial</option>
+                    <option value="presential">Presencial</option>
                   </select>
                 </label>
               </div>
@@ -270,8 +303,20 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   rows={3}
                 />
               </label>
+              
+              {modality === "presential" && (
+                <label className="block">
+                  <span className="text-sm font-medium">Ubicación</span>
+                  <input
+                    type="text"
+                    value={place}
+                    readOnly
+                    className="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-sm text-gray-700"
+                  />
+                </label>
+              )}
 
-              {modality === "presencial" ? (
+              {modality === "presential" ? (
                 <div className="flex flex-col gap-1">
                   <div
                     onClick={() => setShowLocationModal(true)}
@@ -325,53 +370,34 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
 
                 <button
                   type="submit"
-                  disabled={loading || (modality === "presencial" && !place)}
+                  disabled={loading || (modality === "presential" && !place)}
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading
                     ? "Guardando..."
                     : onNextStep
-                      ? modality === "presencial"
+                      ? modality === "presential"
                         ? "Siguiente →"
                         : "Confirmar"
                       : "Añadir"}
                 </button>
-
+              </div>
+              
+              <div className="flex justify-center gap-3 mt-4">
                 <button
                   type="button"
-                  onClick={() => {
-                    setSummaryData({
-                      name: "Alejandro",
-                      date: "13/10/2025",
-                      time: "10:00",
-                      modality: "virtual",
-                      locationOrLink: "https://meet.example.com/test123",
-                      description: "Consulta técnica"
-                    });
-                    setShowSummary(true);
-                  }}
-                  className="px-4 py-2 bg-green-600 text-white rounded text-sm"
+                  onClick={() => handleTest("virtual")}
+                  className="px-4 py-2 bg-blue-600 text-white rounded hover:brightness-110 text-sm"
                 >
-                  Probar virtual
+                  Virtual
                 </button>
                 <button
                   type="button"
-                  onClick={() => {
-                    setSummaryData({
-                      name: "Alejandro",
-                      date: "13/10/2025",
-                      time: "08:30",
-                      modality: "presencial",
-                      locationOrLink: "Av. América y Melchor Pérez",
-                      description: "Instalación de equipo"
-                    });
-                    setShowSummary(true);
-                  }}
-                  className="px-4 py-2 bg-purple-600 text-white rounded text-sm"
+                  onClick={() => handleTest("presential")}
+                  className="px-4 py-2 bg-green-600 text-white rounded hover:brightness-110 text-sm"
                 >
-                  Probar presencial
+                  Presencial
                 </button>
-
               </div>
             </form>
           </div>
