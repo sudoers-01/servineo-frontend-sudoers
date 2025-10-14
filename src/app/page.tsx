@@ -61,7 +61,7 @@ export default function Home() {
       )}
 
       {loggedIn && showEditForm && (
-        <div className="border p-4 rounded shadow">
+        <div className="">
           <h2 className="text-xl font-semibold mb-3">Editar requester</h2>
           <RequesterEditForm
             requesterId="abc12"
