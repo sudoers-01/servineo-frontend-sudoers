@@ -40,7 +40,11 @@ export default function CalendarPage() {
             </div>
 
             <div className="flex justify-center md:block hidden">
-                <MyCalendarPage />
+                <MyCalendarPage 
+                    selectedDate={selectedDate}
+                    fixerId={"fixer_user_001"}
+                    requesterId={"req_user_001"}
+                />
             </div>
 
             <div className="flex flex-col md:hidden justify-center gap-4" >
@@ -51,6 +55,10 @@ export default function CalendarPage() {
                 <div></div>
                 <MobileList
                     selectedDate={selectedDate}
+
+                    fixerId={"fixer_user_001"}
+                    requesterId={"req_user_001"}
+
                 />
             </div>
 

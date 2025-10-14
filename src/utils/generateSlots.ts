@@ -39,6 +39,8 @@ function generateAvailableSlotsForMonth(month: number, year: number, fixerId: st
   // Obtener el primer y último día del mes
   const startDate = new Date(year, month, 1);
   const endDate = new Date(year, month + 1, 0);
+
+  console.log(startDate, endDate);
   
   const current = new Date(startDate);
   const today = new Date();
@@ -105,10 +107,11 @@ function generateAvailableSlotsForMonth(month: number, year: number, fixerId: st
 export async function generateAvailableSlotsFromAPI(
   fixerId: string, 
   requesterId: string,
-  month: number
+  selectedDate: Date | null
 ): Promise<SlotEvent[]> {
   const slots: SlotEvent[] = [];
   const currentYear = new Date().getFullYear();
+  const month = selectedDate ? selectedDate.getMonth() : 1;
 
   try {
     // 🔹 Obtener citas del fixer específico para el mes
