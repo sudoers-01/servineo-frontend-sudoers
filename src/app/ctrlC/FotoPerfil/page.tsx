@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
 
@@ -90,11 +90,13 @@ export default function FotoPerfil() {
             )}
           </div>
         </div>
-              {/*Cancelar*/}
+              {/*Atras*/}
         <div className="flex justify-center gap-3 mt-6">
+          <Link href="/ctrlC/RequesterFrom">
           <button className="px-4 py-2 bg-[#ff0000] text-white rounded-full hover:bg-[#ff0000]">
-            Cancelar
+            Atras
           </button>
+          </Link>
               {/* Continuar */}
           <button
             onClick={continuar}
