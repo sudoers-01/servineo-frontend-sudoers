@@ -6,7 +6,7 @@ import moment from 'moment';
 import 'moment/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
-import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm"; // Importar directamente AppointmentForm
+import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm"; 
 
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "../../components/appointments/forms/EditAppointmentForm";
 import { generateAvailableSlotsFromAPI, SlotEvent } from "../../utils/generateSlots";
