@@ -30,7 +30,11 @@ const JobsGrid = () => {
   }, []);
 
   if (loading) {
-    return <div className='text-center py-10 text-black'>Loading completed jobs...</div>;
+    return (
+      <main className='h-screen flex items-center justify-center text-gray-500 bg-white'>
+        Loading completed jobs...
+      </main>
+    );
   }
 
   return (
