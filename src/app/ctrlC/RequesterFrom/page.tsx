@@ -44,7 +44,6 @@ export default function RegistroForm() {
       onChange={(e) => setNombre(e.target.value)}
       onKeyDown={(e) => {
         const key = e.key;
-        // Solo permite letras, espacio y teclas de control (Backspace, Tab, etc.)
         if (
           !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(key) &&
           key !== "Backspace" &&
