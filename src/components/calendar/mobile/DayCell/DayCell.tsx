@@ -36,7 +36,6 @@ export default function DayCell({
                 );
                 setCount(result);
             } catch (err) {
-                console.error('Error fetching schedules:', err);
                 setCount(0);
             }
         };
@@ -51,10 +50,10 @@ export default function DayCell({
     const getColor = () => {
         if (isSelected) return 'bg-blue-500 text-white';
         if (isPast) return 'text-black';
-        if (count === null) return 'bg-[#16A34A] ';
+        if (count === null) return 'bg-[#16A34A]';
         if (count === 0) return 'bg-[#16A34A]';
-        if (count == 1) return 'bg-[#FFC857]';
-        if (count == 2) return 'bg-[#FF5F57]';
+        if (count >= 1 && count <= 7) return 'bg-[#FFC857]';
+        if (count === 8) return 'bg-[#FF5F57]';
 
     }
     const todayRing = isToday ? 'ring-2 ring-blue-600 ring-offset-2' : '';
@@ -63,7 +62,7 @@ export default function DayCell({
             onClick={() => onSelectDate(date)}
             className={`
         relative flex items-center justify-center w-10 h-10 mx-auto rounded-full 
-        transition-all duration-200 select-none font-medium
+        transition-all duration-200 select-none font-medium cursor-pointer
         ${getColor()} ${todayRing}
       `}
         >

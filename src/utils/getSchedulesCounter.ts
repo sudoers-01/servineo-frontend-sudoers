@@ -7,7 +7,6 @@ export async function getSchedulesCounter(fixer_id: string, requester_id: string
         );
 
         if (!response.ok) {
-            console.log("nononono");
             return 0;
         }
 
@@ -22,7 +21,6 @@ export async function getSchedulesCounter(fixer_id: string, requester_id: string
 
         return totalSchedules;
     } catch (error) {
-        console.error('Error al obtener schedules:', error);
         return 0;
     }
 }
