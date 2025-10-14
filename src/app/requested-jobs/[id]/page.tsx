@@ -61,7 +61,7 @@ export default function JobDetailsPage() {
 
   if (loading) {
     return (
-      <main className='h-screen flex items-center justify-center text-gray-500'>
+      <main className='h-screen flex items-center justify-center text-gray-500 bg-white'>
         Loading job details...
       </main>
     );
