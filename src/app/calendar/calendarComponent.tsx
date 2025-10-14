@@ -153,29 +153,38 @@ export default function MyCalendarPage({
         if (!event.booked || !event.editable) return;
 
         try {
-            const API = process.env.NEXT_PUBLIC_BACKEND;
+            //const API = process.env.NEXT_PUBLIC_BACKEND;
+            const API = process.env.NEXT_PUBLIC_BACKEND as string;
             const dateObj = new Date(event.start);
             const appointment_date = dateObj.toISOString().split('T')[0];
             const start_hour = dateObj.getUTCHours();
-            const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date}&start_hour=${start_hour}`;
+            //const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date} &start_hour=${start_hour}`;
+            const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=uuid-fixer-1234&requester_id=uuid-user-4567&appointment_date=2025-10-17&start_hour=12`;
+            //console.log(url);
+            //http://localho/api/crud_read/appointments/get_modal_form?fixer_id=uuid-fixer-1234&requester_id=uuid-user-9824&appointment_date=2025-10-15&start_hour=17
+            //https://servineo-backend-lorem.onrender.com/api/crud_read/appointments/get_modal_form?fixer_id={value}&requester_id={value}&appointment_date={value}&start_hour={value}
             console.log('Intentando fetch a:', url);
             const res = await fetch(url);
             if (!res.ok) {
                 let errorText = await res.text();
                 console.error('Respuesta no OK:', res.status, errorText);
-                throw new Error(`Error al cargar de BD: ${res.status} - ${errorText}`);
+                throw new Error(`No se encuentra este dato: ${res.status} - ${errorText}`);
             }
             const data = await res.json();
             const existingAppointment: ExistingAppointment = {
-                id: data.id,
-                datetime: data.datetime,
-                client: data.client,
-                contact: data.contact,
-                modality: data.modality,
-                description: data.description,
-                place: data.place,
-                meetingLink: data.meetingLink,
-                location: data.location
+                id: data._id || data.id,
+                datetime: event.start.toISOString(), 
+                client: data.current_requester_name || "",
+                contact: data.current_requester_phone || "",
+                modality: data.appointment_type || "virtual",
+                description: data.appointment_description || "",
+                place: data.display_name || "",
+                meetingLink: data.link_id || "",
+                location: (data.lat && data.lon) ? {
+                    lat: Number(data.lat),
+                    lon: Number(data.lon),
+                    address: data.display_name || ""
+                } : undefined
             };
 
             editFormRef.current?.open(existingAppointment);

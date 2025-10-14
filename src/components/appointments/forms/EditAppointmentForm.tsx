@@ -41,6 +41,8 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  // Estado para guardar los datos originales
+  const [originalAppointment, setOriginalAppointment] = useState<ExistingAppointment | null>(null);
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
@@ -65,6 +67,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setPlace(appointmentData.place || "");
       setLocation(appointmentData.location || null);
       setMeetingLink(appointmentData.meetingLink || "");
+      setOriginalAppointment(appointmentData); // Guardar los datos originales
       setOpen(true);
       setTimeout(() => firstFieldRef.current?.focus(), 40);
     },
@@ -116,18 +119,20 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]+$/;
     if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
 
-    const payload: any = {
-      datetime,
-      client: client.trim(),
-      contact: contact.trim(),
-      modality,
-      description: description.trim(),
-    };
+    // Construir payload solo con campos modificados
+    const payload: any = {};
+    if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
+
+    if (datetime !== originalAppointment.datetime) payload.datetime = datetime;
+    if (client.trim() !== originalAppointment.client) payload.client = client.trim();
+    if (contact.trim() !== originalAppointment.contact) payload.contact = contact.trim();
+    if (modality !== originalAppointment.modality) payload.modality = modality;
+    if ((description || "") !== (originalAppointment.description || "")) payload.description = description.trim();
 
     if (modality === "presencial") {
       if (!place) return setMsg("Selecciona una ubicación.");
-      payload.place = place.trim();
-      if (location) {
+      if ((place || "") !== (originalAppointment.place || "")) payload.place = place.trim();
+      if (JSON.stringify(location) !== JSON.stringify(originalAppointment.location)) {
         payload.location = location;
       }
     } else {
@@ -136,15 +141,21 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
         const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
         if (!urlRegex.test(meetingLink.trim())) return setMsg("Ingrese un enlace válido.");
       }
-      payload.meetingLink = linkToUse;
+      if ((meetingLink || "") !== (originalAppointment.meetingLink || "")) payload.meetingLink = linkToUse;
+    }
+
+    if (Object.keys(payload).length === 0) {
+      setMsg("No hay cambios para guardar.");
+      return;
     }
 
     setLoading(true);
     try {
-        const dateObj = new Date(datetime);
-        const fechaUTC = dateObj.toISOString().split('T')[0];
-        const horaNumero = dateObj.getUTCHours();
-        const res = await fetch(`/api/appointments/${appointmentId}?fixerId=TU_FIXER_ID&fecha=${fechaUTC}&hora=${horaNumero}`, {
+      const dateObj = new Date(datetime);
+      const fechaUTC = dateObj.toISOString().split('T')[0];
+      const horaNumero = dateObj.getUTCHours();
+      // TODO: reemplazar TU_FIXER_ID por el fixerId real si es necesario
+      const res = await fetch(`/api/appointments/${appointmentId}?fixerId=TU_FIXER_ID&fecha=${fechaUTC}&hora=${horaNumero}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
