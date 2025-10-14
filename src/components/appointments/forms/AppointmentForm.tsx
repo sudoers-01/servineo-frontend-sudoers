@@ -109,7 +109,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     if (!phoneRegex.test(contact.trim())) return setMsg("Ingrese un teléfono válido.");
 
     if (!description.trim()) return setMsg("Ingrese una descripción.");
-    const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]+$/;
+    const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\d,.]+$/;
     if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
 
     const { selected_date, starting_time, finishing_time } = parseDatetime(datetime);
@@ -147,7 +147,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     setLoading(true);
     try {
       // Ruta local solicitada
-      const res = await fetch("http://localhost:3000/api/crud_create/appointments/create", {
+      const res = await fetch("https://servineo-backend-lorem.onrender.com/api/crud_create/appointments/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -201,23 +201,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   }
 
   if (!open) return null;
-
-  //Esto esta solo para probar el modal summary borrar
-  function handleTest(mod: "virtual" | "presential") {
-  const testData = {
-    name: "Valery",
-    date: "2025-10-14",
-    time: "10:00 AM",
-    modality: mod,
-    locationOrLink:
-      mod === "virtual"
-        ? "https://meet.google.com/example"
-        : "Av. Siempre Viva 742, Cochabamba",
-    description: mod === "virtual" ? "Reunión virtual de prueba" : "Cita presencial de prueba",
-  };
-  setSummaryData(testData);
-  setShowSummary(true);
-}
 
   return (
     <>
@@ -380,23 +363,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                         ? "Siguiente →"
                         : "Confirmar"
                       : "Añadir"}
-                </button>
-              </div>
-              
-              <div className="flex justify-center gap-3 mt-4">
-                <button
-                  type="button"
-                  onClick={() => handleTest("virtual")}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:brightness-110 text-sm"
-                >
-                  Virtual
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleTest("presential")}
-                  className="px-4 py-2 bg-green-600 text-white rounded hover:brightness-110 text-sm"
-                >
-                  Presencial
                 </button>
               </div>
             </form>
