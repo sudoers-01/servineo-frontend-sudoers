@@ -4,6 +4,7 @@ import { api, ApiResponse } from '@/app/Control_C/lib/api';
 import { Eye, EyeOff } from 'lucide-react'; // para el icono de mostrar/ocultar password
 import LoginGoogle from "@/app/Control_C/components/auth/LoginGoogle";
 
+
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -95,8 +96,9 @@ export default function LoginPage() {
 
         {/* Botón Google */}
         <div className="mt-6">
-          <LoginGoogle />
+          <LoginGoogle onMensajeChange={setMensaje} />
         </div>
+
 
         {/* Mensaje de error o éxito */}
         {mensaje && (
