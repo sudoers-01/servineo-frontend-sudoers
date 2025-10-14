@@ -139,7 +139,7 @@ const JobRequestModal = ({ isOpen, onClose, onSubmit }) => {
       setLoading(false);
     }
   };
-  
+
   const handleOverlayClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
