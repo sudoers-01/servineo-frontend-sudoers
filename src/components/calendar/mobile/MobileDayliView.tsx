@@ -3,28 +3,32 @@ import { useEffect, useRef, useState } from "react";
 import AppointmentForm from "../../appointments/forms/AppointmentForm";
 import type { AppointmentFormHandle } from "../../appointments/forms/AppointmentForm";
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
-import type { EditAppointmentFormHandle, ExistingAppointment } from "../../appointments/forms/EditAppointmentForm";
+import type {
+  EditAppointmentFormHandle,
+  ExistingAppointment,
+} from "../../appointments/forms/EditAppointmentForm";
 
-// BASE DE DATOS (DE MOMENTO POSTMAN)
-const API = process.env.NEXT_PUBLIC_API_BASE_URL;
+const USE_BACKEND = true; 
+const API = process.env.NEXT_PUBLIC_BACKEND as string;
+const AVAILABILITY_URL = `${API}/api/crud_read/appointments/get_meeting_status`;
 
 interface DayScheduleProps {
   fixerId: string;
   requesterId: string;
-  selectedDate: Date | null;
+  selectedDate: Date | string | null;
 }
 
 interface HorarioItem {
   id_Horario: string;
-  Hora_Inicio: string;
-  estado_Horario: string;
+  Hora_Inicio: string; 
+  estado_Horario: "libre" | "ocupado" | "no_disponible";
   cliente?: string;
   contacto?: string;
   modalidad?: "virtual" | "presencial";
   descripcion?: string;
   lugar?: string;
   meetingLink?: string;
-  type?: string;
+  type?: "banner";
   text?: string;
 }
 
@@ -33,14 +37,105 @@ interface DayData {
   horarios?: HorarioItem[];
 }
 
+type Icon = "＋" | "✎" | null;
+
+
+function toYMDAny(d: Date | string) {
+  const date = typeof d === "string" ? new Date(`${d}T00:00:00`) : d;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+}
+
+
+function hourIntsRange(start = 8, end = 18) {
+  const out: number[] = [];
+  for (let h = start; h <= end; h++) out.push(h);
+  return out;
+}
+
+
+function formatHourDisplay(h: number) {
+  return `${String(h).padStart(2, "0")}:00`;
+}
+
+
+const MOCK_FIXER_NAME = "Juan";
+
+function mockHorarios(fechaYMD: string): { nombre_Fixer: string; horarios: HorarioItem[] } {
+  const horarios = hourIntsRange(8, 18).map<HorarioItem>((h) => {
+    const estado: HorarioItem["estado_Horario"] =
+      h % 2 === 0 ? "libre" : h % 5 === 0 ? "no_disponible" : "ocupado";
+
+    const base: HorarioItem = {
+      id_Horario: `${fechaYMD}-${String(h).padStart(2, "0")}`,
+      Hora_Inicio: formatHourDisplay(h),
+      estado_Horario: estado,
+    };
+
+    if (estado === "ocupado") {
+      base.cliente = "Juan Pérez";
+      base.contacto = "+591 7xx xx xx";
+      base.modalidad = "virtual";
+      base.descripcion = "Trabajo en curso";
+      base.lugar = "Av. Siempre Viva 123";
+      base.meetingLink = "https://meet.mock/abc";
+    }
+
+    return base;
+  });
+
+  return { nombre_Fixer: MOCK_FIXER_NAME, horarios };
+}
+
+
+type HourApiStatus = "available" | "partial" | "occuped";
+
+interface HourApiResponse {
+  message: string;
+  status: HourApiStatus;
+  name: string; 
+}
+
+function mapApiToEstado(status: HourApiStatus): HorarioItem["estado_Horario"] {
+  switch (status) {
+    case "available":
+      return "libre";  
+    case "partial":
+      return "ocupado";
+    case "occuped":
+      return "no_disponible";
+    default:
+      return "no_disponible";
+  }
+}
+
+
+async function fetchHour(
+  baseUrl: string,
+  fixerId: string,
+  requesterId: string,
+  ymd: string,
+  hourInt: number
+): Promise<HourApiResponse> {
+  const url = new URL(baseUrl);
+  url.searchParams.set("fixerId", fixerId);
+  url.searchParams.set("requesterId", requesterId);
+  url.searchParams.set("date", ymd);
+  url.searchParams.set("hour", String(hourInt));
+
+  const res = await fetch(url.toString(), { headers: { Accept: "application/json" } });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const json = (await res.json()) as HourApiResponse;
+  return json;
+}
+
+
 export default function DaySchedule({
   fixerId,
   requesterId,
   selectedDate,
 }: DayScheduleProps) {
-  const formattedDate = selectedDate
-    ? selectedDate.toISOString().split("T")[0]
-    : ""; // "yyyy-mm-dd"
+  const formattedDate = selectedDate ? toYMDAny(selectedDate as any) : "";
 
   const [date, setDate] = useState<string>(formattedDate);
   const [loading, setLoading] = useState<boolean>(false);
@@ -50,29 +145,11 @@ export default function DaySchedule({
   const appointmentFormRef = useRef<AppointmentFormHandle | null>(null);
   const editAppointmentFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
-  const fetchDay = async (d: string) => {
-    try {
-      setLoading(true);
-      setErr("");
-      const res = await fetch(
-        `${API}/fixers/${fixerId}/availability?fecha_Seleccionada=${d}`
-      );
-      if (!res.ok) throw new Error("No se pudo cargar la disponibilidad");
-      const json = await res.json();
-      setData(json);
-    } catch (e) {
-      setErr((e as Error).message || "Error");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (date) fetchDay(date);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const labelByEstado = (estado: string) => {
+  const labelByEstado = (estado: "libre" | "ocupado" | "no_disponible"): {
+    text: string;
+    cls: string;
+    icon: Icon;
+  } => {
     switch (estado) {
       case "libre":
         return { text: "DISPONIBLE", cls: "text-emerald-600", icon: "＋" };
@@ -85,16 +162,78 @@ export default function DaySchedule({
     }
   };
 
+  async function fetchDay(d: string) {
+    try {
+      setLoading(true);
+      setErr("");
+
+      if (!USE_BACKEND) {
+        const { nombre_Fixer, horarios } = mockHorarios(d);
+        setData({ nombre_Fixer, horarios });
+        return;
+      }
+
+      const hours = hourIntsRange(8, 18); 
+
+      const results = await Promise.all(
+        hours.map(async (h) => {
+          try {
+            const resp = await fetchHour(AVAILABILITY_URL, fixerId, requesterId, d, h);
+            return { ok: true as const, hourInt: h, resp };
+          } catch {
+            return { ok: false as const, hourInt: h };
+          }
+        })
+      );
+
+      const firstOk = results.find((r) => r.ok);
+      const nombre_Fixer = firstOk && firstOk.ok ? firstOk.resp.name : "—";
+
+      const horarios: HorarioItem[] = results.map((r) => {
+        const horaDisplay = formatHourDisplay(r.hourInt);
+        if (r.ok) {
+          return {
+            id_Horario: `${d}-${String(r.hourInt).padStart(2, "0")}`,
+            Hora_Inicio: horaDisplay,
+            estado_Horario: mapApiToEstado(r.resp.status),
+          };
+        }
+        return {
+          id_Horario: `${d}-${String(r.hourInt).padStart(2, "0")}`,
+          Hora_Inicio: horaDisplay,
+          estado_Horario: "no_disponible",
+        };
+      });
+
+      setData({ nombre_Fixer, horarios });
+    } catch (e) {
+      setErr((e as Error).message || "Error");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    if (date) fetchDay(date);
+  }, []);
+
+
+  useEffect(() => {
+    if (selectedDate) {
+      const d = toYMDAny(selectedDate as any);
+      setDate(d);
+      fetchDay(d);
+    }
+  }, [selectedDate, fixerId, requesterId]);
+
   const handleSlotClick = (item: HorarioItem) => {
     const meta = labelByEstado(item.estado_Horario);
     if (meta.icon === "＋") {
-      // Abrir AppointmentForm como modal
-      appointmentFormRef.current?.open(
-        `${date}T${item.Hora_Inicio}:00`,
-        { eventId: item.id_Horario, title: meta.text }
-      );
+      appointmentFormRef.current?.open(`${date}T${item.Hora_Inicio}:00`, {
+        eventId: item.id_Horario,
+        title: meta.text,
+      });
     } else if (meta.icon === "✎") {
-      // Abrir EditAppointmentForm como modal
       const existingAppointment: ExistingAppointment = {
         id: item.id_Horario,
         datetime: `${date}T${item.Hora_Inicio}:00`,
@@ -184,7 +323,7 @@ export default function DaySchedule({
           </div>
         </div>
       )}
-      {/* Renderizar los formularios una sola vez */}
+
       <AppointmentForm ref={appointmentFormRef} />
       <EditAppointmentForm ref={editAppointmentFormRef} />
     </div>
