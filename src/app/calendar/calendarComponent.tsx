@@ -156,10 +156,14 @@ export default function MyCalendarPage({
             //const API = process.env.NEXT_PUBLIC_BACKEND;
             const API = process.env.NEXT_PUBLIC_BACKEND as string;
             const dateObj = new Date(event.start);
-            const appointment_date = dateObj.toISOString().split('T')[0];
-            const start_hour = dateObj.getUTCHours();
-            //const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date} &start_hour=${start_hour}`;
-            const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=uuid-fixer-1234&requester_id=uuid-user-4567&appointment_date=2025-10-17&start_hour=12`;
+            const appointment_date = dateObj.toString().split('T')[0];
+            const start_hour = dateObj.getUTCHours().toString();
+            console.log( appointment_date);
+            console.log(start_hour);
+            console.log(fixerId);
+            console.log(requesterId);
+            const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date}&start_hour=${start_hour}`;
+            //const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=uuid-fixer-1234&requester_id=uuid-user-4567&appointment_date=2025-10-17&start_hour=12`;
             //console.log(url);
             //http://localho/api/crud_read/appointments/get_modal_form?fixer_id=uuid-fixer-1234&requester_id=uuid-user-9824&appointment_date=2025-10-15&start_hour=17
             //https://servineo-backend-lorem.onrender.com/api/crud_read/appointments/get_modal_form?fixer_id={value}&requester_id={value}&appointment_date={value}&start_hour={value}
