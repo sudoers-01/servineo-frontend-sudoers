@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { getUserLocation, createJobRequest } from '@/services/job-requests';
 import { JobRequestFormData, UserLocation, CreateJobRequestPayload } from '@/types/job-request';
 
-export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (data: any) => void) {
+export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (data: unknown) => void) {
   const [formData, setFormData] = useState<JobRequestFormData>({
     jobMotive: '',
     jobDescription: '',
@@ -69,7 +69,9 @@ export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (d
     }
   }, [formData.locationOption, initialLocation, newLocation]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
@@ -89,7 +91,7 @@ export function useJobRequest(isOpen: boolean, onClose: () => void, onSubmit: (d
       if (!token) throw new Error('No se encontró token de autenticación.');
 
       let finalLocation: CreateJobRequestPayload['location'];
-      
+
       if (formData.locationOption === 'modify' && newLocation) {
         finalLocation = {
           type: 'Point',

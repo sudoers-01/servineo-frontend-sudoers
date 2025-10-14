@@ -33,9 +33,9 @@ label {
   font-weight: bold;
 }
 
-input[type="text"],
-input[type="number"],
-input[type="time"],
+input[type='text'],
+input[type='number'],
+input[type='time'],
 textarea {
   width: 100%;
   padding: 12px;
