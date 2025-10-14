@@ -5,10 +5,11 @@ import { useProfile } from './hooks/useProfile';
 type FixerProfileProps = {
   isOpen: boolean;
   onClose: () => void;
+  userId: string;
 };
 
-export default function FixerProfile({ isOpen, onClose }: FixerProfileProps) {
-  const { data, errors } = useProfile();
+export default function FixerProfile({ isOpen, onClose, userId }: FixerProfileProps) {
+  const { data, errors } = useProfile(userId);
   //
   return (
     <Modal isOpen={isOpen} onClose={onClose}>

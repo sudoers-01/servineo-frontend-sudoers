@@ -1,8 +1,12 @@
 'use client';
+import { useParams } from 'next/navigation';
 import FixerProfile from './fixer-profile-modal';
 import { useState } from 'react';
+
 export default function ProfilePage() {
+  const { id } = useParams();
   const [isOpen, setIsOpen] = useState(false);
+
   const handleShowProfile = () => {
     setIsOpen(true);
   };
@@ -19,7 +23,7 @@ export default function ProfilePage() {
           Ver perfil
         </button>
       </div>
-      {isOpen && <FixerProfile isOpen={isOpen} onClose={closeShowProfile} />}
+      {isOpen && <FixerProfile isOpen={isOpen} onClose={closeShowProfile} userId={id as string} />}
     </>
   );
 }
