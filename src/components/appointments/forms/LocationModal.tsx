@@ -40,7 +40,7 @@ export default function LocationModal({ open, onClose, onConfirm, initialCoords}
 
   async function fetchAddress(lat: number, lon: number) {
     try {
-      const res = await fetch(`${process.env.BACKEND}/api/location/reverse?lat=${lat}&lon=${lon}`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/location/reverse?lat=${lat}&lon=${lon}`);
       const data = await res.json();
       setAddress(data.display_name || "Dirección no disponible");
     } catch {
