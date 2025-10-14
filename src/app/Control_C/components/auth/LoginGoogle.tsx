@@ -23,9 +23,10 @@ export default function LoginGoogle() {
 
       if (res.success) {
         setMensaje(`✅ ${res.data?.message ?? "Login con Google exitoso"}`);
-        window.location.href = "/";
+          // Puedes decidir si redirigir o no
+          window.location.href = "/";
       } else {
-        setMensaje(`❌ ${res.data?.message ?? res.error ?? "Error"}`);
+        setMensaje(`❌ ${res.data?.message ?? res.error ?? "Error al iniciar sesión"}`);
       }
     } catch (err: any) {
       setMensaje(`❌ ${err?.message ?? "Error al conectar con el backend"}`);
