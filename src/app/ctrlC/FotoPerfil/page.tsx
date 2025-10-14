@@ -23,6 +23,7 @@ export default function FotoPerfil() {
   };
 
   return (
+    /* Apartado de arriba */
     <div className="flex justify-center items-center min-h-screen bg-[#759AE0]">
         <div
         className="
@@ -41,6 +42,7 @@ export default function FotoPerfil() {
           Puedes elegir desde tu dispositivo.
         </p>
 
+        {/*Area de la foto */}
         <div className="flex flex-col items-center gap-4">
           <div className="w-24 h-24 rounded-full overflow-hidden bg-gray-200">
             {foto ? (
@@ -69,7 +71,7 @@ export default function FotoPerfil() {
             className="hidden"
             onChange={manejarCambio}
           />
-
+          {/* Cambiar foto */}
           <div className="flex gap-2">
             <label
               htmlFor="input-foto"
@@ -77,7 +79,7 @@ export default function FotoPerfil() {
             >
               {foto ? "Cambiar foto" : "Subir foto"}
             </label>
-
+            {/* Eliminar foto */}
             {foto && (
               <button
                 onClick={eliminarFoto}
@@ -88,12 +90,12 @@ export default function FotoPerfil() {
             )}
           </div>
         </div>
-
+              {/*Cancelar*/}
         <div className="flex justify-center gap-3 mt-6">
           <button className="px-4 py-2 bg-[#ff0000] text-white rounded-full hover:bg-[#ff0000]">
             Cancelar
           </button>
-
+              {/* Continuar */}
           <button
             onClick={continuar}
             disabled={!foto} 
