@@ -73,7 +73,7 @@ export default function FotoPerfil() {
           <div className="flex gap-2">
             <label
               htmlFor="input-foto"
-              className="px-3 py-1.5 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-blue-700"
+              className="px-3 py-1.5 bg-blue-600 text-white rounded-full cursor-pointer hover:bg-[#1491cc]"
             >
               {foto ? "Cambiar foto" : "Subir foto"}
             </label>
@@ -90,7 +90,7 @@ export default function FotoPerfil() {
         </div>
 
         <div className="flex justify-center gap-3 mt-6">
-          <button className="px-4 py-2 bg-[#5E2BE0] text-white rounded-full hover:bg-[#4b23b8]">
+          <button className="px-4 py-2 bg-[#ff0000] text-white rounded-full hover:bg-[#ff0000]">
             Cancelar
           </button>
 
@@ -99,7 +99,7 @@ export default function FotoPerfil() {
             disabled={!foto} 
             className={`px-4 py-2 rounded-full text-white transition-colors ${
               foto
-                ? "bg-[#1AA7ED] hover:bg-[#1491cc]"
+                ? "bg-[#2B31E0] hover:bg-[#1491cc]"
                 : "bg-gray-400 cursor-not-allowed"
             }`}
           >
