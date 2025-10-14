@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import RateJobButton from './components/RateJobButton';
 
 export default function Home() {
   return (
@@ -48,7 +49,13 @@ export default function Home() {
             Read our docs
           </a>
         </div>
+
+        {/* 👇👇 AÑADIDO: tu botón Rate Job debajo de los otros botones */}
+        <div className='mt-10 flex justify-center w-full'>
+          <RateJobButton />
+        </div>
       </main>
+
       <footer className='row-start-3 flex gap-[24px] flex-wrap items-center justify-center'>
         <a
           className='flex items-center gap-2 hover:underline hover:underline-offset-4'
