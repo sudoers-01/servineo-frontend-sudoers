@@ -1,3 +1,4 @@
+
 import './globals.css'
 import { FC, PropsWithChildren } from "react";
 
@@ -8,5 +9,4 @@ const RootLayout: FC<PropsWithChildren> = ({ children }) => {
     </html>
   )
 }
-
 export default RootLayout;
