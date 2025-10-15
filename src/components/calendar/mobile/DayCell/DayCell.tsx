@@ -1,7 +1,7 @@
 
 'use client';
 
-import { getSchedulesCounter } from '@/utils/getSchedulesCounter';
+import { getCounterDay } from '@/utils/getCounterDay';
 import React, { useEffect, useState } from 'react';
 interface DayCellProps {
     date: Date;
@@ -29,7 +29,7 @@ export default function DayCell({
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getSchedulesCounter(
+                const result = await getCounterDay(
                     'uuid-fixer-1234',
                     'uuid-user-4567',
                     date.toISOString().split('T')[0]

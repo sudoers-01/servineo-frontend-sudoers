@@ -1,14 +1,12 @@
 
 'use client';
 import React, { useEffect, useState } from 'react';
-import { getSchedulesCounter } from '@/utils/getSchedulesCounter';
-
+import { getCounterDay } from '@/utils/getCounterDay';
 export default function TestPage() {
     const [count, setCount] = useState<number | null>(null);
-
     useEffect(() => {
         const fetchData = async () => {
-            const result = await getSchedulesCounter(
+            const result = await getCounterDay(
                 'uuid-fixer-1234',
                 'uuid-user-4567',
                 '2025-10-15'
