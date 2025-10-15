@@ -53,7 +53,7 @@ export default function DayCell({
         if (count === null) return 'bg-[#16A34A]';
         if (count === 0) return 'bg-[#16A34A]';
         if (count >= 1 && count <= 7) return 'bg-[#FFC857]';
-        if (count === 8) return 'bg-[#FF5F57]';
+        if (count >= 8) return 'bg-[#FF5F57]';
 
     }
     const todayRing = isToday ? 'ring-2 ring-blue-600 ring-offset-2' : '';
