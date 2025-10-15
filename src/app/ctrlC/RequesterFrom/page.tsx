@@ -33,83 +33,82 @@ export default function RegistroForm() {
 
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* Nombre y Apellido */}
-<div className="flex gap-3">
-  {/* Nombre */}
-  <div className="flex-1">
-    <label className="block text-[#5E2BE0] font-semibold mb-1">
-      Nombre *
-    </label>
-    <input
-      type="text"
-      value={nombre}
-      onChange={(e) => setNombre(e.target.value)}
-      onKeyDown={(e) => {
-        const key = e.key;
-        if (
-          !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(key) &&
-          key !== "Backspace" &&
-          key !== "Tab" &&
-          key !== "Enter" &&
-          key !== "ArrowLeft" &&
-          key !== "ArrowRight"
-        ) {
-          e.preventDefault();
-        }
-      }}
-      className="w-full border rounded-md p-2 text-[#5E2BE0] border-gray-300 focus:border-[#5E2BE0] focus:outline-none"
-      placeholder="Ingresa tu nombre"
-    />
-  </div>
+          <div className="flex gap-3">
+            {/* Nombre */}
+            <div className="flex-1">
+              <label className="block text-[#5E2BE0] font-semibold mb-1">
+                Nombre *
+              </label>
+              <input
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                onKeyDown={(e) => {
+                  const key = e.key;
+                  if (
+                    !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(key) &&
+                    key !== "Backspace" &&
+                    key !== "Tab" &&
+                    key !== "Enter" &&
+                    key !== "ArrowLeft" &&
+                    key !== "ArrowRight"
+                  ) {
+                    e.preventDefault();
+                  }
+                }}
+                className="w-full border rounded-md p-2 text-[#5E2BE0] border-gray-300 focus:border-[#5E2BE0] focus:outline-none"
+                placeholder="Ingresa tu nombre"
+              />
+            </div>
 
-      {/* Apellido */}
-      <div className="flex-1">
-    <label className="block text-[#5E2BE0] font-semibold mb-1">
-      Apellido *
-    </label>
-    <input
-      type="text"
-      value={apellido}
-      onChange={(e) => setApellido(e.target.value)}
-      onKeyDown={(e) => {
-        const key = e.key;
-        if (
-          !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(key) &&
-          key !== "Backspace" &&
-          key !== "Tab" &&
-          key !== "Enter" &&
-          key !== "ArrowLeft" &&
-          key !== "ArrowRight"
-        ) {
-          e.preventDefault();
-        }
-      }}
-      className="w-full border rounded-md p-2 text-[#5E2BE0] border-gray-300 focus:border-[#5E2BE0] focus:outline-none"
-      placeholder="Ingresa tu apellido"
-    />
-      </div>
-      </div>
-            {/* Correo electrónico */}
+            {/* Apellido */}
+            <div className="flex-1">
+              <label className="block text-[#5E2BE0] font-semibold mb-1">
+                Apellido *
+              </label>
+              <input
+                type="text"
+                value={apellido}
+                onChange={(e) => setApellido(e.target.value)}
+                onKeyDown={(e) => {
+                  const key = e.key;
+                  if (
+                    !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(key) &&
+                    key !== "Backspace" &&
+                    key !== "Tab" &&
+                    key !== "Enter" &&
+                    key !== "ArrowLeft" &&
+                    key !== "ArrowRight"
+                  ) {
+                    e.preventDefault();
+                  }
+                }}
+                className="w-full border rounded-md p-2 text-[#5E2BE0] border-gray-300 focus:border-[#5E2BE0] focus:outline-none"
+                placeholder="Ingresa tu apellido"
+              />
+            </div>
+          </div>
+          {/* Correo electrónico */}
           <div>
             <label className="block text-[#5E2BE0] font-semibold mb-1">
-                Correo electrónico *
+              Correo electrónico *
             </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${
-            email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)
-             ? "border-red-500"
-            : "border-gray-300 focus:border-[#5E2BE0]"
-          }`}
-          placeholder="nombre@gmail.com"
-        />
-  {email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email) && (
-    <p className="text-sm text-red-500 mt-1">
-      Solo se permiten correos con @gmail.com
-    </p>
-  )}
-        </div>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)
+                ? "border-red-500"
+                : "border-gray-300 focus:border-[#5E2BE0]"
+                }`}
+              placeholder="nombre@gmail.com"
+            />
+            {email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email) && (
+              <p className="text-sm text-red-500 mt-1">
+                Solo se permiten correos con @gmail.com
+              </p>
+            )}
+          </div>
           {/* Contraseñas */}
           <div className="flex gap-3">
             <div className="w-1/2">
@@ -120,11 +119,10 @@ export default function RegistroForm() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${
-                  contrasenasCoinciden && longitudValida
-                    ? "border-gray-300 focus:border-[#5E2BE0]"
-                    : "border-red-500"
-                }`}
+                className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${contrasenasCoinciden && longitudValida
+                  ? "border-gray-300 focus:border-[#5E2BE0]"
+                  : "border-red-500"
+                  }`}
               />
               <p className="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
             </div>
@@ -137,11 +135,10 @@ export default function RegistroForm() {
                 type="password"
                 value={confirmarPassword}
                 onChange={(e) => setConfirmarPassword(e.target.value)}
-                className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${
-                  contrasenasCoinciden && longitudValida
-                    ? "border-gray-300 focus:border-[#5E2BE0]"
-                    : "border-red-500"
-                }`}
+                className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${contrasenasCoinciden && longitudValida
+                  ? "border-gray-300 focus:border-[#5E2BE0]"
+                  : "border-red-500"
+                  }`}
               />
             </div>
           </div>
@@ -160,21 +157,20 @@ export default function RegistroForm() {
 
           {/* Botón Únete */}
           <Link href="/ctrlC/FotoPerfil">
-          <button
-            type="submit"
-            disabled={!formularioValido}
-            className={`w-full py-2 rounded-md font-semibold text-white transition-colors mt-3 ${
-              formularioValido
+            <button
+              type="submit"
+              disabled={!formularioValido}
+              className={`w-full py-2 rounded-md font-semibold text-white transition-colors mt-3 ${formularioValido
                 ? "bg-[#5E2BE0] hover:bg-[#4b22b8]"
                 : "bg-gray-400 cursor-not-allowed"
-            }`}
-          >
-            Únete
-          </button>
+                }`}
+            >
+              Únete
+            </button>
           </Link>
         </form>
 
-        {}
+        { }
         <div className="my-4 flex items-center justify-center">
           <hr className="w-1/4 border-gray-300" />
           <span className="mx-2 text-gray-500">o</span>
@@ -202,7 +198,11 @@ export default function RegistroForm() {
         <div className="flex items-center mt-4 text-sm text-gray-600">
           <input type="checkbox" className="mr-2" />
           <p>
-            Al registrarte aceptas los <span className="underline cursor-pointer text-[#5E2BE0]">términos de uso</span> de Servineo.
+            Al registrarte aceptas los{" "}
+            <Link href="/ctrlC/RequesterFrom/Terminosycondiciones" className="underline cursor-pointer text-[#5E2BE0]">
+              términos de uso
+            </Link>{" "}
+            de Servineo.
           </p>
         </div>
       </div>
