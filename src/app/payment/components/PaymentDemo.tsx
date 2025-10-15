@@ -8,7 +8,7 @@ import CardList from './CardList';
 import { createCashPayment } from '../service/payments';
 
 const stripePromise = loadStripe(
-  'pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU',
+  'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI',
 );
 
 export default function PaymentDemo() {
@@ -26,7 +26,7 @@ export default function PaymentDemo() {
 
   // Datos para pago con tarjeta
   const requesterId = '68ed47b64ed596d659c1ed8f';
-  const fixerId = '68ed473e4ed596d659c1ed8c';
+  const fixerId = '68ef1be7be38c7f1c3c2c78b';
   const jobId = '68ea51ee0d80087528ad803f';
   const amount = 78;
 
