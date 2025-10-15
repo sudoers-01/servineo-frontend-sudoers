@@ -176,7 +176,7 @@ export async function generateAvailableSlotsFromAPI(
       const start = moment(schedule.starting_time).toDate();
       const end = moment(schedule.finishing_time).toDate();
 
-      console.log(schedule ,start, end);
+      //console.log(schedule ,start, end);
     }
     //console.log("Schedules combinadas:", fixerSchedules);
 
