@@ -2,63 +2,55 @@
 
 import { ReactNode, useState } from 'react'
 import { User, Settings, X } from 'lucide-react'
-/**
- * Ajusta esta importación a la ruta real de tu componente.
- * Posibles ejemplos (elige el correcto según tu estructura):
- *  - '../controlC/RequesterEditForm'
- *  - '../controlC/components/RequesterEditForm'
- *  - './components/RequesterEditForm'
- */
 import RequesterEditForm from '../components/RequesterEditForm'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [showForm, setShowForm] = useState(false)
-  const requesterId = 'abc12' // simulación; cámbialo si tienes otro valor
+  const requesterId = 'abc12'
+// ...existing imports...
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar global */}
-      <header className="flex justify-between items-center p-4 shadow bg-white/80 backdrop-blur-sm sticky top-0 z-30">
-  {/* Izquierda: Nombre del sistema */}
-<div className=" text-2xl font-semibold text-dark-blue-900 tracking-wide ml-6">
+    <div className="min-h-screen bg-[#F5FAFE]">
+      {/* navbar */}
+      <header className="flex justify-between items-center p-4 shadow bg-white/80 backdrop-blur-sm sticky top-0 z-30 border-b border-[#E5F4FB]">
+        {/* left: system name */}
+        <div className="text-2xl font-bold tracking-wide ml-6" style={{ color: '#1A223F' }}>
+          Servineo
+        </div>
 
-    Servineo
-  </div>
+        {/* right: settings and user */}
+        <div className="flex items-center gap-4">
+          {/* settings button */}
+          <button
+            title="Editar perfil"
+            onClick={() => setShowForm(true)}
+            className="p-2 rounded-md hover:bg-[#E5F4FB] transition"
+          >
+            <Settings size={22} className="text-[#1AA7ED]" />
+          </button>
 
-  {/* Derecha: Configuración y usuario */}
-  <div className="flex items-center gap-4">
-    {/* Botón de configuración */}
-    <button
-      title="Editar perfil"
-      onClick={() => setShowForm(true)}
-      className="p-2 rounded-md hover:bg-gray-100 transition"
-    >
-      <Settings size={22} className="text-gray-600" />
-    </button>
+          {/* user profile */}
+          <div className="flex items-center gap-3">
+            <div className="rounded-full bg-[#E5F4FB] w-9 h-9 flex items-center justify-center">
+              <User size={18} className="text-[#2B6AE0]" />
+            </div>
+            <div className="hidden sm:block text-right">
+              <div className="text-sm font-semibold" style={{ color: '#1A223F' }}>Miguel Maradona</div>
+              <div className="text-xs text-[#759AE0]">maradonamiguel4@gmail.com</div>
+            </div>
+          </div>
+        </div>
+      </header>
 
-    {/* Perfil del usuario */}
-    <div className="flex items-center gap-3">
-      <div className="rounded-full bg-gray-100 w-9 h-9 flex items-center justify-center">
-        <User size={18} className="text-gray-600" />
-      </div>
-      <div className="hidden sm:block text-right">
-        <div className="text-sm font-medium text-gray-700">Miguel Maradona</div>
-        <div className="text-xs text-gray-500">maradonamiguel4@gmail.com</div>
-      </div>
-    </div>
-  </div>
-</header>
-
-
-      {/* Contenido principal */}
+      {/* main content */}
       <main className="p-5 max-w-4xl mx-auto">{children}</main>
 
-      {/* Footer opcional */}
-      <footer className="text-center p-4 text-gray-400 text-sm">
-         &copy; {new Date().getFullYear()}
+      {/* footer */}
+      <footer className="text-center p-4 text-[#759AE0] text-sm border-t border-[#E5F4FB]">
+        &copy; {new Date().getFullYear()}
       </footer>
 
-      {/* Modal sencillo para RequesterEditForm */}
+      {/* modal for RequesterEditForm */}
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           {/* backdrop */}
@@ -70,27 +62,25 @@ export default function Layout({ children }: { children: ReactNode }) {
 
           {/* modal box */}
           <div className="relative w-full max-w-3xl mx-4">
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="flex items-center justify-between p-4 border-b">
-                <div className="text-lg font-medium">Editar perfil</div>
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-[#E5F4FB]">
+              <div className="flex items-center justify-between p-4 border-b border-[#E5F4FB] bg-[#F5FAFE]">
+                <div className="text-lg font-semibold" style={{ color: '#1A223F' }}>Editar perfil</div>
                 <button
                   onClick={() => setShowForm(false)}
-                  className="p-2 rounded hover:bg-gray-100"
+                  className="p-2 rounded hover:bg-[#E5F4FB]"
                   title="Cerrar"
                 >
-                  <X size={18} />
+                  <X size={18} className="text-[#2B6AE0]" />
                 </button>
               </div>
 
               <div className="p-4">
-                {/* Importante: RequesterEditForm debe ser 'use client' */}
                 <RequesterEditForm
                   requesterId={requesterId}
                   initialPhone="+591 7xxxxxxx"
                   initialLocation="Cochabamba"
                   onSaved={() => {
                     setShowForm(false)
-                    // opcional: mostrar un toast o alert
                     alert('Cambios guardados!')
                   }}
                 />
