@@ -98,6 +98,7 @@ export default function FotoPerfil() {
           </button>
           </Link>
               {/* Continuar */}
+              <Link href="/ctrlC/UbicacionRequester">
           <button
             onClick={continuar}
             disabled={!foto} 
@@ -109,6 +110,7 @@ export default function FotoPerfil() {
           >
             Continuar
           </button>
+          </Link>
         </div>
       </div>
     </div>
