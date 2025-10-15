@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { Eye, EyeOff, Pencil } from 'lucide-react'
+import { useRouter } from 'next/navigation'
+
 
 type Props = {
   requesterId: string
@@ -10,12 +12,15 @@ type Props = {
   onSaved?: () => void
 }
 
-export default function RequesterEditForm({
+export default function RequesterEditForm(
+  
+  {
   requesterId,
   initialPhone = '',
   initialLocation = '',
   onSaved,
 }: Props) {
+  const router = useRouter()
   const [phone, setPhone] = useState(initialPhone)
   const [location, setLocation] = useState(initialLocation)
   const [loading, setLoading] = useState(false)
@@ -143,6 +148,18 @@ export default function RequesterEditForm({
           {loading ? 'Guardando...' : 'Guardar cambios'}
         </button>
       </div>
+
+      {/* Botón cancelar */}
+      <div className="pt-4">
+        <button
+          type="button"
+          onClick={() => router.push('/home/profile')}
+          className="w-full rounded-md bg-gray-300 px-4 py-2 text-gray-700 font-medium hover:bg-gray-400"
+        >
+          Cancelar
+        </button>
+      </div>
+
     </form>
   )
 }
