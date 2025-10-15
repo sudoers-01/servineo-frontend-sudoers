@@ -120,30 +120,63 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
 
     // Construir payload solo con campos modificados
-    const payload: any = {};
-    if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
+  const payload: any = {};
+  if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
 
-    if (datetime !== originalAppointment.datetime) payload.datetime = datetime;
-    if (client.trim() !== originalAppointment.client) payload.client = client.trim();
-    if (contact.trim() !== originalAppointment.contact) payload.contact = contact.trim();
-    if (modality !== originalAppointment.modality) payload.modality = modality;
-    if ((description || "") !== (originalAppointment.description || "")) payload.description = description.trim();
+  if (client.trim() !== originalAppointment.client) {
+    payload.current_requester_name = client.trim();
+  }
 
-    if (modality === "presencial") {
-      if (!place) return setMsg("Selecciona una ubicación.");
-      if ((place || "") !== (originalAppointment.place || "")) payload.place = place.trim();
-      if (JSON.stringify(location) !== JSON.stringify(originalAppointment.location)) {
-        payload.location = location;
-      }
-    } else {
-      const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
-      if (meetingLink.trim()) {
-        const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
-        if (!urlRegex.test(meetingLink.trim())) return setMsg("Ingrese un enlace válido.");
-      }
-      if ((meetingLink || "") !== (originalAppointment.meetingLink || "")) payload.meetingLink = linkToUse;
+  if (contact.trim() !== originalAppointment.contact) {
+    payload.current_requester_phone = contact.trim();
+  }
+
+  if ((description || "") !== (originalAppointment.description || "")) {
+    payload.appointment_description = description.trim();
+  }
+
+  if (modality !== originalAppointment.modality) {
+    payload.appointment_type = modality;
+  }
+
+  // Si es presencial, verificar cambios en ubicación
+  if (modality === "presencial") {
+    if (!place) return setMsg("Selecciona una ubicación.");
+    
+    const scheduleUpdates: any = {};
+    
+    if ((place || "") !== (originalAppointment.place || "")) {
+      scheduleUpdates.display_name = place.trim();
     }
+    
+    if (location && JSON.stringify(location) !== JSON.stringify(originalAppointment.location)) {
+      scheduleUpdates.lat = location.lat.toString();
+      scheduleUpdates.lon = location.lon.toString();
+    }
+    
+    // Solo agregar schedules si hay cambios
+    if (Object.keys(scheduleUpdates).length > 0) {
+      payload.schedules = scheduleUpdates;
+    }
+  } else {
+    // Si es virtual, verificar cambios en el link
+    const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
+    
+    if (meetingLink.trim()) {
+      const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
+      if (!urlRegex.test(meetingLink.trim())) return setMsg("Ingrese un enlace válido.");
+    }
+    
+    if ((meetingLink || "") !== (originalAppointment.meetingLink || "")) {
+      payload.link_id = linkToUse;
+    }
+  }
 
+if (Object.keys(payload).length === 0) {
+  setMsg("No hay cambios para guardar.");
+  return;
+}
+    
     if (Object.keys(payload).length === 0) {
       setMsg("No hay cambios para guardar.");
       return;
@@ -151,11 +184,8 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
     setLoading(true);
     try {
-      const dateObj = new Date(datetime);
-      const fechaUTC = dateObj.toISOString().split('T')[0];
-      const horaNumero = dateObj.getUTCHours();
-      // TODO: reemplazar TU_FIXER_ID por el fixerId real si es necesario
-      const res = await fetch(`/api/appointments/${appointmentId}?fixerId=TU_FIXER_ID&fecha=${fechaUTC}&hora=${horaNumero}`, {
+      //https://servineo-backend-lorem.onrender.com/api/crud_update/appointments/update_by_id
+      const res = await fetch(`/api/crud_update/appointments/update_by_id?id=${appointmentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

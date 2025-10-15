@@ -156,8 +156,9 @@ export default function MyCalendarPage({
             //const API = process.env.NEXT_PUBLIC_BACKEND;
             const API = process.env.NEXT_PUBLIC_BACKEND as string;
             const dateObj = new Date(event.start);
-            const appointment_date = dateObj.toString().split('T')[0];
-            const start_hour = dateObj.getUTCHours().toString();
+            console.log(dateObj);
+            const appointment_date = dateObj.toISOString().split('T')[0];
+            const start_hour = dateObj.getHours().toString();
             console.log( appointment_date);
             console.log(start_hour);
             console.log(fixerId);
