@@ -56,7 +56,6 @@ export default function CalendarPage() {
                     selectedDate={selectedDate}
                     fixerId={"uuid-fixer-1234"}
                     requesterId={"uuid-user-4567"}
-
                 />
             </div>
 
