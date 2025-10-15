@@ -135,7 +135,7 @@ export default function RequesterEditForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 max-w-2xl mx-auto bg-white shadow-lg rounded-2xl p-8 border border-[#E5F4FB]"
+      className="space-y-6 max-w-2xl mx-auto bg-white rounded-2xl p-8"
       aria-busy={loading}
     >
       {/* phone input */}
@@ -247,7 +247,7 @@ export default function RequesterEditForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center justify-center gap-2 rounded-md bg-[#1A223F] px-3 py-1.5 text-white text-sm font-semibold hover:bg-[#2B31E0] disabled:bg-[#759AE0] transition"
+          className="flex items-center justify-center gap-2 rounded-md bg-[#1A223F] px-3 py-1.5 text-white text-sm font-semibold hover:bg-[#2B31E0] disabled:bg-[#759AE0] transition cursor-pointer"
         >
           {loading ? (
             <>
@@ -261,7 +261,7 @@ export default function RequesterEditForm({
         <button
           type="button"
           onClick={handleCancel}
-          className="rounded-md bg-[#E5F4FB] px-3 py-1.5 text-[#1A223F] text-sm font-semibold hover:bg-[#2BDDE0]/20 transition"
+          className="rounded-md bg-[#E5F4FB] px-3 py-1.5 text-[#1A223F] text-sm font-semibold hover:bg-[#2BDDE0]/20 transition cursor-pointer"
         >
           cancelar
         </button>

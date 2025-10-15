@@ -7,7 +7,6 @@ import RequesterEditForm from '../components/RequesterEditForm'
 export default function Layout({ children }: { children: ReactNode }) {
   const [showForm, setShowForm] = useState(false)
   const requesterId = 'abc12'
-// ...existing imports...
 
   return (
     <div className="min-h-screen bg-[#F5FAFE]">
@@ -24,7 +23,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           <button
             title="Editar perfil"
             onClick={() => setShowForm(true)}
-            className="p-2 rounded-md hover:bg-[#E5F4FB] transition"
+            className="p-2 rounded-md hover:bg-[#E5F4FB] transition cursor-pointer"
           >
             <Settings size={22} className="text-[#1AA7ED]" />
           </button>
