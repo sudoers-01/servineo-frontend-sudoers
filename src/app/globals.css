@@ -4,20 +4,20 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* 🎨 Paleta Servineo */
-  --servineo-100: #8783FB; /* azul con toque cian */
-  --servineo-200: #7773FB; /* azul claro */
-  --servineo-300: #6763FB; /* azul medio */
-  --servineo-400: #5753FB; /* azul ligeramente más claro */
-  --servineo-500: #4743FB; /* azul vívido (principal) */
-  --servineo-600: #9763FB; /* azul con matiz púrpura */
+  /*  Paleta Servineo */
+  --servineo-100: #1AA7ED; 
+  --servineo-200: #2B31E0; 
+  --servineo-300: #2B6AE0; 
+  --servineo-400: #2BDDE0; 
+  --servineo-500: #5E2BE0; 
+  --servineo-600: #759AE0; 
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
-  /* 👇 puedes mapear tus variables a Tailwind */
+  /*mapear tus variables a Tailwind */
   --color-servineo-100: var(--servineo-100);
   --color-servineo-200: var(--servineo-200);
   --color-servineo-300: var(--servineo-300);

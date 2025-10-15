@@ -1,9 +1,8 @@
 'use client';
 import { useState } from 'react';
 import { api, ApiResponse } from '@/app/Control_C/lib/api';
-import { Eye, EyeOff } from 'lucide-react'; // para el icono de mostrar/ocultar password
+import { Eye, EyeOff } from 'lucide-react';
 import LoginGoogle from "@/app/Control_C/components/auth/LoginGoogle";
-
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -31,46 +30,55 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-servineo-500 via-servineo-300 to-servineo-600 p-6">
-      <div className="w-full max-w-sm bg-white rounded-2xl shadow-2xl p-8">
-        <h1 className="text-2xl font-bold text-center text-servineo-500">
-          Ingresa a <span className="text-servineo-600">Servineo modo requester</span>
+    <main className="min-h-screen flex items-center justify-center 
+      bg-gradient-to-br from-servineo-500 via-servineo-300 to-servineo-400 p-6">
+      
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-xl p-10 border border-servineo-100">
+        
+        <h1 className="text-3xl font-bold text-center text-servineo-500 mb-2">
+          Iniciar sesión <span className="text-servineo-400">Servineo</span>
         </h1>
+        <p className="text-center text-sm text-gray-500 mb-8">Modo requester</p>
 
-        <form onSubmit={manejarLogin} className="flex flex-col gap-5 mt-8">
+        <form onSubmit={manejarLogin} className="flex flex-col gap-5">
           {/* Correo */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Correo electrónico
+            <label className="block text-sm font-semibold text-gray-600 mb-2">
+              Correo electrónico*
             </label>
             <input
               type="email"
-              placeholder="Ingrese correo"
+              placeholder="Ingrese su correo"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg p-3 text-black focus:outline-none focus:ring-2 focus:ring-servineo-400"
+              className="w-full border border-gray-300 rounded-xl p-3.5 text-gray-800 
+                focus:outline-none focus:ring-2 focus:ring-servineo-400 
+                focus:border-servineo-300 transition"
               required
             />
           </div>
 
           {/* Contraseña */}
           <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">
-              Contraseña
+            <label className="block text-sm font-semibold text-gray-600 mb-2">
+              Contraseña*
             </label>
             <div className="relative">
               <input
                 type={mostrarPass ? 'text' : 'password'}
-                placeholder="Ingrese contraseña"
+                placeholder="Ingrese su contraseña"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg p-3 text-black pr-10 focus:outline-none focus:ring-2 focus:ring-servineo-400"
+                className="w-full border border-gray-300 rounded-xl p-3.5 pr-10 
+                  text-gray-800 focus:outline-none focus:ring-2 
+                  focus:ring-servineo-400 transition"
                 required
               />
               <button
                 type="button"
                 onClick={() => setMostrarPass(!mostrarPass)}
-                className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-servineo-500"
+                className="absolute inset-y-0 right-3 flex items-center 
+                  text-gray-400 hover:text-servineo-400 transition"
               >
                 {mostrarPass ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
@@ -81,29 +89,31 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-servineo-500 hover:bg-servineo-400 text-white font-semibold rounded-lg p-3 transition disabled:opacity-60"
+            className="w-full bg-gradient-to-r from-servineo-500 to-servineo-300 
+              hover:from-servineo-400 hover:to-servineo-200 text-white 
+              font-semibold rounded-xl p-3.5 mt-2 transition-all 
+              duration-300 shadow-md hover:shadow-lg disabled:opacity-60"
           >
             {loading ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
 
         {/* Separador */}
-        <div className="flex items-center my-6">
+        <div className="flex items-center my-8">
           <div className="flex-1 h-px bg-gray-300"></div>
           <span className="px-2 text-gray-400 text-sm">o</span>
           <div className="flex-1 h-px bg-gray-300"></div>
         </div>
 
         {/* Botón Google */}
-        <div className="mt-6">
+        <div className="mt-4">
           <LoginGoogle onMensajeChange={setMensaje} />
         </div>
 
-
-        {/* Mensaje de error o éxito */}
+        {/* Mensaje */}
         {mensaje && (
           <p
-            className={`mt-4 text-center text-sm ${
+            className={`mt-6 text-center text-sm font-medium ${
               mensaje.startsWith('✅') ? 'text-green-600' : 'text-red-600'
             }`}
           >
@@ -112,9 +122,9 @@ export default function LoginPage() {
         )}
 
         {/* Registro */}
-        <p className="mt-6 text-center text-sm text-gray-500">
+        <p className="mt-8 text-center text-sm text-gray-500">
           ¿No tienes cuenta?{' '}
-          <a href="#" className="text-servineo-500 hover:underline">
+          <a href="#" className="text-servineo-400 hover:text-servineo-500 font-medium hover:underline transition">
             Regístrate
           </a>
         </p>
