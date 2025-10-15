@@ -93,23 +93,23 @@ export default function FotoPerfil() {
               {/*Atras*/}
         <div className="flex justify-center gap-3 mt-6">
           <Link href="/ctrlC/RequesterFrom">
-          <button className="px-4 py-2 bg-[#ff0000] text-white rounded-full hover:bg-[#ff0000]">
-            Atras
-          </button>
+            <button className="px-4 py-2 bg-[#ff0000] text-white rounded-full hover:bg-[#ff0000]">
+              Atras
+            </button>
           </Link>
-              {/* Continuar */}
-              <Link href="/ctrlC/UbicacionRequester">
-          <button
-            onClick={continuar}
-            disabled={!foto} 
-            className={`px-4 py-2 rounded-full text-white transition-colors ${
-              foto
-                ? "bg-[#2B31E0] hover:bg-[#1491cc]"
-                : "bg-gray-400 cursor-not-allowed"
-            }`}
-          >
-            Continuar
-          </button>
+          {/* Continuar */}
+          <Link href="/ctrlC/UbicacionRequester">
+            <button
+              onClick={continuar}
+              disabled={!foto} 
+              className={`px-4 py-2 rounded-full text-white transition-colors ${
+                foto
+                  ? "bg-[#2B31E0] hover:bg-[#1491cc]"
+                  : "bg-gray-400 cursor-not-allowed"
+              }`}
+            >
+              Continuar
+            </button>
           </Link>
         </div>
       </div>
