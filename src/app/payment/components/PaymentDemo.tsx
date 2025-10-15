@@ -2,6 +2,13 @@
 
 import PaymentMethodUI from './PaymentMethodUI';
 import React, { useState } from 'react';
+import { loadStripe } from '@stripe/stripe-js';
+import { Elements } from '@stripe/react-stripe-js';
+import CardList from './CardList';
+
+const stripePromise = loadStripe(
+  'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI',
+);
 
 export default function PaymentDemo() {
   const [trabajos, setTrabajos] = useState([
@@ -13,6 +20,12 @@ export default function PaymentDemo() {
   const [showPaymentSelector, setShowPaymentSelector] = useState(false);
   const [showCashPayment, setShowCashPayment] = useState(false);
   const [selectedTrabajo, setSelectedTrabajo] = useState(null);
+  const [showCardPayment, setShowCardPayment] = useState(false);
+
+  const requesterId = '68ed47b64ed596d659c1ed8f'; // usuario real
+  const fixerId = '68ef1c65be38c7f1c3c2c78e'; // fixer real
+  const jobId = '68ea51ee0d80087528ad803f'; // job real
+  const amount = 78;
 
   const agregarTrabajo = () => {
     const nuevoId = trabajos.length > 0 ? Math.max(...trabajos.map(t => t.id)) + 1 : 1;
