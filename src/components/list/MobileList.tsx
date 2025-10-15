@@ -9,16 +9,13 @@ interface MobileListProps {
     selectedDate: Date | null;
     fixerId: string,
     requesterId: string
-
 }
 
 
 export default function MobileList({
     selectedDate,
-
     fixerId,
     requesterId
-
 }: MobileListProps) {
     const today = selectedDate;
     const [type, setType] = useState<'day' | 'week'>('day');

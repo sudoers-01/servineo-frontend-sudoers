@@ -356,7 +356,7 @@ export default function MyCalendarPage({
                     onNavigate={handleNavigate}
                 />
             </div>
-            <AppointmentForm ref={formRef} />
+            <AppointmentForm ref={formRef} fixerId={fixerId} requesterId={requesterId}/>
             <EditAppointmentForm ref={editFormRef} />
         </div>
     );

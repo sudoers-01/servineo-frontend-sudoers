@@ -10,10 +10,11 @@ export type AppointmentFormHandle = {
 
 interface AppointmentFormProps {
   onNextStep?: (appointmentData: any) => void;
+  fixerId: string;
+  requesterId: string;
 }
 
-
-const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ onNextStep }, ref) => {
+const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ onNextStep, fixerId, requesterId }, ref) => {
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
   const [open, setOpen] = useState(false);
@@ -40,7 +41,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     locationOrLink: string;
     description?: string;
   } | null>(null);
-
 
   useImperativeHandle(ref, () => ({
     open: (dt: string, m?: { eventId?: string; title?: string }) => {
@@ -75,14 +75,16 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   function parseDatetime(datetimeISO: string) {
     const start = new Date(datetimeISO);
     const end = new Date(start.getTime() + 60 * 60 * 1000); // +1 hora
+    
+    // Restar 4 horas para ajustar a la zona horaria correcta
+    const startMinus4Hours = new Date(start.getTime() - 4 * 60 * 60 * 1000);
 
     return {
       selected_date: start.toISOString().split("T")[0], // solo la fecha
-      starting_time: start.toISOString(),
+      starting_time: startMinus4Hours.toISOString(), // Restamos 4 horas
       finishing_time: end.toISOString()
     };
   }
-
 
   // Función para manejar la confirmación de ubicación
   const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
@@ -94,7 +96,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     setPlace(locationData.address); // para mostrar en UI
     setShowLocationModal(false);
   };
-
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -117,10 +118,10 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     if (modality === "presential" && !place) return setMsg("Selecciona una ubicación.");
 
     const payload: any = {
-      id_fixer: "uuid-fixer-2026",
-      id_requester: "uuid-user-8899",
+      id_fixer: fixerId,
+      id_requester: requesterId,  //"user_requester_5678"
       selected_date,
-      starting_time,
+      starting_time, // Aquí ya viene con 4 horas restadas
       appointment_type: modality === "presential" ? "presential" : "virtual",
       appointment_description: description.trim(),
       current_requester_name: client.trim(),
@@ -375,7 +376,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
         data={summaryData!} />
     </>
   );
-
 });
 
 export default AppointmentForm;

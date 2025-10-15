@@ -90,31 +90,7 @@ function getDayName(date: Date): string {
   return date.toLocaleDateString('es-ES', { weekday: 'long' });
 }
 
-function combineAllSchedules(
-  currentRequesterSchedules: Array<{ schedules: Schedule[] }>,
-  otherRequesterSchedules: Array<{ schedules: Schedule[] }>
-): Schedule[] {
-  // Aplanar y combinar ambos arrays
-  const combined = [
-    ...currentRequesterSchedules.flatMap(item => item.schedules),
-    ...otherRequesterSchedules.flatMap(item => item.schedules)
-  ];
-
-  // Ordenar por starting_time ascendente (con Z)
-  combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
-
-  // Convertir a formato sin Z después del sort
-  const schedulesWithoutZ = combined.map(schedule => ({
-    ...schedule,
-    starting_time: schedule.starting_time.replace('Z', ''),
-    finishing_time: schedule.finishing_time.replace('Z', '')
-  }));
-
-  return schedulesWithoutZ;
-}
-
-export default function MobileWeekView({ fixerId, requesterId, selectedDate}: MobileWeekViewProps) {
-    const month = selectedDate ? selectedDate.getMonth() : new Date().getMonth(); 
+export default function MobileWeekView({ fixerId = "fixer_user_001", requesterId = "req_user_001", month = 8 }: MobileWeekViewProps) {
     const [schedulesByDay, setSchedulesByDay] = useState<Schedule[][]>([[], [], [], [], [], [], []]);
     const [loading, setLoading] = useState(true);
 
