@@ -324,7 +324,7 @@ export default function DaySchedule({
         </div>
       )}
 
-      <AppointmentForm ref={appointmentFormRef} />
+      <AppointmentForm ref={appointmentFormRef} fixerId={fixerId} requesterId={requesterId}/>
       <EditAppointmentForm ref={editAppointmentFormRef} />
     </div>
   );
