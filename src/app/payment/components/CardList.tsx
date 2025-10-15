@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import AddCardModal from "./AddCardModal";
-import "../../src/app/globals.css";
+import "../../../app/globals.css";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function CardList({ requesterId, fixerId, jobId, amount }) {
