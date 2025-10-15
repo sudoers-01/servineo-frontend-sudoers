@@ -23,7 +23,7 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
 
       if (res.success) {
         onMensajeChange(`✅ ${res.data?.message ?? "Login con Google exitoso"}`);
-        window.location.href = "/";
+        //window.location.href = "/";
       } else {
         onMensajeChange(`❌ ${res.data?.message ?? res.error ?? "Error"}`);
       }
