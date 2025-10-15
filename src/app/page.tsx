@@ -1,14 +1,13 @@
 'use client'
 
 import { useState } from 'react'
-import RequesterEditForm from '../controlC/components/RequesterEditForm'
+import Layout from '../controlC/components/layout' // AJUSTA la ruta si tu layout está en otro lugar
+// import RequesterEditForm from '../controlC/components/RequesterEditForm' <-- NO lo importamos aquí
 
 export default function Home() {
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [showEditForm, setShowEditForm] = useState(false)
-
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [loggedIn, setLoggedIn] = useState(false)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -19,9 +18,10 @@ export default function Home() {
     }
   }
 
-  return (
-    <main className="p-5 max-w-xl mx-auto space-y-6">
-      {!loggedIn && (
+  // Si no está logueado, mostramos el formulario de login (igual que antes)
+  if (!loggedIn) {
+    return (
+      <main className="p-5 max-w-xl mx-auto space-y-6">
         <form onSubmit={handleLogin} className="space-y-3 border p-4 rounded shadow">
           <h2 className="text-xl font-semibold">Login</h2>
           <div>
@@ -46,31 +46,18 @@ export default function Home() {
             Login
           </button>
         </form>
-      )}
+      </main>
+    )
+  }
 
-      {loggedIn && !showEditForm && (
-        <div className="text-center">
-          <p className="mb-3">Bienvenido, {username}!</p>
-          <button
-            onClick={() => setShowEditForm(true)}
-            className="rounded bg-green-600 px-4 py-2 text-white"
-          >
-            Editar requester
-          </button>
-        </div>
-      )}
-
-      {loggedIn && showEditForm && (
-        <div className="">
-          <h2 className="text-xl font-semibold mb-3">Editar requester</h2>
-          <RequesterEditForm
-            requesterId="abc12"
-            initialPhone="+591 7xxxxxxx"
-            initialLocation="Cochabamba"
-            onSaved={() => alert('Cambios guardados!')}
-          />
-        </div>
-      )}
-    </main>
+  // Si ya está logueado, mostramos EL layout (que contiene navbar y abrirá el RequesterEditForm)
+  return (
+    // Pasamos el username como children o prop según cómo tengas implementado tu layout.
+    // Aquí renderizamos el Layout y le pasamos un contenido simple.
+    <Layout>
+      <div className="text-center mt-6">
+        <p className="mb-3">Bienvenido, {username}!</p>
+      </div>
+    </Layout>
   )
 }
