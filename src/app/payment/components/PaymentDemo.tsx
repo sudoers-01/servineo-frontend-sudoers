@@ -1,10 +1,11 @@
-'use client';
+"use client";
 
-import PaymentMethodUI from './PaymentMethodUI';
 import React, { useState } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
+import PaymentMethodUI from './PaymentMethodUI';
 import CardList from './CardList';
+import { createCashPayment } from '../service/payments';
 
 const stripePromise = loadStripe(
   'pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU',
@@ -19,34 +20,28 @@ export default function PaymentDemo() {
 
   const [showPaymentSelector, setShowPaymentSelector] = useState(false);
   const [showCashPayment, setShowCashPayment] = useState(false);
-  const [selectedTrabajo, setSelectedTrabajo] = useState(null);
   const [showCardPayment, setShowCardPayment] = useState(false);
+  const [selectedTrabajo, setSelectedTrabajo] = useState<any>(null);
+  const [createdPaymentId, setCreatedPaymentId] = useState<string | null>(null);
 
-  const requesterId = '68ed47b64ed596d659c1ed8f'; // usuario real
-  const fixerId = '68ed473e4ed596d659c1ed8c'; // fixer real
-  const jobId = '68ea51ee0d80087528ad803f'; // job real
+  // Datos para pago con tarjeta
+  const requesterId = '68ed47b64ed596d659c1ed8f';
+  const fixerId = '68ed473e4ed596d659c1ed8c';
+  const jobId = '68ea51ee0d80087528ad803f';
   const amount = 78;
 
   const agregarTrabajo = () => {
     const nuevoId = trabajos.length > 0 ? Math.max(...trabajos.map((t) => t.id)) + 1 : 1;
     const montoAleatorio = Math.floor(Math.random() * (500 - 100 + 1)) + 100;
-
-    setTrabajos([
-      ...trabajos,
-      {
-        id: nuevoId,
-        estado: 'Sin Pagar',
-        monto: montoAleatorio,
-      },
-    ]);
+    setTrabajos(prev => [...prev, { id: nuevoId, estado: 'Sin Pagar', monto: montoAleatorio }]);
   };
 
-  const handlePagar = (trabajo) => {
+  const handlePagar = (trabajo: any) => {
     setSelectedTrabajo(trabajo);
     setShowPaymentSelector(true);
   };
 
-  const handleSelectPaymentMethod = (method) => {
+  const handleSelectPaymentMethod = (method: string) => {
     if (method === 'cash') {
       setShowPaymentSelector(false);
       setShowCashPayment(true);
@@ -61,6 +56,7 @@ export default function PaymentDemo() {
   const handleCloseCashPayment = () => {
     setShowCashPayment(false);
     setSelectedTrabajo(null);
+    setCreatedPaymentId(null);
   };
 
   const handleCloseCardPayment = () => {
@@ -84,12 +80,10 @@ export default function PaymentDemo() {
           <span className="text-2xl">🔧</span>
           Agregar Trabajo
         </button>
-
         <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium">
           <span className="text-2xl">🏦</span>
           Agregar cuenta bancaria
         </button>
-
         <div className="ml-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium">
           Estado: SCB
         </div>
@@ -140,27 +134,32 @@ export default function PaymentDemo() {
         </table>
       </div>
 
-      {/* Payment Method Selector Modal */}
+      {/* Selector */}
       {showPaymentSelector && (
         <PaymentMethodSelector
           onSelectMethod={handleSelectPaymentMethod}
           onClose={() => setShowPaymentSelector(false)}
           trabajo={selectedTrabajo}
+          onAfterPostCash={() => {
+            setShowPaymentSelector(false);
+            setShowCashPayment(true);
+          }}
+          setCreatedPaymentId={setCreatedPaymentId}
         />
       )}
 
       {/* Cash Payment Modal */}
       {showCashPayment && (
-        <PaymentMethodUI trabajo={selectedTrabajo} onClose={handleCloseCashPayment} />
+        <PaymentMethodUI
+          paymentId={createdPaymentId}
+          onClose={handleCloseCashPayment}
+        />
       )}
 
       {/* Card Payment Modal */}
-      {/* Card Payment Modal */}
       {showCardPayment && (
         <div className="fixed inset-0 z-[1000] bg-black/60 flex items-center justify-center">
-          {/* Fondo con scroll si el contenido es alto */}
           <div className="bg-white rounded-2xl shadow-2xl p-6 w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto relative">
-            {/* Botón de cierre */}
             <button
               onClick={handleCloseCardPayment}
               className="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-3xl font-bold"
@@ -168,7 +167,6 @@ export default function PaymentDemo() {
               ✕
             </button>
 
-            {/* Contenido Stripe */}
             <Elements stripe={stripePromise}>
               <div className="flex flex-col items-center justify-center">
                 <h2 className="text-2xl font-bold text-gray-800 mb-6">
@@ -190,19 +188,65 @@ export default function PaymentDemo() {
   );
 }
 
-function PaymentMethodSelector({ onSelectMethod, onClose, trabajo }) {
+/** ——— Selector ——— */
+function PaymentMethodSelector({
+  onSelectMethod,
+  onClose,
+  trabajo,
+  onAfterPostCash,
+  setCreatedPaymentId,
+}: {
+  onSelectMethod: (m: string) => void;
+  onClose: () => void;
+  trabajo: any;
+  onAfterPostCash?: () => void;
+  setCreatedPaymentId: (id: string) => void;
+}) {
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState<string | null>(null);
+  const [okMsg, setOkMsg] = useState<string | null>(null);
+
+  // POST al pulsar "Pago Efectivo"
+  const handlePayCash = async () => {
+    setErr(null);
+    setOkMsg(null);
+    setLoading(true);
+    try {
+      const payload = {
+        jobId: "66fabc1234567890abc12345",
+        payerId: "66fdef1234567890abc12345",
+        subTotal: Number(trabajo?.monto || 0),
+        service_fee: 0,
+        discount: 0,
+        currency: "BOB",
+        paymentMethod: "Efectivo",
+      };
+      const resp = await createCashPayment(payload);
+      const created = resp?.data || resp?.payment || resp;
+      const newId = created?._id;
+      if (!newId) throw new Error('No llegó _id del pago creado');
+
+      setCreatedPaymentId(newId);
+      setOkMsg('✅ Pago creado');
+      onAfterPostCash?.();
+    } catch (e: any) {
+      console.error(e);
+      setErr(e.message ?? 'Error al crear el pago');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white w-full max-w-3xl mx-4 rounded-lg shadow-xl">
-        {/* Header */}
         <div className="bg-blue-600 text-white px-6 py-4 rounded-t-lg">
           <h2 className="text-2xl font-semibold">Demo de pagos</h2>
         </div>
 
-        {/* Content */}
         <div className="p-12">
           <h3 className="text-3xl font-semibold text-center mb-12 text-gray-900">
-            Seleccione su metodo de pago preferido
+            Seleccione su método de pago preferido
           </h3>
 
           <div className="space-y-6 max-w-xl mx-auto">
@@ -211,7 +255,7 @@ function PaymentMethodSelector({ onSelectMethod, onClose, trabajo }) {
               className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
             >
               <span className="text-3xl">💳</span>
-              Tarjeta de Credito
+              Tarjeta de Crédito
             </button>
 
             <button className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium">
@@ -220,12 +264,16 @@ function PaymentMethodSelector({ onSelectMethod, onClose, trabajo }) {
             </button>
 
             <button
-              onClick={() => onSelectMethod('cash')}
-              className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
+              onClick={handlePayCash}
+              disabled={loading}
+              className="w-full bg-blue-400 hover:bg-blue-500 disabled:opacity-60 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
             >
               <span className="text-3xl">💵</span>
-              Pago Efectivo
+              {loading ? 'Creando…' : 'Pago Efectivo'}
             </button>
+
+            {err && <p className="text-red-600 text-center">{err}</p>}
+            {okMsg && <p className="text-green-700 text-center">{okMsg}</p>}
           </div>
 
           <div className="flex justify-end mt-12">
