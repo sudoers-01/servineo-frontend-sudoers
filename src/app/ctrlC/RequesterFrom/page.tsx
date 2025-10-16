@@ -105,7 +105,7 @@ export default function RegistroForm() {
             />
             {email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email) && (
               <p className="text-sm text-red-500 mt-1">
-                Solo se permiten correos con @gmail.com
+                Solo se permiten correos  ejemplo@gmail.com
               </p>
             )}
           </div>
@@ -176,24 +176,7 @@ export default function RegistroForm() {
           <span className="mx-2 text-gray-500">o</span>
           <hr className="w-1/4 border-gray-300" />
         </div>
-
-        {/* Botones Google y Apple */}
-        <div className="flex flex-col gap-2">
-          <button className="flex items-center justify-center gap-2 border border-gray-300 rounded-md py-2 hover:bg-gray-100 transition">
-            <FcGoogle size={20} />
-            <span className="text-gray-700 font-medium">
-              Continuar con Google
-            </span>
-          </button>
-
-          <button className="flex items-center justify-center gap-2 border border-gray-300 rounded-md py-2 hover:bg-gray-100 transition">
-            <FaApple size={20} />
-            <span className="text-gray-700 font-medium">
-              Continuar con Apple
-            </span>
-          </button>
-        </div>
-
+        
         {/* Términos & condiciones */}
         <div className="flex items-center mt-4 text-sm text-gray-600">
           <input type="checkbox" className="mr-2" />
