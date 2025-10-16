@@ -5,9 +5,7 @@ import { Trash2 } from "lucide-react";
 
 export default function FotoPerfil() {
   const [foto, setFoto] = useState<string | null>(null);
-
   interface ManejarCambioEvent extends React.ChangeEvent<HTMLInputElement> {}
-
   const manejarCambio = (e: ManejarCambioEvent) => {
     const archivo: File | undefined = e.target.files?.[0];
     if (archivo) {
