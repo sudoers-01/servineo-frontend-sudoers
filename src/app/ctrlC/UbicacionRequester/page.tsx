@@ -1,5 +1,5 @@
 "use client";
-
+import Link from "next/link";
 import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
@@ -8,7 +8,7 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useRouter } from "next/navigation";
 
-// 📍 Icono personalizado del marcador
+// Icono personalizado del marcador
 const customIcon = new L.Icon({
   iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
   iconSize: [35, 35],
@@ -40,13 +40,13 @@ export default function MapaLeaflet() {
           const { latitude, longitude } = pos.coords;
           setPosition([latitude, longitude]);
           setUbicacionPermitida(true);
-          toast.success("📍 Ubicación detectada correctamente", { toastId: "ubicacion-exitosa" });
+          toast.success(" Ubicación detectada correctamente", { toastId: "ubicacion-exitosa" });
         },
         (error) => {
           console.warn("No se pudo obtener la ubicación:", error.message);
           toast.error("No se permitió el acceso a la ubicación.", { toastId: "ubicacion-denegada" });
           setUbicacionPermitida(false);
-          setPosition(null);
+          setPosition([0, 0]);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
@@ -59,26 +59,36 @@ export default function MapaLeaflet() {
   }, []);
 
   // 🛰️ Enviar ubicación y autenticar usuario si es primera vez
-  const manejarEnvio = async () => {
-    try {
-      let token = localStorage.getItem("servineo_token");
+const manejarEnvio = async () => {
+  if (!position) {
+    toast.error("No se detectó la ubicación.");
+    return;
+  }
 
-      // Primera vez: usamos token temporal de Google
-      if (!token) {
-        const googleToken = sessionStorage.getItem("google_token_temp");
-        if (!googleToken) {
-          toast.error("No se encontró usuario logeado. Vuelve a iniciar sesión.");
-          return;
-        }
+  const usuarioId = localStorage.getItem("usuarioId");
+  if (!usuarioId) {
+    toast.error("Usuario no encontrado.");
+    return;
+  }
 
-      }
-      // Redirigimos al home logeado
-      router.push("/controlC");
-    } catch (error) {
-      console.error(error);
-      toast.error("Error al enviar la ubicación al servidor.", { toastId: "error-envio" });
-    }
-  };
+  const response = await fetch("http://localhost:3000/api/usuarios/ubicacion", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      usuarioId,
+      latitud: position[0],
+      longitud: position[0]
+    })
+  });
+
+  if (response.ok) {
+    toast.success("Ubicación guardada correctamente.");
+    router.push("/ctrlC/app");
+  } else {
+    toast.error("Error al guardar ubicación.");
+  }
+};
+
 
   return (
     <div style={{ position: "relative", width: "100%" }}>
@@ -149,7 +159,8 @@ export default function MapaLeaflet() {
             )}
           </MapContainer>
         </div>
-
+        /*D:\SANSIMON\2025 II\ING DE SOFTWARE\gitfront\UserManagment-frontend-\src\app\ctrlC\home.tsx*/
+            <Link href={"/ctrlC/home"}>
         <button
           style={{
             backgroundColor: "#2B6AE0",
@@ -169,6 +180,7 @@ export default function MapaLeaflet() {
         >
           Finalizar registro
         </button>
+        </Link>
       </div>
     </div>
   );
