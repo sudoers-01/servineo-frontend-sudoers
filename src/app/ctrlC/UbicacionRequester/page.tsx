@@ -159,8 +159,7 @@ const manejarEnvio = async () => {
             )}
           </MapContainer>
         </div>
-        /*D:\SANSIMON\2025 II\ING DE SOFTWARE\gitfront\UserManagment-frontend-\src\app\ctrlC\home.tsx*/
-            <Link href={"/ctrlC/home"}>
+            <Link href={"/"}>
         <button
           style={{
             backgroundColor: "#2B6AE0",
