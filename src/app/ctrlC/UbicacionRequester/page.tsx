@@ -71,7 +71,7 @@ const manejarEnvio = async () => {
     return;
   }
 
-  const response = await fetch("http://localhost:3000/api/usuarios/ubicacion", {
+  const response = await fetch("http://localhost:3001/api/usuarios/ubicacion", {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
