@@ -36,16 +36,11 @@ export default function MyCalendarPage({
     const [currentView, setCurrentView] = useState<View>(Views.MONTH);
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
-    const [dayOccupied, changeDayState] = useState(false);
-
-    const toggleDayState = (state : boolean) => {
-        changeDayState(state);
-    }
 
     const formRef = useRef<AppointmentFormHandle | null>(null); // Cambiar el tipo de ref
     const editFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
-    // Cargar slots desde la API cuando cambie el mes
+    // 🔹 Cargar slots desde la API cuando cambie el mes
     useEffect(() => {
         loadSlotsFromAPI();
     }, [currentDate.getMonth(), currentDate.getUTCFullYear(), fixerId, requesterId]);
@@ -80,31 +75,6 @@ export default function MyCalendarPage({
         }
     }
 
-
-    const checkDayAvailability = (dateToCheck: Date) => {
-        const dayEvents = events.filter(event => {
-
-            const eventDate = new Date(event.start);
-            return (
-                eventDate.getDate() === dateToCheck.getDate() &&
-                eventDate.getMonth() === dateToCheck.getMonth() &&
-                eventDate.getFullYear() === dateToCheck.getFullYear()
-            );
-        });
-
-        const notAvailable = dayEvents.length > 0 && dayEvents.every(event => event.booked);
-        toggleDayState(notAvailable);
-        console.log(dateToCheck, notAvailable);
-    };
-
-    const handleRangeChange = (range: Date[] | { start: Date; end: Date }) => {
-        if (currentView === Views.DAY) {
-            setTimeout(() => {
-                checkDayAvailability(currentDate);
-            }, 200);
-        }
-    };
-
     function handleSelectEvent(ev: MyEvent) {
         if (ev.booked && ev.editable) {
             handleEditExistingAppointment(ev);
@@ -125,7 +95,7 @@ export default function MyCalendarPage({
             viewedDate.setHours(0, 0, 0, 0);
 
             const today = new Date();
-            //today.setHours(0, 0, 0, 0); Se verifican las horas también
+            today.setHours(0, 0, 0, 0);
 
             if (viewedDate < today) {
                 return;
@@ -232,12 +202,6 @@ export default function MyCalendarPage({
     // Manejar cambio de navegación en el calendario
     const handleNavigate = (newDate: Date) => {
         setCurrentDate(newDate);
-
-        if (currentView === Views.DAY) {
-            setTimeout(() => {
-                checkDayAvailability(newDate);
-            }, 50);
-        }
     };
 
     useEffect(() => {
@@ -358,27 +322,11 @@ export default function MyCalendarPage({
 
     const handleViewChange = (view: View) => {
         setCurrentView(view);
-
-        // ! De momento no tiene uso, ReactBigCalendar no actualiza las fechas en onView
-        if (view === Views.DAY) {
-            setTimeout(() => {
-                checkDayAvailability(currentDate);
-            }, 50); 
-        } else {
-            toggleDayState(false);
-        }
     };
 
-    // TODO en fixerId debe ir el nombre: consulta backend
     return (
         <div className="max-w-6xl mx-auto p-4">
-            <h1 className="text-2xl font-semibold mb-4 text-black">
-                Calendario de {fixerId}
-                {
-                    dayOccupied && 
-                    <span className="text-red-500 ml-4"> - No hay horarios disponibles</span>
-                }
-            </h1> 
+            <h1 className="text-2xl font-semibold mb-4 text-black">Mi Calendario</h1>
 
             {loading && (
                 <div className="text-center py-4">
