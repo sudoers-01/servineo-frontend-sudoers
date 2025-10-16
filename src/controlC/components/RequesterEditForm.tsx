@@ -106,7 +106,10 @@ export default function RequesterEditForm({
     setLoading(true)
     setError(null)
     try {
-      const res = await fetch('/api/requester', {
+      ////////////////////aplicar .env.local////////////////////
+      ///const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/requester`, {
+      //////////////////////////////////////////////////////////
+      const res = await fetch('http://localhost:3000/api/requester', {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id: requesterId, phone, location }),
