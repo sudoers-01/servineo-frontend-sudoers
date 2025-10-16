@@ -8,6 +8,10 @@ import MobileList from "@/components/list/MobileList";
 
 
 export default function CalendarPage() {
+    //Para cambiar los fixerId y los requesterId, en un futuro se sacarán de la sesión
+    const fixerId = "uuid-fixer-1234";
+    const requesterId = "uuid-user-4567";
+
     const router = useRouter();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const today = new Date();
@@ -41,8 +45,8 @@ export default function CalendarPage() {
 
             <div className="flex justify-center md:block hidden">
                 <MyCalendarPage 
-                    fixerId={"uuid-fixer-1234"}
-                    requesterId={"uuid-user-4567"}
+                    fixerId={fixerId}
+                    requesterId={requesterId}
                 />
             </div>
 
@@ -54,8 +58,8 @@ export default function CalendarPage() {
                 <div></div>
                 <MobileList
                     selectedDate={selectedDate}
-                    fixerId={"uuid-fixer-1234"}
-                    requesterId={"uuid-user-4567"}
+                    fixerId={fixerId}
+                    requesterId={requesterId}
                 />
             </div>
 

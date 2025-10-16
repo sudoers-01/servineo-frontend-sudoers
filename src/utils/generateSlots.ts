@@ -197,7 +197,7 @@ export async function generateAvailableSlotsFromAPI(
       // Determinar estado basado en el schedule
       switch (schedule.schedule_state) {
         case "occupied":
-          slot.title = "Ocupado";
+          slot.title = "No disponible";
           slot.color = "#64748B";
           slot.booked = true;
           break;
@@ -238,7 +238,7 @@ export async function generateAvailableSlotsFromAPI(
     filteredSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
 
     return filteredSlots;
-    return finalSlots;
+    
   } catch (err) {
     console.error("Error al generar los slots para el fixer:", fixerId, selectedDate, month ,err);
     // En caso de error, generar solo los slots disponibles (solo futuros)
