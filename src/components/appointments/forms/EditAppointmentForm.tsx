@@ -58,10 +58,17 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
   useImperativeHandle(ref, () => ({
     open: (appointmentData: ExistingAppointment) => {
+      if(appointmentData.modality != "virtual"){
+        if(appointmentData.modality != "presencial"){
+        appointmentData.modality = "presencial"
+      }
+      }
+      console.log(appointmentData.modality);
       setAppointmentId(appointmentData.id);
       setDatetime(appointmentData.datetime);
       setClient(appointmentData.client);
       setContact(appointmentData.contact);
+      setModality(appointmentData.modality);
       setModality(appointmentData.modality);
       setDescription(appointmentData.description || "");
       setPlace(appointmentData.place || "");
@@ -136,30 +143,25 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   }
 
   if (modality !== originalAppointment.modality) {
-    payload.appointment_type = modality;
+    payload.appointment_type = modality === "presencial" ? "presential" : "virtual";
   }
 
-  // Si es presencial, verificar cambios en ubicación
   if (modality === "presencial") {
     if (!place) return setMsg("Selecciona una ubicación.");
+
+    console.log('Location:', location);
+    console.log('Original Location:', originalAppointment.location);
     
     const scheduleUpdates: any = {};
     
     if ((place || "") !== (originalAppointment.place || "")) {
       scheduleUpdates.display_name = place.trim();
     }
-    
     if (location && JSON.stringify(location) !== JSON.stringify(originalAppointment.location)) {
       scheduleUpdates.lat = location.lat.toString();
       scheduleUpdates.lon = location.lon.toString();
     }
-    
-    // Solo agregar schedules si hay cambios
-    if (Object.keys(scheduleUpdates).length > 0) {
-      payload.schedules = scheduleUpdates;
-    }
   } else {
-    // Si es virtual, verificar cambios en el link
     const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
     
     if (meetingLink.trim()) {
@@ -176,21 +178,17 @@ if (Object.keys(payload).length === 0) {
   setMsg("No hay cambios para guardar.");
   return;
 }
-    
-    if (Object.keys(payload).length === 0) {
-      setMsg("No hay cambios para guardar.");
-      return;
-    }
-
     setLoading(true);
     try {
       //https://servineo-backend-lorem.onrender.com/api/crud_update/appointments/update_by_id
-      const res = await fetch(`/api/crud_update/appointments/update_by_id?id=${appointmentId}`, {
+      const API = process.env.NEXT_PUBLIC_BACKEND as string;
+      console.log('Id de la cita',appointmentId);
+      const res = await fetch(`${API}/api/crud_update/appointments/update_by_id?id=${appointmentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-
+      console.log('APPO to be sent',res)
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setMsg(data?.error || data?.message || "Error al actualizar");
