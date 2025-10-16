@@ -6,7 +6,7 @@ export type AppointmentPayload = {
   datetime: string;
   client: string;
   contact: string;
-  modality: "virtual" | "presential";
+  modality: "virtual" | "presencial";
   description?: string;
   place?: string;
   meetingLink?: string;
@@ -33,7 +33,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
   const [contact, setContact] = useState<string>("+591 ");
-  const [modality, setModality] = useState<"virtual" | "presential">("virtual");
+  const [modality, setModality] = useState<"virtual" | "presencial">("virtual");
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>(""); 
   const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
@@ -58,12 +58,18 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
   useImperativeHandle(ref, () => ({
     open: (appointmentData: ExistingAppointment) => {
+      if(appointmentData.modality != "virtual"){
+        if(appointmentData.modality != "presencial"){
+        appointmentData.modality = "presencial"
+      }
+      }
+      console.log(appointmentData.modality);
       setAppointmentId(appointmentData.id);
       setDatetime(appointmentData.datetime);
       setClient(appointmentData.client);
       setContact(appointmentData.contact);
       setModality(appointmentData.modality);
-      console.log(appointmentData.modality)
+      setModality(appointmentData.modality);
       setDescription(appointmentData.description || "");
       setPlace(appointmentData.place || "");
       setLocation(appointmentData.location || null);
@@ -137,10 +143,10 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   }
 
   if (modality !== originalAppointment.modality) {
-    payload.appointment_type = modality === "presential" ? "presential" : "virtual";
+    payload.appointment_type = modality === "presencial" ? "presential" : "virtual";
   }
 
-  if (modality === "presential") {
+  if (modality === "presencial") {
     if (!place) return setMsg("Selecciona una ubicación.");
 
     console.log('Location:', location);
@@ -247,10 +253,10 @@ if (Object.keys(payload).length === 0) {
 
                 <label className="block">
                   <span className="text-sm font-medium">Modalidad</span>
-                  <select value={modality} onChange={(e) => setModality(e.target.value as "virtual" | "presential")}
+                  <select value={modality} onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
                     className="mt-1 block w-full border rounded px-3 py-2 text-sm">
                     <option value="virtual">Virtual</option>
-                    <option value="presential">Presencial</option>
+                    <option value="presencial">Presencial</option>
                   </select>
                 </label>
               </div>
@@ -290,7 +296,7 @@ if (Object.keys(payload).length === 0) {
                 />
               </label>
 
-              {modality === "presential" ? (
+              {modality === "presencial" ? (
                 <div className="flex flex-col gap-1">
                   <div
                     onClick={() => setShowLocationModal(true)}
@@ -335,7 +341,7 @@ if (Object.keys(payload).length === 0) {
                 <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
                 <button 
                   type="submit" 
-                  disabled={loading || (modality === "presential" && !place)} 
+                  disabled={loading || (modality === "presencial" && !place)} 
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? "Actualizando..." : "Actualizar"}
