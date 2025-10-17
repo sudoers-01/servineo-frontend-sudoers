@@ -36,7 +36,8 @@ export default function CalendarPage() {
                         <path
                             strokeLinecap="round"
                             strokeLinejoin="round"
-                            d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"
+                            d="M6 6l12 12M6 18L18 6"
+                            strokeWidth={2}     
                         />
                     </svg>
                 </button>

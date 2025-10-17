@@ -9,6 +9,9 @@ import AppointmentForm, { AppointmentFormHandle } from "../../components/appoint
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "../../components/appointments/forms/EditAppointmentForm";
 import { generateAvailableSlotsFromAPI, SlotEvent } from "../../utils/generateSlots";
 
+import useMessage from "../../hooks/useMessage";
+import Message from "../../components/ui/Message";
+
 moment.locale('es');
 const localizer = momentLocalizer(moment);
 
@@ -37,7 +40,8 @@ export default function MyCalendarPage({
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [dayOccupied, changeDayState] = useState(false);
-
+      const { showMessage, messageState } = useMessage();
+      
     const toggleDayState = (state : boolean) => {
         changeDayState(state);
     }
@@ -99,79 +103,105 @@ export default function MyCalendarPage({
 
 
     function handleSelectEvent(ev: MyEvent) {
-        if (ev.booked && ev.editable) {
-            handleEditExistingAppointment(ev);
-        } else if (!ev.booked) {
-            formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title });
-        }
+    if (ev.booked && !ev.editable) {
+        showMessage({
+            message: "Este horario está ocupado por otra persona y no es editable",
+            type: 'warning',
+            title: 'No Disponible'
+        });
+        return;
+    }
+    
+    if (ev.booked && ev.editable) {
+        handleEditExistingAppointment(ev);
+    } else if (!ev.booked) {
+        formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title });
+    }
+}
+
+   function handleSelectSlot(slotInfo: SlotInfo) {
+    // No permitir hacer clic en slots en vistas MONTH y WEEK
+    if (currentView === Views.MONTH || currentView === Views.WEEK) {
+        return;
     }
 
-    function handleSelectSlot(slotInfo: SlotInfo) {
-        // No permitir hacer clic en slots en vistas MONTH y WEEK
-        if (currentView === Views.MONTH || currentView === Views.WEEK) {
+    // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
+    if (currentView === Views.DAY) {
+        const viewedDate = new Date(currentDate);
+        viewedDate.setHours(0, 0, 0, 0);
+
+        const today = new Date();
+        if (viewedDate < today) {
             return;
         }
-
-        // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
-        if (currentView === Views.DAY) {
-            const viewedDate = new Date(currentDate);
-            viewedDate.setHours(0, 0, 0, 0);
-
-            const today = new Date();
-            //today.setHours(0, 0, 0, 0); Se verifican las horas también
-
-            if (viewedDate < today) {
-                return;
-            }
-
-
-
-
-        }
-
-        const start = slotInfo.start;
-        const day = start.getDay();
-        const hour = start.getHours();
-
-        // Validar día laboral (lunes a viernes)
-        if (day < 1 || day > 5) return;
-
-        // Validar horario laboral (8-12 y 14-18)
-        if (!((hour >= 8 && hour < 12) || (hour >= 14 && hour < 18))) return;
-
-
-
-
-
-        const dtISO = start.toISOString();
-
-        // Buscar si ya existe un evento en este slot
-        let existing = events.find(e =>
-            e.start.getTime() === start.getTime() &&
-            !e.booked
-        );
-
-        // Si no existe, crear un slot disponible temporal
-        if (!existing) {
-            const newEvent: MyEvent = {
-                title: "Disponible",
-                start,
-                end: new Date(start.getTime() + 60 * 60 * 1000),
-                booked: false,
-                id: `temp-${dtISO}`,
-                color: "#16A34A"
-            };
-
-            setEvents(prev => [...prev, newEvent]);
-            existing = newEvent;
-        }
-
-        // Abrir formulario para el slot disponible
-        if (existing && !existing.booked) {
-            formRef.current?.open(dtISO, { eventId: existing.id, title: existing.title });
-        }
     }
 
+    const start = slotInfo.start;
+    const day = start.getDay();
+    const hour = start.getHours();
+
+    //Validar día laboral (lunes a viernes)
+    if (day < 1 || day > 5) {
+        showMessage({
+            message: "Solo se permiten citas de lunes a viernes",
+            type: 'info'
+        });
+        return;
+    }
+
+    // Validar horario laboral (8-12 y 14-18)
+    if (!((hour >= 8 && hour < 12) || (hour >= 14 && hour < 18))) {
+        showMessage({
+            message: "Horario no laboral. Solo de 8:00-12:00 y 14:00-18:00",
+            type: 'info'
+        });
+        return;
+    }
+
+    // Verificar si el slot ya está ocupado por otra persona
+    const isSlotOccupied = events.some(event => 
+        event.start.getTime() === start.getTime() && 
+        event.booked && 
+        !event.editable
+    );
+
+    if (isSlotOccupied) {
+        showMessage({
+            message: "Este horario ya está ocupado por otra persona",
+            type: 'warning',
+            title: 'Horario Ocupado'
+        });
+        return;
+    }
+
+    const dtISO = start.toISOString();
+
+    // Buscar si ya existe un evento en este slot
+    let existing = events.find(e =>
+        e.start.getTime() === start.getTime() &&
+        !e.booked
+    );
+
+    // Si no existe, crear un slot disponible temporal
+    // if (!existing) {
+    //     const newEvent: MyEvent = {
+    //         title: "Disponible",
+    //         start,
+    //         end: new Date(start.getTime() + 60 * 60 * 1000),
+    //         booked: false,
+    //         id: `temp-${dtISO}`,
+    //         color: "#16A34A"
+    //     };
+
+    //     setEvents(prev => [...prev, newEvent]);
+    //     existing = newEvent;
+    // }
+
+    // Abrir formulario para el slot disponible
+    if (existing && !existing.booked) {
+        formRef.current?.open(dtISO, { eventId: existing.id, title: existing.title });
+    }
+}
     async function handleEditExistingAppointment(event: MyEvent) {
         if (!event.booked || !event.editable) return;
 
@@ -373,6 +403,8 @@ export default function MyCalendarPage({
                 }
             </h1> 
 
+            <Message {...messageState} />
+            
             {loading && (
                 <div className="text-center py-4">
                     <div className="text-slate-500">Cargando slots desde la API...</div>
