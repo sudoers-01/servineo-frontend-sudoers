@@ -1,13 +1,31 @@
+
 @import 'tailwindcss';
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /*  Paleta Servineo */
+  --servineo-100: #1AA7ED; 
+  --servineo-200: #2B31E0; 
+  --servineo-300: #2B6AE0; 
+  --servineo-400: #2BDDE0; 
+  --servineo-500: #5E2BE0; 
+  --servineo-600: #759AE0; 
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  /*mapear tus variables a Tailwind */
+  --color-servineo-100: var(--servineo-100);
+  --color-servineo-200: var(--servineo-200);
+  --color-servineo-300: var(--servineo-300);
+  --color-servineo-400: var(--servineo-400);
+  --color-servineo-500: var(--servineo-500);
+  --color-servineo-600: var(--servineo-600);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
