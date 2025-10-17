@@ -24,3 +24,34 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 } */
+
+@theme inline {
+  --color-background: #ffffff;           /* white background */
+  --color-foreground: #0f172a;           /* slate-900 */
+  --color-card: #ffffff;                 /* white cards */
+  --color-border: #e5e7eb;               /* gray-200 */
+  --color-primary: #1d4ed8;              /* blue-600 */
+  --color-primary-foreground: #ffffff;   /* on primary */
+  --color-muted: #f8fafc;                /* slate-50 */
+  --color-muted-foreground: #475569;     /* slate-600 */
+  --color-destructive: #ef4444;          /* red-500 */
+  --color-destructive-foreground: #ffffff;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+  }
+}
+
+/* ---- Become a FIXER animations & helpers ---- */
+@layer utilities {
+  @keyframes fade-in { from { opacity: 0 } to { opacity: 1 } }
+  @keyframes slide-in { from { transform: translateY(8px); opacity: 0 } to { transform: translateY(0); opacity: 1 } }
+  @keyframes scale-in { from { transform: scale(0.95); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+
+  .animate-fade-in { animation: fade-in 300ms ease-out both }
+  .animate-slide-in { animation: slide-in 300ms ease-out both }
+  .animate-scale-in { animation: scale-in 250ms ease-out both }
+}
