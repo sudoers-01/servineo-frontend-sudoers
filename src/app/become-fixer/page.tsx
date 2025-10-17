@@ -1,121 +1,77 @@
-"use client";
-import FixerRegisterForm, { type FormFieldConfig } from '@/Components/Form/FixerRegisterForm';
-import NewOfferForm from './NewOfferForm';
-import SearchBar from '@/Components/Offers/SearchBar'
-import FilterBar, { type FilterBarValues } from '@/Components/Offers/FilterBar'
-import OfferList, { type OfferItem } from '@/Components/Offers/OfferList'
-import { useState } from 'react'
-import Tabs from '@/Components/Tabs/Tabs';
-import TabsList from '@/Components/Tabs/TabsList';
-import TabsTrigger from '@/Components/Tabs/TabsTrigger';
-import TabsContent from '@/Components/Tabs/TabsContent';
+"use client"
 
-// Apply function that if you are not a fixer has the tab options you have to have them blocked
+import { useState } from "react"
+import FixerRegisterForm, { type FormFieldConfig } from "@/Components/fixer/Fixer-register-form"
+import { FixerEnableWizard } from "@/Components/fixer/Filter-eneable-wizard"
+
 const registerFields: FormFieldConfig[] = [
-  { id: 'fullName', label: 'Nombre completo', type: 'text', placeholder: 'Ej. Juan Pérez' },
-  { id: 'email', label: 'Correo electrónico', type: 'email', placeholder: 'tu@correo.com' },
-  { id: 'phone', label: 'Teléfono', type: 'phone', placeholder: 'Ej. +591 70000000' },
   {
-    id: 'category',
-    label: 'Categoría',
-    type: 'select',
-    placeholder: 'Selecciona una categoría',
-    options: [
-      { label: 'Plomería', value: 'plomeria' },
-      { label: 'Electricidad', value: 'electricidad' },
-      { label: 'Carpintería', value: 'carpinteria' },
-      { label: 'Pintura', value: 'pintura' },
-    ],
+    id: "fullName",
+    label: "Nombre",
+    type: "text",
+    placeholder: "tu nombres completo",
   },
+  { id: "email", label: "Email", type: "email", placeholder: "Tu" },
   {
-    id: 'city',
-    label: 'Ciudad',
-    type: 'select',
-    placeholder: 'Selecciona tu ciudad',
-    options: [
-      { label: 'La Paz', value: 'la-paz' },
-      { label: 'Cochabamba', value: 'cochabamba' },
-      { label: 'Santa Cruz', value: 'santa-cruz' },
-    ],
+    id: "phone",
+    label: "Telefono",
+    type: "phone",
+    placeholder: "+591 70341618",
   },
-  { id: 'idDocument', label: 'Documento de identidad', type: 'file', placeholder: 'Sube tu documento' },
 ]
 
-const BecomeFixerPage = () => {
-  const [activeTab, setActiveTab] = useState('register');
-  
-  const [search, setSearch] = useState('')
-  const [filters, setFilters] = useState<FilterBarValues>({ category: '', price: '', location: '', rating: '' })
+const defaultFormValues = {
+  fullName: "Freddy Amin Zapata",
+  email: "zapata@example.com",
+  phone: "+591 68546043",
+}
 
+type RequesterUser = {
+  id: string
+  name: string
+  email: string
+  urlPhoto?: string
+  role: "requester" | "fixer"
+}
 
-  const myOffers: OfferItem[] = [
-    {
-      id: '1',
-      title: 'Reparación de grifo',
-      description: 'Servicio de reparación y mantenimiento de grifos y llaves de agua',
-      author: 'Juan Pérez',
-      rating: 4.8,
-      price: 150,
-      tag: 'Fontanería',
-      category: 'plomeria',
-      location: 'La Paz',
-    },
-    {
-      id: '2',
-      title: 'Instalación eléctrica',
-      description: 'Instalación y reparación de sistemas eléctricos residenciales',
-      author: 'María García',
-      rating: 4.9,
-      price: 300,
-      tag: 'Electricidad',
-      category: 'electricidad',
-      location: 'Cochabamba',
-    },
-  ]
+export default function BecomeFixerPage() {
+  const [requester, setRequester] = useState<RequesterUser | null>(null)
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6 text-center">LOGO</h1>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex justify-center">
-          <TabsList className="flex mb-4 gap-[0.1px]">
-            <TabsTrigger value="register">Registro</TabsTrigger>
-            <TabsTrigger value="newOffer">Nueva Oferta</TabsTrigger>
-            <TabsTrigger value="myOffer">Mis Ofertas</TabsTrigger>
-            <TabsTrigger value="map">Mapa</TabsTrigger>
-            <TabsTrigger value="video">Video Inspeccion</TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <div className="mt-2">
-          <TabsContent value="register" activeTab={activeTab}>
-            <FixerRegisterForm fields={registerFields} />
-          </TabsContent>
-          
-          <TabsContent value="newOffer" activeTab={activeTab}>
-            <NewOfferForm />
-          </TabsContent>
-          {/* edit and delete buttons for each offer */}
-          <TabsContent value="myOffer" activeTab={activeTab}>
-            <div style={{ display: 'grid', gap: 12 }}>
-              <SearchBar value={search} onChange={setSearch} />
-              <FilterBar {...filters} onChange={setFilters} />
-              <OfferList items={myOffers} search={search} filters={filters} />
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="map" activeTab={activeTab}>
-            <p>section map</p>
-          </TabsContent>
-          
-          <TabsContent value="video" activeTab={activeTab}>
-            <p>section video</p>
-          </TabsContent>
-        </div>
-      </Tabs>
-    </div>
-  );
-};
+    <div className="container mx-auto max-w-4xl p-4">
+      <header className="mb-6 text-center">
+        <h1 className="text-2xl font-bold">Conviertete en un Fixer</h1>
+        <p className="text-sm text-gray-500">Completa tu registro y habilita tu cuenta como FIXER</p>
+      </header>
 
-export default BecomeFixerPage;
+      <section className="space-y-6">
+        <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">
+          <h2 className="mb-3 text-center text-lg font-semibold">Datos iniciales</h2>
+          <FixerRegisterForm
+            fields={registerFields}
+            defaultValues={defaultFormValues}
+            submitButtonText="Continuar"
+            onSubmit={(payload) => {
+              const name = String(payload.fullName || "")
+              const email = String(payload.email || "")
+              const urlPhoto = "https://picsum.photos/80"
+              setRequester({
+                id: "req-1",
+                name,
+                email,
+                urlPhoto,
+                role: "requester",
+              })
+            }}
+          />
+        </div>
+
+        {requester && (
+          <div className="animate-fade-in">
+            <FixerEnableWizard user={requester} />
+          </div>
+        )}
+      </section>
+    </div>
+  )
+}
