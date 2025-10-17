@@ -13,7 +13,8 @@ const Marker = dynamic(() => import('react-leaflet').then(m => m.Marker), { ssr:
 type Props = {
   requesterId: string
   initialPhone?: string
-  initialLocation?: string
+  initialDirection?: string
+  initialCoordinates?: [number, number]
   onSaved?: () => void
   onCancel?: () => void
 }
@@ -23,13 +24,15 @@ type LatLng = { lat: number; lng: number }
 export default function RequesterEditForm({
   requesterId,
   initialPhone = '',
-  initialLocation = '',
+  initialDirection = '',
+  initialCoordinates = [0, 0],
   onSaved,
   onCancel,
 }: Props) {
   const router = useRouter()
   const [phone, setPhone] = useState(initialPhone)
-  const [location, setLocation] = useState(initialLocation)
+  const [direction, setDirection] = useState(initialDirection || '');
+  const [coordinates, setCoordinates] = useState<[number, number]>(initialCoordinates || [0, 0]);
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showPhone, setShowPhone] = useState(false)
@@ -38,6 +41,11 @@ export default function RequesterEditForm({
   const [latLng, setLatLng] = useState<LatLng | null>(null)
   const [mapReady, setMapReady] = useState(false)
 
+  useEffect(() => {
+  if (initialCoordinates && initialCoordinates[0] !== 0 && initialCoordinates[1] !== 0) {
+    setLatLng({ lat: initialCoordinates[0], lng: initialCoordinates[1] });
+    }
+  }, [initialCoordinates]);
   // load leaflet css only on client
   // useEffect(() => {
   //   if (typeof window !== 'undefined') {
@@ -47,25 +55,27 @@ export default function RequesterEditForm({
 
   // get address from coordinates using nominatim
   async function fetchAddress(lat: number, lng: number) {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
-      )
-      const data = await res.json()
-      const { country, state, city, town, village, suburb } = data.address || {}
-      const locationString = [
-        country,
-        state,
-        city || town || village,
-        suburb,
-      ]
-        .filter(Boolean)
-        .join(', ')
-      setLocation(locationString || `${lat.toFixed(6)}, ${lng.toFixed(6)}`)
-    } catch {
-      setLocation(`${lat.toFixed(6)}, ${lng.toFixed(6)}`)
-    }
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+    )
+    const data = await res.json()
+    const { country, state, city, town, village, suburb } = data.address || {}
+    const locationString = [
+      country,
+      state,
+      city || town || village,
+      suburb,
+    ]
+      .filter(Boolean)
+      .join(', ')
+    setDirection(locationString || `${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+    setCoordinates([lat, lng])
+  } catch {
+    setDirection(`${lat.toFixed(6)}, ${lng.toFixed(6)}`)
+    setCoordinates([lat, lng])
   }
+}
 
   // get user current location and update address
   function handleGetLocation() {
@@ -99,42 +109,72 @@ export default function RequesterEditForm({
       <Marker position={[latLng.lat, latLng.lng]} />
     ) : null
   }
+//////////////////////////////la verificacion del formato del numero //////////////////////////////
+function validarTelefono(valor: string) {
+  // Debe tener entre 8 y 15 caracteres
+  if (valor.length < 8 || valor.length > 15) return false;
+  // Puede empezar con +, los demás solo números
+  if (valor.startsWith('+')) {
+    return /^[+][0-9]{7,14}$/.test(valor);
+  }
+  return /^[0-9]{8,15}$/.test(valor);
+}
 
+function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
+  let valor = e.target.value;
+  // Permite solo números y un + al inicio
+  if (valor.startsWith('+')) {
+    valor = '+' + valor.slice(1).replace(/[^0-9]/g, '');
+  } else {
+    valor = valor.replace(/[^0-9]/g, '');
+  }
+  setPhone(valor);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    if (loading) return
-    setLoading(true)
-    setError(null)
-    try {
-      ////////////////////aplicar .env.local////////////////////
-      ///const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/requester`, {
-      //////////////////////////////////////////////////////////
-      const res = await fetch('http://localhost:3000/api/requester', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: requesterId, phone, location }),
-      })
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body?.message || `error ${res.status}`)
-      }
-      setLoading(false)
-      setIsEditingPhone(false)
-      setIsEditingLocation(false)
-      onSaved?.()
-    } catch (err: any) {
-      setLoading(false)
-      setError(err?.message || 'unknown error')
-    }
+  e.preventDefault();
+  if (loading) return;
+  setError(null);
+
+  if (!validarTelefono(phone)) {
+    setError('ingrese un numero de telefono valido');
+    return;
   }
 
-  function handleCancel() {
-    if (onCancel) {
-      onCancel()
-      return
+  setLoading(true);
+  try {
+    const location = {
+    direction,
+    coordinates,
+   };
+    const res = await fetch('http://localhost:3000/api/requester', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: requesterId, phone, location }),
+    });
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      throw new Error(body?.message || `error ${res.status}`);
     }
-    router.push('/home/profile')
-  }// ...existing imports...
+    setLoading(false);
+    setIsEditingPhone(false);
+    setIsEditingLocation(false);
+    alert('Perfil actualizado correctamente');
+    onSaved?.();
+  } catch (err: any) {
+    setLoading(false);
+    setError(err?.message || 'unknown error');
+  }
+}
+
+ function handleCancel() {
+  if (onCancel) {
+    onCancel()
+    return
+  }
+  router.back() // Esto regresa a la página anterior en el historial
+}// ...existing imports...
   return (
     <form
       onSubmit={handleSubmit}
@@ -154,7 +194,7 @@ export default function RequesterEditForm({
             type={showPhone ? 'text' : 'password'}
             value={phone}
             disabled={!isEditingPhone}
-            onChange={(e) => setPhone(e.target.value)}
+            onChange={handlePhoneChange}
             placeholder="+591 7xxxxxxx"
             autoComplete="tel"
             aria-label="telefono"
@@ -199,7 +239,7 @@ export default function RequesterEditForm({
             id="location"
             name="location"
             inputMode="text"
-            value={location}
+            value={direction}
             disabled
             placeholder="pais, ciudad, departamento"
             autoComplete="street-address"
