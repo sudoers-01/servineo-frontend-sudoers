@@ -75,11 +75,15 @@ export default function Layout({ children }: { children: ReactNode }) {
 
               <div className="p-4">
                 <RequesterEditForm
-                  requesterId="68f0545c12a9f3002a9d3c22"
+                  requesterId="68f18bab12a9f3002a9d3c51"
                   initialPhone="+59171234567"
                   initialDirection="Cochabamba, Bolivia"
                   initialCoordinates={[-17.38195, -66.15995]}
-                  onSaved={() => alert('¡Cambios guardados!')}
+                  onSaved={() => {
+                    setShowForm(false)
+                    alert('Cambios guardados!')
+                  }}
+                  onCancel={() => setShowForm(false)}
                 />
               </div>
             </div>
