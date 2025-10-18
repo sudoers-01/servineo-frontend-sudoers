@@ -1,28 +1,52 @@
 "use client";
+
 import Link from "next/link";
 import { useState } from "react";
-import { FcGoogle } from "react-icons/fc";
-import { FaApple } from "react-icons/fa";
+import { enviarRegistroManual } from "../service/conecionbackend"; // 👈 importa tu función
 
 export default function RegistroForm() {
+  // Estados del formulario
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmarPassword, setConfirmarPassword] = useState("");
-  const [formCompleto, setFormCompleto] = useState(false);
+  const [errorRegistro, setErrorRegistro] = useState("");
+  const [cargando, setCargando] = useState(false);
 
+  // Validaciones
   const contrasenasCoinciden = password === confirmarPassword;
   const longitudValida = password.length >= 8;
+  const camposLlenos = nombre && apellido && email && password && confirmarPassword;
+  const emailValido = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
 
-  const camposLlenos =
-    nombre && apellido && email && password && confirmarPassword;
-  const formularioValido = camposLlenos && contrasenasCoinciden && longitudValida;
+  const formularioValido =
+    camposLlenos && contrasenasCoinciden && longitudValida && emailValido;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Envío de datos al backend
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorRegistro("");
+
     if (!formularioValido) return;
-    alert("Registro exitoso");
+
+    setCargando(true);
+    const nombreCompleto = `${nombre} ${apellido}`;
+
+    try {
+      const data = await enviarRegistroManual(nombreCompleto, email, password);
+
+      if (data.success) {
+        alert("✅ Registro exitoso");
+        if (data.token) localStorage.setItem("servineo_token", data.token);
+      } else {
+        setErrorRegistro(data.message || "Error al registrar el usuario.");
+      }
+    } catch (error: any) {
+      setErrorRegistro(error.message || "Ocurrió un error al conectar con el servidor.");
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -34,11 +58,8 @@ export default function RegistroForm() {
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           {/* Nombre y Apellido */}
           <div className="flex gap-3">
-            {/* Nombre */}
-            <div className="flex-1">
-              <label className="block text-[#5E2BE0] font-semibold mb-1">
-                Nombre *
-              </label>
+            <div className="flex-1 relative">
+              <label className="block text-[#2BDDE0] font-semibold mb-1">Nombre *</label>
               <input
                 type="text"
                 value={nombre}
@@ -47,25 +68,15 @@ export default function RegistroForm() {
                   const key = e.key;
                   if (
                     !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(key) &&
-                    key !== "Backspace" &&
-                    key !== "Tab" &&
-                    key !== "Enter" &&
-                    key !== "ArrowLeft" &&
-                    key !== "ArrowRight"
-                  ) {
-                    e.preventDefault();
-                  }
+                    !["Backspace", "Tab", "Enter", "ArrowLeft", "ArrowRight"].includes(key)
+                  ) e.preventDefault();
                 }}
-                className="w-full border rounded-md p-2 text-[#5E2BE0] border-gray-300 focus:border-[#5E2BE0] focus:outline-none"
+                className="w-full border rounded-md p-2 text-black border-gray-300 focus:border-[#2BDDE0] focus:outline-none"
                 placeholder="Ingresa tu nombre"
               />
             </div>
-
-            {/* Apellido */}
-            <div className="flex-1">
-              <label className="block text-[#5E2BE0] font-semibold mb-1">
-                Apellido *
-              </label>
+            <div className="flex-1 relative">
+              <label className="block text-[#2BDDE0] font-semibold mb-1">Apellido *</label>
               <input
                 type="text"
                 value={apellido}
@@ -74,115 +85,109 @@ export default function RegistroForm() {
                   const key = e.key;
                   if (
                     !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]$/.test(key) &&
-                    key !== "Backspace" &&
-                    key !== "Tab" &&
-                    key !== "Enter" &&
-                    key !== "ArrowLeft" &&
-                    key !== "ArrowRight"
-                  ) {
-                    e.preventDefault();
-                  }
+                    !["Backspace", "Tab", "Enter", "ArrowLeft", "ArrowRight"].includes(key)
+                  ) e.preventDefault();
                 }}
-                className="w-full border rounded-md p-2 text-[#5E2BE0] border-gray-300 focus:border-[#5E2BE0] focus:outline-none"
+                className="w-full border rounded-md p-2 text-black border-gray-300 focus:border-[#5E2BE0] focus:outline-none"
                 placeholder="Ingresa tu apellido"
               />
             </div>
           </div>
+
           {/* Correo electrónico */}
-          <div>
-            <label className="block text-[#5E2BE0] font-semibold mb-1">
-              Correo electrónico *
-            </label>
+          <div className="relative w-full">
+            <label className="block text-[#2BDDE0] font-semibold mb-1">Correo electrónico *</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email)
-                ? "border-red-500"
-                : "border-gray-300 focus:border-[#5E2BE0]"
-                }`}
+              className={`w-full border rounded-md p-2 text-black focus:outline-none ${
+                email && !emailValido
+                  ? "border-red-500"
+                  : "border-gray-300 focus:border-[#2BDDE0]"
+              }`}
               placeholder="nombre@gmail.com"
             />
-            {email && !/^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email) && (
-              <p className="text-sm text-red-500 mt-1">
-                Solo se permiten correos  ejemplo@gmail.com
+            {email && !emailValido && (
+              <p className="absolute text-sm text-red-500 mt-1 left-0">
+                Solo se permiten correos "ejemplo@gmail.com"
               </p>
             )}
           </div>
+
           {/* Contraseñas */}
           <div className="flex gap-3">
-            <div className="w-1/2">
-              <label className="block text-[#5E2BE0] font-semibold mb-1">
-                Crearte una Contraseña *
-              </label>
+            <div className="w-1/2 relative">
+              <label className="block text-[#2BDDE0] font-semibold mb-1">Creación de Contraseña *</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${contrasenasCoinciden && longitudValida
-                  ? "border-gray-300 focus:border-[#5E2BE0]"
-                  : "border-red-500"
-                  }`}
+                className={`w-full border rounded-md p-2 text-black focus:outline-none ${
+                  password && (!longitudValida || !contrasenasCoinciden)
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-[#2BDDE0]"
+                }`}
               />
-              <p className="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
+              {password && !longitudValida && (
+                <p className="absolute text-sm text-red-500 mt-1 left-0">
+                  La contraseña debe tener al menos 8 caracteres.
+                </p>
+              )}
             </div>
 
-            <div className="w-1/2">
-              <label className="block text-[#5E2BE0] font-semibold mb-1">
-                Confirmar Contraseña *
-              </label>
+            <div className="w-1/2 relative">
+              <label className="block text-[#2BDDE0] font-semibold mb-1">Confirmar Contraseña *</label>
               <input
                 type="password"
                 value={confirmarPassword}
                 onChange={(e) => setConfirmarPassword(e.target.value)}
-                className={`w-full border rounded-md p-2 text-[#5E2BE0] focus:outline-none ${contrasenasCoinciden && longitudValida
-                  ? "border-gray-300 focus:border-[#5E2BE0]"
-                  : "border-red-500"
-                  }`}
+                className={`w-full border rounded-md p-2 text-black focus:outline-none ${
+                  confirmarPassword && !contrasenasCoinciden
+                    ? "border-red-500"
+                    : "border-gray-300 focus:border-[#2BDDE0]"
+                }`}
               />
+              {confirmarPassword && !contrasenasCoinciden && (
+                <p className="absolute text-sm text-red-500 mt-1 left-0">
+                  Las contraseñas no coinciden.
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Mensajes de error */}
-          {!longitudValida && password && (
-            <p className="text-sm text-red-500">
-              La contraseña debe tener al menos 8 caracteres.
-            </p>
+          {errorRegistro && (
+            <p className="text-sm text-red-500 font-semibold">{errorRegistro}</p>
           )}
-          {!contrasenasCoinciden && confirmarPassword && (
-            <p className="text-sm text-red-500">
-              Las contraseñas no coinciden.
-            </p>
-          )}
+          
 
-          {/* Botón Únete */}
-          <Link href="/ctrlC/FotoPerfil">
-            <button
-              type="submit"
-              disabled={!formularioValido}
-              className={`w-full py-2 rounded-md font-semibold text-white transition-colors mt-3 ${formularioValido
+          <button
+            type="submit"
+            disabled={!formularioValido || cargando}
+            className={`w-full py-2 rounded-md font-semibold text-white transition-colors mt-3 ${
+              formularioValido && !cargando
                 ? "bg-[#5E2BE0] hover:bg-[#4b22b8]"
                 : "bg-gray-400 cursor-not-allowed"
-                }`}
-            >
-              Únete
-            </button>
-          </Link>
+            }`}
+          >
+            {cargando ? "Registrando..." : "Únete"}
+          </button>
         </form>
 
-        { }
         <div className="my-4 flex items-center justify-center">
           <hr className="w-1/4 border-gray-300" />
           <span className="mx-2 text-gray-500">o</span>
           <hr className="w-1/4 border-gray-300" />
         </div>
-        
-        {/* Términos & condiciones */}
+
         <div className="flex items-center mt-4 text-sm text-gray-600">
           <input type="checkbox" className="mr-2" />
           <p>
             Al registrarte aceptas los{" "}
-            <Link href="/ctrlC/RequesterFrom/Terminosycondiciones" className="underline cursor-pointer text-[#5E2BE0]">
+            <Link
+              href="/ctrlC/RequesterFrom/Terminosycondiciones"
+              className="underline cursor-pointer text-[#2BDDE0]"
+            >
               términos de uso
             </Link>{" "}
             de Servineo.
