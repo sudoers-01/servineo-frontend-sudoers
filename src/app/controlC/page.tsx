@@ -2,8 +2,6 @@
 import { useEffect } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-import RegistroModal from "./components/modales/registroModal";
 import UserMenu from "./components/UI/menuUsuario";
 import { useAuth } from "./hooks/usoAutentificacion";
 
@@ -29,7 +27,7 @@ export default function HomePage() {
         <h1 className="text-3xl font-extrabold text-[#2B31E0] tracking-tight">
           Servineo
         </h1>
-        {user ? <UserMenu /> : <RegistroModal />}
+        <UserMenu />
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 pt-24">

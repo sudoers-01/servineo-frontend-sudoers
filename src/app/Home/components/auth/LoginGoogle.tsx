@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { api, ApiResponse } from "@/app/Control_C/lib/api";
+import { api, ApiResponse } from "@/app/Home/lib/api";
 
 // ✅ Declaramos la interfaz para las props del componente
 interface LoginGoogleProps {
@@ -19,11 +19,17 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
     try {
       const res: ApiResponse<any> = await api.post("/api/auth/google", {
         credential: credentialResponse.credential,
+        token: credentialResponse.credential,
+        modo: "login",
       });
 
       if (res.success) {
         onMensajeChange(`✅ ${res.data?.message ?? "Login con Google exitoso"}`);
-        //window.location.href = "/";
+        // aquí puedes guardar el token si quieres:
+        localStorage.setItem("servineo_token", res.data.token);
+        localStorage.setItem("servineo_user", JSON.stringify(res.data.user));
+        // luego redirigir:
+        window.location.href = "/controlC";
       } else {
         onMensajeChange(`❌ ${res.data?.message ?? res.error ?? "Error"}`);
       }

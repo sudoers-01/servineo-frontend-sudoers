@@ -1,8 +1,9 @@
 'use client';
 import { useState } from 'react';
-import { api, ApiResponse } from '@/app/Control_C/lib/api';
+import { api, ApiResponse } from '@/app/Home/lib/api';
 import { Eye, EyeOff } from 'lucide-react';
-import LoginGoogle from "@/app/Control_C/components/auth/LoginGoogle";
+import LoginGoogle from "@/app/Home/components/auth/LoginGoogle";
+import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -10,6 +11,7 @@ export default function LoginPage() {
   const [mostrarPass, setMostrarPass] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const manejarLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -124,9 +126,12 @@ export default function LoginPage() {
         {/* Registro */}
         <p className="mt-8 text-center text-sm text-gray-500">
           ¿No tienes cuenta?{' '}
-          <a href="#" className="text-servineo-400 hover:text-servineo-500 font-medium hover:underline transition">
+          <button
+            onClick={() => router.push('/controlC/FormularioRegistro')} 
+            className="text-servineo-400 hover:text-servineo-500 font-medium hover:underline transition"
+          >
             Regístrate
-          </a>
+          </button>
         </p>
       </div>
     </main>

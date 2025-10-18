@@ -25,7 +25,7 @@ export default function Home() {
         transition={{ delay: 0.3, duration: 0.8 }}
       >
         <Link
-          href="/Control_C"
+          href="/Home"
           className="relative inline-block px-12 py-4 text-lg font-semibold rounded-full overflow-hidden 
           bg-white text-servineo-500 shadow-xl transition-all duration-300 
           hover:scale-105 hover:shadow-servineo-400/40"

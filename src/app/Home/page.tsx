@@ -2,7 +2,7 @@
 
 import { Search, Calendar, MapPin, Hammer } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { api, ApiResponse } from '@/app/Control_C/lib/api';
+import { api, ApiResponse } from '@/app/Home/lib/api';
 import Link from "next/link";
 
 export default function Home() {
@@ -31,7 +31,7 @@ export default function Home() {
       <header className="flex justify-between items-center px-10 py-6 bg-white/10 backdrop-blur-md shadow-sm border-b border-white/20">
         <h1 className="text-2xl font-bold tracking-wide">SERVINEO</h1>
         <Link
-          href="/Control_C/login"
+          href="/Home/login"
           className="relative inline-block px-5 py-2.5 font-semibold text-white rounded-lg 
           bg-gradient-to-r from-servineo-200 via-servineo-300 to-servineo-500 
           shadow-lg overflow-hidden transition-all duration-300 
