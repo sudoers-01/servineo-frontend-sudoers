@@ -15,10 +15,41 @@ export default function FotoPerfil() {
 
   const eliminarFoto = () => setFoto(null);
 
-  const continuar = () => {
-    if (!foto) return;
-    alert("Foto seleccionada correctamente");
-  };
+const continuar = async () => {
+  if (!foto) return;
+
+  const usuarioId = localStorage.getItem("usuarioId");
+  if (!usuarioId) {
+    alert("No se encontró el usuario");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("usuarioId", usuarioId);
+  formData.append("fotoPerfil", foto);
+
+  try {
+    const response = await fetch("http://localhost:3001/api/usuarios/foto", {
+      method: "PUT",
+      body: JSON.stringify({
+        usuarioId,
+        fotoPerfil: foto, // o URL si ya la subes al servidor
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+
+    if (response.ok) {
+      alert("Foto actualizada correctamente");
+      window.location.href = "/ctrlC/UbicacionRequester";
+    } else {
+      alert("Error al subir la foto");
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Error al conectar con el servidor");
+  }
+};
+
 
   return (
     /* Apartado de arriba */
