@@ -5,15 +5,7 @@ import { Eye, EyeOff, Pencil, Loader2, Crosshair } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
-import L from 'leaflet';
-// @ts-expect-error: _getIconUrl es una propiedad interna de Leaflet no tipada
-delete L.Icon.Default.prototype._getIconUrl;
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: '/marker-icon-2x.png',
-  iconUrl: '/marker-icon.png',
-  shadowUrl: '/marker-shadow.png',
-});
 
 // dynamic import for react-leaflet components to avoid ssr issues
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false })
