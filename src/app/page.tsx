@@ -1,76 +1,39 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import RequesterEditForm from '../controlC/RequesterEditForm'
+import Link from "next/link";
+import { motion } from "framer-motion";
 
 export default function Home() {
-  const [loggedIn, setLoggedIn] = useState(false)
-  const [showEditForm, setShowEditForm] = useState(false)
-
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (username && password) {
-      setLoggedIn(true)
-    } else {
-      alert('Ingrese usuario y contraseña')
-    }
-  }
-
   return (
-    <main className="p-8 max-w-md mx-auto space-y-6">
-      {!loggedIn && (
-        <form onSubmit={handleLogin} className="space-y-3 border p-4 rounded shadow">
-          <h2 className="text-xl font-semibold">Login</h2>
-          <div>
-            <label className="block text-sm font-medium">Usuario</label>
-            <input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 block w-full rounded-md border px-3 py-2"
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium">Contraseña</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 block w-full rounded-md border px-3 py-2"
-            />
-          </div>
-          <button type="submit" className="rounded bg-blue-600 px-4 py-2 text-white">
-            Login
-          </button>
-        </form>
-      )}
+    <div className="flex flex-col justify-center items-center min-h-screen text-center bg-gradient-to-br from-servineo-500 via-servineo-300 to-servineo-200 text-white">
+      {/* Título principal */}
+      <motion.h1
+        className="text-6xl md:text-7xl font-extrabold mb-10 drop-shadow-lg"
+        initial={{ opacity: 0, y: -30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 1 }}
+      >
+        <span className="bg-gradient-to-r from-servineo-100 via-servineo-400 to-servineo-600 bg-clip-text text-transparent">
+          SERVINEO
+        </span>
+      </motion.h1>
 
-      {loggedIn && !showEditForm && (
-        <div className="text-center">
-          <p className="mb-3">Bienvenido, {username}!</p>
-          <button
-            onClick={() => setShowEditForm(true)}
-            className="rounded bg-green-600 px-4 py-2 text-white"
-          >
-            Editar requester
-          </button>
-        </div>
-      )}
-
-      {loggedIn && showEditForm && (
-        <div className="border p-4 rounded shadow">
-          <h2 className="text-xl font-semibold mb-3">Editar requester</h2>
-          <RequesterEditForm
-            requesterId="abc12"
-            initialPhone="+591 7xxxxxxx"
-            initialLocation="Cochabamba"
-            onSaved={() => alert('Cambios guardados!')}
-          />
-        </div>
-      )}
-    </main>
-  )
+      {/* Botón "Empezar" */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.3, duration: 0.8 }}
+      >
+        <Link
+          href="/Home"
+          className="relative inline-block px-12 py-4 text-lg font-semibold rounded-full overflow-hidden 
+          bg-white text-servineo-500 shadow-xl transition-all duration-300 
+          hover:scale-105 hover:shadow-servineo-400/40"
+        >
+          <span className="relative z-10">Empezar</span>
+          <span className="absolute inset-0 bg-gradient-to-r from-servineo-400 to-servineo-600 opacity-0 hover:opacity-100 transition-all duration-300 rounded-full"></span>
+        </Link>
+      </motion.div>
+    </div>
+  );
 }

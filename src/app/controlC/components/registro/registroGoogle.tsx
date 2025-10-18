@@ -11,6 +11,7 @@ export default function RegistroGoogle({ onSuccessClose }: { onSuccessClose?: ()
 
   const handleLoginSuccess = async (credentialResponse: any) => {
     const token = credentialResponse?.credential;
+    
     if (!token) {
       console.error("No se recibió el token de Google");
       return;

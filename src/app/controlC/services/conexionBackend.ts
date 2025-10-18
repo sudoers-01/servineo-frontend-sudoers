@@ -24,7 +24,7 @@ export async function enviarTokenGoogle(token: string): Promise<GoogleAuthRespon
     const res = await fetch(`${BASE_URL}/google/auth`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token }),
+      body: JSON.stringify({ token, modo: "registro"}),
     });
 
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
