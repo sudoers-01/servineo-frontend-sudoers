@@ -6,6 +6,10 @@ import { Elements } from '@stripe/react-stripe-js';
 import PaymentMethodUI from './PaymentMethodUI';
 import CardList from './CardList';
 import { createCashPayment } from '../service/payments';
+import dynamic from 'next/dynamic';
+
+// Importar el componente de registro de cuenta
+const RegistroCuentaApp = dynamic(() => import('./agregarCuenta'), { ssr: false });
 
 const stripePromise = loadStripe(
   'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI',
@@ -21,6 +25,7 @@ export default function PaymentDemo() {
   const [showPaymentSelector, setShowPaymentSelector] = useState(false);
   const [showCashPayment, setShowCashPayment] = useState(false);
   const [showCardPayment, setShowCardPayment] = useState(false);
+  const [showRegistroCuenta, setShowRegistroCuenta] = useState(false);
   const [selectedTrabajo, setSelectedTrabajo] = useState<any>(null);
   const [createdPaymentId, setCreatedPaymentId] = useState<string | null>(null);
 
@@ -64,6 +69,19 @@ export default function PaymentDemo() {
     setSelectedTrabajo(null);
   };
 
+  const handleAgregarCuentaBancaria = () => {
+    setShowRegistroCuenta(true);
+  };
+
+  const handleCloseRegistroCuenta = () => {
+    setShowRegistroCuenta(false);
+  };
+
+  // Si se muestra el registro de cuenta, renderizar solo ese componente
+  if (showRegistroCuenta) {
+    return <RegistroCuentaApp />;
+  }
+
   return (
     <div className="min-h-screen bg-white">
       {/* Header */}
@@ -80,7 +98,10 @@ export default function PaymentDemo() {
           <span className="text-2xl">🔧</span>
           Agregar Trabajo
         </button>
-        <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium">
+        <button 
+          onClick={handleAgregarCuentaBancaria}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
+        >
           <span className="text-2xl">🏦</span>
           Agregar cuenta bancaria
         </button>

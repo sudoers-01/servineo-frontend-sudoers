@@ -1,28 +1,18 @@
-// src/app/registro-cuenta/page.tsx (CORREGIDO)
 'use client';
 
-
 import React, { useState, useEffect, FormEvent } from 'react';
-import { ChangeEvent } from 'react'; // Necesario para tipificar handleChange correctamente
+import { ChangeEvent } from 'react';
 
-// Se mantienen los componentes y la lógica de fetch dentro de handleSubmit.
-
-// ID de Fixer TEMPORAL (Necesario para que el backend guarde la cuenta)
 const DEMO_FIXER_ID = 'id_temporal_001_fixer';
-const API_BASE_URL = '/api'; // URL base para la llamada a la API
+const API_BASE_URL = '/api';
 
-// --- Tipificación para la función de navegación (pathSetter) ---
 type PathSetter = (path: string) => void;
 
-// -----------------------------------------------------------
-// --- Componentes (PaymentSuccessPage, PaymentsDemoRoot) ---
-// -----------------------------------------------------------
+// --- Componentes (PaymentSuccessPage) ---
 
-const PaymentSuccessPage = ({ pathSetter }: { pathSetter: PathSetter }) => {
-  // 🛑 CORREGIDO: El mensaje de estado es fijo para simplificar, pero se puede usar localStorage.
+const PaymentSuccessPage = ({ onCloseAll }: { onCloseAll?: () => void }) => {
   const [statusMessage, setStatusMessage] = useState('Cuenta bancaria registrada exitosamente.');
 
-  // El useEffect que lee y limpia el localStorage es correcto.
   useEffect(() => {
     const msg = localStorage.getItem('statusMessage');
     if (msg) {
@@ -32,8 +22,15 @@ const PaymentSuccessPage = ({ pathSetter }: { pathSetter: PathSetter }) => {
   }, []);
 
   const handleBackToPaymentsDemo = () => {
-    // Navega de vuelta a la raíz de la demo.
-    pathSetter('/');
+    console.log('🔵 Botón presionado - PaymentSuccessPage'); // Debug
+    console.log('🔵 onCloseAll existe?', !!onCloseAll); // Debug
+    
+    if (onCloseAll) {
+      console.log('🔵 Ejecutando onCloseAll...'); // Debug
+      onCloseAll();
+    } else {
+      console.log('❌ onCloseAll NO está definido'); // Debug
+    }
   };
 
   return (
@@ -54,7 +51,7 @@ const PaymentSuccessPage = ({ pathSetter }: { pathSetter: PathSetter }) => {
         </svg>
         <h2 className="text-3xl font-bold text-gray-800">¡Registro Exitoso!</h2>
         <p className="text-lg text-gray-600">
-          Tu cuenta bancaria ha sido **registrada en la base de datos** con el ID temporal:{' '}
+          Tu cuenta bancaria ha sido registrada en la base de datos con el ID temporal:{' '}
           {DEMO_FIXER_ID}.
         </p>
         <div className="p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-sm">
@@ -71,94 +68,55 @@ const PaymentSuccessPage = ({ pathSetter }: { pathSetter: PathSetter }) => {
   );
 };
 
-const PaymentsDemoRoot = ({ pathSetter }: { pathSetter: PathSetter }) => {
-  const handleGoToRegistration = () => {
-    pathSetter('/registro-cuenta');
-  };
-
-  const handleClearStatus = () => {
-    localStorage.removeItem('fixer_bank_status');
-    pathSetter('/registro-cuenta');
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="max-w-lg mx-auto p-8 space-y-6 text-center bg-white rounded-xl shadow-2xl border-t-4 border-blue-600">
-        <h2 className="text-3xl font-extrabold text-blue-800">Servineo Demo de Pagos</h2>
-        <p className="text-gray-700">Esta es la página de inicio simulada para el demo de pagos.</p>
-
-        <div className="space-y-4 pt-4">
-          <button
-            onClick={handleGoToRegistration}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors duration-150 shadow-md"
-          >
-            Ir al Formulario de Registro de Cuenta
-          </button>
-          <button
-            onClick={handleClearStatus}
-            className="w-full bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg text-sm font-semibold transition-colors duration-150 shadow-md"
-          >
-            Resetear Estado Local (Solo Demo)
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-// -----------------------------------------------------------
-// --- Componente del Formulario de Registro (RegistrationForm) ---
-// -----------------------------------------------------------
-const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
+const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; onCloseAll?: () => void }) => {
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
 
-  // NOTA: Los tipos de estado en React para objetos se definen implícitamente, pero son correctos aquí.
   const [formData, setFormData] = useState({
-    nombreTitular: 'Juan Pérez',
-    identificacion: '1234567',
-    identificationSuffix: 'LP',
+    nombreTitular: '',  // ← Cambiado a vacío
+    identificacion: '', // ← Cambiado a vacío
+    identificationSuffix: '',
     tipoCuenta: 'Cuenta de Ahorros',
-    numeroCuenta: '1234567890',
+    numeroCuenta: '', // ← Cambiado a vacío
     cuentaFavorita: false,
     banco: 'Banco Nacional de Bolivia',
   });
 
   const handleGoBack = () => {
-    pathSetter('/');
+    console.log('🔵 Botón presionado - RegistrationForm'); // Debug
+    console.log('🔵 onCloseAll existe?', !!onCloseAll); // Debug
+    
+    if (onCloseAll) {
+      console.log('🔵 Ejecutando onCloseAll...'); // Debug
+      onCloseAll();
+    } else {
+      console.log('❌ onCloseAll NO está definido'); // Debug
+    }
   };
 
-  // 🛑 CORREGIDO: Acepta HTMLInputElement o HTMLSelectElement
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    // La propiedad 'checked' solo existe en HTMLInputElement, por eso debemos chequear el tipo
-    const checked = (e.target as HTMLInputElement).checked; 
+    const checked = (e.target as HTMLInputElement).checked;
 
     setFormData((prev) => ({
       ...prev,
-      // Usamos 'checked' solo si el tipo de input es 'checkbox', si no, usamos 'value'
-      [name]: type === 'checkbox' ? checked : value, 
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const isNumeric = (str: string) => /^\d+$/.test(str);
 
-  // 1. EFECTO: Simulación de verificación para evitar recarga
   useEffect(() => {
     if (localStorage.getItem('fixer_bank_status') === 'CCB') {
       setAlreadyRegistered(true);
     }
   }, []);
 
-  // 2. FUNCIÓN DE ENVÍO (Llama directamente a la API)
-  
-  // 🛑 CORREGIDO: Debe ser FormEvent<HTMLFormElement> para el onSubmit del tag <form>
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
 
-    // Validación de Frontend (sin cambios)
     const ci = formData.identificacion.trim();
     if (ci.length < 7 || ci.length > 8 || !isNumeric(ci)) {
       setFormError('El CI debe contener entre 7 y 8 dígitos numéricos.');
@@ -173,14 +131,12 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
 
     setLoading(true);
 
-    // Estructura del payload COINCIDE con BankAccount.model.ts
     const dataToSend = {
-      fixerId: DEMO_FIXER_ID, // ID Temporal
+      fixerId: DEMO_FIXER_ID,
       accountNumber: formData.numeroCuenta,
       bankName: formData.banco,
       nameFixer: formData.nombreTitular,
       accountType: formData.tipoCuenta,
-      // Concatenación para CI + Sufijo
       identification:
         formData.identificacion +
         (formData.identificationSuffix ? '-' + formData.identificationSuffix.toUpperCase() : ''),
@@ -188,7 +144,6 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
     };
 
     try {
-      // A. Registrar la cuenta bancaria (IMPLEMENTACIÓN DIRECTA DE FETCH)
       const response = await fetch(`${API_BASE_URL}/bank-accounts`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -200,26 +155,21 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
         throw new Error(errorData.message || `Fallo en el registro (Status: ${response.status})`);
       }
 
-      // 🛑 CRÍTICO: Simulación de estado CCB para evitar que el form se muestre de nuevo.
       localStorage.setItem('fixer_bank_status', 'CCB');
-
-      // 🛑 CRÍTICO: Configurar el mensaje y navegar a la página de éxito.
       localStorage.setItem('statusMessage', 'Cuenta bancaria registrada exitosamente.');
-      pathSetter('/registro-cuenta/payment'); // Navega a PaymentSuccessPage
-    } catch (error) {
-       // Dejé el catch comentado como estaba, asumiendo que el error.message del CI ya no es un problema.
-      /*console.error('❌ Error en el flujo de registro:', error.message);
+      pathSetter('/agregarCuenta/payment');
+    } catch (error: any) {
+      console.error('❌ Error en el flujo de registro:', error?.message);
       const displayError =
-        error.message.includes('duplicado') || error.message.includes('Duplicate account number')
+        error?.message?.includes('duplicado') || error?.message?.includes('Duplicate account number')
           ? 'El número de cuenta bancaria ya ha sido registrado. Por favor, verifica tus datos.'
-          : `Error al procesar la solicitud: ${error.message}`;
-      setFormError(displayError);*/
+          : `Error al procesar la solicitud: ${error?.message || 'Error desconocido'}`;
+      setFormError(displayError);
     } finally {
       setLoading(false);
     }
   };
 
-  // 3. RENDERIZADO CONDICIONAL (Si ya registró, muestra el mensaje de ya registrado)
   if (alreadyRegistered) {
     return (
       <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4">
@@ -243,10 +193,8 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
   }
 
   return (
-    // Contenedor principal: Fondo azul 600 (El formulario se mantiene sin cambios estructurales)
     <div className="min-h-screen bg-blue-600 flex flex-col font-sans">
       <header className="px-6 py-4 flex items-center justify-between shadow-lg bg-blue-700">
-        
         <button
           onClick={handleGoBack}
           className="bg-cyan-500 hover:bg-cyan-600 text-white px-6 py-2 rounded-full text-sm font-semibold transition-colors duration-150 shadow-md"
@@ -263,9 +211,8 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
           <p className="text-gray-600 mb-6 text-sm">
             Por favor, completa el registro de la cuenta bancaria.
           </p>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 1. Nombre del titular */}
             <div>
               <label
                 htmlFor="nombreTitular"
@@ -279,12 +226,12 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
                 id="nombreTitular"
                 value={formData.nombreTitular}
                 onChange={handleChange}
-                className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors"
+                placeholder="Ej: Juan Pérez"
+                className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors text-gray-900"
                 required
               />
             </div>
 
-            {/* 2. Identificación (CI y Sufijo) */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Identificación (CI)
@@ -298,7 +245,7 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
                   onChange={handleChange}
                   placeholder="7 a 8 dígitos"
                   maxLength={8}
-                  className="flex-grow border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors"
+                  className="flex-grow border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors text-gray-900"
                   required
                   onKeyPress={(e) => {
                     if (!/[0-9]/.test(e.key)) {
@@ -314,12 +261,11 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
                   onChange={handleChange}
                   placeholder="Sufijo (Ej: LP)"
                   maxLength={3}
-                  className="w-1/4 border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 uppercase text-center transition-colors"
+                  className="w-1/4 border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 uppercase text-center transition-colors text-gray-900"
                 />
               </div>
             </div>
 
-            {/* 3. Tipo de cuenta */}
             <div>
               <label htmlFor="tipoCuenta" className="block text-sm font-medium text-gray-700 mb-1">
                 Tipo de cuenta
@@ -328,8 +274,8 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
                 name="tipoCuenta"
                 id="tipoCuenta"
                 value={formData.tipoCuenta}
-                onChange={handleChange} 
-                className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors appearance-none"
+                onChange={handleChange}
+                className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors appearance-none text-gray-900"
                 required
               >
                 <option>Cuenta de Ahorros</option>
@@ -337,7 +283,6 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
               </select>
             </div>
 
-            {/* 4. Número de cuenta */}
             <div>
               <label
                 htmlFor="numeroCuenta"
@@ -353,7 +298,7 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
                 onChange={handleChange}
                 placeholder="7 a 10 dígitos"
                 maxLength={10}
-                className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors"
+                className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors text-gray-900"
                 required
                 onKeyPress={(e) => {
                   if (!/[0-9]/.test(e.key)) {
@@ -363,7 +308,6 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
               />
             </div>
 
-            {/* 5. Banco */}
             <div>
               <label htmlFor="banco" className="block text-sm font-medium text-gray-700 mb-1">
                 Banco
@@ -372,8 +316,8 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
                 name="banco"
                 id="banco"
                 value={formData.banco}
-                onChange={handleChange} 
-                className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors appearance-none"
+                onChange={handleChange}
+                className="w-full border border-gray-300 p-2.5 rounded-lg bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors appearance-none text-gray-900"
                 required
               >
                 <option>Banco Nacional de Bolivia</option>
@@ -382,7 +326,6 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
               </select>
             </div>
 
-            {/* Checkbox Cuenta favorita */}
             <div className="flex items-center pt-2">
               <input
                 type="checkbox"
@@ -397,14 +340,12 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
               </label>
             </div>
 
-            {/* Mensaje de Error (formError) */}
             {formError && (
               <div className="p-3 bg-red-50 border border-red-400 text-red-700 rounded-lg text-sm transition-all duration-300">
                 {formError}
               </div>
             )}
 
-            {/* Botón Guardar Cuenta */}
             <button
               type="submit"
               disabled={loading}
@@ -446,23 +387,20 @@ const RegistrationForm = ({ pathSetter }: { pathSetter: PathSetter }) => {
   );
 };
 
-// --- Componente Principal de la Aplicación (RUTAS) (Sin Cambios) ---
-const App = () => {
-  // 🛑 CRÍTICO: La ruta inicial es '/registro-cuenta' para mostrar el formulario
-  const [path, setPath] = useState('/registro-cuenta');
+// --- Componente Principal modificado para aceptar onClose ---
+const App = ({ onClose }: { onClose?: () => void }) => {
+  const [path, setPath] = useState('/agregarCuenta');
+
+  console.log('🟢 AgregarCuenta App renderizado'); // Debug
+  console.log('🟢 onClose recibido?', !!onClose); // Debug
 
   const renderContent = () => {
     switch (path) {
-      case '/':
-        // Muestra la pantalla de inicio de la demo (Tabla de Pagos)
-        return <PaymentsDemoRoot pathSetter={setPath} />;
-      case '/registro-cuenta/payment':
-        // Muestra la pantalla de éxito después de registrar la cuenta
-        return <PaymentSuccessPage pathSetter={setPath} />;
-      case '/registro-cuenta':
+      case '/agregarCuenta/payment':
+        return <PaymentSuccessPage onCloseAll={onClose} />;
+      case '/agregarCuenta':
       default:
-        // Muestra el formulario de registro de cuenta
-        return <RegistrationForm pathSetter={setPath} />;
+        return <RegistrationForm pathSetter={setPath} onCloseAll={onClose} />;
     }
   };
 
