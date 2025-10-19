@@ -23,7 +23,7 @@ export default function HomePage() {
       });
     }
   }, [user]);
-  
+
 
   return (
     <div
@@ -35,12 +35,12 @@ export default function HomePage() {
       {/* Header */}
       <header className="flex justify-between items-center px-10 py-6 bg-white/10 backdrop-blur-md shadow-sm border-b border-white/20">
         <h1 className="text-2xl font-bold tracking-wide">SERVINEO</h1>
-         <div>
+        <div>
           {user ? (
             <UserMenu />
           ) : (
-            <Link 
-              href="./controlC/HU4/login" 
+            <Link
+              href="./controlC/HU4/login"
               className="px-6 py-3 text-lg text-white bg-[#2B31E0] rounded-lg font-medium hover:bg-[#1AA7ED] transition"
             >
               Registrarse

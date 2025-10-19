@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack --port 3000",
+    "dev": "next dev --turbopack --port 3000",
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "eslint",
@@ -22,15 +23,16 @@
     "react-dom": "19.1.0",
     "react-icons": "^5.5.0",
     "react-leaflet": "^5.0.0",
+    "react-toastify": "^11.0.5""react-dom": "19.1.0",
+    "react-icons": "^5.5.0",
+    "react-leaflet": "^5.0.0",
     "react-toastify": "^11.0.5"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4.1.14",
-
     "@types/leaflet": "^1.9.21",
     "@types/node": "^20",
-
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/react-toastify": "^4.0.2",
