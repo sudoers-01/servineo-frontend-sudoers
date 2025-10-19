@@ -2,7 +2,7 @@
 
 import { ReactNode, useState } from 'react'
 import { User, Settings, X } from 'lucide-react'
-import RequesterEditForm from '../components/RequesterEditForm'
+import RequesterEditForm from './RequesterEditForm'
 
 export default function Layout({ children }: { children: ReactNode }) {
   const [showForm, setShowForm] = useState(false)

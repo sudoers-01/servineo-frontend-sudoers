@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import Layout from '../controlC/components/layout' // AJUSTA la ruta si tu layout está en otro lugar
+import Layout from './controlC/components/layout' // AJUSTA la ruta si tu layout está en otro lugar
 // import RequesterEditForm from '../controlC/components/RequesterEditForm' <-- NO lo importamos aquí
 
 export default function Home() {
