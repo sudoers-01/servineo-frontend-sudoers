@@ -1,5 +1,7 @@
 'use client';
+import Link from "next/link";
 import RegistroGoogle from "../components/registro/registroGoogle";
+import RegistroForm from "../../HU1/RequesterForm/page";
 
 export default function SignUp() {
   return (
@@ -8,16 +10,27 @@ export default function SignUp() {
         Regístrate <span className="text-servineo-500">Servineo</span>
       </h1>
       <p className="text-center text-sm text-gray-700 mb-8">Crea tu cuenta como requester</p>  
-
-      <div className="flex items-center my-8">
+      <RegistroForm />
+      <div className="flex items-center my-5">
         <div className="flex-1 h-px bg-gray-300"></div>
         <span className="px-2 text-gray-400 text-sm">o</span>
         <div className="flex-1 h-px bg-gray-300"></div>
       </div>
 
       <RegistroGoogle />
-
-      <p className="mt-8 text-center text-sm text-gray-700">
+      <div className="flex items-center mt-5 text-sm text-gray-600">
+          <input type="checkbox" className="mr-2" />
+          <p>
+            Al registrarte aceptas los{" "}
+            <Link
+              href="../HU1/RequesterForm/Terminosycondiciones"
+              className="underline cursor-pointer text-[#2BDDE0]"
+            >
+              términos de uso
+            </Link>{" "}
+          </p>
+        </div>
+         <p className="mt-1 text-center text-sm text-gray-700">
         ¿Ya tienes cuenta?{' '}
         <a
           href="../HU4/login"
