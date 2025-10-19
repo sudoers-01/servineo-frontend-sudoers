@@ -27,7 +27,7 @@ export default function UserMenu() {
         className="w-10 h-10 rounded-full border border-gray-300 overflow-hidden"
       >
         <img
-          src={user.picture || "/default-avatar.png"}
+          src={user.picture || "https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&f=y"}
           alt="Perfil"
           className="w-full h-full object-cover"
         />

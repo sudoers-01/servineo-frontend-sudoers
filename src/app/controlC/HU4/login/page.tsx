@@ -1,8 +1,8 @@
 'use client';
 import { useState } from 'react';
-import { api, ApiResponse } from '@/app/Home/lib/api';
+import { api, ApiResponse } from '../lib/api';
 import { Eye, EyeOff } from 'lucide-react';
-import LoginGoogle from "@/app/Home/components/auth/LoginGoogle";
+import LoginGoogle from "../components/auth/LoginGoogle";
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -18,16 +18,22 @@ export default function LoginPage() {
     setLoading(true);
     setMensaje('');
     try {
-      const res: ApiResponse<any> = await api.post('/api/auth/login', { email, password });
+      const res: ApiResponse<any> = await api.post('auth/login', { email, password });
+      
       if (res.success) {
-        setMensaje(`✅ ${res.data.message}`);
+        localStorage.setItem("servineo_token", res.data.token);
+        localStorage.setItem("servineo_user", JSON.stringify(res.data.usuario)); 
+        setMensaje(` ${res.data.message}`);
+        
+        router.push('/'); 
+        
       } else {
-        setMensaje(`❌ ${res.data?.message || res.error}`);
+        setMensaje(` ${res.data?.message || res.error || 'Credenciales inválidas.'}`);
       }
     } catch (err: any) {
-      setMensaje(`❌ Error: ${err?.message ?? 'Algo salió mal'}`);
+      setMensaje(` Error: ${err?.message ?? 'Algo salió mal al conectar con el servidor'}`);
     } finally {
-      setLoading(false);
+      setLoading(false); 
     }
   };
 
@@ -116,7 +122,7 @@ export default function LoginPage() {
         {mensaje && (
           <p
             className={`mt-6 text-center text-sm font-medium ${
-              mensaje.startsWith('✅') ? 'text-green-600' : 'text-red-600'
+              mensaje.startsWith('') ? 'text-green-600' : 'text-red-600'
             }`}
           >
             {mensaje}
@@ -127,7 +133,7 @@ export default function LoginPage() {
         <p className="mt-8 text-center text-sm text-gray-500">
           ¿No tienes cuenta?{' '}
           <button
-            onClick={() => router.push('/controlC/FormularioRegistro')} 
+            onClick={() => router.push('../HU3/FormularioRegistro')} 
             className="text-servineo-400 hover:text-servineo-500 font-medium hover:underline transition"
           >
             Regístrate

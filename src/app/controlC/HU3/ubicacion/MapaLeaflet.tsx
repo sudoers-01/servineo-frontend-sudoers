@@ -29,7 +29,7 @@ export default function MapaLeaflet() {
   const [ubicacionPermitida, setUbicacionPermitida] = useState<boolean | null>(null);
   const router = useRouter();
   const ejecutado = useRef(false);
-  const { user, setUser } = useAuth();
+  const { setUser } = useAuth();
 
   useEffect(() => {
     if (ejecutado.current) return;
@@ -90,7 +90,7 @@ export default function MapaLeaflet() {
       toast.success("Ubicación registrada correctamente.", { toastId: "envio-exitoso" });
 
       // Redirigimos al home logeado
-      router.push("/controlC");
+      router.push("/");
     } catch (error) {
       console.error(error);
       toast.error("Error al enviar la ubicación al servidor.", { toastId: "error-envio" });

@@ -1,3 +1,5 @@
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+
 export interface ApiResponse<T> {
   success: boolean;
   data?: T;
@@ -52,4 +54,4 @@ class ApiClient {
   }
 }
 
-export const api = new ApiClient('');
+export const api = new ApiClient(BASE_URL);

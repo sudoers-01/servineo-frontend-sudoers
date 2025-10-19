@@ -8,7 +8,6 @@ export default function LoginLayout({ children }: { children: React.ReactNode })
 
 
   return (
-    // sin <html> ni <body>, mantiene la interfaz del global
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
       {children}
     </GoogleOAuthProvider>

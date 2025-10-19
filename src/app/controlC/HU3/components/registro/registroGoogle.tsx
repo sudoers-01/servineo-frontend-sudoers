@@ -3,15 +3,15 @@
 import GoogleButton from "../UI/buttonGoogle";
 import { enviarTokenGoogle, GoogleAuthResponse } from "../../services/conexionBackend";
 import { useRouter } from "next/navigation";
-import { useAuth } from "../../hooks/usoAutentificacion"; 
+import { useAuth } from "../../hooks/usoAutentificacion";
+import { CredentialResponse } from "@react-oauth/google";
 
 export default function RegistroGoogle({ onSuccessClose }: { onSuccessClose?: () => void }) {
   const router = useRouter();
-  const { setUser } = useAuth(); 
+  const { setUser } = useAuth();
 
-  const handleLoginSuccess = async (credentialResponse: any) => {
+  const handleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     const token = credentialResponse?.credential;
-    
     if (!token) {
       console.error("No se recibió el token de Google");
       return;
@@ -25,8 +25,8 @@ export default function RegistroGoogle({ onSuccessClose }: { onSuccessClose?: ()
 
       if (data.firstTime) {
         sessionStorage.setItem("google_token_temp", token);
-        router.push("/controlC/ubicacion");
-        return; 
+        router.push("../HU3/ubicacion");
+        return;
       }
 
       if (data.token) {
@@ -37,8 +37,7 @@ export default function RegistroGoogle({ onSuccessClose }: { onSuccessClose?: ()
         setUser(data.user);
       }
 
-      router.push("/controlC");
-
+      router.push("/");
     } catch (error) {
       console.error("Error al enviar el token al backend:", error);
     }
@@ -50,4 +49,3 @@ export default function RegistroGoogle({ onSuccessClose }: { onSuccessClose?: ()
     </div>
   );
 }
-

@@ -2,9 +2,8 @@
 
 import { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { api, ApiResponse } from "@/app/Home/lib/api";
+import { api, ApiResponse } from "../../lib/api";
 
-// ✅ Declaramos la interfaz para las props del componente
 interface LoginGoogleProps {
   onMensajeChange: (mensaje: string) => void;
 }
@@ -14,27 +13,26 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
 
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     setLoading(true);
-    onMensajeChange(""); // Limpia cualquier mensaje previo
+    onMensajeChange(""); 
 
     try {
-      const res: ApiResponse<any> = await api.post("/api/auth/google", {
+      const res: ApiResponse<any> = await api.post("auth/google", {
         credential: credentialResponse.credential,
         token: credentialResponse.credential,
         modo: "login",
       });
 
       if (res.success) {
-        onMensajeChange(`✅ ${res.data?.message ?? "Login con Google exitoso"}`);
-        // aquí puedes guardar el token si quieres:
+        onMensajeChange(`${res.data?.message ?? "Login con Google exitoso"}`);
+
         localStorage.setItem("servineo_token", res.data.token);
         localStorage.setItem("servineo_user", JSON.stringify(res.data.user));
-        // luego redirigir:
-        window.location.href = "/controlC";
+        window.location.href = "/";
       } else {
-        onMensajeChange(`❌ ${res.data?.message ?? res.error ?? "Error"}`);
+        onMensajeChange(`${res.data?.message ?? res.error ?? "Error"}`);
       }
     } catch (err: any) {
-      onMensajeChange(`❌ ${err?.message ?? "Error al conectar con el backend"}`);
+      onMensajeChange(`${err?.message ?? "Error al conectar con el backend"}`);
     } finally {
       setLoading(false);
     }
@@ -45,7 +43,7 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
       <div className="w-full flex justify-center">
         <GoogleLogin
           onSuccess={handleSuccess}
-          onError={() => onMensajeChange("❌ Error al iniciar con Google")}
+          onError={() => onMensajeChange("Error al iniciar con Google")}
         />
       </div>
     </div>

@@ -24,7 +24,7 @@ export async function enviarTokenGoogle(token: string): Promise<GoogleAuthRespon
     const res = await fetch(`${BASE_URL}/google/auth`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, modo: "registro"}),
+      body: JSON.stringify({ token }),
     });
 
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
@@ -66,6 +66,34 @@ export async function enviarUbicacion(lat: number, lng: number): Promise<Ubicaci
     return await res.json();
   } catch (error) {
     console.error("Error al enviar la ubicación al backend:", error);
+    throw error;
+  }
+}
+
+
+export interface RegistroResponse {
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: User;
+}
+
+export async function enviarRegistroManual(name: string, email: string, password: string): Promise<RegistroResponse> {
+  try {
+    const res = await fetch(`${BASE_URL}/registro/manual`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
+
+    if (!res.ok) {
+      const errorData = await res.json();
+      throw new Error(errorData.message || `Error ${res.status}`);
+    }
+
+    return await res.json();
+  } catch (error) {
+    console.error("Error al registrar manualmente:", error);
     throw error;
   }
 }

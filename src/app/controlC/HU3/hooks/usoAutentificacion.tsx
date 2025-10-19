@@ -1,15 +1,31 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { verificarSesionBackend } from "../services/conexionBackend";
+import { verificarSesionBackend, User } from "../services/conexionBackend";
 
-const AuthContext = createContext<any>(null);
+interface AuthContextType {
+  user: User | null;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  logout: () => void;
+  loading: boolean;
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Try to restore user optimistically from localStorage so UI updates immediately
+    try {
+      const userRaw = localStorage.getItem("servineo_user");
+      
+    } catch (e) {
+      console.error("Error parseando servineo_user desde localStorage:", e);
+      localStorage.removeItem("servineo_user");
+    }
+
     const token = localStorage.getItem("servineo_token");
 
     if (!token) {
@@ -20,15 +36,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     verificarSesionBackend(token)
       .then((data) => {
         if (data.valid) {
-          setUser(data.user);
+          if (data.user) setUser(data.user);
         } else {
           localStorage.removeItem("servineo_token");
           localStorage.removeItem("servineo_user");
+          setUser(null);
         }
       })
       .catch(() => {
         localStorage.removeItem("servineo_token");
         localStorage.removeItem("servineo_user");
+        setUser(null);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -37,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem("servineo_token");
     localStorage.removeItem("servineo_user");
     setUser(null);
-    window.location.href = "/controlC";
+    window.location.href = "/";
   };
 
   return (
@@ -47,6 +65,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 }
 
-export function useAuth() {
-  return useContext(AuthContext);
+export function useAuth(): AuthContextType {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth debe usarse dentro de un AuthProvider");
+  }
+  return context;
 }
