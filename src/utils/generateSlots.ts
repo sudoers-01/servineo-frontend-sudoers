@@ -3,6 +3,7 @@
 const API = process.env.NEXT_PUBLIC_BACKEND as string;
 
 import moment from 'moment';
+import axios from 'axios';
 
 export interface SlotEvent {
   title: string;
@@ -12,6 +13,7 @@ export interface SlotEvent {
   color?: string;
   id: string;
   cancelledByUser?: boolean;
+  isBreakTime?: boolean;
   editable?: boolean;
 }
 
@@ -88,9 +90,29 @@ function generateAvailableSlotsForMonth(month: number, year: number, fixerId: st
               end,
               booked: false,
               color: "#16A34A",
+              isBreakTime: false,
               id: `available-${fixerId}-${start.toISOString()}`
             });
           }
+        }
+
+        // Horarios no Disponibles 12 - 14
+        for(let hour = 12; hour < 14; hour++){
+          const start = new Date(current);
+          start.setHours(hour, 0, 0,0);
+          const end = new Date(start);
+          end.setHours(hour + 1);
+
+          slots.push({
+            title: "No Disponible",
+            start,
+            end,
+            booked: true,
+            editable: false,
+            color: "#64748B",
+            isBreakTime: true,
+            id: `occupied-${fixerId}-${start.toISOString()}`
+          });
         }
 
         // Horario tarde: 14-18
@@ -108,6 +130,7 @@ function generateAvailableSlotsForMonth(month: number, year: number, fixerId: st
               end,
               booked: false,
               color: "#16A34A",
+              isBreakTime: false,
               id: `available-${fixerId}-${start.toISOString()}`
             });
           }
@@ -138,23 +161,30 @@ export async function generateAvailableSlotsFromAPI(
   const now = new Date(); // Fecha y hora actual
 
   try {
+    // Consultas con axios
+    const [currentRequesterResponse, otherRequesterResponse] = await Promise.all([
+      axios.get(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month`, {
+        params: {
+          fixer_id: fixerId,
+          requester_id: requesterId,
+          month: month + 1
+        }
+      }),
+      axios.get(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month`, {
+        params: {
+          fixer_id: fixerId,
+          requester_id: requesterId,
+          month: month + 1
+        }
+      })
+    ]);
 
-    const currentRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
-    const otherRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
+    // Sin Axios
+    // const currentRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_current_requester_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
+    // const otherRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
 
-
-    //const currentRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_current_requester_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
-    //const otherRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
-
-    if (!currentRequesterResponse.ok) {
-      throw new Error(`Error HTTP: ${currentRequesterResponse.status}`);
-    }
-    if (!otherRequesterResponse.ok) {
-      throw new Error(`Error HTTP: ${otherRequesterResponse.status}`);
-    }
-
-    const currentRequesterFixerSchedules = await currentRequesterResponse.json();
-    const otherRequesterFixerSchedules = await otherRequesterResponse.json();
+    const currentRequesterFixerSchedules = currentRequesterResponse.data;
+    const otherRequesterFixerSchedules = otherRequesterResponse.data;
 
     //console.log("Schedules del requester actual:", currentRequesterFixerSchedules);
     //console.log("Schedules de otros requesters:", otherRequesterFixerSchedules);
@@ -229,8 +259,8 @@ export async function generateAvailableSlotsFromAPI(
     return filteredSlots;
     
   } catch (err) {
-    console.error("Error al generar los slots para el fixer:", fixerId, selectedDate, month ,err);
-    // En caso de error, generar solo los slots disponibles (solo futuros)
-    return generateAvailableSlotsForMonth(month, currentYear, fixerId);
+    console.log("Error al generar los slots para el fixer:", fixerId, selectedDate, month ,err);
+
+    throw new Error("No se pudieron cargar los horarios disponibles. Por favor, intenta más tarde.");
   }
 }
