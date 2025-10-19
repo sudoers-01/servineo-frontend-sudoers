@@ -25,16 +25,6 @@ export interface Schedule {
   lon: number;
 }
 
-export interface Schedule {
-  _id: string;
-  starting_time: string;
-  finishing_time: string;
-  schedule_state: string;
-  display_name: string;
-  lat: number;
-  lon: number;
-}
-
 //Combinar las Schedules pautadas de todos los requesters (que seran ocupadas) y las del requester que esta viendo el calendario de Fixer (booked)
 function combineAllSchedules(
   currentRequesterSchedules: Array<{ schedules: Schedule[] }>,
@@ -152,7 +142,6 @@ export async function generateAvailableSlotsFromAPI(
     const currentRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
     const otherRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
 
-    console.log("Fecha enviada: ", selectedDate);
 
     //const currentRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_current_requester_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
     //const otherRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
@@ -198,7 +187,7 @@ export async function generateAvailableSlotsFromAPI(
       switch (schedule.schedule_state) {
         case "occupied":
           slot.title = "No disponible";
-          slot.color = "#64748B";
+          slot.color = "#FF5F57";
           slot.booked = true;
           break;
         case "cancelled":

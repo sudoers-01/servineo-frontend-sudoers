@@ -5,12 +5,12 @@ import 'moment/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 
 import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm"; 
-
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "../../components/appointments/forms/EditAppointmentForm";
 import { generateAvailableSlotsFromAPI, SlotEvent } from "../../utils/generateSlots";
 
 import useMessage from "../../hooks/useMessage";
 import Message from "../../components/ui/Message";
+
 
 moment.locale('es');
 const localizer = momentLocalizer(moment);
@@ -40,18 +40,56 @@ export default function MyCalendarPage({
     const [loading, setLoading] = useState(true);
     const [currentDate, setCurrentDate] = useState(new Date());
     const [dayOccupied, changeDayState] = useState(false);
-      const { showMessage, messageState } = useMessage();
-      
+    const { showMessage, messageState } = useMessage();
+
+    // Función para verificar si una fecha está dentro de los próximos 6 meses
+    const isDateWithinNextSixMonths = (date: Date): boolean => {
+        const today = new Date();
+        const sixMonthsFromNow = new Date();
+        sixMonthsFromNow.setMonth(today.getMonth() + 6);
+        
+        // Reset hours to compare only dates
+        const dateToCheck = new Date(date);
+        dateToCheck.setHours(0, 0, 0, 0);
+        
+        const todayNormalized = new Date(today);
+        todayNormalized.setHours(0, 0, 0, 0);
+        
+        const sixMonthsNormalized = new Date(sixMonthsFromNow);
+        sixMonthsNormalized.setHours(23, 59, 59, 999); // End of day
+        
+        return dateToCheck >= todayNormalized && dateToCheck <= sixMonthsNormalized;
+    };
+
+    // Función para verificar si un mes está dentro de los próximos 6 meses
+    const isMonthWithinNextSixMonths = (date: Date): boolean => {
+        const today = new Date();
+        const sixMonthsFromNow = new Date();
+        sixMonthsFromNow.setMonth(today.getMonth() + 6);
+        
+        const dateToCheck = new Date(date.getFullYear(), date.getMonth(), 1);
+        const todayNormalized = new Date(today.getFullYear(), today.getMonth(), 1);
+        const sixMonthsNormalized = new Date(sixMonthsFromNow.getFullYear(), sixMonthsFromNow.getMonth() + 1, 0); // Last day of the month
+        
+        return dateToCheck >= todayNormalized && dateToCheck <= sixMonthsNormalized;
+    };
+
     const toggleDayState = (state : boolean) => {
         changeDayState(state);
     }
 
-    const formRef = useRef<AppointmentFormHandle | null>(null); // Cambiar el tipo de ref
+    const formRef = useRef<AppointmentFormHandle | null>(null);
     const editFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
-    // Cargar slots desde la API cuando cambie el mes
+    // Cargar slots desde la API cuando cambie el mes, solo si está dentro de los próximos 6 meses
     useEffect(() => {
-        loadSlotsFromAPI();
+        if (isMonthWithinNextSixMonths(currentDate)) {
+            loadSlotsFromAPI();
+        } else {
+            // Si el mes está fuera del rango, limpiar los eventos
+            setEvents([]);
+            setLoading(false);
+        }
     }, [currentDate.getMonth(), currentDate.getUTCFullYear(), fixerId, requesterId]);
 
     async function loadSlotsFromAPI() {
@@ -75,7 +113,6 @@ export default function MyCalendarPage({
             }));
 
             setEvents(myEvents);
-            console.log(`Se cargaron ${myEvents.length} slots desde la API`);
         } catch (error) {
             console.error("Error al cargar slots desde API:", error);
             setEvents([]);
@@ -87,7 +124,6 @@ export default function MyCalendarPage({
 
     const checkDayAvailability = (dateToCheck: Date) => {
         const dayEvents = events.filter(event => {
-
             const eventDate = new Date(event.start);
             return (
                 eventDate.getDate() === dateToCheck.getDate() &&
@@ -100,7 +136,6 @@ export default function MyCalendarPage({
         toggleDayState(notAvailable);
         console.log(dateToCheck, notAvailable);
     };
-
 
     function handleSelectEvent(ev: MyEvent) {
     if (ev.booked && !ev.editable) {
@@ -125,16 +160,19 @@ export default function MyCalendarPage({
         return;
     }
 
-    // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
-    if (currentView === Views.DAY) {
-        const viewedDate = new Date(currentDate);
-        viewedDate.setHours(0, 0, 0, 0);
+        // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
+        // o está fuera de los próximos 6 meses
+        if (currentView === Views.DAY) {
+            const viewedDate = new Date(currentDate);
+            viewedDate.setHours(0, 0, 0, 0);
 
-        const today = new Date();
-        if (viewedDate < today) {
-            return;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (viewedDate < today || !isDateWithinNextSixMonths(viewedDate)) {
+                return;
+            }
         }
-    }
 
     const start = slotInfo.start;
     const day = start.getDay();
@@ -182,20 +220,20 @@ export default function MyCalendarPage({
         !e.booked
     );
 
-    // Si no existe, crear un slot disponible temporal
-    // if (!existing) {
-    //     const newEvent: MyEvent = {
-    //         title: "Disponible",
-    //         start,
-    //         end: new Date(start.getTime() + 60 * 60 * 1000),
-    //         booked: false,
-    //         id: `temp-${dtISO}`,
-    //         color: "#16A34A"
-    //     };
+        // Si no existe, crear un slot disponible temporal
+        // if (!existing) {
+        //     const newEvent: MyEvent = {
+        //         title: "Disponible",
+        //         start,
+        //         end: new Date(start.getTime() + 60 * 60 * 1000),
+        //         booked: false,
+        //         id: `temp-${dtISO}`,
+        //         color: "#16A34A"
+        //     };
 
-    //     setEvents(prev => [...prev, newEvent]);
-    //     existing = newEvent;
-    // }
+        //     setEvents(prev => [...prev, newEvent]);
+        //     existing = newEvent;
+        // }
 
     // Abrir formulario para el slot disponible
     if (existing && !existing.booked) {
@@ -206,7 +244,6 @@ export default function MyCalendarPage({
         if (!event.booked || !event.editable) return;
 
         try {
-            //const API = process.env.NEXT_PUBLIC_BACKEND;
             const API = process.env.NEXT_PUBLIC_BACKEND as string;
             const dateObj = new Date(event.start);
             console.log(dateObj);
@@ -217,10 +254,6 @@ export default function MyCalendarPage({
             console.log(fixerId);
             console.log(requesterId);
             const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date}&start_hour=${start_hour}`;
-            //const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=uuid-fixer-1234&requester_id=uuid-user-4567&appointment_date=2025-10-17&start_hour=12`;
-            //console.log(url);
-            //http://localho/api/crud_read/appointments/get_modal_form?fixer_id=uuid-fixer-1234&requester_id=uuid-user-9824&appointment_date=2025-10-15&start_hour=17
-            //https://servineo-backend-lorem.onrender.com/api/crud_read/appointments/get_modal_form?fixer_id={value}&requester_id={value}&appointment_date={value}&start_hour={value}
             console.log('Intentando fetch a:', url);
             const res = await fetch(url);
             if (!res.ok) {
@@ -254,12 +287,18 @@ export default function MyCalendarPage({
 
     // Manejar cambio de navegación en el calendario
     const handleNavigate = (newDate: Date) => {
-        setCurrentDate(newDate);
+        // Solo permitir navegación si la fecha está dentro de los próximos 6 meses
+        if (isMonthWithinNextSixMonths(newDate)) {
+            setCurrentDate(newDate);
+            //console.log("(desde navegacion) Fecha:", newDate);
 
-        if (currentView === Views.DAY) {
-            setTimeout(() => {
-                checkDayAvailability(newDate);
-            }, 50);
+            if (currentView === Views.DAY) {
+                setTimeout(() => {
+                    checkDayAvailability(newDate);
+                }, 50);
+            }
+        } else {
+            console.log("Navegación bloqueada: fecha fuera del rango de 6 meses");
         }
     };
 
@@ -302,12 +341,16 @@ export default function MyCalendarPage({
                 return next;
             });
 
-            setTimeout(() => loadSlotsFromAPI(), 1000);
+            setTimeout(() => {
+                if (isMonthWithinNextSixMonths(currentDate)) {
+                    loadSlotsFromAPI();
+                }
+            }, 1000);
         };
 
         window.addEventListener("booking:created", onCreated);
         return () => window.removeEventListener("booking:created", onCreated);
-    }, []);
+    }, [currentDate]);
 
     function eventStyleGetter(event: MyEvent) {
         const backgroundColor = event.color || "#10B981";
@@ -324,6 +367,31 @@ export default function MyCalendarPage({
         };
     }
 
+    const slotPropGetter = (date: Date) => {
+        // Solo aplicar en vista SEMANAL
+        if (currentView === Views.WEEK) {
+            const today = new Date();
+            const slotDate = new Date(date);
+            
+            // Comparar día, mes y año
+            const isToday = 
+                slotDate.getDate() === today.getDate() &&
+                slotDate.getMonth() === today.getMonth() &&
+                slotDate.getFullYear() === today.getFullYear();
+            
+            if (isToday) {
+                return {
+                    style: {
+                        backgroundColor: 'rgb(43, 106, 224)',
+                        color: 'white'
+                    }
+                };
+            }
+        }
+
+        return {};
+    }
+
     const dayPropGetter = (date: Date) => {
         const day = date.getDay();
         const isWeekend = day === 0 || day === 6;
@@ -331,6 +399,17 @@ export default function MyCalendarPage({
         const isToday = date.getDate() === today.getDate() &&
             date.getMonth() === today.getMonth() &&
             date.getUTCFullYear() === today.getUTCFullYear();
+
+        // Verificar si la fecha está fuera de los próximos 6 meses
+        if (!isDateWithinNextSixMonths(date)) {
+            return {
+                style: {
+                    backgroundColor: '#f8f9fa',
+                    color: '#adb5bd',
+                    cursor: 'not-allowed'
+                }
+            };
+        }
 
         if (currentView === Views.DAY) {
             const viewedDate = new Date(date);
@@ -346,8 +425,6 @@ export default function MyCalendarPage({
                         color: '#adb5bd',
                         cursor: 'not-allowed'
                     }
-
-
                 };
             }
         }
@@ -381,8 +458,8 @@ export default function MyCalendarPage({
 
     const handleViewChange = (view: View) => {
         setCurrentView(view);
+        //console.log("(desde vistas) Fecha:", currentDate);
 
-        // ! De momento no tiene uso, ReactBigCalendar no actualiza las fechas en onView
         if (view === Views.DAY) {
             setTimeout(() => {
                 checkDayAvailability(currentDate);
@@ -392,14 +469,13 @@ export default function MyCalendarPage({
         }
     };
 
-    // TODO en fixerId debe ir el nombre: consulta backend
     return (
         <div className="max-w-6xl mx-auto p-4">
             <h1 className="text-2xl font-semibold mb-4 text-black">
                 Calendario de {fixerId}
                 {
-                    dayOccupied && 
-                    <span className="text-red-500 ml-4"> - No hay horarios disponibles</span>
+                    dayOccupied && currentView == Views.DAY && 
+                    <span className="text-red-500 ml-4"> No hay horarios disponibles</span>
                 }
             </h1> 
 
@@ -426,6 +502,7 @@ export default function MyCalendarPage({
                     onSelectSlot={(slotInfo) => handleSelectSlot(slotInfo)}
                     eventPropGetter={(event) => eventStyleGetter(event as MyEvent)}
                     dayPropGetter={dayPropGetter}
+                    slotPropGetter={slotPropGetter}
                     min={new Date(0, 0, 0, 8, 0, 0)}
                     max={new Date(0, 0, 0, 18, 0, 0)}
                     popup
