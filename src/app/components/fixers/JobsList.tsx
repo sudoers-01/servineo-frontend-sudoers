@@ -1,10 +1,12 @@
 'use client';
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Job } from '@/types/job';
 import RequestedJob from './RequestedJob';
 
 export default function JobsList({ jobs }: { jobs: Job[] }) {
+  const router = useRouter();
   if (!jobs || jobs.length === 0) {
     return (
       <div className='rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-500'>
@@ -22,7 +24,7 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
           jobTitle={job.title}
           schedule={formatSchedule(job.createdAt)}
           state={job.status}
-          onAppointmentDetails={() => console.log('appointment details', job)}
+          onAppointmentDetails={() => router.push(`/requested-jobs/${job._id}`)}
           onRegisterJob={() => console.log('register job', job)}
         />
       ))}

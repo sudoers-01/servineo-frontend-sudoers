@@ -1,5 +1,6 @@
 'use client';
 import { useParams } from 'next/navigation';
+import { apiUrl } from '@/config/api';
 import { useEffect, useState } from 'react';
 
 interface Job {
@@ -16,7 +17,6 @@ export default function JobDetailsPage() {
 
   useEffect(() => {
     if (!id) {
-      // Si no hay id, inicializamos con campos vacíos
       setJob({
         id: '',
         client: '',
@@ -29,7 +29,7 @@ export default function JobDetailsPage() {
 
     const fetchJob = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/requested-jobs/${id}`);
+        const res = await fetch(apiUrl(`api/requested-jobs/${id}`));
         if (!res.ok) throw new Error('Job not found');
         const data = await res.json();
 
@@ -61,7 +61,7 @@ export default function JobDetailsPage() {
 
   if (loading) {
     return (
-      <main className='h-screen flex items-center justify-center text-gray-500'>
+      <main className='h-screen flex items-center justify-center text-gray-500 bg-white'>
         Loading job details...
       </main>
     );

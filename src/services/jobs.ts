@@ -1,10 +1,9 @@
 import { Job } from '@/types/job';
-
-const BASE_URL = process.env.BACKEND_BASE_URL || 'http://localhost:3000';
+import { apiUrl } from '@/config/api';
 
 export async function getJobsByFixerId(fixerId: string, init?: RequestInit): Promise<Job[]> {
   if (!fixerId) throw new Error('fixerId is required');
-  const url = `${BASE_URL}/api/fixers/${encodeURIComponent(fixerId)}/jobs`;
+  const url = apiUrl(`api/fixers/${encodeURIComponent(fixerId)}/jobs`);
   if (process.env.NODE_ENV !== 'production') {
     console.debug('[jobs] GET:', url);
   }

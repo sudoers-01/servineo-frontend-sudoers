@@ -49,7 +49,7 @@ export default function RateJobModal({ isOpen, onClose }) {
   // 🔹 5. Estructura visual del modal
   // -----------------------------
   return (
-    <div className='fixed inset-0 bg-black bg-opacity-40 flex justify-center items-center z-50'>
+    <div className='fixed inset-0 bg-black/40 flex justify-center items-center z-50'>
       <div className='bg-white rounded-2xl shadow-lg p-6 w-96'>
         <h2 className='text-xl font-bold text-[#2B31E0] mb-4'>Rate Job</h2>
 

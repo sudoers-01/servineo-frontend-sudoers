@@ -1,9 +1,8 @@
 import { UserLocation, CreateJobRequestPayload } from '../types/job-request';
-
-const API_URL = 'http://localhost:3000';
+import { apiUrl } from '@/config/api';
 
 export async function getUserLocation(token: string): Promise<UserLocation> {
-  const res = await fetch(`${API_URL}/api/profile/location`, {
+  const res = await fetch(apiUrl('api/profile/location'), {
     headers: { Authorization: `Bearer ${token}` },
   });
 
@@ -20,7 +19,7 @@ export async function createJobRequest(
   payload: CreateJobRequestPayload,
   token: string,
 ): Promise<unknown> {
-  const res = await fetch(`${API_URL}/api/jobrequests`, {
+  const res = await fetch(apiUrl('api/jobrequests'), {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

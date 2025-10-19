@@ -1,5 +1,7 @@
 'use client';
 import React, { useEffect, useState } from 'react';
+import { apiUrl } from '@/config/api';
+import RateJobModal from '@/app/components/RateJobModal';
 
 interface Job {
   id: string;
@@ -11,9 +13,10 @@ interface Job {
 const JobsGrid = () => {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:3000/api/jobs/completed')
+    fetch(apiUrl('api/jobs/completed'))
       .then((res) => res.json())
       .then((data) => {
         setJobs(data);
@@ -27,7 +30,11 @@ const JobsGrid = () => {
   }, []);
 
   if (loading) {
-    return <div className='text-center py-10 text-black'>Loading completed jobs...</div>;
+    return (
+      <main className='h-screen flex items-center justify-center text-gray-500 bg-white'>
+        Loading completed jobs...
+      </main>
+    );
   }
 
   return (
@@ -60,7 +67,10 @@ const JobsGrid = () => {
                 </div>
 
                 <div className='flex-shrink-0'>
-                  <button className='border rounded-lg px-4 py-2 text-white bg-[#1AA7ED] hover:bg-[#178AC3] transition-colors'>
+                  <button
+                    onClick={() => setIsModalOpen(true)}
+                    className='border rounded-lg px-4 py-2 text-white bg-[#1AA7ED] hover:bg-[#178AC3] transition-colors'
+                  >
                     Rate job
                   </button>
                 </div>
@@ -69,6 +79,7 @@ const JobsGrid = () => {
           </div>
         </div>
       )}
+      <RateJobModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
     </div>
   );
 };

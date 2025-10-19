@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { apiUrl } from '@/config/api';
 type ProfileData = {
   name: string;
   photo_url: string;
@@ -11,7 +12,6 @@ type ProfileData = {
   average_rating: number;
   rating_count: number;
 };
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 export const useProfile = (userId: string | undefined) => {
   const [data, setData] = useState<ProfileData | null>(null);
   const [errors, setErrors] = useState<string | null>(null);
@@ -24,35 +24,40 @@ export const useProfile = (userId: string | undefined) => {
 
     const fetchData = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/profile/${userId}`, {
+        const url = apiUrl(`api/profile/${userId}`);
+        const response = await fetch(url, {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' },
+          cache: 'no-store',
         });
-
-        if (response.ok) {
-          const result = await response.json();
-          setData(result);
-        } else {
-          switch (response.status) {
+        if (!response.ok) {
+          const status = response.status;
+          const bodyText = await response.text().catch(() => '');
+          let message = 'Unknown error';
+          switch (status) {
             case 400:
-              setErrors('Invalid ID');
+              message = 'Invalid ID';
               break;
             case 422:
-              setErrors('Invalid ID format');
+              message = 'Invalid ID format';
               break;
             case 404:
-              setErrors('User not found');
+              message = 'User not found';
               break;
             case 500:
-              setErrors('Server error');
+              message = 'Server error';
               break;
             default:
-              setErrors('Unknown error');
+              message = bodyText || `Error ${status}`;
           }
+          setErrors(message);
+          return;
         }
+        const result = await response.json();
+        setData(result);
       } catch (error) {
         console.error('Crash: Error fetching profile data:', error);
-        setErrors('Unknown error');
+        setErrors('Network error');
       }
     };
 

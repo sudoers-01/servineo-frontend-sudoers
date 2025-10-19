@@ -20,31 +20,34 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
     const initMap = async () => {
       try {
         const L = await import('leaflet');
-        
+
         delete L.Icon.Default.prototype._getIconUrl;
         L.Icon.Default.mergeOptions({
-          iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+          iconRetinaUrl:
+            'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
           iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-          shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+          shadowUrl:
+            'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
         });
 
         const map = L.map(mapRef.current).setView(initialPosition, 15);
         mapInstanceRef.current = map;
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          attribution:
+            '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         }).addTo(map);
 
-        const marker = L.marker(initialPosition, { 
-          draggable: true 
+        const marker = L.marker(initialPosition, {
+          draggable: true,
         }).addTo(map);
         markerRef.current = marker;
 
-        marker.on('dragend', function() {
+        marker.on('dragend', function () {
           const position = marker.getLatLng();
-          onPositionChange({ 
-            lat: position.lat, 
-            lng: position.lng 
+          onPositionChange({
+            lat: position.lat,
+            lng: position.lng,
           });
         });
 
@@ -55,7 +58,6 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
         }
 
         setMapReady(true);
-        
       } catch (error) {
         console.error('Error initializing map:', error);
       }
@@ -97,7 +99,7 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
     const L = await import('leaflet');
     const map = mapInstanceRef.current;
     const marker = markerRef.current;
-    
+
     if (map && marker) {
       map.dragging.enable();
       map.touchZoom.enable();
@@ -106,7 +108,7 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
       map.boxZoom.enable();
       map.keyboard.enable();
       marker.dragging.enable();
-      
+
       if (mapRef.current) {
         mapRef.current.style.pointerEvents = 'auto';
         mapRef.current.style.opacity = '1';
@@ -118,7 +120,7 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
     const L = await import('leaflet');
     const map = mapInstanceRef.current;
     const marker = markerRef.current;
-    
+
     if (map && marker) {
       map.dragging.disable();
       map.touchZoom.disable();
@@ -127,7 +129,7 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
       map.boxZoom.disable();
       map.keyboard.disable();
       marker.dragging.disable();
-      
+
       if (mapRef.current) {
         mapRef.current.style.pointerEvents = 'none';
         mapRef.current.style.opacity = '0.6';
@@ -136,18 +138,17 @@ const MapJobRequest = ({ isEnabled, initialLocationObject, onPositionChange }) =
   };
 
   return (
-    <div 
-      ref={mapRef} 
-      className="map-container"
-    >
+    <div ref={mapRef} className='map-container'>
       {!mapReady && (
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          height: '100%',
-          color: '#666'
-        }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            height: '100%',
+            color: '#666',
+          }}
+        >
           Cargando mapa...
         </div>
       )}
