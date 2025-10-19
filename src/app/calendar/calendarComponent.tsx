@@ -23,6 +23,7 @@ interface MyEvent {
     booked: boolean;
     color?: string;
     cancelledByUser?: boolean;
+    isBreakTime?: boolean;
     editable?: boolean;
 }
 
@@ -108,6 +109,7 @@ export default function MyCalendarPage({
                 id: slot.id,
                 booked: slot.booked,
                 color: slot.color,
+                isBreakTime: slot.isBreakTime,
                 cancelledByUser: slot.cancelledByUser,
                 editable: slot.editable
             }));
@@ -116,6 +118,14 @@ export default function MyCalendarPage({
         } catch (error) {
             console.error("Error al cargar slots desde API:", error);
             setEvents([]);
+
+            // Mensaje de fallo de conexión
+            showMessage({
+                message: "No se pudieron generar los horarios disponibles. Por favor, intenta más tarde.",
+                type: 'error',
+                title: 'Error al cargar horarios'
+            });
+
         } finally {
             setLoading(false);
         }
@@ -139,11 +149,18 @@ export default function MyCalendarPage({
 
     function handleSelectEvent(ev: MyEvent) {
     if (ev.booked && !ev.editable) {
-        showMessage({
-            message: "Este horario está ocupado por otra persona y no es editable",
-            type: 'warning',
-            title: 'No Disponible'
-        });
+        if(ev.isBreakTime){
+            showMessage({
+                message: "Horario no laboral. Solo de 8:00-12:00 y 14:00-18:00",
+                type: 'info'
+            });
+        } else {
+            showMessage({
+                message: "Este horario está ocupado por otra persona y no es editable",
+                type: 'warning',
+                title: 'No Disponible'
+            });
+        }
         return;
     }
     
@@ -170,7 +187,7 @@ export default function MyCalendarPage({
             today.setHours(0, 0, 0, 0);
 
             if (viewedDate < today || !isDateWithinNextSixMonths(viewedDate)) {
-                return;
+                //return;
             }
         }
 
@@ -182,15 +199,6 @@ export default function MyCalendarPage({
     if (day < 1 || day > 5) {
         showMessage({
             message: "Solo se permiten citas de lunes a viernes",
-            type: 'info'
-        });
-        return;
-    }
-
-    // Validar horario laboral (8-12 y 14-18)
-    if (!((hour >= 8 && hour < 12) || (hour >= 14 && hour < 18))) {
-        showMessage({
-            message: "Horario no laboral. Solo de 8:00-12:00 y 14:00-18:00",
             type: 'info'
         });
         return;
