@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import RateJobButton from './components/RateJobButton';
+import JobRequesButoon from './components/job-requests/JobRequestButton';
 
 export default function Home() {
   return (
@@ -54,6 +55,10 @@ export default function Home() {
         <div className='mt-10 flex justify-center w-full'>
           <RateJobButton />
         </div>
+
+        <div className='mt-10 flex justify-center w-full'>
+          <JobRequesButoon/>
+        </div> 
       </main>
 
       <footer className='row-start-3 flex gap-[24px] flex-wrap items-center justify-center'>

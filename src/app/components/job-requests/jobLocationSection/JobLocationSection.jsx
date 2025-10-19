@@ -1,5 +1,5 @@
 'use client';
-import MapJobRequest from './MapJobRequest';
+import MapJobRequest from '../mapJobRequest/MapJobRequest';
 
 export default function JobLocationSection({
   formData,

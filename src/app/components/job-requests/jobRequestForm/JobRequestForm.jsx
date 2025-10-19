@@ -1,5 +1,5 @@
 'use client';
-import JobLocationSection from './JobLocationSection';
+import JobLocationSection from '../jobLocationSection/JobLocationSection';
 
 export default function JobRequestForm({
   formData,

@@ -1,6 +1,6 @@
 'use client';
 import { useJobRequest } from './hooks/useJobRequest';
-import JobRequestForm from './JobRequestForm';
+import JobRequestForm from './jobRequestForm/JobRequestForm';
 import './JobRequestModal.css';
 
 export default function JobRequestModal({ isOpen, onClose, onSubmit }) {
