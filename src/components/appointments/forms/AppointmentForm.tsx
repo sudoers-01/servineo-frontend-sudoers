@@ -5,31 +5,40 @@ import { z } from "zod";
 import LocationModal from "./LocationModal"; // Para seleccionar ubicación
 import AppointmentSummaryModal from "./AppointmentSummaryModal"; // Para mostrar resumen
 
-// Tipo del handle para poder abrir/cerrar el formulario desde el padre
 export type AppointmentFormHandle = {
   open: (datetimeISO: string, meta?: { eventId?: string; title?: string }) => void;
   close: () => void;
 };
 
-// Props del componente
 interface AppointmentFormProps {
   onNextStep?: (appointmentData: any) => void;
   fixerId: string;
   requesterId: string;
 }
 
-// Esquema de validación Zod
+// Zod esquema de validación actualizado
 const appointmentSchema = z.object({
-  client: z.string().min(1, "Ingrese el nombre del cliente").regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre válido"),
-  contact: z.string().min(1, "Ingrese un número de contacto").regex(/^[67]\d{7}$/, "Ingrese un teléfono válido"),
-  description: z.string().min(1, "Ingrese una descripción").max(300, "Máximo 300 caracteres"),
+  client: z.string()
+    .nonempty("Ingrese un nombre válido")
+    .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre válido"),
+  contact: z.string()
+    .nonempty("Ingrese un teléfono válido")
+    .regex(/^[67]\d{7}$/, "Ingrese un teléfono válido"),
+  description: z.string()
+    .nonempty("Ingrese una descripción válida")
+    .regex(/^[A-Za-z0-9\s.,#\-_]{1,300}$/, "Ingrese una descripción válida"),
   modality: z.enum(["virtual", "presential"]),
-  meetingLink: z.string().optional(),
+  meetingLink: z.string()
+    .optional()
+    .refine(
+      val => !val || /^(https?:\/\/)?(meet\.google\.com|zoom\.us)\/[^\s]+$/.test(val),
+      { message: "Ingrese un enlace válido de Meet o Zoom" }
+    ),
   location: z.object({
     lat: z.number(),
     lon: z.number(),
-    address: z.string().min(1, "Seleccione una ubicación")
-  }).optional(),
+    address: z.string()
+  }).optional()
 }).refine(data => {
   if (data.modality === "virtual") return !!data.meetingLink;
   if (data.modality === "presential") return !!data.location;
@@ -40,7 +49,6 @@ const appointmentSchema = z.object({
 });
 
 const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ onNextStep, fixerId, requesterId }, ref) => {
-  // Estado del formulario
   const [open, setOpen] = useState(false);
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
@@ -54,7 +62,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [meta, setMeta] = useState<{ eventId?: string; title?: string } | null>(null);
 
-  // Modales
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [summaryData, setSummaryData] = useState<{
@@ -66,11 +73,11 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     description?: string;
   } | null>(null);
 
-  // Refs
+  const [canSubmit, setCanSubmit] = useState(false);
+
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
-  // Handle de apertura/cierre desde el padre
   useImperativeHandle(ref, () => ({
     open: (dt: string, m?: { eventId?: string; title?: string }) => {
       setDatetime(dt);
@@ -81,7 +88,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     close: () => handleClose()
   }), []);
 
-  // Escape para cerrar
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape" && open) handleClose();
@@ -90,7 +96,18 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
-  // Reset del formulario
+  // Habilitar botón solo si todos los campos visibles están llenos
+  useEffect(() => {
+    const allRequiredFilled =
+      client.trim() !== "" &&
+      contact.trim() !== "" &&
+      description.trim() !== "" &&
+      ((modality === "virtual" && meetingLink.trim() !== "") ||
+        (modality === "presential" && location !== null));
+
+    setCanSubmit(allRequiredFilled);
+  }, [client, contact, description, modality, meetingLink, location]);
+  
   function handleClose() {
     setOpen(false);
     setClient("");
@@ -103,7 +120,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     setErrors({});
   }
 
-  // Ajuste de datetime
   function parseDatetime(datetimeISO: string) {
     const start = new Date(datetimeISO);
     const end = new Date(start.getTime() + 60 * 60 * 1000);
@@ -116,14 +132,12 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     };
   }
 
-  // Confirmar ubicación desde LocationModal
   const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
     setLocation(locationData);
     setPlace(locationData.address);
     setShowLocationModal(false);
   };
 
-  // Submit con Zod + Axios
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErrors({});
@@ -133,11 +147,10 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       contact,
       description,
       modality,
-      meetingLink,
+      meetingLink: modality === "virtual" ? meetingLink : undefined,
       location: modality === "presential" ? location : undefined,
     };
 
-    // Validación Zod
     const validation = appointmentSchema.safeParse(formData);
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
@@ -146,7 +159,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
         if (field) fieldErrors[field as string] = err.message;
       });
       setErrors(fieldErrors);
-      return;
+      return; // No enviar si hay errores
     }
 
     const { selected_date, starting_time } = parseDatetime(datetime);
@@ -172,7 +185,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       const data = res.data;
 
       if (data.success) {
-        // Mostrar resumen
         setSummaryData({
           name: client,
           date: new Date(payload.starting_time).toLocaleDateString(),
@@ -182,7 +194,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
           description,
         });
         setShowSummary(true);
-        // handleClose(); <-- BORRAR o comentar
       }
     } catch (err: any) {
       console.error(err);
@@ -221,7 +232,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
             </div>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
-              {/* Fecha y modalidad */}
+              {/* Campos del formulario */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
                 <label className="block">
                   <span className="text-sm font-medium">Fecha y hora *</span>
@@ -245,7 +256,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 </label>
               </div>
 
-              {/* Cliente y contacto */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
                   <span className="text-sm font-medium">Cliente *</span>
@@ -270,7 +280,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 </label>
               </div>
 
-              {/* Descripción */}
               <label className="block">
                 <span className="text-sm font-medium">Descripción del trabajo *</span>
                 <textarea
@@ -283,7 +292,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
               </label>
 
-              {/* Ubicación o link */}
               {modality === "presential" && (
                 <>
                   <div
@@ -294,11 +302,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                       📍 {place ? "Editar ubicación" : "Seleccionar ubicación"}
                     </p>
                   </div>
-                  {place && (
-                    <p className="text-sm text-green-700 px-2 mt-1">
-                      📌 Ubicación: {place}
-                    </p>
-                  )}
+                  {place && <p className="text-sm text-green-700 px-2 mt-1">📌 Ubicación: {place}</p>}
                   {errors.location && <p className="text-red-600 text-sm mt-1">{errors.location}</p>}
                 </>
               )}
@@ -316,10 +320,8 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 </label>
               )}
 
-              {/* Errores generales */}
               {errors.general && <p className="text-red-600 text-sm mt-1">{errors.general}</p>}
 
-              {/* Botones */}
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -330,7 +332,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || (modality === "presential" && !place)}
+                  disabled={loading || !canSubmit}
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? "Guardando..." : "Añadir"}
@@ -341,21 +343,21 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
         </div>
       </div>
 
-      {/* Modales */}
       <LocationModal
         open={showLocationModal}
         onClose={() => setShowLocationModal(false)}
         onConfirm={handleLocationConfirm}
         initialCoords={location}
       />
+
       {summaryData && (
         <AppointmentSummaryModal
           open={showSummary}
           onClose={() => {
             setShowSummary(false);
-            handleClose(); // Limpiar formulario después de ver resumen
+            handleClose();
           }}
-          data={summaryData!}
+          data={summaryData}
         />
       )}
     </>
