@@ -7,8 +7,8 @@ import MobileList from "@/components/list/MobileList";
 
 export default function CalendarPage() {
     // Para cambiar los fixerId y los requesterId, en un futuro se sacarán de la sesión
-    const fixerId = "uuid-fixer-1234";
-    const [requesterId, setRequesterId] = useState("uuid-user-4567");
+    const fixerId = "user_fixer_1234";
+    const [requesterId, setRequesterId] = useState("user_requester_5678");
     // const [showRequesterIdInput, setShowRequesterIdInput] = useState(false);
 
     const router = useRouter();
