@@ -216,8 +216,8 @@ export async function generateAvailableSlotsFromAPI(
     const currentRequesterFixerSchedules = currentRequesterResponse.data;
     const otherRequesterFixerSchedules = otherRequesterResponse.data;
 
-    console.log("Schedules del requester actual:", currentRequesterFixerSchedules);
-    console.log("Schedules de otros requesters:", otherRequesterFixerSchedules);
+    //console.log("Schedules del requester actual:", currentRequesterFixerSchedules);
+    //console.log("Schedules de otros requesters:", otherRequesterFixerSchedules);
 
     const fixerSchedules: Schedule[] = combineSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
 
@@ -227,7 +227,7 @@ export async function generateAvailableSlotsFromAPI(
 
     //   console.log(schedule ,start, end);
     // }
-    console.log("Desde generateSlots:", fixerSchedules);
+    //console.log("Desde generateSlots:", fixerSchedules);
 
     // Generar todos los slots disponibles para el mes (solo futuros)
     const availableSlots = generateAvailableSlotsForMonth(month, currentYear, fixerId);
@@ -285,7 +285,7 @@ export async function generateAvailableSlotsFromAPI(
 
     // Ordenar por fecha
     filteredSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
-    console.log(filteredSlots);
+
     return filteredSlots;
     
   } catch (err) {
