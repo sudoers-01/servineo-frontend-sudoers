@@ -17,6 +17,7 @@
     "@mui/x-date-pickers": "^8.14.0",
     "autoprefixer": "^10.4.21",
     "axios": "^1.12.2",
+    "ci": "^2.3.0",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
     "mongoose": "^8.19.1",
