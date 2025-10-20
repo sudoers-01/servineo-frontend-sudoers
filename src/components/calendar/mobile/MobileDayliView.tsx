@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import axios from "axios";
 import AppointmentForm from "../../appointments/forms/AppointmentForm";
 import type { AppointmentFormHandle } from "../../appointments/forms/AppointmentForm";
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
@@ -8,9 +9,9 @@ import type {
   ExistingAppointment,
 } from "../../appointments/forms/EditAppointmentForm";
 
-const USE_BACKEND = true; 
-const API = process.env.NEXT_PUBLIC_BACKEND as string;
-const AVAILABILITY_URL = `${API}/api/crud_read/appointments/get_meeting_status`;
+const AVAILABILITY_URL =
+  "https://servineo-backend-lorem.onrender.com/api/crud_read/appointments/get_meeting_status";
+const DEFAULT_FIXER_NAME = "John";
 
 interface DayScheduleProps {
   fixerId: string;
@@ -20,7 +21,7 @@ interface DayScheduleProps {
 
 interface HorarioItem {
   id_Horario: string;
-  Hora_Inicio: string; 
+  Hora_Inicio: string;
   estado_Horario: "libre" | "ocupado" | "no_disponible";
   cliente?: string;
   contacto?: string;
@@ -38,10 +39,20 @@ interface DayData {
 }
 
 type Icon = "＋" | "✎" | null;
+type ApiStatus = "occupied" | "cancelled" | "booked" | "available";
 
+interface HourApiResponse {
+  message: string;
+  name: string;
+  status: ApiStatus;
+}
 
+function ymdToLocalDate(ymd: string) {
+  const [y, m, d] = ymd.split("-").map(Number);
+  return new Date(y, m - 1, d);
+}
 function toYMDAny(d: Date | string) {
-  const date = typeof d === "string" ? new Date(`${d}T00:00:00`) : d;
+  const date = typeof d === "string" ? ymdToLocalDate(d) : d;
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
@@ -57,53 +68,16 @@ function hourIntsRange(start = 8, end = 18) {
 function formatHourDisplay(h: number) {
   return `${String(h).padStart(2, "0")}:00`;
 }
-
-
-const MOCK_FIXER_NAME = "Juan";
-
-function mockHorarios(fechaYMD: string): { nombre_Fixer: string; horarios: HorarioItem[] } {
-  const horarios = hourIntsRange(8, 18).map<HorarioItem>((h) => {
-    const estado: HorarioItem["estado_Horario"] =
-      h % 2 === 0 ? "libre" : h % 5 === 0 ? "no_disponible" : "ocupado";
-
-    const base: HorarioItem = {
-      id_Horario: `${fechaYMD}-${String(h).padStart(2, "0")}`,
-      Hora_Inicio: formatHourDisplay(h),
-      estado_Horario: estado,
-    };
-
-    if (estado === "ocupado") {
-      base.cliente = "Juan Pérez";
-      base.contacto = "+591 7xx xx xx";
-      base.modalidad = "virtual";
-      base.descripcion = "Trabajo en curso";
-      base.lugar = "Av. Siempre Viva 123";
-      base.meetingLink = "https://meet.mock/abc";
-    }
-
-    return base;
-  });
-
-  return { nombre_Fixer: MOCK_FIXER_NAME, horarios };
-}
-
-
-type HourApiStatus = "available" | "partial" | "occuped";
-
-interface HourApiResponse {
-  message: string;
-  status: HourApiStatus;
-  name: string; 
-}
-
-function mapApiToEstado(status: HourApiStatus): HorarioItem["estado_Horario"] {
-  switch (status) {
-    case "available":
-      return "libre";  
-    case "partial":
-      return "ocupado";
-    case "occuped":
+function mapApiToEstado(s: ApiStatus): HorarioItem["estado_Horario"] {
+  switch (s) {
+    case "occupied":
       return "no_disponible";
+    case "booked":
+      return "ocupado";
+    case "available":
+      return "libre";
+    case "cancelled":
+      return "libre";
     default:
       return "no_disponible";
   }
@@ -111,23 +85,18 @@ function mapApiToEstado(status: HourApiStatus): HorarioItem["estado_Horario"] {
 
 
 async function fetchHour(
-  baseUrl: string,
-  fixerId: string,
-  requesterId: string,
-  ymd: string,
-  hourInt: number
+  id_fixer: string,
+  id_requester: string,
+  selected_date: string,
+  starting_time: number
 ): Promise<HourApiResponse> {
-  const url = new URL(baseUrl);
-  url.searchParams.set("fixerId", fixerId);
-  url.searchParams.set("requesterId", requesterId);
-  url.searchParams.set("date", ymd);
-  url.searchParams.set("hour", String(hourInt));
-
-  const res = await fetch(url.toString(), { headers: { Accept: "application/json" } });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  const json = (await res.json()) as HourApiResponse;
-  return json;
+  const { data } = await axios.get<HourApiResponse>(AVAILABILITY_URL, {
+    params: { id_fixer, id_requester, selected_date, starting_time },
+    headers: { Accept: "application/json" },
+  });
+  return data;
 }
+
 
 
 export default function DaySchedule({
@@ -145,11 +114,9 @@ export default function DaySchedule({
   const appointmentFormRef = useRef<AppointmentFormHandle | null>(null);
   const editAppointmentFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
-  const labelByEstado = (estado: "libre" | "ocupado" | "no_disponible"): {
-    text: string;
-    cls: string;
-    icon: Icon;
-  } => {
+  const labelByEstado = (
+    estado: "libre" | "ocupado" | "no_disponible"
+  ): { text: string; cls: string; icon: Icon } => {
     switch (estado) {
       case "libre":
         return { text: "DISPONIBLE", cls: "text-emerald-600", icon: "＋" };
@@ -166,45 +133,46 @@ export default function DaySchedule({
     try {
       setLoading(true);
       setErr("");
-
-      if (!USE_BACKEND) {
-        const { nombre_Fixer, horarios } = mockHorarios(d);
-        setData({ nombre_Fixer, horarios });
-        return;
-      }
-
-      const hours = hourIntsRange(8, 18); 
-
+      const hours = hourIntsRange(8, 18);
       const results = await Promise.all(
         hours.map(async (h) => {
           try {
-            const resp = await fetchHour(AVAILABILITY_URL, fixerId, requesterId, d, h);
+            const resp = await fetchHour(fixerId, requesterId, d, h);
             return { ok: true as const, hourInt: h, resp };
-          } catch {
-            return { ok: false as const, hourInt: h };
+          } catch (e) {
+            return { ok: false as const, hourInt: h, error: e as Error };
           }
         })
       );
-
-      const firstOk = results.find((r) => r.ok);
-      const nombre_Fixer = firstOk && firstOk.ok ? firstOk.resp.name : "—";
-
-      const horarios: HorarioItem[] = results.map((r) => {
+      const nombre_Fixer = DEFAULT_FIXER_NAME;
+      const horarios: HorarioItem[] = [];
+      for (const r of results) {
         const horaDisplay = formatHourDisplay(r.hourInt);
+        const baseId = `${d}-${String(r.hourInt).padStart(2, "0")}`;
         if (r.ok) {
-          return {
-            id_Horario: `${d}-${String(r.hourInt).padStart(2, "0")}`,
+          const estado = mapApiToEstado(r.resp.status);
+          horarios.push({
+            id_Horario: baseId,
             Hora_Inicio: horaDisplay,
-            estado_Horario: mapApiToEstado(r.resp.status),
-          };
+            estado_Horario: estado,
+          });
+          if (r.resp.status === "cancelled") {
+            horarios.push({
+              id_Horario: `${baseId}-banner`,
+              Hora_Inicio: horaDisplay,
+              estado_Horario: "libre",
+              type: "banner",
+              text: "CANCELADO POR EL USUARIO",
+            });
+          }
+        } else {
+          horarios.push({
+            id_Horario: baseId,
+            Hora_Inicio: horaDisplay,
+            estado_Horario: "no_disponible",
+          });
         }
-        return {
-          id_Horario: `${d}-${String(r.hourInt).padStart(2, "0")}`,
-          Hora_Inicio: horaDisplay,
-          estado_Horario: "no_disponible",
-        };
-      });
-
+      }
       setData({ nombre_Fixer, horarios });
     } catch (e) {
       setErr((e as Error).message || "Error");
@@ -227,6 +195,7 @@ export default function DaySchedule({
   }, [selectedDate, fixerId, requesterId]);
 
   const handleSlotClick = (item: HorarioItem) => {
+    if (item.type === "banner") return;
     const meta = labelByEstado(item.estado_Horario);
     if (meta.icon === "＋") {
       appointmentFormRef.current?.open(`${date}T${item.Hora_Inicio}:00`, {
@@ -251,7 +220,7 @@ export default function DaySchedule({
   return (
     <div className="mx-auto max-w-sm p-4 text-black">
       <h1 className="text-2xl font-semibold mb-3">
-        Calendario de {data?.nombre_Fixer ?? "—"}
+        Calendario de {data?.nombre_Fixer ?? DEFAULT_FIXER_NAME}
       </h1>
 
       <div className="mb-3">
@@ -269,15 +238,17 @@ export default function DaySchedule({
       </div>
 
       {loading && <div className="text-slate-500">Cargando…</div>}
-      {err && <div className="text-red-600">{err}</div>}
+      {err && <div className="text-red-600">{String(err)}</div>}
 
       {data && (
         <div className="rounded-xl bg-slate-100 p-3 text-black">
           <div className="text-sm font-semibold text-slate-600 mb-2">
-            {new Date(date).toLocaleDateString("es-BO", {
-              day: "2-digit",
-              month: "long",
-            })}
+            {date
+              ? ymdToLocalDate(date).toLocaleDateString("es-BO", {
+                  day: "2-digit",
+                  month: "long",
+                })
+              : ""}
           </div>
 
           <div className="space-y-2">
@@ -285,7 +256,7 @@ export default function DaySchedule({
               if (item.type === "banner") {
                 return (
                   <div
-                    key={`banner-${idx}`}
+                    key={item.id_Horario || `banner-${idx}`}
                     className="rounded-lg bg-rose-500 text-white text-center text-xs font-semibold py-2"
                   >
                     {item.text}
@@ -308,15 +279,9 @@ export default function DaySchedule({
                       : ""
                   }`}
                 >
-                  <div className="font-semibold text-slate-800">
-                    {item.Hora_Inicio}
-                  </div>
-                  <div className={`text-sm font-semibold ${meta.cls}`}>
-                    {meta.text}
-                  </div>
-                  <div className="text-xl text-slate-500 text-right">
-                    {meta.icon}
-                  </div>
+                  <div className="font-semibold text-slate-800">{item.Hora_Inicio}</div>
+                  <div className={`text-sm font-semibold ${meta.cls}`}>{meta.text}</div>
+                  <div className="text-xl text-slate-500 text-right">{meta.icon}</div>
                 </div>
               );
             })}
@@ -324,7 +289,7 @@ export default function DaySchedule({
         </div>
       )}
 
-      <AppointmentForm ref={appointmentFormRef} fixerId={fixerId} requesterId={requesterId}/>
+      <AppointmentForm ref={appointmentFormRef} fixerId={fixerId} requesterId={requesterId} />
       <EditAppointmentForm ref={editAppointmentFormRef} />
     </div>
   );
