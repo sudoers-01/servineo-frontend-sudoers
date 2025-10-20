@@ -270,21 +270,24 @@ export default function MyCalendarPage({
                 throw new Error(`No se encuentra este dato: ${res.status} - ${errorText}`);
             }
             const data = await res.json();
+            //console.log('Datos recibidos para editar cita:',data);
+            //console.log('Nombre',data.data.current_requester_name);
             const existingAppointment: ExistingAppointment = {
-                id: data._id || data.id,
-                datetime: event.start.toISOString(), 
-                client: data.current_requester_name || "",
-                contact: data.current_requester_phone || "",
-                modality: data.appointment_type || "virtual",
-                description: data.appointment_description || "",
-                place: data.display_name || "",
-                meetingLink: data.link_id || "",
-                location: (data.lat && data.lon) ? {
-                    lat: Number(data.lat),
-                    lon: Number(data.lon),
-                    address: data.display_name || ""
+                description: data.data.appointment_description || "",
+                id: data.data._id || data.data.id,
+                datetime: event.start.toISOString(),
+                client: data.data.current_requester_name || "",
+                contact: data.data.current_requester_phone || "",
+                modality: data.data.appointment_type || "virtual",
+                place: data.data.display_name || "",
+                meetingLink: data.data.link_id || "",
+                location: (data.data.lat && data.data.lon) ? {
+                    lat: Number(data.data.lat),
+                    lon: Number(data.data.lon),
+                    address: data.data.display_name || ""
                 } : undefined
             };
+            console.log('Datos procesados',existingAppointment);
 
             editFormRef.current?.open(existingAppointment);
         } catch (err) {
