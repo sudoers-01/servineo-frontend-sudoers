@@ -19,38 +19,40 @@ export interface SlotEvent {
 
 export interface Schedule {
   _id: string;
+  appointment_description: string;
   starting_time: string;
   finishing_time: string;
   schedule_state: string;
-  display_name: string;
+  display_name_location: string;
   lat: number;
   lon: number;
 }
 
-//Combinar las Schedules pautadas de todos los requesters (que seran ocupadas) y las del requester que esta viendo el calendario de Fixer (booked)
-function combineAllSchedules(
-  currentRequesterSchedules: Array<{ schedules: Schedule[] }>,
-  otherRequesterSchedules: Array<{ schedules: Schedule[] }>
+//Combinar las Schedules pautadas de todos los requesters (que seran ocupadas) y 
+//las del requester que esta viendo el calendario de Fixer (booked)
+function combineSchedules(
+  currentRequesterSchedules: Schedule[],
+  otherRequesterSchedules: Schedule[]
 ): Schedule[] {
-  // Aplanar y combinar ambos arrays
+  // Combinar ambos arrays
   const combined = [
-    ...currentRequesterSchedules.flatMap(item => item.schedules),
-    ...otherRequesterSchedules.flatMap(item => item.schedules)
+    ...currentRequesterSchedules,
+    ...otherRequesterSchedules
   ];
 
+  console.log("desde combinedSchedules: ", combined);
   // Ordenar por starting_time ascendente (con Z)
   combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
 
   // Convertir a formato sin Z después del sort
   const schedulesWithoutZ = combined.map(schedule => ({
     ...schedule,
-    starting_time: schedule.starting_time.replace('Z', ''),
-    finishing_time: schedule.finishing_time.replace('Z', '')
+    starting_time: schedule.starting_time ? schedule.starting_time.replace('Z', '') : '',
+    finishing_time: schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : ''
   }));
 
   return schedulesWithoutZ;
 }
-
 /**
  * Genera slots disponibles para horarios laborales que no tienen schedules
  * Solo genera slots para días futuros (no anteriores a hoy)
@@ -180,24 +182,26 @@ export async function generateAvailableSlotsFromAPI(
     ]);
 
     // Sin Axios
-    // const currentRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_current_requester_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
-    // const otherRequesterResponse = await fetch(`http://localhost:3000/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixerId=${fixerId}&requesterId=${requesterId}&month=${month+1}`);
+    //const currentRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
+    //const otherRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
+    //const currentRequesterFixerSchedules = await currentRequesterResponse.json();
+    //const otherRequesterFixerSchedules = await otherRequesterResponse.json();
 
     const currentRequesterFixerSchedules = currentRequesterResponse.data;
     const otherRequesterFixerSchedules = otherRequesterResponse.data;
 
-    //console.log("Schedules del requester actual:", currentRequesterFixerSchedules);
-    //console.log("Schedules de otros requesters:", otherRequesterFixerSchedules);
+    console.log("Schedules del requester actual:", currentRequesterFixerSchedules);
+    console.log("Schedules de otros requesters:", otherRequesterFixerSchedules);
 
-    const fixerSchedules: Schedule[] = combineAllSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
+    const fixerSchedules: Schedule[] = combineSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
 
-    for(const schedule of fixerSchedules) {
-      const start = moment(schedule.starting_time).toDate();
-      const end = moment(schedule.finishing_time).toDate();
+    // for(const schedule of fixerSchedules) {
+    //   const start = moment(schedule.starting_time).toDate();
+    //   const end = moment(schedule.finishing_time).toDate();
 
-      //console.log(schedule ,start, end);
-    }
-    //console.log("Schedules combinadas:", fixerSchedules);
+    //   console.log(schedule ,start, end);
+    // }
+    console.log("Schedules combinadas:", fixerSchedules);
 
     // Generar todos los slots disponibles para el mes (solo futuros)
     const availableSlots = generateAvailableSlotsForMonth(month, currentYear, fixerId);
