@@ -20,7 +20,7 @@ const AppointmentSummaryModal: React.FC<AppointmentSummaryModalProps> = ({ open,
     <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
       <div className="absolute inset-0 bg-black/50" onClick={onClose} aria-hidden="true" />
       <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md mx-auto p-6 z-10">
-        <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Resumen de la cita</h2>
+        <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Cita confirmada</h2>
 
         <div className="space-y-3 text-sm text-gray-700">
           <div className="flex justify-between">
