@@ -1,22 +1,46 @@
 // components/appointments/forms/AppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
-import LocationModal from "./LocationModal"; // Cambiar la importación
-import AppointmentSummaryModal from "./AppointmentSummaryModal";
+import axios from "axios";
+import { z } from "zod";
+import LocationModal from "./LocationModal"; // Para seleccionar ubicación
+import AppointmentSummaryModal from "./AppointmentSummaryModal"; // Para mostrar resumen
 
+// Tipo del handle para poder abrir/cerrar el formulario desde el padre
 export type AppointmentFormHandle = {
   open: (datetimeISO: string, meta?: { eventId?: string; title?: string }) => void;
   close: () => void;
 };
 
+// Props del componente
 interface AppointmentFormProps {
   onNextStep?: (appointmentData: any) => void;
   fixerId: string;
   requesterId: string;
 }
 
+// Esquema de validación Zod
+const appointmentSchema = z.object({
+  client: z.string().min(1, "Ingrese el nombre del cliente").regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre válido"),
+  contact: z.string().min(1, "Ingrese un número de contacto").regex(/^[67]\d{7}$/, "Ingrese un teléfono válido"),
+  description: z.string().min(1, "Ingrese una descripción").max(300, "Máximo 300 caracteres"),
+  modality: z.enum(["virtual", "presential"]),
+  meetingLink: z.string().optional(),
+  location: z.object({
+    lat: z.number(),
+    lon: z.number(),
+    address: z.string().min(1, "Seleccione una ubicación")
+  }).optional(),
+}).refine(data => {
+  if (data.modality === "virtual") return !!data.meetingLink;
+  if (data.modality === "presential") return !!data.location;
+  return true;
+}, {
+  message: "Campo obligatorio según modalidad",
+  path: ["modality"]
+});
+
 const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ onNextStep, fixerId, requesterId }, ref) => {
-  const [showLocationModal, setShowLocationModal] = useState(false);
-  const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
+  // Estado del formulario
   const [open, setOpen] = useState(false);
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
@@ -25,13 +49,13 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>("");
   const [meetingLink, setMeetingLink] = useState<string>("");
+  const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
   const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [meta, setMeta] = useState<{ eventId?: string; title?: string } | null>(null);
 
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const firstFieldRef = useRef<HTMLInputElement | null>(null);
-
+  // Modales
+  const [showLocationModal, setShowLocationModal] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
   const [summaryData, setSummaryData] = useState<{
     name: string;
@@ -42,6 +66,11 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     description?: string;
   } | null>(null);
 
+  // Refs
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const firstFieldRef = useRef<HTMLInputElement | null>(null);
+
+  // Handle de apertura/cierre desde el padre
   useImperativeHandle(ref, () => ({
     open: (dt: string, m?: { eventId?: string; title?: string }) => {
       setDatetime(dt);
@@ -52,6 +81,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     close: () => handleClose()
   }), []);
 
+  // Escape para cerrar
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "Escape" && open) handleClose();
@@ -60,143 +90,104 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
 
+  // Reset del formulario
   function handleClose() {
     setOpen(false);
     setClient("");
     setContact("");
-    setModality("virtual");
     setDescription("");
+    setModality("virtual");
     setPlace("");
-    setLocation(null);
-    setMsg(null);
     setMeetingLink("");
+    setLocation(null);
+    setErrors({});
   }
 
+  // Ajuste de datetime
   function parseDatetime(datetimeISO: string) {
     const start = new Date(datetimeISO);
-    const end = new Date(start.getTime() + 60 * 60 * 1000); // +1 hora
-    
-    // Restar 4 horas para ajustar a la zona horaria correcta
+    const end = new Date(start.getTime() + 60 * 60 * 1000);
     const startMinus4Hours = new Date(start.getTime() - 4 * 60 * 60 * 1000);
 
     return {
-      selected_date: start.toISOString().split("T")[0], // solo la fecha
-      starting_time: startMinus4Hours.toISOString(), // Restamos 4 horas
+      selected_date: start.toISOString().split("T")[0],
+      starting_time: startMinus4Hours.toISOString(),
       finishing_time: end.toISOString()
     };
   }
 
-  // Función para manejar la confirmación de ubicación
+  // Confirmar ubicación desde LocationModal
   const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
-    setLocation({
-      lat: locationData.lat,
-      lon: locationData.lon,
-      address: locationData.address
-    });
-    setPlace(locationData.address); // para mostrar en UI
+    setLocation(locationData);
+    setPlace(locationData.address);
     setShowLocationModal(false);
   };
 
+  // Submit con Zod + Axios
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setMsg(null);
+    setErrors({});
 
-    if (!client.trim()) return setMsg("Ingrese el nombre del cliente.");
-    const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
-    if (!nameRegex.test(client.trim())) return setMsg("Ingrese un nombre válido.");
-
-    if (!contact.trim()) return setMsg("Ingrese un numero de contacto.");
-    const phoneRegex = /^[67]\d{7}$/;
-    if (!phoneRegex.test(contact.trim())) return setMsg("Ingrese un teléfono válido.");
-
-    if (!description.trim()) return setMsg("Ingrese una descripción.");
-    const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s\d,.]+$/;
-    if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
-
-    const { selected_date, starting_time, finishing_time } = parseDatetime(datetime);
-
-    if (modality === "presential" && !place) return setMsg("Selecciona una ubicación.");
-
-    const payload: any = {
-      id_fixer: fixerId,
-      id_requester: requesterId,  //"user_requester_5678"
-      selected_date,
-      starting_time, // Aquí ya viene con 4 horas restadas
-      appointment_type: modality === "presential" ? "presential" : "virtual",
-      appointment_description: description.trim(),
-      current_requester_name: client.trim(),
-      current_requester_phone: contact.trim(),
-      link_id: modality === "virtual" ? meetingLink.trim() : "",
-      display_name: modality === "presential" ? place : "",
-      lat: modality === "presential" ? location?.lat ?? null : null,
-      lon: modality === "presential" ? location?.lon ?? null : null
+    const formData = {
+      client,
+      contact,
+      description,
+      modality,
+      meetingLink,
+      location: modality === "presential" ? location : undefined,
     };
 
-    if (modality === "virtual") {
-      if (!meetingLink.trim()) return setMsg("Ingrese un enlace de reunión.");
-      const meetRegex = /^https:\/\/meet\.google\.com\/[a-zA-Z0-9\-]+$/;
-      if (!meetRegex.test(meetingLink.trim())) {
-        return setMsg("Ingrese un enlace válido de Google Meet.");
-      }
-      payload.link_id = meetingLink.trim();
+    // Validación Zod
+    const validation = appointmentSchema.safeParse(formData);
+    if (!validation.success) {
+      const fieldErrors: Record<string, string> = {};
+      validation.error.issues.forEach(err => {
+        const field = err.path[0];
+        if (field) fieldErrors[field as string] = err.message;
+      });
+      setErrors(fieldErrors);
+      return;
     }
 
-    await submitAppointment(payload);
-  }
+    const { selected_date, starting_time } = parseDatetime(datetime);
 
-  async function submitAppointment(payload: any) {
+    const payload = {
+      id_fixer: fixerId,
+      id_requester: requesterId,
+      selected_date,
+      starting_time,
+      appointment_type: modality,
+      appointment_description: description,
+      current_requester_name: client,
+      current_requester_phone: contact,
+      link_id: modality === "virtual" ? meetingLink : "",
+      display_name: modality === "presential" ? place : "",
+      lat: modality === "presential" ? location?.lat : null,
+      lon: modality === "presential" ? location?.lon : null,
+    };
+
     setLoading(true);
     try {
-      // Ruta local solicitada
-      const res = await fetch("https://servineo-backend-lorem.onrender.com/api/crud_create/appointments/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
+      const res = await axios.post("https://servineo-backend-lorem.onrender.com/api/crud_create/appointments/create", payload);
+      const data = res.data;
 
-      // parseamos el body
-      const data = await res.json().catch(() => ({}));
-
-      // Si el backend responde con created: true mostramos summary
-      if (data && data.created === true) {
-        // Dispatch evento global (opcional)
-        const bookingId = (data as any).id || String(Date.now());
-        window.dispatchEvent(new CustomEvent("booking:created", {
-          detail: {
-            datetime: payload.starting_time,
-            id: bookingId,
-            meta: payload
-          }
-        }));
-
-        setMsg("¡Cita creada!");
+      if (data.success) {
+        // Mostrar resumen
         setSummaryData({
-          name: client.trim(),
+          name: client,
           date: new Date(payload.starting_time).toLocaleDateString(),
           time: new Date(payload.starting_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          modality: payload.appointment_type,
-          locationOrLink: payload.appointment_type === "virtual" ? payload.link_id : payload.display_name,
-          description: payload.appointment_description
+          modality,
+          locationOrLink: modality === "virtual" ? meetingLink : place,
+          description,
         });
         setShowSummary(true);
-
-        // pequeño delay visual y reset
-        setTimeout(() => {
-          setLoading(false);
-          handleClose();
-        }, 700);
-
-        return;
+        // handleClose(); <-- BORRAR o comentar
       }
-
-      // Si no fue creado correctamente, mostramos el mensaje del backend o un error genérico
-      const backendMsg = data?.message || data?.error || "No se pudo crear la cita.";
-      setMsg(backendMsg);
-      setLoading(false);
-      return;
     } catch (err: any) {
       console.error(err);
-      setMsg("Error en la conexión.");
+      setErrors({ general: "Error en la conexión" });
+    } finally {
       setLoading(false);
     }
   }
@@ -230,9 +221,10 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
             </div>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
+              {/* Fecha y modalidad */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
                 <label className="block">
-                  <span className="text-sm font-medium">Fecha y hora</span>
+                  <span className="text-sm font-medium">Fecha y hora *</span>
                   <input
                     readOnly
                     value={new Date(datetime).toLocaleString()}
@@ -241,7 +233,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 </label>
 
                 <label className="block">
-                  <span className="text-sm font-medium">Modalidad</span>
+                  <span className="text-sm font-medium">Modalidad *</span>
                   <select
                     value={modality}
                     onChange={(e) => setModality(e.target.value as "virtual" | "presential")}
@@ -253,32 +245,34 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 </label>
               </div>
 
+              {/* Cliente y contacto */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
-                  <span className="text-sm font-medium">Cliente</span>
+                  <span className="text-sm font-medium">Cliente *</span>
                   <input
                     ref={firstFieldRef}
                     value={client}
                     onChange={(e) => setClient(e.target.value)}
                     placeholder="Nombre del cliente"
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white"
-                    required
                   />
+                  {errors.client && <p className="text-red-600 text-sm mt-1">{errors.client}</p>}
                 </label>
                 <label className="block">
-                  <span className="text-sm font-medium">Contacto</span>
+                  <span className="text-sm font-medium">Contacto *</span>
                   <input
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
                     placeholder="77777777"
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white"
-                    required
                   />
+                  {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
                 </label>
               </div>
 
+              {/* Descripción */}
               <label className="block">
-                <span className="text-sm font-medium">Descripción del trabajo</span>
+                <span className="text-sm font-medium">Descripción del trabajo *</span>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
@@ -286,22 +280,12 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   className="mt-1 block w-full border rounded px-3 py-2 bg-white"
                   rows={3}
                 />
+                {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
               </label>
-              
-              {modality === "presential" && (
-                <label className="block">
-                  <span className="text-sm font-medium">Ubicación</span>
-                  <input
-                    type="text"
-                    value={place}
-                    readOnly
-                    className="mt-1 block w-full border rounded px-3 py-2 bg-gray-100 text-sm text-gray-700"
-                  />
-                </label>
-              )}
 
-              {modality === "presential" ? (
-                <div className="flex flex-col gap-1">
+              {/* Ubicación o link */}
+              {modality === "presential" && (
+                <>
                   <div
                     onClick={() => setShowLocationModal(true)}
                     className="text-center py-3 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
@@ -310,39 +294,32 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                       📍 {place ? "Editar ubicación" : "Seleccionar ubicación"}
                     </p>
                   </div>
-
                   {place && (
-                    <p className="text-sm text-green-700 px-2">
+                    <p className="text-sm text-green-700 px-2 mt-1">
                       📌 Ubicación: {place}
                     </p>
                   )}
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <label className="block">
-                    <span className="text-sm font-medium">Enlace de reunión </span>
-                    <input
-                      value={meetingLink}
-                      onChange={(e) => setMeetingLink(e.target.value)}
-                      placeholder="https://meet.example.com/"
-                      className="mt-1 block w-full border rounded px-3 py-2 bg-white"
-                    />
-                  </label>
-                  <p className="text-xs text-black-600">
-                    Ingrese un enlace para contactarse.
-                  </p>
-                </div>
+                  {errors.location && <p className="text-red-600 text-sm mt-1">{errors.location}</p>}
+                </>
               )}
 
-              <LocationModal
-                open={showLocationModal}
-                onClose={() => setShowLocationModal(false)}
-                onConfirm={handleLocationConfirm}
-                initialCoords={location}
-              />
+              {modality === "virtual" && (
+                <label className="block">
+                  <span className="text-sm font-medium">Enlace de reunión *</span>
+                  <input
+                    value={meetingLink}
+                    onChange={(e) => setMeetingLink(e.target.value)}
+                    placeholder="https://meet.example.com/"
+                    className="mt-1 block w-full border rounded px-3 py-2 bg-white"
+                  />
+                  {errors.meetingLink && <p className="text-red-600 text-sm mt-1">{errors.meetingLink}</p>}
+                </label>
+              )}
 
-              {msg && <p className="text-sm text-red-600">{msg}</p>}
+              {/* Errores generales */}
+              {errors.general && <p className="text-red-600 text-sm mt-1">{errors.general}</p>}
 
+              {/* Botones */}
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button
                   type="button"
@@ -351,29 +328,36 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 >
                   Cancelar
                 </button>
-
                 <button
                   type="submit"
                   disabled={loading || (modality === "presential" && !place)}
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading
-                    ? "Guardando..."
-                    : onNextStep
-                      ? modality === "presential"
-                        ? "Siguiente →"
-                        : "Confirmar"
-                      : "Añadir"}
+                  {loading ? "Guardando..." : "Añadir"}
                 </button>
               </div>
             </form>
           </div>
         </div>
       </div>
-      <AppointmentSummaryModal
-        open={showSummary}
-        onClose={() => setShowSummary(false)}
-        data={summaryData!} />
+
+      {/* Modales */}
+      <LocationModal
+        open={showLocationModal}
+        onClose={() => setShowLocationModal(false)}
+        onConfirm={handleLocationConfirm}
+        initialCoords={location}
+      />
+      {summaryData && (
+        <AppointmentSummaryModal
+          open={showSummary}
+          onClose={() => {
+            setShowSummary(false);
+            handleClose(); // Limpiar formulario después de ver resumen
+          }}
+          data={summaryData!}
+        />
+      )}
     </>
   );
 });
