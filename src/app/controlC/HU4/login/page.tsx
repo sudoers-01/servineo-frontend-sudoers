@@ -4,6 +4,7 @@ import { api, ApiResponse } from '../lib/api';
 import { Eye, EyeOff } from 'lucide-react';
 import LoginGoogle from "../components/auth/LoginGoogle";
 import { useRouter } from 'next/navigation';
+import { useAuth } from '../../HU3/hooks/usoAutentificacion';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [mensaje, setMensaje] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const { setUser } = useAuth();
 
   const manejarLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,12 +23,22 @@ export default function LoginPage() {
       const res: ApiResponse<any> = await api.post('auth/login', { email, password });
       
       if (res.success) {
+        const data = res.data;
         localStorage.setItem("servineo_token", res.data.token);
         localStorage.setItem("servineo_user", JSON.stringify(res.data.usuario)); 
         setMensaje(` ${res.data.message}`);
-        
-        router.push('/'); 
-        
+        if (data.token) {
+        localStorage.setItem("servineo_token", data.token);
+      }
+
+      if (data.user) {
+        localStorage.setItem("servineo_user", JSON.stringify(data.user));
+        setUser(data.user);
+      }
+
+      setMensaje(` ${data.message}`);
+      router.push('/'); 
+
       } else {
         setMensaje(` ${res.data?.message || res.error || 'Credenciales inválidas.'}`);
       }
