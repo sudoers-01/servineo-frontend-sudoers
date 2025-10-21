@@ -254,15 +254,15 @@ export default function MyCalendarPage({
         try {
             const API = process.env.NEXT_PUBLIC_BACKEND as string;
             const dateObj = new Date(event.start);
-            console.log(dateObj);
+            console.log('Fecha recogida',dateObj);
             const appointment_date = dateObj.toISOString().split('T')[0];
             const start_hour = dateObj.getHours().toString();
-            console.log( appointment_date);
-            console.log(start_hour);
-            console.log(fixerId);
-            console.log(requesterId);
+            //console.log( appointment_date);
+            //console.log(start_hour);
+            //console.log(fixerId);
+            //console.log(requesterId);
             const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date}&start_hour=${start_hour}`;
-            console.log('Intentando fetch a:', url);
+            //console.log('Intentando fetch a:', url);
             const res = await fetch(url);
             if (!res.ok) {
                 let errorText = await res.text();
@@ -270,8 +270,7 @@ export default function MyCalendarPage({
                 throw new Error(`No se encuentra este dato: ${res.status} - ${errorText}`);
             }
             const data = await res.json();
-            //console.log('Datos recibidos para editar cita:',data);
-            //console.log('Nombre',data.data.current_requester_name);
+            console.log('Datos recibidos para editar cita:',data);
             const existingAppointment: ExistingAppointment = {
                 description: data.data.appointment_description || "",
                 id: data.data._id || data.data.id,
@@ -281,13 +280,11 @@ export default function MyCalendarPage({
                 modality: data.data.appointment_type || "virtual",
                 place: data.data.display_name || "",
                 meetingLink: data.data.link_id || "",
-                location: (data.data.lat && data.data.lon) ? {
-                    lat: Number(data.data.lat),
-                    lon: Number(data.data.lon),
-                    address: data.data.display_name || ""
-                } : undefined
+                lat: Number(data.data.lat),
+                lon: Number(data.data.lon),
+                address: data.data.display_name || "No expecificada"
             };
-            console.log('Datos procesados',existingAppointment);
+            //console.log('Datos procesados',existingAppointment);
 
             editFormRef.current?.open(existingAppointment);
         } catch (err) {

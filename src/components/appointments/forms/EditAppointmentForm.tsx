@@ -1,7 +1,8 @@
 // components/appointments/forms/EditAppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import LocationModal from "./LocationModal";
-import { z } from "zod";
+import { set, z } from "zod";
+import { parseUrl } from "next/dist/shared/lib/router/utils/parse-url";
 const phoneRegex = /^[67]\d{7}$/;
 const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
 const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]{0,300}$/;
@@ -47,7 +48,9 @@ export type AppointmentPayload = {
   description?: string;
   place?: string;
   meetingLink?: string;
-  location?: { lat: number; lon: number; address: string };
+  lat?: number; 
+  lon?: number; 
+  address?: string;
 };
 
 export type ExistingAppointment = AppointmentPayload & {
@@ -73,7 +76,9 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [modality, setModality] = useState<"virtual" | "presencial">("virtual");
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>(""); 
-  const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
+  const [lat, setLat] = useState<number>();
+  const [lon, setLon] = useState<number>();
+  const [address, setAddress] = useState<string>("");
   const [meetingLink, setMeetingLink] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -104,7 +109,9 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
         appointmentData.modality = "presencial"
       }
       }
-      console.log(appointmentData.modality);
+      console.log('Lat',appointmentData.lat);
+      console.log('Lon',appointmentData.lon);
+      console.log('Address',appointmentData.address);
       setAppointmentId(appointmentData.id);
       setDatetime(appointmentData.datetime);
       setClient(appointmentData.client);
@@ -112,8 +119,9 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setModality(appointmentData.modality);
       setModality(appointmentData.modality);
       setDescription(appointmentData.description || "");
-      setPlace(appointmentData.place || "");
-      setLocation(appointmentData.location || null);
+      setLat(appointmentData.lat || 0);
+      setLon(appointmentData.lon || 0);
+      setAddress(appointmentData.address || "");
       setMeetingLink(appointmentData.meetingLink || "");
       setOriginalAppointment(appointmentData);
 
@@ -144,7 +152,9 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setModality("virtual");
     setDescription("");
     setPlace("");
-    setLocation(null);
+    setLat(0);
+    setLon(0);
+    setAddress("");
     setMeetingLink("");
     setDay("");
     setMonth("");
@@ -153,11 +163,14 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   }
 
   // Función para manejar la confirmación de ubicación
-  const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
-    setLocation(locationData);
-    setPlace(locationData.address);
-    setShowLocationModal(false);
-  };
+  // Cambiar de parámetros separados a un objeto único
+const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
+  setLat(locationData.lat);
+  setLon(locationData.lon);
+  setAddress(locationData.address);
+  setPlace(locationData.address);
+  setShowLocationModal(false);
+};
 
   const incrementHour = () => {
     setHour(prev => (prev + 1) % 24);
@@ -216,14 +229,38 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     }
 
     // Construir payload solo con campos modificados
+    //console.log('Datos Originales',originalAppointment);
     const payload: any = {};
     if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
+    const dateToShowString = originalAppointment.datetime;
+    const isoString = dateToShowString.endsWith('Z') ? dateToShowString : dateToShowString + 'Z';
+    const originalDatetime = new Date(isoString);
 
-    const originalDatetime = new Date(originalAppointment.datetime);
-    if (newDatetime.getTime() !== originalDatetime.getTime()) {
-      const datePart = newDatetime.toISOString().split('T')[0]; 
-      payload.selected_date = datePart;
-      payload.starting_time = newDatetime.toISOString();
+    let currentYear1 = originalDatetime.getUTCFullYear();
+    let currentMonth = originalDatetime.getUTCMonth();
+    let currentDay = originalDatetime.getUTCDate();
+    let currentHour = originalDatetime.getUTCHours();
+    
+    const finalDate = new Date(Date.UTC(currentYear1, currentMonth, currentDay, (currentHour-4),0, 0));  
+    
+    currentMonth = newDatetime.getUTCMonth();
+    currentDay = newDatetime.getUTCDate();
+    currentYear1 = newDatetime.getUTCFullYear();
+    currentHour = newDatetime.getUTCHours();
+    
+    const newFinalDate = new Date(Date.UTC(currentYear1, currentMonth , currentDay,(currentHour-4),0, 0)); 
+    
+    console.log('Fecha Original:',finalDate.toISOString());
+    console.log('Nueva Fecha:',newFinalDate.toISOString());
+    console.log('Direccion',originalAppointment.address);
+    
+    if(newDatetime.toISOString().split('T')[0] !== originalDatetime.toISOString().split('T')[0]) {
+      const datePart = newDatetime.toISOString().split('T')[0];
+      payload.selected_date = datePart; 
+    }
+
+    if (finalDate!== newFinalDate) {
+      payload.starting_time = newFinalDate.toISOString();
     }
 
     if (client.trim() !== originalAppointment.client) {
@@ -248,19 +285,21 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
     if (modality === "presencial") {
       if (!place) return setMsg("Selecciona una ubicación.");
-
-      console.log('Location:', location);
-      console.log('Original Location:', originalAppointment.location);
-      
+     
       const scheduleUpdates: any = {};
       
       if ((place || "") !== (originalAppointment.place || "")) {
         scheduleUpdates.display_name = place.trim();
       }
-      if (location && JSON.stringify(location) !== JSON.stringify(originalAppointment.location)) {
-        scheduleUpdates.lat = location.lat.toString();
-        scheduleUpdates.lon = location.lon.toString();
+      if(lat!== originalAppointment.lat){
+        payload.lat = lat;
       }
+      if(lon!== originalAppointment.lon){
+        payload.lon = lon;
+      } 
+      if(address!== originalAppointment.address){
+        payload.address = address;
+      }  
     } else {
       const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
       
@@ -282,8 +321,8 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     try {
       //https://servineo-backend-lorem.onrender.com/api/crud_update/appointments/update_by_id
       const API = process.env.NEXT_PUBLIC_BACKEND as string;
-      console.log('Payload:',payload);
-      console.log('Id de la cita',appointmentId);
+      console.log('Datos Nuevos:',payload);
+      //console.log('Id de la cita',appointmentId);
       const res = await fetch(`${API}/api/crud_update/appointments/update_by_id?id=${appointmentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -492,7 +531,15 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                 open={showLocationModal}
                 onClose={() => setShowLocationModal(false)}
                 onConfirm={handleLocationConfirm}
-                initialCoords={location}
+                initialCoords={
+                  lat !== undefined && lon !== undefined 
+                    ? { 
+                        lat: lat, 
+                        lon: lon, 
+                        address: address 
+                      }
+                    : undefined
+                }
               />
 
               {msg && <p className="text-sm text-red-600">{msg}</p>}
