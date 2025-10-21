@@ -1,8 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-
-import { Card } from "../Card"
+import { Card } from "@/Components/Card"
 
 interface Location {
   lat: number
@@ -110,7 +109,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
             <p className="text-sm font-medium text-blue-900">Ubicación seleccionada:</p>
             <div className="grid grid-cols-2 gap-2">
               <div>
-                <label className="text-xs text-blue-700">Latitud</label>
+                <label className="text-xs text-primary">Latitud</label>
                 <input
                   type="number"
                   step="0.000001"
@@ -120,7 +119,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
                 />
               </div>
               <div>
-                <label className="text-xs text-blue-700">Longitud</label>
+                <label className="text-xs text-primary">Longitud</label>
                 <input
                   type="number"
                   step="0.000001"
@@ -133,7 +132,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
             <button
               type="button"
               onClick={handleManualUpdate}
-              className="w-full rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+              className="w-full rounded-md bg-primary px-3 py-1 text-sm text-white hover:bg-primary"
             >
               Actualizar ubicación
             </button>

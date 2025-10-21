@@ -1,27 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import FixerRegisterForm, { type FormFieldConfig } from "@/Components/fixer/Fixer-register-form"
+import FixerRegisterForm from "@/Components/fixer/Fixer-register-form"
 import { FixerEnableWizard } from "@/Components/fixer/Filter-eneable-wizard"
 
-const registerFields: FormFieldConfig[] = [
-  {
-    id: "fullName",
-    label: "Nombre",
-    type: "text",
-    placeholder: "tu nombres completo",
-  },
-  { id: "email", label: "Email", type: "email", placeholder: "Tu" },
-  {
-    id: "phone",
-    label: "Telefono",
-    type: "phone",
-    placeholder: "+591 70341618",
-  },
-]
-
 const defaultFormValues = {
-  fullName: "Freddy Amin Zapata",
+  name: "Freddy Amin Zapata",
   email: "zapata@example.com",
   phone: "+591 68546043",
 }
@@ -40,20 +24,17 @@ export default function BecomeFixerPage() {
   return (
     <div className="container mx-auto max-w-4xl p-4">
       <header className="mb-6 text-center">
-        <h1 className="text-2xl font-bold">Conviertete en un Fixer</h1>
+        <h1 className="text-2xl font-bold">Become a FIXER</h1>
         <p className="text-sm text-gray-500">Completa tu registro y habilita tu cuenta como FIXER</p>
       </header>
 
       <section className="space-y-6">
         <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">
-          <h2 className="mb-3 text-center text-lg font-semibold">Datos iniciales</h2>
+          <h2 className="mb-3 text-center text-lg font-semibold">Registro inicial (Requester)</h2>
           <FixerRegisterForm
-            fields={registerFields}
             defaultValues={defaultFormValues}
-            submitButtonText="Continuar"
-            onSubmit={(payload) => {
-              const name = String(payload.fullName || "")
-              const email = String(payload.email || "")
+            onSubmit={(data) => {
+              const { name, email } = data
               const urlPhoto = "https://picsum.photos/80"
               setRequester({
                 id: "req-1",
@@ -63,6 +44,7 @@ export default function BecomeFixerPage() {
                 role: "requester",
               })
             }}
+            submitButtonText="Continuar"
           />
         </div>
 

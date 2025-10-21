@@ -1,6 +1,6 @@
 "use client"
 
-import { Card } from "../Card"
+import { Card } from "@/Components/Card"
 
 interface VehicleStepProps {
   hasVehicle: boolean | null
@@ -29,7 +29,7 @@ export function VehicleStep({
               name="hasVehicle"
               checked={hasVehicle === true}
               onChange={() => onHasVehicleChange(true)}
-              className="h-4 w-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
+              className="h-4 w-4 text-primary focus:ring-2 focus:ring-blue-500"
             />
             <div>
               <div className="font-medium text-gray-900">Sí, tengo vehículo</div>
@@ -43,7 +43,7 @@ export function VehicleStep({
               name="hasVehicle"
               checked={hasVehicle === false}
               onChange={() => onHasVehicleChange(false)}
-              className="h-4 w-4 text-blue-600 focus:ring-2 focus:ring-blue-500"
+              className="h-4 w-4 text-primary focus:ring-2 focus:ring-blue-500"
             />
             <div>
               <div className="font-medium text-gray-900">No tengo vehículo</div>
