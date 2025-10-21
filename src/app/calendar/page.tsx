@@ -1,16 +1,15 @@
-
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from 'next/navigation';
 import MyCalendarPage from './calendarComponent';
 import MobileCalendar from "@/components/calendar/mobile/MobileCalendar";
 import MobileList from "@/components/list/MobileList";
 
-
 export default function CalendarPage() {
-    //Para cambiar los fixerId y los requesterId, en un futuro se sacarán de la sesión
+    // Para cambiar los fixerId y los requesterId, en un futuro se sacarán de la sesión
     const fixerId = "user_fixer_1234";
-    const requesterId = "uuid-user-4567";
+    const [requesterId, setRequesterId] = useState("user_requester_5678");
+    // const [showRequesterIdInput, setShowRequesterIdInput] = useState(false);
 
     const router = useRouter();
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
@@ -20,6 +19,37 @@ export default function CalendarPage() {
         { title: 'Evento 2', date: new Date(today.getFullYear(), today.getMonth(), 12) },
         { title: 'Evento 3', date: new Date(today.getFullYear(), today.getMonth(), 12) },
     ];
+
+    // Effect para manejar los event listeners de teclado
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            // Verificar si se presionaron Ctrl + Alt + E
+            if (event.ctrlKey && event.altKey && event.key === 'e') {
+                event.preventDefault(); // Prevenir comportamiento por defecto
+                
+                // Mostrar prompt para introducir requesterId
+                const newRequesterId = prompt(
+                    "Introduce el requesterId:",
+                    requesterId
+                );
+                
+                // Si el usuario introdujo un valor (no canceló)
+                if (newRequesterId !== null) {
+                    setRequesterId(newRequesterId);
+                    alert(`requesterId actualizado a: ${newRequesterId}`);
+                }
+            }
+        };
+
+        // Agregar event listener
+        window.addEventListener('keydown', handleKeyDown);
+
+        // Cleanup: remover event listener cuando el componente se desmonte
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [requesterId]); // Dependencia: se recrea cuando requesterId cambia
+
     return (
         <div className="flex flex-col font-bold bg-white min-h-screen">
             <div className="flex items-center">
@@ -44,6 +74,13 @@ export default function CalendarPage() {
                 <h2 className="text-black p-4 text-2xl text-center">Calendario</h2>
             </div>
 
+            {/* Indicador del requesterId actual */}
+            <div className="px-4 py-2 text-sm text-gray-600 bg-gray-100">
+                requesterId actual: <span className="font-mono">{requesterId}</span>
+                <br />
+                <span className="text-xs">Presiona Ctrl + Alt + E para cambiarlo</span>
+            </div>
+
             <div className="flex justify-center md:block hidden">
                 <MyCalendarPage
                     fixerId={fixerId}
@@ -56,6 +93,7 @@ export default function CalendarPage() {
                     fixer_id={fixerId}
                     selectedDate={selectedDate}
                     onSelectDate={setSelectedDate}
+                   
                 />
                 <div></div>
                 <MobileList
@@ -64,8 +102,6 @@ export default function CalendarPage() {
                     requesterId={requesterId}
                 />
             </div>
-
-
         </div>
     );
 }

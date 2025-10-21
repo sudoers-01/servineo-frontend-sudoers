@@ -1,6 +1,43 @@
 // components/appointments/forms/EditAppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import LocationModal from "./LocationModal";
+import { z } from "zod";
+const phoneRegex = /^[67]\d{7}$/;
+const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]{0,300}$/;
+const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
+const appointmentSchema = z.object({
+      client: z.string()
+        .min(1, "Ingresa el nombre del cliente")
+        .regex(nameRegex, "Ingrese un nombre válido"),
+      
+      contact: z.string()
+        .min(1, "Ingresa un contacto válido")
+        .refine((val) => {
+          const phone = val.replace(/\D/g, "").slice(-8);
+          return phoneRegex.test(phone);
+        }, "Teléfono debe iniciar con 6 o 7 y tener 8 dígitos"),
+      
+      description: z.string()
+        .min(1, "Ingrese una descripción")
+        .regex(descRegex, "Ingrese una descripción válida"),
+      
+      modality: z.enum(["virtual", "presencial"]),
+      
+      meetingLink: z.string()
+        .optional()
+        .refine((val) => !val || urlRegex.test(val), "Ingrese un enlace válido"),
+      
+      place: z.string().optional()
+    }).refine((data) => {
+      if (data.modality === "presencial") {
+        return !!data.place && data.place.trim().length > 0;
+      }
+      return true;
+    }, {
+      message: "Selecciona una ubicación",
+      path: ["place"]
+    });
 
 export type AppointmentPayload = {
   datetime: string;
@@ -44,6 +81,10 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   // Estado para guardar los datos originales
   const [originalAppointment, setOriginalAppointment] = useState<ExistingAppointment | null>(null);
 
+  const [day, setDay] = useState<string>("");
+  const [month, setMonth] = useState<string>("");
+  const [hour, setHour] = useState<number>(0);
+
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
@@ -74,7 +115,13 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setPlace(appointmentData.place || "");
       setLocation(appointmentData.location || null);
       setMeetingLink(appointmentData.meetingLink || "");
-      setOriginalAppointment(appointmentData); // Guardar los datos originales
+      setOriginalAppointment(appointmentData);
+
+       const dateObj = new Date(appointmentData.datetime);
+      setDay(dateObj.getDate().toString().padStart(2, '0'));
+      setMonth((dateObj.getMonth() + 1).toString().padStart(2, '0'));
+      setHour(dateObj.getHours())
+
       setOpen(true);
       setTimeout(() => firstFieldRef.current?.focus(), 40);
     },
@@ -99,6 +146,9 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setPlace("");
     setLocation(null);
     setMeetingLink("");
+    setDay("");
+    setMonth("");
+    setHour(0);
     setMsg(null);
   }
 
@@ -109,86 +159,136 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setShowLocationModal(false);
   };
 
+  const incrementHour = () => {
+    setHour(prev => (prev + 1) % 24);
+  };
+
+  const decrementHour = () => {
+    setHour(prev => (prev - 1 + 24) % 24);
+  };
+  const formatTimeUnit = (unit: number) => unit.toString().padStart(2, '0');
+
+  const handleDayChange = (value: string) => {
+  const numericValue = value.replace(/\D/g, '').slice(0, 2);
+    setDay(numericValue);
+  };
+
+  const handleMonthChange = (value: string) => {
+    const numericValue = value.replace(/\D/g, '').slice(0, 2);
+    setMonth(numericValue);
+  };
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
+    if (!day || !month || day.length !== 2 || month.length !== 2) {
+      setMsg("Ingrese día y mes válidos (DD/MM)");
+      return;
+    }
 
-    if (!client.trim()) return setMsg("Ingresa el nombre del cliente.");
-    const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
-    if (!nameRegex.test(client.trim())) return setMsg("Ingrese un nombre válido.");
+    const dayNum = parseInt(day);
+    const monthNum = parseInt(month);
 
-    if (!contact.trim()) return setMsg("Ingresa un contacto válido.");
-    const phoneRegex = /^[67]\d{7}$/;
-    const phone = contact.replace(/\D/g, "").slice(-8);
-    if (!phoneRegex.test(phone)) return setMsg("Teléfono debe iniciar con 6 o 7 y tener 8 dígitos.");
+    if (dayNum < 1 || dayNum > 31 || monthNum < 1 || monthNum > 12) {
+      setMsg("Ingrese una fecha válida (DD: 1-31, MM: 1-12)");
+      return;
+    }
+    const originalDate = new Date(originalAppointment?.datetime || datetime);
+    const currentYear = originalDate.getFullYear();
+    const newDatetime = new Date(currentYear, monthNum - 1, dayNum, hour, 0);
+    if (newDatetime <= new Date()) {
+      setMsg("La cita debe ser en una fecha y hora futura");
+      return;
+    }
 
-    if (!description.trim()) return setMsg("Ingrese una descripción.");
-    const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]+$/;
-    if (!descRegex.test(description.trim())) return setMsg("Ingrese una descripción válida.");
+    const formData = {
+      client: client.trim(),
+      contact: contact.trim(),
+      description: description.trim(),
+      modality,
+      meetingLink: meetingLink.trim(),
+      place: place.trim()
+    };
+    try {
+      appointmentSchema.parse(formData);
+    } catch (error) {
+      setMsg("Error de validación");
+      return;
+    }
 
     // Construir payload solo con campos modificados
-  const payload: any = {};
-  if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
+    const payload: any = {};
+    if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
 
-  if (client.trim() !== originalAppointment.client) {
-    payload.current_requester_name = client.trim();
-  }
-
-  if (contact.trim() !== originalAppointment.contact) {
-    payload.current_requester_phone = contact.trim();
-  }
-
-  if ((description || "") !== (originalAppointment.description || "")) {
-    payload.appointment_description = description.trim();
-  }
-
-  if (modality !== originalAppointment.modality) {
-    payload.appointment_type = modality === "presencial" ? "presential" : "virtual";
-  }
-
-  if (modality === "presencial") {
-    if (!place) return setMsg("Selecciona una ubicación.");
-
-    console.log('Location:', location);
-    console.log('Original Location:', originalAppointment.location);
-    
-    const scheduleUpdates: any = {};
-    
-    if ((place || "") !== (originalAppointment.place || "")) {
-      scheduleUpdates.display_name = place.trim();
+    const originalDatetime = new Date(originalAppointment.datetime);
+    if (newDatetime.getTime() !== originalDatetime.getTime()) {
+      const datePart = newDatetime.toISOString().split('T')[0]; 
+      payload.selected_date = datePart;
+      payload.starting_time = newDatetime.toISOString();
     }
-    if (location && JSON.stringify(location) !== JSON.stringify(originalAppointment.location)) {
-      scheduleUpdates.lat = location.lat.toString();
-      scheduleUpdates.lon = location.lon.toString();
-    }
-  } else {
-    const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
-    
-    if (meetingLink.trim()) {
-      const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
-      if (!urlRegex.test(meetingLink.trim())) return setMsg("Ingrese un enlace válido.");
-    }
-    
-    if ((meetingLink || "") !== (originalAppointment.meetingLink || "")) {
-      payload.link_id = linkToUse;
-    }
-  }
 
-if (Object.keys(payload).length === 0) {
-  setMsg("No hay cambios para guardar.");
-  return;
-}
+    if (client.trim() !== originalAppointment.client) {
+      payload.current_requester_name = client.trim();
+    }
+
+    if (contact.trim() !== originalAppointment.contact) {
+      payload.current_requester_phone = contact.trim();
+    }
+
+    if ((description || "") !== (originalAppointment.description || "")) {
+      payload.appointment_description = description.trim();
+    }
+
+    //"selected_date": "2025-10-17",
+   // "starting_time": "2025-10-17T14:00:00.000Z",
+
+
+    if (modality !== originalAppointment.modality) {
+      payload.appointment_type = modality === "presencial" ? "presential" : "virtual";
+    }
+
+    if (modality === "presencial") {
+      if (!place) return setMsg("Selecciona una ubicación.");
+
+      console.log('Location:', location);
+      console.log('Original Location:', originalAppointment.location);
+      
+      const scheduleUpdates: any = {};
+      
+      if ((place || "") !== (originalAppointment.place || "")) {
+        scheduleUpdates.display_name = place.trim();
+      }
+      if (location && JSON.stringify(location) !== JSON.stringify(originalAppointment.location)) {
+        scheduleUpdates.lat = location.lat.toString();
+        scheduleUpdates.lon = location.lon.toString();
+      }
+    } else {
+      const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
+      
+      if (meetingLink.trim()) {
+        const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
+        if (!urlRegex.test(meetingLink.trim())) return setMsg("Ingrese un enlace válido.");
+      }
+      
+      if ((meetingLink || "") !== (originalAppointment.meetingLink || "")) {
+        payload.link_id = linkToUse;
+      }
+    }
+
+    if (Object.keys(payload).length === 0) {
+      setMsg("No hay cambios para guardar.");
+      return;
+    }
     setLoading(true);
     try {
       //https://servineo-backend-lorem.onrender.com/api/crud_update/appointments/update_by_id
       const API = process.env.NEXT_PUBLIC_BACKEND as string;
+      console.log('Payload:',payload);
       console.log('Id de la cita',appointmentId);
       const res = await fetch(`${API}/api/crud_update/appointments/update_by_id?id=${appointmentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      console.log('APPO to be sent',res)
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setMsg(data?.error || data?.message || "Error al actualizar");
@@ -245,20 +345,80 @@ if (Object.keys(payload).length === 0) {
             </div>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
-                <label className="block">
-                  <span className="text-sm font-medium">Fecha y hora</span>
-                  <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
-                </label>
+              <div className="flex gap-4 p-3 rounded items-start">
+                {/* FECHA - Ancho automático */}
+                <div className="flex-none">
+                  <label className="block">
+                    <span className="text-sm font-medium">Fecha *</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      <input 
+                        type="text"
+                        value={day}
+                        onChange={(e) => handleDayChange(e.target.value)}
+                        placeholder="DD"
+                        className="w-10 h-10 border border-gray-300 rounded text-center font-mono text-sm"
+                        maxLength={2}
+                      />
+                      <span className="text-gray-500 font-bold">/</span>
+                      <input 
+                        type="text"
+                        value={month}
+                        onChange={(e) => handleMonthChange(e.target.value)}
+                        placeholder="MM"
+                        className="w-10 h-10 border border-gray-300 rounded text-center font-mono text-sm"
+                        maxLength={2}
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">DD/MM</p>
+                  </label>
+                </div>
 
-                <label className="block">
-                  <span className="text-sm font-medium">Modalidad</span>
-                  <select value={modality} onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
-                    className="mt-1 block w-full border rounded px-3 py-2 text-sm">
-                    <option value="virtual">Virtual</option>
-                    <option value="presencial">Presencial</option>
-                  </select>
-                </label>
+                {/* HORA - Ancho automático */}
+                <div className="flex-none">
+                  <label className="block">
+                    <span className="text-sm font-medium">Hora *</span>
+                    <div className="flex items-center gap-1 mt-1">
+                      {/* Flecha izquierda (decrementar) */}
+                      <button 
+                        type="button"
+                        onClick={decrementHour}
+                        className="w-6 h-10 flex items-center justify-center border border-gray-300 rounded-l hover:bg-gray-100 bg-white text-xs"
+                      >
+                        ←
+                      </button>
+                      
+                      {/* Número de la hora */}
+                      <div className="w-10 h-10 flex items-center justify-center border-y border-gray-300 text-base font-mono bg-white">
+                        {formatTimeUnit(hour)}
+                      </div>
+
+                      {/* Flecha derecha (incrementar) */}
+                      <button 
+                        type="button"
+                        onClick={incrementHour}
+                        className="w-6 h-10 flex items-center justify-center border border-gray-300 rounded-r hover:bg-gray-100 bg-white text-xs"
+                      >
+                        →
+                      </button>
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Hora entera</p>
+                  </label>
+                </div>
+
+                {/* MODALIDAD - Ocupa el espacio restante */}
+                <div className="flex-1">
+                  <label className="block">
+                    <span className="text-sm font-medium">Modalidad</span>
+                    <select 
+                      value={modality} 
+                      onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
+                      className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+                    >
+                      <option value="virtual">Virtual</option>
+                      <option value="presencial">Presencial</option>
+                    </select>
+                  </label>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
