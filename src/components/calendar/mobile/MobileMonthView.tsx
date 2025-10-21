@@ -26,15 +26,12 @@ export default function MobileMonthView({
         a.getMonth() === b.getMonth() &&
         a.getFullYear() === b.getFullYear();
 
-    // Número de días del mes
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    // Ajuste: lunes = 0
     const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
 
     const days: React.ReactNode[] = [];
 
-    // Agregar huecos antes del primer día
     for (let i = 0; i < firstDay; i++) {
         days.push(<div key={`empty-${i}`} className="h-12" />);
     }
