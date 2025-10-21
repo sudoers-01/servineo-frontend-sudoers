@@ -7,11 +7,22 @@ interface DayCellProps {
 }
 
 const DayCell: React.FC<DayCellProps> = ({ date, selectedDate, onSelect }) => {
+    if(selectedDate===null){
+        selectedDate=new Date(Date.now());
+    }
+    const selectedDateString = selectedDate.toISOString();
+    const formatedDate=new Date(selectedDateString);
+    const currentYear=formatedDate.getUTCFullYear();
+    const currentMonth=formatedDate.getUTCMonth();
+    const currentDay=formatedDate.getUTCDate();
+    const currentHour=formatedDate.getUTCHours();
+    const finalDate=new Date(Date.UTC(currentYear,currentMonth,currentDay,(currentHour-4),0,0));
+
     const isSelected =
         selectedDate &&
-        date.getDate() === selectedDate.getDate() &&
-        date.getMonth() === selectedDate.getMonth() &&
-        date.getFullYear() === selectedDate.getFullYear();
+        date.getUTCDate() === selectedDate.getUTCDate() &&
+        date.getUTCMonth() === selectedDate.getUTCMonth() &&
+        date.getUTCFullYear() === selectedDate.getUTCFullYear();
 
     return (
         <div

@@ -104,6 +104,8 @@ export default function DaySchedule({
   requesterId,
   selectedDate,
 }: DayScheduleProps) {
+  //console.log("Fecha recibida:", selectedDate);
+
   const formattedDate = selectedDate ? toYMDAny(selectedDate as any) : "";
 
   const [date, setDate] = useState<string>(formattedDate);
@@ -113,6 +115,41 @@ export default function DaySchedule({
 
   const appointmentFormRef = useRef<AppointmentFormHandle | null>(null);
   const editAppointmentFormRef = useRef<EditAppointmentFormHandle | null>(null);
+
+  // --- Timers para ráfaga de refrescos
+  const refreshTimerRef = useRef<number | null>(null);
+  const refreshIntervalRef = useRef<number | null>(null);
+
+  function clearRefreshTimers() {
+    if (refreshTimerRef.current) {
+      window.clearTimeout(refreshTimerRef.current);
+      refreshTimerRef.current = null;
+    }
+    if (refreshIntervalRef.current) {
+      window.clearInterval(refreshIntervalRef.current);
+      refreshIntervalRef.current = null;
+    }
+  }
+
+  function kickRefreshBurst(targetDate?: string) {
+    const d = targetDate || date;
+    if (!d) return;
+
+    clearRefreshTimers();
+
+    // intento rápido
+    refreshTimerRef.current = window.setTimeout(() => fetchDay(d), 1200);
+
+    // 4 intentos cada 2s (≈9s total con el primero)
+    let attempts = 0;
+    refreshIntervalRef.current = window.setInterval(() => {
+      attempts++;
+      fetchDay(d);
+      if (attempts >= 4) {
+        clearRefreshTimers();
+      }
+    }, 2000);
+  }
 
   const labelByEstado = (
     estado: "libre" | "ocupado" | "no_disponible"
@@ -194,14 +231,56 @@ export default function DaySchedule({
     }
   }, [selectedDate, fixerId, requesterId]);
 
+  // Refrescar al volver a foco/visibilidad
+  useEffect(() => {
+    const onFocus = () => {
+      if (date) fetchDay(date);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible" && date) fetchDay(date);
+    };
+
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onVisibility);
+
+    return () => {
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
+  }, [date, fixerId, requesterId]);
+
+  // Limpieza de timers al desmontar
+  useEffect(() => {
+    return () => {
+      clearRefreshTimers();
+    };
+  }, []);
+
   const handleSlotClick = (item: HorarioItem) => {
     if (item.type === "banner") return;
     const meta = labelByEstado(item.estado_Horario);
+
     if (meta.icon === "＋") {
-      appointmentFormRef.current?.open(`${date}T${item.Hora_Inicio}:00`, {
+      console.log("fecha bien formateada: ",`${date}T${item.Hora_Inicio}:00`);
+      const currentDate=new Date(date);
+      console.log("current date antes de formatear: ", currentDate.toISOString());
+      const currentYear = currentDate.getUTCFullYear();
+      const currentMonth = currentDate.getUTCMonth();
+      const currentDay = currentDate.getUTCDate();
+      const currentHour= parseInt(item.Hora_Inicio);
+      const finalDate=new Date(Date.UTC(currentYear,currentMonth,currentDay,(currentHour+4),0,0));
+      //appointmentFormRef.current?.open(`${date}T${item.Hora_Inicio}:00`, {
+      appointmentFormRef.current?.open(finalDate.toISOString(),{
         eventId: item.id_Horario,
         title: meta.text,
       });
+      console.log("final date anio",currentYear);
+      console.log("final date mes",currentMonth);
+      console.log("final date dia",currentDay);
+      console.log("final date hora",currentHour+4);
+      console.log("Fecha formateada: ", finalDate.toISOString());
+      // Ráfaga de refrescos tras abrir el formulario de creación
+      kickRefreshBurst(date);
     } else if (meta.icon === "✎") {
       const existingAppointment: ExistingAppointment = {
         id: item.id_Horario,
@@ -214,6 +293,8 @@ export default function DaySchedule({
         meetingLink: item.meetingLink || "",
       };
       editAppointmentFormRef.current?.open(existingAppointment);
+      // Ráfaga de refrescos tras abrir el formulario de edición
+      kickRefreshBurst(date);
     }
   };
 
