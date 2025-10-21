@@ -52,7 +52,13 @@ const AppointmentSummaryModal: React.FC<AppointmentSummaryModalProps> = ({ open,
         </div>
 
         <div className="mt-6 flex justify-between gap-2">
-          <button onClick={onClose} className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm">
+          <button 
+            onClick={() => {
+              onClose();
+              window.location.reload();
+            }} 
+            className="px-4 py-2 bg-[#2B6AE0] text-white rounded hover:brightness-110 text-sm"
+          >
             Aceptar
           </button>
         </div>
