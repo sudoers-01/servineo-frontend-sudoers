@@ -17,11 +17,18 @@ export default function PaymentMethodCashFixer({
   const [patching, setPatching] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [okMsg, setOkMsg] = useState<string | null>(null);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Intentos/bloqueo
   const [remainingAttempts, setRemainingAttempts] = useState<number | null>(null);
   const [unlockAtISO, setUnlockAtISO] = useState<string | null>(null);
   const [now, setNow] = useState<number>(Date.now());
+  const [wasLocked, setWasLocked] = useState(false);
+  const [showUnlockMessage, setShowUnlockMessage] = useState(false);
+
+  // Estados de código
+  const [codeExpired, setCodeExpired] = useState(false);
+  const [codeExpiresAt, setCodeExpiresAt] = useState<string | null>(null);
 
   // Summary
   const [summary, setSummary] = useState<{
@@ -31,21 +38,52 @@ export default function PaymentMethodCashFixer({
     amount: { total: number; currency: string };
   } | null>(null);
 
-  // Countdown
+  // Countdown para desbloqueo
   const msLeft = useMemo(() => {
     if (!unlockAtISO) return 0;
     const unlockMs = new Date(unlockAtISO).getTime();
     return Math.max(0, unlockMs - now);
   }, [unlockAtISO, now]);
 
+  // Countdown para expiración del código
+  const msUntilExpiration = useMemo(() => {
+    if (!codeExpiresAt) return 0;
+    const expiresMs = new Date(codeExpiresAt).getTime();
+    return Math.max(0, expiresMs - now);
+  }, [codeExpiresAt, now]);
+
   useEffect(() => {
-    if (!unlockAtISO) return;
+    if (!unlockAtISO && !codeExpiresAt) return;
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
-  }, [unlockAtISO]);
+  }, [unlockAtISO, codeExpiresAt]);
 
   const minutesLeft = Math.floor(msLeft / 60000);
   const secondsLeft = Math.floor((msLeft % 60000) / 1000);
+
+  const hoursUntilExpiration = Math.floor(msUntilExpiration / 3600000);
+  const minutesUntilExpiration = Math.floor((msUntilExpiration % 3600000) / 60000);
+  const secondsUntilExpiration = Math.floor((msUntilExpiration % 60000) / 1000);
+
+  const locked = !!unlockAtISO && msLeft > 0;
+
+  // Detectar cuando se desbloquea
+  useEffect(() => {
+    if (wasLocked && !locked && unlockAtISO) {
+      console.log("🔓 Cuenta desbloqueada");
+      setShowUnlockMessage(true);
+      setUnlockAtISO(null);
+      
+      // Ocultar mensaje después de 5 segundos
+      setTimeout(() => {
+        setShowUnlockMessage(false);
+      }, 5000);
+    }
+    
+    if (locked) {
+      setWasLocked(true);
+    }
+  }, [locked, unlockAtISO, wasLocked]);
 
   // GET summary
   async function fetchSummary() {
@@ -54,21 +92,28 @@ export default function PaymentMethodCashFixer({
       setLoading(false);
       return;
     }
+    
     setErr(null);
     setOkMsg(null);
     setRemainingAttempts(null);
     setUnlockAtISO(null);
     setLoading(true);
+    
     try {
       const res = await fetch(`/api/lab/payments/${trabajo.id}/summary`, {
         cache: "no-store",
       });
+      
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(text || `HTTP ${res.status}`);
       }
+      
       const data = await res.json();
+      console.log("📦 [FIXER] Backend response completo:", data);
+      
       const d = data?.data ?? data;
+      console.log("📋 [FIXER] Data parseada:", d);
 
       const total =
         typeof d?.total === "number"
@@ -76,6 +121,38 @@ export default function PaymentMethodCashFixer({
           : typeof d?.amount?.total === "number"
           ? d.amount.total
           : NaN;
+
+      // Detectar código expirado
+      const backendExpired = d?.codeExpired === true;
+      const manualExpired = d?.codeExpiresAt && new Date(d.codeExpiresAt) < new Date();
+      const isExpired = backendExpired || manualExpired;
+
+      console.log("⏰ [FIXER] Verificación expiración en fetchSummary:", {
+        backendExpired,
+        codeExpiresAt: d?.codeExpiresAt,
+        codeExpiresAtParsed: d?.codeExpiresAt ? new Date(d.codeExpiresAt).toLocaleString('es-BO') : null,
+        now: new Date().toLocaleString('es-BO'),
+        nowISO: new Date().toISOString(),
+        manualExpired,
+        isExpired
+      });
+
+      // Actualizar estado de expiración
+      if (isExpired && !codeExpired) {
+        console.log("🔴 [FIXER] CÓDIGO EXPIRADO detectado en fetchSummary");
+        setCodeExpired(true);
+        setErr("El código ha expirado. Solicite al cliente que genere un nuevo código.");
+      } else if (!isExpired && codeExpired) {
+        // Si se regeneró el código, limpiar el estado de expiración
+        console.log("✅ [FIXER] Código renovado, limpiando estado de expiración");
+        setCodeExpired(false);
+        setErr(null);
+      }
+
+      // Actualizar codeExpiresAt
+      if (d?.codeExpiresAt) {
+        setCodeExpiresAt(d.codeExpiresAt);
+      }
 
       setSummary({
         id: String(d?.id ?? d?._id ?? trabajo.id),
@@ -86,19 +163,57 @@ export default function PaymentMethodCashFixer({
           currency: d?.amount?.currency ?? d?.currency ?? "BOB",
         },
       });
+      
     } catch (e: any) {
+      console.error("❌ [FIXER] Error en fetchSummary:", e);
       setErr(e.message || "No se pudo cargar el resumen");
     } finally {
       setLoading(false);
     }
   }
 
+  // Cargar summary al montar
   useEffect(() => {
     fetchSummary();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [trabajo?.id]);
 
-  // Handlers
+  // Verificación automática de expiración cada segundo
+  useEffect(() => {
+    if (!codeExpiresAt || codeExpired) return;
+    
+    const checkExpiration = () => {
+      const expiresMs = new Date(codeExpiresAt).getTime();
+      const nowMs = Date.now();
+      
+      const secondsLeft = (expiresMs - nowMs) / 1000;
+      
+      console.log("⏰ [FIXER] Verificando expiración (auto-check):", {
+        expiresAt: new Date(expiresMs).toLocaleString('es-BO'),
+        expiresAtISO: new Date(expiresMs).toISOString(),
+        now: new Date(nowMs).toLocaleString('es-BO'),
+        nowISO: new Date(nowMs).toISOString(),
+        secondsLeft: secondsLeft.toFixed(2),
+        expired: nowMs >= expiresMs
+      });
+      
+      if (nowMs >= expiresMs && !codeExpired) {
+        console.log("🔴 [FIXER] CÓDIGO EXPIRADO detectado por auto-check");
+        setCodeExpired(true);
+        setErr("El código ha expirado. Solicite al cliente que genere un nuevo código.");
+      }
+    };
+
+    // Verificar inmediatamente
+    checkExpiration();
+    
+    // Verificar cada segundo
+    const interval = setInterval(checkExpiration, 1000);
+
+    return () => clearInterval(interval);
+  }, [codeExpiresAt, codeExpired]);
+
+  // Confirmar pago
   const handleContinuar = async () => {
     if (!summary) return;
 
@@ -112,6 +227,7 @@ export default function PaymentMethodCashFixer({
     setErr(null);
     setRemainingAttempts(null);
     setUnlockAtISO(null);
+    setShowUnlockMessage(false);
     setPatching(true);
 
     try {
@@ -123,12 +239,11 @@ export default function PaymentMethodCashFixer({
 
       const responseData = await res.json();
 
-      // ✅ Código correcto
+      // ✅ Código correcto - Mostrar modal de éxito
       if (res.ok) {
-        setOkMsg(responseData?.message || "Pago confirmado exitosamente.");
-        // Refrescar summary desde backend
+        console.log("✅ [FIXER] Pago confirmado exitosamente");
+        setShowSuccessModal(true);
         await fetchSummary();
-        // Limpiar el input después de confirmación exitosa
         setCodigoIngresado("");
         return;
       }
@@ -161,7 +276,8 @@ export default function PaymentMethodCashFixer({
 
       // 410 - Código expirado
       if (res.status === 410) {
-        throw new Error(responseData.error || "El código ha expirado");
+        setCodeExpired(true);
+        throw new Error(responseData.error || "El código ha expirado. Solicite al cliente que genere un nuevo código.");
       }
 
       // 400 - Bad Request
@@ -193,7 +309,38 @@ export default function PaymentMethodCashFixer({
     onBack({ refresh: true });
   };
 
-  // Render
+  const handleCloseSuccessModal = () => {
+    setShowSuccessModal(false);
+    onClose();
+  };
+
+  // Modal de éxito
+  if (showSuccessModal) {
+    return (
+      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div className="bg-black rounded-lg shadow-2xl p-8 max-w-md w-full mx-4 text-center">
+          <div className="mb-4">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            ✓ Código correcto! Pago confirmado
+          </h2>
+          <button
+            onClick={handleCloseSuccessModal}
+            className="mt-6 px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold rounded transition-colors w-full"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state
   if (loading) {
     return (
       <Overlay>
@@ -234,8 +381,6 @@ export default function PaymentMethodCashFixer({
 
   if (!summary) return null;
 
-  const locked = !!unlockAtISO && msLeft > 0;
-
   return (
     <Overlay>
       <div className="bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl">
@@ -255,6 +400,49 @@ export default function PaymentMethodCashFixer({
           <div className="text-center mb-12">
             <h2 className="text-2xl font-bold text-gray-900">Confirmación del pago recibido</h2>
           </div>
+
+          {/* Mensaje de desbloqueo */}
+          {showUnlockMessage && (
+            <div className="mb-6 max-w-xl mx-auto animate-fade-in">
+              <div className="bg-green-50 border-l-4 border-green-500 p-4 rounded shadow-lg">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-green-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-green-800">
+                      🔓 El periodo de bloqueo de 10 minutos ha finalizado. Ya puedes intentar nuevamente.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Alerta de código expirado */}
+          {codeExpired && (
+            <div className="mb-6 max-w-xl mx-auto">
+              <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-amber-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className="text-sm font-medium text-amber-800 mb-2">
+                      ⏱️ El código ha expirado
+                    </p>
+                    <p className="text-xs text-amber-700">
+                      Solicite al cliente que genere un nuevo código desde su vista para continuar con el pago.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Alerta de bloqueo */}
           {locked && (
@@ -276,6 +464,20 @@ export default function PaymentMethodCashFixer({
             </div>
           )}
 
+          {/* Info de tiempo restante hasta expiración */}
+          {!codeExpired && codeExpiresAt && msUntilExpiration > 0 && (
+            <div className="mb-6 max-w-xl mx-auto">
+              <div className="bg-blue-50 border border-blue-200 rounded p-3">
+                <p className="text-blue-700 text-sm text-center">
+                  ⏰ Código válido por: <b>
+                    {hoursUntilExpiration > 0 && `${hoursUntilExpiration}h `}
+                    {minutesUntilExpiration}m {secondsUntilExpiration}s
+                  </b>
+                </p>
+              </div>
+            </div>
+          )}
+
           <div className="space-y-6 max-w-xl mx-auto">
             {/* Código (editable) */}
             <RowInput
@@ -283,7 +485,7 @@ export default function PaymentMethodCashFixer({
               value={codigoIngresado}
               onChange={(e) => setCodigoIngresado(e.target.value.toUpperCase())}
               placeholder="Ingresa el código del cliente"
-              disabled={locked || patching}
+              disabled={locked || patching || codeExpired}
             />
 
             {/* Monto */}
@@ -295,19 +497,17 @@ export default function PaymentMethodCashFixer({
             {/* Estado */}
             <ReadOnly 
               label="Estado" 
-              value={summary.status.toUpperCase()} 
+              value={
+                  summary.status === 'paid' ? 'CONFIRMADO' :
+                  summary.status === 'failed' ? 'ERROR' :
+                  'PENDIENTE'
+                }
             />
           </div>
 
           {/* Mensajes */}
           <div className="mt-6 text-center space-y-2">
-            {okMsg && (
-              <div className="bg-green-50 border border-green-200 rounded p-3">
-                <p className="text-emerald-700 font-medium">{okMsg}</p>
-              </div>
-            )}
-            
-            {err && (
+            {err && !codeExpired && (
               <div className="bg-red-50 border border-red-200 rounded p-3">
                 <p className="text-rose-600 font-medium">{err}</p>
               </div>
@@ -338,14 +538,14 @@ export default function PaymentMethodCashFixer({
           <div className="flex justify-center gap-6 mt-12">
             <button
               onClick={handleContinuar}
-              disabled={!codigoIngresado || patching || locked}
+              disabled={!codigoIngresado || patching || locked || codeExpired}
               className={`px-12 py-3 text-white text-lg font-semibold rounded-md transition-colors ${
-                !codigoIngresado || patching || locked
+                !codigoIngresado || patching || locked || codeExpired
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-black hover:bg-gray-800"
               }`}
             >
-              {patching ? "Confirmando…" : locked ? "Bloqueado" : "Continuar"}
+              {patching ? "Confirmando…" : locked ? "Bloqueado" : codeExpired ? "Código Expirado" : "Confirmar Pago Recibido"}
             </button>
             <button
               onClick={handleVolver}
