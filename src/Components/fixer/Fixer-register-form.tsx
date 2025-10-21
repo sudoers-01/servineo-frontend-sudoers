@@ -1,125 +1,99 @@
 "use client"
-
-import type React from "react"
-
-import { useState } from "react"
-
-export interface FormFieldConfig {
-  id: string
-  label: string
-  type: "text" | "email" | "phone" | "password" | "number"
-  placeholder?: string
-  required?: boolean
-}
+import { useForm } from "react-hook-form"
+import { zodResolver } from "@hookform/resolvers/zod"
+import { initialRegistrationSchema, type InitialRegistrationData } from "@/app/lib/validations/fixer-schemas"
+import { AlertCircle } from "lucide-react"
 
 interface FixerRegisterFormProps {
-  fields: FormFieldConfig[]
-  onSubmit: (data: Record<string, string>) => void
+  onSubmit: (data: InitialRegistrationData) => void
   submitButtonText?: string
-  defaultValues?: Record<string, string>
+  defaultValues?: Partial<InitialRegistrationData>
 }
 
 export default function FixerRegisterForm({
-  fields,
   onSubmit,
   submitButtonText = "Registrar",
-  defaultValues = {},
+  defaultValues,
 }: FixerRegisterFormProps) {
-  const [formData, setFormData] = useState<Record<string, string>>(() => {
-    const initial: Record<string, string> = {}
-    fields.forEach((field) => {
-      initial[field.id] = defaultValues[field.id] || ""
-    })
-    console.log("[v0] Initial form data:", initial)
-    return initial
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<InitialRegistrationData>({
+    resolver: zodResolver(initialRegistrationSchema),
+    defaultValues: {
+      name: defaultValues?.name || "Juan Carlos Pérez García",
+      email: defaultValues?.email || "juan.perez@example.com",
+      phone: defaultValues?.phone || "+591 70341618",
+    },
   })
 
-  const [errors, setErrors] = useState<Record<string, string>>({})
-
-  const handleChange = (id: string, value: string) => {
-    console.log("[v0] Field changed:", id, "New value:", value)
-    setFormData((prev) => ({ ...prev, [id]: value }))
-    if (errors[id]) {
-      setErrors((prev) => {
-        const newErrors = { ...prev }
-        delete newErrors[id]
-        return newErrors
-      })
-    }
-  }
-
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    fields.forEach((field) => {
-      const value = formData[field.id]?.trim()
-
-      if (field.required !== false && !value) {
-        newErrors[field.id] = `${field.label} es requerido`
-        return
-      }
-
-      if (value) {
-        if (field.type === "email" && !isValidEmail(value)) {
-          newErrors[field.id] = "Email inválido"
-        } else if (field.type === "phone" && !isValidPhone(value)) {
-          newErrors[field.id] = "Teléfono inválido"
-        }
-      }
-    })
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    console.log("[v0] Form submitted with data:", formData)
-
-    if (validateForm()) {
-      console.log("[v0] Form validation passed, calling onSubmit")
-      onSubmit(formData)
-    } else {
-      console.log("[v0] Form validation failed")
-    }
-  }
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      {fields.map((field) => (
-        <div key={field.id} className="space-y-1">
-          <label htmlFor={field.id} className="block text-sm font-medium text-gray-700">
-            {field.label}
-            {field.required !== false && <span className="text-red-500 ml-1">*</span>}
-          </label>
-          <input
-            id={field.id}
-            type={field.type === "phone" ? "tel" : field.type}
-            value={formData[field.id]}
-            onChange={(e) => handleChange(field.id, e.target.value)}
-            placeholder={field.placeholder}
-            className="w-full rounded-full border border-transparent bg-gray-200 px-4 py-2 text-sm outline-none placeholder:text-gray-500 focus:border-primary "
-          />
-          {errors[field.id] && <p className="text-xs text-red-600">{errors[field.id]}</p>}
-        </div>
-      ))}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-1">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+          Nombre Completo <span className="text-red-500">*</span>
+        </label>
+        <input
+          {...register("name")}
+          id="name"
+          type="text"
+          className="w-full rounded-full border border-transparent bg-gray-200 px-4 py-2 text-sm outline-none placeholder:text-gray-500 focus:border-blue-500 focus:bg-gray-100 focus:ring-2 focus:ring-blue-400 transition-all"
+          placeholder="Ingrese su nombre completo"
+        />
+        {errors.name && (
+          <div className="flex items-center gap-1 text-xs text-red-600">
+            <AlertCircle className="h-3 w-3" />
+            <span>{errors.name.message}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+          Email <span className="text-red-500">*</span>
+        </label>
+        <input
+          {...register("email")}
+          id="email"
+          type="email"
+          className="w-full rounded-full border border-transparent bg-gray-200 px-4 py-2 text-sm outline-none placeholder:text-gray-500 focus:border-blue-500 focus:bg-gray-100 focus:ring-2 focus:ring-blue-400 transition-all"
+          placeholder="correo@ejemplo.com"
+        />
+        {errors.email && (
+          <div className="flex items-center gap-1 text-xs text-red-600">
+            <AlertCircle className="h-3 w-3" />
+            <span>{errors.email.message}</span>
+          </div>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+          Teléfono <span className="text-red-500">*</span>
+        </label>
+        <input
+          {...register("phone")}
+          id="phone"
+          type="tel"
+          className="w-full rounded-full border border-transparent bg-gray-200 px-4 py-2 text-sm outline-none placeholder:text-gray-500 focus:border-blue-500 focus:bg-gray-100 focus:ring-2 focus:ring-blue-400 transition-all"
+          placeholder="+591 70123456"
+        />
+        {errors.phone && (
+          <div className="flex items-center gap-1 text-xs text-red-600">
+            <AlertCircle className="h-3 w-3" />
+            <span>{errors.phone.message}</span>
+          </div>
+        )}
+      </div>
 
       <button
         type="submit"
-        className="w-full rounded-full bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+        disabled={isSubmitting}
+        className="w-full rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 focus:outline-none  focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
-        {submitButtonText}
+        {isSubmitting ? "Registrando..." : submitButtonText}
       </button>
     </form>
   )
-}
-
-function isValidEmail(email: string): boolean {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return emailRegex.test(email)
-}
-
-function isValidPhone(phone: string): boolean {
-  const phoneRegex = /^[\d\s\-+()]{8,}$/
-  return phoneRegex.test(phone)
 }

@@ -1,6 +1,7 @@
 "use client"
 
-import { Card } from "../Card"
+import { Card } from "@/Components/Card"
+
 interface TermsStepProps {
   accepted: boolean
   onAcceptChange: (accepted: boolean) => void
@@ -80,7 +81,7 @@ export function TermsStep({ accepted, onAcceptChange, error }: TermsStepProps) {
             type="checkbox"
             checked={accepted}
             onChange={(e) => onAcceptChange(e.target.checked)}
-            className="mt-1 h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+            className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-2 focus:ring-blue-500"
           />
           <span className="text-sm text-gray-700">
             He leído y acepto los términos y condiciones para convertirme en FIXER

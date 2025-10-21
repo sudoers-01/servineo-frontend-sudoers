@@ -8,6 +8,7 @@ export interface JobOffer {
   whatsapp: string
   photos: string[]
   services: string[]
+  price: number
   createdAt: Date
   city: string
 }
@@ -58,6 +59,7 @@ export const mockJobOffers: JobOffer[] = [
       "/images/carpinteria 3.jpg",
     ],
     services: ["Carpintería"],
+    price: 49,
     createdAt: new Date("2025-01-13"),
     city: "Santa Cruz",
   },
@@ -74,6 +76,7 @@ export const mockJobOffers: JobOffer[] = [
       "/images/construccion 3.jpg",
     ],
     services: ["Albañilería"],
+    price: 49,
     createdAt: new Date("2025-01-12"),
     city: "El Alto",
   },

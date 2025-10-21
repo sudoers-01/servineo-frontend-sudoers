@@ -11,7 +11,7 @@ export function StepIndicator({ step, total }: StepIndicatorProps) {
           key={i}
           className={
             "h-1.5 w-10 rounded-full transition-all " +
-            (i < step ? "bg-blue-700" : i === step ? "bg-blue-500" : "bg-gray-300")
+            (i < step ? "bg-primary" : i === step ? "bg-blue-500" : "bg-gray-300")
           }
         />
       ))}

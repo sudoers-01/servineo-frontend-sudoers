@@ -3,7 +3,8 @@
 import type React from "react"
 
 import { useState } from "react"
-import { Card } from "../Card"
+import { Card } from "@/Components/Card"
+import { Upload, ImageIcon, Video, Trash2, AlertCircle } from "lucide-react"
 
 export interface Experience {
   id: string
@@ -30,7 +31,6 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
     const file = e.target.files?.[0]
     if (!file) return
 
-    // Validate file type
     const isImage = file.type.startsWith("image/")
     const isVideo = file.type.startsWith("video/")
 
@@ -39,7 +39,6 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
       return
     }
 
-    // Validate file size (max 50MB)
     if (file.size > 50 * 1024 * 1024) {
       alert("El archivo es muy grande. Máximo 50MB")
       return
@@ -53,7 +52,6 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
     setUploading(true)
 
     try {
-      // Create a blob URL for preview (in production, upload to server/cloud storage)
       const blobUrl = URL.createObjectURL(file)
 
       onAddExperience({
@@ -64,7 +62,6 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
         fileName: file.name,
       })
 
-      // Reset form
       setTitle("")
       setDescription("")
       e.target.value = ""
@@ -78,7 +75,8 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
   return (
     <Card title="Subir experiencias">
       <div className="space-y-4">
-        <p className="text-sm text-gray-700">
+        <p className="text-sm text-gray-700 flex items-center gap-2">
+          <Upload className="h-4 w-4 text-primary" />
           Muestra tus trabajos anteriores subiendo fotos o videos de tus proyectos completados
         </p>
 
@@ -93,7 +91,7 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Ej: Instalación eléctrica residencial"
               maxLength={100}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-400 transition-all"
             />
           </div>
 
@@ -105,12 +103,13 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
               placeholder="Describe brevemente el trabajo realizado..."
               maxLength={500}
               rows={3}
-              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-primary"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-400 transition-all"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-800">
+            <label className="text-sm font-medium text-gray-800 flex items-center gap-2">
+              <ImageIcon className="h-4 w-4 text-primary" />
               Foto o video <span className="text-red-600">*</span>
             </label>
             <input
@@ -118,18 +117,32 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
               accept="image/*,video/*"
               onChange={handleFileUpload}
               disabled={uploading}
-              className="w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-800 disabled:opacity-50"
+              className="w-full text-sm text-gray-700 file:mr-4 file:rounded-full file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-medium file:text-white hover:file:bg-blue-700 disabled:opacity-50 transition-all"
             />
             <p className="text-xs text-gray-600">Máximo 50MB. Formatos: JPG, PNG, MP4, MOV</p>
           </div>
         </div>
 
         {experiences.length > 0 && (
-          <div className="space-y-3">
+          <div className="space-y-3 animate-fade-in">
             <h3 className="text-sm font-medium text-gray-800">Experiencias agregadas ({experiences.length})</h3>
             <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               {experiences.map((exp) => (
-                <div key={exp.id} className="relative overflow-hidden rounded-lg border border-gray-300 bg-white">
+                <div
+                  key={exp.id}
+                  className="relative overflow-hidden rounded-lg border border-gray-300 bg-white shadow-sm hover:shadow-md transition-shadow"
+                >
+                  <div className="absolute top-2 right-2 z-10">
+                    {exp.fileType === "image" ? (
+                      <div className="rounded-full bg-blue-600 p-1.5">
+                        <ImageIcon className="h-3 w-3 text-white" />
+                      </div>
+                    ) : (
+                      <div className="rounded-full bg-purple-600 p-1.5">
+                        <Video className="h-3 w-3 text-white" />
+                      </div>
+                    )}
+                  </div>
                   {exp.fileType === "image" ? (
                     <img src={exp.fileUrl || "/placeholder.svg"} alt={exp.title} className="h-40 w-full object-cover" />
                   ) : (
@@ -141,8 +154,9 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
                     <button
                       type="button"
                       onClick={() => onDeleteExperience(exp.id)}
-                      className="mt-2 text-xs text-red-600 hover:underline"
+                      className="mt-2 flex items-center gap-1 text-xs text-red-600 hover:text-red-700 transition-colors"
                     >
+                      <Trash2 className="h-3 w-3" />
                       Eliminar
                     </button>
                   </div>
@@ -152,7 +166,12 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
           </div>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && (
+          <div className="flex items-center gap-1 text-sm text-red-600">
+            <AlertCircle className="h-4 w-4" />
+            <span>{error}</span>
+          </div>
+        )}
       </div>
     </Card>
   )

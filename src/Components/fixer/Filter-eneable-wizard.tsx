@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { StepIndicator } from "./Step-indicator"
-import { Card } from "./Card"
+import { Card } from "../Card"
 import { PillButton } from "./Pill-button"
 import { CIStep } from "./steps/Ci-step"
 import { LocationStep } from "./steps/Location-step"
@@ -11,6 +11,8 @@ import { PaymentStep, type PaymentMethod } from "./steps/Payment-step";
 import { ExperienceStep, type Experience } from "./steps/Experience-step"
 import { VehicleStep } from "./steps/Vehicle-step"
 import { TermsStep } from "./steps/Terms-step"
+import { CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react"
+import { ProfilePhotoStep } from "./steps/Profile-photo-step"
 
 type RequesterUser = {
   id: string
@@ -31,6 +33,7 @@ type FixerProfileDraft = {
   hasVehicle: boolean | null
   vehicleType?: string
   termsAccepted: boolean
+  photoUrl?: string
 }
 
 const DEFAULT_SERVICES: Service[] = [
@@ -48,7 +51,7 @@ interface FixerEnableWizardProps {
 
 export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
   const [step, setStep] = useState(0)
-  const total = 7
+  const total = 8
   const [draft, setDraft] = useState<FixerProfileDraft>({
     ci: "",
     location: null,
@@ -60,6 +63,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
     hasVehicle: null,
     vehicleType: "",
     termsAccepted: false,
+    photoUrl: "",
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -68,26 +72,29 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
   function validateStep() {
     const e: Record<string, string> = {}
     if (step === 0) {
+      if (!draft.photoUrl) e.photo = "Debe subir una foto de perfil"
+    }
+    if (step === 1) {
       if (!draft.ci.trim()) e.ci = "CI es requerido"
       else if (!/^[0-9-]+$/.test(draft.ci.trim())) e.ci = "CI debe contener solo números y guiones"
       else if (draft.ci && MOCK_TAKEN_CIS.has(draft.ci.trim())) e.ci = "Este CI ya está registrado"
     }
-    if (step === 1) {
+    if (step === 2) {
       if (!draft.location) e.location = "Debe seleccionar una ubicación"
     }
-    if (step === 2) {
+    if (step === 3) {
       if (draft.selectedServiceIds.length === 0) e.services = "Seleccione al menos un servicio"
     }
-    if (step === 3) {
+    if (step === 4) {
       if (draft.payments.length === 0) e.payments = "Seleccione al menos un método de pago"
       const needsAccount = draft.payments.includes("qr") || draft.payments.includes("card")
       if (needsAccount && !draft.accountInfo?.trim()) e.accountInfo = "Ingrese la cuenta para pagos"
     }
-    if (step === 5) {
+    if (step === 6) {
       if (draft.hasVehicle === null) e.vehicle = "Debe indicar si cuenta con vehículo"
       if (draft.hasVehicle === true && !draft.vehicleType) e.vehicleType = "Seleccione el tipo de vehículo"
     }
-    if (step === 6) {
+    if (step === 7) {
       if (!draft.termsAccepted) e.terms = "Debe aceptar los términos y condiciones"
     }
     setErrors(e)
@@ -164,9 +171,12 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
       <StepIndicator step={step} total={total} />
       {success ? (
         <Card title="¡Listo!">
-          <div className="space-y-3 text-center">
-            <p className="text-sm text-gray-700">{user.name} ahora está habilitado como FIXER.</p>
-            <div className="text-xs text-gray-600">
+          <div className="space-y-4 text-center">
+            <div className="flex justify-center">
+              <CheckCircle2 className="h-16 w-16 text-green-600 animate-scale-in" />
+            </div>
+            <p className="text-lg font-semibold text-gray-900">{user.name} ahora está habilitado como FIXER.</p>
+            <div className="text-sm text-gray-600 space-y-1">
               <p>CI: {draft.ci}</p>
               <p>
                 Ubicación: {draft.location?.lat.toFixed(5)}, {draft.location?.lng.toFixed(5)}
@@ -181,10 +191,18 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
       ) : (
         <div className="space-y-4">
           {step === 0 && (
-            <CIStep ci={draft.ci} onCIChange={(ci) => setDraft((d) => ({ ...d, ci }))} error={errors.ci} />
+            <ProfilePhotoStep
+              photoUrl={draft.photoUrl}
+              onPhotoChange={(photoUrl) => setDraft((d) => ({ ...d, photoUrl }))}
+              error={errors.photo}
+            />
           )}
 
           {step === 1 && (
+            <CIStep ci={draft.ci} onCIChange={(ci) => setDraft((d) => ({ ...d, ci }))} error={errors.ci} />
+          )}
+
+          {step === 2 && (
             <LocationStep
               location={draft.location || null}
               onLocationChange={(location) => setDraft((d) => ({ ...d, location }))}
@@ -192,7 +210,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
             />
           )}
 
-          {step === 2 && (
+          {step === 3 && (
             <ServicesStep
               services={draft.services}
               selectedServiceIds={draft.selectedServiceIds}
@@ -204,7 +222,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
             />
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <PaymentStep
               payments={draft.payments}
               accountInfo={draft.accountInfo || ""}
@@ -222,7 +240,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
             />
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <ExperienceStep
               experiences={draft.experiences}
               onAddExperience={addExperience}
@@ -231,7 +249,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
             />
           )}
 
-          {step === 5 && (
+          {step === 6 && (
             <VehicleStep
               hasVehicle={draft.hasVehicle}
               vehicleType={draft.vehicleType}
@@ -241,7 +259,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
             />
           )}
 
-          {step === 6 && (
+          {step === 7 && (
             <TermsStep
               accepted={draft.termsAccepted}
               onAcceptChange={(termsAccepted) => setDraft((d) => ({ ...d, termsAccepted }))}
@@ -254,22 +272,29 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
               type="button"
               disabled={step === 0}
               onClick={goPrev}
-              className="bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:opacity-50"
+              className="bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:opacity-50 flex items-center gap-2"
             >
+              <ArrowLeft className="h-4 w-4" />
               Atrás
             </PillButton>
-            {step < 6 ? (
-              <PillButton type="button" onClick={goNext} className="bg-blue-700 text-white hover:bg-blue-800">
+            {step < 7 ? (
+              <PillButton
+                type="button"
+                onClick={goNext}
+                className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              >
                 Siguiente
+                <ArrowRight className="h-4 w-4" />
               </PillButton>
             ) : (
               <PillButton
                 type="button"
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="bg-blue-700 text-white hover:bg-blue-800 disabled:opacity-50"
+                className="bg-primary text-white hover:bg-blue-800 disabled:opacity-50 flex items-center gap-2"
               >
                 {submitting ? "Guardando..." : "Finalizar"}
+                <CheckCircle2 className="h-4 w-4" />
               </PillButton>
             )}
           </div>
