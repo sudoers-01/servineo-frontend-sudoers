@@ -67,7 +67,7 @@ export default function CalendarPage() {
                             strokeLinecap="round"
                             strokeLinejoin="round"
                             d="M6 6l12 12M6 18L18 6"
-                            strokeWidth={2}     
+                            strokeWidth={2}
                         />
                     </svg>
                 </button>
@@ -82,7 +82,7 @@ export default function CalendarPage() {
             </div>
 
             <div className="flex justify-center md:block hidden">
-                <MyCalendarPage 
+                <MyCalendarPage
                     fixerId={fixerId}
                     requesterId={requesterId}
                 />
@@ -90,9 +90,10 @@ export default function CalendarPage() {
 
             <div className="flex flex-col md:hidden justify-center gap-4" >
                 <MobileCalendar
+                    fixer_id={fixerId}
                     selectedDate={selectedDate}
                     onSelectDate={setSelectedDate}
-                    events={events} 
+                   
                 />
                 <div></div>
                 <MobileList

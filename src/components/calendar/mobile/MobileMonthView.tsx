@@ -1,15 +1,12 @@
 'use client';
 import React from "react";
 import DayCell from "./DayCell/DayCell"
-interface Event {
-    title: string;
-    date: Date;
-}
+
 
 interface MobileMonthViewProps {
     year: number;
     month: number; // 0 = enero
-    events?: Event[];
+    fixer_id: string;
     selectedDate: Date | null;
     onSelectDate: (date: Date) => void;
 }
@@ -17,7 +14,7 @@ interface MobileMonthViewProps {
 export default function MobileMonthView({
     year,
     month,
-    events = [],
+    fixer_id,
     selectedDate,
     onSelectDate,
 }: MobileMonthViewProps) {
@@ -52,8 +49,10 @@ export default function MobileMonthView({
             <DayCell
                 key={day}
                 date={date}
+                fixer_id={fixer_id}
                 selectedDate={selectedDate}
                 onSelectDate={onSelectDate}
+
                 today={today}
 
             />

@@ -1,21 +1,24 @@
 import axios from 'axios';
-export async function getSchedulesCont(fixer_id: string, searched_date: string) {
+
+export async function getSchedulesCont(fixer_id: string, selected_date: string) {
     try {
         const response = await axios.get(
-            'https://servineo-backend-lorem.onrender.com/api/crud_read/schedules/get_by_fixer_current_requester_day',
+            'https://servineo-backend-lorem.onrender.com/api/crud_read/appointments/get_appointments_date',
             {
                 params: {
-                    fixer_id,
-                    searched_date,
+                    id_fixer: fixer_id,
+                    selected_date,
                 },
             }
         );
+
         const data = response.data;
-        const schedulesCont = data.accessed_appointments?.length || 0;
+        console.log(data);
+        const schedulesCount = data.accessed_appointments?.length || 0;
 
-
-        return schedulesCont;
+        return schedulesCount;
     } catch (error) {
+        console.error('Error al obtener schedules:', error);
         return 0;
     }
 }
