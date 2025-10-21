@@ -20,7 +20,6 @@ export default function MobileHeader({
     onChangeMonth,
     onChangeYear,
 }: MobileHeaderProps) {
-
     const [year, setYear] = useState(initialYear);
     const [month, setMonth] = useState(initialMonth);
 
@@ -42,6 +41,15 @@ export default function MobileHeader({
     };
 
     const handleNextMonth = () => {
+        const currentDate = new Date();
+        const nextDate = new Date(year, month + 1, 1);
+
+        const diffMonths =
+            (nextDate.getFullYear() - currentDate.getFullYear()) * 12 +
+            (nextDate.getMonth() - currentDate.getMonth());
+
+        if (diffMonths > 6) return;
+
         if (month === 11) {
             setMonth(0);
             setYear(prev => prev + 1);
@@ -53,19 +61,43 @@ export default function MobileHeader({
         }
     };
 
+    const isNextDisabled = (() => {
+        const currentDate = new Date();
+        const nextDate = new Date(year, month + 1, 1);
+        const diffMonths =
+            (nextDate.getFullYear() - currentDate.getFullYear()) * 12 +
+            (nextDate.getMonth() - currentDate.getMonth());
+        return diffMonths > 6;
+    })();
+
     return (
         <div className="text-black flex justify-between items-center mb-4 px-2">
             <div className="flex items-center gap-2">
-                <button onClick={handlePrevMonth} className="p-1 rounded-full hover:bg-gray-200 active:bg-gray-400 transition-colors">&lt;</button>
+                {/* Botón mes anterior */}
+                <button
+                    onClick={handlePrevMonth}
+                    className="p-1 rounded-full hover:bg-gray-200 active:bg-gray-400 transition-colors"
+                >
+                    &lt;
+                </button>
+
                 <span className="text-lg font-semibold">{monthNames[month]}</span>
-                <button onClick={handleNextMonth} className="p-1 rounded-full hover:bg-gray-200 active:bg-gray-400 transition-colors">&gt;</button>
+
+                <button
+                    onClick={handleNextMonth}
+                    disabled={isNextDisabled}
+                    className={`p-1 rounded-full transition-colors ${isNextDisabled
+                        ? "opacity-40 cursor-not-allowed"
+                        : "hover:bg-gray-200 active:bg-gray-400"
+                        }`}
+                >
+                    &gt;
+                </button>
             </div>
 
             <div className="flex items-center gap-2">
-                <button onClick={() => { setYear(prev => prev - 1); onChangeYear(year - 1); }} className="p-1 rounded-full hover:bg-gray-200 transition-colors">&lt;</button>
                 <span className="text-lg font-semibold">{year}</span>
-                <button onClick={() => { setYear(prev => prev + 1); onChangeYear(year + 1); }} className="p-1 rounded-full hover:bg-gray-200 transition-colors">&gt;</button>
             </div>
-        </div>
+        </div >
     );
 }

@@ -24,8 +24,8 @@ export default function DayCell({
         a.getFullYear() === b.getFullYear();
     const isToday = isSameDay(date, today);
     const isSelected = selectedDate && isSameDay(date, selectedDate);
-    const [count, setCount] = useState<number | null>(null);
 
+    const [count, setCount] = useState<number | null>(null);
 
     const dayNumber = date.getDate();
     useEffect(() => {

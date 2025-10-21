@@ -2,37 +2,37 @@
 
 import { useEffect, useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_BACKEND as string; 
+const API = process.env.NEXT_PUBLIC_BACKEND as string;
 
 export interface Schedule {
-  _id: string;
-  starting_time: string;
-  finishing_time: string;
-  schedule_state: string;
+    _id: string;
+    starting_time: string;
+    finishing_time: string;
+    schedule_state: string;
 }
 
 // Define la interfaz para las props
 interface MobileWeekViewProps {
-  fixerId: string;
-  requesterId: string;
-  selectedDate : Date | null;
+    fixerId: string;
+    requesterId: string;
+    selectedDate: Date | null;
 }
 
-function groupSchedulesByWeek(fixerSchedules: Schedule[]): Schedule[][]{
+function groupSchedulesByWeek(fixerSchedules: Schedule[]): Schedule[][] {
     const groupedSchedules: Schedule[][] = [[], [], [], [], [], [], []];
 
     fixerSchedules.forEach(schedule => {
         const scheduleDate = new Date(schedule.starting_time);
         const dayOfWeek = scheduleDate.getDay();
-        
+
         let targetIndex: number;
-        
+
         if (dayOfWeek === 0) {
             targetIndex = 6;
         } else {
             targetIndex = dayOfWeek - 1;
         }
-        
+
         groupedSchedules[targetIndex].push(schedule);
     });
 
@@ -41,94 +41,94 @@ function groupSchedulesByWeek(fixerSchedules: Schedule[]): Schedule[][]{
 
 // Función para obtener las próximas 4 semanas
 function getNextFourWeeks(): { startDate: Date; endDate: Date; days: Date[] }[] {
-  const weeks = [];
-  const today = new Date();
-  
-  // Si es fin de semana (sábado = 6, domingo = 0), empezar desde la próxima semana
-  let startDate = new Date(today);
-  if (today.getDay() === 0 || today.getDay() === 6) {
-    startDate.setDate(today.getDate() + (7 - today.getDay()));
-  }
-  
-  // Ajustar al lunes de la semana actual o próxima
-  startDate.setDate(startDate.getDate() - (startDate.getDay() - 1));
-  
-  for (let i = 0; i < 4; i++) {
-    const weekStart = new Date(startDate);
-    weekStart.setDate(startDate.getDate() + (i * 7));
-    
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 4); // Lunes a Viernes
-    
-    const days = [];
-    for (let j = 0; j < 5; j++) { // Solo días de semana (lunes a viernes)
-      const day = new Date(weekStart);
-      day.setDate(weekStart.getDate() + j);
-      days.push(day);
+    const weeks = [];
+    const today = new Date();
+
+    // Si es fin de semana (sábado = 6, domingo = 0), empezar desde la próxima semana
+    let startDate = new Date(today);
+    if (today.getDay() === 0 || today.getDay() === 6) {
+        startDate.setDate(today.getDate() + (7 - today.getDay()));
     }
-    
-    weeks.push({
-      startDate: weekStart,
-      endDate: weekEnd,
-      days: days
-    });
-  }
-  
-  return weeks;
+
+    // Ajustar al lunes de la semana actual o próxima
+    startDate.setDate(startDate.getDate() - (startDate.getDay() - 1));
+
+    for (let i = 0; i < 4; i++) {
+        const weekStart = new Date(startDate);
+        weekStart.setDate(startDate.getDate() + (i * 7));
+
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 4); // Lunes a Viernes
+
+        const days = [];
+        for (let j = 0; j < 5; j++) { // Solo días de semana (lunes a viernes)
+            const day = new Date(weekStart);
+            day.setDate(weekStart.getDate() + j);
+            days.push(day);
+        }
+
+        weeks.push({
+            startDate: weekStart,
+            endDate: weekEnd,
+            days: days
+        });
+    }
+
+    return weeks;
 }
 
 // Función para formatear fecha
 function formatDate(date: Date): string {
-  return date.toLocaleDateString('es-ES', {
-    day: 'numeric',
-    month: 'short'
-  });
+    return date.toLocaleDateString('es-ES', {
+        day: 'numeric',
+        month: 'short'
+    });
 }
 
 // Función para obtener el nombre del día
 function getDayName(date: Date): string {
-  return date.toLocaleDateString('es-ES', { weekday: 'long' });
+    return date.toLocaleDateString('es-ES', { weekday: 'long' });
 }
 
 function combineAllSchedules(
-  currentRequesterSchedules: Array<{ schedules: Schedule[] }>,
-  otherRequesterSchedules: Array<{ schedules: Schedule[] }>
+    currentRequesterSchedules: Array<{ schedules: Schedule[] }>,
+    otherRequesterSchedules: Array<{ schedules: Schedule[] }>
 ): Schedule[] {
-  // Aplanar y combinar ambos arrays
-  const combined = [
-    ...currentRequesterSchedules.flatMap(item => item.schedules),
-    ...otherRequesterSchedules.flatMap(item => item.schedules)
-  ];
+    // Aplanar y combinar ambos arrays
+    const combined = [
+        ...currentRequesterSchedules.flatMap(item => item.schedules),
+        ...otherRequesterSchedules.flatMap(item => item.schedules)
+    ];
 
-  // Ordenar por starting_time ascendente (con Z)
-  combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
+    // Ordenar por starting_time ascendente (con Z)
+    combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
 
-  // Convertir a formato sin Z después del sort
-  const schedulesWithoutZ = combined.map(schedule => ({
-    ...schedule,
-    starting_time: schedule.starting_time.replace('Z', ''),
-    finishing_time: schedule.finishing_time.replace('Z', '')
-  }));
+    // Convertir a formato sin Z después del sort
+    const schedulesWithoutZ = combined.map(schedule => ({
+        ...schedule,
+        starting_time: schedule.starting_time.replace('Z', ''),
+        finishing_time: schedule.finishing_time.replace('Z', '')
+    }));
 
-  return schedulesWithoutZ;
+    return schedulesWithoutZ;
 }
 
-export default function MobileWeekView({ fixerId, requesterId, selectedDate}: MobileWeekViewProps) {
-    const month = selectedDate ? selectedDate.getMonth() : new Date().getMonth(); 
+export default function MobileWeekView({ fixerId, requesterId, selectedDate }: MobileWeekViewProps) {
+    const month = selectedDate ? selectedDate.getMonth() : new Date().getMonth();
     const [schedulesByDay, setSchedulesByDay] = useState<Schedule[][]>([[], [], [], [], [], [], []]);
     const [loading, setLoading] = useState(true);
 
-    async function fetchWeekSchedule(){
+    async function fetchWeekSchedule() {
         try {
             setLoading(true);
-            
+
             //const response = await fetch(`${API}/bookings/fixer/${fixerId}/schedules/${month}`);
-            const currentRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
-            const otherRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month+1}`);
+            const currentRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month + 1}`);
+            const otherRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month + 1}`);
 
             //console.log(currentRequesterResponse);
             //console.log(otherRequesterResponse);
-            
+
             if (!currentRequesterResponse.ok) {
                 throw new Error(`Error: ${currentRequesterResponse.status}`);
             }
@@ -139,13 +139,13 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate}: Mo
             const currentRequesterFixerSchedules = await currentRequesterResponse.json();
             const otherRequesterFixerSchedules = await otherRequesterResponse.json();
 
-            const fixerSchedules : Schedule[] = combineAllSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
+            const fixerSchedules: Schedule[] = combineAllSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
             const fixerSchedulesByWeek = groupSchedulesByWeek(fixerSchedules);
-            
+
             console.log("Schedules grouped by week:", fixerSchedulesByWeek);
             setSchedulesByDay(fixerSchedulesByWeek);
-            
-        } catch(err) {
+
+        } catch (err) {
             console.error("Error al generar los slots para el fixer:", err);
         } finally {
             setLoading(false);
@@ -155,7 +155,7 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate}: Mo
     // Determinar el estado del día basado en la cantidad de horarios
     function getDayStatus(dayIndex: number): { text: string; color: string; available: boolean } {
         const daySchedules = schedulesByDay[dayIndex] || [];
-        
+
         if (daySchedules.length >= 5) {
             return { text: "Ocupado", color: "text-slate-400", available: false };
         } else {
@@ -179,7 +179,7 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate}: Mo
         );
     }
 
-    return(
+    return (
         <div className="mx-auto max-w-sm p-4 bg-white min-h-screen">
             <h1 className="text-2xl font-semibold mb-3 text-black">
                 Calendario de usuario
@@ -187,8 +187,8 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate}: Mo
             <div className="mb-3">
                 <label className="block text-sm mb-1 text-black">Fecha</label>
                 <input
-                type="date"
-                className="w-full rounded-lg border p-2 text-black bg-white"
+                    type="date"
+                    className="w-full rounded-lg border p-2 text-black bg-white"
                 />
             </div>
 
@@ -200,14 +200,14 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate}: Mo
                         <h3 className="text-lg font-semibold mb-3 text-center text-black">
                             {formatDate(week.startDate)} - {formatDate(week.endDate)}
                         </h3>
-                        
+
                         {/* Días de la semana */}
                         <div className="space-y-2">
                             {week.days.map((day, dayIndex) => {
                                 const dayStatus = getDayStatus(dayIndex);
                                 return (
-                                    <div 
-                                        key={dayIndex} 
+                                    <div
+                                        key={dayIndex}
                                         className="flex justify-between items-center p-2 border-b border-gray-200 bg-white rounded-lg"
                                     >
                                         <div className="flex flex-col">
@@ -218,7 +218,7 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate}: Mo
                                                 {formatDate(day)}
                                             </span>
                                         </div>
-                                        
+
                                         {dayStatus.available ? (
                                             <button
                                                 className={`font-bold ${dayStatus.color} cursor-default`}
