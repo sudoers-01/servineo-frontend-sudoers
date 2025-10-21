@@ -40,42 +40,26 @@ function combineSchedules(
     ...otherRequesterSchedules
   ];
 
-  for(const reqSchedule of currentRequesterSchedules) {
-    if(reqSchedule.schedule_state != 'cancelled'){
-      reqSchedule.schedule_state = 'booked';
+  for(const schedule of currentRequesterSchedules){
+    if(schedule.schedule_state != 'cancelled'){
+      schedule.schedule_state = 'booked';
     }
   }
 
-  for(const reqSchedule of otherRequesterSchedules) {
-    if(reqSchedule.schedule_state != 'cancelled'){
-      reqSchedule.schedule_state = 'occupied';
-    }
+  for(const schedule of otherRequesterSchedules){
+    schedule.schedule_state = 'occupied';
   }
 
-  //console.log("desde combinedSchedules: ", combined);
+  console.log("desde combinedSchedules: ", combined);
   // Ordenar por starting_time ascendente (con Z)
-    combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
+  combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
 
-  // Convertir a formato sin Z y asegurar que finishing_time sea starting_time + 1 hora
-  const schedulesWithoutZ = combined.map(schedule => {
-    const startingTimeWithoutZ = schedule.starting_time ? schedule.starting_time.replace('Z', '') : '';
-    
-    // Calcular finishing_time como starting_time + 1 hora
-    let finishingTimeWithoutZ;
-    if (startingTimeWithoutZ) {
-      const startDate = new Date(startingTimeWithoutZ);
-      startDate.setHours(startDate.getHours() + 1);
-      finishingTimeWithoutZ = startDate.toISOString().replace('Z', '');
-    } else {
-      finishingTimeWithoutZ = schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : '';
-    }
-
-    return {
-      ...schedule,
-      starting_time: startingTimeWithoutZ,
-      finishing_time: finishingTimeWithoutZ
-    };
-  });
+  // Convertir a formato sin Z después del sort
+  const schedulesWithoutZ = combined.map(schedule => ({
+    ...schedule,
+    starting_time: schedule.starting_time ? schedule.starting_time.replace('Z', '') : '',
+    finishing_time: schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : ''
+  }));
 
   return schedulesWithoutZ;
 }

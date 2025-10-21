@@ -121,13 +121,26 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   }
 
   function parseDatetime(datetimeISO: string) {
-    const start = new Date(datetimeISO);
-    const end = new Date(start.getTime() + 60 * 60 * 1000);
-    const startMinus4Hours = new Date(start.getTime() - 4 * 60 * 60 * 1000);
+    // Si el string ISO no termina en 'Z', agregarlo para forzar UTC
+    const isoString = datetimeISO.endsWith('Z') ? datetimeISO : datetimeISO + 'Z';
+    const prevStart = new Date(isoString);
 
+    const currentYear = prevStart.getUTCFullYear();
+    const currentMonth = prevStart.getUTCMonth();
+    const currentDay = prevStart.getUTCDate();
+    const currentHour = prevStart.getUTCHours();
+
+    const start = new Date(Date.UTC(currentYear, currentMonth, currentDay, (currentHour - 4), 0, 0));
+
+    const end = new Date(Date.UTC(currentYear, currentMonth, currentDay, (start.getUTCHours() + 1), 0, 0));
+
+    //const startMinus4Hours = new Date(start.getTime() - 4 * 60 * 60 * 1000);
+
+    //console.log("start: ", start.toISOString());
+    //console.log("end: ", end.toISOString());
     return {
       selected_date: start.toISOString().split("T")[0],
-      starting_time: startMinus4Hours.toISOString(),
+      starting_time: start.toISOString(),
       finishing_time: end.toISOString()
     };
   }
@@ -162,13 +175,14 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       return; // No enviar si hay errores
     }
 
-    const { selected_date, starting_time } = parseDatetime(datetime);
+    const { selected_date, starting_time, finishing_time} = parseDatetime(datetime);
 
     const payload = {
       id_fixer: fixerId,
       id_requester: requesterId,
       selected_date,
       starting_time,
+      finishing_time,
       appointment_type: modality,
       appointment_description: description,
       current_requester_name: client,
@@ -184,11 +198,20 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       const res = await axios.post("https://servineo-backend-lorem.onrender.com/api/crud_create/appointments/create", payload);
       const data = res.data;
 
+      const hourToShow = new Date(payload.starting_time).getUTCHours();
+      let hourToShowString;
+      if(hourToShow < 10){
+        hourToShowString = "0" + hourToShow.toString() + ":00";
+      } else{
+        hourToShowString = hourToShow.toString() + ":00";
+      }
+
       if (data.success) {
         setSummaryData({
           name: client,
           date: new Date(payload.starting_time).toLocaleDateString(),
-          time: new Date(payload.starting_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          time: hourToShowString,
+          //time: new Date(payload.starting_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), para futuro
           modality,
           locationOrLink: modality === "virtual" ? meetingLink : place,
           description,
