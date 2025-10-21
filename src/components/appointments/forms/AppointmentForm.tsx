@@ -19,14 +19,12 @@ interface AppointmentFormProps {
 // Zod esquema de validación actualizado
 const appointmentSchema = z.object({
   client: z.string()
-    .nonempty("Ingrese un nombre válido")
+    .max(50, "El nombre no puede tener más de 50 caracteres")
     .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre válido"),
   contact: z.string()
-    .nonempty("Ingrese un teléfono válido")
     .regex(/^[67]\d{7}$/, "Ingrese un teléfono válido"),
   description: z.string()
-    .nonempty("Ingrese una descripción válida")
-    .regex(/^[A-Za-z0-9\s.,#\-_]{1,300}$/, "Ingrese una descripción válida"),
+    .max(300, "La descripción no puede tener más de 300 caracteres"),
   modality: z.enum(["virtual", "presential"]),
   meetingLink: z.string()
     .optional()
