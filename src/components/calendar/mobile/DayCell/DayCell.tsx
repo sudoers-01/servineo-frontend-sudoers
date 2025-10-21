@@ -1,11 +1,12 @@
 
 'use client';
 
-import { getCounterDay } from '@/utils/getCounterDay';
+import { getSchedulesCont } from '@/utils/getSchedulesCont';
 import React, { useEffect, useState } from 'react';
 interface DayCellProps {
     date: Date;
     today: Date;
+    fixer_id: string;
     selectedDate: Date | null;
     onSelectDate: (date: Date) => void;
 }
@@ -13,6 +14,7 @@ interface DayCellProps {
 export default function DayCell({
     date,
     today,
+    fixer_id,
     selectedDate,
     onSelectDate,
 }: DayCellProps) {
@@ -29,9 +31,8 @@ export default function DayCell({
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const result = await getCounterDay(
-                    'uuid-fixer-1234',
-                    'uuid-user-4567',
+                const result = await getSchedulesCont(
+                    fixer_id,
                     date.toISOString().split('T')[0]
                 );
                 setCount(result);
@@ -40,8 +41,7 @@ export default function DayCell({
             }
         };
         fetchData();
-    }, [date]);
-
+    }, [date, fixer_id]);
 
 
     const isPast = date < today && !isToday;
