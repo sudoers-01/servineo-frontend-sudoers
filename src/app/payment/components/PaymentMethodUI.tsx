@@ -14,24 +14,33 @@ export default function PaymentMethodUI({
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [showNotification, setShowNotification] = useState(true);
+  const [regenerating, setRegenerating] = useState(false);
+  const [now, setNow] = useState<number>(Date.now());
+  
   const [summary, setSummary] = useState<{
     id: string;
     code?: string | null;
+    codeExpired?: boolean;
     status: "paid" | "pending" | "failed";
-    expiresAt?: string | null;
+    codeExpiresAt?: string | null;
     amount: { total: number; currency: string };
   } | null>(null);
 
-  // Auto-ocultar notificación después de 10 segundos
+  // Actualizar 'now' cada segundo para countdown
   useEffect(() => {
-    if (showNotification) {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Auto-ocultar notificación después de 10 segundos (solo si NO está expirado)
+  useEffect(() => {
+    if (showNotification && !summary?.codeExpired) {
       const timer = setTimeout(() => {
         setShowNotification(false);
       }, 10000);
-
       return () => clearTimeout(timer);
     }
-  }, [showNotification]);
+  }, [showNotification, summary?.codeExpired]);
 
   // Función para cargar summary (reutilizable)
   const loadSummary = async () => {
@@ -42,7 +51,6 @@ export default function PaymentMethodUI({
     }
     setErr(null);
     setLoading(true);
-    setShowNotification(true);
     
     try {
       const timestamp = new Date().getTime();
@@ -54,13 +62,17 @@ export default function PaymentMethodUI({
           'Expires': '0'
         }
       });
+      
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(text || `HTTP ${res.status}`);
       }
+      
       const data = await res.json();
+      console.log("📦 [REQUESTER] Backend response:", data);
 
       const d = data?.data ?? data;
+      
       const total =
         typeof d?.total === "number"
           ? d.total
@@ -68,11 +80,24 @@ export default function PaymentMethodUI({
           ? d.amount.total
           : NaN;
 
+      // Detectar expiración (backend o manual)
+      const backendExpired = d?.codeExpired === true;
+      const manualExpired = d?.codeExpiresAt && new Date(d.codeExpiresAt) < new Date();
+      const isExpired = backendExpired || manualExpired;
+
+      console.log("⏰ [REQUESTER] Verificación expiración:", {
+        backendExpired,
+        manualExpired,
+        isExpired,
+        codeExpiresAt: d?.codeExpiresAt
+      });
+
       const uiSummary = {
         id: String(d?.id ?? d?._id ?? paymentId),
         code: d?.code ?? null,
+        codeExpired: isExpired,
         status: (d?.status ?? "pending") as "paid" | "pending" | "failed",
-        expiresAt: d?.expiresAt ?? null,
+        codeExpiresAt: d?.codeExpiresAt ?? null,
         amount: {
           total,
           currency: d?.amount?.currency ?? d?.currency ?? "BOB",
@@ -80,7 +105,14 @@ export default function PaymentMethodUI({
       };
 
       setSummary(uiSummary);
+      
+      // Si está expirado, mostrar notificación
+      if (isExpired) {
+        setShowNotification(true);
+      }
+      
     } catch (e: any) {
+      console.error("❌ [REQUESTER] Error:", e);
       setErr(e.message || "No se pudo cargar el resumen");
     } finally {
       setLoading(false);
@@ -89,44 +121,97 @@ export default function PaymentMethodUI({
 
   // GET summary al montar
   useEffect(() => {
-    let alive = true;
-    (async () => {
-      await loadSummary();
-    })();
-    return () => {
-      alive = false;
-    };
+    loadSummary();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentId]);
 
-  // Calcular tiempo restante de vigencia
+  // Verificación automática de expiración cada segundo
+  useEffect(() => {
+    if (!summary?.codeExpiresAt || summary.codeExpired) return;
+    
+    const checkExpiration = () => {
+      const expiresMs = new Date(summary.codeExpiresAt!).getTime();
+      const nowMs = Date.now();
+      
+      console.log("⏰ [REQUESTER] Auto-check expiración:", {
+        expiresAt: new Date(expiresMs).toLocaleString('es-BO'),
+        now: new Date(nowMs).toLocaleString('es-BO'),
+        secondsLeft: ((expiresMs - nowMs) / 1000).toFixed(2),
+        expired: nowMs >= expiresMs
+      });
+      
+      if (nowMs >= expiresMs && !summary.codeExpired) {
+        console.log("🔴 [REQUESTER] CÓDIGO EXPIRADO detectado");
+        setSummary(prev => prev ? { ...prev, codeExpired: true } : null);
+        setShowNotification(true);
+      }
+    };
+
+    checkExpiration();
+    const interval = setInterval(checkExpiration, 1000);
+    return () => clearInterval(interval);
+  }, [summary?.codeExpiresAt, summary?.codeExpired]);
+
+  // Calcular tiempo restante
   const expiryInfo = useMemo(() => {
-    if (!summary?.expiresAt) return null;
+    if (!summary?.codeExpiresAt) return null;
 
-    const now = new Date();
-    const expiry = new Date(summary.expiresAt);
-    const diffMs = expiry.getTime() - now.getTime();
+    const expiry = new Date(summary.codeExpiresAt);
+    const diffMs = expiry.getTime() - now;
 
-    if (diffMs <= 0) {
-      return { expired: true, hoursLeft: 0, minutesLeft: 0 };
+    if (diffMs <= 0 || summary.codeExpired) {
+      return { expired: true, hoursLeft: 0, minutesLeft: 0, secondsLeft: 0 };
     }
 
     const hoursLeft = Math.floor(diffMs / (1000 * 60 * 60));
     const minutesLeft = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+    const secondsLeft = Math.floor((diffMs % (1000 * 60)) / 1000);
 
-    return { expired: false, hoursLeft, minutesLeft };
-  }, [summary?.expiresAt]);
+    return { expired: false, hoursLeft, minutesLeft, secondsLeft };
+  }, [summary?.codeExpiresAt, summary?.codeExpired, now]);
+
+  // Regenerar código
+  const handleRegenerateCode = async () => {
+    if (!summary) return;
+
+    setErr(null);
+    setRegenerating(true);
+
+    try {
+      const res = await fetch(`/api/lab/payments/${summary.id}/regenerate-code`, {
+        method: "POST",
+      });
+
+      const responseData = await res.json();
+
+      if (!res.ok) {
+        throw new Error(responseData.error || "Error al regenerar el código");
+      }
+
+      console.log("✅ [REQUESTER] Código regenerado");
+      
+      // Recargar summary
+      await loadSummary();
+      setShowNotification(true);
+      
+    } catch (e: any) {
+      console.error("❌ [REQUESTER] Error regenerando:", e);
+      setErr(e.message || "Error al regenerar el código");
+    } finally {
+      setRegenerating(false);
+    }
+  };
 
   const handleContinuar = () => setShowFixerView(true);
   
   const handleVolver = async (opts?: { refresh?: boolean }) => {
     setShowFixerView(false);
-    // Si se solicita refresh, recargar los datos
     if (opts?.refresh) {
       await loadSummary();
     }
   };
 
-  // Vista del proveedor
+  // Vista del proveedor (FIXER)
   if (showFixerView && summary) {
     return (
       <PaymentMethodCashFixer
@@ -155,7 +240,7 @@ export default function PaymentMethodUI({
   }
 
   // Error state
-  if (err) {
+  if (err && !summary) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white rounded-lg shadow-xl px-8 py-6 space-y-3 max-w-md">
@@ -175,6 +260,8 @@ export default function PaymentMethodUI({
   }
 
   if (!summary) return null;
+
+  const isExpired = expiryInfo?.expired || summary.codeExpired;
 
   // Vista inicial (REQUESTER)
   return (
@@ -204,12 +291,12 @@ export default function PaymentMethodUI({
             </h2>
           </div>
 
-          {/* Notificación de vigencia de 48 horas (desaparece automáticamente) */}
+          {/* Notificación de vigencia o expiración */}
           {expiryInfo && showNotification && (
             <div className="max-w-xl mx-auto mb-8 relative">
-              {expiryInfo.expired ? (
+              {isExpired ? (
                 // Código expirado
-                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-lg animate-fade-in">
+                <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded shadow-lg">
                   <button
                     onClick={() => setShowNotification(false)}
                     className="absolute top-2 right-2 text-red-500 hover:text-red-700 font-bold text-xl"
@@ -218,42 +305,52 @@ export default function PaymentMethodUI({
                   </button>
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                      <svg className="h-5 w-5 text-red-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                       </svg>
                     </div>
-                    <div className="ml-3">
-                      <p className="text-sm font-medium text-red-800">
-                        ⚠️ Este código ha <strong>expirado</strong>. Por favor, genera uno nuevo.
+                    <div className="ml-3 flex-1 pr-6">
+                      <p className="text-sm font-medium text-red-800 mb-2">
+                        ⚠️ Este código ha <strong>expirado</strong>
                       </p>
+                      <p className="text-xs text-red-700 mb-3">
+                        Por favor, genera un nuevo código para continuar con tu pago.
+                      </p>
+                      <button
+                        onClick={handleRegenerateCode}
+                        disabled={regenerating}
+                        className="bg-red-600 hover:bg-red-700 disabled:bg-red-400 text-white px-4 py-2 rounded text-sm font-medium transition-colors"
+                      >
+                        {regenerating ? "Regenerando..." : "🔄 Generar Nuevo Código"}
+                      </button>
                     </div>
                   </div>
                 </div>
               ) : (
                 // Código vigente
-                <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded shadow-lg animate-fade-in">
+                <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded shadow-lg">
                   <button
                     onClick={() => setShowNotification(false)}
-                    className="absolute top-2 right-2 text-amber-500 hover:text-amber-700 font-bold text-xl"
+                    className="absolute top-2 right-2 text-blue-500 hover:text-blue-700 font-bold text-xl"
                   >
                     ×
                   </button>
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <svg className="h-5 w-5 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      <svg className="h-5 w-5 text-blue-500 mt-0.5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                       </svg>
                     </div>
                     <div className="ml-3 flex-1 pr-6">
-                      <p className="text-sm font-medium text-amber-800">
-                        ⏰ Este código tiene una vigencia de <strong>48 horas</strong>
+                      <p className="text-sm font-medium text-blue-800 mb-1">
+                        ⏰ Tiempo restante de validez
                       </p>
-                      <p className="text-xs text-amber-700 mt-1">
-                        Tiempo restante: <strong>{expiryInfo.hoursLeft}h {expiryInfo.minutesLeft}m</strong>
+                      <p className="text-lg font-bold text-blue-900">
+                        {expiryInfo.hoursLeft}h {expiryInfo.minutesLeft}m {expiryInfo.secondsLeft}s
                       </p>
-                      {summary.expiresAt && (
-                        <p className="text-xs text-amber-600 mt-1">
-                          Expira: {new Date(summary.expiresAt).toLocaleString('es-BO', {
+                      {summary.codeExpiresAt && (
+                        <p className="text-xs text-blue-700 mt-1">
+                          Expira: {new Date(summary.codeExpiresAt).toLocaleString('es-BO', {
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
@@ -274,8 +371,9 @@ export default function PaymentMethodUI({
             {/* Código */}
             <LabeledReadOnly 
               label="Código de Trabajo" 
-              value={summary.code ?? "—"} 
-              highlight={false}
+              value={isExpired ? "EXPIRADO" : (summary.code ?? "—")}
+              highlight={!isExpired}
+              expired={isExpired}
             />
             
             {/* Total */}
@@ -296,9 +394,9 @@ export default function PaymentMethodUI({
               <input
                 type="text"
                 value={
-                  summary.status === 'paid' ? 'PAID' :
-                  summary.status === 'failed' ? 'FAILED' :
-                  'PENDING'
+                  summary.status === 'paid' ? 'CONFIRMADO' :
+                  summary.status === 'failed' ? 'ERROR' :
+                  'PENDIENTE'
                 }
                 readOnly
                 className="flex-1 px-4 py-3 rounded-md text-lg bg-gray-100 border border-gray-300 text-gray-700 text-center uppercase font-semibold"
@@ -306,18 +404,27 @@ export default function PaymentMethodUI({
             </div>
           </div>
 
+          {/* Mensajes de error */}
+          {err && (
+            <div className="mt-6 max-w-xl mx-auto">
+              <div className="bg-red-50 border border-red-200 rounded p-3">
+                <p className="text-rose-600 font-medium text-sm">{err}</p>
+              </div>
+            </div>
+          )}
+
           {/* Botones */}
           <div className="flex justify-center gap-6 mt-12">
             <button
               onClick={handleContinuar}
-              disabled={expiryInfo?.expired}
+              disabled={isExpired}
               className={`px-12 py-3 text-white text-lg font-semibold rounded-md transition-colors ${
-                expiryInfo?.expired
+                isExpired
                   ? 'bg-gray-400 cursor-not-allowed'
                   : 'bg-black hover:bg-gray-800'
               }`}
             >
-              {expiryInfo?.expired ? 'Código Expirado' : 'Continuar'}
+              {isExpired ? 'Código Expirado' : 'Continuar'}
             </button>
             <button
               onClick={onClose}
@@ -337,11 +444,13 @@ export default function PaymentMethodUI({
 function LabeledReadOnly({ 
   label, 
   value,
-  highlight = false
+  highlight = false,
+  expired = false
 }: { 
   label: string; 
   value: string;
   highlight?: boolean;
+  expired?: boolean;
 }) {
   return (
     <div className="flex items-center gap-6">
@@ -353,7 +462,9 @@ function LabeledReadOnly({
         value={value}
         readOnly
         className={`flex-1 px-4 py-3 rounded-md text-lg ${
-          highlight 
+          expired
+            ? 'bg-red-50 border-2 border-red-300 text-red-700 font-bold text-center line-through'
+            : highlight 
             ? 'bg-blue-50 border-2 border-blue-300 text-blue-900 font-bold text-center tracking-widest'
             : 'bg-gray-100 border border-gray-300 text-gray-700'
         }`}

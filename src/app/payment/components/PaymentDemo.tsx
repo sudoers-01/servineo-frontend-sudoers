@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import PaymentMethodUI from './PaymentMethodUI';
@@ -27,14 +27,24 @@ export default function PaymentDemo() {
   const [showCashPayment, setShowCashPayment] = useState(false);
   const [showCardPayment, setShowCardPayment] = useState(false);
   const [showRegistroCuenta, setShowRegistroCuenta] = useState(false);
+  const [bankStatus, setBankStatus] = useState<'SCB' | 'CCB'>('SCB');
   const [selectedTrabajo, setSelectedTrabajo] = useState<any>(null);
   const [createdPaymentId, setCreatedPaymentId] = useState<string | null>(null);
+  const [modalMode, setModalMode] = useState<'register' | 'delete'>('register');
 
   // Datos para pago con tarjeta
   const requesterId = '68ed47b64ed596d659c1ed8f';
   const fixerId = '68ef1be7be38c7f1c3c2c78b';
   const jobId = '68ea51ee0d80087528ad803f';
   const amount = 78;
+
+useEffect(() => {
+    // Lee el estado del almacenamiento local, que es actualizado por agregarCuenta.tsx
+    const storedStatus = localStorage.getItem('fix_bank_status');
+    if (storedStatus === 'CCB' || storedStatus === 'SCB') {
+      setBankStatus(storedStatus);
+    }
+}, []);
 
   const agregarTrabajo = () => {
     const nuevoId = trabajos.length > 0 ? Math.max(...trabajos.map((t) => t.id)) + 1 : 1;
@@ -71,16 +81,29 @@ export default function PaymentDemo() {
   };
 
   const handleAgregarCuentaBancaria = () => {
-    setShowRegistroCuenta(true);
+      setModalMode('register'); // ⬅️ Establecer modo registro
+      setShowRegistroCuenta(true);
+  };
+
+  const handleEliminarCuentaBancaria = () => {
+      setModalMode('delete'); // ⬅️ Establecer modo eliminación
+      setShowRegistroCuenta(true);
   };
 
   const handleCloseRegistroCuenta = () => {
     setShowRegistroCuenta(false);
+    
+    // 🟢 CORRECCIÓN: Volver a leer el estado después de cerrar el modal
+    const updatedStatus = localStorage.getItem('fix_bank_status');
+    if (updatedStatus === 'CCB' || updatedStatus === 'SCB') {
+      setBankStatus(updatedStatus);
+    }
   };
 
   // Si se muestra el registro de cuenta, renderizar solo ese componente
   if (showRegistroCuenta) {
-    return <RegistroCuentaApp />;
+    // 🟢 PASAR EL NUEVO MODO COMO PROP
+    return <RegistroCuentaApp onClose={handleCloseRegistroCuenta} mode={modalMode} />; // ⬅️ CAMBIO CLAVE
   }
 
   return (
@@ -100,14 +123,14 @@ export default function PaymentDemo() {
           Agregar Trabajo
         </button>
         <button 
-          onClick={handleAgregarCuentaBancaria}
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
+        onClick={bankStatus === 'SCB' ? handleAgregarCuentaBancaria : handleEliminarCuentaBancaria} // ⬅️ CORRECCIÓN FINAL
+        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
         >
-          <span className="text-2xl">🏦</span>
-          Agregar cuenta bancaria
+        <span className="text-2xl">🏦</span>
+        {bankStatus === 'SCB' ? 'Agregar cuenta bancaria' : 'Eliminar cuenta bancaria'} 
         </button>
         <div className="ml-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium">
-          Estado: SCB
+        Estado: {bankStatus} 
         </div>
       </div>
 
