@@ -181,6 +181,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       selected_date,
       starting_time,
       finishing_time,
+      schedule_state:"booked",
       appointment_type: modality,
       appointment_description: description,
       current_requester_name: client,
