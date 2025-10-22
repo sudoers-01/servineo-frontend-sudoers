@@ -19,15 +19,6 @@
   --error:   #EF4444;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #F9FAFB;
-    --surface-card: #111214;
-    --text-muted: #9ca3af;
-  }
-}
-
 .line-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;

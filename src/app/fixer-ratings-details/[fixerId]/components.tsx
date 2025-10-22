@@ -7,39 +7,37 @@ function useFixerRatings(fixerId: string) {
   const [ratings, setRatings] = useState<FixerRating[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const timerRef = useRef<number | null>(null);
 
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? '';
-  const url = fixerId ? `${base}/fixers/${fixerId}/ratings` : null;
+const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+const url = fixerId ? `${base}/api/ratings.details/${fixerId}` : null;
 
-  async function load() {
+  const load = async () => {
     if (!url) return;
     try {
-      const data = await jsonFetcher<FixerRating[]>(url, { cache: 'no-store' });
-      setRatings(data ?? []);
+      const data = await jsonFetcher<any[]>(url);
+      const mapped = data.map(d => ({
+        id: d._id,
+        requester: d.title || 'Unknown',
+        score: d.rating as 1|2|3,
+        comment: d.comment || '',
+        createdAt: d.createdAt
+      }));
+      setRatings(mapped);
       setError(null);
     } catch (err) {
       setError(err as Error);
+      setRatings([]);
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     setIsLoading(true);
     load();
-    timerRef.current = window.setInterval(load, 5000);
-    return () => {
-      if (timerRef.current) window.clearInterval(timerRef.current);
-    };
   }, [url]);
 
-  const refresh = () => {
-    setIsLoading(true);
-    load();
-  };
-
-  return { ratings, isLoading, error, refresh };
+  return { ratings, isLoading, error, refresh: load };
 }
 
 export function StarRating({ value, size = 18, srLabel }: { value: 1|2|3; size?: number; srLabel?: string }) {

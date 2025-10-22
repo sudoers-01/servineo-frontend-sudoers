@@ -10,7 +10,7 @@ export default async function RatingsPage({
 }) {
   const { fixerId } = await params; 
 
-  const useBackend = false; 
+  const useBackend = true; 
   return (
     <main className="max-w-3xl mx-auto p-6 space-y-4" style={{ color: 'var(--foreground)' }}>
       <header className="flex items-center justify-between">
