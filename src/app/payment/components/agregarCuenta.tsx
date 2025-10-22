@@ -1,14 +1,17 @@
+//frontend/src/payment/components/agregarCuenta.tsx
 'use client';
+
 
 import React, { useState, useEffect, FormEvent } from 'react';
 import { ChangeEvent } from 'react';
 
-const DEMO_FIXER_ID = 'id_temporal_001_fixer';
+// Asegúrate de que este ID coincida con el ID usado en PaymentDemo.tsx
+const DEMO_FIXER_ID = '65f3f23f4a6b9645f0c98765';
 const API_BASE_URL = '/api';
 
 type PathSetter = (path: string) => void;
 
-// --- Componentes (PaymentSuccessPage) ---
+// --- Componentes ---
 
 const PaymentSuccessPage = ({ onCloseAll }: { onCloseAll?: () => void }) => {
   const [statusMessage, setStatusMessage] = useState('Cuenta bancaria registrada exitosamente.');
@@ -22,14 +25,8 @@ const PaymentSuccessPage = ({ onCloseAll }: { onCloseAll?: () => void }) => {
   }, []);
 
   const handleBackToPaymentsDemo = () => {
-    console.log('🔵 Botón presionado - PaymentSuccessPage'); // Debug
-    console.log('🔵 onCloseAll existe?', !!onCloseAll); // Debug
-    
     if (onCloseAll) {
-      console.log('🔵 Ejecutando onCloseAll...'); // Debug
       onCloseAll();
-    } else {
-      console.log('❌ onCloseAll NO está definido'); // Debug
     }
   };
 
@@ -52,7 +49,7 @@ const PaymentSuccessPage = ({ onCloseAll }: { onCloseAll?: () => void }) => {
         <h2 className="text-3xl font-bold text-gray-800">¡Registro Exitoso!</h2>
         <p className="text-lg text-gray-600">
           Tu cuenta bancaria ha sido registrada en la base de datos con el ID temporal:{' '}
-          {DEMO_FIXER_ID}.
+          <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{DEMO_FIXER_ID}</span>.
         </p>
         <div className="p-3 bg-blue-50 text-blue-700 rounded-lg border border-blue-200 text-sm">
           {statusMessage || 'Redirigiendo al Demo de Pagos...'}
@@ -68,30 +65,33 @@ const PaymentSuccessPage = ({ onCloseAll }: { onCloseAll?: () => void }) => {
   );
 };
 
-const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; onCloseAll?: () => void }) => {
+
+const RegistrationForm = ({ 
+    pathSetter, 
+    onCloseAll, 
+    mode = 'register'
+}: { 
+    pathSetter: PathSetter; 
+    onCloseAll?: () => void;
+    mode?: 'register' | 'delete'
+}) => {
   const [formError, setFormError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
-    nombreTitular: '',  // ← Cambiado a vacío
-    identificacion: '', // ← Cambiado a vacío
+    nombreTitular: '', 
+    identificacion: '', 
     identificationSuffix: '',
     tipoCuenta: 'Cuenta de Ahorros',
-    numeroCuenta: '', // ← Cambiado a vacío
-    cuentaFavorita: false,
+    numeroCuenta: '', 
     banco: 'Banco Nacional de Bolivia',
   });
 
   const handleGoBack = () => {
-    console.log('🔵 Botón presionado - RegistrationForm'); // Debug
-    console.log('🔵 onCloseAll existe?', !!onCloseAll); // Debug
-    
     if (onCloseAll) {
-      console.log('🔵 Ejecutando onCloseAll...'); // Debug
       onCloseAll();
-    } else {
-      console.log('❌ onCloseAll NO está definido'); // Debug
     }
   };
 
@@ -108,10 +108,42 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
   const isNumeric = (str: string) => /^\d+$/.test(str);
 
   useEffect(() => {
-    if (localStorage.getItem('fixer_bank_status') === 'CCB') {
+    if (localStorage.getItem('fix_bank_status') === 'CCB') {
       setAlreadyRegistered(true);
     }
   }, []);
+  
+  // 🟢 LÓGICA DE ELIMINACIÓN DE CUENTA
+  const handleDelete = async () => {
+    setLoading(true);
+    setDeleteError(null);
+    try {
+        const response = await fetch(`${API_BASE_URL}/bank-accounts/${DEMO_FIXER_ID}`, {
+            method: 'DELETE',
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || `Fallo al eliminar (Status: ${response.status})`);
+        }
+
+        // 🟢 ÉXITO: Actualizar el localStorage a 'SCB' (Sin Cuenta Bancaria) y cerrar
+        localStorage.setItem('fix_bank_status', 'SCB');
+        localStorage.setItem('statusMessage', 'Cuenta bancaria eliminada exitosamente. Vuelve a registrar una cuenta.');
+        alert('Cuenta bancaria eliminada exitosamente.'); 
+        
+        if (onCloseAll) {
+            onCloseAll();
+        }
+
+    } catch (error: any) {
+        console.error('❌ Error al eliminar la cuenta:', error);
+        setDeleteError(`Error al eliminar la cuenta: ${error.message || 'Error desconocido.'}`);
+    } finally {
+        setLoading(false);
+    }
+  };
+
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -140,7 +172,6 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
       identification:
         formData.identificacion +
         (formData.identificationSuffix ? '-' + formData.identificationSuffix.toUpperCase() : ''),
-      isFavorite: formData.cuentaFavorita,
     };
 
     try {
@@ -155,7 +186,7 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
         throw new Error(errorData.message || `Fallo en el registro (Status: ${response.status})`);
       }
 
-      localStorage.setItem('fixer_bank_status', 'CCB');
+      localStorage.setItem('fix_bank_status', 'CCB');
       localStorage.setItem('statusMessage', 'Cuenta bancaria registrada exitosamente.');
       pathSetter('/agregarCuenta/payment');
     } catch (error: any) {
@@ -169,8 +200,49 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
       setLoading(false);
     }
   };
-
-  if (alreadyRegistered) {
+  
+  
+  // 🟢 LÓGICA DE RENDERING: Muestra la pantalla de ELIMINACIÓN
+  if (mode === 'delete' && localStorage.getItem('fix_bank_status') === 'CCB') {
+    return (
+        <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4">
+            <div className="max-w-xl mx-auto p-8 space-y-6 text-center bg-white rounded-xl shadow-2xl">
+                <h2 className="text-3xl font-bold text-red-600">
+                    ¿Eliminar Cuenta Bancaria?
+                </h2>
+                <p className="text-lg text-gray-600">
+                    Esta acción eliminará la cuenta asociada al ID: <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{DEMO_FIXER_ID}</span>.
+                    <br/> Tu estado de cuenta volverá a **Sin Cuenta Bancaria (SCB)**.
+                </p>
+                {deleteError && (
+                     <div className="p-3 bg-red-50 border border-red-400 text-red-700 rounded-lg text-sm">
+                         {deleteError}
+                     </div>
+                )}
+                
+                <div className="flex justify-center space-x-4">
+                    <button
+                        onClick={handleGoBack}
+                        disabled={loading}
+                        className="bg-gray-400 hover:bg-gray-500 disabled:opacity-50 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors duration-150 shadow-md"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        onClick={handleDelete} // ⬅️ Llama a la nueva función DELETE
+                        disabled={loading}
+                        className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors duration-150 shadow-md"
+                    >
+                        {loading ? 'Eliminando...' : 'Confirmar Eliminación'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+  }
+  
+  // 🟢 LÓGICA DE RENDERING: Muestra la pantalla de CUENTA REGISTRADA (solo si mode es 'register')
+  if (alreadyRegistered && mode === 'register') {
     return (
       <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4">
         <div className="max-w-xl mx-auto p-6 space-y-4 text-center bg-white rounded-xl shadow-lg">
@@ -192,6 +264,7 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
     );
   }
 
+  // 🟢 LÓGICA DE RENDERING: Muestra el FORMULARIO DE REGISTRO
   return (
     <div className="min-h-screen bg-blue-600 flex flex-col font-sans">
       <header className="px-6 py-4 flex items-center justify-between shadow-lg bg-blue-700">
@@ -213,6 +286,7 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {/* ... Campos del formulario ... */}
             <div>
               <label
                 htmlFor="nombreTitular"
@@ -326,20 +400,6 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
               </select>
             </div>
 
-            <div className="flex items-center pt-2">
-              <input
-                type="checkbox"
-                name="cuentaFavorita"
-                id="cuentaFavorita"
-                checked={formData.cuentaFavorita}
-                onChange={handleChange}
-                className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-              />
-              <label htmlFor="cuentaFavorita" className="ml-2 block text-sm text-gray-900">
-                Marcar como cuenta principal/favorita
-              </label>
-            </div>
-
             {formError && (
               <div className="p-3 bg-red-50 border border-red-400 text-red-700 rounded-lg text-sm transition-all duration-300">
                 {formError}
@@ -350,7 +410,7 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
               type="submit"
               disabled={loading}
               className={`w-full font-semibold py-3 rounded-lg mt-6 transition duration-150 ease-in-out shadow-lg 
-                                  ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl'}`}
+                            ${loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl'}`}
             >
               {loading ? (
                 <span className="flex items-center justify-center">
@@ -387,12 +447,9 @@ const RegistrationForm = ({ pathSetter, onCloseAll }: { pathSetter: PathSetter; 
   );
 };
 
-// --- Componente Principal modificado para aceptar onClose ---
-const App = ({ onClose }: { onClose?: () => void }) => {
+// --- Componente Principal modificado para aceptar onClose y mode ---
+const App = ({ onClose, mode = 'register' }: { onClose?: () => void; mode?: 'register' | 'delete' }) => { // ⬅️ CORRECCIÓN: Ahora recibe 'mode'
   const [path, setPath] = useState('/agregarCuenta');
-
-  console.log('🟢 AgregarCuenta App renderizado'); // Debug
-  console.log('🟢 onClose recibido?', !!onClose); // Debug
 
   const renderContent = () => {
     switch (path) {
@@ -400,7 +457,8 @@ const App = ({ onClose }: { onClose?: () => void }) => {
         return <PaymentSuccessPage onCloseAll={onClose} />;
       case '/agregarCuenta':
       default:
-        return <RegistrationForm pathSetter={setPath} onCloseAll={onClose} />;
+        // 🟢 Se pasa 'mode' a RegistrationForm sin error
+        return <RegistrationForm pathSetter={setPath} onCloseAll={onClose} mode={mode} />;
     }
   };
 
