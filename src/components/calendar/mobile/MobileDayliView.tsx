@@ -56,9 +56,7 @@ function toYMDAny(d: Date | string) {
   const pad = (n: number) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
-
-
-function hourIntsRange(start = 8, end = 18) {
+function hourIntsRange(start = 8, end = 17) {
   const out: number[] = [];
   for (let h = start; h <= end; h++) out.push(h);
   return out;
@@ -104,7 +102,7 @@ export default function DaySchedule({
   requesterId,
   selectedDate,
 }: DayScheduleProps) {
-  //console.log("Fecha recibida:", selectedDate);
+
 
   const formattedDate = selectedDate ? toYMDAny(selectedDate as any) : "";
 
@@ -116,7 +114,7 @@ export default function DaySchedule({
   const appointmentFormRef = useRef<AppointmentFormHandle | null>(null);
   const editAppointmentFormRef = useRef<EditAppointmentFormHandle | null>(null);
 
-  // --- Timers para ráfaga de refrescos
+  
   const refreshTimerRef = useRef<number | null>(null);
   const refreshIntervalRef = useRef<number | null>(null);
 
@@ -137,10 +135,9 @@ export default function DaySchedule({
 
     clearRefreshTimers();
 
-    // intento rápido
+
     refreshTimerRef.current = window.setTimeout(() => fetchDay(d), 1200);
 
-    // 4 intentos cada 2s (≈9s total con el primero)
     let attempts = 0;
     refreshIntervalRef.current = window.setInterval(() => {
       attempts++;
@@ -170,30 +167,28 @@ export default function DaySchedule({
     try {
       setLoading(true);
       setErr("");
-      const hours = hourIntsRange(8, 18);
-      const results = await Promise.all(
-        hours.map(async (h) => {
-          try {
-            const resp = await fetchHour(fixerId, requesterId, d, h);
-            return { ok: true as const, hourInt: h, resp };
-          } catch (e) {
-            return { ok: false as const, hourInt: h, error: e as Error };
-          }
-        })
-      );
-      const nombre_Fixer = DEFAULT_FIXER_NAME;
+      const hours = hourIntsRange(8, 17);
       const horarios: HorarioItem[] = [];
-      for (const r of results) {
-        const horaDisplay = formatHourDisplay(r.hourInt);
-        const baseId = `${d}-${String(r.hourInt).padStart(2, "0")}`;
-        if (r.ok) {
-          const estado = mapApiToEstado(r.resp.status);
+      for (const h of hours) {
+        const horaDisplay = formatHourDisplay(h);
+        const baseId = `${d}-${String(h).padStart(2, "0")}`;
+        if (h === 12 || h === 13) {
+          horarios.push({
+            id_Horario: baseId,
+            Hora_Inicio: horaDisplay,
+            estado_Horario: "no_disponible",
+          });
+          continue;
+        }
+        try {
+          const resp = await fetchHour(fixerId, requesterId, d, h);
+          const estado = mapApiToEstado(resp.status);
           horarios.push({
             id_Horario: baseId,
             Hora_Inicio: horaDisplay,
             estado_Horario: estado,
           });
-          if (r.resp.status === "cancelled") {
+          if (resp.status === "cancelled") {
             horarios.push({
               id_Horario: `${baseId}-banner`,
               Hora_Inicio: horaDisplay,
@@ -202,7 +197,7 @@ export default function DaySchedule({
               text: "CANCELADO POR EL USUARIO",
             });
           }
-        } else {
+        } catch {
           horarios.push({
             id_Horario: baseId,
             Hora_Inicio: horaDisplay,
@@ -210,6 +205,7 @@ export default function DaySchedule({
           });
         }
       }
+      const nombre_Fixer = DEFAULT_FIXER_NAME;
       setData({ nombre_Fixer, horarios });
     } catch (e) {
       setErr((e as Error).message || "Error");
@@ -231,7 +227,7 @@ export default function DaySchedule({
     }
   }, [selectedDate, fixerId, requesterId]);
 
-  // Refrescar al volver a foco/visibilidad
+
   useEffect(() => {
     const onFocus = () => {
       if (date) fetchDay(date);
@@ -249,7 +245,7 @@ export default function DaySchedule({
     };
   }, [date, fixerId, requesterId]);
 
-  // Limpieza de timers al desmontar
+
   useEffect(() => {
     return () => {
       clearRefreshTimers();
@@ -261,25 +257,17 @@ export default function DaySchedule({
     const meta = labelByEstado(item.estado_Horario);
 
     if (meta.icon === "＋") {
-      console.log("fecha bien formateada: ",`${date}T${item.Hora_Inicio}:00`);
-      const currentDate=new Date(date);
-      console.log("current date antes de formatear: ", currentDate.toISOString());
+      const currentDate = new Date(date);
       const currentYear = currentDate.getUTCFullYear();
       const currentMonth = currentDate.getUTCMonth();
       const currentDay = currentDate.getUTCDate();
-      const currentHour= parseInt(item.Hora_Inicio);
-      const finalDate=new Date(Date.UTC(currentYear,currentMonth,currentDay,(currentHour+4),0,0));
-      //appointmentFormRef.current?.open(`${date}T${item.Hora_Inicio}:00`, {
-      appointmentFormRef.current?.open(finalDate.toISOString(),{
+      const currentHour = parseInt(item.Hora_Inicio);
+      const finalDate = new Date(Date.UTC(currentYear, currentMonth, currentDay, currentHour + 4, 0, 0));
+      appointmentFormRef.current?.open(finalDate.toISOString(), {
         eventId: item.id_Horario,
         title: meta.text,
       });
-      console.log("final date anio",currentYear);
-      console.log("final date mes",currentMonth);
-      console.log("final date dia",currentDay);
-      console.log("final date hora",currentHour+4);
-      console.log("Fecha formateada: ", finalDate.toISOString());
-      // Ráfaga de refrescos tras abrir el formulario de creación
+
       kickRefreshBurst(date);
     } else if (meta.icon === "✎") {
       const existingAppointment: ExistingAppointment = {
@@ -293,7 +281,7 @@ export default function DaySchedule({
         meetingLink: item.meetingLink || "",
       };
       editAppointmentFormRef.current?.open(existingAppointment);
-      // Ráfaga de refrescos tras abrir el formulario de edición
+      
       kickRefreshBurst(date);
     }
   };
