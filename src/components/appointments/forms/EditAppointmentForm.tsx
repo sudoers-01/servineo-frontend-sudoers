@@ -93,6 +93,42 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
+  const [changesDetected, setChangesDetected] = useState<boolean>(false);
+
+  // Detectar cambios cada vez que cambia algún campo
+  useEffect(() => {
+    if (!originalAppointment) {
+      setChangesDetected(false);
+      return;
+    }
+
+    const originalDate = new Date(originalAppointment.datetime);
+    const originalDay = originalDate.getDate().toString().padStart(2, '0');
+    const originalMonth = (originalDate.getMonth() + 1).toString().padStart(2, '0');
+    const originalHour = originalDate.getHours();
+
+    const hasDateTimeChanges = day !== originalDay || month !== originalMonth || hour !== originalHour;
+    const hasClientChanges = client.trim() !== originalAppointment.client;
+    const hasContactChanges = contact.trim() !== originalAppointment.contact;
+    const hasDescriptionChanges = (description || "").trim() !== (originalAppointment.description || "").trim();
+    const hasModalityChanges = modality !== originalAppointment.modality;
+
+    let hasLocationOrLinkChanges = false;
+    if (modality === "presencial") {
+      hasLocationOrLinkChanges = (lat ?? 0) !== (originalAppointment.lat ?? 0) || 
+                                  (lon ?? 0) !== (originalAppointment.lon ?? 0)|| 
+                                  address !== originalAppointment.address ||
+                                  (place || "") !== (originalAppointment.place || "");
+    } else {
+      hasLocationOrLinkChanges = (meetingLink||"").trim() !== (originalAppointment.meetingLink || "").trim();
+    }
+
+    const anyChange = hasDateTimeChanges || hasClientChanges || hasContactChanges || 
+                      hasDescriptionChanges || hasModalityChanges || hasLocationOrLinkChanges;
+
+    setChangesDetected(anyChange);
+  }, [day, month, hour, client, contact, description, modality, lat, lon, address, place, meetingLink, originalAppointment]);
+
   // Validación de 24 horas
   const canEditAppointment = (appointmentDateTime: string): boolean => {
     const appointmentDate = new Date(appointmentDateTime);
@@ -385,80 +421,25 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
               <div className="flex gap-4 p-3 rounded items-start">
-                {/* FECHA - Ancho automático */}
-                <div className="flex-none">
-                  <label className="block">
-                    <span className="text-sm font-medium">Fecha *</span>
-                    <div className="flex items-center gap-1 mt-1">
-                      <input 
-                        type="text"
-                        value={day}
-                        onChange={(e) => handleDayChange(e.target.value)}
-                        placeholder="DD"
-                        className="w-10 h-10 border border-gray-300 rounded text-center font-mono text-sm"
-                        maxLength={2}
-                      />
-                      <span className="text-gray-500 font-bold">/</span>
-                      <input 
-                        type="text"
-                        value={month}
-                        onChange={(e) => handleMonthChange(e.target.value)}
-                        placeholder="MM"
-                        className="w-10 h-10 border border-gray-300 rounded text-center font-mono text-sm"
-                        maxLength={2}
-                      />
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">DD/MM</p>
-                  </label>
-                </div>
-
-                {/* HORA - Ancho automático */}
-                <div className="flex-none">
-                  <label className="block">
-                    <span className="text-sm font-medium">Hora *</span>
-                    <div className="flex items-center gap-1 mt-1">
-                      {/* Flecha izquierda (decrementar) */}
-                      <button 
-                        type="button"
-                        onClick={decrementHour}
-                        className="w-6 h-10 flex items-center justify-center border border-gray-300 rounded-l hover:bg-gray-100 bg-white text-xs"
-                      >
-                        ←
-                      </button>
-                      
-                      {/* Número de la hora */}
-                      <div className="w-10 h-10 flex items-center justify-center border-y border-gray-300 text-base font-mono bg-white">
-                        {formatTimeUnit(hour)}
-                      </div>
-
-                      {/* Flecha derecha (incrementar) */}
-                      <button 
-                        type="button"
-                        onClick={incrementHour}
-                        className="w-6 h-10 flex items-center justify-center border border-gray-300 rounded-r hover:bg-gray-100 bg-white text-xs"
-                      >
-                        →
-                      </button>
-                    </div>
-                    <p className="text-xs text-gray-500 mt-1">Hora entera</p>
-                  </label>
-                </div>
-
-                {/* MODALIDAD - Ocupa el espacio restante */}
-                <div className="flex-1">
-                  <label className="block">
-                    <span className="text-sm font-medium">Modalidad</span>
-                    <select 
-                      value={modality} 
-                      onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
-                      className="mt-1 block w-full border rounded px-3 py-2 text-sm"
-                    >
-                      <option value="virtual">Virtual</option>
-                      <option value="presencial">Presencial</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
+                          <label className="block">
+                            <span className="text-sm font-medium">Fecha y hora</span>
+                            <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
+                          </label>
+                            {/* MODALIDAD - Ocupa el espacio restante */}
+                            <div className="flex-1">
+                              <label className="block">
+                                <span className="text-sm font-medium">Modalidad</span>
+                                <select 
+                                  value={modality} 
+                                  onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
+                                  className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+                                >
+                                  <option value="virtual">Virtual</option>
+                                  <option value="presencial">Presencial</option>
+                                </select>
+                              </label>
+                            </div>
+                          </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
@@ -548,7 +529,7 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                 <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
                 <button 
                   type="submit" 
-                  disabled={loading || (modality === "presencial" && !place)} 
+                  disabled={loading || (modality === "presencial" && !place) || !changesDetected} 
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? "Actualizando..." : "Actualizar"}
