@@ -7,6 +7,7 @@ import PaymentMethodUI from './PaymentMethodUI';
 import CardList from './CardList';
 import { createCashPayment } from '../service/payments';
 import dynamic from 'next/dynamic';
+import { useRouter } from "next/navigation";
 
 // Importar el componente de registro de cuenta
 const RegistroCuentaApp = dynamic(() => import('./agregarCuenta'), { ssr: false });
@@ -226,6 +227,19 @@ function PaymentMethodSelector({
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [okMsg, setOkMsg] = useState<string | null>(null);
+  const router = useRouter(); //add qr
+
+  //add qr
+  const goToQR = () => {
+    const bookingId = String(trabajo?.id ?? "TEST-BOOKING-1");
+    const providerId = "prov_123";   // <- debe existir en tu Atlas (ya lo tienes)
+    const amount = Number(trabajo?.monto ?? 0);
+    const currency = "BOB";
+
+    // Cierra el selector y navega
+    onClose();
+    router.push(`/payment/qr?bookingId=${bookingId}&providerId=${providerId}&amount=${amount}&currency=${currency}`);
+  };
 
   // POST al pulsar "Pago Efectivo"
   const handlePayCash = async () => {
@@ -279,7 +293,9 @@ function PaymentMethodSelector({
               Tarjeta de Crédito
             </button>
 
-            <button className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium">
+            <button 
+                onClick={goToQR}
+                className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium">
               <span className="text-3xl">⊞</span>
               Pago QR
             </button>

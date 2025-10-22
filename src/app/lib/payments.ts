@@ -39,3 +39,71 @@ export async function confirmPayment(id: string, code: string) {
     { method: "PATCH", json: { code } }
   );
 }
+
+
+//add para qr
+
+/** Estados para intents QR (son distintos del Status "paid/cancelled" de tus labs) */
+export type PaymentIntentStatus =
+  | "pending"
+  | "under_review"
+  | "confirmed"
+  | "rejected"
+  | "expired";
+
+/** Payload para crear el intent (lo que envías a tu backend) */
+export type CreateQRIntentInput = {
+  bookingId: string;
+  providerId: string;
+  amount: number;
+  currency?: string; // "BOB" por defecto en tu back
+};
+
+/** Respuesta esperada desde tu backend */
+export type CreateQRIntentOutput = {
+  intent: {
+    _id: string;
+    bookingId: string;
+    providerId: string;
+    amountExpected: number;
+    currency: string;
+    paymentReference: string;
+    status: PaymentIntentStatus;
+    deadlineAt?: string;
+    createdAt?: string;
+  };
+  paymentMethod?: {
+    qrImageUrl?: string;
+    accountDisplay?: string;
+  };
+  error?: string;   // p.ej. "NO_QR"
+  message?: string; // mensaje explicativo
+};
+
+/** POST /api/payments/intent (proxy interno) → crea/reusa intent y devuelve el QR */
+export async function createQRIntent(input: CreateQRIntentInput) {
+  return apiFetch<CreateQRIntentOutput>("/payments/intent", {
+    method: "POST",
+    json: input,
+  });
+}
+
+/** (Opcional) POST /api/payments/evidence → registrar comprobante */
+export async function registerQREvidence(input: {
+  paymentIntentId: string;
+  operationNumber?: string;
+  receiptUrl?: string; // URL al archivo (Drive/S3) cuando lo integren
+  uploadedBy: string;  // id de usuario
+}) {
+  return apiFetch<{ ok: boolean; message?: string }>("/payments/evidence", {
+    method: "POST",
+    json: input,
+  });
+}
+
+/** (Opcional) GET /api/payments/intent/:id → recuperar un intent */
+export async function getQRIntentById(id: string) {
+  return apiFetch<{ intent: CreateQRIntentOutput["intent"] }>(
+    `/payments/intent/${id}`
+  );
+}
