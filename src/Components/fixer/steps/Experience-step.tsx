@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { Card } from "@/Components/Card"
 import { Upload, ImageIcon, Video, Trash2, AlertCircle } from "lucide-react"
+import Image from "next/image"
 
 export interface Experience {
   id: string
@@ -65,7 +66,7 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
       setTitle("")
       setDescription("")
       e.target.value = ""
-    } catch (err) {
+    } catch {
       alert("Error al subir el archivo")
     } finally {
       setUploading(false)
@@ -144,7 +145,14 @@ export function ExperienceStep({ experiences, onAddExperience, onDeleteExperienc
                     )}
                   </div>
                   {exp.fileType === "image" ? (
-                    <img src={exp.fileUrl || "/placeholder.svg"} alt={exp.title} className="h-40 w-full object-cover" />
+                    <div className="relative h-40">
+                      <Image 
+                        src={exp.fileUrl || "/placeholder.svg"} 
+                        alt={exp.title} 
+                        fill 
+                        className="object-cover" 
+                      />
+                    </div>
                   ) : (
                     <video src={exp.fileUrl} className="h-40 w-full object-cover" controls />
                   )}

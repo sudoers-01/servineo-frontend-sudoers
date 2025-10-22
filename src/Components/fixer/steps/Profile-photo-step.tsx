@@ -6,6 +6,7 @@ import { useState } from "react"
 import { Upload, User, X } from "lucide-react"
 import { Card } from "@/Components/Card"
 import { fixerService } from "@/app/lib/service/fixer-service"
+import Image from "next/image"
 
 interface ProfilePhotoStepProps {
   photoUrl?: string
@@ -59,11 +60,14 @@ export function ProfilePhotoStep({ photoUrl, onPhotoChange, error }: ProfilePhot
         <div className="flex flex-col items-center gap-4">
           {preview ? (
             <div className="relative">
-              <img
-                src={preview || "/placeholder.svg"}
-                alt="Foto de perfil"
-                className="h-40 w-40 rounded-full object-cover ring-4 ring-blue-100"
-              />
+              <div className="relative h-40 w-40">
+                <Image
+                  src={preview || "/placeholder.svg"}
+                  alt="Foto de perfil"
+                  fill
+                  className="rounded-full object-cover ring-4 ring-blue-100"
+                />
+              </div>
               <button
                 type="button"
                 onClick={handleRemove}

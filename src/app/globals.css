@@ -126,3 +126,127 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Map Styles */
+.map-tiles {
+  filter: saturate(1.05) contrast(1.05) brightness(1.02);
+}
+
+/* Map Marker Styles */
+.custom-offer-marker {
+  filter: drop-shadow(0 4px 6px rgba(59, 130, 246, 0.1));
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.custom-offer-marker:hover {
+  filter: drop-shadow(0 8px 12px rgba(59, 130, 246, 0.15));
+  transform: translateY(-4px);
+}
+
+/* Animation Keyframes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.custom-user-marker {
+  filter: drop-shadow(0 0 15px rgba(59, 130, 246, 0.7));
+}
+
+/* Leaflet Popup Styles */
+.leaflet-popup-content-wrapper {
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.3), 0 0 60px rgba(96, 165, 250, 0.2);
+  color: white;
+}
+
+.leaflet-popup-tip {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  color: white;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-100px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 0.8;
+  }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-fadeInUp {
+  animation: fadeInUp 0.5s ease-out forwards;
+}
+
+.animate-slideInLeft {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Glass Effect */
+.glass {
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+

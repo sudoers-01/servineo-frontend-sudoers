@@ -1,10 +1,24 @@
 import { z } from "zod"
 
 // Schema para el registro inicial
+const nameRegex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/
+const phoneRegex = /^\+?[\d\s\-()]{8,}$/
+
 export const initialRegistrationSchema = z.object({
-  name: z.string().min(3, "El nombre debe tener al menos 3 caracteres"),
-  email: z.string().email("Email inválido"),
-  phone: z.string().regex(/^[\d\s\-+()]{8,}$/, "Teléfono inválido"),
+  name: z
+    .string()
+    .min(3, "El nombre debe tener al menos 3 caracteres")
+    .max(30, "El nombre no puede tener más de 30 caracteres")
+    .regex(nameRegex, "El nombre solo puede contener letras y espacios")
+    .transform(value => value.trim()),
+  email: z
+    .string()
+    .email("Email inválido")
+    .transform(value => value.toLowerCase()),
+  phone: z
+    .string()
+    .regex(phoneRegex, "Formato de teléfono inválido. Debe incluir al menos 8 dígitos")
+    .transform(value => value.trim()),
 })
 
 // Schema para CI

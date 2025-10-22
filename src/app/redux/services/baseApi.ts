@@ -6,7 +6,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 // Configuración base para las queries
 export const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
-  prepareHeaders: (headers, { getState }) => {
+  prepareHeaders: (headers) => {
     // Puedes obtener el token del estado si lo necesitas
     // const token = (getState() as RootState).auth.token
     const token = localStorage.getItem('token');

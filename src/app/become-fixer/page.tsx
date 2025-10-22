@@ -3,6 +3,7 @@
 import { useState } from "react"
 import FixerRegisterForm from "@/Components/fixer/Fixer-register-form"
 import { FixerEnableWizard } from "@/Components/fixer/Filter-eneable-wizard"
+import { Navbar } from "@/Components/Shared/Navbar"
 
 const defaultFormValues = {
   name: "Freddy Amin Zapata",
@@ -22,6 +23,8 @@ export default function BecomeFixerPage() {
   const [requester, setRequester] = useState<RequesterUser | null>(null)
 
   return (
+    <div>
+    <Navbar />
     <div className="container mx-auto max-w-4xl p-4">
       <header className="mb-6 text-center">
         <h1 className="text-2xl font-bold">Become a FIXER</h1>
@@ -54,6 +57,7 @@ export default function BecomeFixerPage() {
           </div>
         )}
       </section>
+    </div>
     </div>
   )
 }

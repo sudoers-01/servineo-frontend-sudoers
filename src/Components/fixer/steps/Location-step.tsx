@@ -31,7 +31,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     }
 
     // Load Leaflet JS
-    if (!(window as any).L) {
+    if (!window.L) {
       const script = document.createElement("script")
       script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       script.onload = () => setMapLoaded(true)
@@ -44,11 +44,10 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return
 
-    const L = (window as any).L
+    const { L } = window
 
     // Initialize map centered on La Paz, Bolivia
     const map = L.map(mapRef.current).setView([-17.3895, -66.1568], 13)
-
 
     // Add OpenStreetMap tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -56,7 +55,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
       maxZoom: 19,
     }).addTo(map)
 
-    let marker: any = null
+    let marker: L.Marker | null = null
 
     // Add existing marker if location exists
     if (location) {
@@ -65,7 +64,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     }
 
     // Handle map clicks
-    map.on("click", (e: any) => {
+    map.on("click", (e: L.LeafletEvent) => {
       const { lat, lng } = e.latlng
 
       // Remove old marker
@@ -85,7 +84,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     return () => {
       map.remove()
     }
-  }, [mapLoaded])
+  }, [mapLoaded, location, onLocationChange])
 
   const handleManualUpdate = () => {
     const lat = Number.parseFloat(manualLat)
