@@ -23,6 +23,7 @@ export default function RequesterEditForm() {
   const [coordinates, setCoordinates] = useState<[number, number]>([0, 0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+    const [errorPhone, setErrorPhone] = useState<string | null>(null);
   const [showPhone, setShowPhone] = useState(false);
   const [isEditingPhone, setIsEditingPhone] = useState(false);
   const [latLng, setLatLng] = useState<LatLng | null>(null);
@@ -59,6 +60,10 @@ export default function RequesterEditForm() {
     if (valor.startsWith('+')) valor = '+' + valor.slice(1).replace(/[^0-9]/g, '');
     else valor = valor.replace(/[^0-9]/g, '');
     setPhone(valor);
+    // limpiar error especifico de telefono al modificar
+    setErrorPhone(null);
+    // opcional limpiar error global
+    setError(null);
   }
 
   async function fetchAddress(lat: number, lng: number) {
@@ -120,15 +125,27 @@ export default function RequesterEditForm() {
 
     setLoading(true);
     try {
-      const result = await actualizarDatosUsuario({
+            const result = await actualizarDatosUsuario({
         phone,
         direction,
         coordinates,
       });
 
-      if (!result.success) throw new Error(result.message);
+      // Si la API nos indica que el número ya está en uso, mostramos error junto al campo
+      if (!result.success) {
+        if (result.code === "PHONE_TAKEN") {
+          setErrorPhone("Este número ya está registrado"); //error 409
+          setError(null); // limpiar error global
+          setLoading(false);
+          return;
+        }
+        // comportamiento previo para otros errores
+        throw new Error(result.message);
+      }
+
       alert('✅ Perfil actualizado correctamente');
       setIsEditingPhone(false);
+
     } catch (err: any) {
       setError(err.message || 'Error al actualizar perfil');
     } finally {
@@ -181,7 +198,7 @@ export default function RequesterEditForm() {
           </button>
           <button
             type="button"
-            onClick={() => setIsEditingPhone((p) => !p)}
+            onClick={() => { setIsEditingPhone((p) => !p); setErrorPhone(null); }}
             className={`p-2 rounded-md border transition ${
               isEditingPhone
                 ? 'border-[#1A223F] bg-[#E5F4FB]'
@@ -191,6 +208,8 @@ export default function RequesterEditForm() {
             <Pencil size={18} />
           </button>
         </div>
+        {errorPhone && <p className="text-sm text-red-600 mt-1" role="alert">{errorPhone}</p>}
+
       </div>
 
       <div>
