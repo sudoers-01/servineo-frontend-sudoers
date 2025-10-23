@@ -1,18 +1,24 @@
 "use client"
 
-import { useState } from "react"
-import { currentFixer, mockJobOffers, type JobOffer } from "@/app/lib/mock-data"
-import { Plus, Edit2, Trash2, ArrowLeft, ImageIcon } from "lucide-react"
-import Link from "next/link"
+import { useState, useEffect } from "react"
+import { currentFixer, mockJobOfferService, type JobOffer } from "@/app/lib/mock-data"
+import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
+//import Link from "next/link"
+import { Navbar } from "@/Components/Shared/Navbar"
 import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
 import { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
+import { ImageCarousel } from "@/Components/Shared/ImageCarousel"
 
 export default function MyOffersPage() {
-  const [offers, setOffers] = useState<JobOffer[]>(
-    mockJobOffers.filter((offer) => offer.fixerId === currentFixer.id),
-  )
+  const [offers, setOffers] = useState<JobOffer[]>([])
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingOffer, setEditingOffer] = useState<JobOffer | null>(null)
+
+  // Cargar las ofertas iniciales
+  useEffect(() => {
+    const myOffers = mockJobOfferService.getMyOffers(currentFixer.id)
+    setOffers(myOffers)
+  }, [])
 
   const handleEdit = (offer: JobOffer) => {
     setEditingOffer(offer)
@@ -21,84 +27,101 @@ export default function MyOffersPage() {
 
   const handleDelete = (offerId: string) => {
     if (confirm("¿Estás seguro de que quieres eliminar esta oferta?")) {
-      setOffers(offers.filter((offer) => offer.id !== offerId))
+      try {
+        mockJobOfferService.deleteOffer(offerId)
+        setOffers(prevOffers => prevOffers.filter(offer => offer.id !== offerId))
+      } catch (error) {
+        console.error('Error al eliminar la oferta:', error)
+        alert('No se pudo eliminar la oferta. Por favor, intenta de nuevo.')
+      }
     }
   }
 
   const handleSubmit = (formData: JobOfferFormData) => {
-    // Convertir los servicios de objetos a strings
-    const servicesAsStrings = formData.services.map(service => service.value)
-    
-    if (editingOffer) {
-      setOffers(
-        offers.map((offer) =>
-          offer.id === editingOffer.id
-            ? {
-                ...offer,
-                ...formData,
-                services: servicesAsStrings,
-                tags: formData.tags || [], 
-                whatsapp: currentFixer.whatsapp,
-                fixerName: currentFixer.name,
-              }
-            : offer,
-        ),
-      )
-    } else {
-      const newOffer: JobOffer = {
-        id: `offer-${Date.now()}`,
+    try {
+      // Validaciones adicionales
+      if (!formData.description || !formData.city || !formData.services || formData.services.length === 0) {
+        alert("Por favor, completa todos los campos requeridos")
+        return
+      }
+
+      // Convertir los servicios de objetos a strings
+      const servicesAsStrings = formData.services.map(service => service.value)
+      // Por ahora usaremos una ubicación por defecto basada en la ciudad
+      // TODO: Implementar selección de ubicación en el mapa
+      const defaultLocations: { [key: string]: { lat: number; lng: number } } = {
+        'Cochabamba': { lat: -17.3895, lng: -66.1568 },
+        'La Paz': { lat: -16.5, lng: -68.15 },
+        'Santa Cruz': { lat: -17.7834, lng: -63.1821 },
+        'El Alto': { lat: -16.5207, lng: -68.1742 },
+      }
+
+      const cityLocation = defaultLocations[formData.city] || defaultLocations['Cochabamba']
+      
+      const offerData = {
+        description: formData.description,
+        city: formData.city,
+        services: servicesAsStrings,
+        tags: formData.services.map(s => s.value),
+        photos: formData.photos || ["/placeholder.svg?height=300&width=400&text=trabajo"],
+        price: formData.price || 0,
         fixerId: currentFixer.id,
         fixerName: currentFixer.name,
         whatsapp: currentFixer.whatsapp,
-        createdAt: new Date(),
-        services: servicesAsStrings,
-        tags: formData.tags || [],
-        description: formData.description,
-        city: formData.city,
-        photos: formData.photos || [],
-        price: formData.price,
+        location: {
+          lat: cityLocation.lat,
+          lng: cityLocation.lng,
+          address: `${formData.city}, Bolivia`, // Podríamos mejorar esto con una dirección más específica
+        },
       }
-      setOffers([newOffer, ...offers])
+      
+      if (editingOffer) {
+        const updatedOffer = mockJobOfferService.updateOffer(editingOffer.id, offerData)
+        if (updatedOffer) {
+          setOffers(prevOffers => 
+            prevOffers.map(offer => 
+              offer.id === editingOffer.id ? updatedOffer : offer
+            )
+          )
+        }
+      } else {
+        const newOffer = mockJobOfferService.addOffer(offerData)
+        setOffers(prevOffers => [newOffer, ...prevOffers])
+      }
+
+      setIsFormOpen(false)
+      setEditingOffer(null)
+    } catch (error) {
+      console.error('Error al procesar el formulario:', error)
+      alert('Hubo un error al procesar el formulario. Por favor, intenta de nuevo.')
     }
-    setIsFormOpen(false)
-    setEditingOffer(null)
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      <header className="bg-card/80 backdrop-blur-lg border-b border-border/50 sticky top-0 z-10 shadow-sm">
-        <div className="container mx-auto px-4 py-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-2 animate-slide-in">
-              <Link
-                href="/"
-                className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-primary transition-colors group"
-              >
-                <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
-                Volver al inicio
-              </Link>
-              <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                  Mis Ofertas de Trabajo
-                </h1>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {currentFixer.name} • {currentFixer.whatsapp}
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setEditingOffer(null)
-                setIsFormOpen(true)
-              }}
-              className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-blue-600 text-primary-foreground rounded-xl hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 font-semibold"
-            >
-              <Plus className="w-5 h-5" />
-              Nueva Oferta
-            </button>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+      <Navbar />
+      <div className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+              Mis Ofertas de Trabajo
+            </h1>
+            <p className="text-sm text-blue-600 mt-1">
+              {currentFixer.name} • {currentFixer.whatsapp}
+            </p>
           </div>
+          <button
+            onClick={() => {
+              setEditingOffer(null)
+              setIsFormOpen(true)
+            }}
+            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300 font-semibold"
+          >
+            <Plus className="w-5 h-5" />
+            Nueva Oferta
+          </button>
         </div>
-      </header>
+      </div>
 
       <div className="container mx-auto px-4 py-8">
         {isFormOpen && (
@@ -130,7 +153,7 @@ export default function MyOffersPage() {
                 setEditingOffer(null)
                 setIsFormOpen(true)
               }}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-primary to-blue-600 text-primary-foreground rounded-xl hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 font-bold"
+              className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-xl hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 font-bold"
             >
               <Plus className="w-5 h-5" />
               Crear Primera Oferta
@@ -139,59 +162,57 @@ export default function MyOffersPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {offers.map((offer, index) => (
-              <div key={offer.id} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                <div className="p-6 bg-card border-2 border-border rounded-2xl hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 group">
-                  <div className="space-y-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className="text-sm text-foreground/80 leading-relaxed">{offer.description}</p>
+              <div key={offer.id} className="animate-fade-in relative group" style={{ animationDelay: `${index * 50}ms` }}>
+                <div className="relative w-full overflow-hidden rounded-xl border border-primary bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
+                  {/* Carrusel de imágenes */}
+                  <ImageCarousel 
+                    images={offer.photos.length > 0 ? offer.photos : ["/placeholder.svg?height=180&width=320&text=Oferta"]} 
+                    alt={`Trabajo de ${offer.fixerName}`} 
+                  />
+
+                  {/* Ciudad y Precio */}
+                  <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 border border-gray-200 shadow-sm">
+                    <span className="font-medium text-blue-600">{offer.city}</span>
+                  </div>
+                  <div className="absolute right-3 top-3 rounded-xl bg-white/95 px-3 py-2 text-sm font-bold text-primary shadow-lg border border-primary/20">
+                    {offer.price} Bs
+                  </div>
+
+                  {/* Información y botones de acción */}
+                  <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-black/0 p-4">
+                    <div className="flex items-end justify-between">
+                      <div className="text-white">
+                        <div className="text-sm opacity-90">{offer.fixerName}</div>
+                        <div className="text-xs opacity-80">{offer.whatsapp}</div>
                       </div>
-                      <div className="flex gap-1 ml-3">
-                        <button
-                          onClick={() => handleEdit(offer)}
-                          className="p-2 hover:bg-primary/10 text-primary rounded-lg transition-all hover:scale-110"
-                          title="Editar"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDelete(offer.id)}
-                          className="p-2 hover:bg-destructive/10 text-destructive rounded-lg transition-all hover:scale-110"
-                          title="Eliminar"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <div className="flex items-center gap-2 text-xs bg-gradient-to-r from-primary to-blue-600 px-3 py-1 rounded-full text-white font-medium">
+                        {offer.services[0]}
                       </div>
                     </div>
+                  </div>
 
-                    <div className="flex flex-wrap gap-2">
-                      {offer.tags.map((tag) => (
-                        <span
-                          key={tag}
-                          className="px-3 py-1.5 bg-gradient-to-r from-primary/10 to-primary/5 text-primary text-xs rounded-full font-medium border border-primary/20"
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-
-                    {offer.photos.length > 0 && (
-                      <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/50 px-3 py-2 rounded-lg">
-                        <ImageIcon className="w-4 h-4" />
-                        <span className="font-medium">
-                          {offer.photos.length} {offer.photos.length === 1 ? "foto" : "fotos"}
-                        </span>
-                      </div>
-                    )}
-
-                    <div className="text-xs text-muted-foreground pt-3 border-t border-border/50">
-                      Publicado:{" "}
-                      {offer.createdAt.toLocaleDateString("es-ES", {
-                        day: "numeric",
-                        month: "long",
-                        year: "numeric",
-                      })}
-                    </div>
+                  {/* Botones de edición y eliminación */}
+                  <div className="absolute right-3 top-14 flex flex-col gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEdit(offer);
+                      }}
+                      className="p-2 bg-white/95 text-primary rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
+                      title="Editar"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(offer.id);
+                      }}
+                      className="p-2 bg-white/95 text-destructive rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 </div>
               </div>

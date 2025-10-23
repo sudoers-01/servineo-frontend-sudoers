@@ -1,5 +1,5 @@
 import type React from "react"
-interface PillButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {}
+type PillButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement>
 
 export function PillButton(props: PillButtonProps) {
   const { className = "", ...rest } = props

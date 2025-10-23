@@ -1,8 +1,9 @@
 "use client"
 
 import { useState, useCallback, useEffect } from "react"
-import { Plus, X, Upload, ImageIcon, Sparkles } from "lucide-react"
+import { X, Upload, Sparkles } from "lucide-react"
 import { JobOffer } from "@/app/lib/mock-data"
+import Image from "next/image"
 import { jobOfferSchema } from "@/app/lib/validations/Job-offer-Schemas"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -37,7 +38,6 @@ export default function JobOfferForm({
     register,
     handleSubmit,
     watch,
-    setValue,
     formState: { errors },
   } = useForm<JobOfferFormData>({
     resolver: zodResolver(jobOfferSchema),
@@ -93,16 +93,27 @@ export default function JobOfferForm({
   }, [fields, append, remove])
 
   const handleFormSubmit = (data: JobOfferFormData): void => {
-    const formattedData: FormattedJobOffer = {
-      ...data,
-      photos,
-      services: data.services.map(service => ({
-        id: service.id || crypto.randomUUID(),
-        value: service.value
-      })),
-      tags: data.services.map(service => service.value)
+    try {
+      // Asegurarse de que hay al menos una foto
+      if (photos.length === 0) {
+        photos.push("/placeholder.svg?height=300&width=400&text=trabajo")
+      }
+
+      const formattedData: FormattedJobOffer = {
+        ...data,
+        photos,
+        services: data.services.map(service => ({
+          id: service.id || crypto.randomUUID(),
+          value: service.value
+        })),
+        tags: data.services.map(service => service.value)
+      }
+      console.log('Enviando datos:', formattedData)
+      onSubmit(formattedData)
+    } catch (error) {
+      console.error('Error al enviar el formulario:', error)
+      alert('Hubo un error al publicar la oferta. Por favor, verifica todos los campos.')
     }
-    onSubmit(formattedData)
   }
 
   return (
@@ -232,11 +243,14 @@ export default function JobOfferForm({
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                 {photos.map((photo, index) => (
                   <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted group">
-                    <img
-                      src={photo || "/placeholder.svg"}
-                      alt={`Foto ${index + 1}`}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
-                    />
+                    <div className="relative w-full h-full">
+                      <Image
+                        src={photo || "/placeholder.svg"}
+                        alt={`Foto ${index + 1}`}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      />
+                    </div>
                     <button
                       type="button"
                       onClick={() => handleRemovePhoto(index)}

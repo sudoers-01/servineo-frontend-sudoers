@@ -1,4 +1,4 @@
-// Servicio para manejar operaciones relacionadas con FIXER
+
 
 const MOCK_TAKEN_CIS = new Set(["1234567", "ABC-890", "9001002"])
 
@@ -11,7 +11,7 @@ export const fixerService = {
   },
 
   
-  registerFixer: async (data: any): Promise<{ success: boolean; fixerId?: string }> => {
+  registerFixer: async (): Promise<{ success: boolean; fixerId?: string }> => {
     // Simular llamada a API
     await new Promise((resolve) => setTimeout(resolve, 900))
     return {
