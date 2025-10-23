@@ -52,10 +52,9 @@ export async function obtenerDatosUsuarioLogueado(): Promise<RequesterData> {
     throw error;
   }
 }
-
 export async function actualizarDatosUsuario(
   data: UpdateRequesterData
-): Promise<{ success: boolean; message?: string }> {
+): Promise<{ success: boolean; message?: string; code?: string }> {
   const token = localStorage.getItem("servineo_token");
 
   if (!token) {
@@ -75,15 +74,28 @@ export async function actualizarDatosUsuario(
       body: JSON.stringify(data),
     });
 
-    const responseData = await res.json();
-    
+    // parseamos siempre el body (si existe)
+    const responseData = await res.json().catch(() => ({}));
+
+    // insertado: manejo específico para 409 PHONE_TAKEN 
+    if (res.status === 409 && responseData?.error === "PHONE_TAKEN") {
+      // devolvemos el mismo formato pero con un codigo para que el front lo detecte
+      return {
+        success: false,
+        message: responseData.message || "Número ya registrado",
+        code: "PHONE_TAKEN",
+      };
+    }
+    // fin de la verifiacion especifica
+
     if (!res.ok) {
-      throw new Error(responseData.message || `Error ${res.status}: No se pudo actualizar.`);
+      return { success: false, message: responseData.message || `Error ${res.status}: No se pudo actualizar.` };
     }
 
     return { success: true, message: "Perfil actualizado con éxito." };
   } catch (error) {
     console.error("Error al actualizar el perfil:", error);
-    return { success: false, message: (error as Error).message || "Fallo en la conexión o servidor." };
+    const errAny = error as any;
+    return { success: false, message: errAny?.message || "Fallo en la conexión o servidor." };
   }
 }
