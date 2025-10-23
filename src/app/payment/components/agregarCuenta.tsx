@@ -1,17 +1,12 @@
-//frontend/src/payment/components/agregarCuenta.tsx
 'use client';
-
 
 import React, { useState, useEffect, FormEvent } from 'react';
 import { ChangeEvent } from 'react';
 
-// Asegúrate de que este ID coincida con el ID usado en PaymentDemo.tsx
 const DEMO_FIXER_ID = '65f3f23f4a6b9645f0c98765';
 const API_BASE_URL = '/api';
 
 type PathSetter = (path: string) => void;
-
-// --- Componentes ---
 
 const PaymentSuccessPage = ({ onCloseAll }: { onCloseAll?: () => void }) => {
   const [statusMessage, setStatusMessage] = useState('Cuenta bancaria registrada exitosamente.');
@@ -65,7 +60,6 @@ const PaymentSuccessPage = ({ onCloseAll }: { onCloseAll?: () => void }) => {
   );
 };
 
-
 const RegistrationForm = ({ 
     pathSetter, 
     onCloseAll, 
@@ -79,6 +73,11 @@ const RegistrationForm = ({
   const [loading, setLoading] = useState(false);
   const [alreadyRegistered, setAlreadyRegistered] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState({
+    nombreTitular: '',
+    identificacion: '',
+    numeroCuenta: '',
+  });
 
   const [formData, setFormData] = useState({
     nombreTitular: '', 
@@ -94,18 +93,88 @@ const RegistrationForm = ({
       onCloseAll();
     }
   };
+    
+  const isNumeric = (str: string) => /^\d+$/.test(str);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
 
+    let processedValue = value;
+
+    if (name === 'nombreTitular') {
+        let filteredValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+        let rawValue = filteredValue.toLowerCase();
+        processedValue = rawValue.replace(/(^|\s)\S/g, (char) => char.toUpperCase());
+    } 
+    else if (name === 'identificationSuffix') {
+        const letters = (value.match(/[a-zA-Z]/g) || []).length;
+        const numbers = (value.match(/[0-9]/g) || []).length;
+        
+        if (letters > 1 || numbers > 1) {
+            return; 
+        }
+    }
+
+    if (name !== 'identificationSuffix' && name !== 'banco' && name !== 'tipoCuenta') {
+      validateField(name, name === 'nombreTitular' ? processedValue : value);
+    }
+
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: name === 'nombreTitular' ? processedValue : (type === 'checkbox' ? checked : value),
     }));
   };
 
-  const isNumeric = (str: string) => /^\d+$/.test(str);
+  const validateField = (name: string, value: string) => {
+    let error = '';
+    const literalValue = value;
+
+    switch (name) {
+      case 'nombreTitular':
+        const cleanValue = literalValue.trim().replace(/\s+/g, ' '); 
+        const wordCount = (cleanValue.match(/\s/g) || []).length + 1;
+        
+        if (/\s\s+/.test(literalValue)) {
+          error = 'No puedes escribir dos o más espacios seguidos entre palabras.';
+        } else if (literalValue.length > 0 && / $/.test(literalValue)) {
+          error = 'No se permite espacio al final del nombre.';
+        } else if (literalValue.length > 0 && /^ /.test(literalValue)) {
+          error = 'No se permite espacio al inicio del nombre.';
+        }
+
+        if (literalValue.length < 1 && !error) {
+            error = ''; 
+        } 
+        else if (!error) {
+          if (cleanValue.length < 7 || cleanValue.length > 50) {
+            error = `Longitud: 7-50 caracteres. (Palabras: ${wordCount})`;
+          } else if (wordCount < 2) {
+            error = 'Se requieren al menos 2 palabras (Nombre y Apellido).';
+          } else if (wordCount > 4) {
+            error = 'Máximo 4 palabras permitidas.';
+          } else if (!/[aeiouAEIOUáéíóúÁÉÍÓÚ]/.test(cleanValue)) {
+            error = 'El nombre debe contener al menos una vocal.';
+          }
+        }
+        break;
+
+      case 'identificacion':
+        if (literalValue.length > 0 && (!isNumeric(literalValue) || literalValue.length < 7 || literalValue.length > 8)) {
+          error = 'Debe ser de 7 a 8 dígitos numéricos.';
+        }
+        break;
+
+      case 'numeroCuenta':
+        if (literalValue.length > 0 && (!isNumeric(literalValue) || literalValue.length < 10 || literalValue.length > 14)) {
+          error = 'Debe ser de 10 a 14 dígitos numéricos.';
+        }
+        break;
+    }
+
+    setFieldErrors(prev => ({ ...prev, [name]: error }));
+    return error === '';
+  };
 
   useEffect(() => {
     if (localStorage.getItem('fix_bank_status') === 'CCB') {
@@ -113,7 +182,6 @@ const RegistrationForm = ({
     }
   }, []);
   
-  // 🟢 LÓGICA DE ELIMINACIÓN DE CUENTA
   const handleDelete = async () => {
     setLoading(true);
     setDeleteError(null);
@@ -127,7 +195,6 @@ const RegistrationForm = ({
             throw new Error(errorData.message || `Fallo al eliminar (Status: ${response.status})`);
         }
 
-        // 🟢 ÉXITO: Actualizar el localStorage a 'SCB' (Sin Cuenta Bancaria) y cerrar
         localStorage.setItem('fix_bank_status', 'SCB');
         localStorage.setItem('statusMessage', 'Cuenta bancaria eliminada exitosamente. Vuelve a registrar una cuenta.');
         alert('Cuenta bancaria eliminada exitosamente.'); 
@@ -137,17 +204,39 @@ const RegistrationForm = ({
         }
 
     } catch (error: any) {
-        console.error('❌ Error al eliminar la cuenta:', error);
+        console.error('Error al eliminar la cuenta:', error);
         setDeleteError(`Error al eliminar la cuenta: ${error.message || 'Error desconocido.'}`);
     } finally {
         setLoading(false);
     }
   };
 
-
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setFormError(null);
+
+    const nombre = formData.nombreTitular;
+    
+    if (/\s\s+/.test(nombre)) {
+        setFormError('El Nombre del titular no puede tener dos o más espacios seguidos.');
+        return;
+    }
+    if (/ $/.test(nombre)) {
+        setFormError('El Nombre del titular no puede terminar con un espacio.');
+        return;
+    }
+    if (/^ /.test(nombre)) {
+        setFormError('El Nombre del titular no puede empezar con un espacio.');
+        return;
+    }
+    
+    const cleanNombre = nombre.trim().replace(/\s+/g, ' '); 
+    const nombreWordCount = (cleanNombre.match(/\s/g) || []).length + 1;
+    
+    if (cleanNombre.length < 7 || cleanNombre.length > 50 || nombreWordCount < 2 || nombreWordCount > 4 || !/[aeiouAEIOUáéíóúÁÉÍÓÚ]/.test(cleanNombre)) {
+        setFormError('Por favor, verifica el Nombre completo del titular. Debe tener 2-4 palabras, 7-50 caracteres y contener vocales.');
+        return; 
+    }
 
     const ci = formData.identificacion.trim();
     if (ci.length < 7 || ci.length > 8 || !isNumeric(ci)) {
@@ -155,9 +244,19 @@ const RegistrationForm = ({
       return;
     }
 
+    const suffix = formData.identificationSuffix.trim().toUpperCase();
+    if (suffix) { 
+        const regexValidSuffix = /^([A-Z]\d|\d[A-Z])$/; 
+
+        if (suffix.length !== 2 || !regexValidSuffix.test(suffix)) {
+            setFormError('El Sufijo debe contener exactamente 2 caracteres: una letra y un número, sin caracteres especiales. (Ej: 9L o L9).');
+            return;
+        }
+    }
+
     const accountNumber = formData.numeroCuenta.trim();
-    if (accountNumber.length < 7 || accountNumber.length > 10 || !isNumeric(accountNumber)) {
-      setFormError('El Número de Cuenta debe contener entre 7 y 10 dígitos numéricos.');
+    if (accountNumber.length < 10 || accountNumber.length > 14 || !isNumeric(accountNumber)) {
+      setFormError('El Número de Cuenta debe contener entre 10 y 14 dígitos numéricos.');
       return;
     }
 
@@ -167,7 +266,7 @@ const RegistrationForm = ({
       fixerId: DEMO_FIXER_ID,
       accountNumber: formData.numeroCuenta,
       bankName: formData.banco,
-      nameFixer: formData.nombreTitular,
+      nameFixer: cleanNombre,
       accountType: formData.tipoCuenta,
       identification:
         formData.identificacion +
@@ -190,7 +289,7 @@ const RegistrationForm = ({
       localStorage.setItem('statusMessage', 'Cuenta bancaria registrada exitosamente.');
       pathSetter('/agregarCuenta/payment');
     } catch (error: any) {
-      console.error('❌ Error en el flujo de registro:', error?.message);
+      console.error('Error en el flujo de registro:', error?.message);
       const displayError =
         error?.message?.includes('duplicado') || error?.message?.includes('Duplicate account number')
           ? 'El número de cuenta bancaria ya ha sido registrado. Por favor, verifica tus datos.'
@@ -201,8 +300,6 @@ const RegistrationForm = ({
     }
   };
   
-  
-  // 🟢 LÓGICA DE RENDERING: Muestra la pantalla de ELIMINACIÓN
   if (mode === 'delete' && localStorage.getItem('fix_bank_status') === 'CCB') {
     return (
         <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4">
@@ -212,7 +309,7 @@ const RegistrationForm = ({
                 </h2>
                 <p className="text-lg text-gray-600">
                     Esta acción eliminará la cuenta asociada al ID: <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{DEMO_FIXER_ID}</span>.
-                    <br/> Tu estado de cuenta volverá a **Sin Cuenta Bancaria (SCB)**.
+                    <br/> Tu estado de cuenta volverá a Sin Cuenta Bancaria (SCB).
                 </p>
                 {deleteError && (
                      <div className="p-3 bg-red-50 border border-red-400 text-red-700 rounded-lg text-sm">
@@ -229,7 +326,7 @@ const RegistrationForm = ({
                         Cancelar
                     </button>
                     <button
-                        onClick={handleDelete} // ⬅️ Llama a la nueva función DELETE
+                        onClick={handleDelete} 
                         disabled={loading}
                         className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors duration-150 shadow-md"
                     >
@@ -241,7 +338,6 @@ const RegistrationForm = ({
     );
   }
   
-  // 🟢 LÓGICA DE RENDERING: Muestra la pantalla de CUENTA REGISTRADA (solo si mode es 'register')
   if (alreadyRegistered && mode === 'register') {
     return (
       <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4">
@@ -264,7 +360,6 @@ const RegistrationForm = ({
     );
   }
 
-  // 🟢 LÓGICA DE RENDERING: Muestra el FORMULARIO DE REGISTRO
   return (
     <div className="min-h-screen bg-blue-600 flex flex-col font-sans">
       <header className="px-6 py-4 flex items-center justify-between shadow-lg bg-blue-700">
@@ -286,13 +381,16 @@ const RegistrationForm = ({
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* ... Campos del formulario ... */}
+            
             <div>
               <label
                 htmlFor="nombreTitular"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
                 Nombre completo del titular
+                {(formData.nombreTitular.trim().length === 0 || fieldErrors.nombreTitular) && (
+                  <span className="text-red-500">*</span>
+                )}
               </label>
               <input
                 type="text"
@@ -300,15 +398,28 @@ const RegistrationForm = ({
                 id="nombreTitular"
                 value={formData.nombreTitular}
                 onChange={handleChange}
-                placeholder="Ej: Juan Pérez"
-                className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors text-gray-900"
+                placeholder="Nombre Apellido Apellido"
+                className={`w-full border p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 transition-colors text-gray-900 
+                    ${fieldErrors.nombreTitular ? 'border-red-500' : 'border-gray-300 focus:border-blue-500'}`}
                 required
+                onKeyPress={(e) => {
+                  const char = e.key;
+                  if (!/[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(char) && char !== ' ' && char !== 'Enter') {
+                    e.preventDefault();
+                  }
+                }}
               />
+              {fieldErrors.nombreTitular && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.nombreTitular}</p>
+              )}
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Identificación (CI)
+                {(formData.identificacion.trim().length === 0 || fieldErrors.identificacion) && (
+                  <span className="text-red-500">*</span>
+                )}
               </label>
               <div className="flex space-x-2">
                 <input
@@ -333,11 +444,38 @@ const RegistrationForm = ({
                   id="identificationSuffix"
                   value={formData.identificationSuffix}
                   onChange={handleChange}
-                  placeholder="Sufijo (Ej: LP)"
-                  maxLength={3}
+                  placeholder="Sufijo (Ej: 9L o L9)"
+                  maxLength={2} 
                   className="w-1/4 border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 uppercase text-center transition-colors text-gray-900"
+                  onKeyPress={(e) => {
+                    const char = e.key;
+                    const currentValue = e.currentTarget.value.toUpperCase();
+                    const isLetter = /[a-zA-Z]/.test(char);
+                    const isNumber = /[0-9]/.test(char);
+
+                    if (!isLetter && !isNumber) {
+                      e.preventDefault();
+                      return;
+                    }
+                    
+                    const currentLetters = (currentValue.match(/[A-Z]/g) || []).length;
+                    const currentNumbers = (currentValue.match(/[0-9]/g) || []).length;
+
+                    if (isLetter && currentLetters >= 1) {
+                      e.preventDefault();
+                      return;
+                    }
+
+                    if (isNumber && currentNumbers >= 1) {
+                      e.preventDefault();
+                      return;
+                    }
+                  }}
                 />
               </div>
+              {fieldErrors.identificacion && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.identificacion}</p>
+              )}
             </div>
 
             <div>
@@ -363,6 +501,9 @@ const RegistrationForm = ({
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
                 Número de cuenta (Solo números)
+                {(formData.numeroCuenta.trim().length === 0 || fieldErrors.numeroCuenta) && (
+                  <span className="text-red-500">*</span>
+                )}
               </label>
               <input
                 type="text"
@@ -370,8 +511,8 @@ const RegistrationForm = ({
                 id="numeroCuenta"
                 value={formData.numeroCuenta}
                 onChange={handleChange}
-                placeholder="7 a 10 dígitos"
-                maxLength={10}
+                placeholder="10 a 14 dígitos"
+                maxLength={14}
                 className="w-full border border-gray-300 p-2.5 rounded-lg focus:ring-4 focus:ring-blue-100 focus:border-blue-500 transition-colors text-gray-900"
                 required
                 onKeyPress={(e) => {
@@ -380,6 +521,9 @@ const RegistrationForm = ({
                   }
                 }}
               />
+              {fieldErrors.numeroCuenta && (
+                <p className="text-red-500 text-xs mt-1">{fieldErrors.numeroCuenta}</p>
+              )}
             </div>
 
             <div>
@@ -396,7 +540,14 @@ const RegistrationForm = ({
               >
                 <option>Banco Nacional de Bolivia</option>
                 <option>Banco Mercantil Santa Cruz</option>
+                <option>Banco de Crédito de Bolivia</option>
+                <option>Banco Económico</option>
+                <option>Banco Ganadero</option>
+                <option>Banco Solidario</option>
+                <option>Banco FIE</option>
+                <option>Banco Fortaleza</option>
                 <option>Banco BISA</option>
+                <option>Banco Unión</option>
               </select>
             </div>
 
@@ -447,8 +598,7 @@ const RegistrationForm = ({
   );
 };
 
-// --- Componente Principal modificado para aceptar onClose y mode ---
-const App = ({ onClose, mode = 'register' }: { onClose?: () => void; mode?: 'register' | 'delete' }) => { // ⬅️ CORRECCIÓN: Ahora recibe 'mode'
+const App = ({ onClose, mode = 'register' }: { onClose?: () => void; mode?: 'register' | 'delete' }) => { 
   const [path, setPath] = useState('/agregarCuenta');
 
   const renderContent = () => {
@@ -457,7 +607,6 @@ const App = ({ onClose, mode = 'register' }: { onClose?: () => void; mode?: 'reg
         return <PaymentSuccessPage onCloseAll={onClose} />;
       case '/agregarCuenta':
       default:
-        // 🟢 Se pasa 'mode' a RegistrationForm sin error
         return <RegistrationForm pathSetter={setPath} onCloseAll={onClose} mode={mode} />;
     }
   };
