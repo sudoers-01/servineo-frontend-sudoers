@@ -41,7 +41,7 @@ export default function MapaLeaflet() {
           const { latitude, longitude } = pos.coords;
           setPosition([latitude, longitude]);
           setUbicacionPermitida(true);
-          toast.success("📍 Ubicación detectada correctamente", { toastId: "ubicacion-exitosa" });
+          toast.success("Ubicación detectada correctamente", { toastId: "ubicacion-exitosa" });
         },
         (error) => {
           console.warn("No se pudo obtener la ubicación:", error.message);
@@ -63,7 +63,7 @@ export default function MapaLeaflet() {
     try {
       let token = localStorage.getItem("servineo_token");
 
-      // Primera vez: usamos token temporal de Google
+     
       if (!token) {
         const googleToken = sessionStorage.getItem("google_token_temp");
         if (!googleToken) {
@@ -78,19 +78,20 @@ export default function MapaLeaflet() {
           localStorage.setItem("servineo_user", JSON.stringify(data.user));
           setUser(data.user);
           sessionStorage.removeItem("google_token_temp");
+          sessionStorage.setItem("toastMessage", `¡Cuenta Creada Exitosamente! Bienvenido, ${data.user.name}!`);
         } else {
           toast.error("Error al autenticar usuario con Google.");
           return;
         }
       }
 
-      // Enviamos la ubicación al backend
+   
       await enviarUbicacion(position?.[0] || 0, position?.[1] || 0);
 
-      toast.success("Ubicación registrada correctamente.", { toastId: "envio-exitoso" });
-
-      // Redirigimos al home logeado
-      router.push("/");
+     
+        router.push("/");
+     
+      
     } catch (error) {
       console.error(error);
       toast.error("Error al enviar la ubicación al servidor.", { toastId: "error-envio" });
