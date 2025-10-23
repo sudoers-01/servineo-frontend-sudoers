@@ -18,6 +18,12 @@ export default function Home() {
           >
             Requesters
           </Link>
+          <Link
+            href='/components/job-requests'
+            className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-green-700 transition'
+          >
+            Job Request
+          </Link>
         </div>
       </div>
     </main>
