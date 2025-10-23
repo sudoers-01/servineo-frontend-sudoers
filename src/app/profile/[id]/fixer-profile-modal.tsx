@@ -1,6 +1,7 @@
 import React from 'react';
 import Modal from './modal-window';
 import { useProfile } from './hooks/useProfile';
+import { useRouter } from 'next/navigation';
 
 type FixerProfileProps = {
   isOpen: boolean;
@@ -10,6 +11,8 @@ type FixerProfileProps = {
 
 export default function FixerProfile({ isOpen, onClose, userId }: FixerProfileProps) {
   const { data, errors } = useProfile(userId);
+  const router = useRouter();
+
   //
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -63,7 +66,10 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                 ))}
               </div>
 
-              <button className='px-4 py-2 text-xs font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'>
+              <button
+                className='px-4 py-2 text-xs font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
+                onClick={() => router.push(`/fixer-ratings-details/68e87a9cdae3b73d8040102f`)}
+              >
                 VER DETALLES DE CALIFICACIONES
               </button>
             </div>
