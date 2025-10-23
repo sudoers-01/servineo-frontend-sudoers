@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 const RegistroCuentaApp = dynamic(() => import('./agregarCuenta'), { ssr: false });
 
 const stripePromise = loadStripe(
-  'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI',
+  'pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU',
 );
 
 export default function PaymentDemo() {
@@ -33,8 +33,8 @@ export default function PaymentDemo() {
   const [modalMode, setModalMode] = useState<'register' | 'delete'>('register');
 
   // Datos para pago con tarjeta
-  const requesterId = '68ed47b64ed596d659c1ed8f';
-  const fixerId = '68ef1be7be38c7f1c3c2c78b';
+  const requesterId = '68ed47b64ed596d659c1ed90';
+  const fixerId = '68ef1be7be38c7f1c3c2c78c';
   const jobId = '68ea51ee0d80087528ad803f';
   const amount = 78;
 
@@ -56,6 +56,8 @@ useEffect(() => {
     setSelectedTrabajo(trabajo);
     setShowPaymentSelector(true);
   };
+
+
 
   const handleSelectPaymentMethod = (method: string) => {
     if (method === 'cash') {
@@ -222,7 +224,7 @@ useEffect(() => {
                   requesterId={requesterId}
                   fixerId={fixerId}
                   jobId={jobId}
-                  amount={amount}
+                  amount={selectedTrabajo.monto}
                 />
               </div>
             </Elements>

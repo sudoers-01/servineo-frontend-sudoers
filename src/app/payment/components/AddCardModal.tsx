@@ -51,7 +51,7 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
         const cardRes = await fetch("http://localhost:4000/api/cardscreate", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, paymentMethodId: paymentMethod.id, saveCard }),
+          body: JSON.stringify({ userId, paymentMethodId: paymentMethod.id, saveCard, cardholderName:cardHolder }),
         });
         const savedCard = await cardRes.json();
         if (!cardRes.ok) throw new Error(savedCard.error || "Error al guardar la tarjeta");

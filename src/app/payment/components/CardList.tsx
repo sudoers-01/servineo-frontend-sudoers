@@ -62,6 +62,8 @@ export default function CardList({ requesterId, fixerId, jobId, amount }) {
       }
 
       showSuccessModal(`Pago realizado exitosamente: ${paymentData.payment.amount} BOB`);
+
+
       await fetchCards();
     } catch (err) {
       console.error(err);
@@ -155,7 +157,7 @@ export default function CardList({ requesterId, fixerId, jobId, amount }) {
                 </div>
                 <div className="text-right">
                   <p className="uppercase">Titular</p>
-                  <p className="font-semibold truncate w-32">Usuario</p>
+                  <p className="font-semibold truncate w-32">{card.cardholderName || "usuario"}</p>
                 </div>
               </div>
 
