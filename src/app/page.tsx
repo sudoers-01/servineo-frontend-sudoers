@@ -10,19 +10,13 @@ import { useAuth } from "./controlC/HU3/hooks/usoAutentificacion";
 
 export default function HomePage() {
   const { user } = useAuth();
-
   useEffect(() => {
-    if (user) {
-      toast.success(`¡Bienvenido, ${user.name || "usuario"}! 👋`, {
-        position: "bottom-right",
-        autoClose: 4000,
-        hideProgressBar: false,
-        pauseOnHover: true,
-        draggable: true,
-        theme: "colored",
-      });
-    }
-  }, [user]);
+  const registro = sessionStorage.getItem("toastMessage");
+  if (registro) {
+    toast.success(registro); 
+    setTimeout(() => sessionStorage.removeItem("toastMessage"), 100);
+  }
+}, [user]);
 
 
   return (
