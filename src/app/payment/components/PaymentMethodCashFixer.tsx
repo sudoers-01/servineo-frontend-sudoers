@@ -1,17 +1,19 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
+
+// typescript: Definir props para el componente
+interface PaymentMethodCashFixerProps {
+  trabajo: { id: string; monto?: number } | null;
+  onClose: (paymentCompleted?: boolean) => void;
+  onBack: (opts?: { refresh?: boolean }) => void;
+}
 
 export default function PaymentMethodCashFixer({
   trabajo,
   onClose,
   onBack,
-}: {
-  trabajo: { id: string; monto?: number } | null;
-  onClose: (paymentCompleted?: boolean) => void;
-  onBack: (opts?: { refresh?: boolean }) => void;
-}) {
-  // Estados de UI
+}: PaymentMethodCashFixerProps) {
   const [codigoIngresado, setCodigoIngresado] = useState("");
   const [loading, setLoading] = useState(true);
   const [patching, setPatching] = useState(false);
@@ -77,13 +79,13 @@ export default function PaymentMethodCashFixer({
         text: '🔓 El periodo de bloqueo de 10 minutos ha finalizado. Ya puedes intentar nuevamente.'
       });
       setUnlockAtISO(null);
-      
+
       // Ocultar mensaje después de 5 segundos
       setTimeout(() => {
         setMainMessage(null);
       }, 5000);
     }
-    
+
     if (locked) {
       setWasLocked(true);
     }
@@ -104,25 +106,25 @@ export default function PaymentMethodCashFixer({
       setLoading(false);
       return;
     }
-    
+
     setMainMessage(null);
     setRemainingAttempts(null);
     setUnlockAtISO(null);
     setLoading(true);
-    
+
     try {
       const res = await fetch(`/api/lab/payments/${trabajo.id}/summary`, {
         cache: "no-store",
       });
-      
+
       if (!res.ok) {
         const text = await res.text().catch(() => "");
         throw new Error(text || `HTTP ${res.status}`);
       }
-      
+
       const data = await res.json();
       console.log("📦 [FIXER] Backend response completo:", data);
-      
+
       const d = data?.data ?? data;
       console.log("📋 [FIXER] Data parseada:", d);
 
@@ -130,8 +132,8 @@ export default function PaymentMethodCashFixer({
         typeof d?.total === "number"
           ? d.total
           : typeof d?.amount?.total === "number"
-          ? d.amount.total
-          : NaN;
+            ? d.amount.total
+            : NaN;
 
       // Detectar código expirado
       const backendExpired = d?.codeExpired === true;
@@ -152,9 +154,9 @@ export default function PaymentMethodCashFixer({
       if (isExpired && !codeExpired) {
         console.log("🔴 [FIXER] CÓDIGO EXPIRADO detectado en fetchSummary");
         setCodeExpired(true);
-        setMainMessage({ 
-          type: 'warning', 
-          text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código desde su vista para continuar con el pago.' 
+        setMainMessage({
+          type: 'warning',
+          text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código desde su vista para continuar con el pago.'
         });
       } else if (!isExpired && codeExpired) {
         console.log("✅ [FIXER] Código renovado, limpiando estado de expiración");
@@ -176,7 +178,7 @@ export default function PaymentMethodCashFixer({
           currency: d?.amount?.currency ?? d?.currency ?? "BOB",
         },
       });
-      
+
     } catch (e: any) {
       console.error("❌ [FIXER] Error en fetchSummary:", e);
       setMainMessage({ type: 'error', text: e.message || 'No se pudo cargar el resumen' });
@@ -194,13 +196,13 @@ export default function PaymentMethodCashFixer({
   // Verificación automática de expiración cada segundo
   useEffect(() => {
     if (!codeExpiresAt || codeExpired) return;
-    
+
     const checkExpiration = () => {
       const expiresMs = new Date(codeExpiresAt).getTime();
       const nowMs = Date.now();
-      
+
       const secondsLeft = (expiresMs - nowMs) / 1000;
-      
+
       console.log("⏰ [FIXER] Verificando expiración (auto-check):", {
         expiresAt: new Date(expiresMs).toLocaleString('es-BO'),
         expiresAtISO: new Date(expiresMs).toISOString(),
@@ -209,13 +211,13 @@ export default function PaymentMethodCashFixer({
         secondsLeft: secondsLeft.toFixed(2),
         expired: nowMs >= expiresMs
       });
-      
+
       if (nowMs >= expiresMs && !codeExpired) {
         console.log("🔴 [FIXER] CÓDIGO EXPIRADO detectado por auto-check");
         setCodeExpired(true);
-        setMainMessage({ 
-          type: 'warning', 
-          text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código desde su vista para continuar con el pago.' 
+        setMainMessage({
+          type: 'warning',
+          text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código desde su vista para continuar con el pago.'
         });
       }
     };
@@ -264,7 +266,7 @@ export default function PaymentMethodCashFixer({
       }
 
       // ❌ Manejo de errores según código de estado
-      
+
       // 429 - Bloqueado por demasiados intentos
       if (res.status === 429) {
         if (responseData.unlocksAt) {
@@ -273,7 +275,7 @@ export default function PaymentMethodCashFixer({
           const unlockDate = new Date(Date.now() + responseData.waitMinutes * 60000);
           setUnlockAtISO(unlockDate.toISOString());
         }
-        
+
         const errorMsg = '🔒 Has superado el número máximo de intentos (3). La cuenta está bloqueada temporalmente por 10 minutos.';
         setMainMessage({ type: 'error', text: errorMsg });
         return;
@@ -284,9 +286,9 @@ export default function PaymentMethodCashFixer({
         const attempts = responseData.remainingAttempts;
         if (typeof attempts === "number") {
           setRemainingAttempts(attempts);
-          setMainMessage({ 
-            type: 'error', 
-            text: `❌ Código inválido. Te quedan ${attempts} intento${attempts !== 1 ? 's' : ''}.` 
+          setMainMessage({
+            type: 'error',
+            text: `❌ Código inválido. Te quedan ${attempts} intento${attempts !== 1 ? 's' : ''}.`
           });
         } else {
           setMainMessage({ type: 'error', text: '❌ Código inválido.' });
@@ -297,9 +299,9 @@ export default function PaymentMethodCashFixer({
       // 410 - Código expirado
       if (res.status === 410) {
         setCodeExpired(true);
-        setMainMessage({ 
-          type: 'warning', 
-          text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código.' 
+        setMainMessage({
+          type: 'warning',
+          text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código.'
         });
         return;
       }
@@ -323,9 +325,9 @@ export default function PaymentMethodCashFixer({
       }
 
       // Otros errores
-      setMainMessage({ 
-        type: 'error', 
-        text: responseData.error || responseData.message || `Error ${res.status}` 
+      setMainMessage({
+        type: 'error',
+        text: responseData.error || responseData.message || `Error ${res.status}`
       });
 
     } catch (e: any) {
@@ -341,7 +343,7 @@ export default function PaymentMethodCashFixer({
 
   const handleCloseSuccessModal = () => {
     setShowSuccessModal(false);
-    onClose(true);
+    onClose(true);
   };
 
   // Modal de éxito
@@ -350,7 +352,8 @@ export default function PaymentMethodCashFixer({
       <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
         <div className="bg-black rounded-lg shadow-2xl p-8 max-w-md w-full mx-4 text-center">
           <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-green-500 rounded-full mb-4">
+            {/* Éxito: #16A34A */}
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#16A34A] rounded-full mb-4">
               <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
               </svg>
@@ -359,9 +362,10 @@ export default function PaymentMethodCashFixer({
           <h2 className="text-2xl font-bold text-white mb-2">
             ✓ Código correcto! Pago confirmado
           </h2>
+          {/* Primary (Main Blue): #2B31E0 */}
           <button
             onClick={handleCloseSuccessModal}
-            className="mt-6 px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white text-lg font-semibold rounded transition-colors w-full"
+            className="mt-6 px-8 py-3 bg-[#2B31E0] hover:bg-[#2B6AE0] text-white text-lg font-semibold rounded transition-colors w-full"
           >
             OK
           </button>
@@ -376,8 +380,10 @@ export default function PaymentMethodCashFixer({
       <Overlay>
         <Box>
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-gray-700">Cargando datos del pago…</p>
+            {/* Primary (Main Blue): #2B31E0 */}
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2B31E0] mb-4"></div>
+            {/* Texto principal (oscuro): #111827 */}
+            <p className="text-[#111827]">Cargando datos del pago…</p>
           </div>
         </Box>
       </Overlay>
@@ -388,18 +394,22 @@ export default function PaymentMethodCashFixer({
     return (
       <Overlay>
         <Box>
-          <div className="text-red-600 font-medium text-lg mb-2">Error</div>
-          <div className="text-gray-700 text-sm mb-4">{mainMessage.text}</div>
+          {/* Error: #EF4444 */}
+          <div className="text-[#EF4444] font-medium text-lg mb-2">Error</div>
+          {/* Texto principal (oscuro): #111827 */}
+          <div className="text-[#111827] text-sm mb-4">{mainMessage.text}</div>
           <div className="flex justify-end gap-3">
-            <button 
-              onClick={handleVolver} 
-              className="px-4 py-2 rounded-md border border-gray-300 hover:bg-gray-50"
+            <button
+              onClick={handleVolver}
+              // Neutros: #E5E7EB, #D1D5DB
+              className="px-4 py-2 rounded-md border border-[#D1D5DB] hover:bg-[#E5E7EB]"
             >
               Volver
             </button>
-            <button 
-              onClick={onClose} 
-              className="px-4 py-2 rounded-md bg-gray-900 text-white hover:bg-gray-800"
+            {/* CTA Secundario: Accent (Turquesa brillante) #2BDDE0 */}
+            <button
+              onClick={() => onClose()}
+              className="px-4 py-2 rounded-md bg-[#2BDDE0] text-[#111827] hover:bg-[#5E2BE0]"
             >
               Cerrar
             </button>
@@ -413,13 +423,15 @@ export default function PaymentMethodCashFixer({
 
   return (
     <Overlay>
-      <div className="bg-white w-full max-w-2xl mx-4 rounded-lg shadow-xl">
+      {/* Fondo claro (principal): #F9FAFB */}
+      <div className="bg-[#F9FAFB] w-full max-w-2xl mx-4 rounded-lg shadow-xl">
         {/* Header */}
-        <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between rounded-t-lg">
+        {/* Primary (Main Blue): #2B31E0, Texto: #F9FAFB */}
+        <div className="bg-[#2B31E0] text-[#F9FAFB] px-6 py-4 flex items-center justify-between rounded-t-lg">
           <h1 className="text-xl font-semibold">Método de pago Efectivo — Vista FIXER</h1>
-          <button 
-            onClick={onClose} 
-            className="hover:bg-blue-700 px-3 py-1 rounded text-xl transition-colors"
+          <button
+            onClick={() => onClose()}
+            className="hover:bg-[#2B6AE0] px-3 py-1 rounded text-xl transition-colors"
           >
             ✕
           </button>
@@ -427,27 +439,29 @@ export default function PaymentMethodCashFixer({
 
         {/* Content */}
         <div className="px-8 py-12">
+          {/* Texto principal (oscuro): #111827 */}
           <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-gray-900">Confirmación del pago recibido</h2>
+            <h2 className="text-2xl font-bold text-[#111827]">Confirmación del pago recibido</h2>
           </div>
 
           {/* Mensaje principal unificado */}
           {mainMessage && (
             <div className="mb-6 max-w-xl mx-auto">
+              {/* Aplicando colores de estado del estándar */}
               <div className={`border-l-4 p-4 rounded ${
-                mainMessage.type === 'error' ? 'bg-red-50 border-red-500' :
-                mainMessage.type === 'warning' ? 'bg-amber-50 border-amber-500' :
-                mainMessage.type === 'success' ? 'bg-green-50 border-green-500' :
-                'bg-blue-50 border-blue-500'
-              }`}>
+                mainMessage.type === 'error' ? 'bg-red-50 border-[#EF4444]' :
+                mainMessage.type === 'warning' ? 'bg-amber-50 border-[#F59E0B]' :
+                mainMessage.type === 'success' ? 'bg-green-50 border-[#16A34A]' :
+                'bg-blue-50 border-[#759AE0]' // Highlight para 'info'
+                }`}>
                 <div className="flex items-start">
                   <div className="flex-shrink-0">
                     <svg className={`h-5 w-5 mt-0.5 ${
-                      mainMessage.type === 'error' ? 'text-red-500' :
-                      mainMessage.type === 'warning' ? 'text-amber-500' :
-                      mainMessage.type === 'success' ? 'text-green-500' :
-                      'text-blue-500'
-                    }`} viewBox="0 0 20 20" fill="currentColor">
+                      mainMessage.type === 'error' ? 'text-[#EF4444]' :
+                      mainMessage.type === 'warning' ? 'text-[#F59E0B]' :
+                      mainMessage.type === 'success' ? 'text-[#16A34A]' :
+                      'text-[#759AE0]' // Highlight para 'info'
+                      }`} viewBox="0 0 20 20" fill="currentColor">
                       {mainMessage.type === 'success' ? (
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       ) : mainMessage.type === 'error' ? (
@@ -463,7 +477,7 @@ export default function PaymentMethodCashFixer({
                       mainMessage.type === 'warning' ? 'text-amber-800' :
                       mainMessage.type === 'success' ? 'text-green-800' :
                       'text-blue-800'
-                    }`}>
+                      }`}>
                       {mainMessage.text}
                     </p>
                   </div>
@@ -475,7 +489,8 @@ export default function PaymentMethodCashFixer({
           {/* Contador de bloqueo */}
           {locked && (
             <div className="mb-6 max-w-xl mx-auto">
-              <div className="bg-red-50 border border-red-200 rounded p-3">
+              {/* Error: #EF4444 */}
+              <div className="bg-red-50 border border-[#EF4444] rounded p-3">
                 <p className="text-red-700 text-sm font-medium text-center">
                   🔒 Cuenta bloqueada. Intenta en:{" "}
                   <b className="text-lg">
@@ -490,7 +505,8 @@ export default function PaymentMethodCashFixer({
           {/* Info de tiempo restante hasta expiración */}
           {!codeExpired && codeExpiresAt && msUntilExpiration > 0 && (
             <div className="mb-6 max-w-xl mx-auto">
-              <div className="bg-blue-50 border border-blue-200 rounded p-3">
+              {/* Highlight: #759AE0 */}
+              <div className="bg-blue-50 border border-[#759AE0] rounded p-3">
                 <p className="text-blue-700 text-sm text-center">
                   ⏰ Código válido por: <b>
                     {hoursUntilExpiration > 0 && `${hoursUntilExpiration}h `}
@@ -513,19 +529,19 @@ export default function PaymentMethodCashFixer({
             />
 
             {/* Monto */}
-            <ReadOnly 
-              label="Monto a Cobrar" 
-              value={`${summary.amount.total} ${summary.amount.currency}`} 
+            <ReadOnly
+              label="Monto a Cobrar"
+              value={`${summary.amount.total} ${summary.amount.currency}`}
             />
 
             {/* Estado */}
-            <ReadOnly 
-              label="Estado" 
+            <ReadOnly
+              label="Estado"
               value={
-                  summary.status === 'paid' ? 'CONFIRMADO' :
+                summary.status === 'paid' ? 'CONFIRMADO' :
                   summary.status === 'failed' ? 'ERROR' :
-                  'PENDIENTE'
-                }
+                    'PENDIENTE'
+              }
             />
           </div>
 
@@ -534,18 +550,21 @@ export default function PaymentMethodCashFixer({
             <button
               onClick={handleContinuar}
               disabled={!codigoIngresado || patching || locked || codeExpired}
-              className={`px-12 py-3 text-white text-lg font-semibold rounded-md transition-colors ${
+              className={`px-12 py-3 text-lg font-semibold rounded-md transition-colors ${
                 !codigoIngresado || patching || locked || codeExpired
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-black hover:bg-gray-800"
-              }`}
+                  // Neutros (deshabilitado): #D1D5DB, #64748B
+                  ? "bg-[#D1D5DB] text-[#64748B] cursor-not-allowed"
+                  // Primary (Main Blue): #2B31E0, Hover: #2B6AE0, Texto: #F9FAFB
+                  : "bg-[#2B31E0] hover:bg-[#2B6AE0] text-[#F9FAFB]"
+                }`}
             >
               {patching ? "Confirmando…" : locked ? "Bloqueado" : codeExpired ? "Código Expirado" : "Confirmar Pago Recibido"}
             </button>
             <button
               onClick={handleVolver}
               disabled={patching}
-              className="px-12 py-3 bg-black text-white text-lg font-semibold rounded-md hover:bg-gray-800 transition-colors disabled:opacity-60"
+              // CTA Secundario: Accent (Turquesa brillante) #2BDDE0
+              className="px-12 py-3 bg-[#2BDDE0] text-[#111827] text-lg font-semibold rounded-md hover:bg-[#5E2BE0] transition-colors disabled:opacity-60"
             >
               Volver
             </button>
@@ -553,7 +572,8 @@ export default function PaymentMethodCashFixer({
 
           {/* Hint */}
           <div className="mt-6 text-center text-sm text-gray-500">
-            ID pago: <span className="font-mono text-gray-700">{summary.id}</span>
+            {/* Neutro: #64748B */}
+            ID pago: <span className="font-mono text-[#64748B]">{summary.id}</span>
           </div>
         </div>
       </div>
@@ -565,7 +585,8 @@ export default function PaymentMethodCashFixer({
 
 function Overlay({ children }: { children: React.ReactNode }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+    // Overlay semitransparente
+    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50">
       {children}
     </div>
   );
@@ -573,24 +594,29 @@ function Overlay({ children }: { children: React.ReactNode }) {
 
 function Box({ children }: { children: React.ReactNode }) {
   return (
-    <div className="bg-white rounded-lg shadow-xl px-8 py-6 max-w-md">
+    // Fondo claro (principal): #F9FAFB
+    <div className="bg-[#F9FAFB] rounded-lg shadow-xl px-8 py-6 max-w-md">
       {children}
     </div>
   );
 }
 
-function RowInput(props: {
+// typescript: Definir props para RowInput
+interface RowInputProps {
   label: string;
   value: string;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   disabled?: boolean;
   maxLength?: number;
-}) {
+}
+
+function RowInput(props: RowInputProps) {
   const { label, value, onChange, placeholder, disabled, maxLength } = props;
   return (
     <div className="flex items-center gap-6">
-      <label className="text-lg font-semibold text-gray-900 w-48 text-left">
+      {/* Texto principal (oscuro): #111827 */}
+      <label className="text-lg font-semibold text-[#111827] w-48 text-left">
         {label}
       </label>
       <input
@@ -600,23 +626,32 @@ function RowInput(props: {
         placeholder={placeholder}
         disabled={disabled}
         maxLength={maxLength}
-        className="flex-1 px-4 py-3 bg-white disabled:bg-gray-100 border-2 border-blue-300 rounded-md text-gray-900 text-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed uppercase"
+        // Highlight: #759AE0, Neutros: #E5E7EB
+        className="flex-1 px-4 py-3 bg-white disabled:bg-[#E5E7EB] border-2 border-[#759AE0] rounded-md text-[#111827] text-lg focus:outline-none focus:ring-2 focus:ring-[#759AE0] disabled:cursor-not-allowed uppercase"
       />
     </div>
   );
 }
 
-function ReadOnly({ label, value }: { label: string; value: string }) {
+// typescript: Definir props para ReadOnly
+interface ReadOnlyProps {
+  label: string;
+  value: string;
+}
+
+function ReadOnly({ label, value }: ReadOnlyProps) {
   return (
     <div className="flex items-center gap-6">
-      <label className="text-lg font-semibold text-gray-900 w-48 text-left">
+      {/* Texto principal (oscuro): #111827 */}
+      <label className="text-lg font-semibold text-[#111827] w-48 text-left">
         {label}
       </label>
+      {/* Neutros: #E5E7EB, #D1D5DB, #111827 */}
       <input
         type="text"
         value={value}
         readOnly
-        className="flex-1 px-4 py-3 bg-gray-100 border border-gray-300 rounded-md text-gray-700 text-lg"
+        className="flex-1 px-4 py-3 bg-[#E5E7EB] border border-[#D1D5DB] rounded-md text-[#111827] text-lg"
       />
     </div>
   );
