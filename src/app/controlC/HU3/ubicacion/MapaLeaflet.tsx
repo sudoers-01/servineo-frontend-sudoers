@@ -27,6 +27,11 @@ function MoveMapToPosition({ position }: { position: [number, number] }) {
 export default function MapaLeaflet() {
   const [position, setPosition] = useState<[number, number] | null>(null);
   const [ubicacionPermitida, setUbicacionPermitida] = useState<boolean | null>(null);
+  const [direccion, setDireccion] = useState<string | null>(null);
+  const [departamento, setDepartamento] = useState<string | null>(null);
+  const [pais, setPais] = useState<string | null>(null);
+  const [cargandoDireccion, setCargandoDireccion] = useState(false);
+
   const router = useRouter();
   const ejecutado = useRef(false);
   const { setUser } = useAuth();
@@ -37,17 +42,49 @@ export default function MapaLeaflet() {
 
     if ("geolocation" in navigator) {
       navigator.geolocation.getCurrentPosition(
-        (pos) => {
+        async (pos) => {
           const { latitude, longitude } = pos.coords;
           setPosition([latitude, longitude]);
           setUbicacionPermitida(true);
           toast.success("Ubicación detectada correctamente", { toastId: "ubicacion-exitosa" });
+try {
+  setCargandoDireccion(true);
+  const res = await fetch(
+    `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json&addressdetails=1`
+  );
+  const data = await res.json();
+
+  if (data) {
+    const dep = data.address?.state || null;
+    const country = data.address?.country || null;
+    let dir = data.display_name || null;
+
+    //Limpiar la dirección para que no repita dep y país
+    if (dir) {
+      if (dep) dir = dir.replace(new RegExp(`,?\\s*${dep}`, "gi"), "");
+      if (country) dir = dir.replace(new RegExp(`,?\\s*${country}`, "gi"), "");
+      dir = dir.replace(/,\s*$/, "");
+    }
+
+    setDireccion(dir);
+    setDepartamento(dep);
+    setPais(country);
+  }
+} catch (error) {
+  console.error("Error obteniendo dirección:", error);
+} finally {
+  setCargandoDireccion(false);
+}
+
         },
         (error) => {
           console.warn("No se pudo obtener la ubicación:", error.message);
           toast.error("No se permitió el acceso a la ubicación.", { toastId: "ubicacion-denegada" });
           setUbicacionPermitida(false);
           setPosition([0, 0]);
+          setDireccion(null);
+          setDepartamento(null);
+          setPais(null);
         },
         { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
@@ -56,14 +93,21 @@ export default function MapaLeaflet() {
       toast.error("El navegador no soporta geolocalización.", { toastId: "ubicacion-no-soportada" });
       setUbicacionPermitida(false);
       setPosition([0, 0]);
+      setDireccion(null);
+      setDepartamento(null);
+      setPais(null);
     }
   }, []);
 
   const manejarEnvio = async () => {
     try {
+      if (cargandoDireccion) {
+        toast.info("Esperando obtener dirección, por favor aguarde...");
+        return;
+      }
+
       let token = localStorage.getItem("servineo_token");
 
-     
       if (!token) {
         const googleToken = sessionStorage.getItem("google_token_temp");
         if (!googleToken) {
@@ -85,13 +129,16 @@ export default function MapaLeaflet() {
         }
       }
 
-   
-      await enviarUbicacion(position?.[0] || 0, position?.[1] || 0);
+      // Enviar lat, lng, dirección, departamento, país
+      await enviarUbicacion(
+        position?.[0] || 0,
+        position?.[1] || 0,
+        direccion || null,
+        departamento || null,
+        pais || null
+      );
 
-     
-        router.push("/");
-     
-      
+      router.push("/");
     } catch (error) {
       console.error(error);
       toast.error("Error al enviar la ubicación al servidor.", { toastId: "error-envio" });
@@ -185,7 +232,7 @@ export default function MapaLeaflet() {
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "#2B6AE0")}
           onClick={manejarEnvio}
         >
-          Finalizar registro
+          {cargandoDireccion ? "Obteniendo dirección..." : "Finalizar registro"}
         </button>
       </div>
     </div>
