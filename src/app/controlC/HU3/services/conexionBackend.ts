@@ -1,3 +1,4 @@
+
 export const BASE_URL = "http://localhost:8000/api/controlC";
 
 export interface User {
@@ -50,16 +51,22 @@ export async function verificarSesionBackend(token: string) {
   }
 }
 
-export async function enviarUbicacion(lat: number, lng: number): Promise<UbicacionResponse> {
+export async function enviarUbicacion(
+  lat: number,
+  lng: number,
+  direccion: string | null,
+  departamento: string | null,
+  pais: string | null
+): Promise<UbicacionResponse> {
   const token = localStorage.getItem("servineo_token");
   try {
     const res = await fetch(`${BASE_URL}/ubicacion`, {
       method: "POST",
-      headers: { 
+      headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
+        Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ lat, lng }),
+      body: JSON.stringify({ lat, lng, direccion, departamento, pais }),
     });
 
     if (!res.ok) throw new Error(`Error ${res.status}: ${res.statusText}`);
@@ -69,6 +76,7 @@ export async function enviarUbicacion(lat: number, lng: number): Promise<Ubicaci
     throw error;
   }
 }
+
 
 
 export interface RegistroResponse {
