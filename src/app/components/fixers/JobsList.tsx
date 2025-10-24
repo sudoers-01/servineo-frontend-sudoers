@@ -4,9 +4,12 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Job } from '@/types/job';
 import RequestedJob from './RequestedJob';
-
+import RegisterJobModal from './RegisterJobModal';
+import { useState } from 'react';
 export default function JobsList({ jobs }: { jobs: Job[] }) {
   const router = useRouter();
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
+
   if (!jobs || jobs.length === 0) {
     return (
       <div className='rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-500'>
@@ -14,9 +17,13 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
       </div>
     );
   }
-
   return (
     <div className='space-y-3'>
+      <RegisterJobModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+      />
+      ;
       {jobs.map((job) => (
         <RequestedJob
           key={job._id}
@@ -25,7 +32,9 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
           schedule={formatSchedule(job.createdAt)}
           state={job.status}
           onAppointmentDetails={() => router.push(`/requested-jobs/${job._id}`)}
-          onRegisterJob={() => console.log('register job', job)}
+          onRegisterJob={() => {
+            setIsRegisterModalOpen(true);
+          }}
         />
       ))}
     </div>
