@@ -10,18 +10,22 @@ import { obtenerDatosUsuarioLogueado, RequesterData } from './service/api' // ðŸ
 interface RequesterDataState {
   requesterId: string;
   telefono: string;
-  direction: string;
-  coordinates: [number, number];
+  ubicacion: {
+    lat: number;
+    lng: number;
+    direccion: string;
+    departamento: string;
+    pais: string;
+  };
 }
+
 
 // Estado inicial
 const INITIAL_DATA: RequesterDataState = {
   requesterId: '',
   telefono: '',
-  direction: '',
-  coordinates: [0, 0],
-}
-
+  ubicacion: { lat: 0, lng: 0, direccion: '', departamento: '', pais: '' },
+};
 
 export default function EditProfilePage() {
   const { user, loading: authLoading } = useAuth() 

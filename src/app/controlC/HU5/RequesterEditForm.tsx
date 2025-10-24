@@ -9,6 +9,8 @@ import {
   actualizarDatosUsuario,
 } from './service/api';
 
+
+
 // Lazy load Leaflet (evita errores SSR)
 const MapContainer = dynamic(() => import('react-leaflet').then(m => m.MapContainer), { ssr: false });
 const TileLayer = dynamic(() => import('react-leaflet').then(m => m.TileLayer), { ssr: false });
@@ -28,25 +30,45 @@ export default function RequesterEditForm() {
   const [isEditingTelefono, setIsEditingTelefono] = useState(false);
   const [latLng, setLatLng] = useState<LatLng | null>(null);
   const [mapReady, setMapReady] = useState(false);
+  const [ubicacion, setUbicacion] = useState({
+          lat: 0,
+          lng: 0,
+          direccion: '',
+          departamento: '',
+          pais: '',
+        });
+
+
 
   // ✅ Cargar datos del usuario al montar
   useEffect(() => {
-    async function cargarDatos() {
-      try {
-        const userData = await obtenerDatosUsuarioLogueado();
-        setTelefono(userData.telefono || '');
-        setDirection(userData.direction || '');
-        setCoordinates(userData.coordinates || [0, 0]);
+  async function cargarDatos() {
+    try {
+      const userData = await obtenerDatosUsuarioLogueado();
+      setTelefono(userData.telefono || '');
+      setUbicacion(userData.ubicacion || {
+        lat: 0,
+        lng: 0,
+        direccion: '',
+        departamento: '',
+        pais: '',
+      });
+
+      // 👇 nuevo: actualiza el mapa según la ubicación guardada
+      if (userData.ubicacion && userData.ubicacion.lat && userData.ubicacion.lng) {
         setLatLng({
-          lat: userData.coordinates?.[0] || -16.5,
-          lng: userData.coordinates?.[1] || -68.15,
+          lat: userData.ubicacion.lat,
+          lng: userData.ubicacion.lng,
         });
-      } catch (err: any) {
-        setError(err.message || 'Error al cargar tus datos.');
       }
+    } catch (err: any) {
+      setError(err.message || 'Error al cargar tus datos.');
     }
-    cargarDatos();
-  }, []);
+  }
+  cargarDatos();
+}, []);
+
+
 
   // 🔹 Función de validación del número
   function validarTelefono(valor: string) {
@@ -67,22 +89,28 @@ export default function RequesterEditForm() {
   }
 
   async function fetchAddress(lat: number, lng: number) {
-    try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
-      );
-      const data = await res.json();
-      const { country, state, city, town, village, suburb } = data.address || {};
-      const locationString = [country, state, city || town || village, suburb]
-        .filter(Boolean)
-        .join(', ');
-      setDirection(locationString || `${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-      setCoordinates([lat, lng]);
-    } catch {
-      setDirection(`${lat.toFixed(6)}, ${lng.toFixed(6)}`);
-      setCoordinates([lat, lng]);
-    }
+  try {
+    const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`);
+    const data = await res.json();
+    const { country, state, road, suburb, city, town } = data.address || {};
+
+    setUbicacion({
+      lat,
+      lng,
+      direccion: [road, suburb, city || town].filter(Boolean).join(', ') || '',
+      departamento: state || '',
+      pais: country || '',
+    });
+  } catch {
+    setUbicacion((prev) => ({
+      ...prev,
+      lat,
+      lng,
+      direccion: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+    }));
   }
+}
+
 
   function handleGetLocation() {
     if (!navigator.geolocation) {
@@ -125,11 +153,11 @@ export default function RequesterEditForm() {
 
     setLoading(true);
     try {
-            const result = await actualizarDatosUsuario({
-        telefono,
-        direction,
-        coordinates,
+          const result = await actualizarDatosUsuario({
+            telefono,
+            ubicacion,
       });
+
 
       // Si la API nos indica que el número ya está en uso, mostramos error junto al campo
       if (!result.success) {
@@ -217,11 +245,12 @@ export default function RequesterEditForm() {
         </label>
         <div className="flex items-center gap-2">
           <input
-            value={direction}
+            value={ubicacion.direccion || ''}
             disabled
             placeholder="País, ciudad, departamento"
             className="flex-1 rounded-md border px-3 py-2 bg-[#F5FAFE] border-[#E5F4FB] cursor-not-allowed"
           />
+
           <button
             type="button"
             onClick={handleGetLocation}
