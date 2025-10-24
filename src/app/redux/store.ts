@@ -12,7 +12,7 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
       .concat(userApi.middleware)
-      .concat(logger), // Solo se incluirá en desarrollo
+      .concat(logger), 
   devTools: process.env.NODE_ENV !== 'production',
 });
 

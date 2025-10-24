@@ -3,6 +3,7 @@
 import { Card } from "@/Components/Card"
 import { PillButton } from "../Pill-button"
 import { Plus, Edit2, Trash2, Wrench } from "lucide-react"
+import { useState } from "react"
 
 export interface Service {
   id: string
@@ -29,11 +30,50 @@ export function ServicesStep({
   onDeleteService,
   error,
 }: ServicesStepProps) {
+  const [newService, setNewService] = useState("")
+  const [editServiceName, setEditServiceName] = useState("")
+
+  const handleServiceChange = (value: string) => {
+    const sanitized = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "").slice(0, 20)
+    setNewService(sanitized)
+  }
+
+  const handleEditServiceChange = (value: string) => {
+    const sanitized = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "").slice(0, 20)
+    setEditServiceName(sanitized)
+  }
+
   const handleAddService = () => {
-    const el = document.getElementById("newService") as HTMLInputElement | null
-    if (el) {
-      onAddCustomService(el.value)
-      el.value = ""
+    if (!newService.trim()) {
+      alert("Por favor ingresa un nombre para el servicio")
+      return
+    }
+
+    if (newService.trim().length < 2) {
+      alert("El servicio debe tener al menos 2 caracteres")
+      return
+    }
+
+    onAddCustomService(newService.trim())
+    setNewService("")
+  }
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleAddService()
+    }
+  }
+
+  const handleEdit = (service: Service) => {
+    setEditServiceName(service.name)
+    const newName = prompt("Editar servicio", service.name)
+    if (newName) {
+      const sanitized = newName.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "").slice(0, 20)
+      if (sanitized.trim().length >= 2) {
+        onEditService(service.id, sanitized.trim())
+      } else {
+        alert("El servicio debe tener al menos 2 caracteres y solo contener letras")
+      }
     }
   }
 
@@ -65,8 +105,7 @@ export function ServicesStep({
                     className="text-primary hover:text-blue-800 transition-colors"
                     onClick={(e) => {
                       e.preventDefault()
-                      const name = prompt("Editar servicio", s.name) || s.name
-                      onEditService(s.id, name)
+                      handleEdit(s)
                     }}
                     title="Editar servicio"
                   >
@@ -89,19 +128,30 @@ export function ServicesStep({
           ))}
         </div>
 
-        <div className="flex items-center gap-2">
-          <input
-            id="newService"
-            placeholder="Añadir nuevo servicio"
-            className="flex-1 rounded-full bg-gray-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400 transition-all"
-          />
-          <PillButton
-            className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
-            onClick={handleAddService}
-          >
-            <Plus className="h-4 w-4" />
-            Agregar
-          </PillButton>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <input
+              value={newService}
+              onChange={(e) => handleServiceChange(e.target.value)}
+              onKeyPress={handleKeyPress}
+              placeholder="Añadir nuevo servicio"
+              maxLength={20}
+              className="flex-1 rounded-full bg-gray-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+            />
+            <PillButton
+              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              onClick={handleAddService}
+            >
+              <Plus className="h-4 w-4" />
+              Agregar
+            </PillButton>
+          </div>
+          <p className="text-xs text-gray-600 px-2">
+            Solo letras, máximo 20 caracteres ({newService.length}/20)
+            {newService.trim().length < 2 && newService.length > 0 && (
+              <span className="text-amber-600 ml-1">Mínimo 2 caracteres</span>
+            )}
+          </p>
         </div>
         {error && <p className="text-sm text-red-600">{error}</p>}
       </div>

@@ -18,10 +18,15 @@ export const initialRegistrationSchema = z.object({
   phone: z
     .string()
     .regex(phoneRegex, "Formato de teléfono inválido. Debe incluir al menos 8 dígitos")
+    .refine((value) => {
+      // Contar solo los dígitos (excluyendo +, - y espacios)
+      const digitCount = value.replace(/\D/g, '').length
+      return digitCount <= 12
+    }, "El número de teléfono no puede tener más de 10 dígitos")
     .transform(value => value.trim()),
 })
 
-// Schema para CI
+// ... el resto de tus schemas se mantiene igual
 export const ciSchema = z.object({
   ci: z
     .string()
