@@ -9,7 +9,7 @@ import { obtenerDatosUsuarioLogueado, RequesterData } from './service/api' // ðŸ
 // Define la estructura de datos que esperas
 interface RequesterDataState {
   requesterId: string;
-  phone: string;
+  telefono: string;
   direction: string;
   coordinates: [number, number];
 }
@@ -17,7 +17,7 @@ interface RequesterDataState {
 // Estado inicial
 const INITIAL_DATA: RequesterDataState = {
   requesterId: '',
-  phone: '',
+  telefono: '',
   direction: '',
   coordinates: [0, 0],
 }
@@ -116,6 +116,7 @@ export default function EditProfilePage() {
         
         <div className="bg-white rounded-2xl shadow-lg p-6 border border-[#E5F4FB]">
           <RequesterEditForm
+          
           />
         </div>
       

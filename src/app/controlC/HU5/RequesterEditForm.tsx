@@ -18,14 +18,14 @@ type LatLng = { lat: number; lng: number };
 
 export default function RequesterEditForm() {
   const router = useRouter();
-  const [phone, setPhone] = useState('');
+  const [telefono, setTelefono] = useState('');
   const [direction, setDirection] = useState('');
   const [coordinates, setCoordinates] = useState<[number, number]>([0, 0]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-    const [errorPhone, setErrorPhone] = useState<string | null>(null);
-  const [showPhone, setShowPhone] = useState(false);
-  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const [errorTelefono, setErrorTelefono] = useState<string | null>(null);
+  const [showTelefono, setShowTelefono] = useState(false);
+  const [isEditingTelefono, setIsEditingTelefono] = useState(false);
   const [latLng, setLatLng] = useState<LatLng | null>(null);
   const [mapReady, setMapReady] = useState(false);
 
@@ -34,7 +34,7 @@ export default function RequesterEditForm() {
     async function cargarDatos() {
       try {
         const userData = await obtenerDatosUsuarioLogueado();
-        setPhone(userData.phone || '');
+        setTelefono(userData.telefono || '');
         setDirection(userData.direction || '');
         setCoordinates(userData.coordinates || [0, 0]);
         setLatLng({
@@ -55,13 +55,13 @@ export default function RequesterEditForm() {
     return /^[0-9]{8,15}$/.test(valor);
   }
 
-  function handlePhoneChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleTelefonoChange(e: React.ChangeEvent<HTMLInputElement>) {
     let valor = e.target.value;
     if (valor.startsWith('+')) valor = '+' + valor.slice(1).replace(/[^0-9]/g, '');
     else valor = valor.replace(/[^0-9]/g, '');
-    setPhone(valor);
+    setTelefono(valor);
     // limpiar error especifico de telefono al modificar
-    setErrorPhone(null);
+    setErrorTelefono(null);
     // opcional limpiar error global
     setError(null);
   }
@@ -118,7 +118,7 @@ export default function RequesterEditForm() {
     if (loading) return;
     setError(null);
 
-    if (!validarTelefono(phone)) {
+    if (!validarTelefono(telefono)) {
       setError('Ingrese un número de teléfono válido');
       return;
     }
@@ -126,7 +126,7 @@ export default function RequesterEditForm() {
     setLoading(true);
     try {
             const result = await actualizarDatosUsuario({
-        phone,
+        telefono,
         direction,
         coordinates,
       });
@@ -134,7 +134,7 @@ export default function RequesterEditForm() {
       // Si la API nos indica que el número ya está en uso, mostramos error junto al campo
       if (!result.success) {
         if (result.code === "PHONE_TAKEN") {
-          setErrorPhone("Este número ya está registrado"); //error 409
+          setErrorTelefono("Este número ya está registrado"); //error 409
           setError(null); // limpiar error global
           setLoading(false);
           return;
@@ -144,7 +144,7 @@ export default function RequesterEditForm() {
       }
 
       alert('✅ Perfil actualizado correctamente');
-      setIsEditingPhone(false);
+      setIsEditingTelefono(false);
 
     } catch (err: any) {
       setError(err.message || 'Error al actualizar perfil');
@@ -176,30 +176,30 @@ export default function RequesterEditForm() {
         </label>
         <div className="flex items-center gap-2">
           <input
-            type={showPhone ? 'text' : 'password'}
-            value={phone}
-            disabled={!isEditingPhone}
-            onChange={handlePhoneChange}
+            type={showTelefono ? 'text' : 'password'}
+            value={telefono}
+            disabled={!isEditingTelefono}
+            onChange={handleTelefonoChange}
             placeholder="+591 7xxxxxxx"
             autoComplete="tel"
             className={`flex-1 rounded-md border px-3 py-2 focus:outline-none focus:ring-2 transition ${
-              isEditingPhone
+              isEditingTelefono
                 ? 'bg-white border-[#759AE0] focus:ring-[#1AA7ED]'
                 : 'bg-[#F5FAFE] border-[#E5F4FB] cursor-not-allowed'
             }`}
           />
           <button
             type="button"
-            onClick={() => setShowPhone((p) => !p)}
+            onClick={() => setShowTelefono((p) => !p)}
             className="p-2 rounded-md border border-[#E5F4FB] bg-[#F5FAFE] hover:bg-[#E5F4FB] transition"
           >
-            {showPhone ? <EyeOff size={18} /> : <Eye size={18} />}
+            {showTelefono ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
           <button
             type="button"
-            onClick={() => { setIsEditingPhone((p) => !p); setErrorPhone(null); }}
+            onClick={() => { setIsEditingTelefono((p) => !p); setErrorTelefono(null); }}
             className={`p-2 rounded-md border transition ${
-              isEditingPhone
+              isEditingTelefono
                 ? 'border-[#1A223F] bg-[#E5F4FB]'
                 : 'border-[#E5F4FB] bg-[#F5FAFE] hover:bg-[#E5F4FB]'
             }`}
@@ -207,7 +207,7 @@ export default function RequesterEditForm() {
             <Pencil size={18} />
           </button>
         </div>
-        {errorPhone && <p className="text-sm text-red-600 mt-1" role="alert">{errorPhone}</p>}
+        {errorTelefono && <p className="text-sm text-red-600 mt-1" role="alert">{errorTelefono}</p>}
 
       </div>
 

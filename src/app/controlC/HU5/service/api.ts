@@ -5,20 +5,20 @@ export interface User {
   email: string;
   name?: string;
   picture?: string;
-  phone?: string;
+  telefono?: string;
   direction?: string;
   coordinates?: [number, number]; 
 }
 
 export interface UpdateRequesterData {
-  phone: string;
+  telefono: string;
   direction: string;
   coordinates: [number, number];
 }
 
 export interface RequesterData {
   requesterId: string;
-  phone: string;
+  telefono: string;
   direction: string;
   coordinates: [number, number];
 }
