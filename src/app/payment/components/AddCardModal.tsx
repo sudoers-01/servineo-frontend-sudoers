@@ -14,7 +14,7 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
   const [showSuccess, setShowSuccess] = useState(false);
 
   useEffect(() => {
-    const regex = /^[a-zA-Z\s]{3,50}$/;
+    const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/;
     setIsValidHolder(regex.test(cardHolder));
   }, [cardHolder]);
 
