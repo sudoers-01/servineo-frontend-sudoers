@@ -146,9 +146,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
         appointmentData.modality = "presencial"
       }
       }
-      console.log('Lat',appointmentData.lat);
-      console.log('Lon',appointmentData.lon);
-      console.log('Address',appointmentData.address);
       setAppointmentId(appointmentData.id);
       setDatetime(appointmentData.datetime);
       setClient(appointmentData.client);
@@ -156,8 +153,8 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setModality(appointmentData.modality);
       setModality(appointmentData.modality);
       setDescription(appointmentData.description || "");
-      setLat(appointmentData.lat);
-      setLon(appointmentData.lon);
+      setLat(Number(appointmentData.lat));
+      setLon(Number(appointmentData.lon));
       setAddress(appointmentData.address || "");
       setMeetingLink(appointmentData.meetingLink || "");
       setOriginalAppointment(appointmentData);
@@ -289,11 +286,7 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
     currentHour = newDatetime.getUTCHours();
     
     const newFinalDate = new Date(Date.UTC(currentYear1, currentMonth , currentDay,(currentHour-4),0, 0)); 
-    
-    console.log('Fecha Original:',finalDate.toISOString());
-    console.log('Nueva Fecha:',newFinalDate.toISOString());
-    console.log('Direccion',originalAppointment.address);
-    
+      
     if(newDatetime.toISOString().split('T')[0] !== originalDatetime.toISOString().split('T')[0]) {
       const datePart = newDatetime.toISOString().split('T')[0];
       payload.selected_date = datePart; 
@@ -315,10 +308,6 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
       payload.appointment_description = description.trim();
     }
 
-    //"selected_date": "2025-10-17",
-   // "starting_time": "2025-10-17T14:00:00.000Z",
-
-
     if (modality !== originalAppointment.modality) {
       payload.appointment_type = modality === "presencial" ? "presential" : "virtual";
     }
@@ -333,14 +322,18 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
       }
      const originalLat = originalAppointment.lat ?? null;
      const originalLon = originalAppointment.lon ?? null;
+     console.log('Original Lat:',originalLat);
+     console.log('Original Lon:',originalLon);
+     console.log('New Lat:',lat);
+     console.log('New Lon:',lon);  
      const originalAddress = originalAppointment.address ?? "";
     
       if (lat !== undefined && lat !== originalLat) {
-        payload.latitude = lat;
+        payload.lat = lat.toString();
       }
       
       if (lon !== undefined && lon !== originalLon) {
-        payload.longitude = lon;
+        payload.lon = lon.toString();
       }
       
       if (address !== originalAddress) {
@@ -521,7 +514,6 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                   <p className="text-xs text-gray-600">Si no ingresa enlace, se generará uno automáticamente.</p>
                 </div>
               )}
-
               <LocationModal
                 open={showLocationModal}
                 onClose={() => setShowLocationModal(false)}
