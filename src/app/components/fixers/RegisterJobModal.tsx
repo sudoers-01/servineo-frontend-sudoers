@@ -48,7 +48,6 @@ export default function RegisterJobModal({ isOpen, onClose, id }: RegisterJobMod
       alert('Cannot save: User location not available');
       return;
     }
-    console.log('Saving coordinates:', userLocation);
 
     setIsSaving(true);
   };
@@ -100,6 +99,11 @@ export default function RegisterJobModal({ isOpen, onClose, id }: RegisterJobMod
           <div className='mb-4'>
             <p className='text-sm font-semibold'>{`Estado: ${data?.status}`}</p>
           </div>
+          {locationError && (
+            <div className='mb-4'>
+              <p className='text-sm font-semibold text-red-600'>{`Location Error: ${locationError}`}</p>
+            </div>
+          )}
 
           <div className='flex justify-end gap-3'>
             <button

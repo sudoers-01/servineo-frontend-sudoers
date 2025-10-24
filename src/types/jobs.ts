@@ -9,6 +9,6 @@ export type Job = {
   createdAt?: string;
   rating?: number | string;
   comment?: string;
-  Ubicacion?: string;            
-  UbicacionOriginal?: string;    
+  Ubicacion?: string;
+  UbicacionOriginal?: string;
 };

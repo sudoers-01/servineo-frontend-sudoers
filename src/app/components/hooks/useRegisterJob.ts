@@ -14,7 +14,6 @@ export const useRegisterJob = (jobId: string) => {
   const [data, setData] = useState<Job | null>(null);
   useEffect(() => {
     const fetchJobData = async (id: string) => {
-      console.log('idd', id);
       try {
         const url = apiUrl(`api/job-info/${id}`);
         console.log('url', url);
@@ -25,7 +24,6 @@ export const useRegisterJob = (jobId: string) => {
           },
         });
         const data = await response.json();
-        console.log('data', data);
         setData({ ...data, createdAt: data.createdAt.split('T')[0] });
         return data;
       } catch (err) {

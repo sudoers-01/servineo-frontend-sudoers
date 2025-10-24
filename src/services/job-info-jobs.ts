@@ -1,5 +1,5 @@
 import { API_BASE_URL } from '@/config/api';
-import type { Job } from '@/types/job';
+import type { Job } from '@/types/jobs';
 import { getJobInfo } from './job-info';
 
 const urlsForFixer = (fixerId: string) => [
@@ -13,7 +13,10 @@ export async function getJobsByFixerId(fixerId: string): Promise<Job[]> {
 
   for (const url of urlsForFixer(fixerId)) {
     try {
-      const res = await fetch(url, { method: 'GET', headers: { 'Content-Type': 'application/json' } });
+      const res = await fetch(url, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      });
       if (!res.ok) {
         continue;
       }
@@ -25,6 +28,7 @@ export async function getJobsByFixerId(fixerId: string): Promise<Job[]> {
       fetched = true;
       break;
     } catch (err) {
+      console.error('Error fetching jobs for fixer:', err);
     }
   }
 
@@ -39,14 +43,16 @@ export async function getJobsByFixerId(fixerId: string): Promise<Job[]> {
           Ubicacion: job.Ubicacion ?? info.Ubicacion ?? 'Desconocida',
           UbicacionOriginal: info.UbicacionOriginal ?? 'Desconocida',
         } as Job;
-      } catch (err) {
+      } catch {
         return {
           ...job,
           Ubicacion: job.Ubicacion ?? 'Desconocida',
         } as Job;
       }
-    })
+    }),
   );
 
-  return enriched.map((r) => (r.status === 'fulfilled' ? r.value : (r as any).reason ?? null)).filter(Boolean) as Job[];
+  return enriched
+    .map((r) => (r.status === 'fulfilled' ? r.value : (r.reason ?? null)))
+    .filter(Boolean) as Job[];
 }
