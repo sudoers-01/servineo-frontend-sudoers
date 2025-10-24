@@ -278,11 +278,10 @@ export default function MyCalendarPage({
                 client: data.data.current_requester_name || "",
                 contact: data.data.current_requester_phone || "",
                 modality: data.data.appointment_type || "virtual",
-                place: data.data.display_name || "",
                 meetingLink: data.data.link_id || "",
                 lat: Number(data.data.lat),
                 lon: Number(data.data.lon),
-                address: data.data.display_name || "No expecificada"
+                address: data.data.display_name_location || "No expecificada"
             };
             //console.log('Datos procesados',existingAppointment);
 

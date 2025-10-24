@@ -189,7 +189,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       current_requester_name: client,
       current_requester_phone: contact,
       link_id: modality === "virtual" ? meetingLink : "",
-      display_name: modality === "presential" ? place : "",
+      display_name_location: modality === "presential" ? place : "",
       lat: modality === "presential" ? location?.lat : null,
       lon: modality === "presential" ? location?.lon : null,
     };
