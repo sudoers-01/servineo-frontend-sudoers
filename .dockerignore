@@ -1,0 +1,17 @@
+
+# Ignora dependencias y builds previos
+node_modules
+.next
+out
+coverage
+
+# Ignora archivos de entorno locales (excepto .env, que sí se copia)
+!.env
+.env.*
+!.env
+
+# Ignora archivos temporales y logs
+*.log
+npm-debug.log
+yarn-error.log
+.DS_Store
