@@ -3,50 +3,51 @@ import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } f
 import LocationModal from "./LocationModal";
 import { set, z } from "zod";
 import { parseUrl } from "next/dist/shared/lib/router/utils/parse-url";
-const phoneRegex = /^[67]\d{7}$/;
-const nameRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
-const descRegex = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s,.]{0,300}$/;
-const urlRegex = /^(https?:\/\/)?([\w\-]+\.)+[\w\-]+(\/[\w\-./?%&=]*)?$/i;
-const appointmentSchema = z.object({
-      client: z.string()
-        .min(1, "Ingresa el nombre del cliente")
-        .regex(nameRegex, "Ingrese un nombre válido"),
-      
-      contact: z.string()
-        .min(1, "Ingresa un contacto válido")
-        .refine((val) => {
-          const phone = val.replace(/\D/g, "").slice(-8);
-          return phoneRegex.test(phone);
-        }, "Teléfono debe iniciar con 6 o 7 y tener 8 dígitos"),
-      
-      description: z.string()
-        .min(1, "Ingrese una descripción")
-        .regex(descRegex, "Ingrese una descripción válida"),
-      
-      modality: z.enum(["virtual", "presencial"]),
-      
-      meetingLink: z.string()
-        .optional()
-        .refine((val) => !val || urlRegex.test(val), "Ingrese un enlace válido"),
-      
-      place: z.string().optional()
-    }).refine((data) => {
-      if (data.modality === "presencial") {
-        return !!data.place && data.place.trim().length > 0;
-      }
-      return true;
-    }, {
-      message: "Selecciona una ubicación",
-      path: ["place"]
-    });
+const baseSchema = z.object({
+  client: z.string()
+    .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre de cliente válido")
+    .nonempty("Ingrese un nombre de cliente")
+    .max(50, "El nombre no puede tener más de 50 caracteres"),
 
+  contact: z.string()
+    .regex(/^[67]\d{7}$/, "Ingrese un número de teléfono válido")
+    .nonempty("Ingrese un número de teléfono"),
+
+  description: z.string()
+    .nonempty("Ingrese una descripción de trabajo")
+    .max(300, "La descripción no puede tener más de 300 caracteres"),
+});
+
+// virtualSchema
+const virtualSchema = baseSchema.extend({
+  modality: z.literal("virtual"),
+  meetingLink: z.string()
+    .regex(/^(https?:\/\/)?(meet\.google\.com|zoom\.us)\/[^\s]+$/, "Ingrese un enlace válido de Meet o Zoom")
+    .nonempty("Ingrese un enlace de Meet o Zoom"),
+  location: z.undefined().optional(),
+});
+
+// presentialSchema
+const presentialSchema = baseSchema.extend({
+  modality: z.literal("presential"),
+  meetingLink: z.undefined().optional(),
+  location: z
+    .object({
+      lat: z.number(),
+      lon: z.number(),
+      address: z.string().nonempty("Seleccione una ubicación"),
+    })
+    .nullable()
+    .refine(val => val !== null, { message: "Seleccione una ubicación" }), 
+});
+
+const appointmentSchema = z.discriminatedUnion("modality", [virtualSchema, presentialSchema]);
 export type AppointmentPayload = {
   datetime: string;
   client: string;
   contact: string;
   modality: "virtual" | "presencial";
   description?: string;
-  place?: string;
   meetingLink?: string;
   lat?: number; 
   lon?: number; 
@@ -75,7 +76,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [contact, setContact] = useState<string>("+591 ");
   const [modality, setModality] = useState<"virtual" | "presencial">("virtual");
   const [description, setDescription] = useState<string>("");
-  const [place, setPlace] = useState<string>(""); 
   const [lat, setLat] = useState<number>();
   const [lon, setLon] = useState<number>();
   const [address, setAddress] = useState<string>("");
@@ -83,6 +83,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   // Estado para guardar los datos originales
   const [originalAppointment, setOriginalAppointment] = useState<ExistingAppointment | null>(null);
 
@@ -117,8 +118,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     if (modality === "presencial") {
       hasLocationOrLinkChanges = (lat ?? 0) !== (originalAppointment.lat ?? 0) || 
                                   (lon ?? 0) !== (originalAppointment.lon ?? 0)|| 
-                                  address !== originalAppointment.address ||
-                                  (place || "") !== (originalAppointment.place || "");
+                                  (address || "") !== (originalAppointment.address ||"");
     } else {
       hasLocationOrLinkChanges = (meetingLink||"").trim() !== (originalAppointment.meetingLink || "").trim();
     }
@@ -127,7 +127,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                       hasDescriptionChanges || hasModalityChanges || hasLocationOrLinkChanges;
 
     setChangesDetected(anyChange);
-  }, [day, month, hour, client, contact, description, modality, lat, lon, address, place, meetingLink, originalAppointment]);
+  }, [day, month, hour, client, contact, description, modality, lat, lon, address, meetingLink, originalAppointment]);
 
   // Validación de 24 horas
   const canEditAppointment = (appointmentDateTime: string): boolean => {
@@ -155,8 +155,8 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setModality(appointmentData.modality);
       setModality(appointmentData.modality);
       setDescription(appointmentData.description || "");
-      setLat(appointmentData.lat || 0);
-      setLon(appointmentData.lon || 0);
+      setLat(appointmentData.lat);
+      setLon(appointmentData.lon);
       setAddress(appointmentData.address || "");
       setMeetingLink(appointmentData.meetingLink || "");
       setOriginalAppointment(appointmentData);
@@ -187,7 +187,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setContact("+591 ");
     setModality("virtual");
     setDescription("");
-    setPlace("");
     setLat(0);
     setLon(0);
     setAddress("");
@@ -196,39 +195,19 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setMonth("");
     setHour(0);
     setMsg(null);
+    setErrors({});
   }
-
-  // Función para manejar la confirmación de ubicación
-  // Cambiar de parámetros separados a un objeto único
 const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
   setLat(locationData.lat);
   setLon(locationData.lon);
   setAddress(locationData.address);
-  setPlace(locationData.address);
   setShowLocationModal(false);
 };
 
-  const incrementHour = () => {
-    setHour(prev => (prev + 1) % 24);
-  };
-
-  const decrementHour = () => {
-    setHour(prev => (prev - 1 + 24) % 24);
-  };
-  const formatTimeUnit = (unit: number) => unit.toString().padStart(2, '0');
-
-  const handleDayChange = (value: string) => {
-  const numericValue = value.replace(/\D/g, '').slice(0, 2);
-    setDay(numericValue);
-  };
-
-  const handleMonthChange = (value: string) => {
-    const numericValue = value.replace(/\D/g, '').slice(0, 2);
-    setMonth(numericValue);
-  };
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setMsg(null);
+    setErrors({});
     if (!day || !month || day.length !== 2 || month.length !== 2) {
       setMsg("Ingrese día y mes válidos (DD/MM)");
       return;
@@ -249,23 +228,47 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
       return;
     }
 
-    const formData = {
+    /*const formData = {
       client: client.trim(),
       contact: contact.trim(),
       description: description.trim(),
       modality,
       meetingLink: meetingLink.trim(),
-      place: place.trim()
+      address: address.trim()
+    };*/
+    const formData: any = {
+      client: client.trim(),
+      contact: contact.trim(),
+      description: description.trim(),
+      modality: modality === "presencial" ? "presential" : "virtual"
     };
-    try {
-      appointmentSchema.parse(formData);
-    } catch (error) {
-      setMsg("Error de validación");
-      return;
+
+    if (modality === "presencial") {
+      formData.location = lat && lon && address ? {
+        lat,
+        lon,
+        address: address.trim()
+      } : null;
+    } else {
+      formData.meetingLink = meetingLink.trim() || genMeetingLink(datetime);
     }
 
-    // Construir payload solo con campos modificados
-    //console.log('Datos Originales',originalAppointment);
+    const validation = appointmentSchema.safeParse(formData);
+      if (!validation.success) {
+        const fieldErrors: Record<string, string> = {};
+        validation.error.issues.forEach(err => {
+          if (Array.isArray(err.path) && err.path.length) {
+            // Si el path es location.address, lo mostramos en errors.location
+            const key = err.path[0];
+            fieldErrors[key as string] = err.message;
+          } else {
+            fieldErrors['general'] = err.message;
+        }
+        });
+        setErrors(fieldErrors);
+        return;
+      }  
+    
     const payload: any = {};
     if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
     const dateToShowString = originalAppointment.datetime;
@@ -320,21 +323,27 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
     }
 
     if (modality === "presencial") {
-      if (!place) return setMsg("Selecciona una ubicación.");
+      if (!address) return setMsg("Selecciona una ubicación.");
      
       const scheduleUpdates: any = {};
       
-      if ((place || "") !== (originalAppointment.place || "")) {
-        scheduleUpdates.display_name = place.trim();
+      if ((address || "") !== (originalAppointment.address || "")) {
+        scheduleUpdates.display_name_location = address.trim();
       }
-      if(lat!== originalAppointment.lat){
-        payload.lat = lat;
+     const originalLat = originalAppointment.lat ?? null;
+     const originalLon = originalAppointment.lon ?? null;
+     const originalAddress = originalAppointment.address ?? "";
+    
+      if (lat !== undefined && lat !== originalLat) {
+        payload.latitude = lat;
       }
-      if(lon!== originalAppointment.lon){
-        payload.lon = lon;
-      } 
-      if(address!== originalAppointment.address){
-        payload.address = address;
+      
+      if (lon !== undefined && lon !== originalLon) {
+        payload.longitude = lon;
+      }
+      
+      if (address !== originalAddress) {
+        payload.display_name_location = address;
       }  
     } else {
       const linkToUse = meetingLink.trim() || genMeetingLink(datetime);
@@ -425,7 +434,6 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                             <span className="text-sm font-medium">Fecha y hora</span>
                             <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
                           </label>
-                            {/* MODALIDAD - Ocupa el espacio restante */}
                             <div className="flex-1">
                               <label className="block">
                                 <span className="text-sm font-medium">Modalidad</span>
@@ -450,18 +458,19 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                     onChange={(e) => setClient(e.target.value)}
                     placeholder="Nombre del cliente" 
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                    required 
+                 
                   />
+                  {errors.client && <p className="text-red-600 text-sm mt-1">{errors.client}</p>}
                 </label>
                 <label className="block">
                   <span className="text-sm font-medium">Contacto *</span>
                   <input 
                     value={contact} 
                     onChange={(e) => setContact(e.target.value)}
-                    placeholder="+591 77777777" 
+                    placeholder="7XXXXXXX" 
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                    required 
                   />
+                  {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
                 </label>
               </div>
 
@@ -474,6 +483,7 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                   className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
                   rows={3} 
                 />
+                {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
               </label>
 
               {modality === "presencial" ? (
@@ -483,14 +493,16 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                     className="text-center py-3 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
                   >
                     <p className="text-sm font-medium text-gray-700">
-                      📍 {place ? "Editar ubicación" : "Seleccionar ubicación"}
+                      📍 {address ? "Editar ubicación" : "Seleccionar ubicación"}
                     </p>
+                    {errors.location && <p className="text-red-600 text-sm mt-1">{errors.location}</p>}
                   </div>
 
-                  {place && (
+                  {address && (
                     <p className="text-sm text-green-700 px-2">
-                      📌 Ubicación: {place}
+                      📌 Ubicación: {address}
                     </p>
+                    
                   )}
                 </div>
               ) : (
@@ -503,6 +515,7 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                       placeholder="https://meet.example.com/abcd" 
                       className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
                     />
+                    {errors.meetingLink && <p className="text-red-600 text-sm mt-1">{errors.meetingLink}</p>}
                   </label>
                   <p className="text-xs text-gray-600">Si no ingresa enlace, se generará uno automáticamente.</p>
                 </div>
@@ -529,7 +542,7 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                 <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
                 <button 
                   type="submit" 
-                  disabled={loading || (modality === "presencial" && !place) || !changesDetected} 
+                  disabled={loading || (modality === "presencial" && !address) || !changesDetected} 
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? "Actualizando..." : "Actualizar"}
