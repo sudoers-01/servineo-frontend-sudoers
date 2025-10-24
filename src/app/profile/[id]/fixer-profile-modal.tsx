@@ -13,7 +13,23 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
   const { data, errors } = useProfile(userId);
   const router = useRouter();
 
-  //
+  const calculatePercentages = () => {
+    if (!data) return { 1: 0, 2: 0, 3: 0 };
+    const percentages = [3, 2, 1].map((rating) =>
+      Math.floor((data.ratings[rating as 1 | 2 | 3] / data.rating_count) * 100),
+    );
+    const sum = percentages.reduce((acc, val) => acc + val, 0);
+    const diff = 100 - sum;
+    percentages[percentages.length - 1] += diff;
+    return {
+      3: percentages[0],
+      2: percentages[1],
+      1: percentages[2],
+    };
+  };
+
+  const displayPercentages = calculatePercentages();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       {data ? (
@@ -138,7 +154,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                         <div
                           className='h-full bg-black rounded-full transition-all duration-300'
                           style={{
-                            width: `${(data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100}%`,
+                            width: `${displayPercentages[rating as 1 | 2 | 3]}%`,
                           }}
                         />
                       ) : (
@@ -149,7 +165,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                       )}
                     </div>
                     <span className='text-xs font-medium w-8'>
-                      {(data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100}%
+                      {displayPercentages[rating as 1 | 2 | 3]}%
                     </span>
                   </div>
                 ))}
@@ -159,7 +175,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                 <p className='text-xs '>
                   PROMEDIO DE CALIFICACIONES
                   {data && (
-                    <span className='font-bold '>{` ${Number(data?.average_rating).toFixed(1)}`}</span>
+                    <span className='font-bold '>{` ${Number(data?.average_rating.toFixed(2))}`}</span>
                   )}
                 </p>
               </div>
