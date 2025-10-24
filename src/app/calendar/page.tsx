@@ -20,7 +20,7 @@ export default function CalendarPage() {
         { title: 'Evento 3', date: new Date(today.getFullYear(), today.getMonth(), 12) },
     ];
 
-    // Effect para manejar los event listeners de teclado
+    //Effect para manejar los event listeners de teclado
     useEffect(() => {
         const handleKeyDown = (event: KeyboardEvent) => {
             // Verificar si se presionaron Ctrl + Alt + E
@@ -75,11 +75,11 @@ export default function CalendarPage() {
             </div>
 
             {/* Indicador del requesterId actual */}
-            <div className="px-4 py-2 text-sm text-gray-600 bg-gray-100">
+            {/* <div className="px-4 py-2 text-sm text-gray-600 bg-gray-100">
                 requesterId actual: <span className="font-mono">{requesterId}</span>
                 <br />
                 <span className="text-xs">Presiona Ctrl + Alt + E para cambiarlo</span>
-            </div>
+            </div> */}
 
             <div className="flex justify-center md:block hidden">
                 <MyCalendarPage

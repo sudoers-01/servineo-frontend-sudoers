@@ -173,6 +173,10 @@ export default function MyCalendarPage({
 
    function handleSelectSlot(slotInfo: SlotInfo) {
     // No permitir hacer clic en slots en vistas MONTH y WEEK
+    const viewedDate = new Date(currentDate);
+    const today = new Date();
+
+
     if (currentView === Views.MONTH || currentView === Views.WEEK) {
         return;
     }
@@ -180,14 +184,12 @@ export default function MyCalendarPage({
         // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
         // o está fuera de los próximos 6 meses
         if (currentView === Views.DAY) {
-            const viewedDate = new Date(currentDate);
+            
             viewedDate.setHours(0, 0, 0, 0);
-
-            const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             if (viewedDate < today || !isDateWithinNextSixMonths(viewedDate)) {
-                //return;
+                return;
             }
         }
 
