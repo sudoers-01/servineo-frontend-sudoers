@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from 'react';
 import { jsonFetcher, type FixerRating } from './utils';
+import { apiUrl } from '@/config/api';
 
 function useFixerRatings(fixerId: string) {
   const [ratings, setRatings] = useState<FixerRating[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'http://localhost:3000';
+  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'apiUrl';
   const url = fixerId ? `${base}/api/ratings.details/${fixerId}` : null;
 
   type RatingResponse = {
