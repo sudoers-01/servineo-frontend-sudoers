@@ -9,8 +9,7 @@ function useFixerRatings(fixerId: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
 
-  const base = process.env.NEXT_PUBLIC_API_BASE_URL ?? 'apiUrl';
-  const url = fixerId ? `${base}/api/ratings.details/${fixerId}` : null;
+  const url = fixerId ? apiUrl(`/api/ratings.details/${fixerId}`) : null;
 
   type RatingResponse = {
     _id: string;
