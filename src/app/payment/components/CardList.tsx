@@ -4,7 +4,7 @@ import AddCardModal from "./AddCardModal";
 import "../../../app/globals.css";
 import { motion, AnimatePresence } from "framer-motion";
 
-export default function CardList({ requesterId, fixerId, jobId, amount }) {
+export default function CardList({ requesterId, fixerId, jobId, amount, onPaymentSuccess }) {
   const [cards, setCards] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [processingCardId, setProcessingCardId] = useState(null);
@@ -29,7 +29,10 @@ export default function CardList({ requesterId, fixerId, jobId, amount }) {
   const handleCardAdded = async ({ payment }) => {
     await fetchCards();
     setShowModal(false);
-    showSuccessModal(`Pago realizado exitosamente: ${payment.amount} BOB`);
+    showSuccessModal(
+      `Pago realizado exitosamente: ${payment.amount} BOB`,
+      onPaymentSuccess 
+    );
   };
 
   const confirmPay = (card) => {
@@ -61,7 +64,10 @@ export default function CardList({ requesterId, fixerId, jobId, amount }) {
         return;
       }
 
-      showSuccessModal(`Pago realizado exitosamente: ${paymentData.payment.amount} BOB`);
+      showSuccessModal(
+        `Pago realizado exitosamente: ${paymentData.payment.amount} BOB`,
+        onPaymentSuccess
+      );
 
 
       await fetchCards();
@@ -73,10 +79,13 @@ export default function CardList({ requesterId, fixerId, jobId, amount }) {
     }
   };
 
-  const showSuccessModal = (msg) => {
-    setSuccessMessage(msg);
-    setTimeout(() => setSuccessMessage(""), 2500);
-  };
+const showSuccessModal = (msg, onComplete) => { 
+    setSuccessMessage(msg);
+    setTimeout(() => {
+      setSuccessMessage("");
+      onComplete?.();
+    }, 2500); // 2.5 segundos
+  };
 
   // 🎨 Paleta más realista y oscura
   const cardBackgrounds = {

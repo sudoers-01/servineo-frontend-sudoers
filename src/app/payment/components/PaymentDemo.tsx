@@ -9,11 +9,10 @@ import { createCashPayment } from '../service/payments';
 import dynamic from 'next/dynamic';
 import { useRouter } from "next/navigation";
 
-// Importar el componente de registro de cuenta
 const RegistroCuentaApp = dynamic(() => import('./agregarCuenta'), { ssr: false });
 
 const stripePromise = loadStripe(
-  'pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU',
+  'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI',
 );
 
 export default function PaymentDemo() {
@@ -33,18 +32,16 @@ export default function PaymentDemo() {
   const [modalMode, setModalMode] = useState<'register' | 'delete'>('register');
 
   // Datos para pago con tarjeta
-  const requesterId = '68ed47b64ed596d659c1ed90';
-  const fixerId = '68ef1be7be38c7f1c3c2c78c';
+  const requesterId = '68ed47b64ed596d659c1ed8f';
+  const fixerId = '68ef1c65be38c7f1c3c2c78e';
   const jobId = '68ea51ee0d80087528ad803f';
-  const amount = 78;
 
-useEffect(() => {
-    // Lee el estado del almacenamiento local, que es actualizado por agregarCuenta.tsx
+  useEffect(() => {
     const storedStatus = localStorage.getItem('fix_bank_status');
     if (storedStatus === 'CCB' || storedStatus === 'SCB') {
       setBankStatus(storedStatus);
     }
-}, []);
+  }, []);
 
   const agregarTrabajo = () => {
     const nuevoId = trabajos.length > 0 ? Math.max(...trabajos.map((t) => t.id)) + 1 : 1;
@@ -52,12 +49,21 @@ useEffect(() => {
     setTrabajos(prev => [...prev, { id: nuevoId, estado: 'Sin Pagar', monto: montoAleatorio }]);
   };
 
+  // 🟢 NUEVA FUNCIÓN: Actualizar estado del trabajo
+  const actualizarEstadoTrabajo = (trabajoId: number, nuevoEstado: string) => {
+    setTrabajos(prev => 
+      prev.map(trabajo => 
+        trabajo.id === trabajoId 
+          ? { ...trabajo, estado: nuevoEstado }
+          : trabajo
+      )
+    );
+  };
+
   const handlePagar = (trabajo: any) => {
     setSelectedTrabajo(trabajo);
     setShowPaymentSelector(true);
   };
-
-
 
   const handleSelectPaymentMethod = (method: string) => {
     if (method === 'cash') {
@@ -71,41 +77,45 @@ useEffect(() => {
     }
   };
 
-  const handleCloseCashPayment = () => {
+  // 🟢 MODIFICADO: Callback para cuando se complete el pago en efectivo
+  const handleCloseCashPayment = (paymentCompleted?: boolean) => {
+    if (paymentCompleted && selectedTrabajo) {
+      actualizarEstadoTrabajo(selectedTrabajo.id, 'Pagado');
+    }
     setShowCashPayment(false);
     setSelectedTrabajo(null);
     setCreatedPaymentId(null);
   };
 
-  const handleCloseCardPayment = () => {
+  // 🟢 MODIFICADO: Callback para cuando se complete el pago con tarjeta
+  const handleCloseCardPayment = (paymentCompleted?: boolean) => {
+    if (paymentCompleted && selectedTrabajo) {
+      actualizarEstadoTrabajo(selectedTrabajo.id, 'Pagado');
+    }
     setShowCardPayment(false);
     setSelectedTrabajo(null);
   };
 
   const handleAgregarCuentaBancaria = () => {
-      setModalMode('register'); // ⬅️ Establecer modo registro
-      setShowRegistroCuenta(true);
+    setModalMode('register');
+    setShowRegistroCuenta(true);
   };
 
   const handleEliminarCuentaBancaria = () => {
-      setModalMode('delete'); // ⬅️ Establecer modo eliminación
-      setShowRegistroCuenta(true);
+    setModalMode('delete');
+    setShowRegistroCuenta(true);
   };
 
   const handleCloseRegistroCuenta = () => {
     setShowRegistroCuenta(false);
-    
-    // 🟢 CORRECCIÓN: Volver a leer el estado después de cerrar el modal
     const updatedStatus = localStorage.getItem('fix_bank_status');
     if (updatedStatus === 'CCB' || updatedStatus === 'SCB') {
       setBankStatus(updatedStatus);
     }
   };
 
-  // Si se muestra el registro de cuenta, renderizar solo ese componente
   if (showRegistroCuenta) {
-    // 🟢 PASAR EL NUEVO MODO COMO PROP
-    return <RegistroCuentaApp onClose={handleCloseRegistroCuenta} mode={modalMode} />; // ⬅️ CAMBIO CLAVE
+    return <RegistroCuentaApp onClose={handleCloseRegistroCuenta} mode={modalMode} />;
   }
 
   return (
@@ -125,14 +135,14 @@ useEffect(() => {
           Agregar Trabajo
         </button>
         <button 
-        onClick={bankStatus === 'SCB' ? handleAgregarCuentaBancaria : handleEliminarCuentaBancaria} // ⬅️ CORRECCIÓN FINAL
-        className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
+          onClick={bankStatus === 'SCB' ? handleAgregarCuentaBancaria : handleEliminarCuentaBancaria}
+          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
         >
-        <span className="text-2xl">🏦</span>
-        {bankStatus === 'SCB' ? 'Agregar cuenta bancaria' : 'Eliminar cuenta bancaria'} 
+          <span className="text-2xl">🏦</span>
+          {bankStatus === 'SCB' ? 'Agregar cuenta bancaria' : 'Eliminar cuenta bancaria'} 
         </button>
         <div className="ml-auto bg-blue-600 text-white px-6 py-3 rounded-lg text-lg font-medium">
-        Estado: {bankStatus} 
+          Estado: {bankStatus} 
         </div>
       </div>
 
@@ -162,7 +172,14 @@ useEffect(() => {
                   {trabajo.id}
                 </td>
                 <td className="border-2 border-black px-4 py-4 text-xl text-gray-800">
-                  {trabajo.estado}
+                  {/* 🟢 Indicador visual según estado */}
+                  <span className={`font-semibold ${
+                    trabajo.estado === 'Pagado' ? 'text-green-600' : 
+                    trabajo.estado === 'Procesando' ? 'text-yellow-600' : 
+                    'text-gray-700'
+                  }`}>
+                    {trabajo.estado}
+                  </span>
                 </td>
                 <td className="border-2 border-black px-4 py-4 text-xl text-right text-gray-800">
                   {trabajo.monto}
@@ -170,9 +187,14 @@ useEffect(() => {
                 <td className="border-2 border-black px-4 py-4 text-center">
                   <button
                     onClick={() => handlePagar(trabajo)}
-                    className="bg-cyan-400 hover:bg-cyan-500 text-white px-8 py-2 rounded text-lg font-semibold"
+                    disabled={trabajo.estado === 'Pagado'}
+                    className={`px-8 py-2 rounded text-lg font-semibold ${
+                      trabajo.estado === 'Pagado'
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-cyan-400 hover:bg-cyan-500 text-white'
+                    }`}
                   >
-                    PAGAR
+                    {trabajo.estado === 'Pagado' ? 'PAGADO' : 'PAGAR'}
                   </button>
                 </td>
               </tr>
@@ -208,7 +230,7 @@ useEffect(() => {
         <div className="fixed inset-0 z-[1000] bg-black/60 flex items-center justify-center">
           <div className="bg-white rounded-2xl shadow-2xl p-6 w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto relative">
             <button
-              onClick={handleCloseCardPayment}
+              onClick={() => handleCloseCardPayment(false)}
               className="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-3xl font-bold"
             >
               ✕
@@ -224,7 +246,8 @@ useEffect(() => {
                   requesterId={requesterId}
                   fixerId={fixerId}
                   jobId={jobId}
-                  amount={selectedTrabajo.monto}
+                  amount={selectedTrabajo?.monto || 0}
+                  onPaymentSuccess={() => handleCloseCardPayment(true)} // 🟢 NUEVO
                 />
               </div>
             </Elements>
@@ -252,21 +275,18 @@ function PaymentMethodSelector({
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [okMsg, setOkMsg] = useState<string | null>(null);
-  const router = useRouter(); //add qr
+  const router = useRouter();
 
-  //add qr
   const goToQR = () => {
     const bookingId = String(trabajo?.id ?? "TEST-BOOKING-1");
-    const providerId = "prov_123";   // <- debe existir en tu Atlas (ya lo tienes)
+    const providerId = "prov_123";
     const amount = Number(trabajo?.monto ?? 0);
     const currency = "BOB";
 
-    // Cierra el selector y navega
     onClose();
     router.push(`/payment/qr?bookingId=${bookingId}&providerId=${providerId}&amount=${amount}&currency=${currency}`);
   };
 
-  // POST al pulsar "Pago Efectivo"
   const handlePayCash = async () => {
     setErr(null);
     setOkMsg(null);
@@ -319,8 +339,9 @@ function PaymentMethodSelector({
             </button>
 
             <button 
-                onClick={goToQR}
-                className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium">
+              onClick={goToQR}
+              className="w-full bg-blue-400 hover:bg-blue-500 text-white px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
+            >
               <span className="text-3xl">⊞</span>
               Pago QR
             </button>

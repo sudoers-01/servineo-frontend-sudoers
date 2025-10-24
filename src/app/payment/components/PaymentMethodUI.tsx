@@ -8,7 +8,7 @@ export default function PaymentMethodUI({
   onClose,
 }: {
   paymentId: string | null;
-  onClose: () => void;
+  onClose: (paymentCompleted?: boolean) => void;
 }) {
   const [showFixerView, setShowFixerView] = useState(false);
   const [loading, setLoading] = useState(true);
