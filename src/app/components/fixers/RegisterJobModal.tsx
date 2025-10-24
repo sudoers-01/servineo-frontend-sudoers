@@ -1,19 +1,57 @@
 import Modal from './../../profile/[id]/modal-window';
 import { useRegisterJob } from '../hooks/useRegisterJob';
+import { useState, useEffect } from 'react';
+
 type RegisterJobModalProps = {
   isOpen: boolean;
   onClose: () => void;
   id: string;
 };
 
-//TODO: Mejorar la ecuacion, o comprar la API de GoogleMaps xd
 const kilometers = 3;
 const distance = 3.53 * kilometers;
 const center = -0.0792 * kilometers ** 3 + 0.8576 * kilometers ** 2 - 4.0616 * kilometers + 7.2885;
 
 export default function RegisterJobModal({ isOpen, onClose, id }: RegisterJobModalProps) {
   const { data } = useRegisterJob(id);
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
+  useEffect(() => {
+    if (isOpen && 'geolocation' in navigator) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation({
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          });
+          setLocationError(null);
+        },
+        (error) => {
+          console.error('Error getting location:', error);
+          setLocationError(error.message);
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 10000,
+          maximumAge: 0,
+        },
+      );
+    } else if (isOpen) {
+      setLocationError('Geolocation is not supported by your browser');
+    }
+  }, [isOpen]);
+
+  const handleSave = async () => {
+    if (!userLocation) {
+      alert('Cannot save: User location not available');
+      return;
+    }
+    console.log('Saving coordinates:', userLocation);
+
+    setIsSaving(true);
+  };
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className='w-[40rem] h-[30rem] bg-white py-4 border-2 rounded-2xl border-gray-900 text-black'>
@@ -59,7 +97,7 @@ export default function RegisterJobModal({ isOpen, onClose, id }: RegisterJobMod
             </div>
           </div>
 
-          <div className='mb-6'>
+          <div className='mb-4'>
             <p className='text-sm font-semibold'>{`Estado: ${data?.status}`}</p>
           </div>
 
@@ -71,10 +109,11 @@ export default function RegisterJobModal({ isOpen, onClose, id }: RegisterJobMod
               Cerrar
             </button>
             <button
-              onClick={onClose}
-              className='px-5 py-2 text-sm font-medium bg-white border border-gray-900 rounded-md hover:bg-gray-50 transition-colors'
+              onClick={handleSave}
+              disabled={!userLocation || isSaving}
+              className='px-5 py-2 text-sm font-medium bg-black text-white border border-gray-900 rounded-md hover:bg-gray-800 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed'
             >
-              Guardar
+              {isSaving ? 'Saving...' : 'Guardar'}
             </button>
           </div>
         </div>
