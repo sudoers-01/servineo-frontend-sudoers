@@ -49,6 +49,7 @@ export type AppointmentPayload = {
   modality: "virtual" | "presencial";
   description?: string;
   meetingLink?: string;
+  place?: string;
   lat?: number; 
   lon?: number; 
   address?: string;
