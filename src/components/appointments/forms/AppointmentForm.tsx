@@ -220,7 +220,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       }
     } catch (err: any) {
       console.error(err);
-      setErrors({ general: "Error en la conexión" });
+      setErrors({ general: "Error: No se pudo crear la cita" });
     } finally {
       setLoading(false);
     }
