@@ -4,11 +4,17 @@ import { useEffect, useState } from "react";
 
 const API = process.env.NEXT_PUBLIC_BACKEND as string;
 
+import axios from 'axios';
+
 export interface Schedule {
     _id: string;
+    appointment_description: string;
     starting_time: string;
     finishing_time: string;
     schedule_state: string;
+    display_name_location: string;
+    lat: number;
+    lon: number;
 }
 
 // Define la interfaz para las props
@@ -18,25 +24,35 @@ interface MobileWeekViewProps {
     selectedDate: Date | null;
 }
 
-function groupSchedulesByWeek(fixerSchedules: Schedule[]): Schedule[][] {
-    const groupedSchedules: Schedule[][] = [[], [], [], [], [], [], []];
+// Función para obtener el día del mes (1-31) de una fecha
+function getDayOfMonth(date: Date): number {
+    return date.getDate();
+}
 
+// Función para obtener el mes de una fecha (0-11)
+function getMonthFromDate(date: Date): number {
+    return date.getMonth();
+}
+
+function groupSchedulesByMonthAndDay(fixerSchedules: Schedule[]): Map<string, Schedule[]> {
+    const schedulesMap = new Map<string, Schedule[]>();
+    
     fixerSchedules.forEach(schedule => {
         const scheduleDate = new Date(schedule.starting_time);
-        const dayOfWeek = scheduleDate.getDay();
-
-        let targetIndex: number;
-
-        if (dayOfWeek === 0) {
-            targetIndex = 6;
-        } else {
-            targetIndex = dayOfWeek - 1;
+        const month = scheduleDate.getMonth();
+        const day = scheduleDate.getDate();
+        
+        // Crear una clave única para el día (mes-día)
+        const key = `${month}-${day}`;
+        
+        if (!schedulesMap.has(key)) {
+            schedulesMap.set(key, []);
         }
-
-        groupedSchedules[targetIndex].push(schedule);
+        
+        schedulesMap.get(key)!.push(schedule);
     });
-
-    return groupedSchedules;
+    
+    return schedulesMap;
 }
 
 // Función para obtener las próximas 4 semanas
@@ -90,60 +106,73 @@ function getDayName(date: Date): string {
     return date.toLocaleDateString('es-ES', { weekday: 'long' });
 }
 
-function combineAllSchedules(
-    currentRequesterSchedules: Array<{ schedules: Schedule[] }>,
-    otherRequesterSchedules: Array<{ schedules: Schedule[] }>
+function combineSchedules(
+  currentRequesterSchedules: Schedule[],
+  otherRequesterSchedules: Schedule[]
 ): Schedule[] {
-    // Aplanar y combinar ambos arrays
-    const combined = [
-        ...currentRequesterSchedules.flatMap(item => item.schedules),
-        ...otherRequesterSchedules.flatMap(item => item.schedules)
-    ];
+  // Combinar ambos arrays
+  const combined = [
+    ...currentRequesterSchedules,
+    ...otherRequesterSchedules
+  ];
 
-    // Ordenar por starting_time ascendente (con Z)
-    combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
+  for(const schedule of currentRequesterSchedules){
+    if(schedule.schedule_state != 'cancelled'){
+      schedule.schedule_state = 'booked';
+    }
+  }
 
-    // Convertir a formato sin Z después del sort
-    const schedulesWithoutZ = combined.map(schedule => ({
-        ...schedule,
-        starting_time: schedule.starting_time.replace('Z', ''),
-        finishing_time: schedule.finishing_time.replace('Z', '')
-    }));
+  for(const schedule of otherRequesterSchedules){
+    schedule.schedule_state = 'occupied';
+  }
 
-    return schedulesWithoutZ;
+  // Ordenar por starting_time ascendente (con Z)
+  combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
+
+  // Convertir a formato sin Z después del sort
+  const schedulesWithoutZ = combined.map(schedule => ({
+    ...schedule,
+    starting_time: schedule.starting_time ? schedule.starting_time.replace('Z', '') : '',
+    finishing_time: schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : ''
+  }));
+
+  return schedulesWithoutZ;
 }
 
 export default function MobileWeekView({ fixerId, requesterId, selectedDate }: MobileWeekViewProps) {
     const month = selectedDate ? selectedDate.getMonth() : new Date().getMonth();
-    const [schedulesByDay, setSchedulesByDay] = useState<Schedule[][]>([[], [], [], [], [], [], []]);
+    const [schedulesMap, setSchedulesMap] = useState<Map<string, Schedule[]>>(new Map());
     const [loading, setLoading] = useState(true);
 
     async function fetchWeekSchedule() {
         try {
             setLoading(true);
 
-            //const response = await fetch(`${API}/bookings/fixer/${fixerId}/schedules/${month}`);
-            const currentRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month + 1}`);
-            const otherRequesterResponse = await fetch(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month?fixer_id=${fixerId}&requester_id=${requesterId}&month=${month + 1}`);
+            const [currentRequesterResponse, otherRequesterResponse] = await Promise.all([
+                axios.get(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month`, {
+                    params: {
+                    fixer_id: fixerId,
+                    requester_id: requesterId,
+                    month: month + 1
+                    }
+                }),
+                axios.get(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month`, {
+                    params: {
+                    fixer_id: fixerId,
+                    requester_id: requesterId,
+                    month: month + 1
+                    }
+                })
+            ]);
 
-            //console.log(currentRequesterResponse);
-            //console.log(otherRequesterResponse);
+            const currentRequesterFixerSchedules = currentRequesterResponse.data;
+            const otherRequesterFixerSchedules = otherRequesterResponse.data;
 
-            if (!currentRequesterResponse.ok) {
-                throw new Error(`Error: ${currentRequesterResponse.status}`);
-            }
-            if (!otherRequesterResponse.ok) {
-                throw new Error(`Error: ${otherRequesterResponse.status}`);
-            }
+            const fixerSchedules: Schedule[] = combineSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
+            const schedulesByMonthAndDay = groupSchedulesByMonthAndDay(fixerSchedules);
 
-            const currentRequesterFixerSchedules = await currentRequesterResponse.json();
-            const otherRequesterFixerSchedules = await otherRequesterResponse.json();
-
-            const fixerSchedules: Schedule[] = combineAllSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
-            const fixerSchedulesByWeek = groupSchedulesByWeek(fixerSchedules);
-
-            console.log("Schedules grouped by week:", fixerSchedulesByWeek);
-            setSchedulesByDay(fixerSchedulesByWeek);
+            console.log("Schedules grouped by month and day:", schedulesByMonthAndDay);
+            setSchedulesMap(schedulesByMonthAndDay);
 
         } catch (err) {
             console.error("Error al generar los slots para el fixer:", err);
@@ -152,11 +181,15 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate }: M
         }
     }
 
-    // Determinar el estado del día basado en la cantidad de horarios
-    function getDayStatus(dayIndex: number): { text: string; color: string; available: boolean } {
-        const daySchedules = schedulesByDay[dayIndex] || [];
+    // Determinar el estado del día basado en la cantidad de horarios para esa fecha específica
+    function getDayStatus(day: Date): { text: string; color: string; available: boolean } {
+        const month = getMonthFromDate(day);
+        const dayOfMonth = getDayOfMonth(day);
+        const key = `${month}-${dayOfMonth}`;
+        
+        const daySchedules = schedulesMap.get(key) || [];
 
-        if (daySchedules.length >= 5) {
+        if (daySchedules.length >= 1) {
             return { text: "Ocupado", color: "text-slate-400", available: false };
         } else {
             return { text: "Horarios Disponibles", color: "text-emerald-600", available: true };
@@ -204,7 +237,7 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate }: M
                         {/* Días de la semana */}
                         <div className="space-y-2">
                             {week.days.map((day, dayIndex) => {
-                                const dayStatus = getDayStatus(dayIndex);
+                                const dayStatus = getDayStatus(day);
                                 return (
                                     <div
                                         key={dayIndex}

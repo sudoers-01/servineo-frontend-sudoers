@@ -56,7 +56,7 @@ export default function Message({
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
             <div className={`bg-white rounded-lg shadow-xl max-w-sm w-full p-6 border-l-4 ${styles.border}`}>
                 <div className="flex items-center mb-4">
                     <div className={`rounded-full p-2 mr-3 ${styles.bgIcon}`}>

@@ -15,42 +15,52 @@ interface AppointmentFormProps {
   fixerId: string;
   requesterId: string;
 }
-
-// Zod esquema de validación actualizado
-const appointmentSchema = z.object({
+// Zod esquema de validacion
+const baseSchema = z.object({
   client: z.string()
-    .max(50, "El nombre no puede tener más de 50 caracteres")
-    .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre válido"),
+    .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre de cliente válido")
+    .nonempty("Ingrese un nombre de cliente")
+    .max(50, "El nombre no puede tener más de 50 caracteres"),
+
   contact: z.string()
-    .regex(/^[67]\d{7}$/, "Ingrese un teléfono válido"),
+    .regex(/^\+591 [67]\d{7}$/, "Ingrese un número de teléfono válido")
+    .nonempty("Ingrese un número de teléfono"),
+
   description: z.string()
+    .nonempty("Ingrese una descripción de trabajo")
     .max(300, "La descripción no puede tener más de 300 caracteres"),
-  modality: z.enum(["virtual", "presential"]),
-  meetingLink: z.string()
-    .optional()
-    .refine(
-      val => !val || /^(https?:\/\/)?(meet\.google\.com|zoom\.us)\/[^\s]+$/.test(val),
-      { message: "Ingrese un enlace válido de Meet o Zoom" }
-    ),
-  location: z.object({
-    lat: z.number(),
-    lon: z.number(),
-    address: z.string()
-  }).optional()
-}).refine(data => {
-  if (data.modality === "virtual") return !!data.meetingLink;
-  if (data.modality === "presential") return !!data.location;
-  return true;
-}, {
-  message: "Campo obligatorio según modalidad",
-  path: ["modality"]
 });
+
+// virtualSchema
+const virtualSchema = baseSchema.extend({
+  modality: z.literal("virtual"),
+  meetingLink: z.string()
+    .regex(/^(https?:\/\/)?(meet\.google\.com|zoom\.us)\/[^\s]+$/, "Ingrese un enlace válido de Meet o Zoom")
+    .nonempty("Ingrese un enlace de Meet o Zoom"),
+  location: z.undefined().optional(),
+});
+
+// presentialSchema
+const presentialSchema = baseSchema.extend({
+  modality: z.literal("presential"),
+  meetingLink: z.undefined().optional(),
+  location: z
+    .object({
+      lat: z.number(),
+      lon: z.number(),
+      address: z.string().nonempty("Seleccione una ubicación"),
+    })
+    .nullable()
+    .refine(val => val !== null, { message: "Seleccione una ubicación" }), 
+});
+
+const appointmentSchema = z.discriminatedUnion("modality", [virtualSchema, presentialSchema]);
 
 const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ onNextStep, fixerId, requesterId }, ref) => {
   const [open, setOpen] = useState(false);
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
-  const [contact, setContact] = useState<string>("");
+  const [contact, setContact] = useState<string>("+591 ");
   const [modality, setModality] = useState<"virtual" | "presential">("virtual");
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>("");
@@ -70,8 +80,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     locationOrLink: string;
     description?: string;
   } | null>(null);
-
-  const [canSubmit, setCanSubmit] = useState(false);
 
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
@@ -93,23 +101,11 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [open]);
-
-  // Habilitar botón solo si todos los campos visibles están llenos
-  useEffect(() => {
-    const allRequiredFilled =
-      client.trim() !== "" &&
-      contact.trim() !== "" &&
-      description.trim() !== "" &&
-      ((modality === "virtual" && meetingLink.trim() !== "") ||
-        (modality === "presential" && location !== null));
-
-    setCanSubmit(allRequiredFilled);
-  }, [client, contact, description, modality, meetingLink, location]);
-  
+ 
   function handleClose() {
     setOpen(false);
     setClient("");
-    setContact("");
+    setContact("+591 ");
     setDescription("");
     setModality("virtual");
     setPlace("");
@@ -117,6 +113,30 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     setLocation(null);
     setErrors({});
   }
+
+  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Si el usuario intenta borrar el "+591 ", no permitirlo
+    if (value.length < 5) {
+      setContact("+591 ");
+      return;
+    }
+    
+    // Asegurarse de que siempre empiece con "+591 "
+    if (!value.startsWith("+591 ")) {
+      setContact("+591 " + value.replace(/[^\d]/g, '').slice(0, 8));
+      return;
+    }
+    
+    // Permitir solo números después del "+591 "
+    const numbersOnly = value.slice(5).replace(/[^\d]/g, '');
+    
+    // Limitar a 8 dígitos después del "+591 "
+    if (numbersOnly.length <= 8) {
+      setContact("+591 " + numbersOnly);
+    }
+  };
 
   function parseDatetime(datetimeISO: string) {
     // Si el string ISO no termina en 'Z', agregarlo para forzar UTC
@@ -166,11 +186,16 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     if (!validation.success) {
       const fieldErrors: Record<string, string> = {};
       validation.error.issues.forEach(err => {
-        const field = err.path[0];
-        if (field) fieldErrors[field as string] = err.message;
+        if (Array.isArray(err.path) && err.path.length) {
+          // Si el path es location.address, lo mostramos en errors.location
+          const key = err.path[0];
+          fieldErrors[key as string] = err.message;
+        } else {
+          fieldErrors['general'] = err.message;
+        }
       });
       setErrors(fieldErrors);
-      return; // No enviar si hay errores
+      return; // no enviar si hay errores
     }
 
     const { selected_date, starting_time, finishing_time} = parseDatetime(datetime);
@@ -187,7 +212,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       current_requester_name: client,
       current_requester_phone: contact,
       link_id: modality === "virtual" ? meetingLink : "",
-      display_name: modality === "presential" ? place : "",
+      display_name_location: modality === "presential" ? place : "",
       lat: modality === "presential" ? location?.lat : null,
       lon: modality === "presential" ? location?.lon : null,
     };
@@ -219,7 +244,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       }
     } catch (err: any) {
       console.error(err);
-      setErrors({ general: "Error en la conexión" });
+      setErrors({ general: "Error: No se pudo crear la cita" });
     } finally {
       setLoading(false);
     }
@@ -294,8 +319,8 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   <span className="text-sm font-medium">Contacto *</span>
                   <input
                     value={contact}
-                    onChange={(e) => setContact(e.target.value)}
-                    placeholder="77777777"
+                    onChange={handleContactChange}
+                    placeholder="+591 7XXXXXXX"
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white"
                   />
                   {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
@@ -354,7 +379,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                 </button>
                 <button
                   type="submit"
-                  disabled={loading || !canSubmit}
+                  disabled={loading}
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {loading ? "Guardando..." : "Añadir"}

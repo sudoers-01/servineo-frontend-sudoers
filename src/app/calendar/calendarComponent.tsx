@@ -173,6 +173,10 @@ export default function MyCalendarPage({
 
    function handleSelectSlot(slotInfo: SlotInfo) {
     // No permitir hacer clic en slots en vistas MONTH y WEEK
+    const viewedDate = new Date(currentDate);
+    const today = new Date();
+
+
     if (currentView === Views.MONTH || currentView === Views.WEEK) {
         return;
     }
@@ -180,14 +184,12 @@ export default function MyCalendarPage({
         // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
         // o está fuera de los próximos 6 meses
         if (currentView === Views.DAY) {
-            const viewedDate = new Date(currentDate);
+            
             viewedDate.setHours(0, 0, 0, 0);
-
-            const today = new Date();
             today.setHours(0, 0, 0, 0);
 
             if (viewedDate < today || !isDateWithinNextSixMonths(viewedDate)) {
-                //return;
+                return;
             }
         }
 
@@ -278,11 +280,10 @@ export default function MyCalendarPage({
                 client: data.data.current_requester_name || "",
                 contact: data.data.current_requester_phone || "",
                 modality: data.data.appointment_type || "virtual",
-                place: data.data.display_name || "",
                 meetingLink: data.data.link_id || "",
-                lat: Number(data.data.lat),
-                lon: Number(data.data.lon),
-                address: data.data.display_name || "No expecificada"
+                lat: Number(data.data.latitude),
+                lon: Number(data.data.longitude),
+                address: data.data.display_name_location || "No expecificada"
             };
             //console.log('Datos procesados',existingAppointment);
 
@@ -476,6 +477,23 @@ export default function MyCalendarPage({
             toggleDayState(false);
         }
     };
+    
+    //esta es la configuracion del idioma porsia, del big calendar
+    const messages = {
+        allDay: 'Todo el día',
+        previous: 'Anterior',
+        next: 'Siguiente',
+        today: 'Hoy',
+        month: 'Mes',
+        week: 'Semana',
+        day: 'Día',
+        agenda: 'Agenda',
+        date: 'Fecha',
+        time: 'Hora',
+        event: 'Evento',
+        noEventsInRange: 'No hay eventos en este rango',
+        showMore: (total: number) => `+ Ver más (${total})`,
+    };
 
     return (
         <div className="max-w-6xl mx-auto p-4">
@@ -516,6 +534,7 @@ export default function MyCalendarPage({
                     popup
                     onView={handleViewChange}
                     onNavigate={handleNavigate}
+                    messages={messages}
                 />
             </div>
             <AppointmentForm ref={formRef} fixerId={fixerId} requesterId={requesterId}/>
