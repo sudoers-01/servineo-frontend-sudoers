@@ -6,22 +6,25 @@ export interface User {
   name?: string;
   picture?: string;
   telefono?: string;
-  direction?: string;
-  coordinates?: [number, number]; 
+  ubicacion?: Ubicacion;
 }
 
 export interface UpdateRequesterData {
   telefono: string;
-  direction: string;
-  coordinates: [number, number];
+  ubicacion: Ubicacion;
 }
-
+export interface Ubicacion {
+  lat: number;
+  lng: number;
+  direccion: string;
+  departamento: string;
+  pais: string;
+}
 
 export interface RequesterData {
   requesterId: string;
   telefono: string;
-  direction: string;
-  coordinates: [number, number];
+  ubicacion: Ubicacion;
 }
 
 export async function obtenerDatosUsuarioLogueado(): Promise<RequesterData> {

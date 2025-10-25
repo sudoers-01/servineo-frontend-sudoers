@@ -130,16 +130,31 @@ export default function RequesterEditForm() {
   }
 
   function LocationMarker() {
-    if (typeof window === 'undefined') return null;
-    const { useMapEvents } = require('react-leaflet');
-    useMapEvents({
-      click(e: any) {
-        setLatLng(e.latlng);
-        fetchAddress(e.latlng.lat, e.latlng.lng);
-      },
-    });
-    return latLng ? <Marker position={[latLng.lat, latLng.lng]} /> : null;
-  }
+  if (typeof window === 'undefined') return null;
+
+  const { useMap, useMapEvents } = require('react-leaflet');
+  const map = useMap();
+
+  // 🔹 Mueve el marcador y centra el mapa al hacer clic
+  useMapEvents({
+    click(e: any) {
+      setLatLng(e.latlng);
+      fetchAddress(e.latlng.lat, e.latlng.lng);
+      // centra suavemente el mapa donde se colocó el marcador
+      map.flyTo(e.latlng, map.getZoom(), { animate: true });
+    },
+  });
+
+  // 🔹 Centra automáticamente cuando cambia la ubicación (por GPS o base de datos)
+  useEffect(() => {
+    if (latLng) {
+      map.flyTo([latLng.lat, latLng.lng], map.getZoom(), { animate: true });
+    }
+  }, [latLng]);
+
+  return latLng ? <Marker position={[latLng.lat, latLng.lng]} /> : null;
+}
+
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
