@@ -24,10 +24,6 @@ export default function TestPage() {
     const fixerId = 'user_fixer_1234';
     return (
         <div className="bg-white">
-            <DateCell
-                value={fechaActual}
-                fixer_id={fixerId}
-            />
 
         </div>
         /*<div className="flex flex-col items-center justify-center h-screen text-lg text-gray-800">
