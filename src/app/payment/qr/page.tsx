@@ -1,257 +1,246 @@
 "use client";
 
-import { useEffect, useState } from "react";    
-import Link from "next/link";    //add
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import BackButton from "../components/BackButton";
-import { createQRIntent } from "../../lib/payments"; // <- SDK del front
 
-
-//tipos simples
 type PaymentStatus = "pending" | "under_review" | "confirmed" | "rejected" | "expired";
-type Intent = {
-  _id: string;
-  bookingId: string;
-  providerId: string;
-  amountExpected: number;
-  currency: string;
-  paymentReference: string;
-  status: PaymentStatus;
-  deadlineAt?: string;
-  createdAt?: string;
-};
-type PaymentMethod = { qrImageUrl?: string; accountDisplay?: string };
 
-// Lee la URL del backend de tu .env.local
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+export default function QRPaymentPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
 
-export default function PaymentsPage() {
-  //estado que llamamos desde el backend
-  const [intent, setIntent] = useState<Intent | null>(null);
-  const [method, setMethod] = useState<PaymentMethod | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Leer parámetros de la URL
+  const trabajoId = searchParams.get('trabajoId');
+  const bookingId = searchParams.get('bookingId') || 'N/A';
+  const providerId = searchParams.get('providerId') || 'DEMO-PROVIDER';
+  const amount = Number(searchParams.get('amount')) || 0;
+  const currency = searchParams.get('currency') || 'BOB';
 
-  //para la demos se esta usando valores fijos; luego se pasarna por porps/ruta
-  const bookingId = "TEST-BOOKING-1";
-  const providerId = "prov_123";
-  const amount = 150; //monto en BOB
-  const currency = "BOB";
-  
+  const [status, setStatus] = useState<PaymentStatus>('pending');
+  const [loading, setLoading] = useState(false);
+  const [paymentReference, setPaymentReference] = useState('');
 
+  // Generar referencia de pago simulada
   useEffect(() => {
-    (async () => {
-      try {
-        setLoading(true);
-        setError(null);
+    const ref = `REF-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+    setPaymentReference(ref);
+    console.log('📋 Pago QR generado:', { trabajoId, bookingId, amount, ref });
+  }, [trabajoId, bookingId, amount]);
 
-        // [LOG B] payload que envías al backend
-        const payload = { bookingId, providerId, amount, currency };
-        console.log("→ POST /api/payments/intent payload =", payload);
-
-        const res = await fetch(`${API_BASE}/api/payments/intent`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ bookingId, providerId, amount, currency }),
-        });
-
-        // [LOG C] status de la respuesta
-        console.log("← status", res.status);
-
-        const data = await res.json();
-
-        // [LOG D] cuerpo de la respuesta
-        console.log("← body", data);
-
-        if (!res.ok) throw new Error(data?.message || data?.error || "Error al crear intent");
-        setIntent(data.intent);
-        setMethod(data.paymentMethod || null);
-        if (data.error === "NO_QR") setError("El proveedor no tiene QR configurado.");
-      } catch (e: any) {
-        setError(e.message || "Error de red");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, []);
-
-  const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
-
-  // [LOG A] — esto sale en la consola del navegador (DevTools > Console)
-  console.log("API_BASE =", API_BASE);
-
-  // Helper para formatear moneda (lo usamos en subtotal/comisión/total)
+  // Helper para formatear moneda
   const money = (n: number) =>
     n.toLocaleString("es-BO", { style: "currency", currency });
 
-    //agregado
-    const [imgSrc, setImgSrc] = useState<string | null>(null);
+  // Calcular subtotal y comisión (3%)
+  const commission = Math.round(amount * 0.03);
+  const subtotal = amount - commission;
 
-const toDriveThumb = (url: string) => {
-  const m = url.match(/id=([^&]+)/);
-  return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w512` : url;
-};
+  // Simulador de pago completado
+  const handleSimulatePayment = () => {
+    setLoading(true);
+    setTimeout(() => {
+      setStatus('confirmed');
+      setLoading(false);
 
-const fallbackQR = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent("Servineo QR")}`;
+      // Guardar en localStorage para actualizar la demo
+      if (trabajoId) {
+        localStorage.setItem('last-paid-trabajo', trabajoId);
 
-useEffect(() => {
-  if (method?.qrImageUrl) {
-    setImgSrc(method.qrImageUrl); // primero intentamos con uc?export=view
-  }
-}, [method]);
+        // Disparar evento personalizado
+        window.dispatchEvent(
+          new CustomEvent('qr-payment-complete', {
+            detail: { trabajoId: Number(trabajoId) }
+          })
+        );
+      }
 
-//fin agregado
-  
-   return (
-    <div className="min-h-screen bg-white">
-      {/* Barra negra superior */}
-      <header className="bg-[#2B6AE0]">
+      // Redirigir después de 2 segundos
+      setTimeout(() => {
+        router.push('/'); // Redirige a la página principal (demo)
+      }, 2000);
+    }, 2000);
+  };
+
+  // QR fallback
+  const fallbackQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(
+    `REF:${paymentReference}|MONTO:${amount}${currency}|TRABAJO:${trabajoId}`
+  )}`;
+
+  return (
+    // Fondo claro (principal): #F9FAFB
+    <div className="min-h-screen bg-[#F9FAFB]">
+      {/* Header */}
+      {/* Primary (Main Blue): #2B31E0, Texto: #F9FAFB */}
+      <header className="bg-[#2B31E0]">
         <div className="max-w-5xl px-6 py-6">
-          <h1 className="text-5xl font-semibold text-white">Pagos con QR</h1>
+          {/* Roboto Bold */}
+          <h1 className="text-5xl font-bold text-[#F9FAFB]">Pagos con QR</h1>
         </div>
       </header>
 
-      <BackButton
-        fallback="/payments"
-        className="fixed bottom-4 right-4 z-50"
-      />
+      {/* BackButton usa sus propios estilos, asumimos que se alinea */}
+      <BackButton fallback="/" className="fixed bottom-4 right-4 z-50" />
 
       <main className="max-w-5xl mx-auto p-6">
-        {/* Mensajes básicos */}
-        {loading && <p>Cargando…</p>}
-        {error && <p className="text-red-600 mb-3">{error}</p>}
+        {/* Alert de estado */}
+        {status === 'confirmed' && (
+          // Éxito: #16A34A
+          <div className="mb-6 p-4 bg-green-50 border-l-4 border-[#16A34A] rounded">
+            <p className="text-green-800 font-semibold">
+              ✅ Pago confirmado exitosamente. Redirigiendo...
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          <section className="md:-ml-35">
-            <h2 className="text-4xl font-semibold mb-3 text-black">Información de pago</h2>
+          {/* Información de pago */}
+          <section>
+            {/* Texto principal (oscuro): #111827, Roboto Bold */}
+            <h2 className="text-4xl font-bold mb-3 text-[#111827]">
+              Información de pago
+            </h2>
 
-            {/* Separador corto, alineado a la izquierda */}
             <div className="my-2">
-              <hr className="w-150 border-t-2 border-[#2B6AE0]" />
+              {/* Primary Medium: #2B6AE0 para línea destacada */}
+              <hr className="w-full border-t-2 border-[#2B6AE0]" />
             </div>
 
-            {/* LISTA CON POSICIÓN LIBRE PARA B (valores)
-              - Cada fila: contenedor relative
-              - A (etiqueta) se muestra normal (inline-block)
-              - B (valor) es absolute y lo mueves con left/top o translate
-            */}
-            <dl className="space-y-6 text-black">
-              {/* --- Fila: Destinatario --- */}
-              <div className="relative min-h-8">
-                {/* A: etiqueta con ancho fijo para consistencia visual */}
-                <dt className="text-2xl font-medium inline-block w-[160px] text-left">
-                  Destinatario:
-                </dt>
-                <dd className="text-2xl leading-tight absolute top-0.5 left-[190px]">
-                  {method?.accountDisplay || "—"}
+            {/* Texto principal (oscuro): #111827 */}
+            <dl className="space-y-6 text-[#111827] mt-6">
+              {/* Trabajo ID */}
+              <div className="flex justify-between items-center">
+                {/* Roboto Medium */}
+                <dt className="text-2xl font-medium">ID Trabajo:</dt>
+                {/* Highlight (Azul suave): #759AE0 como color de realce */}
+                <dd className="text-2xl font-semibold text-[#759AE0]">
+                  #{trabajoId || 'N/A'}
                 </dd>
               </div>
 
-              {/* --- Fila: Número de Transacción --- */}
-              <div className="relative min-h-8">
-                <dt className="text-2xl font-medium inline-block w-[240px] text-left whitespace-nowrap">
+              {/* Destinatario */}
+              <div className="flex justify-between items-center">
+                <dt className="text-2xl font-medium">Destinatario:</dt>
+                <dd className="text-2xl">Servineo Demo</dd>
+              </div>
+
+              {/* Número de Transacción */}
+              <div className="flex justify-between items-start">
+                <dt className="text-2xl font-medium whitespace-nowrap mr-4">
                   N° de Transacción:
                 </dt>
-                <dd className="text-2xl leading-tight absolute top-0 left-[240px]">
-                  {intent?.paymentReference || "—"}
+                {/* Usar texto principal oscuro para buena legibilidad */}
+                <dd className="text-xl text-right break-all font-mono text-[#111827]">
+                  {paymentReference}
                 </dd>
               </div>
 
-              {/* --- Fila: Sub Total --- */}
-              <div className="relative min-h-8">
-                <dt className="text-2xl font-medium inline-block w-[160px] text-left">
-                  Sub Total:
-                </dt>
-                {/* Ejemplo moviendo un poco más pegado a la etiqueta */}
-                <dd className="text-2xl leading-tight absolute top-0 left-[190px]">
-                  {intent ? money(Math.round(intent.amountExpected * 0.97)) : "—"}
+              <div className="my-4">
+                {/* Borde: #D1D5DB */}
+                <hr className="w-full border-t border-[#D1D5DB]" />
+              </div>
+
+              {/* Sub Total */}
+              <div className="flex justify-between items-center">
+                <dt className="text-2xl font-medium">Sub Total:</dt>
+                <dd className="text-2xl">{money(subtotal)}</dd>
+              </div>
+
+              {/* Comisión */}
+              <div className="flex justify-between items-center">
+                <dt className="text-2xl font-medium">Comisión (3%):</dt>
+                <dd className="text-2xl">{money(commission)}</dd>
+              </div>
+
+              <div className="my-4">
+                {/* Primary Medium: #2B6AE0 */}
+                <hr className="w-full border-t-2 border-[#2B6AE0]" />
+              </div>
+
+              {/* Total */}
+              <div className="flex justify-between items-center">
+                <dt className="text-2xl font-semibold">Total:</dt>
+                {/* Primary Medium: #2B6AE0 para destacar el total */}
+                <dd className="text-3xl font-bold text-[#2B6AE0]">
+                  {money(amount)}
                 </dd>
               </div>
 
-              {/* --- Fila: Comisión --- */}
-              <div className="relative min-h-8">
-                <dt className="text-2xl font-medium inline-block w-[160px] text-left">
-                  Comisión:
-                </dt>
-                {/* Ejemplo bajando un poquito el valor (top-1) */}
-                <dd className="text-2xl leading-tight absolute top-0 left-[190px]">
-                  {intent ? money(Math.round(intent.amountExpected * 0.03)) : "—"}
+              <div className="my-6">
+                {/* Primary Medium: #2B6AE0 */}
+                <hr className="w-full border-t-2 border-[#2B6AE0]" />
+              </div>
+
+              {/* Estado */}
+              <div className="flex justify-between items-center">
+                <dt className="text-2xl font-medium">Estado:</dt>
+                <dd className={`text-2xl font-semibold uppercase ${
+                  // Colores de estado del estándar
+                  status === 'confirmed' ? 'text-[#16A34A]' : // Éxito
+                  status === 'pending' ? 'text-[#FFC857]' : // Pendiente
+                  status === 'rejected' ? 'text-[#EF4444]' : // Error
+                  'text-[#64748B]' // Reservado/Ocupado
+                  }`}>
+                  {status === 'confirmed' ? '✓ CONFIRMADO' :
+                    status === 'pending' ? '⏳ PENDIENTE' :
+                    status}
                 </dd>
               </div>
 
-              {/* --- Fila: Total --- */}
-              <div className="relative min-h-8">
-                <dt className="text-2xl font-semibold inline-block w-[160px] text-left">
-                  Total:
-                </dt>
-                {/* Ejemplo moviendo más a la derecha */}
-                <dd className="text-2xl font-semibold leading-tight absolute top-0 left-[190px]">
-                  {intent ? money(intent.amountExpected) : "—"}
-                </dd>
-              </div>
-
-              {/* Separador corto */}
-              <div className="my-2">
-                <hr className="w-150 border-t-2 border-[#2B6AE0]" />
-              </div>
-
-              {/* Separador arriba */}
-              <div className="my-9">
-                <hr className="w-150 border-t-2 border-[#2B6AE0]" />
-              </div>
-
-              {/* --- Fila: Estado --- */}
-              <div className="relative min-h-8 mt-6">
-                <dt className="text-2xl font-medium inline-block w-[160px] text-left">
-                  Estado:
-                </dt>
-                {/* Ejemplo usando translate-x en lugar de left */}
-                <dd className="text-2xl leading-tight absolute top-0 left-0 translate-x-[190px]">
-                  {intent?.status ? intent.status.toUpperCase() : "—"}
-                </dd>
-              </div>
-
-              {/* Separador abajo */}
-              <div className="my-7">
-                <hr className="w-150 border-t-2 border-[#2B6AE0]" />
+              <div className="my-4">
+                {/* Primary Medium: #2B6AE0 */}
+                <hr className="w-full border-t-2 border-[#2B6AE0]" />
               </div>
             </dl>
+
+            {/* Botón simulador (solo para demo) */}
+            <div className="mt-8">
+              <button
+                onClick={handleSimulatePayment}
+                disabled={loading || status === 'confirmed'}
+                className={`w-full px-6 py-4 rounded-lg text-xl font-semibold transition-colors ${
+                  loading || status === 'confirmed'
+                    // Neutros deshabilitado: #E5E7EB, #64748B
+                    ? 'bg-[#E5E7EB] text-[#64748B] cursor-not-allowed'
+                    // Botón primario: Main Blue #2B31E0, Hover: #2B6AE0, Texto: #F9FAFB
+                    : 'bg-[#2B31E0] hover:bg-[#2B6AE0] text-[#F9FAFB]'
+                  }`}
+              >
+                {loading ? '⏳ Procesando...' :
+                  status === 'confirmed' ? '✓ Pago Confirmado' :
+                  '💰 Simular Pago Completado'}
+              </button>
+              {/* Neutro: #64748B */}
+              <p className="text-sm text-[#64748B] text-center mt-2">
+                (Botón de prueba - En producción escanea el QR)
+              </p>
+            </div>
           </section>
 
-          {/* COLUMNA DERECHA: Cuadro gris con título dentro */}
-          <aside className="bg-[#759AE0] rounded-xl p-5 md:justify-self-end w-full md:w-[420px] md:ml-16 md:self-center">
-            <h3 className="text-2xl font-semibold text-gray-900 mb-4 text-center">
+          {/* QR Code */}
+          {/* Highlight (Azul suave): #759AE0 para el fondo */}
+          <aside className="bg-[#759AE0] rounded-xl p-5 md:justify-self-end w-full md:w-[420px] md:ml-16 md:self-start">
+            {/* Texto principal oscuro: #111827 */}
+            <h3 className="text-2xl font-semibold text-[#111827] mb-4 text-center">
               Escanea el código QR
             </h3>
 
-            {/* Área interna (placeholder) para el QR o contenido extra */}
-            <div className="h-64 w-full rounded-lg bg-gray-200 flex items-center justify-center">
-              {imgSrc ? (
-                      <img
-                        src={imgSrc}
-                        alt="QR de pago"
-                        className="max-h-60 object-contain"
-                        referrerPolicy="no-referrer"
-                        onError={() => {
-                          // 1º intento falló: probamos con thumbnail de Drive
-                          if (imgSrc.includes("drive.google.com") && !imgSrc.includes("/thumbnail")) {
-                            setImgSrc(toDriveThumb(imgSrc));
-                          } else {
-                            // 2º intento falló: usamos un QR fallback temporal
-                            setImgSrc(fallbackQR);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <img
-                        src={fallbackQR}
-                        alt="QR de pago (fallback)"
-                        className="max-h-60 object-contain"
-                      />
-                    )}
-                  </div>
-                </aside>
-              </div>
-            </main>
-          </div>
+            {/* Fondo claro para el QR: #F9FAFB */}
+            <div className="h-80 w-full rounded-lg bg-[#F9FAFB] flex items-center justify-center p-4">
+              <img
+                src={fallbackQR}
+                alt="QR de pago"
+                className="max-h-full max-w-full object-contain"
+              />
+            </div>
+
+            {/* Texto principal oscuro: #111827 */}
+            <p className="text-sm text-[#111827] text-center mt-4">
+              Monto a pagar: <span className="font-bold text-lg">{money(amount)}</span>
+            </p>
+          </aside>
+        </div>
+      </main>
+    </div>
   );
 }
