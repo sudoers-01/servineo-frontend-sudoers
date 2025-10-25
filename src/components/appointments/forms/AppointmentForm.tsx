@@ -15,7 +15,6 @@ interface AppointmentFormProps {
   fixerId: string;
   requesterId: string;
 }
-
 // Zod esquema de validacion
 const baseSchema = z.object({
   client: z.string()
@@ -24,7 +23,7 @@ const baseSchema = z.object({
     .max(50, "El nombre no puede tener más de 50 caracteres"),
 
   contact: z.string()
-    .regex(/^[67]\d{7}$/, "Ingrese un número de teléfono válido")
+    .regex(/^\+591 [67]\d{7}$/, "Ingrese un número de teléfono válido")
     .nonempty("Ingrese un número de teléfono"),
 
   description: z.string()
@@ -297,7 +296,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   <input
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    placeholder="7XXXXXXX"
+                    placeholder="+591 7XXXXXXX"
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white"
                   />
                   {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}

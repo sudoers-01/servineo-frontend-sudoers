@@ -230,7 +230,7 @@ export async function generateAvailableSlotsFromAPI(
       // Determinar estado basado en el schedule
       switch (schedule.schedule_state) {
         case "occupied":
-          slot.title = "No disponible";
+          slot.title = "Ocupado";
           slot.color = "#FF5F57";
           slot.booked = true;
           break;
