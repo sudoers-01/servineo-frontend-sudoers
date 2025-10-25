@@ -85,7 +85,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
 
               <div className='flex flex-col justify-center items-center md:block mt-4'>
                 <h3 className='text-sm font-semibold mb-1'>
-                  {`CALIFICACIONES `} {data && <span>({data?.rating_count})</span>}
+                  {`CALIFICACIONES `} {data && <span>({Math.floor(data?.rating_count)})</span>}
                 </h3>
 
                 <div className='flex items-center gap-1 mb-4'>
@@ -138,7 +138,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                         <div
                           className='h-full bg-black rounded-full transition-all duration-300'
                           style={{
-                            width: `${(data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100}%`,
+                            width: `${Math.round((data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100)}%`,
                           }}
                         />
                       ) : (
@@ -149,7 +149,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                       )}
                     </div>
                     <span className='text-xs font-medium w-8'>
-                      {(data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100}%
+                      {data ? Math.round((data?.ratings?.[rating as 1 | 2 | 3] / data?.rating_count) * 100) : 0}%
                     </span>
                   </div>
                 ))}
