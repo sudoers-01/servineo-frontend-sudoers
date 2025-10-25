@@ -11,7 +11,7 @@ const baseSchema = z.object({
     .max(50, "El nombre no puede tener más de 50 caracteres"),
 
   contact: z.string()
-    .regex(/^\+591[67]\d{7}$/, "Ingrese un número de teléfono válido")
+    .regex(/^\+591 [67]\d{7}$/, "Ingrese un número de teléfono válido")
     .nonempty("Ingrese un número de teléfono"),
 
   description: z.string()
