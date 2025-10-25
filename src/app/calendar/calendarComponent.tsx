@@ -1,10 +1,10 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Calendar, momentLocalizer, Views, SlotInfo, Event as RBCEvent, View } from 'react-big-calendar';
+import { Calendar, momentLocalizer, Components, Views, SlotInfo, Event as RBCEvent, View } from 'react-big-calendar';
 import moment from 'moment';
 import 'moment/locale/es';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-
-import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm"; 
+import DateCell from "@/components/calendar/month/dateCell/DateCell";
+import AppointmentForm, { AppointmentFormHandle } from "../../components/appointments/forms/AppointmentForm";
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "../../components/appointments/forms/EditAppointmentForm";
 import { generateAvailableSlotsFromAPI, SlotEvent } from "../../utils/generateSlots";
 
@@ -33,9 +33,9 @@ interface PropList {
 }
 
 export default function MyCalendarPage({
-  fixerId,
-  requesterId,
-} : PropList) {
+    fixerId,
+    requesterId,
+}: PropList) {
     const [events, setEvents] = useState<MyEvent[]>([]);
     const [currentView, setCurrentView] = useState<View>(Views.MONTH);
     const [loading, setLoading] = useState(true);
@@ -48,17 +48,17 @@ export default function MyCalendarPage({
         const today = new Date();
         const sixMonthsFromNow = new Date();
         sixMonthsFromNow.setMonth(today.getMonth() + 6);
-        
+
         // Reset hours to compare only dates
         const dateToCheck = new Date(date);
         dateToCheck.setHours(0, 0, 0, 0);
-        
+
         const todayNormalized = new Date(today);
         todayNormalized.setHours(0, 0, 0, 0);
-        
+
         const sixMonthsNormalized = new Date(sixMonthsFromNow);
         sixMonthsNormalized.setHours(23, 59, 59, 999); // End of day
-        
+
         return dateToCheck >= todayNormalized && dateToCheck <= sixMonthsNormalized;
     };
 
@@ -67,15 +67,15 @@ export default function MyCalendarPage({
         const today = new Date();
         const sixMonthsFromNow = new Date();
         sixMonthsFromNow.setMonth(today.getMonth() + 6);
-        
+
         const dateToCheck = new Date(date.getFullYear(), date.getMonth(), 1);
         const todayNormalized = new Date(today.getFullYear(), today.getMonth(), 1);
         const sixMonthsNormalized = new Date(sixMonthsFromNow.getFullYear(), sixMonthsFromNow.getMonth() + 1, 0); // Last day of the month
-        
+
         return dateToCheck >= todayNormalized && dateToCheck <= sixMonthsNormalized;
     };
 
-    const toggleDayState = (state : boolean) => {
+    const toggleDayState = (state: boolean) => {
         changeDayState(state);
     }
 
@@ -148,43 +148,43 @@ export default function MyCalendarPage({
     };
 
     function handleSelectEvent(ev: MyEvent) {
-    if (ev.booked && !ev.editable) {
-        if(ev.isBreakTime){
-            showMessage({
-                message: "Horario no laboral. Solo de 8:00-12:00 y 14:00-18:00",
-                type: 'info'
-            });
-        } else {
-            showMessage({
-                message: "Este horario está ocupado por otra persona y no es editable",
-                type: 'warning',
-                title: 'No Disponible'
-            });
+        if (ev.booked && !ev.editable) {
+            if (ev.isBreakTime) {
+                showMessage({
+                    message: "Horario no laboral. Solo de 8:00-12:00 y 14:00-18:00",
+                    type: 'info'
+                });
+            } else {
+                showMessage({
+                    message: "Este horario está ocupado por otra persona y no es editable",
+                    type: 'warning',
+                    title: 'No Disponible'
+                });
+            }
+            return;
         }
-        return;
-    }
-    
-    if (ev.booked && ev.editable) {
-        handleEditExistingAppointment(ev);
-    } else if (!ev.booked) {
-        formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title });
-    }
-}
 
-   function handleSelectSlot(slotInfo: SlotInfo) {
-    // No permitir hacer clic en slots en vistas MONTH y WEEK
-    const viewedDate = new Date(currentDate);
-    const today = new Date();
+        if (ev.booked && ev.editable) {
+            handleEditExistingAppointment(ev);
+        } else if (!ev.booked) {
+            formRef.current?.open(ev.start.toISOString(), { eventId: ev.id, title: ev.title });
+        }
+    }
+
+    function handleSelectSlot(slotInfo: SlotInfo) {
+        // No permitir hacer clic en slots en vistas MONTH y WEEK
+        const viewedDate = new Date(currentDate);
+        const today = new Date();
 
 
-    if (currentView === Views.MONTH || currentView === Views.WEEK) {
-        return;
-    }
+        if (currentView === Views.MONTH || currentView === Views.WEEK) {
+            return;
+        }
 
         // En vista DAY: verificar si la fecha que se está viendo es anterior a la actual
         // o está fuera de los próximos 6 meses
         if (currentView === Views.DAY) {
-            
+
             viewedDate.setHours(0, 0, 0, 0);
             today.setHours(0, 0, 0, 0);
 
@@ -193,42 +193,42 @@ export default function MyCalendarPage({
             }
         }
 
-    const start = slotInfo.start;
-    const day = start.getDay();
-    const hour = start.getHours();
+        const start = slotInfo.start;
+        const day = start.getDay();
+        const hour = start.getHours();
 
-    //Validar día laboral (lunes a viernes)
-    if (day < 1 || day > 5) {
-        showMessage({
-            message: "Solo se permiten citas de lunes a viernes",
-            type: 'info'
-        });
-        return;
-    }
+        //Validar día laboral (lunes a viernes)
+        if (day < 1 || day > 5) {
+            showMessage({
+                message: "Solo se permiten citas de lunes a viernes",
+                type: 'info'
+            });
+            return;
+        }
 
-    // Verificar si el slot ya está ocupado por otra persona
-    const isSlotOccupied = events.some(event => 
-        event.start.getTime() === start.getTime() && 
-        event.booked && 
-        !event.editable
-    );
+        // Verificar si el slot ya está ocupado por otra persona
+        const isSlotOccupied = events.some(event =>
+            event.start.getTime() === start.getTime() &&
+            event.booked &&
+            !event.editable
+        );
 
-    if (isSlotOccupied) {
-        showMessage({
-            message: "Este horario ya está ocupado por otra persona",
-            type: 'warning',
-            title: 'Horario Ocupado'
-        });
-        return;
-    }
+        if (isSlotOccupied) {
+            showMessage({
+                message: "Este horario ya está ocupado por otra persona",
+                type: 'warning',
+                title: 'Horario Ocupado'
+            });
+            return;
+        }
 
-    const dtISO = start.toISOString();
+        const dtISO = start.toISOString();
 
-    // Buscar si ya existe un evento en este slot
-    let existing = events.find(e =>
-        e.start.getTime() === start.getTime() &&
-        !e.booked
-    );
+        // Buscar si ya existe un evento en este slot
+        let existing = events.find(e =>
+            e.start.getTime() === start.getTime() &&
+            !e.booked
+        );
 
         // Si no existe, crear un slot disponible temporal
         // if (!existing) {
@@ -245,18 +245,18 @@ export default function MyCalendarPage({
         //     existing = newEvent;
         // }
 
-    // Abrir formulario para el slot disponible
-    if (existing && !existing.booked) {
-        formRef.current?.open(dtISO, { eventId: existing.id, title: existing.title });
+        // Abrir formulario para el slot disponible
+        if (existing && !existing.booked) {
+            formRef.current?.open(dtISO, { eventId: existing.id, title: existing.title });
+        }
     }
-}
     async function handleEditExistingAppointment(event: MyEvent) {
         if (!event.booked || !event.editable) return;
 
         try {
             const API = process.env.NEXT_PUBLIC_BACKEND as string;
             const dateObj = new Date(event.start);
-            console.log('Fecha recogida',dateObj);
+            console.log('Fecha recogida', dateObj);
             const appointment_date = dateObj.toISOString().split('T')[0];
             const start_hour = dateObj.getHours().toString();
             //console.log( appointment_date);
@@ -272,7 +272,7 @@ export default function MyCalendarPage({
                 throw new Error(`No se encuentra este dato: ${res.status} - ${errorText}`);
             }
             const data = await res.json();
-            console.log('Datos recibidos para editar cita:',data);
+            console.log('Datos recibidos para editar cita:', data);
             const existingAppointment: ExistingAppointment = {
                 description: data.data.appointment_description || "",
                 id: data.data._id || data.data.id,
@@ -381,13 +381,13 @@ export default function MyCalendarPage({
         if (currentView === Views.WEEK) {
             const today = new Date();
             const slotDate = new Date(date);
-            
+
             // Comparar día, mes y año
-            const isToday = 
+            const isToday =
                 slotDate.getDate() === today.getDate() &&
                 slotDate.getMonth() === today.getMonth() &&
                 slotDate.getFullYear() === today.getFullYear();
-            
+
             if (isToday) {
                 return {
                     style: {
@@ -472,12 +472,12 @@ export default function MyCalendarPage({
         if (view === Views.DAY) {
             setTimeout(() => {
                 checkDayAvailability(currentDate);
-            }, 50); 
+            }, 50);
         } else {
             toggleDayState(false);
         }
     };
-    
+
     //esta es la configuracion del idioma porsia, del big calendar
     const messages = {
         allDay: 'Todo el día',
@@ -494,19 +494,44 @@ export default function MyCalendarPage({
         noEventsInRange: 'No hay eventos en este rango',
         showMore: (total: number) => `+ Ver más (${total})`,
     };
+    const CustomMonthDateHeader = ({ date, label }: { date: Date; label: string }) => {
+        const today = new Date();
+        const isToday =
+            date.getDate() === today.getDate() &&
+            date.getMonth() === today.getMonth() &&
+            date.getFullYear() === today.getFullYear();
 
+        return (
+            <div className="flex flex-col h-full">
+                <div className={`text-center py-1 text-sm font-semibold ${isToday ? 'bg-blue-600 text-white rounded-t' : 'text-gray-700'
+                    }`}>
+                    {date.getDate()}
+                </div>
+
+                <div className="px-1 py-1 flex-1">
+                    <DateCell date={date} fixer_id={fixerId} />
+                </div>
+            </div>
+        );
+    };
+
+    const components: Components = {
+        month: {
+            dateHeader: CustomMonthDateHeader,
+        },
+    };
     return (
         <div className="max-w-6xl mx-auto p-4">
             <h1 className="text-2xl font-semibold mb-4 text-black">
                 Calendario de {fixerId}
                 {
-                    dayOccupied && currentView == Views.DAY && 
+                    dayOccupied && currentView == Views.DAY &&
                     <span className="text-red-500 ml-4"> No hay horarios disponibles</span>
                 }
-            </h1> 
+            </h1>
 
             <Message {...messageState} />
-            
+
             {loading && (
                 <div className="text-center py-4">
                     <div className="text-slate-500">Cargando slots desde la API...</div>
@@ -535,9 +560,10 @@ export default function MyCalendarPage({
                     onView={handleViewChange}
                     onNavigate={handleNavigate}
                     messages={messages}
+                    components={components}
                 />
             </div>
-            <AppointmentForm ref={formRef} fixerId={fixerId} requesterId={requesterId}/>
+            <AppointmentForm ref={formRef} fixerId={fixerId} requesterId={requesterId} />
             <EditAppointmentForm ref={editFormRef} />
         </div>
     );

@@ -115,31 +115,31 @@ export default function DatePicker({
             `}
         >
             <input
-                className="w-10 text-center font-medium text-sm focus:outline-none bg-transparent"
-                type="text"  // ← Cambiado a "text" para permitir vacío
+                className="w-10 text-center font-medium text-xl focus:outline-none bg-transparent"
+                type="text"
                 value={day}
                 onChange={handleDateChange}
-                onBlur={handleDayBlur}  // ← Valida al salir
+                onBlur={handleDayBlur}
                 placeholder="DD"
                 onFocus={() => setIsFocused(true)}
             />
-            <span className="text-gray-400 text-lg mx-1">/</span>
+            <span className="text-gray-400 text-2xl mx-1">/</span>
             <input
-                className="w-10 text-center font-medium text-sm focus:outline-none bg-transparent"
-                type="text"  // ← Cambiado a "text"
+                className="w-10 text-center font-medium text-xl focus:outline-none bg-transparent"
+                type="text"
                 value={month}
                 onChange={handleMonthChange}
-                onBlur={handleMonthBlur}  // ← Valida al salir
+                onBlur={handleMonthBlur}
                 placeholder="MM"
                 onFocus={() => setIsFocused(true)}
             />
-            <span className="text-gray-400 text-lg mx-1">/</span>
+            <span className="text-gray-400 text-2xl mx-1">/</span>
             <input
-                className="w-14 text-center font-medium text-sm focus:outline-none bg-transparent"
-                type="text"  // ← Cambiado a "text"
+                className="w-14 text-center font-medium text-xl focus:outline-none bg-transparent"
+                type="text"
                 value={year}
                 onChange={handleYearChange}
-                onBlur={handleYearBlur}  // ← Valida al salir
+                onBlur={handleYearBlur}
                 placeholder="YYYY"
                 onFocus={() => setIsFocused(true)}
             />
