@@ -60,7 +60,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   const [open, setOpen] = useState(false);
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
-  const [contact, setContact] = useState<string>("");
+  const [contact, setContact] = useState<string>("+591 ");
   const [modality, setModality] = useState<"virtual" | "presential">("virtual");
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>("");
@@ -105,7 +105,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   function handleClose() {
     setOpen(false);
     setClient("");
-    setContact("");
+    setContact("+591 ");
     setDescription("");
     setModality("virtual");
     setPlace("");
@@ -113,6 +113,30 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     setLocation(null);
     setErrors({});
   }
+
+  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Si el usuario intenta borrar el "+591 ", no permitirlo
+    if (value.length < 5) {
+      setContact("+591 ");
+      return;
+    }
+    
+    // Asegurarse de que siempre empiece con "+591 "
+    if (!value.startsWith("+591 ")) {
+      setContact("+591 " + value.replace(/[^\d]/g, '').slice(0, 8));
+      return;
+    }
+    
+    // Permitir solo números después del "+591 "
+    const numbersOnly = value.slice(5).replace(/[^\d]/g, '');
+    
+    // Limitar a 8 dígitos después del "+591 "
+    if (numbersOnly.length <= 8) {
+      setContact("+591 " + numbersOnly);
+    }
+  };
 
   function parseDatetime(datetimeISO: string) {
     // Si el string ISO no termina en 'Z', agregarlo para forzar UTC
@@ -295,7 +319,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   <span className="text-sm font-medium">Contacto *</span>
                   <input
                     value={contact}
-                    onChange={(e) => setContact(e.target.value)}
+                    onChange={handleContactChange}
                     placeholder="+591 7XXXXXXX"
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white"
                   />
