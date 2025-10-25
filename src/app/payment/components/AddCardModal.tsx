@@ -1,46 +1,46 @@
-"use client";
-import { useState, useEffect } from "react";
-import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import { motion, AnimatePresence } from "framer-motion";
+'use client';
+import { useState, useEffect } from 'react';
+import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, onCardAdded }) {
   const stripe = useStripe();
   const elements = useElements();
-  const [saveCard, setSaveCard] = useState(true);
+  const [saveCard, setSaveCard] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-  const [cardHolder, setCardHolder] = useState("");
+  const [errorMessage, setErrorMessage] = useState('');
+  const [cardHolder, setCardHolder] = useState('');
   const [isValidHolder, setIsValidHolder] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
-    const regex = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/;
-    setIsValidHolder(regex.test(cardHolder));
+    const regex = /^(?=.*[a-zA-ZñÑáéíóúÁÉÍÓÚ])[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/;
+    setIsValidHolder(regex.test(cardHolder.trim()));
   }, [cardHolder]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!stripe || !elements) {
-      setErrorMessage("Stripe aún no está listo, espera unos segundos.");
+      setErrorMessage('Stripe aún no está listo, espera unos segundos.');
       return;
     }
     if (!isValidHolder) {
-      setErrorMessage("Nombre de titular inválido.");
+      setErrorMessage('Nombre de titular inválido.');
       return;
     }
 
     setLoading(true);
-    setErrorMessage("");
+    setErrorMessage('');
     const cardElement = elements.getElement(CardElement);
     if (!cardElement) {
-      setErrorMessage("No se pudo obtener la tarjeta. Recarga la página e inténtalo de nuevo.");
+      setErrorMessage('No se pudo obtener la tarjeta. Recarga la página e inténtalo de nuevo.');
       setLoading(false);
       return;
     }
 
     try {
       const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: "card",
+        type: 'card',
         card: cardElement,
         billing_details: { name: cardHolder },
       });
@@ -48,19 +48,24 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
 
       let cardId = null;
       if (saveCard) {
-        const cardRes = await fetch("http://localhost:4000/api/cardscreate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ userId, paymentMethodId: paymentMethod.id, saveCard, cardholderName:cardHolder }),
+        const cardRes = await fetch('http://localhost:4000/api/cardscreate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId,
+            paymentMethodId: paymentMethod.id,
+            saveCard,
+            cardholderName: cardHolder,
+          }),
         });
         const savedCard = await cardRes.json();
-        if (!cardRes.ok) throw new Error(savedCard.error || "Error al guardar la tarjeta");
+        if (!cardRes.ok) throw new Error(savedCard.error || 'Error al guardar la tarjeta');
         cardId = savedCard._id;
       }
 
-      const paymentRes = await fetch("http://localhost:4000/api/createpayment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const paymentRes = await fetch('http://localhost:4000/api/createpayment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           requesterId: userId,
           fixerId,
@@ -71,7 +76,7 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
         }),
       });
       const paymentData = await paymentRes.json();
-      if (!paymentRes.ok) throw new Error(paymentData.error || "Error al crear el pago");
+      if (!paymentRes.ok) throw new Error(paymentData.error || 'Error al crear el pago');
 
       onCardAdded({
         payment: {
@@ -79,14 +84,17 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
           amount: paymentData.payment.amount,
           card: cardId ? { _id: cardId } : null,
         },
+        cardSaved: saveCard,
       });
 
       cardElement.clear();
-      setCardHolder("");
-      setShowSuccess(true);
+      setCardHolder('');
+      setSuccessMessage(
+        saveCard ? 'Pago realizado exitosamente y tarjeta guardada' : 'Pago realizado exitosamente',
+      );
 
       setTimeout(() => {
-        setShowSuccess(false);
+        setSuccessMessage('');
         onClose();
       }, 2000);
     } catch (err) {
@@ -103,11 +111,11 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         exit={{ scale: 0.8, opacity: 0 }}
-        className="bg-gradient-to-br from-gray-900 to-gray-800 text-white p-6 rounded-2xl shadow-2xl w-96 relative"
+        className="bg-[#2B6AE0] text-black p-6 rounded-2xl shadow-2xl w-96 relative"
       >
         <h2 className="text-xl font-bold mb-3 text-center"> Agregar nueva tarjeta</h2>
-        <p className="text-center mb-4 text-gray-300">
-          Monto a pagar: <strong className="text-green-400">{amount} BOB</strong>
+        <p className="text-center mb-4 text-black">
+          Monto a pagar: <strong className="text-[#2BDDE0]">{amount} BOB</strong>
         </p>
 
         {errorMessage && (
@@ -118,7 +126,7 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block mb-2 text-sm font-semibold text-gray-200">
+            <label className="block mb-2 text-sm font-semibold text-black">
               Nombre de titular*
             </label>
             <input
@@ -126,32 +134,32 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
               value={cardHolder}
               onChange={(e) => setCardHolder(e.target.value)}
               placeholder="Ej: Juan Pérez"
-              className="w-full bg-gray-800 border border-gray-600 rounded-xl px-3 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full bg-[#E5E7EB] border-gray-200 rounded-xl px-3 py-2 text-black outline-none"
               required
             />
           </div>
 
-          <div className="p-3 rounded-xl bg-gray-800 border border-gray-700">
+          <div className="p-3 rounded-xl bg-[#E5E7EB] border text-black border-gray-700">
             <CardElement
               options={{
                 hidePostalCode: true,
                 style: {
                   base: {
-                    fontSize: "16px",
-                    color: "#fff",
-                    "::placeholder": { color: "#888" },
+                    fontSize: '16px',
+                    color: '#000', // <-- texto negro
+                    '::placeholder': { color: '#888' },
                   },
-                  invalid: { color: "#ff6b6b" },
+                  invalid: { color: '#ff6b6b' },
                 },
               }}
             />
           </div>
 
-          <label className="flex items-center gap-2 text-sm text-gray-300 mt-2">
+          <label className="flex items-center gap-2 text-sm text-black mt-2">
             <input
               type="checkbox"
               checked={saveCard}
-              onChange={() => setSaveCard(!saveCard)}
+              onChange={(e) => setSaveCard(e.target.checked)}
               className="accent-blue-500"
             />
             Guardar tarjeta para futuros pagos
@@ -161,7 +169,7 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-xl transition-all"
+              className="px-4 py-2 bg-[#D1D5DB] hover:bg-[#2BDDE0] rounded-xl transition-all"
             >
               Cancelar
             </button>
@@ -169,12 +177,12 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
               type="submit"
               disabled={!stripe || loading || !isValidHolder}
               className={`px-5 py-2 rounded-xl font-semibold transition-all ${
-                (!stripe || loading || !isValidHolder)
-                  ? "bg-blue-400/50 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700"
+                !stripe || loading || !isValidHolder
+                  ? 'bg-[#D1D5DB] cursor-not-allowed'
+                  : 'bg-[#D1D5DB] hover:bg-[#2BDDE0]'
               }`}
             >
-              {loading ? "Procesando..." : "Pagar"}
+              {loading ? 'Procesando...' : 'Pagar'}
             </button>
           </div>
         </form>
@@ -182,14 +190,14 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
 
       {/*  Modal de éxito */}
       <AnimatePresence>
-        {showSuccess && (
+        {successMessage && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="absolute top-10 bg-green-600 text-white px-6 py-3 rounded-xl shadow-xl text-center"
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.8, ease: 'easeOut' } }}
+            exit={{ opacity: 0, y: -20, transition: { duration: 0.6, ease: 'easeIn' } }}
+            className="absolute top-10 bg-[#2BDDE0] text-white px-6 py-3 rounded-xl shadow-xl text-center"
           >
-             Pago realizado exitosamente
+            {successMessage}
           </motion.div>
         )}
       </AnimatePresence>
