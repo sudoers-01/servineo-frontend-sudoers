@@ -281,8 +281,8 @@ export default function MyCalendarPage({
                 contact: data.data.current_requester_phone || "",
                 modality: data.data.appointment_type || "virtual",
                 meetingLink: data.data.link_id || "",
-                lat: Number(data.data.lat),
-                lon: Number(data.data.lon),
+                lat: Number(data.data.latitude),
+                lon: Number(data.data.longitude),
                 address: data.data.display_name_location || "No expecificada"
             };
             //console.log('Datos procesados',existingAppointment);
