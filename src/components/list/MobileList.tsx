@@ -6,10 +6,10 @@ import DaySchedule from '../calendar/mobile/MobileDayliView'
 import WeekSchedule from '../calendar/mobile/MobileWeekView'
 
 interface MobileListProps {
-    selectedDate: Date | null;
+    selectedDate: Date;
     fixerId: string,
     requesterId: string
-    onDateChange?: (newDate: Date) => void;
+    onDateChange: (newDate: Date) => void;
 }
 
 
@@ -19,7 +19,6 @@ export default function MobileList({
     requesterId,
     onDateChange
 }: MobileListProps) {
-    const today = selectedDate;
     const [type, setType] = useState<'day' | 'week'>('day');
 
 
@@ -62,7 +61,11 @@ export default function MobileList({
             </div>
             <div className="mt-4">
                 {type === "week" &&
-                    <WeekSchedule fixerId={fixerId} requesterId={requesterId} selectedDate={selectedDate} />
+                    <WeekSchedule
+                        fixerId={fixerId}
+                        requesterId={requesterId}
+                        selectedDate={selectedDate}
+                        onChangeDate={onDateChange} />
                 }
             </div>
         </div>
