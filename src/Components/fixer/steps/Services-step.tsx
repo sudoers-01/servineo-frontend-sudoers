@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { Card } from "@/Components/Card"
 import { PillButton } from "../Pill-button"
 import { Plus, Edit2, Trash2, Wrench } from "lucide-react"
@@ -31,16 +33,10 @@ export function ServicesStep({
   error,
 }: ServicesStepProps) {
   const [newService, setNewService] = useState("")
-  const [editServiceName, setEditServiceName] = useState("")
 
   const handleServiceChange = (value: string) => {
     const sanitized = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "").slice(0, 20)
     setNewService(sanitized)
-  }
-
-  const handleEditServiceChange = (value: string) => {
-    const sanitized = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "").slice(0, 20)
-    setEditServiceName(sanitized)
   }
 
   const handleAddService = () => {
@@ -65,7 +61,6 @@ export function ServicesStep({
   }
 
   const handleEdit = (service: Service) => {
-    setEditServiceName(service.name)
     const newName = prompt("Editar servicio", service.name)
     if (newName) {
       const sanitized = newName.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "").slice(0, 20)
@@ -95,14 +90,14 @@ export function ServicesStep({
                 type="checkbox"
                 checked={selectedServiceIds.includes(s.id)}
                 onChange={() => onToggleService(s.id)}
-                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-blue-500"
+                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
               />
               <span className="flex-1 truncate">{s.name}</span>
               {s.custom && (
                 <span className="flex gap-2 text-xs">
                   <button
                     type="button"
-                    className="text-primary hover:text-blue-800 transition-colors"
+                    className="text-blue-600 hover:text-blue-800 transition-colors"
                     onClick={(e) => {
                       e.preventDefault()
                       handleEdit(s)
@@ -139,7 +134,7 @@ export function ServicesStep({
               className="flex-1 rounded-full bg-gray-200 px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-400 transition-all"
             />
             <PillButton
-              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              className="bg-blue-600 text-white hover:bg-blue-800 flex items-center gap-2"
               onClick={handleAddService}
             >
               <Plus className="h-4 w-4" />

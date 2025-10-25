@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Card } from "@/Components/Card"
 
 interface Location {
@@ -22,12 +22,12 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
   const [outOfBounds, setOutOfBounds] = useState(false)
 
   // Límites aproximados de Cochabamba
-  const COCHABAMBA_BOUNDS = {
+  const COCHABAMBA_BOUNDS = useMemo(() => ({
     north: -17.2,
     south: -17.6,
     east: -65.8,
     west: -66.4
-  }
+  }), [])
 
   useEffect(() => {
     // Load Leaflet CSS
@@ -40,7 +40,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     }
 
     // Load Leaflet JS
-    if (!(window as any).L) {
+    if (!window.L) {
       const script = document.createElement("script")
       script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
       script.onload = () => setMapLoaded(true)
@@ -50,19 +50,17 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     }
   }, [])
 
-  const isInCochabamba = (lat: number, lng: number): boolean => {
+  const isInCochabamba = useCallback((lat: number, lng: number): boolean => {
     return (
       lat >= COCHABAMBA_BOUNDS.south &&
       lat <= COCHABAMBA_BOUNDS.north &&
       lng >= COCHABAMBA_BOUNDS.west &&
       lng <= COCHABAMBA_BOUNDS.east
     )
-  }
+  }, [COCHABAMBA_BOUNDS])
 
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return
-
-    const L = (window as any).L
 
     // Initialize map centered on Cochabamba, Bolivia
     const map = L.map(mapRef.current).setView([-17.3935, -66.157], 13)
@@ -83,7 +81,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
       map.panInsideBounds(bounds, { animate: false })
     })
 
-    let marker: any = null
+    let marker: L.Marker | null = null
 
     // Add existing marker if location exists and is within Cochabamba
     if (location && isInCochabamba(location.lat, location.lng)) {
@@ -93,7 +91,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     }
 
     // Handle map clicks
-    map.on("click", (e: any) => {
+    map.on("click", (e: L.LeafletEvent) => {
       const { lat, lng } = e.latlng
 
       // Check if location is within Cochabamba
@@ -132,7 +130,7 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     return () => {
       map.remove()
     }
-  }, [mapLoaded])
+  }, [mapLoaded, location, onLocationChange, isInCochabamba, COCHABAMBA_BOUNDS])
 
   const handleManualUpdate = () => {
     const lat = Number.parseFloat(manualLat)
