@@ -52,7 +52,12 @@ export default function MobileList({
             </div>
             <div className="mt-4">
                 {type === "day" &&
-                    <DaySchedule fixerId={fixerId} requesterId={requesterId} selectedDate={selectedDate} onDateChange={onDateChange} />
+                    <DaySchedule
+                        fixerId={fixerId}
+                        requesterId={requesterId}
+                        selectedDate={selectedDate}
+                        onDateChange={onDateChange}
+                    />
                 }
             </div>
             <div className="mt-4">
