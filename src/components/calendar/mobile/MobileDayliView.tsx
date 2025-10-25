@@ -7,15 +7,20 @@ import type { AppointmentFormHandle } from "../../appointments/forms/Appointment
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
 import type { EditAppointmentFormHandle, ExistingAppointment } from "../../appointments/forms/EditAppointmentForm";
 
+import DatePicker from "@/components/list/DatePicker/DatePicker"
+
+
+
 const API_BASE = "https://servineo-backend-lorem.onrender.com";
 const EP_BOOKED = `${API_BASE}/api/crud_read/schedules/get_by_fixer_current_requester_day`;
 const EP_OCCUPIED = `${API_BASE}/api/crud_read/schedules/get_by_fixer_other_requesters_day`;
 const NOMBRE_FIXER_POR_DEFECTO = "John";
 
 interface PropiedadesHorarioDia {
-  fixerId: string;
-  requesterId: string;
-  selectedDate: Date | string | null;
+    fixerId: string;
+    requesterId: string;
+    selectedDate: Date | string | null;
+    onDateChange?: (newDate: Date) => void;
 }
 
 type Estado = "libre" | "reservado_propio" | "ocupado_otro" | "no_disponible";
@@ -185,7 +190,6 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate }: Pr
       if (refActiveLoads.current === 0) setCargando(false);
       if (refAbort.current) refAbort.current = null;
     }
-  }
 
   useEffect(() => {
     if (fecha) obtenerDia(fecha);
