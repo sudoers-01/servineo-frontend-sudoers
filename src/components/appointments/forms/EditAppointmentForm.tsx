@@ -3,6 +3,7 @@ import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } f
 import LocationModal from "./LocationModal";
 import { set, z } from "zod";
 import { parseUrl } from "next/dist/shared/lib/router/utils/parse-url";
+
 const baseSchema = z.object({
   client: z.string()
     .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre de cliente válido")
@@ -10,7 +11,7 @@ const baseSchema = z.object({
     .max(50, "El nombre no puede tener más de 50 caracteres"),
 
   contact: z.string()
-    .regex(/^[67]\d{7}$/, "Ingrese un número de teléfono válido")
+    .regex(/^\+591[67]\d{7}$/, "Ingrese un número de teléfono válido")
     .nonempty("Ingrese un número de teléfono"),
 
   description: z.string()
@@ -42,6 +43,7 @@ const presentialSchema = baseSchema.extend({
 });
 
 const appointmentSchema = z.discriminatedUnion("modality", [virtualSchema, presentialSchema]);
+
 export type AppointmentPayload = {
   datetime: string;
   client: string;
@@ -97,6 +99,31 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
   const [changesDetected, setChangesDetected] = useState<boolean>(false);
 
+  // Función para manejar el cambio en el campo de contacto
+  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    
+    // Si el usuario intenta borrar el "+591 ", no permitirlo
+    if (value.length < 5) {
+      setContact("+591 ");
+      return;
+    }
+    
+    // Asegurarse de que siempre empiece con "+591 "
+    if (!value.startsWith("+591 ")) {
+      setContact("+591 " + value.replace(/[^\d]/g, '').slice(0, 8));
+      return;
+    }
+    
+    // Permitir solo números después del "+591 "
+    const numbersOnly = value.slice(5).replace(/[^\d]/g, '');
+    
+    // Limitar a 8 dígitos después del "+591 "
+    if (numbersOnly.length <= 8) {
+      setContact("+591 " + numbersOnly);
+    }
+  };
+
   // Detectar cambios cada vez que cambia algún campo
   useEffect(() => {
     if (!originalAppointment) {
@@ -149,8 +176,11 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setAppointmentId(appointmentData.id);
       setDatetime(appointmentData.datetime);
       setClient(appointmentData.client);
-      setContact(appointmentData.contact);
-      setModality(appointmentData.modality);
+      // Si el contacto original no tiene +591, lo agregamos
+      const formattedContact = appointmentData.contact.startsWith("+591") 
+        ? appointmentData.contact 
+        : "+591 " + appointmentData.contact;
+      setContact(formattedContact);
       setModality(appointmentData.modality);
       setDescription(appointmentData.description || "");
       setLat(Number(appointmentData.lat));
@@ -195,12 +225,13 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setMsg(null);
     setErrors({});
   }
-const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
-  setLat(locationData.lat);
-  setLon(locationData.lon);
-  setAddress(locationData.address);
-  setShowLocationModal(false);
-};
+
+  const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
+    setLat(locationData.lat);
+    setLon(locationData.lon);
+    setAddress(locationData.address);
+    setShowLocationModal(false);
+  };
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -226,14 +257,6 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
       return;
     }
 
-    /*const formData = {
-      client: client.trim(),
-      contact: contact.trim(),
-      description: description.trim(),
-      modality,
-      meetingLink: meetingLink.trim(),
-      address: address.trim()
-    };*/
     const formData: any = {
       client: client.trim(),
       contact: contact.trim(),
@@ -256,7 +279,6 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
         const fieldErrors: Record<string, string> = {};
         validation.error.issues.forEach(err => {
           if (Array.isArray(err.path) && err.path.length) {
-            // Si el path es location.address, lo mostramos en errors.location
             const key = err.path[0];
             fieldErrors[key as string] = err.message;
           } else {
@@ -358,10 +380,8 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
     }
     setLoading(true);
     try {
-      //https://servineo-backend-lorem.onrender.com/api/crud_update/appointments/update_by_id
       const API = process.env.NEXT_PUBLIC_BACKEND as string;
       console.log('Datos Nuevos:',payload);
-      //console.log('Id de la cita',appointmentId);
       const res = await fetch(`${API}/api/crud_update/appointments/update_by_id?id=${appointmentId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
@@ -424,24 +444,24 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
               <div className="flex gap-4 p-3 rounded items-start">
-                          <label className="block">
-                            <span className="text-sm font-medium">Fecha y hora</span>
-                            <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
-                          </label>
-                            <div className="flex-1">
-                              <label className="block">
-                                <span className="text-sm font-medium">Modalidad</span>
-                                <select 
-                                  value={modality} 
-                                  onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
-                                  className="mt-1 block w-full border rounded px-3 py-2 text-sm"
-                                >
-                                  <option value="virtual">Virtual</option>
-                                  <option value="presencial">Presencial</option>
-                                </select>
-                              </label>
-                            </div>
-                          </div>
+                <label className="block">
+                  <span className="text-sm font-medium">Fecha y hora</span>
+                  <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
+                </label>
+                <div className="flex-1">
+                  <label className="block">
+                    <span className="text-sm font-medium">Modalidad</span>
+                    <select 
+                      value={modality} 
+                      onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
+                      className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+                    >
+                      <option value="virtual">Virtual</option>
+                      <option value="presencial">Presencial</option>
+                    </select>
+                  </label>
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <label className="block">
@@ -452,7 +472,6 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                     onChange={(e) => setClient(e.target.value)}
                     placeholder="Nombre del cliente" 
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                 
                   />
                   {errors.client && <p className="text-red-600 text-sm mt-1">{errors.client}</p>}
                 </label>
@@ -460,8 +479,8 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                   <span className="text-sm font-medium">Contacto *</span>
                   <input 
                     value={contact} 
-                    onChange={(e) => setContact(e.target.value)}
-                    placeholder="7XXXXXXX" 
+                    onChange={handleContactChange}
+                    placeholder="+591 7XXXXXXX" 
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
                   />
                   {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
@@ -496,7 +515,6 @@ const handleLocationConfirm = (locationData: { lat: number; lon: number; address
                     <p className="text-sm text-green-700 px-2">
                       📌 Ubicación: {address}
                     </p>
-                    
                   )}
                 </div>
               ) : (
