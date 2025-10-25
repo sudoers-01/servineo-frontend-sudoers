@@ -523,7 +523,7 @@ export default function MyCalendarPage({
     return (
         <div className="max-w-6xl mx-auto p-4">
             <h1 className="text-2xl font-semibold mb-4 text-black">
-                Calendario de {fixerId}
+                Calendario de Diego Paredes
                 {
                     dayOccupied && currentView == Views.DAY &&
                     <span className="text-red-500 ml-4"> No hay horarios disponibles</span>

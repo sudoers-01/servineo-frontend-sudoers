@@ -330,7 +330,7 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
 
     return (
         <div className="mx-auto max-w-sm p-4 text-black">
-            <h1 className="text-2xl font-semibold mb-3">Calendario de {datos?.nombre_Fixer ?? NOMBRE_FIXER_POR_DEFECTO}</h1>
+            <h1 className="text-2xl font-semibold mb-3">Calendario de Diego Paredes</h1>
             <div className="mb-3">
                 <label className="block text-sm mb-1">Fecha</label>
                 <DatePicker
