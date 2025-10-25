@@ -1,79 +1,63 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import Tabs from '@/Components/Tabs/Tabs';
-import TabsList from '@/Components/Tabs/TabsList';
-import TabsTrigger from '@/Components/Tabs/TabsTrigger';
-import TabsContent from '@/Components/Tabs/TabsContent';
-import FixerRegisterForm, { type FormFieldConfig } from '@/Components/Form/FixerRegisterForm';
-import NewOfferForm from './NewOfferForm';
+import { useState } from "react"
+import FixerRegisterForm from "@/Components/fixer/Fixer-register-form"
+import { FixerEnableWizard } from "@/Components/fixer/Filter-eneable-wizard"
+import { Navbar } from "@/Components/Shared/Navbar"
 
-const registerFields: FormFieldConfig[] = [
-  {
-    id: 'name',
-    label: 'Nombre',
-    type: 'text',
-    placeholder: 'tu nombres completo',
-  },
-  {
-    id: 'specialty',
-    label: 'Especialidad',
-    type: 'select',
-    placeholder: 'Selecciona tu especialidad',
-    options: [
-      { label: 'Electricidad', value: 'electricidad' },
-      { label: 'Plomería', value: 'plomeria' },
-      { label: 'Albañilería', value: 'albanileria' },
-      { label: 'Pintura', value: 'pintura' },
-    ],
-  },
-  { id: 'phone', label: 'Telefono', type: 'phone', placeholder: '+591 70341618' },
-  { id: 'email', label: 'Email', type: 'email', placeholder: 'Tu@gmail.com' },
-  { id: 'certificate', label: 'Titulo/Certificacion', type: 'file', placeholder: 'Subir titulo o certificacion' },
-];
+const defaultFormValues = {
+  name: "Freddy Amin Zapata",
+  email: "zapata@example.com",
+  phone: "+591 68546043",
+}
 
-const BecomeFixerPage = () => {
-  const [activeTab, setActiveTab] = useState('register');
+type RequesterUser = {
+  id: string
+  name: string
+  email: string
+  urlPhoto?: string
+  role: "requester" | "fixer"
+}
+
+export default function BecomeFixerPage() {
+  const [requester, setRequester] = useState<RequesterUser | null>(null)
 
   return (
-    <div className="container mx-auto p-4 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6 text-center">LOGO</h1>
-      
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <div className="flex justify-center">
-          <TabsList className="mb-4">
-            <TabsTrigger value="register">Registro</TabsTrigger>
-            <TabsTrigger value="newOffer">Nueva Oferta</TabsTrigger>
-            <TabsTrigger value="myOffer">Mis Ofertas</TabsTrigger>
-            <TabsTrigger value="map">Mapa</TabsTrigger>
-            <TabsTrigger value="video">Video Inspeccion</TabsTrigger>
-          </TabsList>
-        </div>
-        
-        <div className="mt-2">
-          <TabsContent value="register" activeTab={activeTab}>
-            <FixerRegisterForm fields={registerFields} />
-          </TabsContent>
-          
-          <TabsContent value="newOffer" activeTab={activeTab}>
-            <NewOfferForm />
-          </TabsContent>
-          
-          <TabsContent value="myOffer" activeTab={activeTab}>
-            <p>secction My Offer</p>
-          </TabsContent>
-          
-          <TabsContent value="map" activeTab={activeTab}>
-            <p>section map</p>
-          </TabsContent>
-          
-          <TabsContent value="video" activeTab={activeTab}>
-            <p>section video</p>
-          </TabsContent>
-        </div>
-      </Tabs>
-    </div>
-  );
-};
+    <div>
+    <Navbar />
+    <div className="container mx-auto max-w-4xl p-4">
+      <header className="mb-6 text-center">
+        <h1 className="text-2xl font-bold">Conviertete en un Fixer</h1>
+        <p className="text-sm text-gray-500">Completa tu registro y habilita tu cuenta como FIXER</p>
+      </header>
 
-export default BecomeFixerPage;
+      <section className="space-y-6">
+        <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">
+          <h2 className="mb-3 text-center text-lg font-semibold">Datos iniciales</h2>
+          <FixerRegisterForm
+            defaultValues={defaultFormValues}
+            onSubmit={(data) => {
+              const { name, email } = data
+              const urlPhoto = "https://picsum.photos/80"
+              setRequester({
+                id: "req-1",
+                name,
+                email,
+                urlPhoto,
+                role: "requester",
+              })
+            }}
+            submitButtonText="Continuar"
+          />
+        </div>
+  
+        {requester && (
+          <div className="animate-fade-in">
+            <FixerEnableWizard user={requester} />
+          </div>
+        )}
+      </section>
+    </div>
+    </div>
+  )
+}

@@ -26,11 +26,10 @@ const Tabs = ({ value, onValueChange, className, children }: TabsProps) => {
       })
     }
 
-    const childProps: any = node.props ?? {}
-    const nestedChildren: ReactNode = childProps.children
+    const { children: nestedChildren, ...rest } = (node as ReactElement<{ children?: ReactNode }>).props
     if (nestedChildren) {
-      return cloneElement(node as ReactElement, {
-        ...childProps,
+      return cloneElement(node as ReactElement<{ children?: ReactNode }>, {
+        ...rest,
         children: Children.map(nestedChildren, enhance),
       })
     }
