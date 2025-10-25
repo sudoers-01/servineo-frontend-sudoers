@@ -12,7 +12,7 @@ export default function CalendarPage() {
     // const [showRequesterIdInput, setShowRequesterIdInput] = useState(false);
 
     const router = useRouter();
-    const [selectedDate, setSelectedDate] = useState<Date | null>(new Date());
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const today = new Date();
 
     //Effect para manejar los event listeners de teclado
