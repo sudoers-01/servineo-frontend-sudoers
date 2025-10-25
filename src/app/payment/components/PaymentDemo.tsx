@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 
 const RegistroCuentaApp = dynamic(() => import('./agregarCuenta'), { ssr: false });
 
-// 🟢 CORREGIDO: Eliminado espacio invisible antes de la clave
 const stripePromise = loadStripe(
   'pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU',
 );
@@ -50,13 +49,35 @@ export default function PaymentDemo() {
     }
   }, []);
 
+  // Escuchar cuando se complete un pago QR
+  useEffect(() => {
+    const handleQRPaymentComplete = (event: any) => {
+      const trabajoId = event.detail?.trabajoId;
+      if (trabajoId) {
+        actualizarEstadoTrabajo(trabajoId, 'Pagado');
+      }
+    };
+
+    window.addEventListener('qr-payment-complete', handleQRPaymentComplete);
+
+    // También verificar localStorage al montar el componente
+    const lastPaidTrabajo = localStorage.getItem('last-paid-trabajo');
+    if (lastPaidTrabajo) {
+      actualizarEstadoTrabajo(Number(lastPaidTrabajo), 'Pagado');
+      localStorage.removeItem('last-paid-trabajo');
+    }
+
+    return () => {
+      window.removeEventListener('qr-payment-complete', handleQRPaymentComplete);
+    };
+  }, []);
+
   const agregarTrabajo = () => {
     const nuevoId = trabajos.length > 0 ? Math.max(...trabajos.map((t) => t.id)) + 1 : 1;
     const montoAleatorio = Math.floor(Math.random() * (500 - 100 + 1)) + 100;
     setTrabajos(prev => [...prev, { id: nuevoId, estado: 'Sin Pagar', monto: montoAleatorio }]);
   };
 
-  //Actualizar estado del trabajo
   const actualizarEstadoTrabajo = (trabajoId: number, nuevoEstado: string) => {
     setTrabajos(prev =>
       prev.map(trabajo =>
@@ -84,7 +105,6 @@ export default function PaymentDemo() {
     }
   };
 
-  // Callback para cuando se complete el pago en efectivo
   const handleCloseCashPayment = (paymentCompleted?: boolean) => {
     if (paymentCompleted && selectedTrabajo) {
       actualizarEstadoTrabajo(selectedTrabajo.id, 'Pagado');
@@ -94,7 +114,6 @@ export default function PaymentDemo() {
     setCreatedPaymentId(null);
   };
 
-  //Callback para cuando se complete el pago con tarjeta
   const handleCloseCardPayment = (paymentCompleted?: boolean) => {
     if (paymentCompleted && selectedTrabajo) {
       actualizarEstadoTrabajo(selectedTrabajo.id, 'Pagado');
@@ -136,14 +155,14 @@ export default function PaymentDemo() {
       <div className="p-6 flex items-center gap-4">
         <button
           onClick={agregarTrabajo}
-          className="bg-[#2B31E0] hover:bg-[#2B6AE0] text-[#F9FAFB] px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
+          className="bg-[#2B31E0] hover:bg-[#2B6AE0] text-[#F9FAFB] px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium transition-colors"
         >
           <span className="text-2xl">🔧</span>
           Agregar Trabajo
         </button>
         <button
           onClick={bankStatus === 'SCB' ? handleAgregarCuentaBancaria : handleEliminarCuentaBancaria}
-          className="bg-[#2B31E0] hover:bg-[#2B6AE0] text-[#F9FAFB] px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium"
+          className="bg-[#2B31E0] hover:bg-[#2B6AE0] text-[#F9FAFB] px-6 py-3 rounded-lg flex items-center gap-2 text-lg font-medium transition-colors"
         >
           <span className="text-2xl">🏦</span>
           {bankStatus === 'SCB' ? 'Agregar cuenta bancaria' : 'Eliminar cuenta bancaria'}
@@ -174,12 +193,11 @@ export default function PaymentDemo() {
           </thead>
           <tbody>
             {trabajos.map((trabajo) => (
-              <tr key={trabajo.id} className="bg-white">
+              <tr key={trabajo.id} className="bg-white hover:bg-gray-50 transition-colors">
                 <td className="border-2 border-[#D1D5DB] px-4 py-4 text-xl text-[#111827]">
                   {trabajo.id}
                 </td>
                 <td className="border-2 border-[#D1D5DB] px-4 py-4 text-xl text-[#111827]">
-                  {/* 🟢 Indicador visual según estado */}
                   <span className={`font-semibold ${
                     trabajo.estado === 'Pagado' ? 'text-[#16A34A]' :
                     trabajo.estado === 'Procesando' ? 'text-[#FFC857]' :
@@ -189,13 +207,13 @@ export default function PaymentDemo() {
                   </span>
                 </td>
                 <td className="border-2 border-[#D1D5DB] px-4 py-4 text-xl text-right text-[#111827]">
-                  {trabajo.monto}
+                  {trabajo.monto} BOB
                 </td>
                 <td className="border-2 border-[#D1D5DB] px-4 py-4 text-center">
                   <button
                     onClick={() => handlePagar(trabajo)}
                     disabled={trabajo.estado === 'Pagado'}
-                    className={`px-8 py-2 rounded text-lg font-semibold ${
+                    className={`px-8 py-2 rounded text-lg font-semibold transition-colors ${
                       trabajo.estado === 'Pagado'
                         ? 'bg-[#E5E7EB] text-[#64748B] cursor-not-allowed'
                         : 'bg-[#2BDDE0] hover:bg-[#5E2BE0] text-[#111827]'
@@ -238,7 +256,7 @@ export default function PaymentDemo() {
           <div className="bg-white rounded-2xl shadow-2xl p-6 w-[95%] max-w-5xl max-h-[90vh] overflow-y-auto relative">
             <button
               onClick={() => handleCloseCardPayment(false)}
-              className="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-3xl font-bold"
+              className="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-3xl font-bold transition-colors"
             >
               ✕
             </button>
@@ -254,7 +272,7 @@ export default function PaymentDemo() {
                   fixerId={fixerId}
                   jobId={jobId}
                   amount={selectedTrabajo?.monto || 0}
-                  onPaymentSuccess={() => handleCloseCardPayment(true)} // 🟢 NUEVO
+                  onPaymentSuccess={() => handleCloseCardPayment(true)}
                 />
               </div>
             </Elements>
@@ -273,7 +291,6 @@ interface PaymentMethodSelectorProps {
   setCreatedPaymentId: (id: string) => void;
 }
 
-/** ——— Selector ——— */
 function PaymentMethodSelector({
   onSelectMethod,
   onClose,
@@ -286,14 +303,18 @@ function PaymentMethodSelector({
   const [okMsg, setOkMsg] = useState<string | null>(null);
   const router = useRouter();
 
+  // Pasar trabajoId y monto a la URL del QR
   const goToQR = () => {
-    const bookingId = String(trabajo?.id ?? "TEST-BOOKING-1");
-    const providerId = "prov_123";
+    const trabajoId = trabajo?.id ?? 1;
+    const bookingId = `TRABAJO-${trabajoId}`;
+    const providerId = "DEMO-PROVIDER";
     const amount = Number(trabajo?.monto ?? 0);
     const currency = "BOB";
 
+    console.log("🔵 Redirigiendo a QR con:", { trabajoId, bookingId, amount });
+
     onClose();
-    router.push(`/payment/qr?bookingId=${bookingId}&providerId=${providerId}&amount=${amount}&currency=${currency}`);
+    router.push(`/payment/qr?trabajoId=${trabajoId}&bookingId=${bookingId}&providerId=${providerId}&amount=${amount}&currency=${currency}`);
   };
 
   const handlePayCash = async () => {
@@ -327,26 +348,21 @@ function PaymentMethodSelector({
   };
 
   return (
-
     <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50">
-      {/* Fondo claro (principal): #F9FAFB */}
       <div className="bg-[#F9FAFB] w-full max-w-3xl mx-4 rounded-lg shadow-xl">
-        {/* Primary (Main Blue) #2B31E0 */}
         <div className="bg-[#2B31E0] text-[#F9FAFB] px-6 py-4 rounded-t-lg">
           <h2 className="text-2xl font-bold">Demo de pagos Servineo</h2>
         </div>
 
         <div className="p-12">
-          {/* Texto principal (oscuro): #111827 */}
           <h3 className="text-3xl font-semibold text-center mb-12 text-[#111827]">
             Seleccione su método de pago preferido
           </h3>
 
           <div className="space-y-6 max-w-xl mx-auto">
-            {/* Botones alternativos: Primary Light (Ateneo Blue) #1AA7ED */}
             <button
               onClick={() => onSelectMethod('card')}
-              className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] text-[#F9FAFB] px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
+              className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] text-[#F9FAFB] px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium transition-colors"
             >
               <span className="text-3xl">💳</span>
               Tarjeta de Crédito
@@ -354,7 +370,7 @@ function PaymentMethodSelector({
 
             <button
               onClick={goToQR}
-              className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] text-[#F9FAFB] px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
+              className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] text-[#F9FAFB] px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium transition-colors"
             >
               <span className="text-3xl">⊞</span>
               Pago QR
@@ -363,23 +379,20 @@ function PaymentMethodSelector({
             <button
               onClick={handlePayCash}
               disabled={loading}
-              className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] disabled:opacity-60 text-[#F9FAFB] px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium"
+              className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] disabled:opacity-60 text-[#F9FAFB] px-8 py-4 rounded-lg flex items-center gap-4 text-2xl font-medium transition-colors"
             >
               <span className="text-3xl">💵</span>
               {loading ? 'Creando…' : 'Pago Efectivo'}
             </button>
 
-            {/* Error: #EF4444 */}
-            {err && <p className="text-[#EF4444] text-center">{err}</p>}
-            {/* Éxito: #16A34A */}
-            {okMsg && <p className="text-[#16A34A] text-center">{err}</p>}
+            {err && <p className="text-[#EF4444] text-center font-medium">{err}</p>}
+            {okMsg && <p className="text-[#16A34A] text-center font-medium">{okMsg}</p>}
           </div>
 
           <div className="flex justify-end mt-12">
-            {/* CTA Secundario: Accent (Turquesa brillante) #2BDDE0 */}
             <button
               onClick={onClose}
-              className="bg-[#2BDDE0] hover:bg-[#5E2BE0] text-[#111827] px-12 py-3 rounded-lg text-xl font-semibold"
+              className="bg-[#2BDDE0] hover:bg-[#5E2BE0] text-[#111827] px-12 py-3 rounded-lg text-xl font-semibold transition-colors"
             >
               Cancelar
             </button>
