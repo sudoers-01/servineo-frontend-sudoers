@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { getSchedulesCont } from '@/utils/getSchedulesCont';
 import DatePicker from '@/components/list/DatePicker/DatePicker'
+import DateCell from '@/components/calendar/month/dateCell/DateCell';
 export default function TestPage() {
     const [count, setCount] = useState<number | null>(null);
     useEffect(() => {
@@ -19,11 +20,13 @@ export default function TestPage() {
         };
         fetchData();
     }, []);
-    const fecha = new Date('2025-12-26T12:00:00');
+    const fechaActual = new Date('2025-10-27');
+    const fixerId = 'user_fixer_1234';
     return (
         <div className="bg-white">
-            <DatePicker
-                selectedDate={fecha}
+            <DateCell
+                value={fechaActual}
+                fixer_id={fixerId}
             />
 
         </div>

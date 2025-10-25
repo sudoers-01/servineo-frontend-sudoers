@@ -43,13 +43,16 @@ export default function DayCell({
         fetchData();
     }, [date, fixer_id]);
 
-
+    const isWeekend = date.getDay() == 6 || date.getDay() == 0;
     const isPast = date < today && !isToday;
 
 
     const getColor = () => {
         if (isSelected) return 'bg-blue-500 text-white';
         if (isPast) return 'text-black';
+        if (isWeekend) return 'bg-[#9FA1A5]'
+
+
         if (count === null) return 'bg-[#16A34A]';
         if (count === 0) return 'bg-[#16A34A]';
         if (count >= 1 && count <= 7) return 'bg-[#FFC857]';

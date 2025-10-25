@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-
+import DatePicker from "@/components/list/DatePicker/DatePicker";
 const API = process.env.NEXT_PUBLIC_BACKEND as string;
 
 import axios from 'axios';
@@ -21,7 +21,8 @@ export interface Schedule {
 interface MobileWeekViewProps {
     fixerId: string;
     requesterId: string;
-    selectedDate: Date | null;
+    selectedDate: Date;
+    onChangeDate: (newDate: Date) => void;
 }
 
 // Función para obtener el día del mes (1-31) de una fecha
@@ -36,22 +37,22 @@ function getMonthFromDate(date: Date): number {
 
 function groupSchedulesByMonthAndDay(fixerSchedules: Schedule[]): Map<string, Schedule[]> {
     const schedulesMap = new Map<string, Schedule[]>();
-    
+
     fixerSchedules.forEach(schedule => {
         const scheduleDate = new Date(schedule.starting_time);
         const month = scheduleDate.getMonth();
         const day = scheduleDate.getDate();
-        
+
         // Crear una clave única para el día (mes-día)
         const key = `${month}-${day}`;
-        
+
         if (!schedulesMap.has(key)) {
             schedulesMap.set(key, []);
         }
-        
+
         schedulesMap.get(key)!.push(schedule);
     });
-    
+
     return schedulesMap;
 }
 
@@ -107,39 +108,39 @@ function getDayName(date: Date): string {
 }
 
 function combineSchedules(
-  currentRequesterSchedules: Schedule[],
-  otherRequesterSchedules: Schedule[]
+    currentRequesterSchedules: Schedule[],
+    otherRequesterSchedules: Schedule[]
 ): Schedule[] {
-  // Combinar ambos arrays
-  const combined = [
-    ...currentRequesterSchedules,
-    ...otherRequesterSchedules
-  ];
+    // Combinar ambos arrays
+    const combined = [
+        ...currentRequesterSchedules,
+        ...otherRequesterSchedules
+    ];
 
-  for(const schedule of currentRequesterSchedules){
-    if(schedule.schedule_state != 'cancelled'){
-      schedule.schedule_state = 'booked';
+    for (const schedule of currentRequesterSchedules) {
+        if (schedule.schedule_state != 'cancelled') {
+            schedule.schedule_state = 'booked';
+        }
     }
-  }
 
-  for(const schedule of otherRequesterSchedules){
-    schedule.schedule_state = 'occupied';
-  }
+    for (const schedule of otherRequesterSchedules) {
+        schedule.schedule_state = 'occupied';
+    }
 
-  // Ordenar por starting_time ascendente (con Z)
-  combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
+    // Ordenar por starting_time ascendente (con Z)
+    combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
 
-  // Convertir a formato sin Z después del sort
-  const schedulesWithoutZ = combined.map(schedule => ({
-    ...schedule,
-    starting_time: schedule.starting_time ? schedule.starting_time.replace('Z', '') : '',
-    finishing_time: schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : ''
-  }));
+    // Convertir a formato sin Z después del sort
+    const schedulesWithoutZ = combined.map(schedule => ({
+        ...schedule,
+        starting_time: schedule.starting_time ? schedule.starting_time.replace('Z', '') : '',
+        finishing_time: schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : ''
+    }));
 
-  return schedulesWithoutZ;
+    return schedulesWithoutZ;
 }
 
-export default function MobileWeekView({ fixerId, requesterId, selectedDate }: MobileWeekViewProps) {
+export default function MobileWeekView({ fixerId, requesterId, selectedDate, onChangeDate }: MobileWeekViewProps) {
     const month = selectedDate ? selectedDate.getMonth() : new Date().getMonth();
     const [schedulesMap, setSchedulesMap] = useState<Map<string, Schedule[]>>(new Map());
     const [loading, setLoading] = useState(true);
@@ -151,16 +152,16 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate }: M
             const [currentRequesterResponse, otherRequesterResponse] = await Promise.all([
                 axios.get(`${API}/api/crud_read/schedules/get_by_fixer_current_requester_month`, {
                     params: {
-                    fixer_id: fixerId,
-                    requester_id: requesterId,
-                    month: month + 1
+                        fixer_id: fixerId,
+                        requester_id: requesterId,
+                        month: month + 1
                     }
                 }),
                 axios.get(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month`, {
                     params: {
-                    fixer_id: fixerId,
-                    requester_id: requesterId,
-                    month: month + 1
+                        fixer_id: fixerId,
+                        requester_id: requesterId,
+                        month: month + 1
                     }
                 })
             ]);
@@ -186,7 +187,7 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate }: M
         const month = getMonthFromDate(day);
         const dayOfMonth = getDayOfMonth(day);
         const key = `${month}-${dayOfMonth}`;
-        
+
         const daySchedules = schedulesMap.get(key) || [];
 
         if (daySchedules.length >= 1) {
@@ -219,9 +220,9 @@ export default function MobileWeekView({ fixerId, requesterId, selectedDate }: M
             </h1>
             <div className="mb-3">
                 <label className="block text-sm mb-1 text-black">Fecha</label>
-                <input
-                    type="date"
-                    className="w-full rounded-lg border p-2 text-black bg-white"
+                <DatePicker
+                    selectedDate={selectedDate}
+                    onDateChange={onChangeDate}
                 />
             </div>
 
