@@ -3,66 +3,99 @@
 import { useState, useEffect } from "react"
 import { currentFixer, mockJobOfferService, type JobOffer } from "@/app/lib/mock-data"
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
-//import Link from "next/link"
 import { Navbar } from "@/Components/Shared/Navbar"
 import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
-import { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
+import type { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
 import { ImageCarousel } from "@/Components/Shared/ImageCarousel"
+import NotificationModal from "@/Components/Modal-notifications"
+import ConfirmationModal from "@/Components/Modal-confirmation"
+import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
+import { setFixer } from "@/app/redux/slice/fixerSlice"
+import {
+  setOffers,
+  addOffer,
+  updateOffer as updateOfferRedux,
+  deleteOffer as deleteOfferRedux,
+} from "@/app/redux/slice/jobOffersSlice"
 
 export default function MyOffersPage() {
-  const [offers, setOffers] = useState<JobOffer[]>([])
+  const dispatch = useAppDispatch()
+  const offers = useAppSelector((state) => state.jobOffers.offers)
+  const currentFixerRedux = useAppSelector((state) => state.fixer.currentFixer)
+
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingOffer, setEditingOffer] = useState<JobOffer | null>(null)
+  const [notification, setNotification] = useState<{
+    isOpen: boolean
+    type: "success" | "error" | "info" | "warning"
+    title: string
+    message: string
+  }>({ isOpen: false, type: "success", title: "", message: "" })
+  const [confirmDelete, setConfirmDelete] = useState<{
+    isOpen: boolean
+    offerId: string | null
+  }>({ isOpen: false, offerId: null })
 
-  // Cargar las ofertas iniciales
+  // Initialize fixer and offers from mock data on mount
   useEffect(() => {
+    if (!currentFixerRedux) {
+      dispatch(setFixer(currentFixer))
+    }
     const myOffers = mockJobOfferService.getMyOffers(currentFixer.id)
-    setOffers(myOffers)
-  }, [])
+    dispatch(setOffers(myOffers))
+  }, [dispatch, currentFixerRedux])
 
   const handleEdit = (offer: JobOffer) => {
     setEditingOffer(offer)
     setIsFormOpen(true)
   }
 
-  const handleDelete = (offerId: string) => {
-    if (confirm("¿Estás seguro de que quieres eliminar esta oferta?")) {
+  const handleDeleteClick = (offerId: string) => {
+    setConfirmDelete({ isOpen: true, offerId })
+  }
+
+  const handleConfirmDelete = () => {
+    if (confirmDelete.offerId) {
       try {
-        mockJobOfferService.deleteOffer(offerId)
-        setOffers(prevOffers => prevOffers.filter(offer => offer.id !== offerId))
+        mockJobOfferService.deleteOffer(confirmDelete.offerId)
+        dispatch(deleteOfferRedux(confirmDelete.offerId))
+        setNotification({
+          isOpen: true,
+          type: "success",
+          title: "Oferta eliminada",
+          message: "La oferta se eliminó correctamente",
+        })
       } catch (error) {
-        console.error('Error al eliminar la oferta:', error)
-        alert('No se pudo eliminar la oferta. Por favor, intenta de nuevo.')
+        console.error("Error al eliminar la oferta:", error)
+        setNotification({
+          isOpen: true,
+          type: "error",
+          title: "Error",
+          message: "No se pudo eliminar la oferta. Por favor, intenta de nuevo.",
+        })
       }
     }
+    setConfirmDelete({ isOpen: false, offerId: null })
   }
 
   const handleSubmit = (formData: JobOfferFormData) => {
     try {
-      // Validaciones adicionales
-      if (!formData.description || !formData.city || !formData.services || formData.services.length === 0) {
-        alert("Por favor, completa todos los campos requeridos")
-        return
-      }
-
       // Convertir los servicios de objetos a strings
-      const servicesAsStrings = formData.services.map(service => service.value)
-      // Por ahora usaremos una ubicación por defecto basada en la ciudad
-      // TODO: Implementar selección de ubicación en el mapa
+      const servicesAsStrings = formData.services.map((service) => service.value)
       const defaultLocations: { [key: string]: { lat: number; lng: number } } = {
-        'Cochabamba': { lat: -17.3895, lng: -66.1568 },
-        'La Paz': { lat: -16.5, lng: -68.15 },
-        'Santa Cruz': { lat: -17.7834, lng: -63.1821 },
-        'El Alto': { lat: -16.5207, lng: -68.1742 },
+        Cochabamba: { lat: -17.3895, lng: -66.1568 },
+        "La Paz": { lat: -16.5, lng: -68.15 },
+        "Santa Cruz": { lat: -17.7834, lng: -63.1821 },
+        "El Alto": { lat: -16.5207, lng: -68.1742 },
       }
 
-      const cityLocation = defaultLocations[formData.city] || defaultLocations['Cochabamba']
-      
+      const cityLocation = defaultLocations[formData.city] || defaultLocations["Cochabamba"]
+
       const offerData = {
         description: formData.description,
         city: formData.city,
         services: servicesAsStrings,
-        tags: formData.services.map(s => s.value),
+        tags: formData.services.map((s) => s.value),
         photos: formData.photos || ["/placeholder.svg?height=300&width=400&text=trabajo"],
         price: formData.price || 0,
         fixerId: currentFixer.id,
@@ -71,29 +104,46 @@ export default function MyOffersPage() {
         location: {
           lat: cityLocation.lat,
           lng: cityLocation.lng,
-          address: `${formData.city}, Bolivia`, // Podríamos mejorar esto con una dirección más específica
+          address: `${formData.city}, Bolivia`,
         },
       }
-      
+
       if (editingOffer) {
-        const updatedOffer = mockJobOfferService.updateOffer(editingOffer.id, offerData)
+        const updatedOffer = mockJobOfferService.updateOffer(editingOffer.id, {
+          ...offerData,
+          id: editingOffer.id,
+          createdAt: editingOffer.createdAt,
+        })
         if (updatedOffer) {
-          setOffers(prevOffers => 
-            prevOffers.map(offer => 
-              offer.id === editingOffer.id ? updatedOffer : offer
-            )
-          )
+          dispatch(updateOfferRedux(updatedOffer))
+          setNotification({
+            isOpen: true,
+            type: "success",
+            title: "Oferta actualizada",
+            message: "La oferta se actualizó correctamente",
+          })
         }
       } else {
         const newOffer = mockJobOfferService.addOffer(offerData)
-        setOffers(prevOffers => [newOffer, ...prevOffers])
+        dispatch(addOffer(newOffer))
+        setNotification({
+          isOpen: true,
+          type: "success",
+          title: "Oferta creada",
+          message: "La oferta se creó correctamente",
+        })
       }
 
       setIsFormOpen(false)
       setEditingOffer(null)
     } catch (error) {
-      console.error('Error al procesar el formulario:', error)
-      alert('Hubo un error al procesar el formulario. Por favor, intenta de nuevo.')
+      console.error("Error al procesar el formulario:", error)
+      setNotification({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message: "Hubo un error al procesar el formulario. Por favor, intenta de nuevo.",
+      })
     }
   }
 
@@ -132,7 +182,7 @@ export default function MyOffersPage() {
                 setIsFormOpen(false)
                 setEditingOffer(null)
               }}
-              defaultValues={editingOffer || {}}
+              defaultValues={editingOffer ?? undefined}
               submitButtonText={editingOffer ? "Guardar Cambios" : "Publicar Oferta"}
             />
           </div>
@@ -162,12 +212,18 @@ export default function MyOffersPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {offers.map((offer, index) => (
-              <div key={offer.id} className="animate-fade-in relative group" style={{ animationDelay: `${index * 50}ms` }}>
+              <div
+                key={offer.id}
+                className="animate-fade-in relative group"
+                style={{ animationDelay: `${index * 50}ms` }}
+              >
                 <div className="relative w-full overflow-hidden rounded-xl border border-primary bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
                   {/* Carrusel de imágenes */}
-                  <ImageCarousel 
-                    images={offer.photos.length > 0 ? offer.photos : ["/placeholder.svg?height=180&width=320&text=Oferta"]} 
-                    alt={`Trabajo de ${offer.fixerName}`} 
+                  <ImageCarousel
+                    images={
+                      offer.photos.length > 0 ? offer.photos : ["/placeholder.svg?height=180&width=320&text=Oferta"]
+                    }
+                    alt={`Trabajo de ${offer.fixerName}`}
                   />
 
                   {/* Ciudad y Precio */}
@@ -192,11 +248,11 @@ export default function MyOffersPage() {
                   </div>
 
                   {/* Botones de edición y eliminación */}
-                  <div className="absolute right-3 top-14 flex flex-col gap-2">
+                  <div className="absolute left-3 bottom-16 flex gap-2">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(offer);
+                        e.stopPropagation()
+                        handleEdit(offer)
                       }}
                       className="p-2 bg-white/95 text-primary rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
                       title="Editar"
@@ -205,8 +261,8 @@ export default function MyOffersPage() {
                     </button>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation();
-                        handleDelete(offer.id);
+                        e.stopPropagation()
+                        handleDeleteClick(offer.id)
                       }}
                       className="p-2 bg-white/95 text-destructive rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
                       title="Eliminar"
@@ -220,6 +276,27 @@ export default function MyOffersPage() {
           </div>
         )}
       </div>
+
+      {/* Notification Modal */}
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={() => setNotification({ ...notification, isOpen: false })}
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+      />
+
+      {/* Confirmation Modal */}
+      <ConfirmationModal
+        isOpen={confirmDelete.isOpen}
+        onClose={() => setConfirmDelete({ isOpen: false, offerId: null })}
+        onConfirm={handleConfirmDelete}
+        title="¿Eliminar oferta?"
+        message="Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar esta oferta?"
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        type="danger"
+      />
     </div>
   )
 }
