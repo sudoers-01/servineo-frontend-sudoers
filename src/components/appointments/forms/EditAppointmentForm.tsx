@@ -291,32 +291,32 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     
     const payload: any = {};
     if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
-    const dateToShowString = originalAppointment.datetime;
-    const isoString = dateToShowString.endsWith('Z') ? dateToShowString : dateToShowString + 'Z';
-    const originalDatetime = new Date(isoString);
+    // const dateToShowString = originalAppointment.datetime;
+    // const isoString = dateToShowString.endsWith('Z') ? dateToShowString : dateToShowString + 'Z';
+    // const originalDatetime = new Date(isoString);
 
-    let currentYear1 = originalDatetime.getUTCFullYear();
-    let currentMonth = originalDatetime.getUTCMonth();
-    let currentDay = originalDatetime.getUTCDate();
-    let currentHour = originalDatetime.getUTCHours();
+    // let currentYear1 = originalDatetime.getUTCFullYear();
+    // let currentMonth = originalDatetime.getUTCMonth();
+    // let currentDay = originalDatetime.getUTCDate();
+    // let currentHour = originalDatetime.getUTCHours();
     
-    const finalDate = new Date(Date.UTC(currentYear1, currentMonth, currentDay, (currentHour-4),0, 0));  
+    // const finalDate = new Date(Date.UTC(currentYear1, currentMonth, currentDay, (currentHour-4),0, 0));  
     
-    currentMonth = newDatetime.getUTCMonth();
-    currentDay = newDatetime.getUTCDate();
-    currentYear1 = newDatetime.getUTCFullYear();
-    currentHour = newDatetime.getUTCHours();
+    // currentMonth = newDatetime.getUTCMonth();
+    // currentDay = newDatetime.getUTCDate();
+    // currentYear1 = newDatetime.getUTCFullYear();
+    // currentHour = newDatetime.getUTCHours();
     
-    const newFinalDate = new Date(Date.UTC(currentYear1, currentMonth , currentDay,(currentHour-4),0, 0)); 
+    // const newFinalDate = new Date(Date.UTC(currentYear1, currentMonth , currentDay,(currentHour-4),0, 0)); 
       
-    if(newDatetime.toISOString().split('T')[0] !== originalDatetime.toISOString().split('T')[0]) {
-      const datePart = newDatetime.toISOString().split('T')[0];
-      payload.selected_date = datePart; 
-    }
+    // if(newDatetime.toISOString().split('T')[0] !== originalDatetime.toISOString().split('T')[0]) {
+    //   const datePart = newDatetime.toISOString().split('T')[0];
+    //   payload.selected_date = datePart; 
+    // }
 
-    if (finalDate!== newFinalDate) {
-      payload.starting_time = newFinalDate.toISOString();
-    }
+    // if (finalDate!== newFinalDate) {
+    //   payload.starting_time = newFinalDate.toISOString();
+    // }
 
     if (client.trim() !== originalAppointment.client) {
       payload.current_requester_name = client.trim();
