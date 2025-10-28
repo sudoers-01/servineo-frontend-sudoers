@@ -17,6 +17,7 @@ export default function MobileMonthView({
     fixer_id,
     selectedDate,
     onSelectDate,
+
 }: MobileMonthViewProps) {
     const today = new Date();
 
@@ -30,9 +31,7 @@ export default function MobileMonthView({
     for (let i = 0; i < firstDay; i++) {
         days.push(<div key={`empty-${i}`} className="h-12" />);
     }
-    //    console.log(selectedDate);
 
-    // Agregar los días del mes
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
 
@@ -43,7 +42,6 @@ export default function MobileMonthView({
                 fixer_id={fixer_id}
                 selectedDate={selectedDate}
                 onSelectDate={onSelectDate}
-
                 today={today}
 
             />
@@ -51,12 +49,10 @@ export default function MobileMonthView({
     }
     return (
         <div className="p-4">
-            {/* Encabezado de días (lunes = primer día) */}
             <div className="grid grid-cols-7 gap-2 text-center text-sm font-medium text-gray-500 mb-2">
                 <div>L</div><div>M</div><div>M</div><div>J</div><div>V</div><div>S</div><div>D</div>
             </div>
 
-            {/* Grilla de fechas */}
             <div className="grid grid-cols-7 gap-y-4">
                 {days}
             </div>
