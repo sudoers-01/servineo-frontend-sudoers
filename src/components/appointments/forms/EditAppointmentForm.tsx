@@ -4,6 +4,15 @@ import LocationModal from "./LocationModal";
 import { set, z } from "zod";
 import { parseUrl } from "next/dist/shared/lib/router/utils/parse-url";
 
+// Import modules
+import { EditAppointmentHeader } from './modules/EditAppointmentHeader';
+import { DateTimeSection } from './modules/DateTimeSection';
+import { ClientSection } from './modules/ClientSection';
+import { DescriptionSection } from './modules/DescriptionSection';
+import { LocationSection } from './modules/LocationSection';
+import { MeetingLinkSection } from './modules/MeetingLinkSection';
+import { EditAppointmentActions } from './modules/EditAppointmentActions';
+
 const baseSchema = z.object({
   client: z.string()
     .regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre de cliente válido")
@@ -98,31 +107,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
   const [changesDetected, setChangesDetected] = useState<boolean>(false);
-
-  // Función para manejar el cambio en el campo de contacto
-  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    
-    // Si el usuario intenta borrar el "+591 ", no permitirlo
-    if (value.length < 5) {
-      setContact("+591 ");
-      return;
-    }
-    
-    // Asegurarse de que siempre empiece con "+591 "
-    if (!value.startsWith("+591 ")) {
-      setContact("+591 " + value.replace(/[^\d]/g, '').slice(0, 8));
-      return;
-    }
-    
-    // Permitir solo números después del "+591 "
-    const numbersOnly = value.slice(5).replace(/[^\d]/g, '');
-    
-    // Limitar a 8 dígitos después del "+591 "
-    if (numbersOnly.length <= 8) {
-      setContact("+591 " + numbersOnly);
-    }
-  };
 
   // Detectar cambios cada vez que cambia algún campo
   useEffect(() => {
@@ -291,32 +275,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     
     const payload: any = {};
     if (!originalAppointment) return setMsg("Error: datos originales no disponibles");
-    // const dateToShowString = originalAppointment.datetime;
-    // const isoString = dateToShowString.endsWith('Z') ? dateToShowString : dateToShowString + 'Z';
-    // const originalDatetime = new Date(isoString);
-
-    // let currentYear1 = originalDatetime.getUTCFullYear();
-    // let currentMonth = originalDatetime.getUTCMonth();
-    // let currentDay = originalDatetime.getUTCDate();
-    // let currentHour = originalDatetime.getUTCHours();
-    
-    // const finalDate = new Date(Date.UTC(currentYear1, currentMonth, currentDay, (currentHour-4),0, 0));  
-    
-    // currentMonth = newDatetime.getUTCMonth();
-    // currentDay = newDatetime.getUTCDate();
-    // currentYear1 = newDatetime.getUTCFullYear();
-    // currentHour = newDatetime.getUTCHours();
-    
-    // const newFinalDate = new Date(Date.UTC(currentYear1, currentMonth , currentDay,(currentHour-4),0, 0)); 
-      
-    // if(newDatetime.toISOString().split('T')[0] !== originalDatetime.toISOString().split('T')[0]) {
-    //   const datePart = newDatetime.toISOString().split('T')[0];
-    //   payload.selected_date = datePart; 
-    // }
-
-    // if (finalDate!== newFinalDate) {
-    //   payload.starting_time = newFinalDate.toISOString();
-    // }
 
     if (client.trim() !== originalAppointment.client) {
       payload.current_requester_name = client.trim();
@@ -435,103 +393,44 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
         <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="edit-appointment-title"
           className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto" style={{ maxHeight: "90vh" }}>
           <div className="p-4 sm:p-6">
-            <div className="flex items-start justify-between">
-              <h3 id="edit-appointment-title" className="text-lg font-semibold text-black">
-                Editar cita
-              </h3>
-              <button aria-label="Cerrar" className="text-gray-500 hover:text-gray-700" onClick={handleClose}>✕</button>
-            </div>
+            <EditAppointmentHeader onClose={handleClose} />
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
-              <div className="flex gap-4 p-3 rounded items-start">
-                <label className="block">
-                  <span className="text-sm font-medium">Fecha y hora</span>
-                  <input readOnly value={new Date(datetime).toLocaleString()} className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm" />
-                </label>
-                <div className="flex-1">
-                  <label className="block">
-                    <span className="text-sm font-medium">Modalidad</span>
-                    <select 
-                      value={modality} 
-                      onChange={(e) => setModality(e.target.value as "virtual" | "presencial")}
-                      className="mt-1 block w-full border rounded px-3 py-2 text-sm"
-                    >
-                      <option value="virtual">Virtual</option>
-                      <option value="presencial">Presencial</option>
-                    </select>
-                  </label>
-                </div>
-              </div>
+              <DateTimeSection 
+                datetime={datetime}
+                modality={modality}
+                onModalityChange={setModality}
+              />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="text-sm font-medium">Cliente *</span>
-                  <input 
-                    ref={firstFieldRef} 
-                    value={client} 
-                    onChange={(e) => setClient(e.target.value)}
-                    placeholder="Nombre del cliente" 
-                    className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                  />
-                  {errors.client && <p className="text-red-600 text-sm mt-1">{errors.client}</p>}
-                </label>
-                <label className="block">
-                  <span className="text-sm font-medium">Contacto *</span>
-                  <input 
-                    value={contact} 
-                    onChange={handleContactChange}
-                    placeholder="+591 7XXXXXXX" 
-                    className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                  />
-                  {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
-                </label>
-              </div>
+              <ClientSection
+                client={client}
+                contact={contact}
+                errors={errors}
+                ref={firstFieldRef}  // ✅ Esto debería funcionar ahora
+                onClientChange={setClient}
+                onContactChange={setContact}
+              />
 
-              <label className="block">
-                <span className="text-sm font-medium">Descripción del trabajo</span>
-                <textarea 
-                  value={description} 
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Breve descripción de lo que se requiere" 
-                  className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                  rows={3} 
-                />
-                {errors.description && <p className="text-red-600 text-sm mt-1">{errors.description}</p>}
-              </label>
+              <DescriptionSection
+                description={description}
+                error={errors.description}
+                onChange={setDescription}
+              />
 
               {modality === "presencial" ? (
-                <div className="flex flex-col gap-1">
-                  <div
-                    onClick={() => setShowLocationModal(true)}
-                    className="text-center py-3 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
-                  >
-                    <p className="text-sm font-medium text-gray-700">
-                      📍 {address ? "Editar ubicación" : "Seleccionar ubicación"}
-                    </p>
-                    {errors.location && <p className="text-red-600 text-sm mt-1">{errors.location}</p>}
-                  </div>
-
-                  {address && (
-                    <p className="text-sm text-green-700 px-2">
-                      📌 Ubicación: {address}
-                    </p>
-                  )}
-                </div>
+                <LocationSection
+                  address={address}
+                  error={errors.location}
+                  onOpenLocationModal={() => setShowLocationModal(true)}
+                />
               ) : (
-                <div className="space-y-2">
-                  <label className="block">
-                    <span className="text-sm font-medium">Enlace de reunión</span>
-                    <input 
-                      value={meetingLink} 
-                      onChange={(e) => setMeetingLink(e.target.value)}
-                      placeholder="https://meet.example.com/abcd" 
-                      className="mt-1 block w-full border rounded px-3 py-2 bg-white" 
-                    />
-                    {errors.meetingLink && <p className="text-red-600 text-sm mt-1">{errors.meetingLink}</p>}
-                  </label>
-                  <p className="text-xs text-gray-600">Si no ingresa enlace, se generará uno automáticamente.</p>
-                </div>
+                <MeetingLinkSection
+                  meetingLink={meetingLink}
+                  error={errors.meetingLink}
+                  onChange={setMeetingLink}
+                />
               )}
+
               <LocationModal
                 open={showLocationModal}
                 onClose={() => setShowLocationModal(false)}
@@ -549,16 +448,12 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
               {msg && <p className="text-sm text-red-600">{msg}</p>}
 
-              <div className="flex items-center justify-end gap-2 pt-2">
-                <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">Cancelar</button>
-                <button 
-                  type="submit" 
-                  disabled={loading || (modality === "presencial" && !address) || !changesDetected} 
-                  className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {loading ? "Actualizando..." : "Actualizar"}
-                </button>
-              </div>
+              <EditAppointmentActions
+                loading={loading}
+                changesDetected={changesDetected}
+                onCancel={handleClose}
+                submitDisabled={modality === "presencial" && !address}
+              />
             </form>
           </div>
         </div>
