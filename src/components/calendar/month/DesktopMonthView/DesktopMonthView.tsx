@@ -3,17 +3,18 @@ import React from "react";
 import DateCell from "../dateCell/DateCell"
 
 interface DesktopMonthViewProps {
+    year: number;
+    month: number;
     fixer_id: string;
     requester_id: string;
 
 }
 export default function DesktopMonthView({
+    year,
+    month,
     fixer_id,
     requester_id
 }: DesktopMonthViewProps) {
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = today.getMonth();
 
 
     const daysInMonth = new Date(year, month + 1, 0).getDate();

@@ -3,7 +3,6 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import useCalendarNavigation from "@/hooks/useCalendarNavigation";
-import useCalendarView from "@/hooks/useCalendarView";
 import HeaderSection from "./HeaderSection";
 
 
@@ -12,8 +11,16 @@ import HeaderSection from "./HeaderSection";
 interface HeaderDesktopProps {
     year: number;
     month: number;
+    day: number;
     onChangeMonth: (newMonth: number) => void;
     onChangeYear: (newYear: number) => void;
+    onChangeDate: (newDate: number) => void;
+    view: 'month' | 'week' | 'day';
+    onViewChange: {
+        handleMonthView: () => void;
+        handleWeekView: () => void;
+        handleDayView: () => void;
+    }
 }
 
 const monthNames = [
@@ -23,44 +30,57 @@ const monthNames = [
 export default function HeaderDesktop({
     year: initialYear,
     month: initialMonth,
+    day: initialDay,
     onChangeMonth,
     onChangeYear,
+    onChangeDate,
+    view,
+    onViewChange
 }: HeaderDesktopProps) {
 
     const {
+        year,
         month,
-        handlePrevMonth,
-        handleNextMonth,
+        date,
+        handlePrev,
+        handleNext,
         handleToday,
         isPrevDisabled,
-        isNextDisabled
+        isNextDisabled,
+        getWeekRange
     } = useCalendarNavigation({
         initialYear,
         initialMonth,
-        onChangeMonth,
-        onChangeYear
-    });
-    const {
+        initialDate: initialDay,
         view,
-        handleMonthView,
-        handleWeekView,
-        handleDayView
-    } = useCalendarView();
+        onChangeMonth,
+        onChangeYear,
+        onChangeDate
+    });
+
+
+    const { start, end } = getWeekRange();
 
 
     return (
 
-        <div className="text-black flex  justify-between items-center mb-4 px-2">
+        <div className="text-black flex  justify-between items-center my-1 px-2 w-full">
             <HeaderSection buttons={[
-                { label: "Anterior", onClick: handlePrevMonth, disabled: isPrevDisabled },
+                { label: "Anterior", onClick: handlePrev, disabled: isPrevDisabled },
                 { label: "Hoy", onClick: handleToday, disabled: isPrevDisabled },
-                { label: "Siguiente", onClick: handleNextMonth, disabled: isNextDisabled },
+                { label: "Siguiente", onClick: handleNext, disabled: isNextDisabled },
             ]} />
-            <span className="text-lg font-semibold">{monthNames[month]}  </span>
+
+
+            {view === 'month' && <span className="text-lg font-semibold">{monthNames[month]} {year} </span>}
+            {view === 'week' && <span className="text-lg font-semibold">{monthNames[month]} {start.getDate()} - {end.getDate()}</span>}
+            {view === 'day' && <span className="text-lg font-semibold">{monthNames[month]} {date} </span>}
+
+
             <HeaderSection buttons={[
-                { label: "Mes", onClick: handleMonthView, disabled: view === "month" },
-                { label: "Semana", onClick: handleWeekView, disabled: view === "week" },
-                { label: "Día", onClick: handleDayView, disabled: view === "day" },
+                { label: "Mes", onClick: onViewChange.handleMonthView, disabled: view === "month" },
+                { label: "Semana", onClick: onViewChange.handleWeekView, disabled: view === "week" },
+                { label: "Día", onClick: onViewChange.handleDayView, disabled: view === "day" },
             ]} />
         </div >
     );
