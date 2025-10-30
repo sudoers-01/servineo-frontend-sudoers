@@ -18,6 +18,7 @@ export default function MobileCalendar({
     const today = selectedDate || new Date();
     const [year, setYear] = useState(today.getFullYear());
     const [month, setMonth] = useState(today.getMonth());
+    const [date, setDate] = useState(today.getDate());
     const [message, setMessage] = useState("");
 
     useEffect(() => {
@@ -42,8 +43,10 @@ export default function MobileCalendar({
             <MobileHeader
                 month={today.getMonth()}
                 year={today.getFullYear()}
+                date={today.getDate()}
                 onChangeMonth={setMonth}
                 onChangeYear={setYear}
+                onChangeDate={setDate}
             />
 
             <MobileMonthView
