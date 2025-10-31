@@ -31,6 +31,7 @@ export default function DesktopDailyView({
                 <DesktopDailyHours
                     date={date}
                     fixer_id={fixer_id}
+                    view={'day'}
                 />
             </div>
         </div>
