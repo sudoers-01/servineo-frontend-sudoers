@@ -61,6 +61,7 @@ export default function DesktopWeekView({
                                 <DesktopDailyHours
                                     date={day}
                                     fixer_id={fixer_id}
+                                    view={'week'}
                                 />
 
                             </div>
