@@ -28,7 +28,17 @@ export default function DesktopDailyHours({
         isHourBooked,
     } = useAppointmentsByDate(fixer_id, date);
     const isPast = (hour: number) => {
-        return hour < currentHour && date <= today;
+        if (date.getFullYear() < today.getFullYear() ||
+            date.getMonth() < today.getMonth() ||
+            date.getDate() < today.getDate()) {
+            return true;
+        }
+
+        if (isToday) {
+            return hour < currentHour;
+        }
+
+        return false;
     }
     const isToday =
         date.getFullYear() === today.getFullYear() &&
@@ -44,6 +54,7 @@ export default function DesktopDailyHours({
             {hours.map(hour => (
                 <HourCell
                     key={hour}
+                    hour={hour}
                     isBooked={isHourBooked(hour)}
                     isPast={isPast(hour)}
                     isToday={isToday}
