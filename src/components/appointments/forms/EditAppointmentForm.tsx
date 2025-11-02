@@ -1,11 +1,9 @@
-
 // components/appointments/forms/EditAppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import LocationModal from "./LocationModal";
 import { set, z } from "zod";
 import { parseUrl } from "next/dist/shared/lib/router/utils/parse-url";
 
-// Import modules
 import { EditAppointmentHeader } from './modules/EditAppointmentHeader';
 import { DateTimeSection } from './modules/DateTimeSection';
 import { ClientSection } from './modules/ClientSection';
@@ -21,7 +19,7 @@ const baseSchema = z.object({
     .max(50, "El nombre no puede tener más de 50 caracteres"),
 
   contact: z.string()
-    .regex(/^\+591 [67]\d{7}$/, "Ingrese un número de teléfono válido")
+    .regex(/^\ [67]\d{7}$/, "Ingrese un número de teléfono válido")
     .nonempty("Ingrese un número de teléfono"),
 
   description: z.string()
@@ -72,7 +70,7 @@ export type ExistingAppointment = AppointmentPayload & {
 };
 
 export type EditAppointmentFormHandle = {
-  open: (appointmentData: ExistingAppointment) => void;
+  open: (datetime: Date, fixerId: string, requesterId: string) => void;
   close: () => void;
 };
 
@@ -86,7 +84,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [appointmentId, setAppointmentId] = useState<string>("");
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
-  const [contact, setContact] = useState<string>("+591 ");
+  const [contact, setContact] = useState<string>(" ");
   const [modality, setModality] = useState<"virtual" | "presencial">("virtual");
   const [description, setDescription] = useState<string>("");
   const [lat, setLat] = useState<number>();
@@ -97,7 +95,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [msg, setMsg] = useState<string | null>(null);
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  // Estado para guardar los datos originales
   const [originalAppointment, setOriginalAppointment] = useState<ExistingAppointment | null>(null);
 
   const [day, setDay] = useState<string>("");
@@ -108,8 +105,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
   const [changesDetected, setChangesDetected] = useState<boolean>(false);
-
-  // Detectar cambios cada vez que cambia algún campo
   useEffect(() => {
     if (!originalAppointment) {
       setChangesDetected(false);
@@ -149,32 +144,44 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     const timeDiff = appointmentDate.getTime() - now.getTime();
     const hoursDiff = timeDiff / (1000 * 3600);
     return hoursDiff > 24;
-  };
+};
 
   useImperativeHandle(ref, () => ({
-    open: (appointmentData: ExistingAppointment) => {
-      if(appointmentData.modality != "virtual"){
-        if(appointmentData.modality != "presencial"){
-        appointmentData.modality = "presencial"
+    open: async (datetime: Date, fixerId: String, requesterId: String) => {
+      const API = process.env.NEXT_PUBLIC_BACKEND as string;
+      const appointment_date = datetime.toISOString().split('T')[0]
+      const start_hour = datetime.getHours().toString();
+      console.log('Hora',datetime);
+      const url = `${API}/api/crud_read/appointments/get_modal_form?fixer_id=${fixerId}&requester_id=${requesterId}&appointment_date=${appointment_date}&start_hour=${start_hour}`;
+      
+      const res = await fetch(url);
+      if (!res.ok) {
+                let errorText = await res.text();
+                console.error('Respuesta no OK:', res.status, errorText);
+                throw new Error(`No se encuentra este dato: ${res.status} - ${errorText}`);
       }
-      }
-      setAppointmentId(appointmentData.id);
-      setDatetime(appointmentData.datetime);
-      setClient(appointmentData.client);
-      // Si el contacto original no tiene +591, lo agregamos
-      const formattedContact = appointmentData.contact.startsWith("+591") 
-        ? appointmentData.contact 
-        : "+591 " + appointmentData.contact;
-      setContact(formattedContact);
-      setModality(appointmentData.modality);
-      setDescription(appointmentData.description || "");
-      setLat(Number(appointmentData.lat));
-      setLon(Number(appointmentData.lon));
-      setAddress(appointmentData.address || "");
-      setMeetingLink(appointmentData.meetingLink || "");
-      setOriginalAppointment(appointmentData);
 
-       const dateObj = new Date(appointmentData.datetime);
+      const data = await res.json();
+      console.log('Datos recibidos para editar cita:', data);
+      if(data.data.appointment_type != "virtual"){
+        if(data.data.appointment_type != "presencial"){
+        data.data.appointment_type = "presencial"
+      }
+
+      }
+      setAppointmentId(data.data._id);
+      setDatetime(datetime.toISOString());
+      setClient(data.data.current_requester_name);
+      setContact(data.data.current_requester_phone);
+      setModality(data.data.appointment_type);
+      setDescription(data.data.appointment_description || "");
+      setLat(Number(data.data.latitude));
+      setLon(Number(data.data.longitude));
+      setAddress(data.data.display_name_location || "");
+      setMeetingLink(data.data.link_id || "");
+      setOriginalAppointment(data);
+
+      const dateObj = new Date(data.datetime);
       setDay(dateObj.getDate().toString().padStart(2, '0'));
       setMonth((dateObj.getMonth() + 1).toString().padStart(2, '0'));
       setHour(dateObj.getHours())
@@ -197,7 +204,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setOpen(false);
     setAppointmentId("");
     setClient("");
-    setContact("+591 ");
+    setContact("");
     setModality("virtual");
     setDescription("");
     setLat(0);
@@ -363,8 +370,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   }
 
   if (!open) return null;
-
-  // Validación de 24 horas - muestra mensaje si no se puede editar
   if (!canEditAppointment(datetime)) {
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
