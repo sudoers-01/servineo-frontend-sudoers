@@ -1,7 +1,7 @@
 'use client';
 import React from "react";
 export default function Hours() {
-    const hours = Array.from({ length: 10 }, (_, i) => i + 8);
+    const hours = Array.from({ length: 23 }, (_, i) => i);
 
     return (
         <div className="w-20 flex-shrink-0 bg-[#D9D9D9] border-b border-black ">
