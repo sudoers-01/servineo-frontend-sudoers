@@ -7,7 +7,7 @@ interface DesktopDailyViewProps {
 
     date: Date;
     fixer_id: string;
-
+    requester_id: string;
 }
 function getDayName(dayNumber: number): string {
     const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
@@ -15,7 +15,8 @@ function getDayName(dayNumber: number): string {
 }
 export default function DesktopDailyView({
     date,
-    fixer_id
+    fixer_id,
+    requester_id
 }: DesktopDailyViewProps) {
 
     return (
@@ -31,6 +32,7 @@ export default function DesktopDailyView({
                 <DesktopDailyHours
                     date={date}
                     fixer_id={fixer_id}
+                    requester_id={requester_id}
                     view={'day'}
                 />
             </div>

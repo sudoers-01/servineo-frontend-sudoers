@@ -10,23 +10,21 @@ interface DesktopDailyViewProps {
 
     date: Date;
     fixer_id: string;
+    requester_id: string;
     view: 'week' | 'day';
 }
 
 const today = new Date();
 const currentHour = today.getHours();
-console.log(currentHour);
 
 
 
 export default function DesktopDailyHours({
     date,
     fixer_id,
+    requester_id,
     view
 }: DesktopDailyViewProps) {
-    const {
-        isHourBooked,
-    } = useAppointmentsByDate(fixer_id, date);
     const isPast = (hour: number) => {
         if (date.getFullYear() < today.getFullYear() ||
             date.getMonth() < today.getMonth() ||
@@ -54,10 +52,12 @@ export default function DesktopDailyHours({
             {hours.map(hour => (
                 <HourCell
                     key={hour}
+                    date={date}
                     hour={hour}
-                    isBooked={isHourBooked(hour)}
                     isPast={isPast(hour)}
                     isToday={isToday}
+                    fixer_id={fixer_id}
+                    requester_id={requester_id}
                     view={view}
                 />
             ))}
