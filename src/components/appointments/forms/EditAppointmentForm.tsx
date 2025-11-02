@@ -1,3 +1,4 @@
+
 // components/appointments/forms/EditAppointmentForm.tsx
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import LocationModal from "./LocationModal";
@@ -406,9 +407,10 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                 client={client}
                 contact={contact}
                 errors={errors}
-                ref={firstFieldRef}  // ✅ Esto debería funcionar ahora
+                ref={firstFieldRef}
                 onClientChange={setClient}
                 onContactChange={setContact}
+                readonly={false}
               />
 
               <DescriptionSection
@@ -422,6 +424,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                   address={address}
                   error={errors.location}
                   onOpenLocationModal={() => setShowLocationModal(true)}
+                  formtype="edit"
                 />
               ) : (
                 <MeetingLinkSection
