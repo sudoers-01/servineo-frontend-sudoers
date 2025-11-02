@@ -59,11 +59,13 @@ export default function DesktopCalendar({
                     {view === 'week' && <DesktopWeekView
                         date={selectedDate}
                         fixer_id={fixer_id}
+                        requester_id={requester_id}
                     />}
 
                     {view === 'day' && <DesktopDailyView
                         date={selectedDate}
                         fixer_id={fixer_id}
+                        requester_id={requester_id}
                     />}
                 </div>
             </div>

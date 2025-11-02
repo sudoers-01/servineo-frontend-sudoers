@@ -9,12 +9,12 @@ import MobileCalendar from "@/components/calendar/mobile/MobileCalendar";
 import MobileList from "@/components/list/MobileList";
 
 
-const fixer_id = "user_fixer_1234";
+const fixer_id = "68e87a9cdae3b73d8040102f";
+const requester_id = "68ec99ddf39c7c140f42fcfa"
 export default function CalendarPage() {
 
     const router = useRouter();
 
-    const [requesterId, setRequesterId] = useState("user_requester_5678");
 
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const today = new Date();
@@ -52,7 +52,7 @@ export default function CalendarPage() {
             <div className="flex justify-center md:block hidden">
                 <DesktopCalendar
                     fixer_id={fixer_id}
-                    requester_id={"ungu"}
+                    requester_id={requester_id}
                 />
 
             </div>
@@ -68,7 +68,7 @@ export default function CalendarPage() {
                 <MobileList
                     selectedDate={selectedDate}
                     fixerId={fixer_id}
-                    requesterId={requesterId}
+                    requesterId={requester_id}
                     onDateChange={handleDataChange}
                 />
             </div>
