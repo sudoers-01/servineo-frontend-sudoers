@@ -47,7 +47,7 @@ export default function DesktopDailyHours({
 
 
 
-    const hours = Array.from({ length: 23 }, (_, i) => i + 8);
+    const hours = Array.from({ length: 23 }, (_, i) => i);
 
     return (
         <div className="flex-1 grid grid-rows-23">
