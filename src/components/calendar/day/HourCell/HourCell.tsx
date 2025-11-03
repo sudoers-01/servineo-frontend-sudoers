@@ -7,6 +7,8 @@ import { useUserRole } from "@/utils/contexts/UserRoleContext";
 import useAppointmentsByDate from "@/hooks/useDailyAppointments";
 import type { AppointmentFormHandle } from "@/components/appointments/forms/AppointmentForm";
 import AppointmentForm from "@/components/appointments/forms/AppointmentForm";
+import AppointmentDetailsForm, { EditAppointmentFormHandle } from "@/components/appointments/forms/AppointmentDetails";
+
 
 interface HourCellProps {
     date: Date;
@@ -33,6 +35,7 @@ export default function HourCell({
     view
 }: HourCellProps) {
     const refFormularioCita = useRef<AppointmentFormHandle | null>(null);
+    const formRef = useRef<EditAppointmentFormHandle>(null);
 
 
     const isBooked = isHourBooked(hour);
@@ -73,18 +76,32 @@ export default function HourCell({
 
 
     const { isFixer, isRequester, fixer_id: fixi } = useUserRole();
+    const handleOpenForm = () => {
+        if (formRef.current) {
+            const now = new Date(date);
+            now.setHours(hour, 0, 0, 0);
 
-    const handleClick = () => {
-        if (isBooked) {
-            const appointmentDateTime = new Date(date);
-            appointmentDateTime.setHours(hour, 0, 0, 0);
-            setEditDateTime(appointmentDateTime);
-            setIsEditModalOpen(true);
-        } else {
-            const localISOString = createISOWithOffset(date, hour);
-            refFormularioCita.current?.open(localISOString);
+            formRef.current.open(now);
         }
     }
+    const handleClick = () => {
+        if (isRequester) {
+            if (isBooked) {
+                const appointmentDateTime = new Date(date);
+                appointmentDateTime.setHours(hour, 0, 0, 0);
+                setEditDateTime(appointmentDateTime);
+                setIsEditModalOpen(true);
+            } else {
+                const localISOString = createISOWithOffset(date, hour);
+                refFormularioCita.current?.open(localISOString);
+            }
+
+        } else if (isFixer) {
+            handleOpenForm();
+        }
+    }
+
+
 
     const handleCloseEditModal = () => {
         setIsEditModalOpen(false);
@@ -119,6 +136,9 @@ export default function HourCell({
                     requesterId={requester_id}
                 />
             )}
+
+            <AppointmentDetailsForm ref={formRef} />
+
         </div>
     );
 }
