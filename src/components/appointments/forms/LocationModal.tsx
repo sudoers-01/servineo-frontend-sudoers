@@ -2,8 +2,7 @@
 
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
-
-// Importar MapView dinámicamente solo en el cliente
+export type FormType = 'create'|'edit'|'view'
 const MapView = dynamic(
   () => import("@/components/maps/location/MapView"),
   {
@@ -24,9 +23,10 @@ interface LocationModalProps {
   onClose: () => void;
   onConfirm: (location: { lat: number; lon: number; address: string }) => void;
   initialCoords?: { lat: number; lon: number; address?: string } | null;
+  formtype?: 'create'|'edit'|'view';
 }
 
-export default function LocationModal({ open, onClose, onConfirm, initialCoords}: LocationModalProps) {
+export default function LocationModal({ open, onClose, onConfirm, initialCoords, formtype}: LocationModalProps) {
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [address, setAddress] = useState<string>("");
 
@@ -68,9 +68,10 @@ export default function LocationModal({ open, onClose, onConfirm, initialCoords}
               <b>Dirección:</b> {address || "Cargando..."}
             </p>
           )}
-
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={onClose} className="px-4 py-2 rounded bg-gray-300 text-black text-sm">Cancelar</button>
+            {
+              formtype !== 'view' ?(
             <button
               onClick={() => coords && onConfirm({ ...coords, address })}
               disabled={!coords}
@@ -78,6 +79,8 @@ export default function LocationModal({ open, onClose, onConfirm, initialCoords}
             >
               Confirmar ubicación
             </button>
+              ) : null
+            }
           </div>
         </div>
       </div>

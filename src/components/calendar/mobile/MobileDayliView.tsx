@@ -4,7 +4,6 @@ import axios from "axios";
 import AppointmentForm from "../../appointments/forms/AppointmentForm";
 import type { AppointmentFormHandle } from "../../appointments/forms/AppointmentForm";
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
-import type { EditAppointmentFormHandle, ExistingAppointment } from "../../appointments/forms/EditAppointmentForm";
 import DatePicker from "@/components/list/DatePicker/DatePicker"
 
 const API_BASE = "https://servineo-backend-lorem.onrender.com";
@@ -129,7 +128,6 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
     const [error, setError] = useState<string>("");
 
     const refFormularioCita = useRef<AppointmentFormHandle | null>(null);
-    const refFormularioEditarCita = useRef<EditAppointmentFormHandle | null>(null);
 
     const refAbort = useRef<AbortController | null>(null);
     const refReqSeq = useRef(0);
@@ -229,7 +227,7 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
                 e?.name === "AbortError" ||
                 e?.name === "CanceledError" ||
                 e?.code === "ERR_CANCELED" ||
-                (typeof axios.isCancel === "function" && axios.isCancel(e));
+                (typeof (axios as any).isCancel === "function" && (axios as any).isCancel(e))
             if (!isAbort) setError(e?.message || "Error");
         } finally {
             refActiveLoads.current = Math.max(0, refActiveLoads.current - 1);
@@ -251,51 +249,6 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
         }
     }, [selectedDate, fixerId, requesterId]);
 
-    async function cargarYEditarCita(item: HorarioItem) {
-        try {
-            const [y, m, d] = fecha.split("-").map(Number);
-            const [hh] = (item.Hora_Inicio || "00:00").split(":");
-            const horaLocal = parseInt(hh, 10);
-            const isoParaEditar = new Date(Date.UTC(y, m - 1, d, horaLocal + 4, 0, 0)).toISOString();
-
-            const url =
-                `${API_BASE}/api/crud_read/appointments/get_modal_form` +
-                `?fixer_id=${encodeURIComponent(fixerId)}` +
-                `&requester_id=${encodeURIComponent(requesterId)}` +
-                `&appointment_date=${encodeURIComponent(fecha)}` +
-                `&start_hour=${encodeURIComponent(String(horaLocal))}`;
-
-            const res = await fetch(url, { headers: { Accept: "application/json" } });
-            if (!res.ok) {
-                const body = await res.text().catch(() => "<sin cuerpo>");
-                alert(`Error ${res.status} al consultar la cita.\n${body}`);
-                return;
-            }
-            const data = await res.json();
-
-            const modality = data?.data?.appointment_type === "presential" ? "presencial" : "virtual";
-
-            const existingAppointment: ExistingAppointment = {
-                id: data?.data?._id || data?.data?.id || `${fecha}-${hh}`,
-                datetime: isoParaEditar,
-                client: data?.data?.current_requester_name || "",
-                contact: data?.data?.current_requester_phone || "",
-                modality,
-                description: data?.data?.appointment_description || "",
-                meetingLink: data?.data?.link_id || "",
-                lat: data?.data?.latitude != null ? Number(data.data.latitude) : undefined,
-                lon: data?.data?.longitude != null ? Number(data.data.longitude) : undefined,
-                address: data?.data?.display_name_location || "",
-                place: "",
-            };
-
-            refFormularioEditarCita.current?.open(existingAppointment);
-        } catch (err) {
-            alert("Error al cargar los datos de la cita para editar. Revisa consola.");
-            console.error(err);
-        }
-    }
-
     const etiquetaPorEstado = (estado: Estado): { text: string; icon: Icono; textCls: string; rowCls: string } => {
         switch (estado) {
             case "libre":
@@ -309,7 +262,12 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
                 return { text: "NO DISPONIBLE", icon: null, textCls: "text-slate-400", rowCls: "bg-white opacity-60" };
         }
     };
-
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [editDateTime, setEditDateTime] = useState<Date | null>(null);
+    const handleCloseEditModal = () => {
+            setIsEditModalOpen(false);
+            setEditDateTime(null);
+    }
     const manejarClickEnSlot = (item: HorarioItem) => {
         const meta = etiquetaPorEstado(item.estado_Horario);
         if (item.estado_Horario === "libre") {
@@ -321,7 +279,11 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
             const fechaFinal = new Date(Date.UTC(anio, mes, dia, horaActual + 4, 0, 0));
             refFormularioCita.current?.open(fechaFinal.toISOString());
         } else if (item.estado_Horario === "reservado_propio") {
-            cargarYEditarCita(item);
+            const appointmentDateTime = convertToDate(date);
+            console.log('Fecha Matsi:', item.Hora_Inicio);
+            appointmentDateTime.setHours(parseInt(item.Hora_Inicio), 0, 0, 0);
+            setEditDateTime(appointmentDateTime);
+            setIsEditModalOpen(true);
         }
     };
 
@@ -377,7 +339,15 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
                 </div>
             )}
             <AppointmentForm ref={refFormularioCita} fixerId={fixerId} requesterId={requesterId} />
-            <EditAppointmentForm ref={refFormularioEditarCita} />
+            {isEditModalOpen && editDateTime && (
+                <EditAppointmentForm
+                    isOpen={isEditModalOpen}
+                    onClose={handleCloseEditModal}
+                    datetime={editDateTime}
+                    fixerId={fixerId}
+                    requesterId={requesterId}
+                />
+            )}
         </div>
     );
 }
