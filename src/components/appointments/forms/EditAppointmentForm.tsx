@@ -364,28 +364,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
   if (!open) return null;
 
-  // Validación de 24 horas - muestra mensaje si no se puede editar
-  if (!canEditAppointment(datetime)) {
-    return (
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
-        <div className="relative bg-white rounded-lg shadow-xl w-full max-w-md mx-auto p-6">
-          <h3 className="text-lg font-semibold text-red-600 mb-4">No se puede editar</h3>
-          <p className="text-gray-700 mb-4">
-            Las citas solo se pueden editar hasta 24 horas antes de la cita programada.
-          </p>
-          <div className="flex justify-end">
-            <button 
-              onClick={handleClose}
-              className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 transition-colors"
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   return (
     <>
@@ -452,11 +431,12 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
               {msg && <p className="text-sm text-red-600">{msg}</p>}
 
               <EditAppointmentActions
-                loading={loading}
-                changesDetected={changesDetected}
-                onCancel={handleClose}
-                submitDisabled={modality === "presencial" && !address}
-              />
+                  loading={loading}
+                  changesDetected={changesDetected}
+                  onCancel={handleClose}
+                  appointmentStart={originalAppointment ? new Date(originalAppointment.datetime) : undefined}  // ✅
+                  submitDisabled={modality === "presencial" && !address}
+                />
             </form>
           </div>
         </div>
