@@ -46,7 +46,7 @@ export default function CalendarPage() {
     const handleConfirmCancel = (selectedDays: string[]) => {
         //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
     }
-    
+
 
     return (
         <UserRoleProvider
@@ -83,16 +83,16 @@ export default function CalendarPage() {
                         className="ml-auto w-60 bg-green-700 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors cursor-pointer">
                         Vista Actual: {userRole}
                     </button>
-
-                    <button className="ml-auto w-60 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors">
-                        Modificar Disponibilidad
-                    </button>
-                    <button 
-                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2" 
-                        onClick={openCancelModal} 
-                    >
-                        Cancelar
-                    </button>
+                    {userRole === 'fixer' && (<div>
+                        <button className="ml-auto w-60 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors">
+                            Modificar Disponibilidad
+                        </button>
+                        <button
+                            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2"
+                            onClick={openCancelModal}
+                        >
+                            Cancelar
+                        </button></div>)}
                 </div>
 
                 <div className="flex justify-center md:block hidden">
