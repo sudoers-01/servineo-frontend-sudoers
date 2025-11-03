@@ -2,19 +2,19 @@
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import axios from "axios";
 import { z } from "zod";
-import LocationModal from "./LocationModal"; // Para seleccionar ubicación
-import AppointmentSummaryModal from "./AppointmentSummaryModal"; // Para mostrar resumen
+import LocationModal from "./LocationModal";
+import AppointmentSummaryModal from "./AppointmentSummaryModal";
 
 export type AppointmentFormHandle = {
-  open: (datetimeISO: string, meta?: { eventId?: string; title?: string }) => void;
+  open: (datetimeISO: string) => void;
   close: () => void;
 };
 
 interface AppointmentFormProps {
-  onNextStep?: (appointmentData: any) => void;
   fixerId: string;
   requesterId: string;
 }
+
 // Zod esquema de validacion
 const baseSchema = z.object({
   client: z.string()
@@ -23,7 +23,7 @@ const baseSchema = z.object({
     .max(50, "El nombre no puede tener más de 50 caracteres"),
 
   contact: z.string()
-    .regex(/^\+591 [67]\d{7}$/, "Ingrese un número de teléfono válido")
+    .regex(/^[67]\d{7}$/, "Ingrese un número de teléfono válido (8 dígitos)")
     .nonempty("Ingrese un número de teléfono"),
 
   description: z.string()
@@ -31,7 +31,6 @@ const baseSchema = z.object({
     .max(300, "La descripción no puede tener más de 300 caracteres"),
 });
 
-// virtualSchema
 const virtualSchema = baseSchema.extend({
   modality: z.literal("virtual"),
   meetingLink: z.string()
@@ -40,7 +39,6 @@ const virtualSchema = baseSchema.extend({
   location: z.undefined().optional(),
 });
 
-// presentialSchema
 const presentialSchema = baseSchema.extend({
   modality: z.literal("presential"),
   meetingLink: z.undefined().optional(),
@@ -56,11 +54,13 @@ const presentialSchema = baseSchema.extend({
 
 const appointmentSchema = z.discriminatedUnion("modality", [virtualSchema, presentialSchema]);
 
-const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ onNextStep, fixerId, requesterId }, ref) => {
+const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(({ fixerId, requesterId }, ref) => {
+  console.log("create.propsReceived", { fixerId, requesterId });
+
   const [open, setOpen] = useState(false);
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
-  const [contact, setContact] = useState<string>("+591 ");
+  const [contact, setContact] = useState<string>("");
   const [modality, setModality] = useState<"virtual" | "presential">("virtual");
   const [description, setDescription] = useState<string>("");
   const [place, setPlace] = useState<string>("");
@@ -68,7 +68,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [meta, setMeta] = useState<{ eventId?: string; title?: string } | null>(null);
 
   const [showLocationModal, setShowLocationModal] = useState(false);
   const [showSummary, setShowSummary] = useState(false);
@@ -85,9 +84,9 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   const firstFieldRef = useRef<HTMLInputElement | null>(null);
 
   useImperativeHandle(ref, () => ({
-    open: (dt: string, m?: { eventId?: string; title?: string }) => {
+    open: (dt: string) => {
+      console.log("create.openingModal", { datetimeReceived: dt });
       setDatetime(dt);
-      setMeta(m || null);
       setOpen(true);
       setTimeout(() => firstFieldRef.current?.focus(), 40);
     },
@@ -103,9 +102,10 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
   }, [open]);
  
   function handleClose() {
+    console.log("create.closingModal");
     setOpen(false);
     setClient("");
-    setContact("+591 ");
+    setContact("");
     setDescription("");
     setModality("virtual");
     setPlace("");
@@ -114,56 +114,33 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     setErrors({});
   }
 
-  const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    
-    // Si el usuario intenta borrar el "+591 ", no permitirlo
-    if (value.length < 5) {
-      setContact("+591 ");
-      return;
-    }
-    
-    // Asegurarse de que siempre empiece con "+591 "
-    if (!value.startsWith("+591 ")) {
-      setContact("+591 " + value.replace(/[^\d]/g, '').slice(0, 8));
-      return;
-    }
-    
-    // Permitir solo números después del "+591 "
-    const numbersOnly = value.slice(5).replace(/[^\d]/g, '');
-    
-    // Limitar a 8 dígitos después del "+591 "
-    if (numbersOnly.length <= 8) {
-      setContact("+591 " + numbersOnly);
-    }
-  };
+
+
+
 
   function parseDatetime(datetimeISO: string) {
-    // Si el string ISO no termina en 'Z', agregarlo para forzar UTC
-    const isoString = datetimeISO.endsWith('Z') ? datetimeISO : datetimeISO + 'Z';
-    const prevStart = new Date(isoString);
+    console.log("create.parsingDatetime", { inputISO: datetimeISO });
 
-    const currentYear = prevStart.getUTCFullYear();
-    const currentMonth = prevStart.getUTCMonth();
-    const currentDay = prevStart.getUTCDate();
-    const currentHour = prevStart.getUTCHours();
+    // Parsear la fecha que llega (UTC)
+    const originalDate = new Date(datetimeISO);
 
-    const start = new Date(Date.UTC(currentYear, currentMonth, currentDay, (currentHour - 4), 0, 0));
+    // Restar 4 horas para el backend
+    const adjustedStart = new Date(originalDate.getTime() - 4 * 60 * 60 * 1000);
+    const adjustedEnd = new Date(adjustedStart.getTime() + 60 * 60 * 1000);
 
-    const end = new Date(Date.UTC(currentYear, currentMonth, currentDay, (start.getUTCHours() + 1), 0, 0));
+    console.log("create.adjustedStart", adjustedStart.toISOString());
+    console.log("create.adjustedEnd", adjustedEnd.toISOString());
 
-    //const startMinus4Hours = new Date(start.getTime() - 4 * 60 * 60 * 1000);
-
-    //console.log("start: ", start.toISOString());
-    //console.log("end: ", end.toISOString());
     return {
-      selected_date: start.toISOString().split("T")[0],
-      starting_time: start.toISOString(),
-      finishing_time: end.toISOString()
+      selected_date: adjustedStart.toISOString().split("T")[0],
+      starting_time: adjustedStart.toISOString(),
+      finishing_time: adjustedEnd.toISOString()
     };
   }
 
+
   const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
+    console.log("create.locationConfirmed", locationData);
     setLocation(locationData);
     setPlace(locationData.address);
     setShowLocationModal(false);
@@ -171,6 +148,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    console.log("create.submitStarted");
     setErrors({});
 
     const formData = {
@@ -182,12 +160,14 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       location: modality === "presential" ? location : undefined,
     };
 
+    console.log("create.formData", formData);
+
     const validation = appointmentSchema.safeParse(formData);
     if (!validation.success) {
+      console.log("create.validationFailed", validation.error.issues);
       const fieldErrors: Record<string, string> = {};
       validation.error.issues.forEach(err => {
         if (Array.isArray(err.path) && err.path.length) {
-          // Si el path es location.address, lo mostramos en errors.location
           const key = err.path[0];
           fieldErrors[key as string] = err.message;
         } else {
@@ -195,10 +175,12 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
         }
       });
       setErrors(fieldErrors);
-      return; // no enviar si hay errores
+      return;
     }
 
-    const { selected_date, starting_time, finishing_time} = parseDatetime(datetime);
+    console.log("create.validationSuccess");
+
+    const { selected_date, starting_time, finishing_time } = parseDatetime(datetime);
 
     const payload = {
       id_fixer: fixerId,
@@ -206,7 +188,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       selected_date,
       starting_time,
       finishing_time,
-      schedule_state:"booked",
+      schedule_state: "booked",
       appointment_type: modality,
       appointment_description: description,
       current_requester_name: client,
@@ -217,36 +199,58 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
       lon: modality === "presential" ? location?.lon : null,
     };
 
+    console.log("create.payloadToSend", payload);
+    console.log("create.payloadDates", {
+      selected_date: payload.selected_date,
+      starting_time: payload.starting_time,
+      finishing_time: payload.finishing_time
+    });
+    console.log("create.payloadPhone", payload.current_requester_phone);
+
     setLoading(true);
     try {
-      const res = await axios.post("https://servineo-backend-lorem.onrender.com/api/crud_create/appointments/create", payload);
+      console.log("create.sendingRequest");
+      const res = await axios.post(
+        "https://servineo-backend-lorem.onrender.com/api/crud_create/appointments/create",
+        payload
+      );
       const data = res.data;
+      console.log("create.backendResponse", data);
 
-      const hourToShow = new Date(payload.starting_time).getUTCHours();
-      let hourToShowString;
-      if(hourToShow < 10){
-        hourToShowString = "0" + hourToShow.toString() + ":00";
-      } else{
-        hourToShowString = hourToShow.toString() + ":00";
-      }
+      // Calcular hora para mostrar (local del usuario)
+      const startDate = new Date(payload.starting_time);
+      const localHour = startDate.getHours();
+      const hourToShowString = localHour < 10 ? `0${localHour}:00` : `${localHour}:00`;
+      
+      console.log("create.displayHourCalculated", { 
+        utcHour: startDate.getUTCHours(), 
+        localHour: localHour,
+        formatted: hourToShowString 
+      });
 
       if (data.success) {
-        setSummaryData({
+        const summary = {
           name: client,
-          date: new Date(payload.starting_time).toLocaleDateString(),
+          date: startDate.toLocaleDateString(),
           time: hourToShowString,
-          //time: new Date(payload.starting_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), para futuro
           modality,
           locationOrLink: modality === "virtual" ? meetingLink : place,
           description,
-        });
+        };
+        console.log("create.showingSummary", summary);
+        setSummaryData(summary);
         setShowSummary(true);
       }
     } catch (err: any) {
-      console.error(err);
-      setErrors({ general: "Error: No se pudo crear la cita" });
+      const backendMessage = err.response?.data?.message || "No se pudo crear la cita";
+      console.log("create.requestError", { 
+        message: backendMessage, 
+        fullError: err.response?.data 
+      });
+      setErrors({ general: backendMessage });
     } finally {
       setLoading(false);
+      console.log("create.processFinished");
     }
   }
 
@@ -267,7 +271,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
           <div className="p-4 sm:p-6">
             <div className="flex items-start justify-between">
               <h3 id="appointment-title" className="text-lg font-semibold text-black">
-                Agendar cita {meta?.title ? `- ${meta.title}` : ""}
+                Agendar cita
               </h3>
               <button
                 aria-label="Cerrar"
@@ -279,7 +283,6 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
             </div>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
-              {/* Campos del formulario */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
                 <label className="block">
                   <span className="text-sm font-medium">Fecha y hora *</span>
@@ -319,8 +322,9 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
                   <span className="text-sm font-medium">Contacto *</span>
                   <input
                     value={contact}
-                    onChange={handleContactChange}
-                    placeholder="+591 7XXXXXXX"
+                    onChange={(e) => setContact(e.target.value)}
+                    placeholder="7XXXXXXX"
+                    maxLength={8}
                     className="mt-1 block w-full border rounded px-3 py-2 bg-white"
                   />
                   {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
