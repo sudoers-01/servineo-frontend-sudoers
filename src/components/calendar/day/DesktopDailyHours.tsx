@@ -25,6 +25,12 @@ export default function DesktopDailyHours({
     requester_id,
     view
 }: DesktopDailyViewProps) {
+
+    const {
+        isHourBooked,
+    } = useAppointmentsByDate(fixer_id, date);
+
+
     const isPast = (hour: number) => {
         if (date.getFullYear() < today.getFullYear() ||
             date.getMonth() < today.getMonth() ||
@@ -58,6 +64,7 @@ export default function DesktopDailyHours({
                     isToday={isToday}
                     fixer_id={fixer_id}
                     requester_id={requester_id}
+                    isHourBooked={isHourBooked}
                     view={view}
                 />
             ))}
