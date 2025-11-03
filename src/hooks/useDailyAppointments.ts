@@ -22,7 +22,9 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
         fetchAppointments();
     }, [fixer_id, date]);
 
-
+    const getAppointmentByHour = (hour: number) => {
+        return appointments.find(apt => new Date(apt.starting_time).getUTCHours() === hour);
+    };
 
     const bookedHours = appointments.map(apt => new Date(apt.starting_time).getUTCHours());
 
@@ -31,6 +33,7 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
 
     return {
         bookedHours,
+        getAppointmentByHour,
         isHourBooked,
         loading
     };

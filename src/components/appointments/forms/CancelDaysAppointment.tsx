@@ -1,12 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '../../atoms/button';
+import axios from 'axios';
 
 interface DayWithAppointments {
-  date: string; // formato: "YYYY-MM-DD"
+  date: string;
   appointmentCount: number;
   dayName: string;
   dayNumber: number;
   monthName: string;
+  appointmentIds: string[];
 }
 
 interface CancelDaysAppointmentsProps {
@@ -14,59 +16,220 @@ interface CancelDaysAppointmentsProps {
   onClose: () => void;
   onConfirm: (selectedDays: string[]) => void;
   loading?: boolean;
+  fixer_id?: string;
 }
 
 export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
   isOpen,
   onClose,
   onConfirm,
-  loading = false
+  loading = false,
+  fixer_id
 }) => {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [daysWithAppointments, setDaysWithAppointments] = useState<DayWithAppointments[]>([]);
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
   const [currentYear, setCurrentYear] = useState(new Date().getFullYear());
-  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const [fetchLoading, setFetchLoading] = useState(false);
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  
+  const API_BASE = 'https://servineo-backend-lorem.onrender.com/api';
+  const FIXER_ID = fixer_id || "68e87a9cdae3b73d8040102f";
+  
   const months = [
     'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
     'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
   ];
-  async function fetchDaysWithAppointments(currentMonth: number, currentYear: number) {
-    const fecha = await fetch(`${API}/appointments/days-with-appointments?month=${currentMonth}&year=${currentYear}`);
-  }
-fetchDaysWithAppointments(currentMonth, currentYear);
 
-  // ******************************************************************
-  // AQUÍ DEBES CARGAR LOS DÍAS CON CITAS DESDE EL BACKEND
-  // Reemplaza este useEffect con tu llamada API real
-  // El backend debe filtrar por mes y año actual
-  // ******************************************************************
-  useEffect(() => {
-    if (isOpen) {
-      const fetchDaysWithAppointments = async () => {
-        try {
-          // TODO: Reemplazar con tu llamada real al API
-          // const response = await yourApiCall(currentMonth, currentYear);
-          // setDaysWithAppointments(response.data);
-          
-          // Data de ejemplo basada en la imagen para Octubre
-          const mockData: DayWithAppointments[] = [
-            { date: '2024-10-19', appointmentCount: 4, dayName: 'Lunes', dayNumber: 19, monthName: 'Octubre' },
-            { date: '2024-10-20', appointmentCount: 4, dayName: 'Martes', dayNumber: 20, monthName: 'Octubre' },
-            { date: '2024-10-22', appointmentCount: 3, dayName: 'Jueves', dayNumber: 22, monthName: 'Octubre' },
-            { date: '2024-10-23', appointmentCount: 2, dayName: 'Viernes', dayNumber: 23, monthName: 'Octubre' },
-            { date: '2024-10-27', appointmentCount: 5, dayName: 'Martes', dayNumber: 27, monthName: 'Octubre' },
-            { date: '2024-10-28', appointmentCount: 5, dayName: 'Miércoles', dayNumber: 28, monthName: 'Octubre' },
-          ];
-          setDaysWithAppointments(mockData);
-        } catch (error) {
-          console.error('Error fetching appointments:', error);
-        }
+  const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+
+  const normalizeDate = (dateString: string): { normalizedDate: string, localDate: Date } => {
+    try {
+      const utcDate = new Date(dateString);
+      const localDate = new Date(utcDate.getTime() + utcDate.getTimezoneOffset() * 60000);
+      
+      const year = localDate.getFullYear();
+      const month = String(localDate.getMonth() + 1).padStart(2, '0');
+      const day = String(localDate.getDate()).padStart(2, '0');
+      
+      return {
+        normalizedDate: `${year}-${month}-${day}`,
+        localDate: localDate
       };
-
-      fetchDaysWithAppointments();
-      setSelectedDays([]); // Reset selección al abrir
+    } catch (error) {
+      const fallbackDate = new Date(dateString.split('T')[0]);
+      return {
+        normalizedDate: dateString.split('T')[0],
+        localDate: fallbackDate
+      };
     }
+  };
+
+  const fetchDaysWithAppointments = async (month: number, year: number) => {
+    setFetchLoading(true);
+    setError(null);
+    
+    try {
+      const date = `${year}-${String(month + 1).padStart(2, '0')}-01`;
+      
+      const response = await axios.get(
+        `${API_BASE}/crud_read/appointments/get_all_appointments_by_fixer_date`,
+        {
+          params: {
+            id_fixer: FIXER_ID, 
+            date: date
+          }
+        }
+      );
+      
+      if (response.data && response.data.appointments && Array.isArray(response.data.appointments)) {
+        const appointmentsByDay: { [key: string]: { count: number, ids: string[], localDate: Date } } = {};
+        
+        response.data.appointments.forEach((appointment: any) => {
+          if (appointment && appointment.selected_date && !appointment.cancelled_fixer) {
+            try {
+              const { normalizedDate, localDate } = normalizeDate(appointment.selected_date);
+              
+              if (!appointmentsByDay[normalizedDate]) {
+                appointmentsByDay[normalizedDate] = { 
+                  count: 0, 
+                  ids: [],
+                  localDate: localDate
+                };
+              }
+              
+              appointmentsByDay[normalizedDate].count += 1;
+              appointmentsByDay[normalizedDate].ids.push(appointment._id);
+              
+            } catch (dateError) {
+              console.error('Error procesando fecha:', dateError);
+            }
+          }
+        });
+        
+        const formattedData: DayWithAppointments[] = Object.entries(appointmentsByDay).map(([date, data]) => {
+          const localDate = data.localDate;
+          
+          return {
+            date: date,
+            appointmentCount: data.count,
+            dayName: dayNames[localDate.getDay()],
+            dayNumber: localDate.getDate(),
+            monthName: months[localDate.getMonth()],
+            appointmentIds: data.ids
+          };
+        });
+        
+        formattedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        return formattedData;
+      } else {
+        return [];
+      }
+      
+    } catch (error: any) {
+      setError('Error al cargar las citas');
+      return [];
+    } finally {
+      setFetchLoading(false);
+    }
+  };
+
+const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
+  let successCount = 0;
+  let failedCount = 0;
+  
+  for (const appointmentId of day.appointmentIds) {
+    try {
+      console.log('Canceling appointment ID:', appointmentId);
+      
+     const response = await axios.put(
+        `${API_BASE}/crud_update/appointments/update_cancell_appointment_fixer?appointment_id=${appointmentId}`,
+        {}, 
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+
+      
+      
+      if (response.data && response.data.succeed === true) {
+        successCount++;
+      } else {
+        failedCount++;
+      }
+    } catch (error: any) {
+      console.log('Error details:', error.response?.data);
+      failedCount++;
+    }
+  }
+  
+  return { success: successCount, failed: failedCount };
+};
+  const handleConfirm = async () => {
+    if (cancelLoading || selectedDays.length === 0) return;
+    
+    const selectedDaysData = daysWithAppointments.filter(day => 
+      selectedDays.includes(day.date)
+    );
+    
+    setError(null);
+    setSuccessMessage(null);
+    setCancelLoading(true);
+    
+    try {
+      let totalSuccess = 0;
+      let totalFailed = 0;
+      
+      for (const day of selectedDaysData) {
+        const result = await cancelAppointmentsForDay(day);
+        totalSuccess += result.success;
+        totalFailed += result.failed;
+      }
+      
+      if (totalSuccess > 0) {
+        const successMsg = `Se cancelaron ${totalSuccess} cita${totalSuccess !== 1 ? 's' : ''}`;
+        if (totalFailed > 0) {
+          setSuccessMessage(`${successMsg}. ${totalFailed} cita${totalFailed !== 1 ? 's' : ''} no se pudieron cancelar.`);
+        } else {
+          setSuccessMessage(successMsg);
+        }
+        
+        onConfirm(selectedDays);
+        setSelectedDays([]);
+        
+        // Recargar datos
+        setTimeout(async () => {
+          const appointmentsData = await fetchDaysWithAppointments(currentMonth, currentYear);
+          setDaysWithAppointments(appointmentsData);
+        }, 1000);
+        
+      } else {
+        setError('No se pudo cancelar ninguna cita');
+      }
+      
+    } catch (error: any) {
+      setError('Error al cancelar las citas');
+    } finally {
+      setCancelLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (isOpen) {
+        const data = await fetchDaysWithAppointments(currentMonth, currentYear);
+        setDaysWithAppointments(data || []);
+        setSelectedDays([]);
+        setError(null);
+        setSuccessMessage(null);
+      }
+    };
+
+    loadData();
   }, [isOpen, currentMonth, currentYear]);
 
   const toggleDaySelection = (date: string) => {
@@ -78,10 +241,6 @@ fetchDaysWithAppointments(currentMonth, currentYear);
       }
       return prev;
     });
-  };
-
-  const handleConfirm = () => {
-    onConfirm(selectedDays);
   };
 
   const changeMonth = (direction: 'prev' | 'next') => {
@@ -104,15 +263,18 @@ fetchDaysWithAppointments(currentMonth, currentYear);
 
   if (!isOpen) return null;
   
+  const isLoading = loading || cancelLoading;
+  
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full overflow-hidden">
-        {/* Barra azul superior más grande con botón X */}
-        <div className="bg-blue-600 h-12 px-4 flex items-center justify-between">
-          <div className="w-6"></div> {/* Espacio para centrar */}
+      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col">
+        <div className="bg-blue-600 h-12 px-4 flex items-center justify-between flex-shrink-0">
+          <div className="w-6"></div>
+          <h3 className="text-white font-semibold">Cancelar Citas por Día</h3>
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 transition-colors"
+            disabled={isLoading}
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -131,112 +293,156 @@ fetchDaysWithAppointments(currentMonth, currentYear);
           </button>
         </div>
 
-        {/* Navegación del mes */}
-        <div className="flex items-center justify-center space-x-4 py-4">
-          <button
-            onClick={() => changeMonth('prev')}
-            className="text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15.75 19.5L8.25 12l7.5-7.5"
-              />
-            </svg>
-          </button>
-          
-          <h2 className="text-black text-xl text-center ">
-            {months[currentMonth]}
-          </h2>
-          
-          <button
-            onClick={() => changeMonth('next')}
-            className="text-gray-600 hover:text-gray-800 transition-colors"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-              className="w-5 h-5"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8.25 4.5l7.5 7.5-7.5 7.5"
-              />
-            </svg>
-          </button>
-        </div>
-
-        {/* Content */}
-        <div className="px-6 pb-4 max-h-96 overflow-y-auto">
-         
-
-          <div className="space-y-2">
-            {daysWithAppointments.map((day) => (
-              <div
-                key={day.date}
-                className={` text-black flex items-center justify-between p-3 border rounded cursor-pointer transition-all ${
-                  selectedDays.includes(day.date)
-                    ? 'bg-blue-50 border-blue-300 border-2'
-                    : 'border-gray-200 hover:bg-gray-50'
-                }`}
-                onClick={() => toggleDaySelection(day.date)}
-              >
-                <span className="font-medium">
-                  <strong>{day.dayName} {day.dayNumber}</strong> - {day.appointmentCount} citas
-                </span>
-                
-                {/* Checkbox cuadrado a la derecha */}
-                <div className={`w-5 h-5 border-2 rounded flex items-center justify-center ${
-                  selectedDays.includes(day.date) 
-                    ? 'bg-blue-600 border-blue-600' 
-                    : 'border-gray-400'
-                }`}>
-                  {selectedDays.includes(day.date) && (
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                      className="w-3 h-3 text-white"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  )}
+        <div className="flex-1 overflow-hidden flex flex-col">
+          {(error || successMessage) && (
+            <div className="flex-shrink-0 px-4 pt-4">
+              {error && (
+                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                  {error}
                 </div>
-              </div>
-            ))}
+              )}
+              {successMessage && (
+                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                  {successMessage}
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex items-center justify-center space-x-4 py-4 flex-shrink-0">
+            <button
+              onClick={() => changeMonth('prev')}
+              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+              disabled={fetchLoading || isLoading}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                />
+              </svg>
+            </button>
+            
+            <h2 className="text-black text-xl text-center">
+              {months[currentMonth]} {currentYear}
+              {fetchLoading && ' (Cargando...)'}
+            </h2>
+            
+            <button
+              onClick={() => changeMonth('next')}
+              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+              disabled={fetchLoading || isLoading}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={2}
+                stroke="currentColor"
+                className="w-5 h-5"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M8.25 4.5l7.5 7.5-7.5 7.5"
+                />
+              </svg>
+            </button>
           </div>
 
-          {/* Selected counter */}
-          <div className="mt-4 text-sm text-gray-700">
-            <strong>Seleccionado: {selectedDays.length}</strong>
+          <div className="px-6 pb-4 flex-1 overflow-y-auto">
+            {fetchLoading ? (
+              <div className="text-center py-8">
+                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600">Cargando citas...</p>
+              </div>
+            ) : daysWithAppointments.length === 0 ? (
+              <div className="text-center py-8 text-gray-500">
+                No hay citas programadas para {months[currentMonth]} {currentYear}
+              </div>
+            ) : (
+              <>
+                <p className="text-sm text-gray-600 mb-4 text-center">
+                  Selecciona los días que deseas cancelar (máximo 5)
+                </p>
+
+                <div className="space-y-3">
+                  {daysWithAppointments.map((day) => (
+                    <div
+                      key={day.date}
+                      className={`text-black flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                        selectedDays.includes(day.date)
+                          ? 'bg-blue-50 border-blue-500 shadow-sm'
+                          : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
+                      } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
+                      onClick={() => !isLoading && toggleDaySelection(day.date)}
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-lg">
+                          {day.dayName} {day.dayNumber} de {day.monthName}
+                        </span>
+                        <span className="text-sm text-gray-600 mt-1">
+                          {day.appointmentCount} {day.appointmentCount === 1 ? 'cita programada' : 'citas programadas'}
+                        </span>
+                      </div>
+                      
+                      <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-colors ${
+                        selectedDays.includes(day.date) 
+                          ? 'bg-blue-600 border-blue-600' 
+                          : 'border-gray-400'
+                      }`}>
+                        {selectedDays.includes(day.date) && (
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                            className="w-4 h-4 text-white"
+                          >
+                            <path
+                              fillRule="evenodd"
+                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                              clipRule="evenodd"
+                            />
+                          </svg>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="mt-6 p-3 bg-gray-50 rounded-lg text-left">
+                  <strong className="text-gray-800">
+                    Seleccionado: {selectedDays.length}
+                  </strong>
+                </div>
+              </>
+            )}
           </div>
         </div>
 
-        {/* Footer con botón pegado a la derecha */}
-        <div className="border-t p-4 flex justify-end">
+        <div className="border-t p-4 flex justify-end space-x-3 flex-shrink-0">
+          <Button
+            onClick={onClose}
+            disabled={isLoading}
+            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 font-medium disabled:opacity-50"
+          >
+            Cerrar
+          </Button>
           <Button
             onClick={handleConfirm}
-            loading={loading}
-            disabled={selectedDays.length === 0 || loading}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 font-medium"
+            loading={cancelLoading}
+            disabled={selectedDays.length === 0 || isLoading}
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 font-medium disabled:opacity-50 min-w-32"
           >
-            {loading ? 'Cancelando...' : 'Cancelar citas'}
+            {cancelLoading ? 'Cancelando...' : `Cancelar ${selectedDays.length} día${selectedDays.length !== 1 ? 's' : ''}`}
           </Button>
         </div>
       </div>

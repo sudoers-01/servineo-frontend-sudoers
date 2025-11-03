@@ -10,25 +10,33 @@ interface DesktopDailyViewProps {
 
     date: Date;
     fixer_id: string;
+    requester_id: string;
     view: 'week' | 'day';
 }
 
 const today = new Date();
 const currentHour = today.getHours();
-console.log(currentHour);
 
 
 
 export default function DesktopDailyHours({
     date,
     fixer_id,
+    requester_id,
     view
 }: DesktopDailyViewProps) {
-    const {
-        isHourBooked,
-    } = useAppointmentsByDate(fixer_id, date);
     const isPast = (hour: number) => {
-        return hour < currentHour && date <= today;
+        if (date.getFullYear() < today.getFullYear() ||
+            date.getMonth() < today.getMonth() ||
+            date.getDate() < today.getDate()) {
+            return true;
+        }
+
+        if (isToday) {
+            return hour < currentHour;
+        }
+
+        return false;
     }
     const isToday =
         date.getFullYear() === today.getFullYear() &&
@@ -37,16 +45,19 @@ export default function DesktopDailyHours({
 
 
 
-    const hours = Array.from({ length: 10 }, (_, i) => i + 8);
+    const hours = Array.from({ length: 23 }, (_, i) => i);
 
     return (
-        <div className="flex-1 grid grid-rows-9">
+        <div className="flex-1 grid grid-rows-23">
             {hours.map(hour => (
                 <HourCell
                     key={hour}
-                    isBooked={isHourBooked(hour)}
+                    date={date}
+                    hour={hour}
                     isPast={isPast(hour)}
                     isToday={isToday}
+                    fixer_id={fixer_id}
+                    requester_id={requester_id}
                     view={view}
                 />
             ))}
