@@ -17,8 +17,6 @@ interface EditAppointmentActionsProps {
 
 const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
 
-
-
 export const EditAppointmentActions = ({
   loading,
   changesDetected,
@@ -34,11 +32,13 @@ export const EditAppointmentActions = ({
   const [popupConfirmLabel, setPopupConfirmLabel] = useState<string>("Confirmar");
   const [popupOnConfirm, setPopupOnConfirm] = useState<(() => void) | undefined>(undefined);
   const [justifyOpen, setJustifyOpen] = useState(false);
+
   const within3h = useMemo(() => {
     if (!appointmentStart) return false;
     const start = new Date(appointmentStart).getTime();
     return start - Date.now() < THREE_HOURS_MS;
   }, [appointmentStart]);
+
   const openInfo = (message: React.ReactNode) => {
   setPopupVariant("info");
   setPopupMessage(message);
@@ -112,6 +112,7 @@ const handleTryCancel = () => {
           {formType==='create'?'Crear Cita':'Actualizar'}
         </Button>
       )}
+
      {formType === "edit" && (
         <>
           <Button variant="secondary" onClick={handleTryReprogram}>Reprogramar</Button>
@@ -120,7 +121,7 @@ const handleTryCancel = () => {
           </Button>
         </>
       )}
-            
+
       {formType === 'view' && onDelete && (
         <Button onClick={onDelete}>
           Cancelar Cita
@@ -144,7 +145,6 @@ const handleTryCancel = () => {
           onDelete?.();
         }}
       />
-
     </div>
   );
 };
