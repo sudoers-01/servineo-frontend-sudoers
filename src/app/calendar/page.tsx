@@ -132,7 +132,7 @@ export default function CalendarPage() {
                 <ModeSelectionModal 
                     ref={modeModalRef} 
                     fixerId={fixer_id}
-
+                />
 
                 {/* Modal de cancelación */}
                 <CancelDaysAppointments
