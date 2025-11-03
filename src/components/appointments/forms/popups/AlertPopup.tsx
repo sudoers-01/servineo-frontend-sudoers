@@ -21,7 +21,7 @@ export const AlertPopup: React.FC<AlertPopupProps> = ({
   variant = "info",
   title = "Atención",
   message,
-  confirmLabel = "Confirmar",
+  confirmLabel = "Cancelar",
   cancelLabel = "Volver",
   onConfirm,
 }) => (
@@ -55,7 +55,7 @@ export const AlertPopup: React.FC<AlertPopupProps> = ({
           <div className="mx-auto mb-3">
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-6 w-6 inline-block"
+              className="h-6 w-6 inline-block text-red-600"
               viewBox="0 0 24 24"
               fill="currentColor"
             >
@@ -63,7 +63,7 @@ export const AlertPopup: React.FC<AlertPopupProps> = ({
             </svg>
           </div>
           <div className="text-sm text-gray-700 leading-relaxed">{message}</div>
-
+         
           <div className={`mt-5 flex ${variant === "confirm" ? "justify-between gap-3" : "justify-center"}`}>
             <Button variant="secondary" onClick={onClose} className="rounded-full px-6">
               {cancelLabel}
