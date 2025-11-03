@@ -7,9 +7,15 @@ import { UserRoleProvider } from "@/utils/contexts/UserRoleContext";
 import MobileCalendar from "@/components/calendar/mobile/MobileCalendar";
 import MobileList from "@/components/list/MobileList";
 import { ModeSelectionModal, ModeSelectionModalHandles } from '@/components/appointments/forms/ModeSelectionModal';
+import CancelDaysAppointments from "@/components/appointments/forms/CancelDaysAppointment"; // Asegúrate de que la ruta sea correcta
+
 
 const fixer_id = "68e87a9cdae3b73d8040102f";
 const requester_id = "68ec99ddf39c7c140f42fcfa"
+
+function cancelAppointments() {
+    console.log("Citas canceladas");
+}
 
 export default function CalendarPage() {
     const router = useRouter();
@@ -17,6 +23,7 @@ export default function CalendarPage() {
 
     const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false); // Estado para controlar el modal
     const today = new Date();
 
     const handleDataChange = (newDate: Date) => {
@@ -35,6 +42,19 @@ export default function CalendarPage() {
         modeModalRef.current?.open();
     }
 
+
+    const openCancelModal = () => {
+        setIsCancelModalOpen(true);
+    }
+
+    const closeCancelModal = () => {
+        setIsCancelModalOpen(false);
+    }
+
+    const handleConfirmCancel = (selectedDays: string[]) => {
+        //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
+    }
+
     return (
         <UserRoleProvider
             role={userRole}
@@ -42,7 +62,6 @@ export default function CalendarPage() {
             requester_id={requester_id}
         >
             <div className="flex flex-col bg-white min-h-screen">
-
                 <div className="flex items-center">
                     <button
                         onClick={() => router.back()}
@@ -80,13 +99,14 @@ export default function CalendarPage() {
                             >
                                 Modificar Disponibilidad
                             </button>
-                            <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2">
+                            <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2"  onClick={openCancelModal}>
                                 Cancelar
                             </button>
                         </div>
                     )}
 
                 </div>
+
                 <div className="flex justify-center md:block hidden">
                     <DesktopCalendar
                         fixer_id={fixer_id}
@@ -112,6 +132,15 @@ export default function CalendarPage() {
                 <ModeSelectionModal 
                     ref={modeModalRef} 
                     fixerId={fixer_id}
+
+
+                {/* Modal de cancelación */}
+                <CancelDaysAppointments
+                    isOpen={isCancelModalOpen}
+                    onClose={closeCancelModal}
+                    onConfirm={handleConfirmCancel}
+                    fixer_id={fixer_id}
+
                 />
             </div>
         </UserRoleProvider>
