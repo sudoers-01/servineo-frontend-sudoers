@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Button } from '../../../atoms/button';
 import { AlertPopup } from "../popups/AlertPopup";
+import { JustificationPopup } from "../popups/JustificationPopup";
 
 export type FormType = 'create'|'edit'|'view'
 
@@ -32,6 +33,7 @@ export const EditAppointmentActions = ({
   const [popupMessage, setPopupMessage] = useState<React.ReactNode>(null);
   const [popupConfirmLabel, setPopupConfirmLabel] = useState<string>("Confirmar");
   const [popupOnConfirm, setPopupOnConfirm] = useState<(() => void) | undefined>(undefined);
+  const [justifyOpen, setJustifyOpen] = useState(false);
   const within3h = useMemo(() => {
     if (!appointmentStart) return false;
     const start = new Date(appointmentStart).getTime();
@@ -55,23 +57,22 @@ const openConfirm = (
   setPopupOnConfirm(() => onConfirm);
   setPopupOpen(true);
 };
-
+onConfirm: () => {
+  setPopupOpen(false);
+  setJustifyOpen(true);
+}
 const handleTryReprogram = () => {
   if (within3h) {
     openInfo(<>No es posible cancelar una cita con menos de <b>3 horas</b> de anticipación.</>);
   } else {
     openConfirm(
-      <>
-        ¿Está seguro que desea cancelar la cita actual?
+      <>¿Está seguro que desea cancelar la cita actual?
         <br />
         <span className="text-gray-500 text-xs">
           *En caso de cancelación, la cita deberá ser reprogramada.
-        </span>
-      </>,
-      "Cancelar",
-      () => {
-        setPopupOpen(false);
-      }
+        </span></>,
+      "Confirmar", 
+      () => { setPopupOpen(false); setJustifyOpen(true); }
     );
   }
 };
@@ -91,6 +92,7 @@ const handleTryCancel = () => {
       "Cancelar",
       () => {
         setPopupOpen(false);
+        setJustifyOpen(true); 
       }
     );
   }
@@ -133,6 +135,16 @@ const handleTryCancel = () => {
         onConfirm={popupOnConfirm}
         cancelLabel="Volver"
       />
+      <JustificationPopup
+        open={justifyOpen}
+        onClose={() => setJustifyOpen(false)}
+        onSubmit={(reason) => {
+          console.log("Motivo de cancelación:", reason);
+          setJustifyOpen(false);
+          onDelete?.();
+        }}
+      />
+
     </div>
   );
 };
