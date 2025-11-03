@@ -33,8 +33,6 @@ export interface WeekAvailabilityModalHandles {
 }
 
 export const WeekAvailabilityModal = forwardRef<WeekAvailabilityModalHandles, WeekAvailabilityModalProps>(
-
-
     ({ onClose }, ref) => {
         const [isOpen, setIsOpen] = useState(false);
         const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -167,7 +165,7 @@ export const WeekAvailabilityModal = forwardRef<WeekAvailabilityModalHandles, We
         if (!isOpen) return null;
 
         return (
-            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+            <div className="fixed inset-0 flex items-center justify-center p-4 z-50">
                 <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
                     <AvailabilityHeader
                         headerText='Seleccionar Disponibilidad'
