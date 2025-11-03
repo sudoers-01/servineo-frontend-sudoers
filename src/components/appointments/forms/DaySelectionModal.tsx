@@ -109,7 +109,7 @@ export const DaySelectionModal = forwardRef<DaySelectionModalHandles, DaySelecti
 
     return (
       <>
-        <div className={`fixed inset-0 flex items-center justify-center p-4 z-50 ${
+        <div className={`fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}>
           <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6 transform transition-transform duration-300 ${
@@ -167,7 +167,6 @@ export const DaySelectionModal = forwardRef<DaySelectionModalHandles, DaySelecti
           </div>
         </div>
 
-        {/* Modal de horas - siempre en el DOM */}
         <DayAvailabilityModal 
           ref={hourModalRef}
           fixerId={fixerId}

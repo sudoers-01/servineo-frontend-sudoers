@@ -1,11 +1,13 @@
 import { Button } from "@/components/atoms/button";
 
 interface ModeSelectionActionsProps{
+    fixerId: string;
     openWeek: () => void;
     openDaySelection: () => void;
 }
 
 export const ModeSelectionActions = ({
+    fixerId,
     openWeek,
     openDaySelection  
 }: ModeSelectionActionsProps ) => {

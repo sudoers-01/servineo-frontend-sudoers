@@ -1,22 +1,19 @@
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import DesktopCalendar from "@/components/calendar/DesktopCalendar";
 import { UserRoleProvider } from "@/utils/contexts/UserRoleContext";
 import MobileCalendar from "@/components/calendar/mobile/MobileCalendar";
 import MobileList from "@/components/list/MobileList";
-
+import { ModeSelectionModal, ModeSelectionModalHandles } from '@/components/appointments/forms/ModeSelectionModal';
 
 const fixer_id = "68e87a9cdae3b73d8040102f";
 const requester_id = "68ec99ddf39c7c140f42fcfa"
 
-
-
 export default function CalendarPage() {
-
     const router = useRouter();
+    const modeModalRef = useRef<ModeSelectionModalHandles>(null);
 
     const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -25,12 +22,17 @@ export default function CalendarPage() {
     const handleDataChange = (newDate: Date) => {
         setSelectedDate(newDate);
     }
+
     const switchRole = () => {
         if (userRole === 'requester') {
             setUserRole('fixer');
         } else {
             setUserRole('requester');
         }
+    }
+
+    const handleOpenAvailabilityModal = () => {
+        modeModalRef.current?.open();
     }
 
     return (
@@ -71,14 +73,16 @@ export default function CalendarPage() {
                     </button>
 
                     {userRole === 'fixer' && (
-                        <div>
-                            <button className="ml-auto w-60 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors">
+                        <div className="flex items-center ml-4">
+                            <button 
+                                className="w-60 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors"
+                                onClick={handleOpenAvailabilityModal}
+                            >
                                 Modificar Disponibilidad
                             </button>
                             <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2">
                                 Cancelar
                             </button>
-
                         </div>
                     )}
 
@@ -88,7 +92,6 @@ export default function CalendarPage() {
                         fixer_id={fixer_id}
                         requester_id={requester_id}
                     />
-
                 </div>
 
                 <div className="flex flex-col md:hidden justify-center gap-4" >
@@ -96,7 +99,6 @@ export default function CalendarPage() {
                         fixer_id={fixer_id}
                         selectedDate={selectedDate}
                         onSelectDate={handleDataChange}
-
                     />
                     <div></div>
                     <MobileList
@@ -106,8 +108,12 @@ export default function CalendarPage() {
                         onDateChange={handleDataChange}
                     />
                 </div>
+                
+                <ModeSelectionModal 
+                    ref={modeModalRef} 
+                    fixerId={fixer_id}
+                />
             </div>
         </UserRoleProvider>
-
     );
 }
