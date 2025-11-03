@@ -46,8 +46,8 @@ export default function useDayUtilities({
         if (isPast) return 'text-black';
         if (isWeekend) return 'bg-[#9FA1A5]';
         if (count === 0) return 'bg-[#16A34A] ';
-        if (count >= 1 && count <= 7) return 'bg-[#FFC857]';
-        if (count >= 8) return 'bg-[#FF5F57] ';
+        if (count >= 1 && count <= 23) return 'bg-[#FFC857]';
+        if (count === 24) return 'bg-[#FF5F57] ';
         return 'bg-gray-200 text-black';
     };
 
@@ -55,8 +55,8 @@ export default function useDayUtilities({
         if (isPast) return '';
         if (isWeekend) return 'Inhabilitado';
         if (count === 0) return 'Disponible';
-        if (count >= 1 && count <= 7) return 'Parc. Oc.';
-        if (count >= 8) return 'Ocupado';
+        if (count >= 1 && count <= 23) return 'Parc. Oc.';
+        if (count === 24) return 'Ocupado';
         return '';
     };
     return { count, isPast, isSameDay, isToday, getColor, getText };

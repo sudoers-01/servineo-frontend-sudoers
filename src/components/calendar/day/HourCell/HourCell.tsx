@@ -1,9 +1,9 @@
 'use client';
 
-import React from "react";
+import React, { useContext } from "react";
 import { useState, useRef } from "react";
 import EditAppointmentForm from "@/components/appointments/forms/EditAppointmentForm";
-
+import { useUserRole } from "@/utils/contexts/UserRoleContext";
 import useAppointmentsByDate from "@/hooks/useDailyAppointments";
 import type { AppointmentFormHandle } from "@/components/appointments/forms/AppointmentForm";
 import AppointmentForm from "@/components/appointments/forms/AppointmentForm";
@@ -15,6 +15,8 @@ interface HourCellProps {
     isToday: boolean;
     fixer_id: string;
     requester_id: string;
+    isHourBooked: (hour: number) => boolean;
+
     view: 'day' | 'week';
 }
 
@@ -26,18 +28,15 @@ export default function HourCell({
     isPast,
     isToday,
     fixer_id,
+    isHourBooked,
     requester_id,
     view
 }: HourCellProps) {
     const refFormularioCita = useRef<AppointmentFormHandle | null>(null);
 
-    const {
-        isHourBooked,
-    } = useAppointmentsByDate(fixer_id, date);
 
     const isBooked = isHourBooked(hour);
 
-    // ⭐ Estados para el modal de editar
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editDateTime, setEditDateTime] = useState<Date | null>(null);
 
@@ -49,12 +48,14 @@ export default function HourCell({
 
     const getColor = () => {
         if (isBooked) return "bg-[#FFC857]";
-        else return "bg-[#16A34A]";
+        else if (isRequester) {
+            return "bg-[#16A34A]"
+        }
     }
 
     const getText = () => {
         if (isBooked) return "Ocupado";
-        else return "Disponible";
+        else if (isRequester) return "Disponible";
     }
 
 
@@ -69,6 +70,11 @@ export default function HourCell({
 
 
     };
+
+
+    const { isFixer, isRequester, fixer_id: fixi } = useUserRole();
+    console.log(fixi);
+
     const handleClick = () => {
         if (isBooked) {
             const appointmentDateTime = new Date(date);
@@ -105,7 +111,6 @@ export default function HourCell({
                 requesterId={requester_id}
             />
 
-            {/* ⭐ Solo renderizar cuando isEditModalOpen es true y editDateTime existe */}
             {isEditModalOpen && editDateTime && (
                 <EditAppointmentForm
                     isOpen={isEditModalOpen}
