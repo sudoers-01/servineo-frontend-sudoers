@@ -73,7 +73,6 @@ export default function HourCell({
 
 
     const { isFixer, isRequester, fixer_id: fixi } = useUserRole();
-    console.log(fixi);
 
     const handleClick = () => {
         if (isBooked) {
