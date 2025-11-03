@@ -319,7 +319,7 @@ export default function HorarioDelDia({ fixerId, requesterId, selectedDate, onDa
             const dia = fechaActual.getUTCDate();
             const horaActual = parseInt(item.Hora_Inicio);
             const fechaFinal = new Date(Date.UTC(anio, mes, dia, horaActual + 4, 0, 0));
-            refFormularioCita.current?.open(fechaFinal.toISOString(), { eventId: item.id_Horario, title: meta.text });
+            refFormularioCita.current?.open(fechaFinal.toISOString());
         } else if (item.estado_Horario === "reservado_propio") {
             cargarYEditarCita(item);
         }

@@ -32,7 +32,14 @@ export const EditAppointmentActions = ({
           {formType==='create'?'Crear Cita':'Actualizar'}
         </Button>
       )}
-
+       {formType === "edit" && (
+        <>
+          <Button variant="secondary">Reprogramar</Button>
+          <Button type="submit" loading={loading} disabled={!changesDetected || submitDisabled}>
+            Actualizar
+          </Button>
+        </>
+      )}
       
 
       {formType === 'view' && onDelete && (

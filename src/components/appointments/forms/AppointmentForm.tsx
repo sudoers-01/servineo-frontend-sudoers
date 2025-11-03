@@ -2,8 +2,8 @@
 import React, { useState, forwardRef, useImperativeHandle, useRef, useEffect } from "react";
 import axios from "axios";
 import { z } from "zod";
-import LocationModal from "./LocationModal"; // Para seleccionar ubicación
-import AppointmentSummaryModal from "./AppointmentSummaryModal"; // Para mostrar resumen
+import LocationModal from "./LocationModal";
+import AppointmentSummaryModal from "./AppointmentSummaryModal";
 
 export type AppointmentFormHandle = {
     open: (datetimeISO: string, meta?: { eventId?: string; title?: string }) => void;
@@ -17,6 +17,7 @@ interface AppointmentFormProps {
     requesterId: string;
 
 }
+
 // Zod esquema de validacion
 const baseSchema = z.object({
     client: z.string()
@@ -33,7 +34,6 @@ const baseSchema = z.object({
         .max(300, "La descripción no puede tener más de 300 caracteres"),
 });
 
-// virtualSchema
 const virtualSchema = baseSchema.extend({
     modality: z.literal("virtual"),
     meetingLink: z.string()
@@ -42,7 +42,6 @@ const virtualSchema = baseSchema.extend({
     location: z.undefined().optional(),
 });
 
-// presentialSchema
 const presentialSchema = baseSchema.extend({
     modality: z.literal("presential"),
     meetingLink: z.undefined().optional(),
