@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -7,24 +6,27 @@ import DesktopCalendar from "@/components/calendar/DesktopCalendar";
 import { UserRoleProvider } from "@/utils/contexts/UserRoleContext";
 import MobileCalendar from "@/components/calendar/mobile/MobileCalendar";
 import MobileList from "@/components/list/MobileList";
-
+import CancelDaysAppointments from "@/components/appointments/forms/CancelDaysAppointment"; // Asegúrate de que la ruta sea correcta
 
 const fixer_id = "68e87a9cdae3b73d8040102f";
 const requester_id = "68ec99ddf39c7c140f42fcfa"
 
-
+function cancelAppointments() {
+    console.log("Citas canceladas");
+}
 
 export default function CalendarPage() {
-
     const router = useRouter();
 
     const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false); // Estado para controlar el modal
     const today = new Date();
 
     const handleDataChange = (newDate: Date) => {
         setSelectedDate(newDate);
     }
+
     const switchRole = () => {
         if (userRole === 'requester') {
             setUserRole('fixer');
@@ -33,6 +35,19 @@ export default function CalendarPage() {
         }
     }
 
+    const openCancelModal = () => {
+        setIsCancelModalOpen(true);
+    }
+
+    const closeCancelModal = () => {
+        setIsCancelModalOpen(false);
+    }
+
+    const handleConfirmCancel = (selectedDays: string[]) => {
+        //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
+    }
+    
+
     return (
         <UserRoleProvider
             role={userRole}
@@ -40,7 +55,6 @@ export default function CalendarPage() {
             requester_id={requester_id}
         >
             <div className="flex flex-col bg-white min-h-screen">
-
                 <div className="flex items-center">
                     <button
                         onClick={() => router.back()}
@@ -70,25 +84,22 @@ export default function CalendarPage() {
                         Vista Actual: {userRole}
                     </button>
 
-                    {userRole === 'fixer' && (
-                        <div>
-                            <button className="ml-auto w-60 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors">
-                                Modificar Disponibilidad
-                            </button>
-                            <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2">
-                                Cancelar
-                            </button>
-
-                        </div>
-                    )}
-
+                    <button className="ml-auto w-60 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors">
+                        Modificar Disponibilidad
+                    </button>
+                    <button 
+                        className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2" 
+                        onClick={openCancelModal} 
+                    >
+                        Cancelar
+                    </button>
                 </div>
+
                 <div className="flex justify-center md:block hidden">
                     <DesktopCalendar
                         fixer_id={fixer_id}
                         requester_id={requester_id}
                     />
-
                 </div>
 
                 <div className="flex flex-col md:hidden justify-center gap-4" >
@@ -96,7 +107,6 @@ export default function CalendarPage() {
                         fixer_id={fixer_id}
                         selectedDate={selectedDate}
                         onSelectDate={handleDataChange}
-
                     />
                     <div></div>
                     <MobileList
@@ -106,8 +116,15 @@ export default function CalendarPage() {
                         onDateChange={handleDataChange}
                     />
                 </div>
+
+                {/* Modal de cancelación */}
+                <CancelDaysAppointments
+                    isOpen={isCancelModalOpen}
+                    onClose={closeCancelModal}
+                    onConfirm={handleConfirmCancel}
+                    fixer_id={fixer_id}
+                />
             </div>
         </UserRoleProvider>
-
     );
 }
