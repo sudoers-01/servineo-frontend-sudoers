@@ -71,7 +71,7 @@ export default function LocationModal({ open, onClose, onConfirm, initialCoords,
           <div className="flex justify-end gap-2 mt-4">
             <button onClick={onClose} className="px-4 py-2 rounded bg-gray-300 text-black text-sm">Cancelar</button>
             {
-              formtype === 'view' ?(
+              formtype !== 'view' ?(
             <button
               onClick={() => coords && onConfirm({ ...coords, address })}
               disabled={!coords}
