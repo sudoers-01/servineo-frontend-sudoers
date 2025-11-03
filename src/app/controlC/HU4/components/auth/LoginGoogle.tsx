@@ -5,7 +5,7 @@ import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { api, ApiResponse } from "../../lib/api";
 
 interface LoginGoogleProps {
-  onMensajeChange: (mensaje: string) => void;
+  onMensajeChange: (mensaje: string, tipo: 'error') => void; // solo error
 }
 
 export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
@@ -13,39 +13,57 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
 
   const handleSuccess = async (credentialResponse: CredentialResponse) => {
     setLoading(true);
-    onMensajeChange(""); 
 
     try {
-      const res: ApiResponse<any> = await api.post("auth/google", {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res: ApiResponse<any> = await api.post("/auth/google", {
         credential: credentialResponse.credential,
         token: credentialResponse.credential,
         modo: "login",
       });
 
-      if (res.success) {
-        onMensajeChange(`${res.data?.message ?? "Login con Google exitoso"}`);
-
+      if (res.success && res.data) {
+        // Guardamos token y usuario
         localStorage.setItem("servineo_token", res.data.token);
         localStorage.setItem("servineo_user", JSON.stringify(res.data.user));
+
+        // Guardamos mensaje de éxito en sessionStorage para Home
+        const mensajeExito = res.data?.message || `¡Inicio de sesión exitoso con Google! Bienvenido, ${res.data.user.name}!`;
+        sessionStorage.setItem("toastMessage", mensajeExito);
+
+        // Redirigimos al Home
         window.location.href = "/";
       } else {
-        onMensajeChange(`${res.data?.message ?? res.error ?? "Error"}`);
+        const mensajeError =
+          res.message ||
+          res.data?.message ||
+          res.error ||
+          "Error desconocido al iniciar sesión con Google.";
+        onMensajeChange(mensajeError, 'error');
       }
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
-      onMensajeChange(`${err?.message ?? "Error al conectar con el backend"}`);
+      onMensajeChange(err?.message ?? "No se pudo conectar con el servidor.", 'error');
     } finally {
       setLoading(false);
     }
   };
 
+  const handleError = () => {
+    onMensajeChange("Error al iniciar sesión con Google.", 'error');
+  };
+
   return (
     <div className="flex flex-col items-center gap-2">
       <div className="w-full flex justify-center">
-        <GoogleLogin
-          onSuccess={handleSuccess}
-          onError={() => onMensajeChange("Error al iniciar con Google")}
-        />
+        <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
       </div>
+
+      {loading && (
+        <p className="text-sm text-gray-500 mt-2 animate-pulse">
+          Verificando credenciales...
+        </p>
+      )}
     </div>
   );
 }

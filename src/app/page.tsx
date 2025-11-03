@@ -1,7 +1,7 @@
 'use client';
 
-import { Search, Calendar, MapPin, Hammer } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { Hammer } from 'lucide-react';
+import { useEffect } from 'react';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Link from 'next/link';
@@ -18,10 +18,9 @@ export default function HomePage() {
   }
 }, [user]);
 
-
   return (
     <div
-      className={`font-sans flex flex-col min-h-screen text-white`}
+      className="font-sans flex flex-col min-h-screen text-white"
       style={{
         background: 'linear-gradient(135deg, #2B31E0 0%, #1AA7ED 50%, #5E2BE0 100%)',
       }}
@@ -54,7 +53,7 @@ export default function HomePage() {
 
         {/* Search Bar funcional */}
         <div className="flex flex-col md:flex-row items-center gap-4 bg-white/20 backdrop-blur-sm border border-white/30 rounded-2xl p-6 w-full max-w-3xl shadow-lg">
-          <div className="flex items-center ">
+          <div className="flex items-center">
             <Hammer className="text-white" />
             <input
               type="text"
@@ -64,10 +63,13 @@ export default function HomePage() {
           </div>
         </div>
       </main>
+
       {/* Footer */}
       <footer className="text-center py-6 text-white/80 text-sm border-t border-white/20 bg-white/10 backdrop-blur-md">
         © 2025 Servineo — Conecta con los mejores profesionales de tu comunidad.
       </footer>
+
+      {/* Toast notifications */}
       <ToastContainer position="bottom-right" autoClose={4000} />
     </div>
   );

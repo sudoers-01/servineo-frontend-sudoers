@@ -34,8 +34,8 @@ export default function RegistroGoogle({ onSuccessClose }: { onSuccessClose?: ()
       }
       if (data.user) {
         localStorage.setItem("servineo_user", JSON.stringify(data.user));
-        sessionStorage.setItem("toastMessage", `¡Bienvenido, ${data.user.name}!`);
         setUser(data.user);
+        sessionStorage.setItem("toastMessage", `¡Bienvenido, ${data.user.name}!`);
       }
 
       router.push("/");

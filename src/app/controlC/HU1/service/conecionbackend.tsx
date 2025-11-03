@@ -1,54 +1,103 @@
-"use client";
-export const BASE_URL = "http://localhost:8000/api/controlC";
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''; 
 
 export interface User {
-  email: string;
-  name?: string;
-  picture?: string;
+  email: string;
+  name?: string;
+  picture?: string;
 }
 
 export interface RegistroResponse {
-  success: boolean;
-  message?: string;
-  token?: string;
-  user?: User;
+  success: boolean;
+  message?: string;
+  token?: string;
+  user?: User;
 }
 
-export async function enviarRegistroManual(name: string, email: string, password: string): Promise<RegistroResponse> {
-  try {
-    const url = `${BASE_URL}/registro/manual`;
-    
-    console.log(`Enviando registro a: ${url}`); 
+export interface UbicacionResponse {
+  success: boolean;
+  message?: string;
+}
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, password }),
-    });
-    const contentType = res.headers.get("content-type");
-    
-    if (contentType && contentType.includes("text/html")) {
-      const textError = await res.text();
-      console.error("Respuesta HTML del servidor:", textError.substring(0, 100) + "...");
-      
-      throw new Error(
-        `Error ${res.status}: La API no respondió con JSON. (Respuesta: HTML). Confirme que la ruta del backend (${url}) esté activa y correcta.`
-      );
-    }
+export async function enviarRegistroManual(
+  name: string,
+  email: string,
+  password: string
+): Promise<RegistroResponse> {
+  const url = `${BASE_URL}/registro/manual`;
 
-    if (!res.ok) {
-      try {
-        const errorData = await res.json();
-        throw new Error(errorData.message || `Error del servidor: ${res.status}`);
-      } catch (e) {
-        throw new Error(`Error ${res.status}: No se pudo obtener el mensaje de error del servidor.`);
-      }
-    }
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, password }),
+    });
 
-    return await res.json();
+    const contentType = res.headers.get("content-type");
 
-  } catch (error) {
-    console.error("Error al registrar manualmente (red/código):", error);
-    throw error;
-  }
+    if (contentType?.includes("text/html")) {
+      const textError = await res.text();
+      throw new Error(
+        `Error ${res.status}: La API no respondió con JSON. Respuesta: ${textError.slice(
+          0,
+          120
+        )}`
+      );
+    }
+
+    if (!res.ok) {
+      const errorData = await res.json().catch(() => ({}));
+      throw new Error(errorData.message || `Error del servidor: ${res.status}`);
+    }
+
+    return (await res.json()) as RegistroResponse;
+  } catch (error) {
+    console.error("Error al registrar manualmente:", error);
+    throw error;
+  }
+}
+
+export async function enviarUbicacion(
+    lat: number, 
+    lng: number,
+  direccion: string | null,
+  departamento: string | null,
+  pais: string | null
+): Promise<UbicacionResponse> {
+  const url = `${BASE_URL}/ubicacion`;
+
+    try {
+    const token = localStorage.getItem("servineo_token");
+    if (!token) throw new Error("No se encontró el token de autenticación.");
+
+    const res = await fetch(url, {
+        method: "POST",
+        headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ lat, lng, direccion, departamento, pais }),
+    });
+
+    const contentType = res.headers.get("content-type");
+
+    if (contentType?.includes("text/html")) {
+        const textError = await res.text();
+        throw new Error(
+        `Error ${res.status}: La API no respondió con JSON. Respuesta: ${textError.slice(
+            0,
+            120
+        )}`
+      );
+    }
+
+    if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.message || `Error del servidor: ${res.status}`);
+    }
+
+    return (await res.json()) as UbicacionResponse;
+    } catch (error) {
+    console.error("Error al enviar la ubicación:", error);
+    throw error;
+    }
 }

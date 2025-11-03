@@ -5,12 +5,13 @@ import { Eye, EyeOff } from 'lucide-react';
 import LoginGoogle from "../components/auth/LoginGoogle";
 import { useRouter } from 'next/navigation';
 import { useAuth } from '../../HU3/hooks/usoAutentificacion';
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [mostrarPass, setMostrarPass] = useState(false);
-  const [mensaje, setMensaje] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { setUser } = useAuth();
@@ -18,34 +19,48 @@ export default function LoginPage() {
   const manejarLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setMensaje('');
-    try {
-      const res: ApiResponse<any> = await api.post('auth/login', { email, password });
-      
-      if (res.success) {
-        const data = res.data;
-        localStorage.setItem("servineo_token", res.data.token);
-        localStorage.setItem("servineo_user", JSON.stringify(res.data.usuario)); 
-        setMensaje(` ${res.data.message}`);
-        if (data.token) {
-        localStorage.setItem("servineo_token", data.token);
-      }
 
-      if (data.user) {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const res: ApiResponse<any> = await api.post('/auth/login', { email, password });
+
+      if (res.success && res.data) {
+        const data = res.data;
+
+        localStorage.setItem("servineo_token", data.token);
         localStorage.setItem("servineo_user", JSON.stringify(data.user));
         setUser(data.user);
-      }
 
-      setMensaje(` ${data.message}`);
-      router.push('/'); 
+        // Guardamos mensaje de éxito en sessionStorage para Home
+        const mensajeExito = data.message || `¡Cuenta Creada Exitosamente! Bienvenido, ${data.user.name}!`;
+        sessionStorage.setItem("toastMessage", mensajeExito);
+
+        router.push('/');
 
       } else {
-        setMensaje(` ${res.data?.message || res.error || 'Credenciales inválidas.'}`);
+        const mensajeError =
+          res.message ||
+          res.data?.message ||
+          res.error ||
+          'Credenciales inválidas o error en el servidor.';
+
+        toast.error(mensajeError, {
+          position: "top-center",
+          autoClose: 3000,
+          theme: "colored",
+        });
       }
-    } catch (err: any) {
-      setMensaje(` Error: ${err?.message ?? 'Algo salió mal al conectar con el servidor'}`);
+
+    } 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    catch (err: any) {
+      toast.error(`Error: ${err?.message ?? 'No se pudo conectar con el servidor.'}`, {
+        position: "top-center",
+        autoClose: 3000,
+        theme: "colored",
+      });
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
@@ -127,31 +142,29 @@ export default function LoginPage() {
 
         {/* Botón Google */}
         <div className="mt-4">
-          <LoginGoogle onMensajeChange={setMensaje} />
+          <LoginGoogle
+            onMensajeChange={(msg, tipo) =>
+              tipo === 'error'
+                ? toast.error(msg, { position: 'top-center', theme: 'colored' })
+                : null // éxito ya se guarda en sessionStorage
+            }
+          />
         </div>
-
-        {/* Mensaje */}
-        {mensaje && (
-          <p
-            className={`mt-6 text-center text-sm font-medium ${
-              mensaje.startsWith('') ? 'text-green-600' : 'text-red-600'
-            }`}
-          >
-            {mensaje}
-          </p>
-        )}
 
         {/* Registro */}
         <p className="mt-8 text-center text-sm text-gray-500">
           ¿No tienes cuenta?{' '}
           <button
-            onClick={() => router.push('../HU3/FormularioRegistro')} 
+            onClick={() => router.push('../HU3/FormularioRegistro')}
             className="text-servineo-400 hover:text-servineo-500 font-medium hover:underline transition"
           >
             Regístrate
           </button>
         </p>
       </div>
+
+      {/* Contenedor Toastify */}
+      <ToastContainer />
     </main>
   );
 }

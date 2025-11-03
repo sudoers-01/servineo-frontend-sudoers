@@ -1,5 +1,5 @@
-
 "use client";
+
 import dynamic from "next/dynamic";
 
 const MapaLeaflet = dynamic(() => import("./MapaLeaflet"), { ssr: false });
