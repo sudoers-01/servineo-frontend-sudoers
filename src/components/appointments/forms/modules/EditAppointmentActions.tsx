@@ -14,7 +14,7 @@ interface EditAppointmentActionsProps {
   appointmentStart?: string | Date; 
 }
 
-const THREE_HOURS_MS = 13 * 60 * 60 * 1000;
+const THREE_HOURS_MS = 3 * 60 * 60 * 1000;
 
 
 
