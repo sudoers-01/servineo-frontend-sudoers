@@ -406,7 +406,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                 client={client}
                 contact={contact}
                 errors={errors}
-                ref={firstFieldRef}  // ✅ Esto debería funcionar ahora
+                ref={firstFieldRef}
                 onClientChange={setClient}
                 onContactChange={setContact}
               />
