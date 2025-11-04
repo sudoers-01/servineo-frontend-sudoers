@@ -33,7 +33,6 @@ export default function TestPage() {
       <CancelDaysAppointments
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onConfirm={handleConfirmCancel}
         loading={loading}
       />
     </div>
