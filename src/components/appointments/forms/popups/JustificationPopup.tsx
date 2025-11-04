@@ -1,3 +1,4 @@
+"use client";
 import * as React from "react";
 import { Dialog, DialogContent } from "../../../calendar/ui/dialog";
 import { Button } from "../../../atoms/button";
@@ -7,6 +8,11 @@ interface JustificationPopupProps {
   onClose: () => void;
   onSubmit: (reason: string) => void;
   title?: string;
+  confirmLabel?: string;
+  cancelLabel?: string;
+  minLength?: number; // por defecto 10
+  maxLength?: number; // por defecto 300
+  placeholder?: string;
 }
 
 export const JustificationPopup: React.FC<JustificationPopupProps> = ({
@@ -14,31 +20,52 @@ export const JustificationPopup: React.FC<JustificationPopupProps> = ({
   onClose,
   onSubmit,
   title = "Justificación",
+  confirmLabel = "Continuar",
+  cancelLabel = "Volver",
+  minLength = 10,
+  maxLength = 300,
+  placeholder = "Describe brevemente el motivo…",
 }) => {
   const [reason, setReason] = React.useState("");
+  const [error, setError] = React.useState<string | null>(null);
+  const textareaRef = React.useRef<HTMLTextAreaElement | null>(null);
+
   React.useEffect(() => {
-    if (!open) {
-      setReason(""); 
+    if (open) {
+      setTimeout(() => textareaRef.current?.focus(), 40);
+    } else {
+      // limpiar al cerrar
+      setReason("");
+      setError(null);
     }
   }, [open]);
 
-  const handleSubmit = () => {
-    const r = reason.trim();
-    if (!r) return;
-    onSubmit(r);
-    setReason(""); 
+  const handleConfirm = () => {
+    const trimmed = reason.trim();
+    if (trimmed.length < minLength) {
+      setError(`Debe ingresar al menos ${minLength} caracteres.`);
+      return;
+    }
+    if (trimmed.length > maxLength) {
+      setError(`El motivo no puede superar los ${maxLength} caracteres.`);
+      return;
+    }
+    setError(null);
+    onSubmit(trimmed);
   };
 
   return (
     <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
       <DialogContent className="bg-transparent shadow-none p-0">
-        <div className="overflow-hidden rounded-2xl max-w-sm bg-white">
+        <div className="overflow-hidden rounded-2xl w-full max-w-md bg-white text-black">
+          {/* Header */}
           <div className="bg-indigo-700 text-white px-4 py-3 flex items-center justify-between">
             <span className="font-semibold">{title}</span>
             <button
               onClick={onClose}
-              aria-label="Cerrar"
+              
               className="opacity-90 hover:opacity-100 transition"
+              aria-label="Cerrar"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -55,27 +82,34 @@ export const JustificationPopup: React.FC<JustificationPopupProps> = ({
             </button>
           </div>
 
-          <div className="p-6 text-center">
-            <p className="text-sm text-gray-800 font-medium mb-3">
-              Ingrese los motivos por los cuales desea cancelar esta cita:
+          {/* Body */}
+          <div className="p-5">
+            <p className="text-sm text-gray-700 mb-3">
+              Indique el motivo por el cual desea cancelar/reprogramar la cita.
             </p>
 
             <textarea
+              ref={textareaRef}
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              className="w-full h-28 border border-gray-300 rounded-lg p-3 outline-none focus:ring-2 focus:ring-indigo-500 text-sm text-black" 
+              rows={5}
+              maxLength={maxLength}
+              placeholder={placeholder}
+              className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
+
+            <div className="mt-1 text-right text-xs text-gray-500">
+              {reason.trim().length}/{maxLength}
+            </div>
+
+            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
 
             <div className="mt-5 flex justify-between gap-3">
               <Button variant="secondary" onClick={onClose} className="rounded-full px-6">
-                Volver
+                {cancelLabel}
               </Button>
-              <Button
-                onClick={handleSubmit}
-                className="rounded-full px-6"
-                disabled={!reason.trim()}
-              >
-                Reprogramar 
+              <Button onClick={handleConfirm} className="rounded-full px-6">
+                {confirmLabel}
               </Button>
             </div>
           </div>
@@ -84,3 +118,5 @@ export const JustificationPopup: React.FC<JustificationPopupProps> = ({
     </Dialog>
   );
 };
+
+export default JustificationPopup;
