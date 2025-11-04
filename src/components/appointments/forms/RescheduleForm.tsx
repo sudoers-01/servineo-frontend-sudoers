@@ -4,6 +4,7 @@ import axios from "axios";
 import { z } from "zod";
 import LocationModal from "./LocationModal";
 import AppointmentSummaryModal from "./AppointmentSummaryModal";
+import MobileDayliView from "@/components/calendar/mobile/MobileDayliView";
 
 export type RescheduleFormHandle = {
   open: (newSlotISO?: string) => void;
@@ -14,9 +15,10 @@ interface RescheduleFormProps {
   fixerId: string;
   requesterId: string;
   pastDate: string;   // ISO de la cita actual
-  motivo: string;
+  motivo: string;     // Motivo de reprogramación
   onSuccess?: () => void;
 }
+
 
 const baseSchema = z.object({
   client: z.string().regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre de cliente válido").nonempty("Ingrese un nombre de cliente").max(50),
@@ -31,9 +33,18 @@ const virtualSchema = baseSchema.extend({
 const presentialSchema = baseSchema.extend({
   modality: z.literal("presential"),
   meetingLink: z.undefined().optional(),
-  location: z.object({ lat: z.number(), lon: z.number(), address: z.string().nonempty("Seleccione una ubicación") })
-            .nullable()
-            .refine((v) => v !== null, { message: "Seleccione una ubicación" }),
+  location: z
+    .object({
+      lat: z.number(),
+      lon: z.number(),
+      address: z.string().nonempty("Seleccione una ubicación"),
+    })
+    .nullable()
+    .refine((val) => val !== null, { message: "Seleccione una ubicación" })
+    .refine(
+      (val) => val?.address !== "No se pudo obtener la dirección",
+      { message: "Seleccione una ubicación." }
+    ),
 });
 const appointmentSchema = z.discriminatedUnion("modality", [virtualSchema, presentialSchema]);
 
@@ -50,40 +61,50 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
   { fixerId, requesterId, pastDate, motivo, onSuccess },
   ref
 ) {
-  const [open, setOpen] = useState(false);
-  const [newDatetime, setNewDatetime] = useState<string>("");
+    const [open, setOpen] = useState(false);
+    const [newDatetime, setNewDatetime] = useState<string>("");
 
-  // campos editables (prefill desde backend)
-  const [client, setClient] = useState("");
-  const [contact, setContact] = useState("");
-  const [modality, setModality] = useState<"virtual" | "presential">("virtual");
-  const [description, setDescription] = useState("");
-  const [meetingLink, setMeetingLink] = useState("");
-  const [place, setPlace] = useState("");
-  const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
+    // campos editables (prefill desde backend)
+    const [client, setClient] = useState("");
+    const [contact, setContact] = useState("");
+    const [modality, setModality] = useState<"virtual" | "presential">("virtual");
+    const [description, setDescription] = useState("");
+    const [meetingLink, setMeetingLink] = useState("");
+    const [place, setPlace] = useState("");
+    const [location, setLocation] = useState<{ lat: number; lon: number; address: string } | null>(null);
+    const [originalAppointmentId, setOriginalAppointmentId] = useState<string | null>(null);
 
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [showLocationModal, setShowLocationModal] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({});
+    const [showLocationModal, setShowLocationModal] = useState(false);
+    const [showDatePicker, setShowDatePicker] = useState(false);
+    const [pickerSelectedDate, setPickerSelectedDate] = useState<Date>(new Date());
 
-  const [showSummary, setShowSummary] = useState(false);
-  const [summaryData, setSummaryData] = useState<{
-    name: string; date: string; time: string;
-    modality: "virtual" | "presential"; locationOrLink: string;
-    description?: string; motive?: string;
-  } | null>(null);
+    const [showSummary, setShowSummary] = useState(false);
+    const [summaryData, setSummaryData] = useState<{
+        title: string;
+        name: string; date: string; time: string;
+        modality: "virtual" | "presential"; locationOrLink: string;
+        description?: string; motive?: string;
+    } | null>(null);
 
-  const dialogRef = useRef<HTMLDivElement | null>(null);
-  const firstRef = useRef<HTMLInputElement | null>(null);
+    const dialogRef = useRef<HTMLDivElement | null>(null);
+    const firstRef = useRef<HTMLInputElement | null>(null);
 
-  useImperativeHandle(ref, () => ({
-    open: (iso?: string) => {
-      if (iso) setNewDatetime(iso);
-      setOpen(true);
-      fetchExisting().finally(() => setTimeout(() => firstRef.current?.focus(), 40));
+    useImperativeHandle(ref, () => ({
+    open: async (iso?: string) => {
+        if (iso) setNewDatetime(iso);
+        setOpen(true);
+        try {
+        await loadOriginalAppointment();
+        } finally {
+        setTimeout(() => firstRef.current?.focus(), 40);
+        }
     },
     close: () => handleClose(),
-  }));
+    }));
+
+
 
   function handleClose() {
     setOpen(false);
@@ -106,42 +127,62 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
     };
   }
 
-  async function fetchExisting() {
+    async function loadOriginalAppointment() {
     try {
-      const url =
+        const url =
         `${API_BASE}/api/crud_read/appointments/get_modal_form` +
         `?fixer_id=${encodeURIComponent(fixerId)}` +
         `&requester_id=${encodeURIComponent(requesterId)}` +
-        `&appointment_date=${encodeURIComponent(ymd(pastDate))}` +
+        `&appointment_date=${encodeURIComponent(ymd(pastDate))}T00:00:00.000Z` +
         `&start_hour=${encodeURIComponent(String(startHour(pastDate)))}`;
 
-      const res = await fetch(url, { headers: { Accept: "application/json" } });
-      const data = await res.json();
-      const ap = data?.data || {};
+        const res = await axios.get(url, {
+        headers: { Accept: "application/json" },
+        timeout: 10000,
+        });
 
-      setClient(ap.current_requester_name || "");
-      setContact(ap.current_requester_phone || "");
-      setDescription(ap.appointment_description || "");
-      const isPresential = ap.appointment_type === "presential";
-      setModality(isPresential ? "presential" : "virtual");
-      if (isPresential) {
+        const ap = res.data?.data || {};
+        setOriginalAppointmentId(ap._id || null);
+        setClient(ap.current_requester_name || "");
+        setContact(ap.current_requester_phone || "");
+        setDescription(ap.appointment_description || "");
+        const isPresential = ap.appointment_type === "presential";
+        setModality(isPresential ? "presential" : "virtual");
+
+        if (isPresential) {
         const lat = ap.latitude != null ? Number(ap.latitude) : undefined;
         const lon = ap.longitude != null ? Number(ap.longitude) : undefined;
         const address = ap.display_name_location || "";
         if (Number.isFinite(lat) && Number.isFinite(lon) && address) {
-          setLocation({ lat: lat as number, lon: lon as number, address });
-          setPlace(address);
+            setLocation({ lat: lat as number, lon: lon as number, address });
+            setPlace(address);
         }
-      } else {
+        } else {
         setMeetingLink(ap.link_id || "");
-      }
+        }
     } catch (e) {
-      console.error("No se pudo cargar la cita original:", e);
+        console.error("❌ Error al cargar cita original:", e);
+        setErrors({ general: "No se pudo cargar la cita original." });
     }
-  }
+    }
+
 
   function handleLocationConfirm(loc: { lat: number; lon: number; address: string }) {
     setLocation(loc); setPlace(loc.address); setShowLocationModal(false);
+  }
+
+  function handleDatePickerOpen() {
+    setPickerSelectedDate(new Date());
+    setShowDatePicker(true);
+  }
+
+  function handleDatePickerDateChange(newDate: Date) {
+    setPickerSelectedDate(newDate);
+  }
+
+  function handleDateTimeSelect(selectedDatetime: string) {
+    setNewDatetime(selectedDatetime);
+    setShowDatePicker(false);
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -165,59 +206,104 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
     }
 
     if (!newDatetime) {
-      setErrors({ general: "Selecciona la nueva fecha y hora (desde el calendario) antes de reprogramar." });
+      setErrors({ general: "Seleccione una nueva fecha y hora" });
       return;
     }
 
+    setLoading(true);
+    try {
+        if (!originalAppointmentId) {
+        setErrors({ general: "No se pudo obtener el ID de la cita original." });
+        return;
+        }
+
+        const updateUrl = `${API_BASE}/api/crud_update/appointments/update_by_id?id=${encodeURIComponent(originalAppointmentId)}`;
+        const updatePayload = {
+        schedule_state: "cancelled",
+        reprogram_reason: motivo ?? "Sin motivo",
+        };
+
+        const updateRes = await axios.put(updateUrl, updatePayload, {
+        headers: { "Content-Type": "application/json" },
+        timeout: 10000,
+        });
+
+        const updateData = updateRes?.data;
+        console.log("update response:", updateRes.status, updateData);
+
+        if (updateRes.status >= 400 || updateData?.modified === false) {
+        throw new Error(updateData?.message || `Actualización fallida (status ${updateRes.status})`);
+        }
+
+        console.log("Cita original cancelada");
+
+
+    //  --- CREAR LA NUEVA CITA ---
     const { selected_date, starting_time, finishing_time } = parseNewTimes(newDatetime);
-    const payload = {
-      id_fixer: fixerId,
-      id_requester: requesterId,
-      selected_date,
-      starting_time,
-      finishing_time,
-      schedule_state: "booked",
-      appointment_type: modality,
-      appointment_description: description,
-      current_requester_name: client,
-      current_requester_phone: contact,
-      link_id: modality === "virtual" ? meetingLink : "",
-      display_name_location: modality === "presential" ? place : "",
-      lat: modality === "presential" ? location?.lat ?? null : null,
-      lon: modality === "presential" ? location?.lon ?? null : null,
-      // cancellation_reason: motivo, // si tu backend lo soporta
+
+    const createPayload = {
+        id_fixer: fixerId,
+        id_requester: requesterId,
+        selected_date,
+        starting_time,
+        finishing_time,
+        schedule_state: "booked",
+        appointment_type: modality,
+        appointment_description: description,
+        current_requester_name: client,
+        current_requester_phone: contact,
+        link_id: modality === "virtual" ? meetingLink : "",
+        display_name_location: modality === "presential" ? place : "",
+        lat: modality === "presential" ? location?.lat ?? null : null,
+        lon: modality === "presential" ? location?.lon ?? null : null,
     };
 
-    try {
-      setLoading(true);
-      const res = await axios.post(`${API_BASE}/api/crud_create/appointments/create`, payload);
-      const data = res.data;
+    const createRes = await axios.post(`${API_BASE}/api/crud_create/appointments/create`, createPayload, {
+        headers: { "Content-Type": "application/json" },
+        timeout: 10000,
+    });
 
-      const startLocal = new Date(payload.starting_time);
-      const hourStr = `${String(startLocal.getHours()).padStart(2, "0")}:00`;
+    const createData = createRes?.data;
+    console.log("create response:", createRes.status, createData);
 
-      if (data?.success) {
-        setSummaryData({
-          name: client,
-          date: startLocal.toLocaleDateString(),
-          time: hourStr,
-          modality,
-          locationOrLink: modality === "virtual" ? meetingLink : place,
-          description,
-          motive: motivo || undefined,
-        });
-        setShowSummary(true);
-      } else {
-        setErrors({ general: data?.message || "No se pudo reprogramar" });
-      }
-    } catch (err: any) {
-      const backendMessage = err?.response?.data?.message || "No se pudo reprogramar";
-      setErrors({ general: backendMessage });
-    } finally {
-      setLoading(false);
+    if (createRes.status >= 400 || (createData && createData.success === false)) {
+        throw new Error(createData?.message || `Creación fallida (status ${createRes.status})`);
     }
-  }
 
+    console.log("✅ Nueva cita creada");
+
+    //  --- MOSTRAR RESUMEN ---
+    const startLocal = new Date(createPayload.starting_time);
+    const adjustedHour = new Date(startLocal.getTime() + 4 * 60 * 60 * 1000); // +4 horas
+    const hourStr = `${String(adjustedHour.getHours()).padStart(2, "0")}:00`;
+
+    setSummaryData({
+        title: "Cita reprogramada con éxito",
+        name: client,
+        date: startLocal.toLocaleDateString(),
+        time: hourStr,
+        modality,
+        locationOrLink: modality === "virtual" ? meetingLink : place,
+        description,
+        motive: motivo || undefined,
+    });
+    setShowSummary(true);
+    } catch (err: any) {
+    // Mensaje claro para el usuario + logging para debugging
+    console.error("❌ Error en reprogramación:", err);
+
+    // Si axios devolvió respuesta del servidor, muestra cuerpo y status
+    if (err?.response) {
+        console.error("axios.response.status:", err.response.status);
+        console.error("axios.response.data:", err.response.data);
+        setErrors({ general: err.response.data?.message || `Error servidor (${err.response.status})` });
+    } else {
+        setErrors({ general: err?.message || "No se pudo reprogramar" });
+    }
+    } finally {
+    setLoading(false);
+    }
+}
   if (!open) return null;
 
   return (
@@ -238,13 +324,15 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
               <button aria-label="Cerrar" className="text-gray-500 hover:text-gray-700" onClick={handleClose}>✕</button>
             </div>
 
-            <p className="mt-2 text-xs text-gray-500">Cita actual: {new Date(pastDate).toLocaleString()}</p>
-            {motivo && <p className="mt-1 text-xs text-gray-600">Motivo: <span className="italic">{motivo}</span></p>}
-            {newDatetime && (
-              <p className="mt-1 text-xs text-indigo-600">
-                Nueva fecha/hora: {new Date(newDatetime).toLocaleString()}
-              </p>
-            )}
+            <div className="mt-2 text-xs text-gray-600 space-y-1">
+              <p>📅 Cita actual: {new Date(pastDate).toLocaleString()}</p>
+              {motivo && <p>💬 Motivo: <span className="italic font-medium">{motivo}</span></p>}
+              {newDatetime && (
+                <p className="text-indigo-600 font-medium">
+                  ✨ Nueva fecha/hora: {new Date(newDatetime).toLocaleString()}
+                </p>
+              )}
+            </div>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
@@ -253,9 +341,11 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
                   <input
                     readOnly
                     value={newDatetime ? new Date(newDatetime).toLocaleString() : ""}
-                    className="mt-1 block w-full bg-gray-100 border border-gray-200 rounded px-3 py-2 text-sm"
-                    placeholder="Selecciona un slot en el calendario"
+                    onClick={handleDatePickerOpen}
+                    className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
+                    placeholder="Click para seleccionar fecha"
                   />
+                  {errors.general && <p className="text-red-600 text-sm mt-1">{errors.general}</p>}
                 </label>
 
                 <label className="block">
@@ -333,18 +423,16 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
                 </label>
               )}
 
-              {errors.general && <p className="text-red-600 text-sm mt-1">{errors.general}</p>}
-
               <div className="flex items-center justify-end gap-2 pt-2">
                 <button type="button" onClick={handleClose} className="px-4 py-2 rounded bg-gray-300 text-sm">
-                  Volver
+                  Cancelar
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
                   className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
                 >
-                  {loading ? "Guardando..." : "Reprogramar"}
+                  {loading ? "Reprogramando..." : "Reprogramar"}
                 </button>
               </div>
             </form>
@@ -358,6 +446,38 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
         onConfirm={handleLocationConfirm}
         initialCoords={location}
       />
+
+      {/* Modal de selección de fecha/hora con calendario */}
+      {showDatePicker && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDatePicker(false)} />
+          <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto overflow-hidden" style={{ maxHeight: "90vh" }}>
+            <div className="p-4 border-b flex items-center justify-between">
+              <h4 className="text-lg font-semibold text-black">Seleccionar nueva fecha y hora</h4>
+              <button
+                onClick={() => setShowDatePicker(false)}
+                className="text-gray-500 hover:text-gray-700"
+                aria-label="Cerrar"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="overflow-auto" style={{ maxHeight: "calc(90vh - 80px)" }}>
+                <MobileDayliView
+                selectedDate={pickerSelectedDate}
+                fixerId={fixerId}
+                requesterId={requesterId}
+                onDateChange={handleDatePickerDateChange}
+                pickerMode={true}         // <--- activar modo "picker"
+                onSlotSelect={(iso: string) => {
+                    // recibe la ISO desde MobileDayliView y la procesa como antes
+                    handleDateTimeSelect(iso);
+                }}
+                />
+            </div>
+          </div>
+        </div>
+      )}
 
       {summaryData && (
         <AppointmentSummaryModal
