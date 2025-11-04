@@ -1,8 +1,9 @@
-
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 
 const CentroDePagos = () => {
+  const router = useRouter();
   const [fixerData, setFixerData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -19,9 +20,6 @@ const CentroDePagos = () => {
     setError(null);
     
     try {
-      // 🔧 IMPORTANTE: Ajusta el puerto según tu configuración
-      // Si el backend está en puerto 4000, usa: http://localhost:4000
-      // Si el backend está en puerto 3000, usa: http://localhost:3000
       const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
       
       console.log(`🔍 Intentando conectar a: ${BACKEND_URL}/api/fixer/payment-center/${FIXER_ID}`);
@@ -147,8 +145,8 @@ const CentroDePagos = () => {
         
         <div className="space-y-3">
           {/* Fixer Wallet */}
-          <button 
-            onClick={() => window.location.href = '/fixer-wallet'}
+          <button
+            onClick={() => router.push(`/payment/FixerWallet?fixerId=${FIXER_ID}`)}
             className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
           >
             <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">

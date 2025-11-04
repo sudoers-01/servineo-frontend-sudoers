@@ -1,4 +1,7 @@
-import { useState } from 'react';
+"use client";
+
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Wallet, TrendingUp, TrendingDown, CreditCard, QrCode, Building2 } from 'lucide-react';
 
 // Datos de ejemplo (en producción vienen del backend)
@@ -88,6 +91,23 @@ export default function FixerWalletApp() {
   const [screen, setScreen] = useState<'wallet' | 'recharge' | 'history'>('wallet');
   const [amount, setAmount] = useState('0.00');
   const [selectedMethod, setSelectedMethod] = useState<string | null>(null);
+
+  const router = useRouter();
+  const [receivedFixerId, setReceivedFixerId] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Esperamos a que el router esté listo
+    if (router.isReady) {
+      const { fixerId } = router.query;
+      if (fixerId) {
+        setReceivedFixerId(fixerId as string);
+        // En un futuro, aquí llamarías a tu backend:
+        // fetchWalletData(fixerId);
+      } else {
+        console.warn("No se recibió fixerId en la URL.");
+      }
+    }
+  }, [router.isReady, router.query]);
 
   const handleQuickAmount = (value: number) => {
     setAmount(value.toFixed(2));
