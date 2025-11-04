@@ -4,6 +4,7 @@ interface AppointmentSummaryModalProps {
   open: boolean;
   onClose: () => void;
   data: {
+    title: string;
     name: string;
     date: string;
     time: string;
@@ -28,7 +29,7 @@ const AppointmentSummaryModal: React.FC<AppointmentSummaryModalProps> = ({ open,
             </svg>
           </div>
 
-          <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">Cita agendada con éxito</h2>
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">{data.title}</h2>
         </div>
         <div className="space-y-3 text-sm text-gray-700">
           <div className="flex justify-between">

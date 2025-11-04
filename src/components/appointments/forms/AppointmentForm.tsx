@@ -76,6 +76,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
     const [showLocationModal, setShowLocationModal] = useState(false);
     const [showSummary, setShowSummary] = useState(false);
     const [summaryData, setSummaryData] = useState<{
+        title: string,
         name: string;
         date: string;
         time: string;
@@ -208,6 +209,7 @@ const AppointmentForm = forwardRef<AppointmentFormHandle, AppointmentFormProps>(
 
             if (data.success) {
                 setSummaryData({
+                    title: "Cita agendada con éxito",
                     name: client,
                     date: new Date(payload.starting_time).toLocaleDateString(),
                     time: hourToShowString,

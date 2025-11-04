@@ -13,10 +13,14 @@ const EP_OCCUPIED = `${API_BASE}/api/crud_read/schedules/get_by_fixer_other_requ
 const NOMBRE_FIXER_POR_DEFECTO = "John";
 
 interface PropiedadesHorarioDia {
-    fixerId: string;
-    requesterId: string;
-    selectedDate: Date | string | null;
-    onDateChange?: (newDate: Date) => void;
+  fixerId: string;
+  requesterId: string;
+  selectedDate: Date | string | null;
+  onDateChange?: (newDate: Date) => void;
+
+  /** NUEVAS PROPS: modo picker y callback para devolver fecha+hora en ISO */
+  pickerMode?: boolean; // si true: solo mostrar "libre" y devolver iso en onSlotSelect
+  onSlotSelect?: (iso: string) => void; // iso en formato ISO string (toISOString())
 }
 
 type Estado = "libre" | "reservado_propio" | "ocupado_otro" | "no_disponible";
@@ -114,10 +118,12 @@ function convertToDate(selectedDate: Date | string | null): Date {
 }
 
 export default function HorarioDelDia({
-    fixerId,
-    requesterId,
-    selectedDate,
-    onDateChange,
+  fixerId,
+  requesterId,
+  selectedDate,
+  onDateChange,
+  pickerMode = false, // por defecto falso (comportamiento actual)
+  onSlotSelect,
 }: PropiedadesHorarioDia) {
     const fechaFormateadaInicial = selectedDate ? aYMDDeCualquiera(selectedDate as any) : "";
     const [fecha, setFecha] = useState<string>(fechaFormateadaInicial);
@@ -309,23 +315,31 @@ export default function HorarioDelDia({
     };
 
     const manejarClickEnSlot = (item: HorarioItem) => {
-        const clickeable = item.estado_Horario === "libre" || item.estado_Horario === "reservado_propio";
-        if (!clickeable) return;
+    const clickeable = item.estado_Horario === "libre" || item.estado_Horario === "reservado_propio";
+    if (!clickeable) return;
 
-        const ymd = fecha || toYMDAny(selectedDate || new Date());
-        const baseDate = convertirYMDaFechaLocal(ymd);
-        const hour = parseInt(item.Hora_Inicio.split(":")[0], 10);
+    const ymd = fecha || toYMDAny(selectedDate || new Date());
+    const baseDate = convertirYMDaFechaLocal(ymd);
+    const hour = parseInt(item.Hora_Inicio.split(":")[0], 10);
 
-        const slotDate = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), hour, 0, 0, 0);
+    const slotDateLocal = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), hour, 0, 0, 0);
+    const iso = slotDateLocal.toISOString(); // ISO en UTC (misma convención que usabas antes)
 
-        if (item.estado_Horario === "libre") {
-            refFormularioCita.current?.open(slotDate.toISOString());
-            return;
-        }
+    if (pickerMode) {
+        // En modo picker: devolver la fecha seleccionada y no abrir formularios
+        onSlotSelect?.(iso);
+        return;
+    }
 
-        if (item.estado_Horario === "reservado_propio") {
-            cargarYEditarCita(item);
-        }
+    // comportamiento por defecto (abrir formulario o editar)
+    if (item.estado_Horario === "libre") {
+        refFormularioCita.current?.open(slotDateLocal.toISOString());
+        return;
+    }
+
+    if (item.estado_Horario === "reservado_propio") {
+        cargarYEditarCita(item);
+    }
     };
 
     const noHayHorariosDisponibles = !!datos && (datos.horarios ?? []).every((it) => it.estado_Horario !== "libre");
@@ -353,26 +367,38 @@ export default function HorarioDelDia({
                     </div>
 
                     <div className="space-y-2">
-                        {datos.horarios?.map((item, idx) => {
-                            const meta = etiquetaPorEstado(item.estado_Horario);
-                            const clickeable = item.estado_Horario === "libre" || item.estado_Horario === "reservado_propio";
-                            return (
+                        {datos.horarios && (() => {
+                        // Si estamos en pickerMode sólo mostramos los slots "libre"
+                        const horariosVisibles = pickerMode ? (datos.horarios.filter(h => h.estado_Horario === "libre")) : datos.horarios;
+
+                        return (
+                            <div className="space-y-2">
+                            {horariosVisibles.map((item, idx) => {
+                                const meta = etiquetaPorEstado(item.estado_Horario);
+                                const clickeable = item.estado_Horario === "libre" || item.estado_Horario === "reservado_propio";
+
+                                return (
                                 <div
                                     key={item.id_Horario || `slot-${idx}`}
-                                    onClick={() => clickeable && manejarClickEnSlot(item)}
-                                    className={`grid grid-cols-[64px_1fr_28px] items-center rounded-lg border px-3 py-2 shadow-sm ${meta.rowCls} ${clickeable ? "hover:brightness-95 cursor-pointer" : ""
-                                        }`}
+                                    onClick={() => {
+                                    if (!clickeable) return;
+                                    manejarClickEnSlot(item);
+                                    }}
+                                    className={`grid grid-cols-[64px_1fr_28px] items-center rounded-lg border px-3 py-2 shadow-sm ${meta.rowCls} ${clickeable ? "hover:brightness-95 cursor-pointer" : ""}`}
                                 >
                                     <div className={`font-semibold ${item.estado_Horario === "ocupado_otro" ? "text-white" : "text-slate-800"}`}>
-                                        {item.Hora_Inicio}
+                                    {item.Hora_Inicio}
                                     </div>
                                     <div className={`text-sm font-semibold ${meta.textCls}`}>{meta.text}</div>
                                     <div className={`text-xl text-right ${item.estado_Horario === "ocupado_otro" ? "text-white" : "text-slate-500"}`}>
-                                        {meta.icon}
+                                    {meta.icon}
                                     </div>
                                 </div>
-                            );
-                        })}
+                                );
+                            })}
+                            </div>
+                        );
+                        })()}
                     </div>
 
                     {noHayHorariosDisponibles && !cargando && (
