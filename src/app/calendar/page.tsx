@@ -51,7 +51,10 @@ export default function CalendarPage() {
         setIsCancelModalOpen(false);
     }
 
-    
+    const handleConfirmCancel = (selectedDays: string[]) => {
+        //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
+    }
+
     return (
         <UserRoleProvider
             role={userRole}
@@ -90,13 +93,13 @@ export default function CalendarPage() {
 
                     {userRole === 'fixer' && (
                         <div className="flex items-center ml-4">
-                            <button 
+                            <button
                                 className="w-60 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 transition-colors"
                                 onClick={handleOpenAvailabilityModal}
                             >
                                 Modificar Disponibilidad
                             </button>
-                            <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2"  onClick={openCancelModal}>
+                            <button className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors ml-2" onClick={openCancelModal}>
                                 Cancelar
                             </button>
                         </div>
@@ -125,13 +128,12 @@ export default function CalendarPage() {
                         onDateChange={handleDataChange}
                     />
                 </div>
-                
-                <ModeSelectionModal 
-                    ref={modeModalRef} 
+
+                <ModeSelectionModal
+                    ref={modeModalRef}
                     fixerId={fixer_id}
                 />
 
-                {/* Modal de cancelación */}
                 <CancelDaysAppointments
                     isOpen={isCancelModalOpen}
                     onClose={closeCancelModal}
