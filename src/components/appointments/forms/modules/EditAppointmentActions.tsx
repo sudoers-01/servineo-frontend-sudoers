@@ -81,16 +81,16 @@ export const EditAppointmentActions = ({
   const askConfirmReprogram = () => {
     if (within3h) {
       openInfo(
-        <>No es posible cancelar una cita con menos de <b>3 horas</b> de anticipación.</>
+        <>La reprogramación de citas deberá realizarse con al menos <b>3 horas</b> de anticipación.</>
       );
       return;
     }
     openConfirm(
       <>
-        ¿Está seguro que desea cancelar la cita actual para reprogramar?
+        ¿Esta seguro que desea reprogramar la cita actual?
         <br />
         <span className="text-gray-500 text-xs">
-          *Deberá ingresar un motivo y elegir un nuevo horario.
+          *En caso de reprogramación, la cita actual será cancelada.
         </span>
       </>,
       "Confirmar",
