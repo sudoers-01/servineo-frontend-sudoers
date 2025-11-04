@@ -85,7 +85,7 @@ export const JustificationPopup: React.FC<JustificationPopupProps> = ({
           {/* Body */}
           <div className="p-5">
             <p className="text-sm text-gray-700 mb-3">
-              Indique el motivo por el cual desea cancelar/reprogramar la cita.
+              Indique el motivo por el cual desea reprogramar la cita.
             </p>
 
             <textarea

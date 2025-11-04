@@ -320,18 +320,8 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
         >
           <div className="p-4 sm:p-6">
             <div className="flex items-start justify-between">
-              <h3 id="reschedule-title" className="text-lg font-semibold text-black">Reprogramar cita</h3>
+              <h2 id="reschedule-title" className="text-lg font-semibold text-black">Reprogramar cita</h2>
               <button aria-label="Cerrar" className="text-gray-500 hover:text-gray-700" onClick={handleClose}>✕</button>
-            </div>
-
-            <div className="mt-2 text-xs text-gray-600 space-y-1">
-              <p>📅 Cita actual: {new Date(pastDate).toLocaleString()}</p>
-              {motivo && <p>💬 Motivo: <span className="italic font-medium">{motivo}</span></p>}
-              {newDatetime && (
-                <p className="text-indigo-600 font-medium">
-                  ✨ Nueva fecha/hora: {new Date(newDatetime).toLocaleString()}
-                </p>
-              )}
             </div>
 
             <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
