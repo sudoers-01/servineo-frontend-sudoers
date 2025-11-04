@@ -30,6 +30,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
 
 type DivProps = React.HTMLAttributes<HTMLDivElement> & { children: React.ReactNode };
 
+
 export function DialogContent({ className, children, ...rest }: DivProps) {
   return (
     <div
