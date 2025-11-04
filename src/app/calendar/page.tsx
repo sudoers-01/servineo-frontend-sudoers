@@ -51,10 +51,7 @@ export default function CalendarPage() {
         setIsCancelModalOpen(false);
     }
 
-    const handleConfirmCancel = (selectedDays: string[]) => {
-        //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
-    }
-
+    
     return (
         <UserRoleProvider
             role={userRole}
@@ -138,7 +135,6 @@ export default function CalendarPage() {
                 <CancelDaysAppointments
                     isOpen={isCancelModalOpen}
                     onClose={closeCancelModal}
-                    onConfirm={handleConfirmCancel}
                     fixer_id={fixer_id}
 
                 />

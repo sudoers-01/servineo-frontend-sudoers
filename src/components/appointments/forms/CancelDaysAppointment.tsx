@@ -15,7 +15,6 @@ interface DayWithAppointments {
 interface CancelDaysAppointmentsProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (selectedDays: string[]) => void;
   loading?: boolean;
   fixer_id?: string;
 }
@@ -23,7 +22,6 @@ interface CancelDaysAppointmentsProps {
 export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
   isOpen,
   onClose,
-  onConfirm,
   loading = false,
   fixer_id
 }) => {
@@ -201,7 +199,6 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
           setSuccessMessage(successMsg);
         }
         
-        onConfirm(selectedDays);
         setSelectedDays([]);
         
         // Recargar datos
@@ -432,13 +429,6 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
         </div>
 
         <div className="border-t p-4 flex justify-end space-x-3 flex-shrink-0">
-          <Button
-            onClick={onClose}
-            disabled={isLoading}
-            className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 font-medium disabled:opacity-50"
-          >
-            Cerrar
-          </Button>
           <Button
             onClick={handleConfirm}
             loading={cancelLoading}
