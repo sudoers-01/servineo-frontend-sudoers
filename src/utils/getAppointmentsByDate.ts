@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 export interface Appointment {
+    cancelled_fixer: boolean;
     _id: string;
     id_fixer: string;
     id_requester: string;
@@ -16,10 +17,14 @@ export interface Appointment {
     display_name_location: string;
     lat: string;
     lon: string;
+    active: boolean;
+    reprogram_reason: string;
     createdAt: string;
     updatedAt: string;
     __v: number;
 }
+
+
 
 interface ApiResponse {
     success: boolean;
