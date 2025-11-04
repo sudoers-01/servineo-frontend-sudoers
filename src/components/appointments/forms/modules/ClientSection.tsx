@@ -49,7 +49,7 @@ export const ClientSection = React.forwardRef<HTMLInputElement, ClientSectionPro
           value={contact}
           readOnly={readonly}
           onChange={handleContactChange}
-          placeholder="+591 7XXXXXXX"
+          placeholder="7XXXXXXX"
           error={errors.contact}
         />
       </div>
