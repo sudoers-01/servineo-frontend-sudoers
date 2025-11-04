@@ -23,7 +23,7 @@ export default function CalendarPage() {
 
     const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false); // Estado para controlar el modal
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const today = new Date();
 
     const handleDataChange = (newDate: Date) => {
