@@ -1,10 +1,9 @@
 'use client';
 
-import React, { useContext } from "react";
 import { useState, useRef } from "react";
 import EditAppointmentForm from "@/components/appointments/forms/EditAppointmentForm";
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
-import useAppointmentsByDate from "@/hooks/useDailyAppointments";
+import { DayOfWeek } from "@/hooks/useDailyAppointments";
 import type { AppointmentFormHandle } from "@/components/appointments/forms/AppointmentForm";
 import AppointmentForm from "@/components/appointments/forms/AppointmentForm";
 import AppointmentDetailsForm, { EditAppointmentFormHandle } from "@/components/appointments/forms/AppointmentDetails";
@@ -18,11 +17,14 @@ interface HourCellProps {
     fixer_id: string;
     requester_id: string;
     isHourBooked: (hour: number) => boolean;
+    isDisabled: (hour: number, day: DayOfWeek) => boolean;
 
     view: 'day' | 'week';
 }
 
 const today = new Date();
+
+const days: DayOfWeek[] = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
 
 export default function HourCell({
     hour,
@@ -32,6 +34,8 @@ export default function HourCell({
     fixer_id,
     isHourBooked,
     requester_id,
+    isDisabled,
+
     view
 }: HourCellProps) {
     const refFormularioCita = useRef<AppointmentFormHandle | null>(null);
@@ -39,7 +43,7 @@ export default function HourCell({
 
 
     const isBooked = isHourBooked(hour);
-
+    const isDisable = isDisabled(hour, days[date.getDay()]);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editDateTime, setEditDateTime] = useState<Date | null>(null);
 
@@ -50,18 +54,24 @@ export default function HourCell({
     }
 
     const getColor = () => {
-        if (isBooked) return "bg-[#FFC857]";
+        if (isDisable) {
+            return "bg-[#64748B]"
+        } if (isBooked) return "bg-[#FFC857]";
         else if (isRequester) {
-            if (isWeekend) return "bg-[#DADADA]"
             return "bg-[#16A34A]"
         }
     }
 
     const getText = () => {
+        if (isDisable) return "Inhabilitado";
         if (isBooked) return "Ocupado";
-        else if (isRequester) return "Inhabilitado"
+        if (isFixer) {
+            return ''
 
-        return "Disponible";
+        } else if (isRequester) {
+
+            return "Disponible";
+        }
     }
 
 
@@ -79,7 +89,7 @@ export default function HourCell({
 
     const isWeekend = date.getDay() === 6 || date.getDay() === 0;
 
-    const { isFixer, isRequester, fixer_id: fixi } = useUserRole();
+    const { isFixer, isRequester } = useUserRole();
     const handleOpenForm = () => {
         if (formRef.current) {
             const now = new Date(date);

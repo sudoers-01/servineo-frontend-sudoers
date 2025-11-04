@@ -28,6 +28,7 @@ export default function DesktopDailyHours({
 
     const {
         isHourBooked,
+        isDisabled
     } = useAppointmentsByDate(fixer_id, date);
 
 
@@ -65,6 +66,7 @@ export default function DesktopDailyHours({
                     fixer_id={fixer_id}
                     requester_id={requester_id}
                     isHourBooked={isHourBooked}
+                    isDisabled={isDisabled}
                     view={view}
                 />
             ))}
