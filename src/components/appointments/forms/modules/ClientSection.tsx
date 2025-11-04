@@ -15,21 +15,9 @@ export const ClientSection = React.forwardRef<HTMLInputElement, ClientSectionPro
   ({ client, contact, errors, onClientChange, onContactChange,readonly }, ref) => {
     const handleContactChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const value = e.target.value;
-      
-      if (value.length < 5) {
-        onContactChange(" ");
-        return;
-      }
-      
-      if (!value.startsWith(" ")) {
-        onContactChange(" " + value.replace(/[^\d]/g, '').slice(0, 8));
-        return;
-      }
-      
-      const numbersOnly = value.slice(5).replace(/[^\d]/g, '');
-      if (numbersOnly.length <= 8) {
-        onContactChange(" " + numbersOnly);
-      }
+    
+    const numbersOnly = value.replace(/[^\d]/g, '').slice(0, 8);
+      onContactChange(numbersOnly);
     };
 
     return (
