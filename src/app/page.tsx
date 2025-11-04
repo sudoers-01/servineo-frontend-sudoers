@@ -1,6 +1,6 @@
 'use client';
-import PaymentDemo from './payment/components/PaymentDemo';
+import CentroPagos from './payment/components/CentroPagos';
 
 export default function Home() {
-  return <PaymentDemo />;
+  return <CentroPagos />;
 }
