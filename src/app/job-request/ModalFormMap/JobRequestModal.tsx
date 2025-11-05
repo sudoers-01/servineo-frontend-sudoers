@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import JobRequestForm from './JobRequestForm';
 import { getUserLocation, createJobRequest } from '../../../services/job-request.modal';
 import { UserLocation, CreateJobRequestPayload, JobRequest } from './../../../types/job-request';
+//import { getUserIdFromToken } from '../../../utils/auth'; modificar según el token real
 
 interface JobRequestData {
   jobMotive: string;
@@ -86,6 +87,12 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
         throw new Error('No se ha definido una ubicación para el trabajo.');
       }
 
+      const token = localStorage.getItem('auth-token');
+      if (!token) throw new Error('No hay token de autenticación');
+
+      //const requesterId = getUserIdFromToken(token);
+      const requesterId = "507f1f77bcf86cd799439011"; // eliminar si ya tenemos el token original
+
       const payload: CreateJobRequestPayload = {
         jobMotive: formData.jobMotive,
         jobDescription: formData.jobDescription,
@@ -94,12 +101,9 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
         endTime: formData.endTime,
         suggestedRate: formData.suggestedRate || '0',
         id_fixer: fixerId,
+        requesterId: requesterId,
       };
 
-      const token = localStorage.getItem('auth-token');
-      if (!token) throw new Error('No hay token de autenticación');
-
-      // ✅ Ahora createJobRequest retorna Promise<JobRequest> directamente
       const data: JobRequest = await createJobRequest(payload, token);
 
       onSubmit(data);

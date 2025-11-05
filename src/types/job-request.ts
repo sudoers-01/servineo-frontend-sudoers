@@ -14,6 +14,7 @@ export interface CreateJobRequestPayload {
   endTime: string;
   suggestedRate: string | number;
   id_fixer: string;
+  requesterId: string;
 }
 
 export interface JobRequest {
