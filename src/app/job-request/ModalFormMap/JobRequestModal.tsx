@@ -91,7 +91,7 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
       if (!token) throw new Error('No hay token de autenticación');
 
       //const requesterId = getUserIdFromToken(token);
-      const requesterId = "507f1f77bcf86cd799439011"; // eliminar si ya tenemos el token original
+      const requesterId = "68ec99ddf39c7c140f42fcfa"; // eliminar si ya tenemos el token original
 
       const payload: CreateJobRequestPayload = {
         jobMotive: formData.jobMotive,
