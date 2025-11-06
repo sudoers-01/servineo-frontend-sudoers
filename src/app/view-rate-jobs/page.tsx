@@ -7,7 +7,6 @@ export default function RatedJobsPage() {
       className="max-w-3xl mx-auto p-6 space-y-6"
       style={{ color: 'var(--foreground)' }}
     >
-      {/* Header */}
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold tracking-tight">
           Rated Jobs List
@@ -22,7 +21,6 @@ export default function RatedJobsPage() {
         </a>
       </header>
 
-      {/* Listado visual con mock data */}
       <RatedJobsList jobs={mockRatedJobs} />
     </main>
   );

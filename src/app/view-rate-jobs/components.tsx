@@ -48,10 +48,10 @@ function Dropdown() {
              className="absolute z-10 mt-2 w-56 rounded-xl border bg-white shadow"
              style={{ borderColor:'var(--surface-border)' }}>
           <button className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-50">
-            Descendente (3→0)
+            Descendente
           </button>
           <button className="w-full text-left px-3 py-2 text-sm hover:bg-neutral-50">
-            Ascendente (0→3)
+            Ascendente
           </button>
         </div>
       )}
@@ -65,12 +65,10 @@ export function RatedJobsList({
 
   return (
     <section className="space-y-4 relative">
-      {/* Encabezado con dropdown de calificación */}
       <div className="flex items-center justify-end">
         <Dropdown />
       </div>
 
-      {/* Lista de trabajos (solo mock visual) */}
       <div className="relative">
         <ul className="flex flex-col gap-4 min-h-[220px]">
           {jobs.map(job => (
@@ -89,7 +87,6 @@ export function RatedJobsList({
         </ul>
       </div>
 
-      {/* Botón inferior derecho */}
       <div className="flex justify-end mt-6">
         <button
           type="button"

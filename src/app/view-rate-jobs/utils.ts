@@ -1,7 +1,7 @@
 export type RatedJob = {
   id: string;
   title: string;
-  dateISO: string;      // ISO 8601
+  dateISO: string;      
   rating: 0 | 1 | 2 | 3;
 };
 
