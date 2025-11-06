@@ -5,7 +5,7 @@ import type { RatedJob } from './utils';
 
 export function StarRating({
   value,
-  size = 18,
+  size = 32,
   srLabel,
 }: { value: 0|1|2|3; size?: number; srLabel?: string }) {
   return (
