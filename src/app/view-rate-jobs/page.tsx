@@ -261,6 +261,14 @@ export default function RatedJobsPage() {
                 { key: 'ascending', label: 'Ascendente' },
               ]}
             />
+
+            <GenericDropdown
+              label='Filtrar por fecha'
+              options={[
+                { key: 'recent', label: 'Mas reciente' },
+              ]}
+            />
+
           </div>
         </header>
 
