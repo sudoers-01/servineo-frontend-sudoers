@@ -1,4 +1,4 @@
-// Asegúrate de tener 'lucide-react' instalado: npm install lucide-react
+// Tener 'lucide-react' instalado: npm install lucide-react
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
@@ -87,7 +87,8 @@ const CentroDePagos = () => {
       </div>
 
       {/* Contenedor principal para centrar y limitar el ancho con un padding general */}
-      <div className="max-w-4xl mx-auto px-4"> 
+      {/* CAMBIO: max-w-3xl para un ancho de escritorio más balanceado */}
+      <div className="max-w-3xl mx-auto px-4"> 
 
         {/* Aviso de Datos de Prueba (si aplica) */}
         {fixerData?.isTestData && (
@@ -103,22 +104,25 @@ const CentroDePagos = () => {
 
         {/* Tarjeta de Saldo: Fondo azul sólido */}
         <div className="pt-6 pb-4">
-          <div className="bg-blue-600 rounded-2xl p-6 shadow-xl text-white">
-            {/* Saldo Actual: Icono a la izquierda, texto a la derecha */}
-            <div className="flex items-center gap-4 mb-6">
+          {/* CAMBIO: Padding responsivo (p-4 en móvil, sm:p-6 en escritorio) */}
+          <div className="bg-blue-600 rounded-2xl p-4 sm:p-6 shadow-xl text-white">
+            
+            {/* CAMBIO: flex-col en móvil, sm:flex-row en escritorio */}
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-6">
               <Wallet size={44} className="opacity-90 flex-shrink-0" />
               <div>
                 <span className="text-sm opacity-90">Saldo Actual</span>
-                <h2 className="text-4xl font-bold">
+                {/* CAMBIO: text-3xl en móvil, sm:text-4xl en escritorio */}
+                <h2 className="text-3xl sm:text-4xl font-bold">
                   Bs. {fixerData?.saldoActual?.toFixed(2) || '0.00'}
                 </h2>
               </div>
             </div>
 
-            {/* Grid de Estadísticas: Cajas de azul más claro y texto blanco */}
-            <div className="grid grid-cols-2 gap-4">
+            {/* CAMBIO: grid-cols-1 en móvil, sm:grid-cols-2 en escritorio */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               
-              {/* Total Ganado - CAMBIO DE COLOR */}
+              {/* Total Ganado */}
               <div className="bg-[#759ae0] rounded-xl p-4">
                 <p className="text-xs text-white opacity-75 mb-1">Total Ganado</p>
                 <p className="text-xl font-bold text-white">
@@ -130,7 +134,7 @@ const CentroDePagos = () => {
                 </p>
               </div>
 
-              {/* Trabajos Completados - CAMBIO DE COLOR */}
+              {/* Trabajos Completados */}
               <div className="bg-[#759ae0] rounded-xl p-4">
                 <p className="text-xs text-white opacity-75 mb-1">Trabajos Completados</p>
                 <p className="text-3xl font-bold text-white">
@@ -147,7 +151,9 @@ const CentroDePagos = () => {
         <div className="pb-6">
           <h3 className="text-base font-semibold text-gray-600 mb-3">Acciones Rápidas</h3>
           
+          {/* Este layout (space-y-3) es inherentemente responsivo, no necesita cambios */}
           <div className="space-y-3">
+            
             {/* Fixer Wallet */}
             <button
               onClick={() => router.push(`/payment/FixerWallet?fixerId=${FIXER_ID}`)}
@@ -178,7 +184,7 @@ const CentroDePagos = () => {
               <ChevronRight className="text-gray-400 group-hover:text-cyan-600 transition-colors" size={24} />
             </button>
 
-            {/* Mis Facturas (cambiado de púrpura a azul para coincidir con el mockup) */}
+            {/* Mis Facturas */}
             <button 
               onClick={() => router.push('/facturas')} // Usar router.push
               className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
