@@ -145,7 +145,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
 
       <fieldset className='border border-gray-300 rounded-md p-4'>
         <legend className='text-sm font-medium text-gray-700 px-2'>Ubicación del trabajo:</legend>
-        <div className='space-y-2'>
+        <div className='space-y-3'>
           <label className='flex items-center'>
             <input
               type='radio'
@@ -154,9 +154,9 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
               checked={formData.locationOption === 'keep'}
               onChange={handleInputChange}
               disabled={loading}
-              className='mr-2'
+              className='mr-3'
             />
-            Mantener ubicación guardada
+            <span className='text-sm text-gray-700 font-medium'>Mantener ubicación guardada</span>
           </label>
           <label className='flex items-center'>
             <input
@@ -166,9 +166,9 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
               checked={formData.locationOption === 'modify'}
               onChange={handleInputChange}
               disabled={loading}
-              className='mr-2'
+              className='mr-3'
             />
-            Modificar ubicación del trabajo
+            <span className='text-sm text-gray-700 font-medium'>Modificar ubicación del trabajo</span>
           </label>
         </div>
       </fieldset>
