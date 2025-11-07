@@ -168,7 +168,9 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
               disabled={loading}
               className='mr-3'
             />
-            <span className='text-sm text-gray-700 font-medium'>Modificar ubicación del trabajo</span>
+            <span className='text-sm text-gray-700 font-medium'>
+              Modificar ubicación del trabajo
+            </span>
           </label>
         </div>
       </fieldset>
