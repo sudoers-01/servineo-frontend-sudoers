@@ -266,6 +266,7 @@ export default function RatedJobsPage() {
               label='Filtrar por fecha'
               options={[
                 { key: 'recent', label: 'Mas reciente' },
+                { key: 'oldest', label: 'Mas antiguo' },
               ]}
             />
 
