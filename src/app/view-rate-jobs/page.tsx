@@ -14,7 +14,7 @@ const roboto = Roboto({
 
 function StarRating({
   value,
-  size = 30,
+  size = 38,
   srLabel,
 }: {
   value: 0 | 1 | 2 | 3;
@@ -22,7 +22,7 @@ function StarRating({
   srLabel?: string;
 }) {
   return (
-    <div className='inline-flex gap-1' aria-label={srLabel ?? `${value} de 3 estrellas`}>
+    <div className="inline-flex gap-1" aria-label={srLabel ?? `${value} de 3 estrellas`}>
       {Array.from({ length: 3 }).map((_, i) => {
         const filled = i < value;
         return (
@@ -30,16 +30,16 @@ function StarRating({
             key={i}
             width={size}
             height={size}
-            viewBox='0 0 24 24'
-            role='img'
-            aria-hidden='true'
+            viewBox="0 0 24 24"
+            role="img"
+            aria-hidden="true"
             className={filled ? 'drop-shadow-sm' : 'opacity-60'}
           >
             <path
-              d='M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'
+              d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
               style={
                 filled
-                  ? { fill: '#facc15' }
+                  ? { fill: '#facc15' } // yellow
                   : { fill: 'transparent', stroke: '#cbd5e1', strokeWidth: 1.5 }
               }
             />
@@ -50,7 +50,15 @@ function StarRating({
   );
 }
 
-function DropdownPortal() {
+function GenericDropdown({
+  label,
+  options,
+  align = 'right',
+}: {
+  label: string;
+  options: { key: string; label: string }[];
+  align?: 'right' | 'left';
+}) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<{ left: number; top: number; width: number } | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
@@ -104,24 +112,24 @@ function DropdownPortal() {
 
   return (
     <>
-      <div className='inline-block'>
+      <div className="inline-block">
         <button
           ref={btnRef}
-          type='button'
+          type="button"
           onClick={toggle}
-          className='px-3 py-2 rounded-lg border bg-white shadow-sm text-sm flex items-center gap-2 border-gray-200'
-          aria-haspopup='menu'
+          className="px-3 py-2 rounded-lg border bg-white shadow-sm text-sm flex items-center gap-2 border-gray-200 ml-6"
+          aria-haspopup="menu"
           aria-expanded={open}
         >
-          Ordenar por calificación
+          {label}
           <svg
-            className='w-3 h-3 ml-1 text-blue-600'
-            viewBox='0 0 10 6'
-            fill='currentColor'
-            xmlns='http://www.w3.org/2000/svg'
+            className="w-3 h-3 ml-1 text-blue-600"
+            viewBox="0 0 10 6"
+            fill="currentColor"
+            xmlns="http://www.w3.org/2000/svg"
             aria-hidden
           >
-            <path d='M1 1l4 4 4-4' />
+            <path d="M1 1l4 4 4-4" />
           </svg>
         </button>
       </div>
@@ -131,32 +139,27 @@ function DropdownPortal() {
         typeof document !== 'undefined' &&
         createPortal(
           <div
-            role='menu'
+            role="menu"
             style={{
               position: 'absolute',
-              left: coords.left,
+              left: align === 'right' ? coords.left : coords.left,
               top: coords.top,
               width: coords.width,
               zIndex: 99999,
             }}
-            className='rounded-xl border bg-white opacity-100 shadow-lg border-gray-200 text-gray-800 pointer-events-auto'
+            className="rounded-xl border bg-white opacity-100 shadow-lg border-gray-200 text-gray-800 pointer-events-auto"
           >
-            <button
-              onClick={() => {
-                setOpen(false);
-              }}
-              className='w-full text-left px-3 py-2 text-sm hover:bg-gray-50 text-gray-800'
-            >
-              Descendente
-            </button>
-            <button
-              onClick={() => {
-                setOpen(false);
-              }}
-              className='w-full text-left px-3 py-2 text-sm hover:bg-gray-50 text-gray-800'
-            >
-              Ascendente
-            </button>
+            {options.map((opt) => (
+              <button
+                key={opt.key}
+                onClick={() => {
+                  setOpen(false);
+                }}
+                className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 text-gray-800"
+              >
+                {opt.label}
+              </button>
+            ))}
           </div>,
           document.body,
         )}
@@ -166,19 +169,17 @@ function DropdownPortal() {
 
 function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
   return (
-    <section className='space-y-6 relative w-full'>
-      <div className='relative'>
-        <ul className='flex flex-col gap-4 min-h-[220px]'>
+    <section className="space-y-6 relative w-full">
+      <div className="relative">
+        <ul className="flex flex-col gap-4 min-h-[220px]">
           {jobs.map((job) => (
             <li
               key={job.id}
-              className='flex items-center justify-between gap-4 p-4 rounded-xl border bg-white border-gray-200 w-full'
+              className="flex items-center justify-between gap-4 p-4 rounded-xl border bg-white border-gray-200 w-full shadow-[0_6px_8px_rgba(0,0,0,0.06)]"
             >
-              <div className='min-w-0'>
-                <p className='font-medium truncate text-gray-800'>{job.title}</p>
-                <p className='text-xs text-gray-500'>
-                  Date: {new Date(job.dateISO).toLocaleDateString()}
-                </p>
+              <div className="min-w-0">
+                <p className="font-medium truncate text-gray-800">{job.title}</p>
+                <p className="text-xs text-gray-500">Date: {new Date(job.dateISO).toLocaleDateString()}</p>
               </div>
 
               <StarRating value={job.rating} />
@@ -187,10 +188,10 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
         </ul>
       </div>
 
-      <div className='fixed bottom-6 right-40 z-50'>
+      <div className="fixed bottom-6 right-40 z-50">
         <button
-          type='button'
-          className='px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 transition'
+          type="button"
+          className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 transition"
         >
           Go to comments
         </button>
@@ -200,18 +201,51 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
 }
 
 export default function RatedJobsPage() {
+  const [jobs] = useState<RatedJob[]>(mockRatedJobs);
+
+  const [loading, setLoading] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+
+  useEffect(() => {
+    if (dropdownOpen) {
+      setLoading(true);
+      const t = setTimeout(() => setLoading(false), 600);
+      return () => clearTimeout(t);
+    }
+    setLoading(false);
+  }, [dropdownOpen]);
+
   return (
     <main className={`min-h-screen bg-white text-gray-700 ${roboto.className}`}>
-      <div className='max-w-3xl mx-auto p-6 space-y-6'>
-        <header className='flex flex-col items-center'>
-          <h1 className='text-2xl font-semibold tracking-tight text-center'>Rated Jobs List</h1>
+      <div className="max-w-3xl mx-auto p-6 space-y-6">
+        <header className="flex flex-col items-center">
+          <h1 className="text-2xl font-semibold tracking-tight text-center">Rated Jobs List</h1>
 
-          <div className='mt-3 ml-30'>
-            <DropdownPortal />
+          <div className="mt-3 flex items-center gap-35 w-full justify-center justify-center">
+            <div className="flex items-center mr-2">
+              {loading && (
+                <div className="flex items-center gap-2">
+                <svg className="animate-spin h-5 w-5 text-blue-600" viewBox="0 0 24 24" aria-hidden>
+                  <circle cx="12" cy="12" r="10" strokeWidth="4" stroke="#3b82f6" strokeOpacity="0.25" fill="none" />
+                  <path d="M22 12a10 10 0 0 1-10 10" strokeWidth="4" stroke="#3b82f6" strokeLinecap="round" fill="none" />
+                </svg>
+                <span className="text-sm text-gray-500">Procesando...</span>
+            </div>
+              )}
+            </div>
+
+            <GenericDropdown
+              label="Ordenar por calificación"
+              options={[
+                { key: 'descending', label: 'Descendente' },
+                { key: 'ascending', label: 'Ascendente' },
+              ]}
+            />
+
           </div>
         </header>
 
-        <RatedJobsList jobs={mockRatedJobs} />
+        <RatedJobsList jobs={jobs} />
       </div>
     </main>
   );
