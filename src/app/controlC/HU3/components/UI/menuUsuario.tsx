@@ -4,12 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../hooks/usoAutentificacion";
 import { useRouter } from "next/navigation";
 
-
 export default function UserMenu() {
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
@@ -40,15 +40,28 @@ export default function UserMenu() {
           <div className="px-4 py-2 text-gray-700 border-b font-semibold">
             {user.name || "Usuario"}
           </div>
+          
           <button
-  className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100"
-  onClick={() => {
-    setOpen(false);
-    router.push("controlC/HU5"); // Cambia la ruta según tu estructura
-  }}
->
-  Editar perfil
-</button>
+            className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100"
+            onClick={() => {
+              setOpen(false);
+              router.push("/controlC/HU5");
+            }}
+          >
+            Editar perfil
+          </button>
+
+          {/* 🔹 NUEVO BOTÓN - Cambiar contraseña */}
+          <button
+            className="block w-full text-left px-4 py-2 text-gray-600 hover:bg-gray-100"
+            onClick={() => {
+              setOpen(false);
+              router.push("controlC/HU8");
+            }}
+          >
+            Cambiar contraseña
+          </button>
+
           <button
             className="block w-full text-left px-4 py-2 text-red-600 hover:bg-red-100"
             onClick={logout}
