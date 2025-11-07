@@ -29,7 +29,7 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
 
       const fetchUserLocation = async () => {
         if (!authToken) {
-          setError('No hay token de autenticación');
+          setError('');
           setLoading(false);
           return;
         }
