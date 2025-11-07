@@ -3,33 +3,35 @@ import React from "react";
 
 import HourCell from "./HourCell/HourCell";
 
-import useAppointmentsByDate from "@/hooks/useDailyAppointments";
+import { useUserRole } from "@/utils/contexts/UserRoleContext";
 
+import { useAppointmentsContext } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 
 interface DesktopDailyViewProps {
 
     date: Date;
-    fixer_id: string;
-    requester_id: string;
     view: 'week' | 'day';
 }
 
 const today = new Date();
 const currentHour = today.getHours();
 
-
-
 export default function DesktopDailyHours({
     date,
-    fixer_id,
-    requester_id,
     view
 }: DesktopDailyViewProps) {
-
+    const {
+        fixer_id,
+        requester_id
+    } = useUserRole();
     const {
         isHourBooked,
         isDisabled
-    } = useAppointmentsByDate(fixer_id, date);
+    } = useAppointmentsContext();
+
+
+
+
 
 
     const isPast = (hour: number) => {
@@ -60,11 +62,11 @@ export default function DesktopDailyHours({
                 <HourCell
                     key={hour}
                     date={date}
+                    fixer_id={fixer_id}
+                    requester_id={requester_id}
                     hour={hour}
                     isPast={isPast(hour)}
                     isToday={isToday}
-                    fixer_id={fixer_id}
-                    requester_id={requester_id}
                     isHourBooked={isHourBooked}
                     isDisabled={isDisabled}
                     view={view}

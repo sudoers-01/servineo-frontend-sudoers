@@ -12,27 +12,26 @@ const API_BASE = "https://servineo-backend-lorem.onrender.com";
 
 interface HourCellProps {
     date: Date;
+    fixer_id: string;
+    requester_id: string;
     hour: number;
     isPast: boolean;
     isToday: boolean;
-    fixer_id: string;
-    requester_id: string;
-    isHourBooked: (hour: number) => boolean;
-    isDisabled: (hour: number, day: DayOfWeek) => boolean;
+    isHourBooked: (datei: Date, hour: number) => boolean;
+    isDisabled: (datei: Date, hour: number) => boolean;
     view: 'day' | 'week';
 }
 
 const today = new Date();
-const days: DayOfWeek[] = ['domingo', 'lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado'];
 
 export default function HourCell({
     hour,
     date,
+    fixer_id,
+    requester_id,
     isPast,
     isToday,
-    fixer_id,
     isHourBooked,
-    requester_id,
     isDisabled,
     view
 }: HourCellProps) {
@@ -40,8 +39,8 @@ export default function HourCell({
     const formRef = useRef<DetailsFormHandle>(null);
     const refFormularioEditarCita = useRef<EditAppointmentFormHandle | null>(null);
 
-    const isBooked = isHourBooked(hour);
-    const isDisable = isDisabled(hour, days[date.getDay()]);
+    const isBooked = isHourBooked(date, hour);
+    const isDisable = isDisabled(date, hour);
 
     const todayColor = () => {
         if (isToday && view === 'week') return "bg-blue-300";
