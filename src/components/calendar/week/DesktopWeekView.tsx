@@ -1,12 +1,11 @@
 'use client';
 import DesktopDailyHours from "../day/DesktopDailyHours";
 
+
 import Hours from "../ui/Hours";
 
 interface DesktopWeekViewProps {
     date: Date;
-    fixer_id: string;
-    requester_id: string;
 }
 
 const getWeekDays = (selectedDate: Date) => {
@@ -28,7 +27,6 @@ const getWeekDays = (selectedDate: Date) => {
 
     return days;
 };
-
 function getDayName(dayNumber: number): string {
     const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
     return days[dayNumber];
@@ -36,8 +34,6 @@ function getDayName(dayNumber: number): string {
 
 export default function DesktopWeekView({
     date,
-    fixer_id,
-    requester_id
 }: DesktopWeekViewProps) {
 
 
@@ -62,8 +58,6 @@ export default function DesktopWeekView({
                                 <div className=" flex items-center justify-center border-r border-b bg-gray-300 text-black">{getDayName(day.getDay())} {day.getDate()}</div >
                                 <DesktopDailyHours
                                     date={day}
-                                    fixer_id={fixer_id}
-                                    requester_id={requester_id}
                                     view={'week'}
                                 />
 

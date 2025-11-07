@@ -31,8 +31,6 @@ export default function DesktopDailyView({
                 <div className=" flex items-center justify-center border-r border-b bg-gray-300 text-black">{getDayName(date.getDay())} </div >
                 <DesktopDailyHours
                     date={date}
-                    fixer_id={fixer_id}
-                    requester_id={requester_id}
                     view={'day'}
                 />
             </div>

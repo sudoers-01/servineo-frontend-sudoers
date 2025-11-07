@@ -1,8 +1,26 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getAppointmentsByDate, Appointment } from '@/utils/getAppointmentsByDate';
 import { getAppointmentsDisable, Days } from "@/utils/getAppointmentsDisable";
 
 export type DayOfWeek = keyof Days;
+
+const DAY_MAP: { [key: number]: DayOfWeek } = {
+    0: 'domingo',
+    1: 'lunes',
+    2: 'martes',
+    3: 'miercoles',
+    4: 'jueves',
+    5: 'viernes',
+    6: 'sabado'
+};
+
+interface CacheData {
+    endDate: Date;
+    appointments: Appointment[];
+    appointmentsDis: Days;
+}
+
+
 
 export default function useAppointmentsByDate(fixer_id: string, date: Date) {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
@@ -18,25 +36,62 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    //Para el cache, cachai??
+    const cacheRef = useRef<CacheData | null>(null);
+
+
+    const daysInMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+
     useEffect(() => {
         async function fetchData() {
             if (!fixer_id || fixer_id === '' || fixer_id === 'undefined') {
-                console.warn('fixer_id no válido:', fixer_id);
+                console.warn('fixer_id no valido:', fixer_id);
                 setLoading(false);
                 return;
             }
 
+
+
+            if (cacheRef.current) {
+                const cached = cacheRef.current;
+                const isSameRange =
+                    cached.endDate.getMonth() === date.getMonth() &&
+                    cached.endDate.getFullYear() === date.getFullYear();
+
+                if (isSameRange) {
+                    console.log("Ya esta cachai?");
+                    setAppointments(cached.appointments);
+                    setAppointmentsDis(cached.appointmentsDis);
+                    setLoading(false);
+                    return;
+                }
+
+            }
+
+
             setLoading(true);
 
             try {
-                const [appointmentsData, availabilityData] = await Promise.all([
-                    getAppointmentsByDate(fixer_id, date.toISOString().split('T')[0]),
-                    getAppointmentsDisable(fixer_id)
+
+                const monthDates: string[] = [];
+
+                for (let i = 0; i <= daysInMonth; i++) {
+                    monthDates.push(new Date(date.getFullYear(), date.getMonth(), i).toISOString().split('T')[0]);
+                }
+
+
+                const [availabilityData, ...appointmentsDataArray] = await Promise.all([
+                    getAppointmentsDisable(fixer_id),
+                    ...monthDates.map((date: string) => getAppointmentsByDate(fixer_id, date))
                 ]);
 
-                setAppointments(appointmentsData);
+                const allAppointments = appointmentsDataArray.flat();
+
+                setAppointments(allAppointments);
                 setAppointmentsDis(availabilityData);
                 setError(null);
+
+
             } catch (err) {
                 setError('Error al cargar los datos');
                 console.error('Error en fetchData:', err);
@@ -58,31 +113,34 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
         fetchData();
     }, [fixer_id, date]);
 
-    const getAppointmentByHour = (hour: number) => {
-        return appointments.find(apt => new Date(apt.starting_time).getUTCHours() === hour);
+    const isHourBooked = (day: Date, hour: number): boolean => {
+        return appointments.some((apt: Appointment) => {
+            const aptDate = new Date(apt.starting_time);
+            return (
+                aptDate.getFullYear() === day.getFullYear() &&
+                aptDate.getMonth() === day.getMonth() &&
+                aptDate.getDate() === day.getDate() &&
+                aptDate.getUTCHours() === hour
+            );
+        });
     };
 
-    const bookedHours = appointments.map(apt =>
-        new Date(apt.starting_time).getUTCHours(),
-    );
+    const isDisabled = (day: Date, hour: number): boolean => {
+        const dayOfWeek = day.getDay();
+        const dayName = DAY_MAP[dayOfWeek];
 
-    const isHourBooked = (hour: number): boolean => {
-        return bookedHours.includes(hour);
-    }
-
-    const isDisabled = (hour: number, day: DayOfWeek): boolean => {
-        if (!appointmentsDis || !appointmentsDis[day]) {
+        if (!appointmentsDis || !appointmentsDis[dayName]) {
             return false;
         }
-        return appointmentsDis[day].includes(hour);
+
+        return appointmentsDis[dayName].includes(hour);
+
     }
 
     return {
-        bookedHours,
-        getAppointmentByHour,
         isHourBooked,
+        isDisabled,
         loading,
-        error,
-        isDisabled
+        error
     };
 }

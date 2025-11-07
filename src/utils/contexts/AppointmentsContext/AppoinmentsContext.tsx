@@ -5,10 +5,11 @@ import React, { createContext, useContext, ReactNode } from 'react';
 interface AppointmentsContextType {
     isHourBooked: (date: Date, hour: number) => boolean;
     isDisabled: (date: Date, hour: number) => boolean;
+    loading: boolean;
 
 }
 
-const AppoinmentsContext = createContext<AppointmentsContextType | null>(null);
+const AppointmentsContext = createContext<AppointmentsContextType | null>(null);
 
 
 export function useAppointmentsContext() {
@@ -21,7 +22,26 @@ export function useAppointmentsContext() {
     return context;
 }
 
-interface AppointmentsProvider {
-
+interface AppointmentsProviderProps {
+    children: ReactNode;
+    isHourBooked: (date: Date, hour: number) => boolean;
+    isDisabled: (date: Date, hour: number) => boolean;
+    loading: boolean;
 }
 
+export function AppointmentsProvider({
+    children,
+    isHourBooked,
+    isDisabled,
+    loading
+}: AppointmentsProviderProps) {
+    return (
+        <AppointmentsContext.Provider value={{
+            isHourBooked,
+            isDisabled,
+            loading
+        }}>
+            {children}
+        </AppointmentsContext.Provider>
+    );
+}
