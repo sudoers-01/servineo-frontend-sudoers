@@ -2,9 +2,21 @@
 import React, { useState, useEffect } from 'react';
 import JobRequestForm from './JobRequestForm';
 import { getUserLocation, createJobRequest } from '../../../services/job-request.modal';
-import { UserLocation, CreateJobRequestPayload, JobRequest, Location, JobRequestData, JobRequestModalProps } from '../../../types/job-request';
+import {
+  UserLocation,
+  CreateJobRequestPayload,
+  JobRequest,
+  Location,
+  JobRequestData,
+  JobRequestModalProps,
+} from '../../../types/job-request';
 
-const JobRequestModal: React.FC<JobRequestModalProps> = ({ isOpen, onClose, onSubmit, fixerId }) => {
+const JobRequestModal: React.FC<JobRequestModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  fixerId,
+}) => {
   const [initialLocation, setInitialLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -66,13 +78,16 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({ isOpen, onClose, onSu
       } else if (initialLocation) {
         finalLocation = {
           type: 'Point' as const,
-          coordinates: [initialLocation.lat.toString(), initialLocation.lng.toString()] as [string, string],
+          coordinates: [initialLocation.lat.toString(), initialLocation.lng.toString()] as [
+            string,
+            string,
+          ],
         };
       } else {
         throw new Error('No se ha definido una ubicación para el trabajo.');
       }
 
-      const requesterId = "68ec99ddf39c7c140f42fcfa";
+      const requesterId = '68ec99ddf39c7c140f42fcfa';
 
       const payload: CreateJobRequestPayload = {
         jobMotive: formData.jobMotive,

@@ -35,10 +35,13 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
     setNewLocation({ lat: pos.lat, lng: pos.lng });
   }, []);
 
-  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  }, []);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    },
+    [],
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,7 +128,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
           />
         )}
       </div>
-      
+
       <div>
         <label htmlFor='suggestedRate' className='block text-sm font-medium text-gray-700 mb-2'>
           Tarifa sugerida (opcional):

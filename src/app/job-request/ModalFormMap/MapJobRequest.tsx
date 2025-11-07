@@ -159,8 +159,7 @@ const MapJobRequest: React.FC<MapJobRequestProps> = ({
       if (mapInstanceRef.current) {
         try {
           mapInstanceRef.current.remove();
-        } catch (error) {
-        }
+        } catch {}
         mapInstanceRef.current = null;
         markerRef.current = null;
       }
