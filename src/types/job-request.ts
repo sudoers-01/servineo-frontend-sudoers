@@ -34,3 +34,31 @@ export interface JobRequest {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface Location {
+  lat: number;
+  lng: number;
+}
+
+export interface JobRequestData {
+  jobMotive: string;
+  jobDescription: string;
+  locationOption: 'keep' | 'modify';
+  startTime: string;
+  endTime: string;
+  suggestedRate: string;
+}
+
+export interface JobRequestModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: JobRequest) => void;
+  fixerId: string;
+}
+
+export interface JobRequestFormProps {
+  initialLocation: Location | null;
+  loading: boolean;
+  onSubmit: (formData: JobRequestData, newLocation: Location | null) => void;
+  onCancel: () => void;
+}

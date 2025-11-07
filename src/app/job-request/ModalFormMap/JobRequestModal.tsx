@@ -2,49 +2,30 @@
 import React, { useState, useEffect } from 'react';
 import JobRequestForm from './JobRequestForm';
 import { getUserLocation, createJobRequest } from '../../../services/job-request.modal';
-import { UserLocation, CreateJobRequestPayload, JobRequest } from './../../../types/job-request';
-//import { getUserIdFromToken } from '../../../utils/auth'; modificar según el token real
+import { UserLocation, CreateJobRequestPayload, JobRequest, Location, JobRequestData, JobRequestModalProps } from '../../../types/job-request';
 
-interface JobRequestData {
-  jobMotive: string;
-  jobDescription: string;
-  locationOption: 'keep' | 'modify';
-  startTime: string;
-  endTime: string;
-  suggestedRate: string;
-}
-
-interface Location {
-  lat: number;
-  lng: number;
-}
-
-interface JobRequestModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  onSubmit: (data: JobRequest) => void;
-  fixerId: string;
-}
-
-const JobRequestModal: React.FC<JobRequestModalProps> = ({
-  isOpen,
-  onClose,
-  onSubmit,
-  fixerId,
-}) => {
+const JobRequestModal: React.FC<JobRequestModalProps> = ({ isOpen, onClose, onSubmit, fixerId }) => {
   const [initialLocation, setInitialLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     if (isOpen) {
+      const authToken = localStorage.getItem('auth-token');
+      setToken(authToken);
+
       const fetchUserLocation = async () => {
+        if (!authToken) {
+          setError('No hay token de autenticación');
+          setLoading(false);
+          return;
+        }
+
         setLoading(true);
         setError('');
         try {
-          const token = localStorage.getItem('auth-token');
-          if (!token) throw new Error('No hay token de autenticación');
-          const userLocation: UserLocation = await getUserLocation(token);
+          const userLocation: UserLocation = await getUserLocation(authToken);
 
           const locationForMap: Location = {
             lat: parseFloat(userLocation.lat),
@@ -61,10 +42,17 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
       };
 
       fetchUserLocation();
+    } else {
+      setToken(null);
     }
   }, [isOpen]);
 
   const handleFormSubmit = async (formData: JobRequestData, newLocation: Location | null) => {
+    if (!token) {
+      setError('No hay token de autenticación');
+      return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -78,20 +66,13 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
       } else if (initialLocation) {
         finalLocation = {
           type: 'Point' as const,
-          coordinates: [initialLocation.lat.toString(), initialLocation.lng.toString()] as [
-            string,
-            string,
-          ],
+          coordinates: [initialLocation.lat.toString(), initialLocation.lng.toString()] as [string, string],
         };
       } else {
         throw new Error('No se ha definido una ubicación para el trabajo.');
       }
 
-      const token = localStorage.getItem('auth-token');
-      if (!token) throw new Error('No hay token de autenticación');
-
-      //const requesterId = getUserIdFromToken(token);
-      const requesterId = "68ec99ddf39c7c140f42fcfa"; // eliminar si ya tenemos el token original
+      const requesterId = "68ec99ddf39c7c140f42fcfa";
 
       const payload: CreateJobRequestPayload = {
         jobMotive: formData.jobMotive,

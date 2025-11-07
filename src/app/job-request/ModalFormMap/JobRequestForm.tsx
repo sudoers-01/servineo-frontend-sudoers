@@ -1,27 +1,7 @@
 'use client';
 import React, { useState, useCallback, useMemo } from 'react';
 import MapJobRequest from './MapJobRequest';
-
-interface JobRequestData {
-  jobMotive: string;
-  jobDescription: string;
-  locationOption: 'keep' | 'modify';
-  startTime: string;
-  endTime: string;
-  suggestedRate: string;
-}
-
-interface Location {
-  lat: number;
-  lng: number;
-}
-
-interface JobRequestFormProps {
-  initialLocation: Location | null;
-  loading: boolean;
-  onSubmit: (formData: JobRequestData, newLocation: Location | null) => void;
-  onCancel: () => void;
-}
+import { JobRequestData, Location, JobRequestFormProps } from '../../../types/job-request';
 
 const MapJobRequestMemo = React.memo(MapJobRequest);
 

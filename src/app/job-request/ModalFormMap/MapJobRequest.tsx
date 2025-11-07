@@ -1,11 +1,7 @@
 'use client';
 import React, { useEffect, useRef, useMemo, useState, useCallback } from 'react';
 import 'leaflet/dist/leaflet.css';
-
-interface Location {
-  lat: number;
-  lng: number;
-}
+import { Location } from '../../../types/job-request';
 
 interface MapJobRequestProps {
   isEnabled: boolean;

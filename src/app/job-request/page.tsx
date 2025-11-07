@@ -4,11 +4,11 @@ import { useState } from 'react';
 
 export default function JobRequestPage() {
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
-  const fakeFixerId = '507f1f77bcf86cd799439011'; //id para pruebas
+  const fakeFixerId = '507f1f77bcf86cd799439011';
   return (
     <main className='min-h-screen bg-white flex items-center justify-center'>
       <div className='text-center space-y-8'>
-        <h1 className='text-3xl sm:text-4xl font-semibold text-gray-900'>Fixers</h1>
+        <h1 className='text-3xl sm:text-4xl font-semibold text-gray-900'>fixer offer details</h1>
         <div className='flex items-center justify-center gap-4'>
           <button
             onClick={() => setIsMapModalOpen(true)}
@@ -22,7 +22,6 @@ export default function JobRequestPage() {
         isOpen={isMapModalOpen}
         onClose={() => setIsMapModalOpen(false)}
         onSubmit={(data) => console.log('Solicitud enviada:', data)}
-        //fixerId={offer.fixerId}   obtener de los detalles de la oferta
         fixerId={fakeFixerId}
       />
     </main>
