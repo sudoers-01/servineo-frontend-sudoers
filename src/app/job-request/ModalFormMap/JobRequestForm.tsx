@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import MapJobRequest from './MapJobRequest';
 import { JobRequestData, Location, JobRequestFormProps } from '../../../types/job-request';
 
@@ -21,6 +21,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
   });
 
   const [newLocation, setNewLocation] = useState<Location | null>(null);
+  const [timeError, setTimeError] = useState<string>('');
 
   const currentMapLocation = useMemo(() => {
     if (formData.locationOption === 'modify' && newLocation) {
@@ -30,6 +31,50 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
   }, [formData.locationOption, newLocation, initialLocation]);
 
   const isMapEnabled = formData.locationOption === 'modify';
+
+  const validateTimes = useCallback((start: string, end: string): string => {
+    if (!start || !end) return '';
+
+    const startTime = new Date(`2000-01-01T${start}`);
+    const endTime = new Date(`2000-01-01T${end}`);
+
+    const minTime = new Date(`2000-01-01T07:00`);
+    const maxTime = new Date(`2000-01-01T21:00`);
+
+    if (startTime < minTime || startTime > maxTime) {
+      return 'La hora de inicio debe estar entre 7:00 y 21:00';
+    }
+
+    if (endTime < minTime || endTime > maxTime) {
+      return 'La hora de fin debe estar entre 7:00 y 21:00';
+    }
+
+    if (endTime <= startTime) {
+      return 'La hora de fin debe ser mayor a la hora de inicio';
+    }
+
+    const durationMs = endTime.getTime() - startTime.getTime();
+    const durationHours = durationMs / (1000 * 60 * 60);
+
+    if (durationHours < 2) {
+      return 'La duración mínima del trabajo es de 2 horas';
+    }
+
+    if (durationHours > 8) {
+      return 'La duración máxima del trabajo es de 8 horas';
+    }
+
+    return '';
+  }, []);
+
+  useEffect(() => {
+    if (formData.startTime && formData.endTime) {
+      const error = validateTimes(formData.startTime, formData.endTime);
+      setTimeError(error);
+    } else {
+      setTimeError('');
+    }
+  }, [formData.startTime, formData.endTime, validateTimes]);
 
   const handlePositionChange = useCallback((pos: Location) => {
     setNewLocation({ lat: pos.lat, lng: pos.lng });
@@ -45,6 +90,20 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (formData.startTime && formData.endTime) {
+      const finalError = validateTimes(formData.startTime, formData.endTime);
+      if (finalError) {
+        setTimeError(finalError);
+        return;
+      }
+    }
+
+    if (!formData.startTime || !formData.endTime) {
+      setTimeError('Debe ingresar tanto la hora de inicio como la de fin');
+      return;
+    }
+
     onSubmit(formData, newLocation);
   };
 
@@ -129,6 +188,58 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
         )}
       </div>
 
+      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+        <div>
+          <label htmlFor='startTime' className='block text-sm font-medium text-gray-700 mb-2'>
+            Hora de inicio:
+          </label>
+          <input
+            type='time'
+            id='startTime'
+            name='startTime'
+            value={formData.startTime}
+            onChange={handleInputChange}
+            required
+            disabled={loading}
+            min='07:00'
+            max='21:00'
+            className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900'
+          />
+          <p className='text-xs text-gray-500 mt-1'>Entre 7:00 y 21:00</p>
+        </div>
+
+        <div>
+          <label htmlFor='endTime' className='block text-sm font-medium text-gray-700 mb-2'>
+            Hora de fin:
+          </label>
+          <input
+            type='time'
+            id='endTime'
+            name='endTime'
+            value={formData.endTime}
+            onChange={handleInputChange}
+            required
+            disabled={loading}
+            min='07:00'
+            max='21:00'
+            className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900'
+          />
+          <p className='text-xs text-gray-500 mt-1'>Entre 7:00 y 21:00</p>
+        </div>
+      </div>
+
+      {timeError && (
+        <div className='bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded text-sm'>
+          {timeError}
+        </div>
+      )}
+
+      {formData.startTime && formData.endTime && !timeError && (
+        <div className='bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded text-sm'>
+          Duración: {calculateDuration(formData.startTime, formData.endTime)}
+        </div>
+      )}
+
       <div>
         <label htmlFor='suggestedRate' className='block text-sm font-medium text-gray-700 mb-2'>
           Tarifa sugerida (opcional):
@@ -156,7 +267,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
         </button>
         <button
           type='submit'
-          disabled={loading}
+          disabled={loading || !!timeError}
           className='px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50'
         >
           {loading ? 'Guardando...' : 'Guardar'}
@@ -165,5 +276,21 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
     </form>
   );
 };
+
+function calculateDuration(startTime: string, endTime: string): string {
+  const start = new Date(`2000-01-01T${startTime}`);
+  const end = new Date(`2000-01-01T${endTime}`);
+  const durationMs = end.getTime() - start.getTime();
+  const hours = Math.floor(durationMs / (1000 * 60 * 60));
+  const minutes = Math.floor((durationMs % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (hours === 0) {
+    return `${minutes} minutos`;
+  } else if (minutes === 0) {
+    return `${hours} horas`;
+  } else {
+    return `${hours} horas y ${minutes} minutos`;
+  }
+}
 
 export default JobRequestForm;

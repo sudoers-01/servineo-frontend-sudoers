@@ -14,7 +14,7 @@ export default function JobRequestPage() {
             onClick={() => setIsMapModalOpen(true)}
             className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
           >
-            Job Request
+            Request Job
           </button>
         </div>
       </div>
