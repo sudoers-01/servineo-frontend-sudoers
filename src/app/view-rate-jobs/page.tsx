@@ -183,7 +183,7 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
                 </p>
               </div>
 
-              <StarRating value={job.rating} />
+              <StarRating value={job.rating ?? 0} />
             </li>
           ))}
         </ul>
