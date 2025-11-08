@@ -70,11 +70,12 @@ export const EditAppointmentActions = ({
         ¿Está seguro que desea cancelar la cita actual?
         <br />
         <span className="text-gray-500 text-xs">
-          *En caso de cancelación, la cita deberá ser reprogramada.
+          *En caso de cancelación,la cita dejara de ser accesible.
         </span>
+
       </>,
       "Confirmar",
-      () => { onRequestReprogram?.(); } // ← aquí recién se pide justificación (en el padre)
+      () => { onDelete?.(); } // ← aquí recién se pide justificación (en el padre)
     );
   };
 
