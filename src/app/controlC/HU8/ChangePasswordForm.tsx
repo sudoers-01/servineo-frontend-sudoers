@@ -124,12 +124,13 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
           <div className="relative">
             <input
               id="currentPassword"
-              type={showCurrentPassword ? 'text' : 'password'}
-              value={currentPassword}
-              onChange={(e) => {
+                type={showCurrentPassword ? 'text' : 'password'}
+                value={currentPassword}
+                onChange={(e) => {
                 setCurrentPassword(e.target.value);
                 setError(null);
               }}
+              onPaste={(e) => e.preventDefault()} // ← Bloquear copy/paste
               placeholder="Ingresa tu contraseña actual"
               className="w-full rounded-md border border-[#E5F4FB] bg-[#F5FAFE] px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:border-[#2BDDE0] focus:outline-none focus:ring-1 focus:ring-[#2BDDE0]"
               disabled={loading}
@@ -158,13 +159,14 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
               type={showNewPassword ? 'text' : 'password'}
               value={newPassword}
               onChange={(e) => {
-                setNewPassword(e.target.value);
-                setError(null);
-              }}
-              placeholder="Mínimo 8 caracteres, mayúscula, minúscula, número"
-              className="w-full rounded-md border border-[#E5F4FB] bg-[#F5FAFE] px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:border-[#2BDDE0] focus:outline-none focus:ring-1 focus:ring-[#2BDDE0]"
-              disabled={loading}
-            />
+              setNewPassword(e.target.value);
+              setError(null);
+            }}
+            onPaste={(e) => e.preventDefault()} // ← Bloquear copy/paste
+            placeholder="Mínimo 8 caracteres, mayúscula, minúscula, número"
+            className="w-full rounded-md border border-[#E5F4FB] bg-[#F5FAFE] px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:border-[#2BDDE0] focus:outline-none focus:ring-1 focus:ring-[#2BDDE0]"
+            disabled={loading}
+          />
             <button
             type="button"
             onClick={() => setShowNewPassword(!showNewPassword)}
@@ -192,6 +194,7 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
                 setConfirmPassword(e.target.value);
                 setError(null);
               }}
+              onPaste={(e) => e.preventDefault()} // ← Bloquear copy/paste
               placeholder="Repita su nueva contraseña"
               className="w-full rounded-md border border-[#E5F4FB] bg-[#F5FAFE] px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:border-[#2BDDE0] focus:outline-none focus:ring-1 focus:ring-[#2BDDE0]"
               disabled={loading}
