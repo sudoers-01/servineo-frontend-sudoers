@@ -119,6 +119,10 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
             const data = await res.json();
             console.log('Datos recibidos para editar cita:', data);
+            if(data.appointment[0].schedule_state === 'cancelled' || data.appointment[0].cancelled_fixer){
+                alert('No se puede editar una cita cancelada.');
+                return;
+            }   
             if (data.appointment[0].appointment_type != "virtual") {
                 if (data.appointment[0].appointment_type != "presencial") {
                     data.appointment[0].appointment_type = "presencial"
@@ -189,6 +193,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
         } catch (error) {
             console.error('Error al eliminar la cita:', error);
         }
+        handleClose()
     }
 
     const handleLocationConfirm = (locationData: { lat: number; lon: number; address: string }) => {
@@ -204,7 +209,10 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                 <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="edit-appointment-title"
                     className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto" style={{ maxHeight: "90vh" }}>
                     <div className="p-4 sm:p-6">
-                        <EditAppointmentHeader onClose={handleClose} />
+                        <EditAppointmentHeader 
+                            onClose={handleClose} 
+                            title="Detalles de la Cita"
+                        />
 
                         <DateTimeDisplaySection
                             datetime={datetime}
