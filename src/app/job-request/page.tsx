@@ -8,13 +8,13 @@ export default function JobRequestPage() {
   return (
     <main className='min-h-screen bg-white flex items-center justify-center'>
       <div className='text-center space-y-8'>
-        <h1 className='text-3xl sm:text-4xl font-semibold text-gray-900'>fixer offer details</h1>
+        <h1 className='text-3xl sm:text-4xl font-semibold text-gray-900'>Detalle de oferta de trabajo</h1>
         <div className='flex items-center justify-center gap-4'>
           <button
             onClick={() => setIsMapModalOpen(true)}
             className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
           >
-            Request Job
+            Solicitar trabajo
           </button>
         </div>
       </div>

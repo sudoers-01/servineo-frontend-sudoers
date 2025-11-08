@@ -128,7 +128,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
 
       <div>
         <label htmlFor='jobDescription' className='block text-sm font-medium text-gray-700 mb-2'>
-          Descripción:
+          Descripción del trabajo:
         </label>
         <textarea
           id='jobDescription'
@@ -156,7 +156,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
               disabled={loading}
               className='mr-3'
             />
-            <span className='text-sm text-gray-700 font-medium'>Mantener ubicación guardada</span>
+            <span className='text-sm text-gray-700 font-medium'>Mantener la ubicación guardada</span>
           </label>
           <label className='flex items-center'>
             <input
@@ -169,7 +169,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
               className='mr-3'
             />
             <span className='text-sm text-gray-700 font-medium'>
-              Modificar ubicación del trabajo
+              Modificar la ubicación del trabajo
             </span>
           </label>
         </div>
@@ -190,43 +190,49 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
         )}
       </div>
 
-      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-        <div>
-          <label htmlFor='startTime' className='block text-sm font-medium text-gray-700 mb-2'>
-            Hora de inicio:
-          </label>
-          <input
-            type='time'
-            id='startTime'
-            name='startTime'
-            value={formData.startTime}
-            onChange={handleInputChange}
-            required
-            disabled={loading}
-            min='07:00'
-            max='21:00'
-            className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900'
-          />
-          <p className='text-xs text-gray-500 mt-1'>Entre 7:00 y 21:00</p>
-        </div>
+      <div>
+        <label className='block text-sm font-medium text-gray-700 mb-2'>
+          Disponibilidad:
+        </label>
 
-        <div>
-          <label htmlFor='endTime' className='block text-sm font-medium text-gray-700 mb-2'>
-            Hora de fin:
-          </label>
-          <input
-            type='time'
-            id='endTime'
-            name='endTime'
-            value={formData.endTime}
-            onChange={handleInputChange}
-            required
-            disabled={loading}
-            min='07:00'
-            max='21:00'
-            className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900'
-          />
-          <p className='text-xs text-gray-500 mt-1'>Entre 7:00 y 21:00</p>
+        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+          <div>
+            <label htmlFor='startTime' className='block text-sm font-medium text-gray-700 mb-2'>
+              De:
+            </label>
+            <input
+              type='time'
+              id='startTime'
+              name='startTime'
+              value={formData.startTime}
+              onChange={handleInputChange}
+              required
+              disabled={loading}
+              min='07:00'
+              max='21:00'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900'
+            />
+            <p className='text-xs text-gray-500 mt-1'>Entre 7:00 y 21:00</p>
+          </div>
+
+          <div>
+            <label htmlFor='endTime' className='block text-sm font-medium text-gray-700 mb-2'>
+              Hasta:
+            </label>
+            <input
+              type='time'
+              id='endTime'
+              name='endTime'
+              value={formData.endTime}
+              onChange={handleInputChange}
+              required
+              disabled={loading}
+              min='07:00'
+              max='21:00'
+              className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900'
+            />
+            <p className='text-xs text-gray-500 mt-1'>Entre 7:00 y 21:00</p>
+          </div>
         </div>
       </div>
 
@@ -243,6 +249,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
       )}
 
       <div>
+
         <label htmlFor='suggestedRate' className='block text-sm font-medium text-gray-700 mb-2'>
           Tarifa sugerida (opcional):
         </label>
