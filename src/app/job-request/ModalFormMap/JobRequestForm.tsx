@@ -156,7 +156,9 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
               disabled={loading}
               className='mr-3'
             />
-            <span className='text-sm text-gray-700 font-medium'>Mantener la ubicación guardada</span>
+            <span className='text-sm text-gray-700 font-medium'>
+              Mantener la ubicación guardada
+            </span>
           </label>
           <label className='flex items-center'>
             <input
@@ -191,9 +193,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
       </div>
 
       <div>
-        <label className='block text-sm font-medium text-gray-700 mb-2'>
-          Disponibilidad:
-        </label>
+        <label className='block text-sm font-medium text-gray-700 mb-2'>Disponibilidad:</label>
 
         <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
           <div>
@@ -249,7 +249,6 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
       )}
 
       <div>
-
         <label htmlFor='suggestedRate' className='block text-sm font-medium text-gray-700 mb-2'>
           Tarifa sugerida (opcional):
         </label>
