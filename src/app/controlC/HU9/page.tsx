@@ -1,28 +1,50 @@
-// src/app/controlC/HU9/page.tsx
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+
+const BASE_API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/controlC";
 
 export default function RecuperacionCorreoPage() {
   const [email, setEmail] = useState('');
   const [error, setError] = useState<string | null>(null);
-  const [enviado, setEnviado] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  useEffect(() => {
+    if (error) {
+      const id = setTimeout(() => setError(null), 5000);
+      return () => clearTimeout(id);
+    }
+  }, [error]);
 
   const handleEnviar = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
 
-    // validación básica UI-only
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      setError('Ingresa un correo válido.');
-      return;
-    }
+    if (!email) { setError("El correo no puede estar vacío"); return; }
+    if (!emailValid) { setError("Correo inválido"); return; }
 
-    // Por ahora solo mock: navegamos a la pantalla de "enlace enviado" pasando el email por query
-    // (la integración real con backend vendrá después)
-    router.push(`/controlC/HU9/enlace-enviado?email=${encodeURIComponent(email)}`);
+    setLoading(true);
+    try {
+      const res = await fetch(`${BASE_API}/auth/forgot-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        router.push(`/controlC/HU9/enlace-enviado?email=${encodeURIComponent(email)}`);
+      } else {
+        setError(data.message || "Error al solicitar el enlace");
+      }
+    } catch (err) {
+      setError("Error de conexión con el servidor");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -48,9 +70,14 @@ export default function RecuperacionCorreoPage() {
 
           <button
             type="submit"
-            className="w-full bg-gradient-to-r from-servineo-500 to-servineo-300 hover:from-servineo-400 hover:to-servineo-200 text-white font-semibold rounded-xl p-3.5 mt-2 transition-all duration-300 shadow-md"
+            disabled={!emailValid || loading}
+            className={`w-full font-semibold rounded-xl p-3.5 mt-2 transition-all duration-300 shadow-md
+              ${(!emailValid || loading)
+                ? 'bg-servineo-200 text-white cursor-not-allowed'
+                : 'bg-gradient-to-r from-servineo-500 to-servineo-300 hover:from-servineo-400 hover:to-servineo-200 text-white'
+              }`}
           >
-            Enviar correo electrónico
+            {loading ? "Enviando..." : "Enviar correo electrónico"}
           </button>
         </form>
 
