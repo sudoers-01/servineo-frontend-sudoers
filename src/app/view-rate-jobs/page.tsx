@@ -269,7 +269,6 @@ export default function RatedJobsPage() {
                 { key: 'oldest', label: 'Mas antiguo' },
               ]}
             />
-
           </div>
         </header>
 
