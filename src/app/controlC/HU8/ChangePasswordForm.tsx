@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cambiarContrasena } from './service/editPassword';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 type Props = {
   onCancel?: () => void;
@@ -109,8 +109,9 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
 
   return (
     <div className="flex flex-col gap-6 rounded-lg border border-[#E5F4FB] bg-white p-6 shadow-sm">
-      <h2 className="text-xl font-bold text-[#1A223F]">Cambiar contraseña</h2>
-
+        <p className="text-sm text-gray-400 mb-2">
+          Elige una contraseña segura y no la utilices en otras cuentas.
+        </p>
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
         {/* Contraseña actual */}
         <div>
@@ -149,7 +150,7 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
             htmlFor="newPassword"
             className="block text-sm font-semibold text-[#1A223F] mb-2"
           >
-            Nueva contraseña
+            Contraseña nueva
           </label>
           <div className="relative">
             <input
@@ -180,7 +181,7 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
             htmlFor="confirmPassword"
             className="block text-sm font-semibold text-[#1A223F] mb-2"
           >
-            Confirmar nueva contraseña
+            
           </label>
           <div className="relative">
             <input
@@ -191,7 +192,7 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
                 setConfirmPassword(e.target.value);
                 setError(null);
               }}
-              placeholder="Repite tu nueva contraseña"
+              placeholder="Repita su nueva contraseña"
               className="w-full rounded-md border border-[#E5F4FB] bg-[#F5FAFE] px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:border-[#2BDDE0] focus:outline-none focus:ring-1 focus:ring-[#2BDDE0]"
               disabled={loading}
             />
@@ -219,26 +220,31 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
         )}
 
         {/* Botones */}
-        <div className="flex gap-3 pt-4">
+        <div className="pt-4 flex justify-end gap-3">
           <button
             type="submit"
             disabled={loading}
-            className="flex-1 rounded-md bg-[#2BDDE0] px-4 py-2 font-semibold text-white hover:bg-[#24b8b8] disabled:bg-gray-400 transition-colors"
+            className="flex items-center gap-2 rounded-md bg-[#1A223F] px-4 py-2 text-white font-semibold hover:bg-[#2B31E0] disabled:bg-[#759AE0]"
           >
-            {loading ? 'Guardando...' : 'Cambiar contraseña'}
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              if (onCancel) {
-                onCancel();
-              } else {
-                router.back();
-              }
+            {loading ? (
+            <>
+              <Loader2 size={14} className="animate-spin" /> Guardando...
+           </>
+        ) : (
+        'Cambiar contraseña'
+        )}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+          if (onCancel) {
+            onCancel();
+            } else {
+            router.back();
+          }
             }}
             disabled={loading}
-            className="flex-1 rounded-md bg-[#E5F4FB] px-4 py-2 font-semibold text-[#1A223F] hover:bg-[#2BDDE0]/20 disabled:bg-gray-200 transition-colors"
+            className="rounded-md bg-[#E5F4FB] px-4 py-2 text-[#1A223F] font-semibold hover:bg-[#2BDDE0]/20"
           >
             Cancelar
           </button>
