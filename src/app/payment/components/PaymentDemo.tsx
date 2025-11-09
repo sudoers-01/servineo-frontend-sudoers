@@ -9,7 +9,7 @@ import { createCashPayment } from '../service/payments';
 import dynamic from 'next/dynamic';
 import { useRouter } from "next/navigation";
 
-const RegistroCuentaApp = dynamic(() => import('../../cuenta-bancaria/page'), { ssr: false });
+const RegistroCuentaApp = dynamic(() => import('../../cuenta-bancaria/CuentaBancariaClient'), { ssr: false });
 
 const stripePromise = loadStripe(
   'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI',
