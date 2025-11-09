@@ -3,6 +3,7 @@ import Link from "next/link";
 import RegistroGoogle from "../components/registro/registroGoogle";
 import RegistroForm from "../../HU1/RequesterForm/page";
 import GithubButton from "../../HU7/components/UI/buttonGithub";
+import DiscordButton from "../../HU7/components/UI/buttonDiscord";
 
 export default function SignUp() {
   return (
@@ -18,8 +19,11 @@ export default function SignUp() {
         <div className="flex-1 h-px bg-gray-300"></div>
       </div>
 
-      <RegistroGoogle />
-      <GithubButton />
+       <div className="flex flex-col gap-3 mt-3 w-full">
+        <RegistroGoogle />
+        <DiscordButton />
+        <GithubButton />
+      </div>
       <div className="flex items-center mt-5 text-sm text-gray-600">
           <input type="checkbox" className="mr-2" />
           <p>
