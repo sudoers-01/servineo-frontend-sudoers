@@ -103,8 +103,8 @@ const RegistrationForm = ({
     let processedValue = value;
 
     if (name === 'nombreTitular') {
-        let filteredValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
-        let rawValue = filteredValue.toLowerCase();
+        const filteredValue = value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, '');
+        const rawValue = filteredValue.toLowerCase();
         processedValue = rawValue.replace(/(^|\s)\S/g, (char) => char.toUpperCase());
     } 
     else if (name === 'identificationSuffix') {
