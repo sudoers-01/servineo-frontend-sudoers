@@ -153,7 +153,7 @@ export const DaySelectionModal = forwardRef<DaySelectionModalHandles, DaySelecti
                 />
 
                 <p className="text-sm text-gray-700 mb-4">
-                  *Se editará la disponibilidad los días seleccionados
+                  *Se editará la disponibilidad los días seleccionados (azules)
                 </p>
 
                 <AvailabilityActions

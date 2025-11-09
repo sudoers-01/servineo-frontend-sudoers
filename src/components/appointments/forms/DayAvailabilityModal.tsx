@@ -6,6 +6,9 @@ import { AvailabilityActions } from './modules/AvailabilityActions';
 import { AvailabilityHeader } from './modules/AvailabilityHeader';
 import { SelectHourSection } from './modules/SelectHourSection';
 
+import useMessage from '@/hooks/useMessage'; 
+import Message from '@/components/ui/Message';
+
 const API = process.env.NEXT_PUBLIC_BACKEND as string;
 
 interface DayAvailabilityModalProps {
@@ -27,6 +30,7 @@ export const DayAvailabilityModal = forwardRef<DayAvailabilityModalHandles, DayA
     const [selectedHours, setSelectedHours] = useState<number[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { showMessage, hideMessage, messageState } = useMessage();
 
     useImperativeHandle(ref, () => ({
       open: (days: string[]) => {
@@ -82,9 +86,15 @@ export const DayAvailabilityModal = forwardRef<DayAvailabilityModalHandles, DayA
             });
           
           if (response.data.updated) {
-            console.log('Disponibilidad actualizada correctamente');
-            handleClose();
-            onConfirm?.();
+             showMessage({
+              message: 'Horas guardadas correctamente',
+              type: 'success',
+              title: 'Éxito!',
+              onCloseCallback: () => {
+                handleClose();
+                onConfirm?.();
+              }
+            });
           } else {
             setError('Error al actualizar la disponibilidad');
           }
@@ -106,40 +116,43 @@ export const DayAvailabilityModal = forwardRef<DayAvailabilityModalHandles, DayA
     if (!isOpen) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-          <AvailabilityHeader 
-            headerText='Seleccionar Disponibilidad' 
-            onClose={handleClose}
-          />
+      <>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
+            <AvailabilityHeader 
+              headerText='Seleccionar Disponibilidad' 
+              onClose={handleClose}
+            />
 
-          <p className="text-black font-semibold mb-4">
-            Horas de trabajo para: {daysToConfigure.map(day => day.charAt(0).toUpperCase() + day.slice(1)).join(', ')}
-          </p>
+            <p className="text-black font-semibold mb-4">
+              Horas de trabajo para: {daysToConfigure.map(day => day.charAt(0).toUpperCase() + day.slice(1)).join(', ')}
+            </p>
 
-          <SelectHourSection
-            selectedHours={selectedHours}
-            onHoursChange={toggleHour}
-          />
+            <SelectHourSection
+              selectedHours={selectedHours}
+              onHoursChange={toggleHour}
+            />
 
-          <p className="text-sm text-gray-700 mb-4">
-            *Las horas seleccionadas se aplicaran para todos los días laborales seleccionados de cada semana.
-          </p>
+            <p className="text-sm text-gray-700 mb-4">
+              *Las horas seleccionadas (azules) se aplicaran para todos los días laborales seleccionados de cada semana.
+            </p>
 
-          {error && (
-            <div className="text-red-600 text-sm mb-4 p-2 bg-red-50 rounded">
-              {error}
-            </div>
-          )}
+            {error && (
+              <div className="text-red-600 text-sm mb-4 p-2 bg-red-50 rounded">
+                {error}
+              </div>
+            )}
 
-          <AvailabilityActions
-            onCancel={handleCancel}
-            confirmPlaceholder={loading ? 'Guardando...' : 'Guardar'}
-            onConfirm={handleConfirm}
-            confirmDisabled={isConfirmDisabled}
-          />
+            <AvailabilityActions
+              onCancel={handleCancel}
+              confirmPlaceholder={loading ? 'Guardando...' : 'Guardar'}
+              onConfirm={handleConfirm}
+              confirmDisabled={isConfirmDisabled}
+            />
+          </div>
         </div>
-      </div>
+        <Message {...messageState} />
+      </>
     );
   }
 );
