@@ -72,7 +72,7 @@ export default function PaymentsPage() {
         setIntent(data.intent);
         setMethod(data.paymentMethod || null);
         if (data.error === "NO_QR") setError("El proveedor no tiene QR configurado.");
-      } catch (e: any) {
+      } catch (e: unknown) {
         setError(e.message || "Error de red");
       } finally {
         setLoading(false);

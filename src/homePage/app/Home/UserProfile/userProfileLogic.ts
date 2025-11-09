@@ -488,7 +488,7 @@ export function initUserProfileLogic(): void {
           resolve(canvas.toDataURL("image/jpeg", 0.9));
         };
         img.onerror = (err) => reject(err);
-        // @ts-ignore
+        // @ts-expect-error
         img.src = (e.target as FileReader).result as string;
       };
       reader.onerror = (err) => reject(err);
