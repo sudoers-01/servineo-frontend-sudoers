@@ -1,9 +1,10 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { getAppointmentsByDate, Appointment } from '@/utils/getAppointmentsByDate';
+import { Appointment } from '@/utils/getAppointmentsByDate';
+import { getSixMonthAppointments } from "@/utils/Appointments/getSixMonthAppointments";
+
 import { getAppointmentsDisable, Days } from "@/utils/getAppointmentsDisable";
 
 export type DayOfWeek = keyof Days;
-
 const DAY_MAP: { [key: number]: DayOfWeek } = {
     0: 'domingo',
     1: 'lunes',
@@ -19,33 +20,8 @@ const DAY_MAP: { [key: number]: DayOfWeek } = {
 
 
 
-const getMondayOfWeek = (date: Date): Date => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = day === 0 ? -6 : 1 - day;
-    d.setDate(d.getDate() + diff);
-    d.setHours(0, 0, 0, 0);
-    return d;
-};
 
-const getWeekDays = (selectedDate: Date) => {
-    const days: Date[] = [];
-    const current = new Date(selectedDate);
-    const dayOfWeek = current.getDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-    for (let i = 0; i < 7; i++) {
-        const day = new Date(current);
-        day.setDate(current.getDate() + diff + i);
-        days.push(day);
-    }
-
-    return days;
-};
-
-
-
-export default function useAppointmentsByDate(fixer_id: string, date: Date) {
+export default function useSixMonthsAppointments(fixer_id: string, date: Date) {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [appointmentsDis, setAppointmentsDis] = useState<Days>({
         lunes: [],
@@ -59,10 +35,12 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
-
-
-
+    const hasFetched = useRef(false);
     useEffect(() => {
+        if (hasFetched.current) {
+            return;
+        }
+
         async function fetchData() {
             if (!fixer_id || fixer_id === '' || fixer_id === 'undefined') {
                 console.warn('fixer_id no válido:', fixer_id);
@@ -71,17 +49,16 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
             }
 
             setLoading(true);
-
-
             try {
                 const [appointmentsData, availabilityData] = await Promise.all([
-                    getAppointmentsByDate(fixer_id, date.toISOString().split('T')[0]),
+                    getSixMonthAppointments(fixer_id, date.toISOString().split('T')[0]),
                     getAppointmentsDisable(fixer_id)
                 ]);
 
                 setAppointments(appointmentsData);
                 setAppointmentsDis(availabilityData);
                 setError(null);
+                hasFetched.current = true;
             } catch (err) {
                 setError('Error al cargar los datos');
                 console.error('Error en fetchData:', err);
@@ -107,7 +84,6 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
 
 
 
-
     const isHourBooked = useCallback((day: Date, hour: number): boolean => {
         return appointments.some((apt: Appointment) => {
             const aptDate = new Date(apt.starting_time);
@@ -120,7 +96,6 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
         });
     }, [appointments]);
 
-    /// todosa <= isHourBooked
 
     const isDisabled = useCallback((day: Date, hour: number): boolean => {
         const dayOfWeek = day.getDay();
