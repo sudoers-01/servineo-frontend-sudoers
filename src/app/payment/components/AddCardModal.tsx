@@ -5,6 +5,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // --- INICIO DE LA CORRECCIÓN ---
 
+interface CardListProps {
+  requesterId: string;
+  fixerId: string;
+  jobId: string;
+  amount: number;
+  onPaymentSuccess: () => void;
+}
+
 // 1. Definir un tipo para el payload de 'onCardAdded'
 interface OnCardAddedPayload {
   payment: {
@@ -30,14 +38,13 @@ interface AddCardModalProps {
 
 
 // 3. Aplicar la interfaz correcta y desestructurar las props
-export default function AddCardModal({ 
-  userId, 
+export default function CardList({ 
+  requesterId, 
   fixerId, 
   jobId, 
   amount, 
-  onClose, 
-  onCardAdded 
-}: AddCardModalProps) { // <-- Se usa AddCardModalProps
+  onPaymentSuccess 
+}: CardListProps) { // <-- Se usa AddCardModalProps
 
   const stripe = useStripe();
   const elements = useElements();
