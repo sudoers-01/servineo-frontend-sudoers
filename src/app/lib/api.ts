@@ -1,7 +1,7 @@
 // src/lib/api.ts
-export async function apiFetch<T = any>(
+export async function apiFetch<T = unknown | null>(
   path: string,
-  init?: RequestInit & { json?: any }
+  init?: RequestInit & { json?: unknown | null }
 ): Promise<T> {
   const opts: RequestInit = {
     cache: "no-store",

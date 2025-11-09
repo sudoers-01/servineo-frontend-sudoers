@@ -12,7 +12,7 @@ export async function createCashPayment(input: {
   paymentMethods?: "cash"; // alineado con tu backend
 }) {
   // backend: POST /lab/payments
-  return apiFetch<{ message: string; data: any }>(`/lab/payments`, {
+  return apiFetch<{ message: string; data: unknown | null }>(`/lab/payments`, {
     method: "POST",
     json: input,
   });

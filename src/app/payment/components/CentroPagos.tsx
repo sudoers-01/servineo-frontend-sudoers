@@ -9,7 +9,7 @@ const CentroDePagos = () => {
 
   const searchParams = useSearchParams(); 
 
-  const [fixerData, setFixerData] = useState<any>(null); 
+  const [fixerData, setFixerData] = useState<unknown | null>(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   
@@ -55,7 +55,7 @@ const CentroDePagos = () => {
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
-    } catch (err: any) {
+    } catch (err: unknown | null) {
       console.error('❌ Error fetching fixer data:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
       
