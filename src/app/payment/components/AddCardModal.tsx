@@ -6,19 +6,29 @@ import { motion, AnimatePresence } from 'framer-motion';
 // --- INICIO DE LA CORRECCIÓN ---
 
 // 1. Definir la interfaz para las props
+interface OnCardAddedPayload {
+  payment: {
+    _id: string;
+    amount: number;
+    card: { _id: string } | null;
+  };
+  cardSaved: boolean;
+}
+
+// 2. Define la interfaz para las props del modal
 interface AddCardModalProps {
   userId: string;
   fixerId: string;
   jobId: string;
   amount: number;
   onClose: () => void;
-  onCardAdded: (payload: any) => void; // Puedes definir un tipo más estricto si lo deseas
+  // 3. Usa el tipo de payload específico en lugar de 'any'
+  onCardAdded: (payload: OnCardAddedPayload) => void; 
 }
 
 // --- FIN DE LA CORRECCIÓN ---
 
-
-// 2. Aplicar la interfaz a las props
+// 4. Aplica la interfaz a tus props (esto ya deberías tenerlo)
 export default function AddCardModal({ 
   userId, 
   fixerId, 
