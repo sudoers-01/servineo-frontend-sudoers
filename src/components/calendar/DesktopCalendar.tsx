@@ -42,20 +42,6 @@ export default function DesktopCalendar({
     const selectedDate = useMemo(() => {
         return new Date(year, month, day);
     }, [year, month, day, view]);
-    const {
-        isHourBooked,
-        isDisabled,
-        isCanceled,
-        loading,
-
-    } = useSixMonthsAppointments(fixer_id, selectedDate);
-    const providerValue = useMemo(() => ({
-        isHourBooked,
-        isDisabled,
-        isCanceled,
-        loading
-
-    }), [isHourBooked, isDisabled, isCanceled, loading]);
 
 
 
@@ -63,47 +49,41 @@ export default function DesktopCalendar({
     //    console.log(`Esta es la fecha actual ${selectedDate}`);
     return (
 
-        <AppointmentsProvider
-            isHourBooked={providerValue.isHourBooked}
-            isDisabled={providerValue.isDisabled}
-            isCanceled={providerValue.isCanceled}
-            loading={providerValue.loading}
-        >
-            <div className="w-full flex flex-col items-center bg-white">
-                <div className="w-full max-w-5xl">
-                    <div className="bg-green-500 w-full p-1 flex items-center">
-                        <HeaderDesktop
-                            year={year}
-                            month={month}
-                            day={day}
-                            onChangeMonth={setMonth}
-                            onChangeYear={setYear}
-                            onChangeDate={setDay}
-                            view={view}
-                            onViewChange={{ handleMonthView, handleWeekView, handleDayView }}
-                        />
-                    </div>
 
-                    <div className=" w-full  justify-center">
-                        {view === 'month' && <DesktopMonthView
-                            year={year}
-                            month={month}
-                            fixer_id={fixer_id}
-                            requester_id={requester_id}
-                        />}
+        <div className="w-full flex flex-col items-center bg-white">
+            <div className="w-full max-w-5xl">
+                <div className="bg-green-500 w-full p-1 flex items-center">
+                    <HeaderDesktop
+                        year={year}
+                        month={month}
+                        day={day}
+                        onChangeMonth={setMonth}
+                        onChangeYear={setYear}
+                        onChangeDate={setDay}
+                        view={view}
+                        onViewChange={{ handleMonthView, handleWeekView, handleDayView }}
+                    />
+                </div>
 
-                        {view === 'week' && <DesktopWeekView
-                            date={selectedDate}
-                        />}
+                <div className=" w-full  justify-center">
+                    {view === 'month' && <DesktopMonthView
+                        year={year}
+                        month={month}
+                        fixer_id={fixer_id}
+                        requester_id={requester_id}
+                    />}
 
-                        {view === 'day' && <DesktopDailyView
-                            date={selectedDate}
-                            fixer_id={fixer_id}
-                            requester_id={requester_id}
-                        />}
-                    </div>
+                    {view === 'week' && <DesktopWeekView
+                        date={selectedDate}
+                    />}
+
+                    {view === 'day' && <DesktopDailyView
+                        date={selectedDate}
+                        fixer_id={fixer_id}
+                        requester_id={requester_id}
+                    />}
                 </div>
             </div>
-        </AppointmentsProvider>
+        </div>
     );
 }
