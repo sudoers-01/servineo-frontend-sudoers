@@ -88,7 +88,10 @@ export default function ConfiguracionPage() {
       <div className="flex flex-1">
         {/* Sidebar */}
 {/* Sidebar */}
-<aside className="w-64 bg-white border-r p-6 flex flex-col justify-between">
+<aside className="w-64 bg-white p-6 flex flex-col justify-between relative shadow-md">
+  {/* Línea vertical sutil (gradiente) */}
+  <div className="absolute right-0 top-4 bottom-4 w-[1.5px] bg-gradient-to-b from-transparent via-gray-300/90 to-transparent pointer-events-none" />
+  
   <div>
     {/* Encabezado con botón "Volver" al lado del título */}
     <div className="flex items-center justify-between mb-4">
@@ -108,25 +111,35 @@ export default function ConfiguracionPage() {
     <nav className="space-y-2">
       <Link href="/controlC/HU5" className="block">
         <button
-          className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
+          className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
             pathname === '/controlC/HU5'
               ? 'bg-blue-100 text-blue-600 font-semibold'
               : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
           }`}
         >
-          <Edit className="w-4 h-4" /> Editar Perfil
+          <img
+            src="/icons/edit-config.png"
+            alt="Editar Perfil"
+            className="w-6 h-6"
+          />
+          Editar Perfil
         </button>
       </Link>
 
       <Link href="/controlC/Configuracion/Seguridad" className="block">
         <button
-          className={`flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
+          className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
             pathname === '/controlC/Configuracion/Seguridad'
               ? 'bg-blue-100 text-blue-600 font-semibold'
               : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
           }`}
         >
-          <Shield className="w-4 h-4" /> Seguridad
+          <img
+            src="/icons/seguridad-config.png"
+            alt="Seguridad"
+            className="w-7 h-7"
+          />
+          Seguridad
         </button>
       </Link>
     </nav>
