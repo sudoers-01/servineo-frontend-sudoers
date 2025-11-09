@@ -1,6 +1,7 @@
 'use client';
 import { useParams } from 'next/navigation';
 import FixerProfile from './fixer-profile';
+import { ClientRatings } from './components';
 
 export default function ProfilePage() {
   const { id } = useParams();
@@ -15,15 +16,38 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="px-6 py-4">          
-        <h1 className="text-xl font-semibold text-gray-800">Servineo</h1>
+      <header className="bg-white border-b border-gray-300 w-full fixed top-0 left-0 z-50">
+        <div className="px-6 py-4">
+          <h1 className="text-xl font-semibold text-gray-900">Servineo</h1>
         </div>
       </header>
 
-      <main className="flex-grow p-6">
-        <div className="max-w-4xl mx-auto">
+      <main className="flex-grow pt-20 px-6 pb-12">
+        <div className="max-w-4xl mx-auto space-y-8">
           <FixerProfile userId={id as string} />
+
+          <section
+            aria-labelledby="ratings-heading"
+            className="bg-white rounded-2xl border border-gray-200 p-6 shadow-sm"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <h2 id="ratings-heading" className="text-2xl font-semibold tracking-tight">
+                Rating Details
+              </h2>
+              <a
+                href=".."
+                className="text-sm px-3 py-1.5 border rounded-lg transition-colors hover:bg-white/60"
+                style={{ borderColor: 'var(--surface-border)' }}
+                aria-label="Back to profile"
+              >
+                Back
+              </a>
+            </div>
+
+            <div>
+              <ClientRatings fixerId={id as string} />
+            </div>
+          </section>
         </div>
       </main>
     </div>
