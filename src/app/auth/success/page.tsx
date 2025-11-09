@@ -34,7 +34,7 @@ export default function AuthSuccess() {
       console.error("Error al decodificar JWT", e);
     }
 
-    router.push("/");
+   router.push("/controlC/HU3/ubicacion");
   }, [router, setUser]);
 
   return (
