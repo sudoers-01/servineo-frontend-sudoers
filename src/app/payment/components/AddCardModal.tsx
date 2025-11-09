@@ -5,15 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // --- INICIO DE LA CORRECCIÓN ---
 
-interface CardListProps {
-  requesterId: string;
-  fixerId: string;
-  jobId: string;
-  amount: number;
-  onPaymentSuccess: () => void;
-}
-
-// 1. Definir un tipo para el payload de 'onCardAdded'
+// 1. Define un tipo para el payload de 'onCardAdded'
 interface OnCardAddedPayload {
   payment: {
     _id: string;
@@ -23,28 +15,27 @@ interface OnCardAddedPayload {
   cardSaved: boolean;
 }
 
-// 2. Definir la interfaz para las props de ESTE modal (AddCardModal)
-// (Estabas usando CardListProps por error)
+// 2. Define la interfaz para las props de ESTE modal (AddCardModal)
 interface AddCardModalProps {
-  userId: string;       // <-- Esta es la prop que causaba el error
+  userId: string;
   fixerId: string;
   jobId: string;
   amount: number;
   onClose: () => void;
   onCardAdded: (payload: OnCardAddedPayload) => void; 
 }
-
 // --- FIN DE LA CORRECCIÓN ---
 
 
-// 3. Aplicar la interfaz correcta y desestructurar las props
-export default function CardList({ 
-  requesterId, 
+// 3. APLICA LA INTERFAZ Y DESESTRUCTURA LAS PROPS
+export default function AddCardModal({ 
+  userId, 
   fixerId, 
   jobId, 
   amount, 
-  onPaymentSuccess 
-}: CardListProps) { // <-- Se usa AddCardModalProps
+  onClose, 
+  onCardAdded 
+}: AddCardModalProps) { // <-- ESTA LÍNEA ES LA CORRECTA
 
   const stripe = useStripe();
   const elements = useElements();
@@ -94,7 +85,7 @@ export default function CardList({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId, // <-- Ahora 'userId' existe gracias a la desestructuración
+            userId, // <-- Ahora 'userId' SÍ existe
             paymentMethodId: paymentMethod.id,
             saveCard,
             cardholderName: cardHolder,
@@ -109,7 +100,7 @@ export default function CardList({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          requesterId: userId, // <-- Aquí estabas usando 'requesterId' pero la prop es 'userId'
+          requesterId: userId, // <-- 'userId' SÍ existe
           fixerId,
           jobId,
           cardId: cardId || null,
