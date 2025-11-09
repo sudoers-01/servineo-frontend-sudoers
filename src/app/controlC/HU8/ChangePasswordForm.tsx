@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cambiarContrasena } from './service/editPassword';
+import { cerrarTodasSesiones } from './service/logoutService';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 
 type Props = {
@@ -39,7 +40,6 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
       return;
     }
 
-    // 🔹 Validaciones previas
     if (!currentPassword.trim()) return setError('Ingresa tu contraseña actual');
     if (!newPassword.trim()) return setError('Ingresa una nueva contraseña');
     if (!validarContrasena(newPassword))
@@ -62,30 +62,21 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
-
-        // Mostrar modal tras un pequeño delay
         setTimeout(() => setShowSuggestionModal(true), 2000);
       } else {
-        // Error controlado desde backend
         setError(result.message || 'El cambio no se completó, error inesperado.');
       }
     } catch (err: any) {
       console.error('Error al cambiar contraseña:', err);
-
-      // 🔹 Clasificación del error
       if (err.message?.includes('NetworkError') || err.message?.includes('Failed to fetch')) {
         setError('El cambio no se completó, error de conexión.');
       } else if (err.response?.status >= 500) {
         setError('El cambio no se completó, error del servidor.');
-      } else if (err.name === 'TypeError' || err instanceof TypeError) {
-        setError('El cambio no se completó, error inesperado de JS.');
       } else {
         setError('El cambio no se completó, error inesperado.');
       }
     } finally {
       setLoading(false);
-
-      // 🔹 Desaparecer mensaje después de 10 segundos
       setTimeout(() => {
         setError(null);
         setSuccess(null);
@@ -180,16 +171,12 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
 
         {/* Mensajes */}
         {error && (
-          <div
-            className="rounded-md bg-red-50 p-3 text-sm text-red-700 transition-opacity duration-1000 ease-out"
-          >
+          <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 transition-opacity duration-1000 ease-out">
             {error}
           </div>
         )}
         {success && (
-          <div
-            className="rounded-md bg-green-50 p-3 text-sm text-green-700 transition-opacity duration-1000 ease-out"
-          >
+          <div className="rounded-md bg-green-50 p-3 text-sm text-green-700 transition-opacity duration-1000 ease-out">
             {success}
           </div>
         )}
@@ -241,7 +228,18 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
                 No, cerrar sesiones
               </button>
               <button
-                onClick={() => router.push('/')}
+                onClick={async () => {
+                  try {
+                    const result = await cerrarTodasSesiones();
+                    console.log("✅ Resultado:", result.message);
+                    localStorage.removeItem("servineo_token");
+                    localStorage.removeItem("servineo_user");
+                    window.location.href = "/";
+                  } catch (error) {
+                    console.error("❌ Error al cerrar sesiones:", error);
+                    alert("No se pudo cerrar todas las sesiones. Intenta nuevamente.");
+                  }
+                }}
                 className="flex-1 rounded-md bg-[#1A223F] px-4 py-2 text-white font-semibold hover:bg-[#2B31E0]"
               >
                 Sí, cerrar sesiones
