@@ -7,6 +7,9 @@ import { AvailabilityActions } from './modules/AvailabilityActions';
 import { AvailabilityHeader } from './modules/AvailabilityHeader';
 import { WeekDaysSection } from './modules/WeekDaysSection';
 
+import useMessage from '@/hooks/useMessage'; 
+import Message from '@/components/ui/Message';
+
 const API = process.env.NEXT_PUBLIC_BACKEND as string;
 
 interface AvailabilityResponse {
@@ -38,6 +41,7 @@ export const WeekAvailabilityModal = forwardRef<WeekAvailabilityModalHandles, We
     const [selectedDays, setSelectedDays] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const { showMessage, hideMessage, messageState } = useMessage();
 
     useImperativeHandle(ref, () => ({
       open: () => {
@@ -138,8 +142,14 @@ export const WeekAvailabilityModal = forwardRef<WeekAvailabilityModalHandles, We
           });
           
           if (response.data.updated) {
-            console.log('Disponibilidad actualizada correctamente');
-            handleClose();
+            showMessage({
+              message: 'Días guardados correctamente',
+              type: 'success',
+              title: 'Éxito!',
+              onCloseCallback: () => {
+                handleClose();
+              }
+            });
           } else {
             setError('Error al actualizar la disponibilidad');
           }
@@ -164,58 +174,61 @@ export const WeekAvailabilityModal = forwardRef<WeekAvailabilityModalHandles, We
     if (!isOpen) return null;
 
     return (
-      <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-        <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
-          <AvailabilityHeader 
-            headerText='Seleccionar Disponibilidad' 
-            onClose={handleClose}
-          />
+      <>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-6">
+            <AvailabilityHeader 
+              headerText='Seleccionar Disponibilidad' 
+              onClose={handleClose}
+            />
 
-          <p className="text-black font-semibold mb-4">Días de trabajo de la semana</p>
+            <p className="text-black font-semibold mb-4">Días de trabajo de la semana</p>
 
-          {loading ? (
-            <div className="flex justify-center items-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-              <span className="ml-2">Cargando configuración...</span>
-            </div>
-          ) : error ? (
-            <div className="text-red-600 text-center py-4">
-              {error}
-              <div className="flex gap-2 justify-center mt-3">
-                <button 
-                  onClick={loadPreviousConfiguration}
-                  className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-                >
-                  Reintentar
-                </button>
-                <button 
-                  onClick={handleClose}
-                  className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm"
-                >
-                  Cerrar
-                </button>
+            {loading ? (
+              <div className="flex justify-center items-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                <span className="ml-2">Cargando configuración...</span>
               </div>
-            </div>
-          ) : (
-            <>
-              <WeekDaysSection
-                selectedDays={selectedDays}
-                onDaysChange={handleDaysChange}
-              />
+            ) : error ? (
+              <div className="text-red-600 text-center py-4">
+                {error}
+                <div className="flex gap-2 justify-center mt-3">
+                  <button 
+                    onClick={loadPreviousConfiguration}
+                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
+                  >
+                    Reintentar
+                  </button>
+                  <button 
+                    onClick={handleClose}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400 text-sm"
+                  >
+                    Cerrar
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <>
+                <WeekDaysSection
+                  selectedDays={selectedDays}
+                  onDaysChange={handleDaysChange}
+                />
 
-              <p className="text-sm text-gray-700 mb-4">
-                *Los días seleccionados se aplicarán como laborales para todas las semanas de cada mes.
-              </p>
-              
-              <AvailabilityActions
-                confirmPlaceholder='Guardar'
-                onCancel={handleCancel}
-                onConfirm={handleConfirm}
-              />
-            </>
-          )}
+                <p className="text-sm text-gray-700 mb-4">
+                  *Los días seleccionados (azules) se aplicarán como laborales para todas las semanas de cada mes.
+                </p>
+                
+                <AvailabilityActions
+                  confirmPlaceholder='Guardar'
+                  onCancel={handleCancel}
+                  onConfirm={handleConfirm}
+                />
+              </>
+            )}
+          </div>
         </div>
-      </div>
+        <Message {...messageState} />
+      </>
     );
   }
 );
