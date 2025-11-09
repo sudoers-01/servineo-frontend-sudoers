@@ -183,9 +183,11 @@ const CentroDePagos = () => {
             </button>
 
             <button 
-              onClick={() => router.push('/cuenta-bancaria')} 
-              className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
-            >
+  // RUTA CORREGIDA: 
+  onClick={() => router.push(`/cuenta-bancaria?fixerId=${fixerData.fixerId}`)} 
+  disabled={!fixerData?.fixerId} 
+  className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
+>
               <div className="bg-cyan-100 p-3 rounded-xl group-hover:bg-cyan-200 transition-colors">
                 <Building2 className="text-cyan-600" size={28} />
               </div>
