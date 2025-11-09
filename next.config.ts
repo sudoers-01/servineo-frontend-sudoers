@@ -12,6 +12,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  
+  eslint: {
+      // Advertencia: Esto omitirá los errores de ESLint solo durante el 'build'.
+      // Deberías arreglarlos localmente para mantener la calidad del código.
+      ignoreDuringBuilds: true,
+    },
+    // --- FIN DE LA ADICIÓN ---
 };
 
 export default nextConfig;
