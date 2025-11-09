@@ -4,12 +4,57 @@ import AddCardModal from './AddCardModal';
 import '../../../app/globals.css';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function CardList({ requesterId, fixerId, jobId, amount, onPaymentSuccess }) {
-  const [cards, setCards] = useState([]);
+// --- INICIO DE LA CORRECCIÓN ---
+
+// 1. Definir la interfaz para las props del componente
+interface CardListProps {
+  requesterId: string;
+  fixerId: string;
+  jobId: string;
+  amount: number;
+  onPaymentSuccess: () => void;
+}
+
+// 2. Definir un tipo para la estructura de una tarjeta (basado en el uso)
+// Esto evita usar 'any' más adelante
+interface Card {
+  _id: string;
+  brand?: string;
+  last4: string;
+  expMonth: string | number;
+  expYear: string | number;
+  cardholderName?: string;
+  isDefault?: boolean;
+}
+
+// 3. Definir un tipo para el payload de onCardAdded
+interface CardAddedPayload {
+  payment: {
+    _id: string;
+    amount: number;
+    card: { _id: string } | null;
+  };
+  cardSaved: boolean;
+}
+
+// --- FIN DE LA CORRECCIÓN ---
+
+
+// 4. Aplicar la interfaz CardListProps a las props
+export default function CardList({ 
+  requesterId, 
+  fixerId, 
+  jobId, 
+  amount, 
+  onPaymentSuccess 
+}: CardListProps) {
+  
+  // 5. Aplicar el tipo Card al estado 'cards' y 'confirmModal'
+  const [cards, setCards] = useState<Card[]>([]);
   const [showModal, setShowModal] = useState(false);
-  const [processingCardId, setProcessingCardId] = useState(null);
+  const [processingCardId, setProcessingCardId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState('');
-  const [confirmModal, setConfirmModal] = useState(null); // card a pagar
+  const [confirmModal, setConfirmModal] = useState<Card | null>(null); // card a pagar
 
   const fetchCards = async () => {
     try {
@@ -24,9 +69,10 @@ export default function CardList({ requesterId, fixerId, jobId, amount, onPaymen
 
   useEffect(() => {
     fetchCards();
-  }, []);
+  }, []); // El array vacío está bien si fetchCards no depende de props
 
-  const handleCardAdded = async ({ payment, cardSaved }) => {
+  // 6. Aplicar el tipo al payload de 'handleCardAdded'
+  const handleCardAdded = async ({ payment, cardSaved }: CardAddedPayload) => {
     await fetchCards();
     setShowModal(false);
 
@@ -37,11 +83,13 @@ export default function CardList({ requesterId, fixerId, jobId, amount, onPaymen
     showSuccessModal(message, onPaymentSuccess);
   };
 
-  const confirmPay = (card) => {
+  // 7. Aplicar el tipo Card a la función 'confirmPay'
+  const confirmPay = (card: Card) => {
     setConfirmModal(card);
   };
 
-  const handlePayWithCard = async (card) => {
+  // 8. Aplicar el tipo Card a la función 'handlePayWithCard'
+  const handlePayWithCard = async (card: Card) => {
     if (processingCardId) return;
     setProcessingCardId(card._id);
     setConfirmModal(null);
@@ -80,7 +128,8 @@ export default function CardList({ requesterId, fixerId, jobId, amount, onPaymen
     }
   };
 
-  const showSuccessModal = (msg, onComplete) => {
+  // 9. Tipar los parámetros de 'showSuccessModal'
+  const showSuccessModal = (msg: string, onComplete: () => void) => {
     setSuccessMessage(msg);
     setTimeout(() => {
       setSuccessMessage('');
@@ -89,15 +138,15 @@ export default function CardList({ requesterId, fixerId, jobId, amount, onPaymen
   };
 
   // 🎨 Paleta más realista y oscura
-  const cardBackgrounds = {
+  const cardBackgrounds: { [key: string]: string } = { // Tipar el objeto
     visa: 'from-blue-950 via-blue-800 to-blue-700',
     mastercard: 'from-red-900 via-orange-800 to-yellow-700',
     amex: 'from-cyan-900 via-teal-800 to-teal-700',
     default: 'from-gray-800 via-gray-700 to-gray-600',
   };
 
-  const getCardBackground = (brand) => {
-    const key = brand?.toLowerCase();
+  const getCardBackground = (brand: string | undefined) => { // Tipar 'brand'
+    const key = brand?.toLowerCase() || 'default';
     return cardBackgrounds[key] || cardBackgrounds.default;
   };
 
@@ -129,7 +178,8 @@ export default function CardList({ requesterId, fixerId, jobId, amount, onPaymen
                 y: -5,
                 boxShadow: '0px 8px 25px rgba(0,0,0,0.3)',
               }}
-              className={`relative rounded-2xl shadow-2xl p-6 text-black bg-[#1AA7ED]`}
+              // He quitado getCardBackground para simplificar, puedes añadirlo si quieres
+              className={`relative rounded-2xl shadow-2xl p-6 text-black bg-[#1AA7ED]`} 
             >
               {/* Reflejo */}
               <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent rounded-2xl pointer-events-none"></div>
