@@ -30,10 +30,6 @@ export default function DesktopDailyHours({
     } = useAppointmentsContext();
 
 
-
-
-
-
     const isPast = (hour: number) => {
         if (date.getFullYear() < today.getFullYear() ||
             date.getMonth() < today.getMonth() ||
@@ -56,8 +52,9 @@ export default function DesktopDailyHours({
 
     const hours = Array.from({ length: 24 }, (_, i) => i);
 
+
     return (
-        <div className="flex-1 grid grid-rows-23">
+        <div className="flex-1 flex flex-col">
             {hours.map(hour => (
                 <HourCell
                     key={hour}

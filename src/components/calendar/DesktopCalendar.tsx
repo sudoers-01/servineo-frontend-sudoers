@@ -9,6 +9,10 @@ import DesktopDailyView from "./day/DesktopDailyView";
 import DesktopWeekView from "./week/DesktopWeekView";
 import { AppointmentsProvider } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 
+import useSixMonthsAppointments from '@/hooks/Appointments/useSixMonthsAppointments';
+
+
+
 
 interface DesktopCalendarProps {
     fixer_id: string;
@@ -35,21 +39,43 @@ export default function DesktopCalendar({
         handleDayView
     } = useCalendarView();
 
+    const selectedDate = useMemo(() => {
+        if (view === 'week') {
+            console.log('🎯 INICIO - DesktopCalendar selectedDate', { year, month, day, view });
+
+            const d = new Date(year, month, day);
+            const dayOfWeek = d.getDay();
+            const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+            d.setDate(d.getDate() + diff);
+
+            console.log('✅ Lunes calculado:', {
+                fecha: d.toISOString().split('T')[0],
+                dia: d.getDate(),
+                mes: d.getMonth(),
+                año: d.getFullYear()
+            });
+
+
+            return d;
+        }
+        return new Date(year, month, day);
+    }, [year, month, day, view]);
     const {
         isHourBooked,
         isDisabled,
-        loading
-    } = useAppointmentsByDate(fixer_id, date);
+        loading,
 
+    } = useSixMonthsAppointments(fixer_id, selectedDate);
     const providerValue = useMemo(() => ({
         isHourBooked,
         isDisabled,
-        loading
+        loading,
     }), [isHourBooked, isDisabled, loading]);
 
-    const selectedDate = useMemo(() =>
-        new Date(year, month, day)
-        , [year, month, day]);
+
+
+
+    //    console.log(`Esta es la fecha actual ${selectedDate}`);
     return (
 
         <AppointmentsProvider

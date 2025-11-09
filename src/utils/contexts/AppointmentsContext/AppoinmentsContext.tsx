@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext, useMemo, ReactNode } from 'react';
 
 interface AppointmentsContextType {
     isHourBooked: (date: Date, hour: number) => boolean;
@@ -27,20 +27,22 @@ interface AppointmentsProviderProps {
     isHourBooked: (date: Date, hour: number) => boolean;
     isDisabled: (date: Date, hour: number) => boolean;
     loading: boolean;
+
 }
 
 export function AppointmentsProvider({
     children,
     isHourBooked,
     isDisabled,
-    loading
+    loading,
 }: AppointmentsProviderProps) {
+    const value = useMemo(
+        () => ({ isHourBooked, isDisabled, loading }),  // ← AGREGAR
+        [isHourBooked, isDisabled, loading]  // ← AGREGAR
+    );
+
     return (
-        <AppointmentsContext.Provider value={{
-            isHourBooked,
-            isDisabled,
-            loading
-        }}>
+        <AppointmentsContext.Provider value={value}>
             {children}
         </AppointmentsContext.Provider>
     );

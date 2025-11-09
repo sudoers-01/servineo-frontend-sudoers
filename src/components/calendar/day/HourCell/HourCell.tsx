@@ -7,7 +7,7 @@ import { DayOfWeek } from "@/hooks/useDailyAppointments";
 import type { AppointmentFormHandle } from "@/components/appointments/forms/AppointmentForm";
 import AppointmentForm from "@/components/appointments/forms/AppointmentForm";
 import AppointmentDetailsForm, { EditAppointmentFormHandle as DetailsFormHandle } from "@/components/appointments/forms/AppointmentDetails";
-
+import { useAppointmentsContext } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 const API_BASE = "https://servineo-backend-lorem.onrender.com";
 
 interface HourCellProps {
@@ -31,13 +31,14 @@ export default function HourCell({
     requester_id,
     isPast,
     isToday,
-    isHourBooked,
-    isDisabled,
     view
 }: HourCellProps) {
     const refFormularioCita = useRef<AppointmentFormHandle | null>(null);
     const formRef = useRef<DetailsFormHandle>(null);
     const refFormularioEditarCita = useRef<EditAppointmentFormHandle | null>(null);
+
+    const { isHourBooked, isDisabled } = useAppointmentsContext();
+
 
     const isBooked = isHourBooked(date, hour);
     const isDisable = isDisabled(date, hour);
@@ -47,24 +48,29 @@ export default function HourCell({
         if (isToday && view === 'day' && today.getHours() === hour) return "bg-blue-300";
         else return "bg-white";
     }
+    const { isFixer, isRequester } = useUserRole();
 
     const getColor = () => {
         if (isDisable) {
-            return "bg-[#64748B]"
+            return "bg-[#16A34A]"
         }
         if (isBooked) return "bg-[#FFC857]";
         else if (isRequester) {
-            return "bg-[#16A34A]"
+            return "bg-[#64748B]"
         }
+        return "bg-[#64748B]"
     }
 
     const getText = () => {
-        if (isDisable) return "Inhabilitado";
+        if (isDisable)
+            return "Disponible";
+
+
         if (isBooked) return "Ocupado";
         if (isFixer) {
             return ''
         } else if (isRequester) {
-            return "Disponible";
+            return "Inhabilitado";
         }
     }
 
@@ -77,7 +83,6 @@ export default function HourCell({
         return fechaFinal.toISOString();
     };
 
-    const { isFixer, isRequester } = useUserRole();
 
     const handleOpenForm = () => {
         if (formRef.current) {
