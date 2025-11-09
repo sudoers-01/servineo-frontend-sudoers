@@ -3,7 +3,30 @@ import { useState, useEffect } from 'react';
 import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, onCardAdded }) {
+// --- INICIO DE LA CORRECCIÓN ---
+
+// 1. Definir la interfaz para las props
+interface AddCardModalProps {
+  userId: string;
+  fixerId: string;
+  jobId: string;
+  amount: number;
+  onClose: () => void;
+  onCardAdded: (payload: any) => void; // Puedes definir un tipo más estricto si lo deseas
+}
+
+// --- FIN DE LA CORRECCIÓN ---
+
+
+// 2. Aplicar la interfaz a las props
+export default function AddCardModal({ 
+  userId, 
+  fixerId, 
+  jobId, 
+  amount, 
+  onClose, 
+  onCardAdded 
+}: AddCardModalProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [saveCard, setSaveCard] = useState(false);
@@ -18,7 +41,8 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
     setIsValidHolder(regex.test(cardHolder.trim()));
   }, [cardHolder]);
 
-  const handleSubmit = async (e) => {
+  // 3. Tipar el evento 'e'
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements) {
       setErrorMessage('Stripe aún no está listo, espera unos segundos.');
@@ -97,9 +121,16 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
         setSuccessMessage('');
         onClose();
       }, 2000);
-    } catch (err) {
+
+    // 4. Tipar el error 'err'
+    } catch (err: unknown) { 
       console.error(err);
-      setErrorMessage(err.message);
+      // Comprobar si 'err' es un Error para acceder a 'message'
+      if (err instanceof Error) {
+        setErrorMessage(err.message);
+      } else {
+        setErrorMessage('Ocurrió un error inesperado.');
+      }
     } finally {
       setLoading(false);
     }
@@ -188,7 +219,7 @@ export default function AddCardModal({ userId, fixerId, jobId, amount, onClose, 
         </form>
       </motion.div>
 
-      {/*  Modal de éxito */}
+      {/* Modal de éxito */}
       <AnimatePresence>
         {successMessage && (
           <motion.div
