@@ -5,7 +5,6 @@ import HourCell from "./HourCell/HourCell";
 
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
 
-import { useAppointmentsContext } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 
 interface DesktopDailyViewProps {
 
@@ -24,20 +23,16 @@ export default function DesktopDailyHours({
         fixer_id,
         requester_id
     } = useUserRole();
-    const {
-        isHourBooked,
-        isDisabled
-    } = useAppointmentsContext();
-
 
     const isPast = (hour: number) => {
-        if (date.getFullYear() < today.getFullYear() ||
-            date.getMonth() < today.getMonth() ||
-            date.getDate() < today.getDate()) {
+        const dateOnly = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+        if (dateOnly < todayOnly) {
             return true;
         }
 
-        if (isToday) {
+        if (dateOnly.getTime() === todayOnly.getTime()) {
             return hour < currentHour;
         }
 
@@ -64,8 +59,6 @@ export default function DesktopDailyHours({
                     hour={hour}
                     isPast={isPast(hour)}
                     isToday={isToday}
-                    isHourBooked={isHourBooked}
-                    isDisabled={isDisabled}
                     view={view}
                 />
             ))}
