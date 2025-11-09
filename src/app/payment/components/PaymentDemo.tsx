@@ -51,7 +51,7 @@ export default function PaymentDemo() {
 
   // Escuchar cuando se complete un pago QR
   useEffect(() => {
-    const handleQRPaymentComplete = (event: any) => {
+    const handleQRPaymentComplete = (event: unknown | null) => {
       const trabajoId = event.detail?.trabajoId;
       if (trabajoId) {
         actualizarEstadoTrabajo(trabajoId, 'Pagado');
@@ -332,14 +332,14 @@ function PaymentMethodSelector({
         paymentMethod: "Efectivo",
       };
       const resp = await createCashPayment(payload);
-      const created: any = resp?.data || resp?.payment || resp;
-      const newId: any = created?._id;
+      const created: unknown | null = resp?.data || resp?.payment || resp;
+      const newId: unknown | null = created?._id;
       if (!newId) throw new Error('No llegó _id del pago creado');
 
       setCreatedPaymentId(newId);
       setOkMsg('✅ Pago creado');
       onAfterPostCash?.();
-    } catch (e: any) { 
+    } catch (e: unknown | null) { 
       console.error(e);
       setErr(e.message ?? 'Error al crear el pago');
     } finally {

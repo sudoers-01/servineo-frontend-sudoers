@@ -179,7 +179,7 @@ export default function PaymentMethodCashFixer({
         },
       });
 
-    } catch (e: any) {
+    } catch (e: unknown | null) {
       console.error("❌ [FIXER] Error en fetchSummary:", e);
       setMainMessage({ type: 'error', text: e.message || 'No se pudo cargar el resumen' });
     } finally {
@@ -330,7 +330,7 @@ export default function PaymentMethodCashFixer({
         text: responseData.error || responseData.message || `Error ${res.status}`
       });
 
-    } catch (e: any) {
+    } catch (e: unknown | null) {
       setMainMessage({ type: 'error', text: e.message || 'Error al confirmar el pago' });
     } finally {
       setPatching(false);

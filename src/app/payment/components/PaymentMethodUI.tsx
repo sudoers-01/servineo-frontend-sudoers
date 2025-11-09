@@ -113,7 +113,7 @@ export default function PaymentMethodUI({
         setShowNotification(true);
       }
 
-    } catch (e: any) {
+    } catch (e: unknown | null) {
       console.error("❌ [REQUESTER] Error:", e);
       setErr(e.message || "No se pudo cargar el resumen");
     } finally {
@@ -196,7 +196,7 @@ export default function PaymentMethodUI({
       await loadSummary();
       setShowNotification(true);
 
-    } catch (e: any) {
+    } catch (e: unknown | null) {
       console.error("❌ [REQUESTER] Error regenerando:", e);
       setErr(e.message || "Error al regenerar el código");
     } finally {

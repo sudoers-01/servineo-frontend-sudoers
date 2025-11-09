@@ -14,9 +14,9 @@ export type UISummary = {
 };
 
 // --- Helper base: SIEMPRE rutas relativas para pasar por el proxy /api ---
-async function apiFetch<T = any>(
+async function apiFetch<T = unknown | null>(
   path: string,
-  init?: RequestInit & { json?: any }
+  init?: RequestInit & { json?: unknown | null }
 ): Promise<T> {
   const opts: RequestInit = {
     cache: "no-store",
@@ -47,7 +47,7 @@ async function apiFetch<T = any>(
 }
 
 // --- Normalizador: adapta cualquier backend a UISummary uniforme ---
-function normalizeSummary(d: any): UISummary {
+function normalizeSummary(d: unknown | null): UISummary {
   const total =
     typeof d?.total === "number"
       ? d.total
@@ -93,7 +93,7 @@ export async function createCashPayment(input: CreateCashPaymentDTO) {
     commissionRate: input.commissionRate ?? 0.1,
   };
 
-  return apiFetch<{ message: string; data: any }>(`/lab/payments`, {
+  return apiFetch<{ message: string; data: unknown | null }>(`/lab/payments`, {
     method: "POST",
     json: payload,
   });
@@ -101,13 +101,13 @@ export async function createCashPayment(input: CreateCashPaymentDTO) {
 
 // --- GET: summary por ID ---
 export async function getPaymentSummaryById(id: string): Promise<UISummary> {
-  const r = await apiFetch<{ data: any }>(`/lab/payments/${id}/summary`);
+  const r = await apiFetch<{ data: unknown | null }>(`/lab/payments/${id}/summary`);
   return normalizeSummary(r?.data ?? r);
 }
 
 // --- GET: último summary por jobId ---
 export async function getLastPaymentSummaryByJob(jobId: string): Promise<UISummary> {
-  const r = await apiFetch<{ data: any }>(`/lab/payments/by-job/${jobId}/summary`);
+  const r = await apiFetch<{ data: unknown | null }>(`/lab/payments/by-job/${jobId}/summary`);
   return normalizeSummary(r?.data ?? r);
 }
 

@@ -12,13 +12,13 @@ type User = {
   notif?: boolean;
   password?: string;
   role?: 'requester' | 'fixer';
-  [k: string]: any;
+  [k: string]: unknown | null;
 };
 
 type UsersStore = {
   sessions: Record<string, User>;
   lastUpdated?: number;
-  [k: string]: any;
+  [k: string]: unknown | null;
 };
 
 declare global {
@@ -34,7 +34,7 @@ declare global {
     savePasswordChange?: () => void;
     cancelPasswordChange?: () => void;
     togglePasswordChange?: () => void;
-    togglePasswordVisibility?: (id: string, target?: any) => void;
+    togglePasswordVisibility?: (id: string, target?: unknown | null) => void;
     closeEdit?: () => void;
     closeProfileModal?: () => void;
   }
@@ -259,7 +259,7 @@ export function initUserProfileLogic(): void {
     saveUsersStore();
 
     try {
-      (window as any).userProfile = merged;
+      (window as unknown | null).userProfile = merged;
     } catch (err) {
       console.warn("[userProfileLogic] No se pudo asignar a window.userProfile:", err);
     }
@@ -433,7 +433,7 @@ export function initUserProfileLogic(): void {
     window.userProfile = updated;
     window.isAuthenticated = false;
     
-     try { (window as any).closeMenu?.(); } catch {}
+     try { (window as unknown | null).closeMenu?.(); } catch {}
      const profileMenu = document.getElementById("profileMenu");
     if (profileMenu) {
     profileMenu.classList.remove("show");
@@ -513,7 +513,7 @@ let _initialScale = 1;
 
 // --- abrir crop modal con file ---
 function openCropModal(file: File) {
-  try { (window as any).closeMenu?.(); } catch {}
+  try { (window as unknown | null).closeMenu?.(); } catch {}
   try { closeEdit(); } catch {}
 
   _pendingCroppedDataUrl = null;
@@ -582,7 +582,7 @@ function openCropModal(file: File) {
       _initialScale = _cropScale;
     }
 
-    try { (ev.target as Element).setPointerCapture?.((ev as any).pointerId); } catch {}
+    try { (ev.target as Element).setPointerCapture?.((ev as unknown | null).pointerId); } catch {}
   };
 
   const onPointerMove = (ev: PointerEvent) => {
@@ -637,7 +637,7 @@ function openCropModal(file: File) {
       if (zoomRange) zoomRange.value = _cropScale.toFixed(2);
     }
 
-    try { (ev.target as Element).releasePointerCapture?.((ev as any).pointerId); } catch {}
+    try { (ev.target as Element).releasePointerCapture?.((ev as unknown | null).pointerId); } catch {}
   };
 
   cropCanvas.addEventListener("pointerdown", onPointerDown);
@@ -1102,7 +1102,7 @@ if (photoInput && photoPreviewImg && photoPreviewContainer) {
   if (u && u.photo) photoPreviewImg.src = u.photo;
   else photoPreviewImg.src = "/avatar.png";
 
-  photoInput.addEventListener("change", (e: any) => {
+  photoInput.addEventListener("change", (e: unknown | null) => {
     const file = e.target.files?.[0];
     if (file) openCropModal(file);
     e.target.value = "";

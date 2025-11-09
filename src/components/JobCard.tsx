@@ -16,7 +16,7 @@ interface Props {
     nombre: string,
     apellido: string,
     ubicacion: string,
-    fechaDePublicacion: any,
+    fechaDePublicacion: unknown | null,
     calificacion: number,
     telefono: number,
     precio: {

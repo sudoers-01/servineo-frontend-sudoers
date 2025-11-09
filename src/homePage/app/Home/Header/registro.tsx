@@ -15,7 +15,7 @@ const Registro: React.FC<RegistroProps> = ({ isOpen, onClose }) => {
       try {
         const saved =
           JSON.parse(localStorage.getItem('booka_user') || 'null') ||
-          (window as any)?.userProfile ||
+          (window as unknown | null)?.userProfile ||
           mockUser;
         setUser(saved);
       } catch (e) {
@@ -32,7 +32,7 @@ const Registro: React.FC<RegistroProps> = ({ isOpen, onClose }) => {
       const u = { ...user, loggedIn: true };
       const deviceId =
         localStorage.getItem('booka_device_id') ||
-        (window as any)?.deviceId ||
+        (window as unknown | null)?.deviceId ||
         'dev-default';
 
       const usersStoreRaw = localStorage.getItem('booka_users') || null;
@@ -45,8 +45,8 @@ const Registro: React.FC<RegistroProps> = ({ isOpen, onClose }) => {
       localStorage.setItem('booka_users', JSON.stringify(usersStore));
       localStorage.setItem('booka_user', JSON.stringify(u));
 
-      (window as any).userProfile = u;
-      (window as any).isAuthenticated = true;
+      (window as unknown | null).userProfile = u;
+      (window as unknown | null).isAuthenticated = true;
 
       window.dispatchEvent(new CustomEvent('booka-auth-updated', { detail: u }));
       window.dispatchEvent(new CustomEvent('booka-profile-updated', { detail: u }));

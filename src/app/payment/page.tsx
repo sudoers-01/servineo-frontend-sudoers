@@ -54,7 +54,7 @@ export default function PaymentsPage() {
       setTrabajos(prev =>
         prev.map(x => (x.id === t.id ? { ...x, estado: "Sin Pagar" } : x))
       );
-    } catch (e: any) {
+    } catch (e: unknown | null) {
       setError(e.message || "Error al pagar");
     } finally {
       setLoading(null);
@@ -72,7 +72,7 @@ export default function PaymentsPage() {
       setTrabajos(prev =>
         prev.map(x => (x.id === lastPaymentId ? { ...x, estado: "Pagado" } : x))
       );
-    } catch (e: any) {
+    } catch (e: unknown | null) {
       setError(e.message || "Error al confirmar");
     } finally {
       setLoading(null);
