@@ -6,125 +6,100 @@ import type { AppointmentFormHandle } from "../../appointments/forms/Appointment
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
 import type { EditAppointmentFormHandle, ExistingAppointment } from "../../appointments/forms/EditAppointmentForm";
 import DatePicker from "@/components/list/DatePicker/DatePicker";
+import { useUserRole } from "@/utils/contexts/UserRoleContext";
+import { useAppointmentsContext } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 
 const API_BASE = "https://servineo-backend-lorem.onrender.com";
-const EP_BOOKED = `${API_BASE}/api/crud_read/schedules/get_by_fixer_current_requester_day`;
-const EP_OCCUPIED = `${API_BASE}/api/crud_read/schedules/get_by_fixer_other_requesters_day`;
-const NOMBRE_FIXER_POR_DEFECTO = "John";
 
 interface PropiedadesHorarioDia {
-  fixerId: string;
-  requesterId: string;
-  selectedDate: Date | string | null;
-  onDateChange?: (newDate: Date) => void;
-
-  /** NUEVAS PROPS: modo picker y callback para devolver fecha+hora en ISO */
-  pickerMode?: boolean; // si true: solo mostrar "libre" y devolver iso en onSlotSelect
-  onSlotSelect?: (iso: string) => void; // iso en formato ISO string (toISOString())
+    fixerId: string;
+    requesterId: string;
+    selectedDate: Date | string | null;
+    onDateChange?: (newDate: Date) => void;
+    pickerMode?: boolean;
+    onSlotSelect?: (iso: string) => void;
 }
 
-type Estado = "libre" | "reservado_propio" | "ocupado_otro" | "no_disponible";
+type Estado = "disponible" | "reservado" | "cancelado_por_fixer" | "cancelado_por_requester" | "no_disponible";
 
 interface HorarioItem {
     id_Horario: string;
     Hora_Inicio: string;
     estado_Horario: Estado;
-    type?: "banner";
-    text?: string;
 }
 
 interface DatosDia {
-    nombre_Fixer?: string;
     horarios?: HorarioItem[];
 }
 
 type Icono = "＋" | "✎" | null;
 
-type SchedState = "booked" | "occupied";
-interface SchedRow {
-    starting_hour: number;
-    finishing_hour: number;
-    schedule_state: SchedState;
-}
-
+// Convierte string YYYY-MM-DD a objeto Date local
 function convertirYMDaFechaLocal(ymd: string) {
     const [y, m, d] = ymd.split("-").map(Number);
     return new Date(y, m - 1, d);
 }
+
+// Convierte Date o string a formato YYYY-MM-DD
 function aYMDDeCualquiera(d: Date | string) {
     const fecha = typeof d === "string" ? convertirYMDaFechaLocal(d) : d;
     const pad = (n: number) => String(n).padStart(2, "0");
     return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())}`;
 }
-function rangoHorasEnteras(inicio = 8, fin = 17) {
+
+// Genera array de horas [0, 1, 2, ..., 23]
+function rangoHorasEnteras(inicio = 0, fin = 23) {
     const arr: number[] = [];
     for (let h = inicio; h <= fin; h++) arr.push(h);
     return arr;
 }
+
 function formatearHora(h: number) {
     return `${String(h).padStart(2, "0")}:00`;
 }
+
+// Obtiene fecha/hora actual en Bolivia (UTC-4)
+function obtenerAhoraBolivia(): Date {
+    const ahora = new Date();
+    const utc = ahora.getTime() + (ahora.getTimezoneOffset() * 60000);
+    const boliviaTime = new Date(utc - (4 * 60 * 60 * 1000));
+    return boliviaTime;
+}
+
+// Verifica si una fecha YYYY-MM-DD ya pasó
 function esPasadoYMD(d: string) {
-    const hoy = aYMDDeCualquiera(new Date());
+    const hoyBolivia = obtenerAhoraBolivia();
+    const hoy = aYMDDeCualquiera(hoyBolivia);
     return d < hoy;
 }
-function esFinDeSemanaYMD(d: string) {
-    const fecha = convertirYMDaFechaLocal(d);
-    const dia = fecha.getDay();
-    return dia === 0 || dia === 6;
-}
 
-async function fetchSched(
-    urlBase: string,
-    params: { fixer_id: string; requester_id: string; searched_date: string },
-    signal?: AbortSignal
-) {
-    const url = new URL(urlBase);
-    url.searchParams.set("fixer_id", params.fixer_id);
-    url.searchParams.set("requester_id", params.requester_id);
-    url.searchParams.set("searched_date", params.searched_date);
-    const res = await fetch(url.toString(), {
-        method: "GET",
-        headers: { Accept: "application/json" },
-        signal,
-    });
-    if (!res.ok) {
-        const text = await res.text().catch(() => "");
-        throw new Error(`HTTP ${res.status} en ${url.pathname} ${text}`);
-    }
-    const data = await res.json().catch(() => null);
-    return Array.isArray(data) ? (data as SchedRow[]) : [];
-}
+// Verifica si una hora específica de hoy ya pasó
+function esHoraPasadaHoy(ymd: string, hora: number): boolean {
+    const ahoraBolivia = obtenerAhoraBolivia();
+    const hoyYMD = aYMDDeCualquiera(ahoraBolivia);
 
-function ymdToLocalDate(ymd: string) {
-    const [y, m, d] = ymd.split("-").map(Number);
-    return new Date(y, m - 1, d);
-}
-function toYMDAny(d: Date | string) {
-    const date = typeof d === "string" ? ymdToLocalDate(d) : d;
-    const pad = (n: number) => String(n).padStart(2, "0");
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
-}
-function convertToDate(selectedDate: Date | string | null): Date {
-    if (!selectedDate) return new Date();
-    if (selectedDate instanceof Date) {
-        const year = selectedDate.getFullYear();
-        const month = selectedDate.getMonth();
-        const day = selectedDate.getDate();
-        return new Date(year, month, day, 12, 0, 0);
-    }
-    if ((selectedDate as string).includes("T")) return new Date(selectedDate as string);
-    return new Date(`${selectedDate}T12:00:00`);
+    if (ymd !== hoyYMD) return false;
+
+    const horaActual = ahoraBolivia.getHours();
+    const minutoActual = ahoraBolivia.getMinutes();
+
+    if (hora < horaActual) return true;
+    if (hora === horaActual && minutoActual > 0) return true;
+
+    return false;
 }
 
 export default function HorarioDelDia({
-  fixerId,
-  requesterId,
-  selectedDate,
-  onDateChange,
-  pickerMode = false, // por defecto falso (comportamiento actual)
-  onSlotSelect,
+    fixerId,
+    requesterId,
+    selectedDate,
+    onDateChange,
+    pickerMode = false,
+    onSlotSelect,
 }: PropiedadesHorarioDia) {
+    const { isFixer, isRequester } = useUserRole();
+    const { isHourBooked, isDisabled, isCanceled, loading: contextLoading } = useAppointmentsContext();
+
     const fechaFormateadaInicial = selectedDate ? aYMDDeCualquiera(selectedDate as any) : "";
     const [fecha, setFecha] = useState<string>(fechaFormateadaInicial);
     const [cargando, setCargando] = useState<boolean>(false);
@@ -138,20 +113,16 @@ export default function HorarioDelDia({
     const refReqSeq = useRef(0);
     const refActiveLoads = useRef(0);
 
-    const [date, setDate] = useState<string>(selectedDate ? toYMDAny(selectedDate as any) : "");
-
-    const fechaInicial = convertToDate(selectedDate);
-
     const handleDatePickerChange = (newDate: Date) => {
-        const newDateStr = toYMDAny(newDate);
-        setDate(newDateStr);
+        const newDateStr = aYMDDeCualquiera(newDate);
+        setFecha(newDateStr);
         onDateChange?.(newDate);
     };
 
     useEffect(() => {
         if (selectedDate) {
-            const d = toYMDAny(selectedDate as any);
-            setDate(d);
+            const d = aYMDDeCualquiera(selectedDate as any);
+            setFecha(d);
         }
     }, [selectedDate]);
 
@@ -174,30 +145,17 @@ export default function HorarioDelDia({
             setCargando(true);
             setError("");
 
-            const horas = rangoHorasEnteras(8, 17);
+            const horas = rangoHorasEnteras(0, 23);
 
-            if (esPasadoYMD(d) || esFinDeSemanaYMD(d)) {
+            // Si el día completo ya pasó, marcar todo como no disponible
+            if (esPasadoYMD(d)) {
                 const horarios: HorarioItem[] = horas.map((h) => ({
                     id_Horario: `${d}-${String(h).padStart(2, "0")}`,
                     Hora_Inicio: formatearHora(h),
                     estado_Horario: "no_disponible",
                 }));
-                if (myReq === refReqSeq.current) setDatos({ nombre_Fixer: NOMBRE_FIXER_POR_DEFECTO, horarios });
+                if (myReq === refReqSeq.current) setDatos({ horarios });
                 return;
-            }
-
-            const [bookedRows, occupiedRows] = await Promise.all([
-                fetchSched(EP_BOOKED, { fixer_id: fixerId, requester_id: requesterId, searched_date: d }, ac.signal),
-                fetchSched(EP_OCCUPIED, { fixer_id: fixerId, requester_id: requesterId, searched_date: d }, ac.signal),
-            ]);
-
-            const bookedSet = new Set<number>();
-            const occupiedSet = new Set<number>();
-            for (const r of bookedRows) {
-                if (r.schedule_state === "booked") bookedSet.add(Number(r.starting_hour));
-            }
-            for (const r of occupiedRows) {
-                if (r.schedule_state === "occupied") occupiedSet.add(Number(r.starting_hour));
             }
 
             const horarios: HorarioItem[] = [];
@@ -205,22 +163,43 @@ export default function HorarioDelDia({
                 const horaMostrar = formatearHora(h);
                 const idBase = `${d}-${String(h).padStart(2, "0")}`;
 
-                if (h === 12 || h === 13) {
+                // Si la hora ya pasó hoy, marcar como no disponible
+                if (esHoraPasadaHoy(d, h)) {
                     horarios.push({ id_Horario: idBase, Hora_Inicio: horaMostrar, estado_Horario: "no_disponible" });
                     continue;
                 }
 
-                if (occupiedSet.has(h)) {
-                    horarios.push({ id_Horario: idBase, Hora_Inicio: horaMostrar, estado_Horario: "ocupado_otro" });
-                } else if (bookedSet.has(h)) {
-                    horarios.push({ id_Horario: idBase, Hora_Inicio: horaMostrar, estado_Horario: "reservado_propio" });
-                } else {
-                    horarios.push({ id_Horario: idBase, Hora_Inicio: horaMostrar, estado_Horario: "libre" });
+                // Crear Date object para la hora actual
+                const [year, month, day] = d.split("-").map(Number);
+                const currentHourDate = new Date(year, month - 1, day, h, 0, 0);
+
+                let estadoHora: Estado = "no_disponible"; // Default
+
+                if (isFixer) {
+                    // Lógica para FIXER
+                    if (isHourBooked(currentHourDate, h)) {
+                        estadoHora = "reservado";
+                    } else if (isCanceled(currentHourDate, h, requesterId)) {
+                        estadoHora = "cancelado_por_fixer";
+                        console.log("huhuhu");
+                    } else if (isDisabled(currentHourDate, h)) {
+                        estadoHora = "disponible";
+                    }
+                } else if (isRequester) {
+                    // Lógica para REQUESTER (usa las mismas funciones pero sin mostrar cancelados)
+                    if (isHourBooked(currentHourDate, h)) {
+                        estadoHora = "reservado";
+                    } else if (isDisabled(currentHourDate, h)) {
+                        estadoHora = "disponible";
+                    }
+                    // Si está cancelado, se queda como "no_disponible" (default)
                 }
+
+                horarios.push({ id_Horario: idBase, Hora_Inicio: horaMostrar, estado_Horario: estadoHora });
             }
 
             if (myReq === refReqSeq.current && !ac.signal.aborted) {
-                setDatos({ nombre_Fixer: NOMBRE_FIXER_POR_DEFECTO, horarios });
+                setDatos({ horarios });
             }
         } catch (e: any) {
             const isAbort =
@@ -302,12 +281,14 @@ export default function HorarioDelDia({
         estado: Estado
     ): { text: string; icon: Icono; textCls: string; rowCls: string } => {
         switch (estado) {
-            case "libre":
+            case "disponible":
                 return { text: "DISPONIBLE", icon: "＋", textCls: "text-emerald-600", rowCls: "bg-white" };
-            case "reservado_propio":
+            case "reservado":
                 return { text: "RESERVADO", icon: "✎", textCls: "text-amber-500", rowCls: "bg-white" };
-            case "ocupado_otro":
-                return { text: "OCUPADO", icon: null, textCls: "text-white", rowCls: "bg-rose-600" };
+            case "cancelado_por_fixer":
+                return { text: "CANCELADO POR FIXER", icon: null, textCls: "text-white", rowCls: "bg-rose-600" };
+            case "cancelado_por_requester":
+                return { text: "CANCELADO POR REQUESTER", icon: null, textCls: "text-white", rowCls: "bg-rose-600" };
             case "no_disponible":
             default:
                 return { text: "NO DISPONIBLE", icon: null, textCls: "text-slate-400", rowCls: "bg-white opacity-60" };
@@ -315,45 +296,64 @@ export default function HorarioDelDia({
     };
 
     const manejarClickEnSlot = (item: HorarioItem) => {
-    const clickeable = item.estado_Horario === "libre" || item.estado_Horario === "reservado_propio";
-    if (!clickeable) return;
+        // Determinar si el slot es clickeable según el rol
+        let clickeable = false;
 
-    const ymd = fecha || toYMDAny(selectedDate || new Date());
-    const baseDate = convertirYMDaFechaLocal(ymd);
-    const hour = parseInt(item.Hora_Inicio.split(":")[0], 10);
+        if (isFixer) {
+            // Para fixer: solo "reservado" es clickeable (para editar)
+            clickeable = item.estado_Horario === "reservado";
+        } else if (isRequester) {
+            // Para requester: "disponible" y "reservado" son clickeables
+            clickeable = item.estado_Horario === "disponible" || item.estado_Horario === "reservado";
+        }
 
-    const slotDateLocal = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), hour, 0, 0, 0);
-    const iso = slotDateLocal.toISOString(); // ISO en UTC (misma convención que usabas antes)
+        if (!clickeable) return;
 
-    if (pickerMode) {
-        // En modo picker: devolver la fecha seleccionada y no abrir formularios
-        onSlotSelect?.(iso);
-        return;
-    }
+        const ymd = fecha || aYMDDeCualquiera(selectedDate || new Date());
+        const baseDate = convertirYMDaFechaLocal(ymd);
+        const hour = parseInt(item.Hora_Inicio.split(":")[0], 10);
 
-    // comportamiento por defecto (abrir formulario o editar)
-    if (item.estado_Horario === "libre") {
-        refFormularioCita.current?.open(slotDateLocal.toISOString());
-        return;
-    }
+        const slotDateLocal = new Date(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate(), hour, 0, 0, 0);
+        const iso = slotDateLocal.toISOString();
 
-    if (item.estado_Horario === "reservado_propio") {
-        cargarYEditarCita(item);
-    }
+        if (pickerMode) {
+            onSlotSelect?.(iso);
+            return;
+        }
+
+        if (item.estado_Horario === "disponible") {
+            refFormularioCita.current?.open(iso);
+            return;
+        }
+
+        if (item.estado_Horario === "reservado") {
+            cargarYEditarCita(item);
+        }
     };
 
-    const noHayHorariosDisponibles = !!datos && (datos.horarios ?? []).every((it) => it.estado_Horario !== "libre");
+    const noHayHorariosDisponibles = !!datos && (datos.horarios ?? []).every((it) => it.estado_Horario !== "disponible");
+
+    const esEstadoCancelado = (estado: Estado) =>
+        estado === "cancelado_por_fixer" || estado === "cancelado_por_requester";
 
     return (
         <div className="mx-auto max-w-sm p-4 text-black">
-            <h1 className="text-2xl font-semibold mb-3">Calendario de Diego Paredes</h1>
+            <h1 className="text-2xl font-semibold mb-3">
+                Calendario de Diego Paredes
+                <span className="text-xs ml-2 text-slate-500">
+                    ({isFixer ? 'Vista Fixer' : 'Vista Requester'})
+                </span>
+            </h1>
 
             <div className="mb-3">
                 <label className="block text-sm mb-1">Fecha</label>
-                <DatePicker selectedDate={fechaInicial} onDateChange={handleDatePickerChange} />
+                <DatePicker
+                    selectedDate={selectedDate ? (typeof selectedDate === 'string' ? convertirYMDaFechaLocal(selectedDate) : selectedDate) : new Date()}
+                    onDateChange={handleDatePickerChange}
+                />
             </div>
 
-            {cargando && (
+            {(cargando || contextLoading) && (
                 <div className="mb-2 rounded-md bg-slate-100 text-slate-600 px-3 py-2 text-sm font-medium">
                     Cargando…
                 </div>
@@ -368,36 +368,44 @@ export default function HorarioDelDia({
 
                     <div className="space-y-2">
                         {datos.horarios && (() => {
-                        // Si estamos en pickerMode sólo mostramos los slots "libre"
-                        const horariosVisibles = pickerMode ? (datos.horarios.filter(h => h.estado_Horario === "libre")) : datos.horarios;
+                            const horariosVisibles = pickerMode
+                                ? datos.horarios.filter(h => h.estado_Horario === "disponible")
+                                : datos.horarios;
 
-                        return (
-                            <div className="space-y-2">
-                            {horariosVisibles.map((item, idx) => {
-                                const meta = etiquetaPorEstado(item.estado_Horario);
-                                const clickeable = item.estado_Horario === "libre" || item.estado_Horario === "reservado_propio";
+                            return (
+                                <div className="space-y-2">
+                                    {horariosVisibles.map((item, idx) => {
+                                        const meta = etiquetaPorEstado(item.estado_Horario);
 
-                                return (
-                                <div
-                                    key={item.id_Horario || `slot-${idx}`}
-                                    onClick={() => {
-                                    if (!clickeable) return;
-                                    manejarClickEnSlot(item);
-                                    }}
-                                    className={`grid grid-cols-[64px_1fr_28px] items-center rounded-lg border px-3 py-2 shadow-sm ${meta.rowCls} ${clickeable ? "hover:brightness-95 cursor-pointer" : ""}`}
-                                >
-                                    <div className={`font-semibold ${item.estado_Horario === "ocupado_otro" ? "text-white" : "text-slate-800"}`}>
-                                    {item.Hora_Inicio}
-                                    </div>
-                                    <div className={`text-sm font-semibold ${meta.textCls}`}>{meta.text}</div>
-                                    <div className={`text-xl text-right ${item.estado_Horario === "ocupado_otro" ? "text-white" : "text-slate-500"}`}>
-                                    {meta.icon}
-                                    </div>
+                                        // Determinar clickeabilidad según rol
+                                        let clickeable = false;
+                                        if (isFixer) {
+                                            clickeable = item.estado_Horario === "reservado";
+                                        } else if (isRequester) {
+                                            clickeable = item.estado_Horario === "disponible" || item.estado_Horario === "reservado";
+                                        }
+
+                                        return (
+                                            <div
+                                                key={item.id_Horario || `slot-${idx}`}
+                                                onClick={() => {
+                                                    if (!clickeable) return;
+                                                    manejarClickEnSlot(item);
+                                                }}
+                                                className={`grid grid-cols-[64px_1fr_28px] items-center rounded-lg border px-3 py-2 shadow-sm ${meta.rowCls} ${clickeable ? "hover:brightness-95 cursor-pointer" : ""}`}
+                                            >
+                                                <div className={`font-semibold ${esEstadoCancelado(item.estado_Horario) ? "text-white bg-red-500" : "text-slate-800"}`}>
+                                                    {item.Hora_Inicio}
+                                                </div>
+                                                <div className={`text-sm font-semibold ${meta.textCls}`}>{meta.text}</div>
+                                                <div className={`text-xl text-right ${esEstadoCancelado(item.estado_Horario) ? "text-white" : "text-slate-500"}`}>
+                                                    {meta.icon}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
-                                );
-                            })}
-                            </div>
-                        );
+                            );
                         })()}
                     </div>
 
