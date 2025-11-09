@@ -33,6 +33,7 @@ export default function SuccessDiscord() {
     }
 
     router.push("/controlC/HU3/ubicacion");
+    ////redireccion a ubicacion para guardar datos de geolocalizacion y datos especificos 
   }, [router, setUser]);
 
   return <p>Redirigiendo…</p>;
