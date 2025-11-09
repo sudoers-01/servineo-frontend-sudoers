@@ -462,7 +462,7 @@ const Header = () => {
         {/* Botón 2: Centro de Pagos (Se muestra si el rol es 'fixer') */}
         {user?.role === 'fixer' && (
           <Link 
-            href={`/centro-de-pagos?fixerId=${user._id}`}
+            href={`/payment/pages/centro-de-pagos?fixerId=${user._id}`}
             id="centroPagosBtn" 
             className="menu-item"
             onClick={() => window.closeMenu?.()}

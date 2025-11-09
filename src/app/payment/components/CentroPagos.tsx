@@ -168,7 +168,7 @@ const CentroDePagos = () => {
             
             {/* <-- CAMBIO 8: Actualizar el onClick del botón Fixer Wallet --> */}
             <button
-              onClick={() => router.push(`/payment/FixerWallet?fixerId=${fixerData.fixerId}`)}
+              onClick={() => router.push(`/payment/pages/FixerWallet?fixerId=${fixerData.fixerId}`)}
               disabled={!fixerData?.fixerId} // Deshabilitar si no hay fixerId
               className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
             >

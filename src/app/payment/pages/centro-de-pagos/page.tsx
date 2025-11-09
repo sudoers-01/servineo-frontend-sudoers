@@ -2,7 +2,7 @@
 
 import React from 'react';
 // Importa tu componente (ajusta la ruta para subir un nivel)
-import CentroPagos from '../payment/components/CentroPagos'; 
+import CentroPagos from '../../components/CentroPagos'; 
 
 export default function CentroDePagosPage() {
   return (
