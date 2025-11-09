@@ -54,8 +54,6 @@ export default function DesktopDailyHours({
                 <HourCell
                     key={hour}
                     date={date}
-                    fixer_id={fixer_id}
-                    requester_id={requester_id}
                     hour={hour}
                     isPast={isPast(hour)}
                     isToday={isToday}

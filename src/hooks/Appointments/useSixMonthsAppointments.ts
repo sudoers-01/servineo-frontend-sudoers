@@ -109,12 +109,26 @@ export default function useSixMonthsAppointments(fixer_id: string, date: Date) {
     }, [appointmentsDis]);
 
 
+    const isCanceled = useCallback((day: Date, hour: number, requester_id: string): boolean => {
+        return appointments.some((apt: Appointment) => {
+            const aptDate = new Date(apt.starting_time);
+            const aptReq = apt.id_requester;
+            const aptCancel = apt.cancelled_fixer === true;
+            return (
+                aptDate.getFullYear() === day.getFullYear() &&
+                aptDate.getMonth() === day.getMonth() &&
+                aptDate.getDate() === day.getDate() &&
+                aptDate.getUTCHours() === hour && aptReq === requester_id && aptCancel
+            );
+        });
 
+    }, [appointments]);
 
     return {
         isHourBooked,
         isDisabled,
         loading,
+        isCanceled,
         error
     };
 }

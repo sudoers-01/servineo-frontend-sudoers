@@ -5,6 +5,7 @@ import React, { createContext, useContext, useMemo, ReactNode } from 'react';
 interface AppointmentsContextType {
     isHourBooked: (date: Date, hour: number) => boolean;
     isDisabled: (date: Date, hour: number) => boolean;
+    isCanceled: (date: Date, hour: number, requester_id: string) => boolean;
     loading: boolean;
 
 }
@@ -26,6 +27,7 @@ interface AppointmentsProviderProps {
     children: ReactNode;
     isHourBooked: (date: Date, hour: number) => boolean;
     isDisabled: (date: Date, hour: number) => boolean;
+    isCanceled: (date: Date, hour: number, requester_id: string) => boolean;
     loading: boolean;
 
 }
@@ -34,11 +36,12 @@ export function AppointmentsProvider({
     children,
     isHourBooked,
     isDisabled,
-    loading,
+    isCanceled,
+    loading
 }: AppointmentsProviderProps) {
     const value = useMemo(
-        () => ({ isHourBooked, isDisabled, loading }),  // ← AGREGAR
-        [isHourBooked, isDisabled, loading]  // ← AGREGAR
+        () => ({ isHourBooked, isDisabled, isCanceled, loading }),  // ← AGREGAR
+        [isHourBooked, isDisabled, isCanceled, loading]  // ← AGREGAR
     );
 
     return (
