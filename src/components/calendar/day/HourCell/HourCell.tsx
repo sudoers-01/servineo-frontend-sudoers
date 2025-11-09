@@ -17,8 +17,6 @@ interface HourCellProps {
     hour: number;
     isPast: boolean;
     isToday: boolean;
-    isHourBooked: (datei: Date, hour: number) => boolean;
-    isDisabled: (datei: Date, hour: number) => boolean;
     view: 'day' | 'week';
 }
 
