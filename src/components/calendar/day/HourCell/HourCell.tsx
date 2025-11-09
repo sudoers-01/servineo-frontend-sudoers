@@ -12,8 +12,6 @@ const API_BASE = "https://servineo-backend-lorem.onrender.com";
 
 interface HourCellProps {
     date: Date;
-    fixer_id: string;
-    requester_id: string;
     hour: number;
     isPast: boolean;
     isToday: boolean;
@@ -25,8 +23,6 @@ const today = new Date();
 export default function HourCell({
     hour,
     date,
-    fixer_id,
-    requester_id,
     isPast,
     isToday,
     view
@@ -35,20 +31,24 @@ export default function HourCell({
     const formRef = useRef<DetailsFormHandle>(null);
     const refFormularioEditarCita = useRef<EditAppointmentFormHandle | null>(null);
 
-    const { isHourBooked, isDisabled } = useAppointmentsContext();
+    const { isHourBooked, isDisabled, isCanceled } = useAppointmentsContext();
 
+    const { isFixer, isRequester, requester_id, fixer_id } = useUserRole();
 
     const isBooked = isHourBooked(date, hour);
     const isDisable = isDisabled(date, hour);
+    const isCancel = isCanceled(date, hour, requester_id);
 
     const todayColor = () => {
         if (isToday && view === 'week') return "bg-blue-300";
         if (isToday && view === 'day' && today.getHours() === hour) return "bg-blue-300";
         else return "bg-white";
     }
-    const { isFixer, isRequester } = useUserRole();
 
     const getColor = () => {
+        if (isCancel) {
+            return "bg-[#FF3E17]"
+        }
         if (isDisable) {
             return "bg-[#16A34A]"
         }
@@ -60,6 +60,7 @@ export default function HourCell({
     }
 
     const getText = () => {
+        if (isCancel) return "kkVale";
         if (isDisable)
             return "Disponible";
 

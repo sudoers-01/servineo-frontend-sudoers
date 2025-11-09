@@ -40,37 +40,22 @@ export default function DesktopCalendar({
     } = useCalendarView();
 
     const selectedDate = useMemo(() => {
-        if (view === 'week') {
-            console.log('🎯 INICIO - DesktopCalendar selectedDate', { year, month, day, view });
-
-            const d = new Date(year, month, day);
-            const dayOfWeek = d.getDay();
-            const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-            d.setDate(d.getDate() + diff);
-
-            console.log('✅ Lunes calculado:', {
-                fecha: d.toISOString().split('T')[0],
-                dia: d.getDate(),
-                mes: d.getMonth(),
-                año: d.getFullYear()
-            });
-
-
-            return d;
-        }
         return new Date(year, month, day);
     }, [year, month, day, view]);
     const {
         isHourBooked,
         isDisabled,
+        isCanceled,
         loading,
 
     } = useSixMonthsAppointments(fixer_id, selectedDate);
     const providerValue = useMemo(() => ({
         isHourBooked,
         isDisabled,
-        loading,
-    }), [isHourBooked, isDisabled, loading]);
+        isCanceled,
+        loading
+
+    }), [isHourBooked, isDisabled, isCanceled, loading]);
 
 
 
@@ -81,6 +66,7 @@ export default function DesktopCalendar({
         <AppointmentsProvider
             isHourBooked={providerValue.isHourBooked}
             isDisabled={providerValue.isDisabled}
+            isCanceled={providerValue.isCanceled}
             loading={providerValue.loading}
         >
             <div className="w-full flex flex-col items-center bg-white">
