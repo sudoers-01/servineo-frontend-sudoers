@@ -5,24 +5,40 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 // --- INICIO DE LA CORRECCIÓN ---
 
-// 1. Definir la interfaz para las props
-interface CardListProps {
-  requesterId: string;
+// 1. Definir un tipo para el payload de 'onCardAdded'
+interface OnCardAddedPayload {
+  payment: {
+    _id: string;
+    amount: number;
+    card: { _id: string } | null;
+  };
+  cardSaved: boolean;
+}
+
+// 2. Definir la interfaz para las props de ESTE modal (AddCardModal)
+// (Estabas usando CardListProps por error)
+interface AddCardModalProps {
+  userId: string;       // <-- Esta es la prop que causaba el error
   fixerId: string;
   jobId: string;
   amount: number;
-  onPaymentSuccess: () => void; // Una función que no devuelve nada
+  onClose: () => void;
+  onCardAdded: (payload: OnCardAddedPayload) => void; 
 }
-// --- FIN DE LA ADICIÓN ---
 
-// APLICA LA INTERFAZ A LAS PROPS DE LA FUNCIÓN
-export default function CardList({ 
-  requesterId, 
+// --- FIN DE LA CORRECCIÓN ---
+
+
+// 3. Aplicar la interfaz correcta y desestructurar las props
+export default function AddCardModal({ 
+  userId, 
   fixerId, 
   jobId, 
   amount, 
-  onPaymentSuccess 
-}: CardListProps) {
+  onClose, 
+  onCardAdded 
+}: AddCardModalProps) { // <-- Se usa AddCardModalProps
+
   const stripe = useStripe();
   const elements = useElements();
   const [saveCard, setSaveCard] = useState(false);
@@ -37,7 +53,6 @@ export default function CardList({
     setIsValidHolder(regex.test(cardHolder.trim()));
   }, [cardHolder]);
 
-  // 3. Tipar el evento 'e'
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!stripe || !elements) {
@@ -72,7 +87,7 @@ export default function CardList({
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            userId,
+            userId, // <-- Ahora 'userId' existe gracias a la desestructuración
             paymentMethodId: paymentMethod.id,
             saveCard,
             cardholderName: cardHolder,
@@ -87,7 +102,7 @@ export default function CardList({
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          requesterId: userId,
+          requesterId: userId, // <-- Aquí estabas usando 'requesterId' pero la prop es 'userId'
           fixerId,
           jobId,
           cardId: cardId || null,
@@ -118,10 +133,8 @@ export default function CardList({
         onClose();
       }, 2000);
 
-    // 4. Tipar el error 'err'
     } catch (err: unknown) { 
       console.error(err);
-      // Comprobar si 'err' es un Error para acceder a 'message'
       if (err instanceof Error) {
         setErrorMessage(err.message);
       } else {
