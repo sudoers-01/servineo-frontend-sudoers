@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../../atoms/button';
 import axios from 'axios';
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
+import { AlertPopup } from '../forms/popups/AlertPopup'; // Asegúrate de importar correctamente
 
 interface DayWithAppointments {
   date: string;
@@ -36,6 +37,7 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
   const [cancelLoading, setCancelLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false); // Nuevo estado para el popup
   
   const API_BASE = 'https://servineo-backend-lorem.onrender.com/api';
   
@@ -170,9 +172,16 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
   
   return { success: successCount, failed: failedCount };
 };
-  const handleConfirm = async () => {
+
+ const handleConfirm = async () => {
     if (cancelLoading || selectedDays.length === 0) return;
     
+    // Mostrar el popup de confirmación en lugar de proceder directamente
+    setShowConfirmPopup(true);
+  };
+
+  // Nueva función que ejecuta la cancelación real
+  const executeCancellation = async () => {
     const selectedDaysData = daysWithAppointments.filter(day => 
       selectedDays.includes(day.date)
     );
@@ -266,11 +275,14 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
   const isLoading = loading || cancelLoading;
   
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg max-w-md w-full max-h-[90vh] overflow-hidden flex flex-col">
-        <div className="bg-blue-600 h-12 px-4 flex items-center justify-between flex-shrink-0">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+        {/* Header */}
+        <div className="bg-blue-600 h-12 px-3 sm:px-4 flex items-center justify-between flex-shrink-0">
           <div className="w-6"></div>
-          <h3 className="text-white font-semibold">Cancelar Citas por Día</h3>
+          <h3 className="text-white font-semibold text-base sm:text-lg text-center">
+            Cancelar Citas por Día
+          </h3>
           <button
             onClick={onClose}
             className="text-white hover:text-gray-200 transition-colors"
@@ -282,7 +294,7 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
               viewBox="0 0 24 24"
               strokeWidth={2.5}
               stroke="currentColor"
-              className="w-6 h-6"
+              className="w-5 h-5 sm:w-6 sm:h-6"
             >
               <path
                 strokeLinecap="round"
@@ -293,26 +305,29 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
           </button>
         </div>
 
+        {/* Content */}
         <div className="flex-1 overflow-hidden flex flex-col">
+          {/* Messages */}
           {(error || successMessage) && (
-            <div className="flex-shrink-0 px-4 pt-4">
+            <div className="flex-shrink-0 px-3 sm:px-4 pt-3 sm:pt-4">
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
+                <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded text-sm sm:text-base">
                   {error}
                 </div>
               )}
               {successMessage && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded">
+                <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 sm:px-4 sm:py-3 rounded text-sm sm:text-base">
                   {successMessage}
                 </div>
               )}
             </div>
           )}
 
-          <div className="flex items-center justify-center space-x-4 py-4 flex-shrink-0">
+          {/* Month Navigation */}
+          <div className="flex items-center justify-between sm:justify-center sm:space-x-4 py-3 sm:py-4 flex-shrink-0 px-3 sm:px-0">
             <button
               onClick={() => changeMonth('prev')}
-              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 p-1"
               disabled={fetchLoading || isLoading}
             >
               <svg
@@ -331,14 +346,18 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
               </svg>
             </button>
             
-            <h2 className="text-black text-xl text-center">
+            <h2 className="text-black text-lg sm:text-xl text-center font-medium">
               {months[currentMonth]} {currentYear}
-              {fetchLoading && ' (Cargando...)'}
+              {fetchLoading && (
+                <span className="text-sm font-normal block sm:inline sm:ml-2 mt-1 sm:mt-0">
+                  (Cargando...)
+                </span>
+              )}
             </h2>
             
             <button
               onClick={() => changeMonth('next')}
-              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50"
+              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 p-1"
               disabled={fetchLoading || isLoading}
             >
               <svg
@@ -358,43 +377,44 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
             </button>
           </div>
 
-          <div className="px-6 pb-4 flex-1 overflow-y-auto">
+          {/* Days List */}
+          <div className="px-3 sm:px-6 pb-3 sm:pb-4 flex-1 overflow-y-auto">
             {fetchLoading ? (
-              <div className="text-center py-8">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-gray-600">Cargando citas...</p>
+              <div className="text-center py-6 sm:py-8">
+                <div className="inline-block animate-spin rounded-full h-7 w-7 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
+                <p className="mt-2 text-gray-600 text-sm sm:text-base">Cargando citas...</p>
               </div>
             ) : daysWithAppointments.length === 0 ? (
-              <div className="text-center py-8 text-gray-500">
+              <div className="text-center py-6 sm:py-8 text-gray-500 text-sm sm:text-base">
                 No hay citas programadas para {months[currentMonth]} {currentYear}
               </div>
             ) : (
               <>
-                <p className="text-sm text-gray-600 mb-4 text-center">
+                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 text-center">
                   Selecciona los días que deseas cancelar (máximo 5)
                 </p>
 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   {daysWithAppointments.map((day) => (
                     <div
                       key={day.date}
-                      className={`text-black flex items-center justify-between p-4 border-2 rounded-lg cursor-pointer transition-all ${
+                      className={`text-black flex items-center justify-between p-3 sm:p-4 border-2 rounded-lg cursor-pointer transition-all ${
                         selectedDays.includes(day.date)
                           ? 'bg-blue-50 border-blue-500 shadow-sm'
                           : 'border-gray-200 hover:bg-gray-50 hover:border-gray-300'
                       } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
                       onClick={() => !isLoading && toggleDaySelection(day.date)}
                     >
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-lg">
+                      <div className="flex flex-col flex-1 min-w-0">
+                        <span className="font-semibold text-base sm:text-lg truncate">
                           {day.dayName} {day.dayNumber} de {day.monthName}
                         </span>
-                        <span className="text-sm text-gray-600 mt-1">
+                        <span className="text-xs sm:text-sm text-gray-600 mt-1">
                           {day.appointmentCount} {day.appointmentCount === 1 ? 'cita programada' : 'citas programadas'}
                         </span>
                       </div>
                       
-                      <div className={`w-6 h-6 border-2 rounded flex items-center justify-center transition-colors ${
+                      <div className={`flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6 border-2 rounded flex items-center justify-center transition-colors ml-2 ${
                         selectedDays.includes(day.date) 
                           ? 'bg-blue-600 border-blue-600' 
                           : 'border-gray-400'
@@ -404,7 +424,7 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
                             xmlns="http://www.w3.org/2000/svg"
                             viewBox="0 0 20 20"
                             fill="currentColor"
-                            className="w-4 h-4 text-white"
+                            className="w-3 h-3 sm:w-4 sm:h-4 text-white"
                           >
                             <path
                               fillRule="evenodd"
@@ -418,8 +438,8 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
                   ))}
                 </div>
 
-                <div className="mt-6 p-3 bg-gray-50 rounded-lg text-left">
-                  <strong className="text-gray-800">
+                <div className="mt-4 sm:mt-6 p-2 sm:p-3 bg-gray-50 rounded-lg text-left">
+                  <strong className="text-gray-800 text-sm sm:text-base">
                     Seleccionado: {selectedDays.length}
                   </strong>
                 </div>
@@ -427,19 +447,36 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
             )}
           </div>
         </div>
-
-        <div className="border-t p-4 flex justify-end space-x-3 flex-shrink-0">
+        <div className="border-t p-3 sm:p-4 flex justify-end space-x-2 sm:space-x-3 flex-shrink-0">
           <Button
             onClick={handleConfirm}
             loading={cancelLoading}
             disabled={selectedDays.length === 0 || isLoading}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 font-medium disabled:opacity-50 min-w-32"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 font-medium disabled:opacity-50 min-w-28 sm:min-w-32 text-sm sm:text-base"
           >
-            {cancelLoading ? 'Cancelando...' : `Cancelar ${selectedDays.length} día${selectedDays.length !== 1 ? 's' : ''}`}
+            {cancelLoading ? 'Cancelando...' : `Cancelar`}
           </Button>
+
+          <AlertPopup
+        open={showConfirmPopup}
+        onClose={() => setShowConfirmPopup(false)}
+        variant="confirm"
+        title="Confirmar Cancelación"
+        message={
+          <div>
+            ¿Estás seguro de que deseas cancelar las citas de {selectedDays.length} día{selectedDays.length !== 1 ? 's' : ''} seleccionado{selectedDays.length !== 1 ? 's' : ''}?
+            <br />
+            <span className="text-red-600 font-medium">Esta acción no se puede deshacer.</span>
+          </div>
+        }
+        confirmLabel="Sí, Cancelar"
+        cancelLabel="Volver"
+        onConfirm={executeCancellation} // Se ejecuta cuando confirman
+      />
         </div>
       </div>
     </div>
+    
   );
 };
 

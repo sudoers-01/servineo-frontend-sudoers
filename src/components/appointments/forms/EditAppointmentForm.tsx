@@ -18,7 +18,7 @@ import RescheduleForm, { RescheduleFormHandle } from "./RescheduleForm";
 
 const baseSchema = z.object({
   client: z.string().regex(/^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/, "Ingrese un nombre de cliente válido").nonempty("Ingrese un nombre de cliente").max(50),
-  contact: z.string().regex(/^\+591 [67]\d{7}$/, "Ingrese un número de teléfono válido").nonempty("Ingrese un número de teléfono"),
+  contact: z.string().regex(/[67]\d{7}$/, "Ingrese un número de teléfono válido").nonempty("Ingrese un número de teléfono"),
   description: z.string().nonempty("Ingrese una descripción de trabajo").max(300),
 });
 
@@ -71,7 +71,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
   const [appointmentId, setAppointmentId] = useState<string>("");
   const [datetime, setDatetime] = useState<string>("");
   const [client, setClient] = useState<string>("");
-  const [contact, setContact] = useState<string>("+591 ");
+  const [contact, setContact] = useState<string>("");
   const [modality, setModality] = useState<"virtual" | "presencial">("virtual");
   const [description, setDescription] = useState<string>("");
   const [lat, setLat] = useState<number | undefined>(undefined);
@@ -130,7 +130,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
       setAppointmentId(appointmentData.id);
       setDatetime(appointmentData.datetime);
       setClient(appointmentData.client);
-      setContact(appointmentData.contact?.startsWith("+591") ? appointmentData.contact : `+591 ${appointmentData.contact ?? ""}`);
+      setContact(appointmentData.contact? appointmentData.contact : `${appointmentData.contact ?? ""}`);
       setModality(normalized);
       setDescription(appointmentData.description || "");
 
@@ -166,7 +166,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
     setOpen(false);
     setAppointmentId("");
     setClient("");
-    setContact("+591 ");
+    setContact("");
     setModality("virtual");
     setDescription("");
     setLat(undefined);
