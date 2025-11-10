@@ -43,7 +43,7 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
 
     cargarUltimoCambio();
   }, []);
-  
+
   const actualizarFecha = async () => {
     try {
       const resultado = await obtenerUltimoCambio();
@@ -52,6 +52,13 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
       console.error('Error al actualizar fecha:', error);
     }
   };
+
+  function limpiarCampos() {
+    setCurrentPassword('');
+    setNewPassword('');
+    setConfirmPassword('');
+  }
+
   function validarContrasena(password: string): boolean {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     return regex.test(password);
@@ -65,21 +72,45 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
     const token = localStorage.getItem("servineo_token");
     if (!token) {
       setError('No hay sesión activa. Por favor, inicia sesión.');
+      limpiarCampos();
       return;
     }
 
-    if (!currentPassword.trim()) return setError('Ingresa tu contraseña actual');
-    if (!newPassword.trim()) return setError('Ingresa una nueva contraseña');
-    if (!confirmPassword.trim()) return setError('Confirma tu nueva contraseña');
-    if (/\s/.test(newPassword) || /\s/.test(confirmPassword)) {
-      return setError('La nueva contraseña no puede contener espacios');
+    if (!currentPassword.trim()) {
+      setError('Ingresa tu contraseña actual');
+      limpiarCampos();
+      return;
     }
-    if (!validarContrasena(newPassword))
-      return setError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número');
-    if (newPassword !== confirmPassword)
-      return setError('Las contraseñas no coinciden');
-    if (currentPassword === newPassword)
-      return setError('La nueva contraseña debe ser diferente a la actual');
+    if (!newPassword.trim()) {
+      setError('Ingresa una nueva contraseña');
+      limpiarCampos();
+      return;
+    }
+    if (!confirmPassword.trim()) {
+      setError('Confirma tu nueva contraseña');
+      limpiarCampos();
+      return;
+    }
+    if (/\s/.test(newPassword) || /\s/.test(confirmPassword)) {
+      setError('La nueva contraseña no puede contener espacios');
+      limpiarCampos();
+      return;
+    }
+    if (!validarContrasena(newPassword)) {
+      setError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número');
+      limpiarCampos();
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setError('Las contraseñas no coinciden');
+      limpiarCampos();
+      return;
+    }
+    if (currentPassword === newPassword) {
+      setError('La nueva contraseña debe ser diferente a la actual');
+      limpiarCampos();
+      return;
+    }
 
     setLoading(true);
 
@@ -92,16 +123,16 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
 
       if (result.success) {
         setSuccess('Contraseña actualizada exitosamente');
-        setCurrentPassword('');
-        setNewPassword('');
-        setConfirmPassword('');
+        limpiarCampos();
         await actualizarFecha();
         setTimeout(() => setShowSuggestionModal(true), 2000);
       } else {
         setError(result.message || 'El cambio no se completó, error inesperado.');
+        limpiarCampos();
       }
     } catch (err: any) {
       console.error('Error al cambiar contraseña:', err);
+      limpiarCampos();
       if (err.message?.includes('NetworkError') || err.message?.includes('Failed to fetch')) {
         setError('El cambio no se completó, error de conexión.');
       } else if (err.response?.status >= 500) {
@@ -257,7 +288,7 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
         </div>
       </form>
 
-      {/* Modal de sugerencia solo si éxito */}
+      {/* Modal de sugerencia */}
       {showSuggestionModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
           <div className="bg-white w-[520px] rounded-lg shadow-lg overflow-hidden">
