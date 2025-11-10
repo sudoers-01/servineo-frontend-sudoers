@@ -93,7 +93,6 @@ export default function HorarioDelDia({
         isHourBooked,
         isOccupiedByOther,
         isDisabled,
-        putamadre,
         isCancelledByFixer,
         isCancelledByRequester,
         loading: contextLoading,
