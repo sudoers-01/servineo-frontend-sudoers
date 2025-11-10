@@ -7,7 +7,7 @@ import type { AppointmentFormHandle } from "../../appointments/forms/Appointment
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
 import type { EditAppointmentFormHandle, ExistingAppointment } from "../../appointments/forms/EditAppointmentForm";
 import DatePicker from "@/components/list/DatePicker/DatePicker";
-import { useAppointmentsContext } from "@/utils/contexts/DayliViewRequesterContext";
+import { useDailyAppointments } from "@/utils/contexts/DayliViewRequesterContext";
 
 const API_BASE = "https://servineo-backend-lorem.onrender.com";
 
@@ -96,7 +96,7 @@ export default function HorarioDelDia({
         isCancelledByFixer,
         isCancelledByRequester,
         loading: contextLoading,
-    } = useAppointmentsContext();
+    } = useDailyAppointments();
 
     const fechaFormateadaInicial = selectedDate ? aYMDDeCualquiera(selectedDate as any) : "";
     const [fecha, setFecha] = useState<string>(fechaFormateadaInicial);
