@@ -1,8 +1,11 @@
+// src/app/controlC/HU9/page.tsx
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import http from '../HU4/lib/http'; // 👈 usa tu cliente axios configurado
+
+const BASE_API =
+  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/controlC';
 
 export default function RecuperacionCorreoPage() {
   const [email, setEmail] = useState('');
@@ -30,26 +33,28 @@ export default function RecuperacionCorreoPage() {
     const fallback = setTimeout(() => setError('Estamos tardando más de lo normal…'), 3000);
 
     try {
-      const { data } = await http.post('/auth/forgot-password', { email });
+      const res = await fetch(`${BASE_API}/auth/forgot-password`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      const data = await res.json();
 
-      if (data.success) {
+      if (res.ok && data.success) {
+        // 🔒 Guardar correo en sessionStorage (no en URL)
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('servineo_last_email', email);
         }
-        router.push('/controlC/HU9/enlace-enviado');
-      } else {
-        if (data.message?.includes('no asociada'))
-          setError('El correo no está asociado a ninguna cuenta.');
-        else if (data.message?.includes('solicitud en curso'))
-          setError('Ya existe una solicitud en curso. Intenta nuevamente en 1 minuto.');
-        else setError(data.message || 'Error al solicitar el enlace.');
-      }
-    } catch (err: any) {
-      const status = err?.response?.status;
-      if (status === 404) setError('El correo no está asociado a ninguna cuenta.');
-      else if (status === 429)
+        router.push('/controlC/HU9/enlace-enviado'); // sin ?email=...
+      } else if (res.status === 404) {
+        setError('El correo no está asociado a ninguna cuenta.');
+      } else if (res.status === 429) {
         setError('Ya existe una solicitud en curso. Intenta nuevamente en 1 minuto.');
-      else setError(err?.response?.data?.message || 'Error de conexión con el servidor.');
+      } else {
+        setError(data.message || 'Error al solicitar el enlace.');
+      }
+    } catch {
+      setError('Error de conexión con el servidor.');
     } finally {
       clearTimeout(fallback);
       setLoading(false);
@@ -65,9 +70,7 @@ export default function RecuperacionCorreoPage() {
         </p>
 
         <form onSubmit={handleEnviar} className="flex flex-col gap-4">
-          <label htmlFor="email" className="text-sm font-medium text-gray-700">
-            Correo electrónico
-          </label>
+          <label htmlFor="email" className="text-sm font-medium text-gray-700">Correo electrónico</label>
           <input
             id="email"
             type="email"
@@ -101,10 +104,7 @@ export default function RecuperacionCorreoPage() {
         </form>
 
         <div className="mt-6 text-center text-sm text-gray-500">
-          <Link
-            href="/controlC/HU4/login"
-            className="text-servineo-400 hover:text-servineo-500 hover:underline"
-          >
+          <Link href="/controlC/HU4/login" className="text-servineo-400 hover:text-servineo-500 hover:underline">
             Volver al inicio de sesión
           </Link>
         </div>
