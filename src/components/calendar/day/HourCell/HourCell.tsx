@@ -75,7 +75,7 @@ export default function HourCell({
     }
 
 
-    const getColor = (estado: Estados) => {
+    const getColor = () => {
 
         if (isCancel !== 'notCancel') {
             return "bg-[#FF3E17]"
