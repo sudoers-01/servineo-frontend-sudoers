@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Roboto } from 'next/font/google';
 import type { RatedJob } from './utils';
+import { apiFetch } from '../../config/api'; // corrige la ruta según tu estructura
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -207,12 +208,11 @@ export default function RatedJobsPage() {
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
-  useEffect(() => {
-    fetch('http://localhost:3000/api/rated-jobs')
-      .then((res) => res.json())
-      .then((result) => setJobs(result.data))
-      .catch((err) => console.error('Error fetching jobs:', err));
-  }, []);
+ useEffect(() => {
+  apiFetch('api/rated-jobs')
+    .then((result) => setJobs(result.data || []))
+    .catch((err) => console.error('Error fetching jobs:', err));
+}, []);
 
   return (
     <main className={`min-h-screen bg-white text-gray-700 ${roboto.className}`}>
