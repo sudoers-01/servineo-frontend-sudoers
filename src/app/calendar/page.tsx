@@ -12,8 +12,10 @@ import CancelDaysAppointments from "@/components/appointments/forms/CancelDaysAp
 import useSixMonthsAppointments from '@/hooks/Appointments/useSixMonthsAppointments';
 import { AppointmentsProvider } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 
+//const fixer_id = "68ef1993be38c7f1c3c2c777";
 const fixer_id = "68e87a9cdae3b73d8040102f";
-const requester_id = "68ec99ddf39c7c140f42fcfa"
+const requester_id = "68ec99ddf39c7c140f42fcfa";
+//const requester_id = "68f3f37a44d9cf8aa91537fb";
 
 function cancelAppointments() {
     console.log("Citas canceladas");
