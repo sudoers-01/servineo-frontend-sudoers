@@ -119,10 +119,10 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
 
             const data = await res.json();
             console.log('Datos recibidos para editar cita:', data);
-            if(data.appointment[0].schedule_state === 'cancelled' || data.appointment[0].cancelled_fixer){
+            /*if(data.appointment[0].schedule_state === 'cancelled' || data.appointment[0].cancelled_fixer){
                 alert('No se puede editar una cita cancelada.');
                 return;
-            }   
+            }*/   
             if (data.appointment[0].appointment_type != "virtual") {
                 if (data.appointment[0].appointment_type != "presencial") {
                     data.appointment[0].appointment_type = "presencial"
@@ -208,7 +208,7 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                 <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden="true" />
                 <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="edit-appointment-title"
                     className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto" style={{ maxHeight: "90vh" }}>
-                    <div className="p-4 sm:p-6">
+                    <div className="p-4 sm:p-6 text-black">
                         <EditAppointmentHeader 
                             onClose={handleClose} 
                             title="Detalles de la Cita"
@@ -252,7 +252,6 @@ const EditAppointmentForm = forwardRef<EditAppointmentFormHandle>((_props, ref) 
                                 readonly={true}
                             />
                         )}
-
                         <LocationModal
                             open={showLocationModal}
                             onClose={() => setShowLocationModal(false)}
