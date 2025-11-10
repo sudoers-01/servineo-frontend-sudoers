@@ -116,7 +116,7 @@ function GenericDropdown({
           ref={btnRef}
           type='button'
           onClick={toggle}
-          className='px-3 py-2 rounded-lg border bg-white shadow-sm text-sm flex items-center gap-2 border-gray-200 ml-6'
+          className='px-3 py-2 rounded-lg border bg-white shadow-sm text-sm flex items-center gap-2 border-gray-200'
           aria-haspopup='menu'
           aria-expanded={open}
         >
@@ -219,8 +219,7 @@ export default function RatedJobsPage() {
       <div className='max-w-3xl mx-auto p-6 space-y-6'>
         <header className='flex flex-col items-center'>
           <h1 className='text-2xl font-semibold tracking-tight text-center'>Rated Jobs List</h1>
-
-          <div className='mt-3 flex items-center gap-35 w-full justify-center justify-center'>
+          <div className='mt-3 flex items-center gap-4 w-full justify-end'>
             <div className='flex items-center mr-2'>
               {loading && (
                 <div className='flex items-center gap-2'>
