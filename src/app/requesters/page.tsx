@@ -19,6 +19,14 @@ export default function RequestersLanding() {
             View Profile
           </Link>
         </div>
+        <div>
+          <Link
+            href='/view-rate-jobs'
+            className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition inline-block'
+          >
+            View Rated Jobs
+          </Link>
+        </div>
       </div>
     </main>
   );
