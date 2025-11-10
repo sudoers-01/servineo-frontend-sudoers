@@ -1,0 +1,80 @@
+"use client";
+
+import { useState } from "react";
+import { FcGoogle } from "react-icons/fc";
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+interface VincularGoogleProps {
+  onLinked?: () => void;
+  tokenUsuario?: string;
+}
+
+export default function VincularGoogle({ onLinked, tokenUsuario }: VincularGoogleProps) {
+  const [loading, setLoading] = useState(false);
+
+  const handleLoginSuccess = async (credentialResponse: CredentialResponse) => {
+    const tokenGoogle = credentialResponse?.credential;
+    if (!tokenGoogle) return console.error("Token de Google vacío");
+
+    setLoading(true);
+    try {
+      const res = await fetch("https://backdos.vercel.app/api/controlC/cliente/link-google", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${tokenUsuario}`,
+        },
+        body: JSON.stringify({ tokenGoogle }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        toast.success("Cuenta de Google vinculada correctamente");
+        onLinked?.();
+      } else {
+        toast.error(data.message || "Error al vincular Google");
+      }
+    } catch (err) {
+      console.error("Error vinculando Google:", err);
+      toast.error("Error al vincular con Google");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition">
+      <div className="flex items-center gap-3">
+        <FcGoogle size={30} />
+        <div className="flex flex-col">
+          <span className="text-sm font-semibold text-gray-800">Google</span>
+          <span className="text-xs text-gray-500">Vincula tu cuenta de Google</span>
+        </div>
+      </div>
+
+      <div className="relative">
+        <button
+          disabled={loading}
+          className="flex items-center justify-center gap-2 bg-blue-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-700 transition disabled:opacity-60"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Vinculando...
+            </>
+          ) : (
+            "Vincular"
+          )}
+        </button>
+
+        <div className="absolute inset-0 opacity-0 cursor-pointer">
+          <GoogleLogin
+            onSuccess={handleLoginSuccess}
+            onError={() => toast.error("Error al iniciar sesión con Google")}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

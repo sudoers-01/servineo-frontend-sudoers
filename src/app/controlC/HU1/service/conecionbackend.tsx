@@ -101,3 +101,47 @@ export async function enviarUbicacion(
     throw error;
     }
 }
+
+
+export interface FotoResponse {
+  success: boolean;
+  message?: string;
+  user?: {
+    name: string;
+    email: string;
+    picture?: string;
+  };
+}
+
+export async function enviarFotoPerfil(usuarioId: string, archivo: File): Promise<FotoResponse> {
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const base64Foto = await fileToBase64(archivo);
+  const url = `${BASE_URL}/fotoPerfil/usuarios/foto`;
+
+  const res = await fetch(url, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ usuarioId, fotoPerfil: base64Foto }),
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    return { success: false, message: data.message || "Error al subir la foto" };
+  }
+
+  // 👇 Guarda el usuario actualizado en localStorage, si lo deseas
+  if (data.user) {
+    localStorage.setItem("servineo_user", JSON.stringify(data.user));
+  }
+
+  return data;
+}

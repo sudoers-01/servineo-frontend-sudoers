@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { verificarSesionBackend, User } from "../services/conexionBackend";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: User | null;
@@ -15,19 +16,20 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
-    // Try to restore user optimistically from localStorage so UI updates immediately
     try {
-      const userRaw = localStorage.getItem("servineo_user");
-      
+      const storedUser = localStorage.getItem("servineo_user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
     } catch (e) {
-      console.error("Error parseando servineo_user desde localStorage:", e);
+      console.error("Error leyendo usuario:", e);
       localStorage.removeItem("servineo_user");
     }
 
     const token = localStorage.getItem("servineo_token");
-
     if (!token) {
       setLoading(false);
       return;
@@ -35,8 +37,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     verificarSesionBackend(token)
       .then((data) => {
-        if (data.valid) {
-          if (data.user) setUser(data.user);
+        if (data.valid && data.user) {
+          setUser((prev) => {
+            const newUser = { ...prev, ...data.user };
+            localStorage.setItem("servineo_user", JSON.stringify(newUser));
+            return newUser;
+          });
         } else {
           localStorage.removeItem("servineo_token");
           localStorage.removeItem("servineo_user");
@@ -51,11 +57,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setLoading(false));
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      localStorage.setItem("servineo_user", JSON.stringify(user));
+    }
+  }, [user]);
+
   const logout = () => {
     localStorage.removeItem("servineo_token");
     localStorage.removeItem("servineo_user");
     setUser(null);
-    window.location.href = "/";
+    router.push("/");
   };
 
   return (

@@ -1,6 +1,8 @@
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''; 
 
 export interface User {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  id: any
   email: string;
   name?: string;
   picture?: string;
