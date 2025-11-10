@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '../../HU3/hooks/usoAutentificacion';
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Link from 'next/link';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -118,6 +119,16 @@ export default function LoginPage() {
                 {mostrarPass ? <EyeOff size={20} /> : <Eye size={20} />}
               </button>
             </div>
+          </div>
+
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-500"></div>
+              <Link
+                href="/controlC/HU9"
+                className="text-servineo-400 hover:text-servineo-500 font-medium hover:underline transition text-sm"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
           </div>
 
           {/* Botón ingresar */}
