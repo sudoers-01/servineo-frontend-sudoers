@@ -39,9 +39,9 @@ export default function HourCell({
 
     const isBookedFixer = isHourBookedFixer(date, hour);
     const isBooked = isHourBooked(date, hour, requester_id);
-    console.log(isBooked === 'other' ? date : '');
     const isEnable = isEnabled(date, hour);
-    const isCancel = isCanceled(date, hour, fixer_id, requester_id);
+    const isCancel = isCanceled(date, hour, requester_id);
+
 
     const todayColor = () => {
         if (isToday && view === 'week') return "bg-blue-300";
@@ -54,9 +54,16 @@ export default function HourCell({
 
 
     const getColor = () => {
-        if (isCancel) {
+        if (isCancel === 'other') {
+            console.log(isCancel);
+
+            return "bg-[#D624FF]";
+        }
+        if (isCancel !== 'notCancel') {
             return "bg-[#FF3E17]"
         }
+
+
         if (isBooked !== 'notBooked') {
             return "bg-[#FFC857]";
 
@@ -76,13 +83,16 @@ export default function HourCell({
     }
 
     const getText = () => {
-        if (isCancel) {
-            return "Cancelado"
+        if (isCancel === 'fixer') {
+            return "Cancelado por fixer"
+        } else if (isCancel === 'requester') {
+            return "Cancelado por requester";
         }
 
         if (isFixer) {
             if (isBookedFixer) return "KKVale ";
         } else {
+            if (isCancel === 'other') return "pupupu";
             if (isBooked === 'other') {
                 return "No disponible";
 
@@ -96,8 +106,8 @@ export default function HourCell({
             if (isRequester)
                 return "Disponible"
         } else {
-
-            return "Inhabilitado";
+            if (isCancel)
+                return "Inhabilitado";
         }
 
         return "";
