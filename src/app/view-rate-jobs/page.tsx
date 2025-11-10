@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Roboto } from 'next/font/google';
 import type { RatedJob } from './utils';
-import { mockRatedJobs } from './utils';
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -184,7 +183,7 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
                 </p>
               </div>
 
-              <StarRating value={job.rating} />
+              <StarRating value={job.rating ?? 0} />
             </li>
           ))}
         </ul>
@@ -203,19 +202,17 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
 }
 
 export default function RatedJobsPage() {
-  const [jobs] = useState<RatedJob[]>(mockRatedJobs);
+  const [jobs, setJobs] = useState<RatedJob[]>([]);
 
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    if (dropdownOpen) {
-      setLoading(true);
-      const t = setTimeout(() => setLoading(false), 600);
-      return () => clearTimeout(t);
-    }
-    setLoading(false);
-  }, [dropdownOpen]);
+    fetch('http://localhost:3000/api/rated-jobs')
+      .then((res) => res.json())
+      .then((result) => setJobs(result.data))
+      .catch((err) => console.error('Error fetching jobs:', err));
+  }, []);
 
   return (
     <main className={`min-h-screen bg-white text-gray-700 ${roboto.className}`}>
@@ -259,6 +256,14 @@ export default function RatedJobsPage() {
               options={[
                 { key: 'descending', label: 'Descendente' },
                 { key: 'ascending', label: 'Ascendente' },
+              ]}
+            />
+
+            <GenericDropdown
+              label='Filtrar por fecha'
+              options={[
+                { key: 'recent', label: 'Mas reciente' },
+                { key: 'oldest', label: 'Mas antiguo' },
               ]}
             />
           </div>
