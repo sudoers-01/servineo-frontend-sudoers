@@ -17,7 +17,10 @@ interface HourCellProps {
     view: 'day' | 'week';
 }
 
-type Estados = 'disponible' | 'noDisponible' | 'reservado' | 'inhabilitado' | 'ocupado' | 'reservadoOtro' | 'cancelFixer' | 'cancelRequester' | 'cancelOtherFixer' | 'cancelOtherRequester';
+/*type Estados =
+    'disponible' | 'reservado' | 'inhabilitado'
+    | 'ocupado' | 'reservadoOtro' | 'cancelFixer' | 'cancelRequester'
+    | 'cancelOtherFixer' | 'cancelOtherRequester';*/
 const today = new Date();
 
 export default function HourCell({
@@ -50,18 +53,11 @@ export default function HourCell({
     }
 
 
-    //type Estados = 'disponible' | 'noDisponible' | 'reservado' | 'inhabilitado' | 'ocupado';
-    // self 
-    // other - otro erquester
-    // notBooked  => no tiene nada a aesa hora 
     const getEstado = () => {
-        if (isBooked) return 'reservado';
-        if (isBookedFixer) return 'reservadoOtro';
-        if (isEnable) {
-            return 'disponible';
-        } else {
-            return 'inhabilitado';
-        }
+        if (isBooked === 'self') return 'reservado';
+        if (isBooked === 'other') return 'reservadoOtro';
+        if (isBookedFixer) return 'ocupado';
+        if (!isEnable) return 'inhabilitado';
 
         if (isCancel === 'fixer') {
             return 'cancelFixer';
@@ -72,70 +68,62 @@ export default function HourCell({
         } else if (isCancel === 'otherRequester')
             return 'cancelOtherRequester';
 
+
+        return 'disponible'
+
     }
 
+    const estado = getEstado();
+    const getColor = () => {
 
-    const getColor = (estado: Estados) => {
+        if (estado === 'disponible')
+            return "bg-[#16A34A]"
 
-        if (isCancel !== 'notCancel') {
+        if (estado === 'cancelOtherFixer' || estado === 'cancelFixer' || estado === 'cancelOtherRequester' || estado === 'cancelRequester')
             return "bg-[#FF3E17]"
-        }
 
-
-        if (isBooked !== 'notBooked') {
+        if (estado === 'reservado' || estado === 'ocupado' || estado === 'reservadoOtro')
             return "bg-[#FFC857]";
 
-        }
-
-        if (isEnable) {
-            if (isRequester) {
-
-                return "bg-[#16A34A]"
-            } else {
-                return "";
-            }
-
-        }
-
-        return "bg-[#64748B]";
+        if (estado === 'inhabilitado')
+            return "bg-[#64748B]";
     }
 
     const getText = () => {
-
-
-
-
         if (isFixer) {
-            if (isCancel === 'otherRequester' || isCancel === 'requester') {
-                return "Cancelado por requester";
-            } else if (isCancel === 'otherFixer' || isCancel === 'fixer') {
-                return "Cancelado por fixer"
-            }
+            if (estado === 'disponible')
+                return 'Disponible';
+            if (estado === 'cancelOtherFixer' || estado === 'cancelFixer')
+                return "Cancelado por Fixer";
 
-            if (isBookedFixer) return "Reservado";
+            if (estado === 'cancelOtherRequester' || estado === 'cancelRequester')
+                return "Cancelado por requester"
 
-        } else { ///isRequester
-            if (isCancel === 'fixer') {
-                return "Cancelado por fixer"
-            } else if (isCancel === 'requester') {
-                return "Cancelado por requester";
-            } else if (isCancel === 'otherRequester') return "Disponible";
-            if (isBooked === 'other') {
-                return "No disponible";
+            if (estado === 'reservado' || estado === 'ocupado' || estado === 'reservadoOtro')
+                return "Reservado";
 
-            }
-            if (isBooked === 'self') {
-                return 'Reservado';
-            }
-        }
+            if (estado === 'inhabilitado')
+                return "Inhabilitado";
 
-        if (isEnable) {
-            if (isRequester)
-                return "Disponible"
         } else {
-            return "Inhabilitado";
-        }
+            if (estado === 'disponible' || estado === 'cancelOtherRequester')
+                return "Disponible";
+            if (estado === 'cancelFixer')
+                return "Cancelado por Fixer";
+            if (estado === 'cancelRequester')
+                return "Cancelado por Requester";
 
+            if (estado === 'reservado')
+                return "Reservado";
+
+
+            if (estado === 'ocupado' || estado === 'reservadoOtro')
+                return "Ocupado";
+            if (estado === 'inhabilitado' || estado === 'cancelOtherFixer')
+                return 'Inhabilitado';
+
+
+        }
         return "";
     }
 
@@ -221,10 +209,19 @@ export default function HourCell({
         }
     }
 
+    const showHourCell = () => {
+        if (isPast) return false;
+        if (isFixer) {
+            if (estado === 'disponible') return false;
+
+        }
+        return true;
+    }
+
     return (
         <div className={`flex items-center ${todayColor()} h-15 border-b border-r border-black`}>
             <div className="w-full">
-                {!isPast && (
+                {showHourCell() && (
                     <div
                         className={`mx-3 py-3 rounded-md text-center text-white ${getColor()} cursor-pointer`}
                         onClick={handleClick}
