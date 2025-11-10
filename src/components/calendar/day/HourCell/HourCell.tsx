@@ -193,20 +193,20 @@ export default function HourCell({
 
     const handleClick = () => {
         if (isRequester) {
-            if (isEnable) {
-                if (isBooked === 'self' || isBooked === 'other') {
-                    cargarYEditarCita();
-                } else {
-                    const localISOString = createISOWithOffset(date, hour);
-                    refFormularioCita.current?.open(localISOString);
-                }
-            } else {
-                //                console.log("no putito");
-            }
+            if (estado === 'disponible' || estado === 'cancelOtherRequester') {
+                const localISOString = createISOWithOffset(date, hour);
+                refFormularioCita.current?.open(localISOString);
 
-        } else if (isFixer) {
-            handleOpenForm();
+            } else if (estado === 'reservado') {
+                cargarYEditarCita();
+
+            }
+        } else {
+            if (estado === 'ocupado' || estado == 'reservado' || estado === 'reservadoOtro') {
+                handleOpenForm();
+            }
         }
+
     }
 
     const showHourCell = () => {
