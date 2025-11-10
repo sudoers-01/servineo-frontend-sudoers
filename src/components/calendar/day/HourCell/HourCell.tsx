@@ -31,46 +31,76 @@ export default function HourCell({
     const formRef = useRef<DetailsFormHandle>(null);
     const refFormularioEditarCita = useRef<EditAppointmentFormHandle | null>(null);
 
-    const { isHourBooked, isDisabled, isCanceled } = useAppointmentsContext();
+    const { isHourBookedFixer, isHourBooked, isEnabled, isCanceled } = useAppointmentsContext();
 
     const { isFixer, isRequester, requester_id, fixer_id } = useUserRole();
 
-    const isBooked = isHourBooked(date, hour);
-    const isDisable = isDisabled(date, hour);
-    const isCancel = isCanceled(date, hour, requester_id);
+
+
+    const isBookedFixer = isHourBookedFixer(date, hour);
+    const isBooked = isHourBooked(date, hour, requester_id);
+    console.log(isBooked === 'other' ? date : '');
+    const isEnable = isEnabled(date, hour);
+    const isCancel = isCanceled(date, hour, fixer_id, requester_id);
 
     const todayColor = () => {
         if (isToday && view === 'week') return "bg-blue-300";
         if (isToday && view === 'day' && today.getHours() === hour) return "bg-blue-300";
         else return "bg-white";
     }
+    // self 
+    // other - otro erquester
+    // notBooked  => no tiene nada a aesa hora 
+
 
     const getColor = () => {
         if (isCancel) {
             return "bg-[#FF3E17]"
         }
-        if (isDisable) {
-            return "bg-[#16A34A]"
+        if (isBooked !== 'notBooked') {
+            return "bg-[#FFC857]";
+
         }
-        if (isBooked) return "bg-[#FFC857]";
-        else if (isRequester) {
-            return "bg-[#64748B]"
+
+        if (isEnable) {
+            if (isRequester) {
+
+                return "bg-[#16A34A]"
+            } else {
+                return "";
+            }
+
         }
-        return "bg-[#64748B]"
+
+        return "bg-[#64748B]";
     }
 
     const getText = () => {
-        if (isCancel) return "kkVale";
-        if (isDisable)
-            return "Disponible";
+        if (isCancel) {
+            return "Cancelado"
+        }
 
-
-        if (isBooked) return "Ocupado";
         if (isFixer) {
-            return ''
-        } else if (isRequester) {
+            if (isBookedFixer) return "KKVale ";
+        } else {
+            if (isBooked === 'other') {
+                return "No disponible";
+
+            }
+            if (isBooked === 'self') {
+                return 'Reservado';
+            }
+        }
+
+        if (isEnable) {
+            if (isRequester)
+                return "Disponible"
+        } else {
+
             return "Inhabilitado";
         }
+
+        return "";
     }
 
     const createISOWithOffset = (date: Date, hour: number) => {
@@ -139,12 +169,17 @@ export default function HourCell({
 
     const handleClick = () => {
         if (isRequester) {
-            if (isBooked) {
-                cargarYEditarCita();
+            if (isEnable) {
+                if (isBooked === 'self' || isBooked === 'other') {
+                    cargarYEditarCita();
+                } else {
+                    const localISOString = createISOWithOffset(date, hour);
+                    refFormularioCita.current?.open(localISOString);
+                }
             } else {
-                const localISOString = createISOWithOffset(date, hour);
-                refFormularioCita.current?.open(localISOString);
+                //                console.log("no putito");
             }
+
         } else if (isFixer) {
             handleOpenForm();
         }

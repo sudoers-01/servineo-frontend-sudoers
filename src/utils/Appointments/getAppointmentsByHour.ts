@@ -1,54 +1,43 @@
+
 import axios from 'axios';
 
 export interface Appointment {
-    cancelled_fixer: boolean;
     _id: string;
     id_fixer: string;
     id_requester: string;
-    selected_date: string;
     current_requester_name: string;
     appointment_type: string;
     appointment_description: string;
     link_id: string;
     current_requester_phone: string;
-    starting_time: string;
-    finishing_time: string;
-    schedule_state: string;
     display_name_location: string;
-    lat: string;
-    lon: string;
-    active: boolean;
-    reprogram_reason: string;
-    createdAt: string;
-    updatedAt: string;
-    __v: number;
+    latitude: string;
+    longitude: string;
 }
-
-
-
 
 interface ApiResponse {
-    success: boolean;
     message: string;
-    accessed_appointments: Appointment[];
+    data: Appointment[];
 }
 
-export async function getAppointmentsByDate(fixerId: string, date: string): Promise<Appointment[]> {
+export async function getSixMonthAppointments(fixerId: string, requesterId: string, date: string, hour: number): Promise<Appointment[]> {
     try {
 
         const response = await axios.get<ApiResponse>(
-            'https://servineo-backend-lorem.onrender.com/api/crud_read/appointments/get_appointments_date',
+            'https://servineo-backend-lorem.onrender.com/api/crud_read/appointments/get_modal_form?fixer_id=68e87a9cdae3b73d8040102f&requester_id=68ec99ddf39c7c140f42fcfa&appointment_date=2025-11-16T00:00:00.000Z&start_hour=9',
             {
                 params: {
-                    id_fixer: fixerId,
-                    selected_date: date
+                    fixer_id: fixerId,
+                    requester_id: requesterId,
+                    date: date,
+                    hour: hour
                 }
             }
         );
 
 
-        if (response.data.success && response.data.accessed_appointments) {
-            return response.data.accessed_appointments;
+        if (response.data.message && response.data.data) {
+            return response.data.data;
         } else {
             console.log('No se encontraron citas ');
             return [];

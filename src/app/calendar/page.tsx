@@ -64,19 +64,21 @@ export default function CalendarPage() {
     }
 
     const {
+        isHourBookedFixer,
         isHourBooked,
-        isDisabled,
+        isEnabled,
         isCanceled,
         loading,
     } = useSixMonthsAppointments(fixer_id, today);
     
     const providerValue = useMemo(() => ({
+        isHourBookedFixer,
         isHourBooked,
-        isDisabled,
+        isEnabled,
         isCanceled,
         loading
-    }), [isHourBooked, isDisabled, isCanceled, loading]);
-    
+
+    }), [isHourBooked, isEnabled, isCanceled, loading]);
     return (
         <UserRoleProvider
             role={userRole}
@@ -84,8 +86,9 @@ export default function CalendarPage() {
             requester_id={requester_id}
         >
             <AppointmentsProvider
+                isHourBookedFixer={providerValue.isHourBookedFixer}
                 isHourBooked={providerValue.isHourBooked}
-                isDisabled={providerValue.isDisabled}
+                isEnabled={providerValue.isEnabled}
                 isCanceled={providerValue.isCanceled}
                 loading={providerValue.loading}
             >
