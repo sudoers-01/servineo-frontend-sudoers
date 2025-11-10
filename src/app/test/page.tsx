@@ -34,7 +34,6 @@ export default function CalendarPage() {
     }, []); // Se ejecuta una vez al montar el componente
     const { isHourBooked } = useSixMonthsAppointments(fixer_id, todi);
 
-    console.log(isHourBooked(todi, 8));
     return (
         <div className="text-black" >
             <h2>🧪 Test de getSixMonthAppointments</h2>
