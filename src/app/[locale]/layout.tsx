@@ -8,6 +8,7 @@ import TopMenu from '@/Components/Navigation/TopMenu';
 import { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import {NextIntlClientProvider} from 'next-intl';
+import { TranslationButton } from '@/Components/Shared/TranslationButton';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -49,6 +50,7 @@ export default async function RootLayout({
             <TopMenu/>
           </div>
           {children}
+          <div className='text-black fixed bottom-7 right-7'><TranslationButton/></div>
         </ReduxProvider>
         </NextIntlClientProvider>
       </body>
