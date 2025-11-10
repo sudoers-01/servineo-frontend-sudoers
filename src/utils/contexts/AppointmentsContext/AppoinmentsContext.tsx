@@ -6,7 +6,7 @@ interface AppointmentsContextType {
     isHourBookedFixer: (date: Date, hour: number) => boolean;
     isHourBooked: (date: Date, hour: number, requester_id: string) => 'self' | 'other' | 'notBooked';
     isEnabled: (date: Date, hour: number) => boolean;
-    isCanceled: (date: Date, hour: number, requester_id: string) => 'fixer' | 'requester' | 'other' | 'notCancel';
+    isCanceled: (date: Date, hour: number, requester_id: string) => 'fixer' | 'requester' | 'otherFixer' | 'otherRequester' | 'notCancel';
     loading: boolean;
 
 }
@@ -29,7 +29,7 @@ interface AppointmentsProviderProps {
     isHourBookedFixer: (date: Date, hour: number) => boolean;
     isHourBooked: (date: Date, hour: number, requester_id: string) => 'self' | 'other' | 'notBooked';
     isEnabled: (date: Date, hour: number) => boolean;
-    isCanceled: (date: Date, hour: number, requester_id: string) => 'fixer' | 'requester' | 'other' | 'notCancel';
+    isCanceled: (date: Date, hour: number, requester_id: string) => 'fixer' | 'requester' | 'otherFixer' | 'otherRequester' | 'notCancel';
     loading: boolean;
 
 }

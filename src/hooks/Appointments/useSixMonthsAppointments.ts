@@ -87,12 +87,13 @@ export default function useSixMonthsAppointments(fixer_id: string, date: Date) {
         return appointments.some((apt: Appointment) => {
             const aptDate = new Date(apt.starting_time);
             const aptState = apt.schedule_state;
+            const aptCanceledFixer = apt.cancelled_fixer;
             return (
                 aptDate.getFullYear() === day.getFullYear() &&
                 aptDate.getMonth() === day.getMonth() &&
                 aptDate.getDate() === day.getDate() &&
                 aptDate.getUTCHours() === hour &&
-                aptState === 'booked'
+                aptState === 'booked' && aptCanceledFixer === false
             );
         });
     }, [appointments]);
@@ -102,13 +103,14 @@ export default function useSixMonthsAppointments(fixer_id: string, date: Date) {
     const isHourBooked = useCallback((day: Date, hour: number, requester_id: string): 'self' | 'other' | 'notBooked' => {
         const appointment = appointments.find((apt: Appointment) => {
             const aptDate = new Date(apt.starting_time);
+            const aptCanceledFixer = apt.cancelled_fixer;
             const aptState = apt.schedule_state;
             return (
                 aptDate.getFullYear() === day.getFullYear() &&
                 aptDate.getMonth() === day.getMonth() &&
                 aptDate.getDate() === day.getDate() &&
                 aptDate.getUTCHours() === hour &&
-                aptState === 'booked'
+                aptState === 'booked' && aptCanceledFixer === false
             );
         });
 
@@ -133,7 +135,7 @@ export default function useSixMonthsAppointments(fixer_id: string, date: Date) {
     }, [appointmentsDis]);
 
 
-    const isCanceled = useCallback((day: Date, hour: number, requester_id: string): 'fixer' | 'requester' | 'other' | 'notCancel' => {
+    const isCanceled = useCallback((day: Date, hour: number, requester_id: string): 'fixer' | 'requester' | 'otherFixer' | 'otherRequester' | 'notCancel' => {
         const appointment = appointments.find((apt: Appointment) => {
             const aptDate = new Date(apt.starting_time);
             const aptCancel = apt.schedule_state;
@@ -141,21 +143,33 @@ export default function useSixMonthsAppointments(fixer_id: string, date: Date) {
                 aptDate.getFullYear() === day.getFullYear() &&
                 aptDate.getMonth() === day.getMonth() &&
                 aptDate.getDate() === day.getDate() &&
-                aptDate.getUTCHours() === hour && aptCancel === 'cancelled'
+                aptDate.getUTCHours() === hour
             );
         });
-
         if (!appointment) return 'notCancel';
-        if (appointment.id_requester === requester_id) {
 
+        if (appointment.id_requester === requester_id) {
             if (appointment.cancelled_fixer) {
-                return 'fixer';
+                return 'fixer'
             } else {
-                return 'requester';
+                if (appointment.schedule_state === 'cancelled') {
+                    return 'requester';
+                } else {
+                    return 'notCancel';
+                }
             }
         } else {
-            return 'other';
+            if (appointment.cancelled_fixer) {
+                return 'otherFixer'
+            } else {
+                if (appointment.schedule_state === 'cancelled') {
+                    return 'otherRequester';
+                } else {
+                    return 'notCancel';
+                }
+            }
         }
+
     }, [appointments]);
 
 
