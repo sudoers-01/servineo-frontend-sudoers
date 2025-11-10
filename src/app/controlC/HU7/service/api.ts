@@ -1,4 +1,4 @@
-const BASE_URL = 'https://backdos.vercel.app';
+const BASE_URL = 'http://localhost:8000';
 const CLIENT_BASE = '/api/controlC/cliente';
 
 export interface AuthProvider {
