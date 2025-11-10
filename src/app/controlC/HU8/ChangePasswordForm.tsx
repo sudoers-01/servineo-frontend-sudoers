@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { cambiarContrasena } from './service/editPassword';
 import { cerrarTodasSesiones } from './service/logoutService';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { obtenerUltimoCambio } from './service/getLastChange';
 
 type Props = {
   onCancel?: () => void;
@@ -23,7 +24,34 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
   const [success, setSuccess] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [showSuggestionModal, setShowSuggestionModal] = useState(false);
+  const [ultimaModificacion, setUltimaModificacion] = useState<string>('');
+  const [cargandoFecha, setCargandoFecha] = useState(true);
 
+  useEffect(() => {
+    const cargarUltimoCambio = async () => {
+      try {
+        setCargandoFecha(true);
+        const resultado = await obtenerUltimoCambio();
+        setUltimaModificacion(resultado.fechaFormateada);
+      } catch (error) {
+        console.error('Error al cargar último cambio:', error);
+        setUltimaModificacion('No disponible');
+      } finally {
+        setCargandoFecha(false);
+      }
+    };
+
+    cargarUltimoCambio();
+  }, []);
+  
+  const actualizarFecha = async () => {
+    try {
+      const resultado = await obtenerUltimoCambio();
+      setUltimaModificacion(resultado.fechaFormateada);
+    } catch (error) {
+      console.error('Error al actualizar fecha:', error);
+    }
+  };
   function validarContrasena(password: string): boolean {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
     return regex.test(password);
@@ -62,6 +90,7 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
         setCurrentPassword('');
         setNewPassword('');
         setConfirmPassword('');
+        await actualizarFecha();
         setTimeout(() => setShowSuggestionModal(true), 2000);
       } else {
         setError(result.message || 'El cambio no se completó, error inesperado.');
@@ -180,6 +209,22 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
             {success}
           </div>
         )}
+
+        <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-gray-700">
+              Última modificación:
+            </span>
+            {cargandoFecha ? (
+              <div className="flex items-center gap-1">
+                <Loader2 size={14} className="animate-spin" />
+                <span className="text-sm text-gray-500">Cargando...</span>
+              </div>
+            ) : (
+              <span className="text-sm text-gray-600">{ultimaModificacion}</span>
+            )}
+          </div>
+        </div>
 
         {/* Botones */}
         <div className="pt-4 flex justify-end gap-3">
