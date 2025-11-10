@@ -5,6 +5,7 @@ import AppointmentForm from "../../appointments/forms/AppointmentForm";
 import type { AppointmentFormHandle } from "../../appointments/forms/AppointmentForm";
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
 import type { EditAppointmentFormHandle, ExistingAppointment } from "../../appointments/forms/EditAppointmentForm";
+import AppointmentDetailsForm, { EditAppointmentFormHandle as DetailsFormHandle } from "@/components/appointments/forms/AppointmentDetails";
 import DatePicker from "@/components/list/DatePicker/DatePicker";
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
 import { useAppointmentsContext } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
@@ -113,7 +114,7 @@ export default function HorarioDelDia({
 
     const refFormularioCita = useRef<AppointmentFormHandle | null>(null);
     const refFormularioEditarCita = useRef<EditAppointmentFormHandle | null>(null);
-
+    const formRef = useRef<DetailsFormHandle>(null);
     const handleDatePickerChange = (newDate: Date) => {
         const newDateStr = aYMDDeCualquiera(newDate);
         setFecha(newDateStr);
@@ -257,6 +258,17 @@ export default function HorarioDelDia({
         }
     }
 
+    async function cargarDetallesCita(item: HorarioItem) {
+        if (formRef.current) {
+            const [y,m,d]=fecha.split("-").map(Number);
+            const [hh]=item.Hora_Inicio.split(":");
+            const horaLocal=parseInt(hh,10);
+            
+            const now = new Date(y,m-1,d,horaLocal,0,0,0);
+            formRef.current.open(now);
+        }
+    }
+
     const etiquetaPorEstado = (
         estado: Estado
     ): { text: string; icon: Icono; textCls: string; rowCls: string } => {
@@ -316,8 +328,10 @@ export default function HorarioDelDia({
             return;
         }
 
-        if (item.estado_Horario === "reservado") {
+        if (item.estado_Horario === "reservado" && isRequester) {
             cargarYEditarCita(item);
+        }else if(item.estado_Horario === "reservado" && isFixer){
+            cargarDetallesCita(item);
         }
     };
 
@@ -412,6 +426,7 @@ export default function HorarioDelDia({
                 <>
                     <AppointmentForm ref={refFormularioCita} fixerId={fixerId} requesterId={requesterId} />
                     <EditAppointmentForm ref={refFormularioEditarCita} />
+                    <AppointmentDetailsForm ref={formRef} />
                 </>
             )}
         </div>
