@@ -11,57 +11,162 @@ import {
   JobRequestModalProps,
 } from '../../../types/job-request';
 
+type TimeInput = { $date: string } | string;
+
 const JobRequestModal: React.FC<JobRequestModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
   fixerId,
+  appointmentData,
 }) => {
   const [initialLocation, setInitialLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [token, setToken] = useState<string | null>(null);
+  const [formData, setFormData] = useState<JobRequestData>({
+    jobMotive: '',
+    jobDescription: '',
+    locationOption: 'keep',
+    startTime: '',
+    endTime: '',
+    suggestedRate: '',
+  });
+
+  const [formInstanceKey, setFormInstanceKey] = useState(0);
+
+  const extractTime = (timeInput: TimeInput): string => {
+    const dateString = typeof timeInput === 'object' ? timeInput?.$date : timeInput;
+
+    if (!dateString) return '';
+
+    try {
+      const date = new Date(dateString);
+      if (Number.isNaN(date.getTime())) return '';
+
+      return date.toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+      });
+    } catch {
+      return '';
+    }
+  };
+
+  const getToken = (): string | null => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('auth-token');
+    }
+    return null;
+  };
+
+  const getUserIdFromToken = (): string | null => {
+    const token = getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload.userId || payload.id || payload.sub;
+    } catch {
+      return null;
+    }
+  };
 
   useEffect(() => {
     if (isOpen) {
-      const authToken = localStorage.getItem('auth-token');
-      setToken(authToken);
+      setFormInstanceKey((prev) => prev + 1);
+    }
+  }, [isOpen, appointmentData?._id]);
 
-      const fetchUserLocation = async () => {
-        if (!authToken) {
-          setError('');
-          setLoading(false);
-          return;
-        }
-
+  useEffect(() => {
+    if (isOpen) {
+      const initializeModal = async () => {
         setLoading(true);
         setError('');
+
         try {
-          const userLocation: UserLocation = await getUserLocation(authToken);
+          const authToken = getToken();
 
-          const locationForMap: Location = {
-            lat: parseFloat(userLocation.lat),
-            lng: parseFloat(userLocation.lng),
-          };
+          if (!appointmentData) {
+            if (authToken) {
+              const userLocation: UserLocation = await getUserLocation(authToken);
+              const locationForMap: Location = {
+                lat: parseFloat(userLocation.lat),
+                lng: parseFloat(userLocation.lng),
+              };
+              setInitialLocation(locationForMap);
+            }
 
-          setInitialLocation(locationForMap);
+            setFormData({
+              jobMotive: '',
+              jobDescription: '',
+              locationOption: 'keep',
+              startTime: '',
+              endTime: '',
+              suggestedRate: '',
+            });
+          } else {
+            let userLocation: UserLocation;
+            if (appointmentData.lat && appointmentData.lon) {
+              userLocation = {
+                lat: appointmentData.lat,
+                lng: appointmentData.lon,
+              };
+            } else if (authToken) {
+              userLocation = await getUserLocation(authToken);
+            } else {
+              userLocation = { lat: '-16.5000', lng: '-68.1500' };
+            }
+
+            const locationForMap: Location = {
+              lat: parseFloat(userLocation.lat),
+              lng: parseFloat(userLocation.lng),
+            };
+            setInitialLocation(locationForMap);
+
+            const startTime = extractTime(appointmentData.starting_time);
+            const endTime = extractTime(appointmentData.finishing_time);
+
+            setFormData({
+              jobMotive: appointmentData.appointment_description,
+              jobDescription: appointmentData.appointment_description,
+              locationOption: 'keep',
+              startTime: startTime,
+              endTime: endTime,
+              suggestedRate: '',
+            });
+          }
         } catch (err: unknown) {
-          console.error('Error al obtener ubicación:', err);
           setError(err instanceof Error ? err.message : 'Error desconocido');
         } finally {
           setLoading(false);
         }
       };
 
-      fetchUserLocation();
+      initializeModal();
     } else {
-      setToken(null);
+      setFormData({
+        jobMotive: '',
+        jobDescription: '',
+        locationOption: 'keep',
+        startTime: '',
+        endTime: '',
+        suggestedRate: '',
+      });
     }
-  }, [isOpen]);
+  }, [isOpen, appointmentData]);
 
   const handleFormSubmit = async (formData: JobRequestData, newLocation: Location | null) => {
+    const token = getToken();
+
     if (!token) {
       setError('No hay token de autenticación');
+      return;
+    }
+
+    const currentUserId = getUserIdFromToken();
+    if (!currentUserId) {
+      setError('No se pudo obtener el ID del usuario');
       return;
     }
 
@@ -87,7 +192,23 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
         throw new Error('No se ha definido una ubicación para el trabajo.');
       }
 
-      const requesterId = '68ec99ddf39c7c140f42fcfa';
+      let requesterId: string;
+      let finalFixerId: string;
+
+      if (!appointmentData) {
+        requesterId = currentUserId;
+        finalFixerId = fixerId;
+      } else {
+        requesterId = appointmentData.id_requester;
+        finalFixerId = currentUserId;
+      }
+
+      if (!requesterId) {
+        throw new Error('No se pudo determinar el ID del requester');
+      }
+      if (!finalFixerId) {
+        throw new Error('No se pudo determinar el ID del fixer');
+      }
 
       const payload: CreateJobRequestPayload = {
         title: formData.jobMotive,
@@ -96,8 +217,9 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
         startTime: formData.startTime,
         endTime: formData.endTime,
         price: formData.suggestedRate || '0',
-        fixerId: fixerId,
+        fixerId: finalFixerId,
         requesterId: requesterId,
+        appointmentId: appointmentData?._id,
       };
 
       const data: JobRequest = await createJobRequest(payload, token);
@@ -105,7 +227,6 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
       onSubmit(data);
       onClose();
     } catch (err: unknown) {
-      console.error('Error al enviar solicitud:', err);
       setError(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
@@ -125,7 +246,9 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
     >
       <div className='bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden'>
         <div className='bg-blue-600 text-white p-4'>
-          <h2 className='text-xl font-bold text-center'>Formulario de solicitud</h2>
+          <h2 className='text-xl font-bold text-center'>
+            {appointmentData ? 'Crear Trabajo desde Cita' : 'Formulario de solicitud'}
+          </h2>
         </div>
 
         <div className='p-6 overflow-y-auto max-h-[calc(90vh-80px)]'>
@@ -136,10 +259,12 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
           )}
 
           <JobRequestForm
+            key={formInstanceKey}
             initialLocation={initialLocation}
             loading={loading}
             onSubmit={handleFormSubmit}
             onCancel={onClose}
+            initialFormData={formData}
           />
         </div>
       </div>

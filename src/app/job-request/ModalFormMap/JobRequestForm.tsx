@@ -10,15 +10,18 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
   loading,
   onSubmit,
   onCancel,
+  initialFormData,
 }) => {
-  const [formData, setFormData] = useState<JobRequestData>({
-    jobMotive: '',
-    jobDescription: '',
-    locationOption: 'keep',
-    startTime: '',
-    endTime: '',
-    suggestedRate: '',
-  });
+  const [formData, setFormData] = useState<JobRequestData>(
+    initialFormData || {
+      jobMotive: '',
+      jobDescription: '',
+      locationOption: 'keep',
+      startTime: '',
+      endTime: '',
+      suggestedRate: '',
+    },
+  );
 
   const [newLocation, setNewLocation] = useState<Location | null>(null);
   const [timeError, setTimeError] = useState<string>('');
