@@ -43,16 +43,17 @@ export default function PaymentMethods({
     try {
       const payload = {
         jobId,
-        payerId: requesterId,
+        requesterId,
+        fixerId,
         subTotal: amount,
         service_fee: 0,
         discount: 0,
         currency: "BOB",
         paymentMethod: "Efectivo",
       };
-      const resp = await createCashPayment(payload);
+      const resp = await createCashPayment(payload as any);
       const created: any = resp?.data || resp?.payment || resp;
-      setCreatedPaymentId(created?._id || null);
+      setCreatedPaymentId(created?.id || created?._id || null);
       setShowCashPayment(true);
     } catch (e: any) {
       console.error("Error creando pago en efectivo:", e);

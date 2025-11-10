@@ -323,17 +323,18 @@ function PaymentMethodSelector({
     setLoading(true);
     try {
       const payload = {
-        jobId: "66fabc1234567890abc12345",
-        payerId: "66fdef1234567890abc12345",
+        jobId,
+        requesterId,
+        fixerId,
         subTotal: Number(trabajo?.monto || 0),
         service_fee: 0,
         discount: 0,
         currency: "BOB",
         paymentMethod: "Efectivo",
       };
-      const resp = await createCashPayment(payload);
+      const resp = await createCashPayment(payload as any);
       const created: any = resp?.data || resp?.payment || resp;
-      const newId: any = created?._id;
+      const newId: any = created?.id || created?._id;
       if (!newId) throw new Error('No llegó _id del pago creado');
 
       setCreatedPaymentId(newId);

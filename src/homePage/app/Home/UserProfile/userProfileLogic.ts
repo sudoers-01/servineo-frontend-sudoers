@@ -86,6 +86,31 @@ function injectUserProfileHTMLIfNeeded(): void {
         </div>
       </div>
 
+    <!-- En tu archivo HTML donde está el menú de perfil -->
+        <div class="profile-menu" id="profileMenu">
+        <div class="menu-header">
+         <span>Mi Perfil</span>
+         <span class="close-btn" onclick="toggleProfileMenu()">✕</span>
+      </div>
+  
+      <img id="menuPhoto" src="/avatar.png" class="profile-preview" alt="Foto de perfil">
+      <p><strong id="menuName">Invitado</strong></p>
+      <p id="menuEmail" style="font-size:13px;color:#666"></p>
+  
+    <div class="menu-item" id="editProfileBtn" onclick="openEdit()">✏️ Editar Perfil</div>
+  
+         <!-- ✅ NUEVO BOTÓN: Solo visible para fixers -->
+         <a href="/confirm-payments" class="menu-item" id="centroPagosBtn" style="display:none">
+      💵 Confirmar Pagos
+    </a>
+  
+      <!-- ✅ Botón convertirse en fixer: Solo visible para requesters -->
+       <div class="menu-item" id="convertFixer" style="display:none" onclick="convertFixer()">
+         🔧 Convertirse en Fixer
+      </div>
+  
+  <div class="menu-item" id="logoutBtn" onclick="logout()">🚪 Cerrar Sesión</div>
+</div>
       <div id="passwordChangeFields" style="display:none;flex-direction:column;gap:12px;margin-top:10px">
         <label for="currentPassword">Contraseña actual</label>
           <div style="position:relative">

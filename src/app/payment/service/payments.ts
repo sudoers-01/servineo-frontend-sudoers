@@ -84,6 +84,9 @@ export type CreateCashPaymentDTO = {
 export async function createCashPayment(input: CreateCashPaymentDTO) {
   const payload = {
     jobId: input.jobId,
+    // Compat: Backend V4 requiere requesterId y fixerId
+    ...( (input as any).requesterId ? { requesterId: (input as any).requesterId } : {}),
+    ...( (input as any).fixerId ? { fixerId: (input as any).fixerId } : {}),
     ...(input.payerId ? { payerId: input.payerId } : {}),
     subTotal: input.subTotal,
     service_fee: input.service_fee ?? 0,

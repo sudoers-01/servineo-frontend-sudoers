@@ -5,6 +5,8 @@ export type Status = "pending" | "paid" | "failed" | "cancelled";
 
 export async function createCashPayment(input: {
   jobId: string;
+  requesterId?: string; // V4
+  fixerId?: string;     // V4
   subTotal: number;
   service_fee: number;
   discount?: number;
@@ -26,9 +28,9 @@ export async function getPaymentSummaryById(id: string) {
 }
 
 export async function getLastPaymentSummaryByJob(jobId: string) {
-  // backend: GET /lab/jobs/:jobId/payments/summary
+  // backend: GET /lab/payments/by-job/:jobId/summary (según rutas V4)
   return apiFetch<{ data: { id: string; jobId: string; total: number; status: Status; expiresAt: string | null } }>(
-    `/lab/jobs/${jobId}/payments/summary`
+    `/lab/payments/by-job/${jobId}/summary`
   );
 }
 
