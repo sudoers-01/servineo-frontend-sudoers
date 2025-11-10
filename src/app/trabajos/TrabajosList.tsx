@@ -11,7 +11,7 @@ export default function TrabajosList({ userId }) {
     const fetchJobs = async () => {
       try {
         console.log("📡 Obteniendo trabajos para el usuario:", userId);
-        const res = await fetch(`http://localhost:4000/api/jobs?userId=${userId}`);
+        const res = await fetch(`https://servineo-backend-m68a.onrender.com/api/jobs?userId=${userId}`);
         if (!res.ok) throw new Error("Error al obtener trabajos");
         const data = await res.json();
         console.log("✅ Trabajos recibidos:", data);
