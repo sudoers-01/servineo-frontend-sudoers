@@ -425,7 +425,6 @@ export default function PaymentMethodCashFixer({
     <Overlay>
       {/* Fondo claro (principal): #F9FAFB */}
       <div className="bg-[#F9FAFB] w-full max-w-2xl mx-4 rounded-lg shadow-xl">
-        {/* Header */}
         {/* Primary (Main Blue): #2B31E0, Texto: #F9FAFB */}
         <div className="bg-[#2B31E0] text-[#F9FAFB] px-6 py-4 flex items-center justify-between rounded-t-lg">
           <h1 className="text-xl font-semibold">Método de pago Efectivo — Vista FIXER</h1>

@@ -9,10 +9,10 @@ import { createCashPayment } from '../service/payments';
 import dynamic from 'next/dynamic';
 import { useRouter } from "next/navigation";
 
-const RegistroCuentaApp = dynamic(() => import('../../cuenta-bancaria/CuentaBancariaClient'), { ssr: false });
+const RegistroCuentaApp = dynamic(() => import('./agregarCuenta'), { ssr: false });
 
 const stripePromise = loadStripe(
-  'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI',
+  'pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU',
 );
 
 interface Trabajo {
@@ -39,7 +39,7 @@ export default function PaymentDemo() {
 
   // Datos para pago con tarjeta
   const requesterId = '68ed47b64ed596d659c1ed8f';
-  const fixerId = '68ef1be7be38c7f1c3c2c78c';
+  const fixerId = '68ef1be7be38c7f1c3c2c78b';
   const jobId = '68ea51ee0d80087528ad803f';
 
   useEffect(() => {
@@ -51,7 +51,7 @@ export default function PaymentDemo() {
 
   // Escuchar cuando se complete un pago QR
   useEffect(() => {
-    const handleQRPaymentComplete = (event: unknown | null) => {
+    const handleQRPaymentComplete = (event: any) => {
       const trabajoId = event.detail?.trabajoId;
       if (trabajoId) {
         actualizarEstadoTrabajo(trabajoId, 'Pagado');
@@ -332,14 +332,14 @@ function PaymentMethodSelector({
         paymentMethod: "Efectivo",
       };
       const resp = await createCashPayment(payload);
-      const created: unknown | null = resp?.data || resp?.payment || resp;
-      const newId: unknown | null = created?._id;
+      const created: any = resp?.data || resp?.payment || resp;
+      const newId: any = created?._id;
       if (!newId) throw new Error('No llegó _id del pago creado');
 
       setCreatedPaymentId(newId);
       setOkMsg('✅ Pago creado');
       onAfterPostCash?.();
-    } catch (e: unknown | null) { 
+    } catch (e: any) { 
       console.error(e);
       setErr(e.message ?? 'Error al crear el pago');
     } finally {

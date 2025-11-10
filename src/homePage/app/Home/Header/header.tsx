@@ -159,6 +159,8 @@ const Header = () => {
     setTimeout(() => window.convertFixer?.(), 150);
   };
 
+ 
+
   const handleAyudaClick = (e: React.MouseEvent<HTMLElement>) => {
     e.preventDefault();
     if (!isAuthenticated) {
@@ -473,6 +475,7 @@ const Header = () => {
 
         {/* Botón 3: Convertirse en Fixer (Se muestra si el rol NO es 'fixer') */}
         {user?.role !== 'fixer' && (
+          <>
           <div 
             id="convertFixer"
             className="menu-item" 
@@ -480,9 +483,22 @@ const Header = () => {
           >
             Convertirse en Fixer
           </div>
+
+           <Link 
+            href={`/trabajos`}
+            id="TrabajosRequesterBtn" 
+            className="menu-item"
+            onClick={() => window.closeMenu?.()}
+          >
+           Trabajos Requester
+          </Link>
+          
+          </>
+          
+
         )}
-        
-        {/* --- FIN DE LA LÓGICA --- */}
+          
+     {/* --- FIN DE LA LÓGICA --- */}
 
         {/* Botón 4: Cerrar Sesión */}
         <div className="menu-item" onClick={onLogout}>
