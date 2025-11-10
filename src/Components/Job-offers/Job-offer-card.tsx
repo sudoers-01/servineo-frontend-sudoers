@@ -44,7 +44,7 @@ export function JobOfferCard({
   return (
     <div 
       onClick={handleCardClick}
-      className="group relative w-full overflow-hidden rounded-xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
+      className="group relative w-full overflow-hidden rounded-xl border border-primary border-2 bg-white transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 cursor-pointer"
     >
       {/* Image Carousel */}
       <div className="h-48 w-full relative">
@@ -53,26 +53,17 @@ export function JobOfferCard({
           alt={offer.title || 'Oferta de trabajo'}
         />
         
-        {/* WhatsApp Button */}
-        {offer.whatsapp && (
-          <button
-            onClick={handleWhatsAppClick}
-            className="absolute bottom-3 right-3 bg-green-500 hover:bg-green-600 text-white p-2 rounded-full shadow-lg transition-colors"
-            aria-label="Contactar por WhatsApp"
-          >
-            <MessageCircle className="w-5 h-5" />
-          </button>
-        )}
+       
       </div>
 
-      {/* City Badge */}
+    
       <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 shadow-sm border border-gray-200">
         <MapPin className="w-3 h-3 text-primary" />
         <span className="font-medium text-gray-700">{offer.city}</span>
       </div>
 
       {/* Price */}
-      <div className="absolute right-3 top-3 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary shadow-sm border border-primary/20">
+      <div className="absolute right-3 top-3 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-semibold text-primary shadow-sm border border-primary/20">
         {offer.price?.toLocaleString()} Bs
       </div>
 
