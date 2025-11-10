@@ -5,11 +5,13 @@ import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getUserIdFromToken } from "../decoder/getID";
+import { enviarFotoPerfil } from "../service/conecionbackend"; 
 
 export default function FotoPerfil() {
   const router = useRouter();
   const [archivo, setArchivo] = useState<File | null>(null);
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
 
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -24,47 +26,27 @@ export default function FotoPerfil() {
     setFotoPreview(null);
   };
 
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
-  };
-
   const continuar = async () => {
-    if (!archivo) {
-      alert("Primero selecciona una foto");
-      return;
-    }
+    if (!archivo) return alert("Primero selecciona una foto");
 
     const usuarioId = getUserIdFromToken();
-    if (!usuarioId) {
-      alert("No se encontró el ID del usuario");
-      return;
-    }
+    if (!usuarioId) return alert("No se encontró el ID del usuario");
 
     try {
-      const base64Foto = await fileToBase64(archivo);
+      setCargando(true);
+      const response = await enviarFotoPerfil(usuarioId, archivo);
 
-      const response = await fetch("https://fronted-pearl.vercel.app/api/controlC/fotoPerfil/usuarios/foto", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          usuarioId,
-          fotoPerfil: base64Foto,
-        }),
-      });
-
-      if (response.ok) {
+      if (response.success) {
         alert("Foto actualizada correctamente");
+        router.push("/controlC/HU1/UbicacionRequester"); // ✅ redirige al siguiente paso
       } else {
-        alert("Error al subir la foto, selecciona otra foto más ligera");
+        alert(response.message || "Error al subir la foto");
       }
     } catch (error) {
       console.error("Error al subir la foto:", error);
       alert("Error de conexión con el servidor");
+    } finally {
+      setCargando(false);
     }
   };
 
@@ -76,16 +58,16 @@ export default function FotoPerfil() {
       }}
     >
       <main className="flex flex-col items-center justify-center flex-1 p-6">
-        {/* Aumentamos opacidad del recuadro central */}
         <div className="bg-white/30 backdrop-blur-lg border border-white/40 shadow-2xl rounded-3xl p-10 w-full max-w-md text-center">
           <h2 className="text-2xl font-semibold mb-6">Foto de perfil</h2>
 
           <div className="flex flex-col items-center gap-4">
+            {/* Vista previa */}
             <div className="w-32 h-32 rounded-full overflow-hidden bg-gray-200 shadow-lg">
               {fotoPreview ? (
                 <Image
                   src={fotoPreview}
-                  alt="Foto"
+                  alt="Foto de perfil"
                   width={128}
                   height={128}
                   className="w-full h-full object-cover rounded-full"
@@ -103,6 +85,7 @@ export default function FotoPerfil() {
               )}
             </div>
 
+            {/* Input de archivo */}
             <input
               id="input-foto"
               type="file"
@@ -111,6 +94,7 @@ export default function FotoPerfil() {
               onChange={manejarCambio}
             />
 
+            {/* Botones de subir/eliminar */}
             <div className="flex gap-2 mt-3">
               <label
                 htmlFor="input-foto"
@@ -130,6 +114,7 @@ export default function FotoPerfil() {
             </div>
           </div>
 
+          {/* Botones de navegación */}
           <div className="flex justify-center gap-4 mt-8">
             <button
               onClick={() => router.push("/controlC/HU1/RequesterForm")}
@@ -139,15 +124,15 @@ export default function FotoPerfil() {
             </button>
 
             <button
-              onClick={() => router.push("/controlC/HU1/UbicacionRequester")}
-              disabled={!archivo}
+              onClick={continuar}
+              disabled={!archivo || cargando}
               className={`px-5 py-2 rounded-full transition ${
                 archivo
                   ? "bg-[#2B31E0] hover:bg-[#1AA7ED]"
                   : "bg-gray-500 cursor-not-allowed"
               }`}
             >
-              Continuar
+              {cargando ? "Subiendo..." : "Continuar"}
             </button>
           </div>
         </div>
