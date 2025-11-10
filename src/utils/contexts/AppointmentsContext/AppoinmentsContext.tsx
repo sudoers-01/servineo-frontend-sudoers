@@ -3,8 +3,9 @@
 import React, { createContext, useContext, useMemo, ReactNode } from 'react';
 
 interface AppointmentsContextType {
-    isHourBooked: (date: Date, hour: number) => boolean;
-    isDisabled: (date: Date, hour: number) => boolean;
+    isHourBookedFixer: (date: Date, hour: number) => boolean;
+    isHourBooked: (date: Date, hour: number, requester_id: string) => 'self' | 'other' | 'notBooked';
+    isEnabled: (date: Date, hour: number) => boolean;
     isCanceled: (date: Date, hour: number, requester_id: string) => boolean;
     loading: boolean;
 
@@ -25,8 +26,9 @@ export function useAppointmentsContext() {
 
 interface AppointmentsProviderProps {
     children: ReactNode;
-    isHourBooked: (date: Date, hour: number) => boolean;
-    isDisabled: (date: Date, hour: number) => boolean;
+    isHourBookedFixer: (date: Date, hour: number) => boolean;
+    isHourBooked: (date: Date, hour: number, requester_id: string) => 'self' | 'other' | 'notBooked';
+    isEnabled: (date: Date, hour: number) => boolean;
     isCanceled: (date: Date, hour: number, requester_id: string) => boolean;
     loading: boolean;
 
@@ -34,14 +36,15 @@ interface AppointmentsProviderProps {
 
 export function AppointmentsProvider({
     children,
+    isHourBookedFixer,
     isHourBooked,
-    isDisabled,
+    isEnabled,
     isCanceled,
     loading
 }: AppointmentsProviderProps) {
     const value = useMemo(
-        () => ({ isHourBooked, isDisabled, isCanceled, loading }),  // ← AGREGAR
-        [isHourBooked, isDisabled, isCanceled, loading]  // ← AGREGAR
+        () => ({ isHourBookedFixer, isHourBooked, isEnabled, isCanceled, loading }),  // ← AGREGAR
+        [isHourBookedFixer, isHourBooked, isEnabled, isCanceled, loading]  // ← AGREGAR
     );
 
     return (
