@@ -8,7 +8,7 @@ export const initialRegistrationSchema = z.object({
   name: z
     .string()
     .min(3, "El nombre debe tener al menos 3 caracteres")
-    .max(30, "El nombre no puede tener más de 30 caracteres")
+    .max(40, "El nombre no puede tener más de 30 caracteres")
     .regex(nameRegex, "El nombre solo puede contener letras y espacios")
     .transform(value => value.trim()),
   email: z
