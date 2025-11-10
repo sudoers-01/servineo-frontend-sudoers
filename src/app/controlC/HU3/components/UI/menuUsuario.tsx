@@ -42,6 +42,7 @@ export default function UserMenu() {
 
   if (!user) return null;
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const getPictureSrc = (pic: any): string | null => {
     if (!pic) return null;
     if (typeof pic === "string") {

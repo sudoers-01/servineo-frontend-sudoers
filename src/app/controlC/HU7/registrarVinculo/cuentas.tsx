@@ -175,6 +175,7 @@ export default function AccountLoginSettings({ token }: Props) {
                 );
               }
               if (method.provider === "github") {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 function handleCuentaVinculada(client: any): void {
                   throw new Error("Function not implemented.");
                 }

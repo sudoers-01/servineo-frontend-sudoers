@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function VincularCorreo({ token, onLinked }: { token: string; onLinked?: (client: any) => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -25,6 +26,7 @@ export default function VincularCorreo({ token, onLinked }: { token: string; onL
 
       // Actualizar UI con el cliente completo
       if (onLinked) onLinked(data.client);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       setMessage("❌ " + err.message);
     } finally {

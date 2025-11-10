@@ -12,7 +12,7 @@ export default function GithubButton() {
     setLoading(true);
 
     const popup = window.open(
-      "http://localhost:8000/auth/github",
+      "https://backdos.vercel.app/auth/github",
       "GitHubLogin",
       "width=600,height=700"
     );
@@ -23,7 +23,7 @@ export default function GithubButton() {
     }
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== "http://localhost:8000") return;
+      if (event.origin !== "https://backdos.vercel.app") return;
 
       const data = event.data;
 

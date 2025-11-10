@@ -20,7 +20,7 @@ export default function VincularGoogle({ onLinked, tokenUsuario }: VincularGoogl
 
     setLoading(true);
     try {
-      const res = await fetch("http://localhost:8000/api/controlC/cliente/link-google", {
+      const res = await fetch("https://backdos.vercel.app/api/controlC/cliente/link-google", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface VincularGithubProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onLinked?: (client: any) => void; // callback opcional al vincular
 }
 
@@ -30,7 +31,7 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
     );
 
     const popup = window.open(
-      `http://localhost:8000/auth/github?state=${state}`,
+      `https://backdos.vercel.app/auth/github?state=${state}`,
       "GitHubLink",
       "width=600,height=700"
     );
@@ -42,7 +43,7 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
     }
 
     const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== "http://localhost:8000") return;
+      if (event.origin !== "https://backdos.vercel.app") return;
 
       const data = event.data;
 

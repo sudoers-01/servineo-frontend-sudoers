@@ -99,6 +99,7 @@ export async function actualizarDatosUsuario(
     return { success: true, message: "Perfil actualizado con éxito." };
   } catch (error) {
     console.error("Error al actualizar el perfil:", error);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errAny = error as any;
     return { success: false, message: errAny?.message || "Fallo en la conexión o servidor." };
   }
