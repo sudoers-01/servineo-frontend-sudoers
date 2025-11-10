@@ -208,11 +208,11 @@ export default function RatedJobsPage() {
   const [loading, setLoading] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
- useEffect(() => {
-  apiFetch('api/rated-jobs')
-    .then((result) => setJobs(result.data || []))
-    .catch((err) => console.error('Error fetching jobs:', err));
-}, []);
+  useEffect(() => {
+    apiFetch('api/rated-jobs')
+      .then((result) => setJobs(result.data || []))
+      .catch((err) => console.error('Error fetching jobs:', err));
+  }, []);
 
   return (
     <main className={`min-h-screen bg-white text-gray-700 ${roboto.className}`}>
