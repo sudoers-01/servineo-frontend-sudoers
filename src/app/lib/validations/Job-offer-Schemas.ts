@@ -1,6 +1,8 @@
+
 import { z } from "zod"
 
 export const jobOfferSchema = z.object({
+  title: z.string().min(2, "El título es requerido"),
   description: z
     .string()
     .min(5, "La descripción debe tener al menos 5 caracteres")

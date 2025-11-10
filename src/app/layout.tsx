@@ -1,9 +1,10 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
-import './globals.css';
+import "./globals.css";
 import { roboto } from './fonts';
 import 'leaflet/dist/leaflet.css'
 import { ReduxProvider } from './redux/ReduxProvider';
+import TopMenu from '@/Components/Navigation/TopMenu';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -26,9 +27,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${roboto.variable} font-sans`}>
+    <html lang="en" className={`${roboto.className} `}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReduxProvider>
+          <div className="">
+            <TopMenu/>
+          </div>
           {children}
         </ReduxProvider>
       </body>
