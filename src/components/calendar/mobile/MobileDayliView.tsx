@@ -12,15 +12,15 @@ import { useAppointmentsContext } from "@/utils/contexts/AppointmentsContext/App
 const API_BASE = "https://servineo-backend-lorem.onrender.com";
 
 interface PropiedadesHorarioDia {
-    fixerId: string;
-    requesterId: string;
-    selectedDate: Date | string | null;
-    onDateChange?: (newDate: Date) => void;
-    pickerMode?: boolean;
-    onSlotSelect?: (iso: string) => void;
+  fixerId: string;
+  requesterId: string;
+  selectedDate: Date | string | null;
+  onDateChange?: (newDate: Date) => void;
+  pickerMode?: boolean;
+  onSlotSelect?: (iso: string) => void;
 }
 
-type Estado = "disponible" | "reservado" | "cancelado_por_fixer" | "cancelado_por_requester" | "no_disponible";
+type Estado = "disponible" | "reservado" | "cancelado_fixer" | "cancelado_requester" | "no_disponible";
 
 interface HorarioItem {
     id_Horario: string;
@@ -66,40 +66,40 @@ function obtenerAhoraBolivia(): Date {
     return boliviaTime;
 }
 
-// Verifica si una fecha YYYY-MM-DD ya pasó
+// Verifica si una fecha YYYY-MM-DD ya paso
 function esPasadoYMD(d: string) {
     const hoyBolivia = obtenerAhoraBolivia();
     const hoy = aYMDDeCualquiera(hoyBolivia);
     return d < hoy;
 }
 
-// Verifica si una hora específica de hoy ya pasó
+// Verifica si una hora especifica de hoy ya paso
 function esHoraPasadaHoy(ymd: string, hora: number): boolean {
     const ahoraBolivia = obtenerAhoraBolivia();
     const hoyYMD = aYMDDeCualquiera(ahoraBolivia);
-
+    
     if (ymd !== hoyYMD) return false;
-
+    
     const horaActual = ahoraBolivia.getHours();
     const minutoActual = ahoraBolivia.getMinutes();
-
+    
     if (hora < horaActual) return true;
     if (hora === horaActual && minutoActual > 0) return true;
-
+    
     return false;
 }
 
 export default function HorarioDelDia({
-    fixerId,
-    requesterId,
-    selectedDate,
-    onDateChange,
-    pickerMode = false,
-    onSlotSelect,
+  fixerId,
+  requesterId,
+  selectedDate,
+  onDateChange,
+  pickerMode = false,
+  onSlotSelect,
 }: PropiedadesHorarioDia) {
     const { isFixer, isRequester } = useUserRole();
     const { isHourBooked, isDisabled, isCanceled, loading: contextLoading } = useAppointmentsContext();
-
+    
     const fechaFormateadaInicial = selectedDate ? aYMDDeCualquiera(selectedDate as any) : "";
     const [fecha, setFecha] = useState<string>(fechaFormateadaInicial);
     const [cargando, setCargando] = useState<boolean>(false);
@@ -147,7 +147,7 @@ export default function HorarioDelDia({
 
             const horas = rangoHorasEnteras(0, 23);
 
-            // Si el día completo ya pasó, marcar todo como no disponible
+            // Si el día completo ya paso, marcar todo como no disponible
             if (esPasadoYMD(d)) {
                 const horarios: HorarioItem[] = horas.map((h) => ({
                     id_Horario: `${d}-${String(h).padStart(2, "0")}`,
@@ -163,7 +163,7 @@ export default function HorarioDelDia({
                 const horaMostrar = formatearHora(h);
                 const idBase = `${d}-${String(h).padStart(2, "0")}`;
 
-                // Si la hora ya pasó hoy, marcar como no disponible
+                // Si la hora ya paso hoy, marcar como no disponible
                 if (esHoraPasadaHoy(d, h)) {
                     horarios.push({ id_Horario: idBase, Hora_Inicio: horaMostrar, estado_Horario: "no_disponible" });
                     continue;
@@ -175,24 +175,35 @@ export default function HorarioDelDia({
 
                 let estadoHora: Estado = "no_disponible"; // Default
 
-                if (isFixer) {
-                    // Lógica para FIXER
+                // PICKER MODE: Solo mostrar disponibles usando isDisabled
+                if (pickerMode) {
+                    if (isDisabled(currentHourDate, h)) {
+                        estadoHora = "disponible";
+                    }
+                } else if (isFixer) {
+                    // Logica para FIXER (prioridad: ocupado > disponible)
                     if (isHourBooked(currentHourDate, h)) {
+                        // PRIORIDAD 1: Si está ocupado por otro requester
                         estadoHora = "reservado";
-                    } else if (isCanceled(currentHourDate, h, requesterId)) {
-                        estadoHora = "cancelado_por_fixer";
-                        console.log("huhuhu");
                     } else if (isDisabled(currentHourDate, h)) {
+                        // PRIORIDAD 2: Si está disponible
                         estadoHora = "disponible";
                     }
                 } else if (isRequester) {
-                    // Lógica para REQUESTER (usa las mismas funciones pero sin mostrar cancelados)
-                    if (isHourBooked(currentHourDate, h)) {
-                        estadoHora = "reservado";
+                    // Logica para REQUESTER (filtra cancelados y ocupados)
+                    const estaCancelado = isCanceled(currentHourDate, h, requesterId);
+                    const estaOcupado = isHourBooked(currentHourDate, h);
+                    
+                    if (estaCancelado) {
+                        // Mostrar como cancelado por fixer
+                        estadoHora = "cancelado_fixer";
+                    } else if (estaOcupado) {
+                        // Si esta ocupado, no se muestra (queda no_disponible)
+                        estadoHora = "no_disponible";
                     } else if (isDisabled(currentHourDate, h)) {
+                        // Si esta disponible, lo mostramos
                         estadoHora = "disponible";
                     }
-                    // Si está cancelado, se queda como "no_disponible" (default)
                 }
 
                 horarios.push({ id_Horario: idBase, Hora_Inicio: horaMostrar, estado_Horario: estadoHora });
@@ -285,9 +296,9 @@ export default function HorarioDelDia({
                 return { text: "DISPONIBLE", icon: "＋", textCls: "text-emerald-600", rowCls: "bg-white" };
             case "reservado":
                 return { text: "RESERVADO", icon: "✎", textCls: "text-amber-500", rowCls: "bg-white" };
-            case "cancelado_por_fixer":
+            case "cancelado_fixer":
                 return { text: "CANCELADO POR FIXER", icon: null, textCls: "text-white", rowCls: "bg-rose-600" };
-            case "cancelado_por_requester":
+            case "cancelado_requester":
                 return { text: "CANCELADO POR REQUESTER", icon: null, textCls: "text-white", rowCls: "bg-rose-600" };
             case "no_disponible":
             default:
@@ -296,10 +307,22 @@ export default function HorarioDelDia({
     };
 
     const manejarClickEnSlot = (item: HorarioItem) => {
-        // Determinar si el slot es clickeable según el rol
-        let clickeable = false;
+        // Validar que la hora no haya pasado antes de permitir click
+        if (fecha) {
+            const [hh] = item.Hora_Inicio.split(":");
+            const hora = parseInt(hh, 10);
+            if (esHoraPasadaHoy(fecha, hora)) {
+                return; // No permitir click en horas pasadas
+            }
+        }
 
-        if (isFixer) {
+        // Determinar si el slot es clickeable según el modo y rol
+        let clickeable = false;
+        
+        if (pickerMode) {
+            // En picker mode, solo disponibles son clickeables
+            clickeable = item.estado_Horario === "disponible";
+        } else if (isFixer) {
             // Para fixer: solo "reservado" es clickeable (para editar)
             clickeable = item.estado_Horario === "reservado";
         } else if (isRequester) {
@@ -333,23 +356,25 @@ export default function HorarioDelDia({
 
     const noHayHorariosDisponibles = !!datos && (datos.horarios ?? []).every((it) => it.estado_Horario !== "disponible");
 
-    const esEstadoCancelado = (estado: Estado) =>
-        estado === "cancelado_por_fixer" || estado === "cancelado_por_requester";
+    const esEstadoCancelado = (estado: Estado) => 
+        estado === "cancelado_fixer" || estado === "cancelado_requester";
 
     return (
         <div className="mx-auto max-w-sm p-4 text-black">
             <h1 className="text-2xl font-semibold mb-3">
                 Calendario de Diego Paredes
-                <span className="text-xs ml-2 text-slate-500">
-                    ({isFixer ? 'Vista Fixer' : 'Vista Requester'})
-                </span>
+                {!pickerMode && (
+                    <span className="text-xs ml-2 text-slate-500">
+                        ({isFixer ? 'Vista Fixer' : 'Vista Requester'})
+                    </span>
+                )}
             </h1>
 
             <div className="mb-3">
                 <label className="block text-sm mb-1">Fecha</label>
-                <DatePicker
-                    selectedDate={selectedDate ? (typeof selectedDate === 'string' ? convertirYMDaFechaLocal(selectedDate) : selectedDate) : new Date()}
-                    onDateChange={handleDatePickerChange}
+                <DatePicker 
+                    selectedDate={selectedDate ? (typeof selectedDate === 'string' ? convertirYMDaFechaLocal(selectedDate) : selectedDate) : new Date()} 
+                    onDateChange={handleDatePickerChange} 
                 />
             </div>
 
@@ -368,18 +393,20 @@ export default function HorarioDelDia({
 
                     <div className="space-y-2">
                         {datos.horarios && (() => {
-                            const horariosVisibles = pickerMode
-                                ? datos.horarios.filter(h => h.estado_Horario === "disponible")
+                            const horariosVisibles = pickerMode 
+                                ? datos.horarios.filter(h => h.estado_Horario === "disponible") 
                                 : datos.horarios;
 
                             return (
                                 <div className="space-y-2">
                                     {horariosVisibles.map((item, idx) => {
                                         const meta = etiquetaPorEstado(item.estado_Horario);
-
-                                        // Determinar clickeabilidad según rol
+                                        
+                                        // Determinar clickeabilidad según modo y rol
                                         let clickeable = false;
-                                        if (isFixer) {
+                                        if (pickerMode) {
+                                            clickeable = item.estado_Horario === "disponible";
+                                        } else if (isFixer) {
                                             clickeable = item.estado_Horario === "reservado";
                                         } else if (isRequester) {
                                             clickeable = item.estado_Horario === "disponible" || item.estado_Horario === "reservado";
@@ -394,7 +421,7 @@ export default function HorarioDelDia({
                                                 }}
                                                 className={`grid grid-cols-[64px_1fr_28px] items-center rounded-lg border px-3 py-2 shadow-sm ${meta.rowCls} ${clickeable ? "hover:brightness-95 cursor-pointer" : ""}`}
                                             >
-                                                <div className={`font-semibold ${esEstadoCancelado(item.estado_Horario) ? "text-white bg-red-500" : "text-slate-800"}`}>
+                                                <div className={`font-semibold ${esEstadoCancelado(item.estado_Horario) ? "text-white" : "text-slate-800"}`}>
                                                     {item.Hora_Inicio}
                                                 </div>
                                                 <div className={`text-sm font-semibold ${meta.textCls}`}>{meta.text}</div>
@@ -409,14 +436,18 @@ export default function HorarioDelDia({
                         })()}
                     </div>
 
-                    {noHayHorariosDisponibles && !cargando && (
+                    {noHayHorariosDisponibles && !cargando && !pickerMode && (
                         <div className="mt-3 text-center text-sm font-semibold text-slate-600">No hay horarios disponibles</div>
                     )}
                 </div>
             )}
 
-            <AppointmentForm ref={refFormularioCita} fixerId={fixerId} requesterId={requesterId} />
-            <EditAppointmentForm ref={refFormularioEditarCita} />
+            {!pickerMode && (
+                <>
+                    <AppointmentForm ref={refFormularioCita} fixerId={fixerId} requesterId={requesterId} />
+                    <EditAppointmentForm ref={refFormularioEditarCita} />
+                </>
+            )}
         </div>
     );
 }
