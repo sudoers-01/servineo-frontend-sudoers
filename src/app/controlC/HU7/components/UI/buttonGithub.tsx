@@ -34,7 +34,7 @@ export default function GithubButton() {
         if (data.isFirstTime) {
           router.push("/controlC/HU3/ubicacion");
         } else {
-          router.push("/"); 
+          router.push("/");
         }
 
         window.removeEventListener("message", handleMessage);
@@ -54,13 +54,15 @@ export default function GithubButton() {
   };
 
   return (
-    <button
-      onClick={handleGithub}
-      disabled={loading}
-      className="flex items-center gap-2 px-4 py-2 rounded-md border hover:bg-gray-100"
-    >
-      <Github size={18} />
-      {loading ? "Cargando..." : "Continuar con GitHub"}
-    </button>
+    <div className="relative inline-block">
+      <button
+        onClick={handleGithub}
+        disabled={loading}
+        className="flex items-center gap-2 bg-white border border-gray-300 hover:bg-gray-100 font-semibold py-2 px-4 rounded-lg shadow-sm text-black transition-colors"
+      >
+        <Github size={24} className="text-black" />
+        {loading ? "Cargando..." : "Continuar con GitHub"}
+      </button>
+    </div>
   );
 }
