@@ -58,7 +58,7 @@ export default function CardList({
 
   const fetchCards = async () => {
     try {
-      const res = await fetch(`http://localhost:4000/api/cards?userId=${requesterId}`);
+      const res = await fetch(`https://servineo-backend-m68a.onrender.com/api/cards?userId=${requesterId}`);
       if (!res.ok) throw new Error('Error fetching cards');
       const data = await res.json();
       setCards(data);
@@ -95,7 +95,7 @@ export default function CardList({
     setConfirmModal(null);
 
     try {
-      const paymentRes = await fetch('http://localhost:4000/api/createpayment', {
+      const paymentRes = await fetch('https://servineo-backend-m68a.onrender.com/api/createpayment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
