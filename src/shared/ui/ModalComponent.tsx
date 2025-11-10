@@ -25,9 +25,9 @@ export const ModalComponent = ({
                 })
             }
         >
-            <div className="flex flex-col gap-6 relative bg-white p-6 rounded-lg shadow-lg" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col gap-6 relative bg-white p-12 rounded-4xl shadow-lg" onClick={(e) => e.stopPropagation()}>
                 <button
-                    className="absolute top-2 right-2 text-gray-600 hover:text-gray-800"
+                    className="absolute top-8 right-8 text-gray-600 hover:text-gray-800 cursor-pointer"
                     onClick={
                         onClose ||
                         (() => {

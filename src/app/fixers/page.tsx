@@ -1,4 +1,6 @@
+'use client';
 import Link from 'next/link';
+import { DetailsModal } from '../components/fixers/DetailsModal';
 
 export default function FixersLanding() {
   return (
@@ -18,6 +20,7 @@ export default function FixersLanding() {
           >
             View Profile
           </Link>
+          <DetailsModal isOpen={true} onClose={() => {}} onAccept={() => {}} />
         </div>
       </div>
     </main>
