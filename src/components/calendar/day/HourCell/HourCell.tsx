@@ -3,7 +3,6 @@
 import { useState, useRef } from "react";
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "@/components/appointments/forms/EditAppointmentForm";
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
-import { DayOfWeek } from "@/hooks/useDailyAppointments";
 import type { AppointmentFormHandle } from "@/components/appointments/forms/AppointmentForm";
 import AppointmentForm from "@/components/appointments/forms/AppointmentForm";
 import AppointmentDetailsForm, { EditAppointmentFormHandle as DetailsFormHandle } from "@/components/appointments/forms/AppointmentDetails";
@@ -48,6 +47,8 @@ export default function HourCell({
         if (isToday && view === 'day' && today.getHours() === hour) return "bg-blue-300";
         else return "bg-white";
     }
+
+
     // self 
     // other - otro erquester
     // notBooked  => no tiene nada a aesa hora 
@@ -55,7 +56,6 @@ export default function HourCell({
 
     const getColor = () => {
         if (isCancel === 'other') {
-            console.log(isCancel);
 
             return "bg-[#D624FF]";
         }
@@ -90,9 +90,9 @@ export default function HourCell({
         }
 
         if (isFixer) {
-            if (isBookedFixer) return "KKVale ";
+            if (isBookedFixer) return "Reservado";
         } else {
-            if (isCancel === 'other') return "pupupu";
+            if (isCancel === 'other') return "Disponible";
             if (isBooked === 'other') {
                 return "No disponible";
 
