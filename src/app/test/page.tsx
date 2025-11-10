@@ -36,7 +36,7 @@ export default function CalendarPage() {
 
     return (
         <div className="text-black" >
-            <h2>🧪 Test de getSixMonthAppointments</h2>
+            <h2> Test de getSixMonthAppointments</h2>
 
             <button onClick={fetchAppointments} disabled={loading}>
                 {loading ? 'Cargando...' : 'Recargar datos'}
