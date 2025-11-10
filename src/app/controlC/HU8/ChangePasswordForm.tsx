@@ -70,11 +70,16 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
 
     if (!currentPassword.trim()) return setError('Ingresa tu contraseña actual');
     if (!newPassword.trim()) return setError('Ingresa una nueva contraseña');
+    if (!confirmPassword.trim()) return setError('Confirma tu nueva contraseña');
+    if (/\s/.test(newPassword) || /\s/.test(confirmPassword)) {
+      return setError('La nueva contraseña no puede contener espacios');
+    }
     if (!validarContrasena(newPassword))
       return setError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número');
-    if (!confirmPassword.trim()) return setError('Confirma tu nueva contraseña');
-    if (newPassword !== confirmPassword) return setError('Las contraseñas no coinciden');
-    if (currentPassword === newPassword) return setError('La nueva contraseña debe ser diferente a la actual');
+    if (newPassword !== confirmPassword)
+      return setError('Las contraseñas no coinciden');
+    if (currentPassword === newPassword)
+      return setError('La nueva contraseña debe ser diferente a la actual');
 
     setLoading(true);
 
