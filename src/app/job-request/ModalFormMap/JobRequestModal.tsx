@@ -90,13 +90,13 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
       const requesterId = '68ec99ddf39c7c140f42fcfa';
 
       const payload: CreateJobRequestPayload = {
-        jobMotive: formData.jobMotive,
-        jobDescription: formData.jobDescription,
+        title: formData.jobMotive,
+        description: formData.jobDescription,
         location: finalLocation,
         startTime: formData.startTime,
         endTime: formData.endTime,
-        suggestedRate: formData.suggestedRate || '0',
-        id_fixer: fixerId,
+        price: formData.suggestedRate || '0',
+        fixerId: fixerId,
         requesterId: requesterId,
       };
 

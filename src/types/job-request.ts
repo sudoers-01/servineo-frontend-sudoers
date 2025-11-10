@@ -4,35 +4,38 @@ export interface UserLocation {
 }
 
 export interface CreateJobRequestPayload {
-  jobMotive: string;
-  jobDescription: string;
+  title: string;
+  description: string;
   location: {
     type: 'Point';
     coordinates: [string, string];
   };
   startTime: string;
   endTime: string;
-  suggestedRate: string | number;
-  id_fixer: string;
+  price: string | number;
+  fixerId: string;
   requesterId: string;
 }
 
 export interface JobRequest {
   _id: string;
-  jobMotive: string;
-  jobDescription: string;
-  location: {
+  title: string;
+  description: string;
+  location?: {
     type: 'Point';
     coordinates: [string, string];
   };
-  startTime: string;
-  endTime: string;
-  suggestedRate: number;
-  id_requester: string;
-  id_fixer?: string;
-  status: 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
+  startTime?: string;
+  endTime?: string;
+  price: number;
+  requesterId: string;
+  fixerId?: string;
+  status: 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled' | 'paid';
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
+  rating?: number;
+  comment?: string;
+  type?: string;
 }
 
 export interface Location {
