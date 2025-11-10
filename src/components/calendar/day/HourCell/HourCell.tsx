@@ -17,6 +17,7 @@ interface HourCellProps {
     view: 'day' | 'week';
 }
 
+type Estados = 'disponible' | 'noDisponible' | 'reservado' | 'inhabilitado' | 'ocupado' | 'reservadoOtro' | 'cancelFixer' | 'cancelRequester' | 'cancelOtherFixer' | 'cancelOtherRequester';
 const today = new Date();
 
 export default function HourCell({
@@ -49,16 +50,33 @@ export default function HourCell({
     }
 
 
+    //type Estados = 'disponible' | 'noDisponible' | 'reservado' | 'inhabilitado' | 'ocupado';
     // self 
     // other - otro erquester
     // notBooked  => no tiene nada a aesa hora 
-
-
-    const getColor = () => {
-        if (isCancel === 'other') {
-
-            return "bg-[#D624FF]";
+    const getEstado = () => {
+        if (isBooked) return 'reservado';
+        if (isBookedFixer) return 'reservadoOtro';
+        if (isEnable) {
+            return 'disponible';
+        } else {
+            return 'inhabilitado';
         }
+
+        if (isCancel === 'fixer') {
+            return 'cancelFixer';
+        } else if (isCancel === 'requester') {
+            return 'cancelRequester';
+        } else if (isCancel === 'otherFixer') {
+            return 'cancelOtherFixer';
+        } else if (isCancel === 'otherRequester')
+            return 'cancelOtherRequester';
+
+    }
+
+
+    const getColor = (estado: Estados) => {
+
         if (isCancel !== 'notCancel') {
             return "bg-[#FF3E17]"
         }
@@ -83,16 +101,25 @@ export default function HourCell({
     }
 
     const getText = () => {
-        if (isCancel === 'fixer') {
-            return "Cancelado por fixer"
-        } else if (isCancel === 'requester') {
-            return "Cancelado por requester";
-        }
+
+
+
 
         if (isFixer) {
+            if (isCancel === 'otherRequester' || isCancel === 'requester') {
+                return "Cancelado por requester";
+            } else if (isCancel === 'otherFixer' || isCancel === 'fixer') {
+                return "Cancelado por fixer"
+            }
+
             if (isBookedFixer) return "Reservado";
-        } else {
-            if (isCancel === 'other') return "Disponible";
+
+        } else { ///isRequester
+            if (isCancel === 'fixer') {
+                return "Cancelado por fixer"
+            } else if (isCancel === 'requester') {
+                return "Cancelado por requester";
+            } else if (isCancel === 'otherRequester') return "Disponible";
             if (isBooked === 'other') {
                 return "No disponible";
 
@@ -106,8 +133,7 @@ export default function HourCell({
             if (isRequester)
                 return "Disponible"
         } else {
-            if (isCancel)
-                return "Inhabilitado";
+            return "Inhabilitado";
         }
 
         return "";
