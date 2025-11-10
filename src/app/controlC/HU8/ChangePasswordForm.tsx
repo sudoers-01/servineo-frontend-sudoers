@@ -65,89 +65,102 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
   }
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setSuccess(null);
+  e.preventDefault();
+  setError(null);
+  setSuccess(null);
 
-    const token = localStorage.getItem("servineo_token");
-    if (!token) {
-      setError('No hay sesión activa. Por favor, inicia sesión.');
-      limpiarCampos();
-      return;
-    }
-
-    if (!currentPassword.trim()) {
-      setError('Ingresa tu contraseña actual');
-      limpiarCampos();
-      return;
-    }
-    if (!newPassword.trim()) {
-      setError('Ingresa una nueva contraseña');
-      limpiarCampos();
-      return;
-    }
-    if (!confirmPassword.trim()) {
-      setError('Confirma tu nueva contraseña');
-      limpiarCampos();
-      return;
-    }
-    if (/\s/.test(newPassword) || /\s/.test(confirmPassword)) {
-      setError('La nueva contraseña no puede contener espacios');
-      limpiarCampos();
-      return;
-    }
-    if (!validarContrasena(newPassword)) {
-      setError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número');
-      limpiarCampos();
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setError('Las contraseñas no coinciden');
-      limpiarCampos();
-      return;
-    }
-    if (currentPassword === newPassword) {
-      setError('La nueva contraseña debe ser diferente a la actual');
-      limpiarCampos();
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const result = await cambiarContrasena({
-        currentPassword,
-        newPassword,
-        confirmPassword,
-      });
-
-      if (result.success) {
-        setSuccess('Contraseña actualizada exitosamente');
-        limpiarCampos();
-        await actualizarFecha();
-        setTimeout(() => setShowSuggestionModal(true), 2000);
-      } else {
-        setError(result.message || 'El cambio no se completó, error inesperado.');
-        limpiarCampos();
-      }
-    } catch (err: any) {
-      console.error('Error al cambiar contraseña:', err);
-      limpiarCampos();
-      if (err.message?.includes('NetworkError') || err.message?.includes('Failed to fetch')) {
-        setError('El cambio no se completó, error de conexión.');
-      } else if (err.response?.status >= 500) {
-        setError('El cambio no se completó, error del servidor.');
-      } else {
-        setError('El cambio no se completó, error inesperado.');
-      }
-    } finally {
-      setLoading(false);
-      setTimeout(() => {
-        setError(null);
-        setSuccess(null);
-      }, 10000);
-    }
+  const token = localStorage.getItem("servineo_token");
+  if (!token) {
+    setError('No hay sesión activa. Por favor, inicia sesión.');
+    limpiarCampos();
+    return;
   }
+
+  // Validaciones existentes...
+  if (!currentPassword.trim()) {
+    setError('Ingresa tu contraseña actual');
+    limpiarCampos();
+    return;
+  }
+  if (!newPassword.trim()) {
+    setError('Ingresa una nueva contraseña');
+    limpiarCampos();
+    return;
+  }
+  if (!confirmPassword.trim()) {
+    setError('Confirma tu nueva contraseña');
+    limpiarCampos();
+    return;
+  }
+  if (/\s/.test(newPassword) || /\s/.test(confirmPassword)) {
+    setError('La nueva contraseña no puede contener espacios');
+    limpiarCampos();
+    return;
+  }
+  if (!validarContrasena(newPassword)) {
+    setError('La contraseña debe tener mínimo 8 caracteres, una mayúscula, una minúscula y un número');
+    limpiarCampos();
+    return;
+  }
+  if (newPassword !== confirmPassword) {
+    setError('Las contraseñas no coinciden');
+    limpiarCampos();
+    return;
+  }
+  if (currentPassword === newPassword) {
+    setError('La nueva contraseña debe ser diferente a la actual');
+    limpiarCampos();
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const result = await cambiarContrasena({
+      currentPassword,
+      newPassword,
+      confirmPassword,
+    });
+
+    // ✅ ÉXITO
+    if (result.success) {
+      setSuccess('Contraseña actualizada exitosamente');
+      limpiarCampos();
+      await actualizarFecha();
+      setTimeout(() => setShowSuggestionModal(true), 2000);
+    } else {
+      // 🚨 ERROR (puede incluir contador de intentos o bloqueo)
+      setError(result.message || 'El cambio no se completó, error inesperado.');
+      
+      // Solo limpiar contraseña actual en caso de error
+      setCurrentPassword('');
+      
+      // Si es logout forzado, el servicio ya manejó la redirección
+      if (result.forceLogout) {
+        return; // No hacer nada más
+      }
+    }
+  } catch (err: any) {
+    console.error('Error al cambiar contraseña:', err);
+    
+    // Solo limpiar contraseña actual
+    setCurrentPassword('');
+    
+    if (err.message?.includes('NetworkError') || err.message?.includes('Failed to fetch')) {
+      setError('El cambio no se completó, error de conexión.');
+    } else if (err.response?.status >= 500) {
+      setError('El cambio no se completó, error del servidor.');
+    } else {
+      setError(err.message || 'El cambio no se completó, error inesperado.');
+    }
+  } finally {
+    setLoading(false);
+    setTimeout(() => {
+      setError(null);
+      setSuccess(null);
+    }, 10000);
+  }
+}
 
   return (
     <div className="relative flex flex-col gap-6 rounded-lg border border-[#E5F4FB] bg-white p-6 shadow-sm transition-all duration-300">
@@ -236,16 +249,33 @@ export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
 
         {/* Mensajes */}
         {error && (
-          <div className="rounded-md bg-red-50 p-3 text-sm text-red-700 transition-opacity duration-1000 ease-out">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="rounded-md bg-green-50 p-3 text-sm text-green-700 transition-opacity duration-1000 ease-out">
-            {success}
-          </div>
-        )}
+  <div className={`rounded-md p-3 text-sm transition-opacity duration-1000 ease-out ${
+    error.includes('bloqueada') || error.includes('Demasiados intentos') || error.includes('restantes')
+      ? 'bg-red-100 border border-red-300 text-red-800' 
+      : 'bg-red-50 text-red-700'
+  }`}>
+    {(error.includes('bloqueada') || error.includes('Demasiados intentos')) && (
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-lg">🔒</span>
+        <strong>Seguridad Activada</strong>
+      </div>
+    )}
+    {error.includes('restantes') && (
+      <div className="flex items-center gap-2 mb-1">
+        <span className="text-lg">⚠️</span>
+        <strong>Atención</strong>
+      </div>
+    )}
+    {error}
+  </div>
+)}
 
+{success && (
+  <div className="rounded-md bg-green-50 p-3 text-sm text-green-700 transition-opacity duration-1000 ease-out flex items-center gap-2">
+    <span className="text-lg">✅</span>
+    {success}
+  </div>
+)}
         <div className="mt-2 p-4 bg-gray-50 rounded-lg border border-gray-200">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium text-gray-700">
