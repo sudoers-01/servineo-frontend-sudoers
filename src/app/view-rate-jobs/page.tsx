@@ -56,16 +56,20 @@ function GenericDropdown({
   align = 'right',
   disabled = false,
   onSelect,
+  selectedKey,
 }: {
   label: string;
   options: { key: string; label: string }[];
   align?: 'right' | 'left';
   disabled?: boolean;
   onSelect?: (key: string) => void;
+  selectedKey?: string;
 }) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<{ left: number; top: number; width: number } | null>(null);
   const btnRef = useRef<HTMLButtonElement | null>(null);
+
+  const displayLabel = label;
 
   function updateCoords() {
     if (!btnRef.current) return;
@@ -128,7 +132,7 @@ function GenericDropdown({
           aria-expanded={open}
           aria-disabled={disabled}
         >
-          {label}
+          {displayLabel}
           {disabled && <span className='sr-only'>(deshabilitado)</span>}
           <svg
             className='w-3 h-3 ml-1 text-blue-600'
@@ -164,7 +168,9 @@ function GenericDropdown({
                   setOpen(false);
                   onSelect?.(opt.key);
                 }}
-                className='w-full text-left px-3 py-2 text-sm hover:bg-gray-50 text-gray-800'
+                className={`w-full text-left px-3 py-2 text-sm hover:bg-gray-50 ${
+                  opt.key === selectedKey ? 'bg-blue-50 text-blue-600 font-medium' : 'text-gray-800'
+                }`}
               >
                 {opt.label}
               </button>
@@ -222,8 +228,7 @@ export default function RatedJobsPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [slowLoading, setSlowLoading] = useState<boolean>(false);
-  const [sortByRating, setSortByRating] = useState<string>('rating_desc');
-  const [sortByDate, setSortByDate] = useState<string>('recent');
+  const [currentSort, setCurrentSort] = useState<string>('recent');
 
   const fetchJobs = async (sortParam: string) => {
     const slowTimer: ReturnType<typeof setTimeout> = setTimeout(() => {
@@ -237,7 +242,7 @@ export default function RatedJobsPage() {
       const result = await apiFetch<{ data?: RatedJob[] }>(`api/rated-jobs?sortBy=${sortParam}`);
       setJobs(result.data ?? []);
     } catch (err) {
-      console.error('Error fetching jobs:', err);
+      console.warn('Error fetching jobs:', err);
       setError('Sin conexión. Intenta de nuevo más tarde');
     } finally {
       setLoading(false);
@@ -251,12 +256,12 @@ export default function RatedJobsPage() {
   }, []);
 
   const handleRatingSort = (key: string) => {
-    setSortByRating(key);
+    setCurrentSort(key);
     fetchJobs(key);
   };
 
   const handleDateSort = (key: string) => {
-    setSortByDate(key);
+    setCurrentSort(key);
     fetchJobs(key);
   };
 
@@ -332,6 +337,9 @@ export default function RatedJobsPage() {
               label='Ordenar por calificación'
               disabled={disableDropdowns}
               onSelect={handleRatingSort}
+              selectedKey={
+                ['rating_asc', 'rating_desc'].includes(currentSort) ? currentSort : undefined
+              }
               options={[
                 { key: 'rating_desc', label: 'Descendente' },
                 { key: 'rating_asc', label: 'Ascendente' },
@@ -342,6 +350,7 @@ export default function RatedJobsPage() {
               label='Filtrar por fecha'
               disabled={disableDropdowns}
               onSelect={handleDateSort}
+              selectedKey={['recent', 'oldest'].includes(currentSort) ? currentSort : undefined}
               options={[
                 { key: 'recent', label: 'Mas reciente' },
                 { key: 'oldest', label: 'Mas antiguo' },
