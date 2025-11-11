@@ -424,10 +424,10 @@ export default function PaymentMethodCashFixer({
   return (
     <Overlay>
       {/* Fondo claro (principal): #F9FAFB */}
-      <div className="bg-[#F9FAFB] w-full max-w-2xl mx-4 rounded-lg shadow-xl">
+      <div className="bg-[#F9FAFB] w-full max-w-2xl mx-4 rounded-lg shadow-xl ">
         {/* Primary (Main Blue): #2B31E0, Texto: #F9FAFB */}
-        <div className="bg-[#2B31E0] text-[#F9FAFB] px-6 py-4 flex items-center justify-between rounded-t-lg">
-          <h1 className="text-xl font-semibold">Método de pago Efectivo — Vista FIXER</h1>
+        <div className="bg-[#2B31E0] text-[#F9FAFB] px-6 py-4 flex items-center justify-between rounded-t-lg ">
+          <h1 className="text-xl font-semibold ">Método de pago Efectivo — Vista FIXER</h1>
           <button
             onClick={() => onClose()}
             className="hover:bg-[#2B6AE0] px-3 py-1 rounded text-xl transition-colors"
@@ -435,7 +435,7 @@ export default function PaymentMethodCashFixer({
             ✕
           </button>
         </div>
-
+ 
         {/* Content */}
         <div className="px-8 py-12">
           {/* Texto principal (oscuro): #111827 */}

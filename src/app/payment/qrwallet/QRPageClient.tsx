@@ -109,7 +109,7 @@ export default function PaymentsPage() {
       {/* Barra negra superior */}
       <header className="bg-[#2B6AE0]">
         <div className="max-w-5xl px-6 py-6">
-          <h1 className="text-5xl font-semibold text-white">Pagos con QR</h1>
+          <h1 className="text-5xl font-semibold text-white">Recarga de Saldo</h1>
         </div>
       </header>
 
@@ -125,7 +125,7 @@ export default function PaymentsPage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
           <section className="md:-ml-35">
-            <h2 className="text-4xl font-semibold mb-3 text-black">Información de pago</h2>
+            <h2 className="text-4xl font-semibold mb-3 text-black"></h2>
 
             {/* Separador corto, alineado a la izquierda */}
             <div className="my-2">
@@ -134,13 +134,8 @@ export default function PaymentsPage() {
 
             <dl className="space-y-6 text-black">
               {/* --- Fila: Número de Trabajo (DE LA DEMO) --- */}
-              <div className="relative min-h-8">
-                <dt className="text-2xl font-medium inline-block w-[200px] text-left">
-                  Nro de Trabajo:
-                </dt>
-                <dd className="text-2xl leading-tight absolute top-0.5 left-[220px]">
-                  {trabajoId}
-                </dd>
+              <div className="relative min-h-2">              
+                
               </div>
 
               {/* --- Fila: Destinatario (ESTÁTICO DE LA BD) --- */}
@@ -160,26 +155,6 @@ export default function PaymentsPage() {
                 </dt>
                 <dd className="text-2xl leading-tight absolute top-0 left-[240px]">
                   {intent?.paymentReference || "—"}
-                </dd>
-              </div>
-
-              {/* --- Fila: Sub Total (USA EL MONTO DE LA DEMO) --- */}
-              <div className="relative min-h-8">
-                <dt className="text-2xl font-medium inline-block w-[160px] text-left">
-                  Sub Total:
-                </dt>
-                <dd className="text-2xl leading-tight absolute top-0 left-[190px]">
-                  {money(Math.round(montoDemo * 0.97))}
-                </dd>
-              </div>
-
-              {/* --- Fila: Comisión (USA EL MONTO DE LA DEMO) --- */}
-              <div className="relative min-h-8">
-                <dt className="text-2xl font-medium inline-block w-[160px] text-left">
-                  Comisión:
-                </dt>
-                <dd className="text-2xl leading-tight absolute top-0 left-[190px]">
-                  {money(Math.round(montoDemo * 0.03))}
                 </dd>
               </div>
 

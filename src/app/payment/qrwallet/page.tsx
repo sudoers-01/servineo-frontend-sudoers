@@ -4,7 +4,7 @@ import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
 
 // 1. Importa el componente cliente que acabas de renombrar
-import QRPageClient from '../qr/QRPageClient'; 
+import QRPageClient from '../qrwallet/QRPageClient'; 
 
 // 2. Un componente de carga (puedes personalizarlo)
 function LoadingFallback() {

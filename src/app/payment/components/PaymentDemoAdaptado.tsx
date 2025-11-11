@@ -9,8 +9,8 @@ import { createCashPayment } from "../service/payments";
 import { useRouter } from "next/navigation";
 
 const stripePromise = loadStripe(
-  "pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI"
-);
+  "pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU"
+); 
 
 interface PaymentProps {
   amount: number;
@@ -65,7 +65,7 @@ export default function PaymentMethods({
       {/* Overlay principal */}
       <div
         onClick={onClose}
-        className="fixed inset-0 z-[1000] bg-black/50 flex items-center justify-center p-4"
+        className="fixed inset-0 z-[10] bg-black/50 flex items-center justify-center p-4"
       >
         <div
           onClick={(e) => e.stopPropagation()} // evita que clic dentro cierre modal

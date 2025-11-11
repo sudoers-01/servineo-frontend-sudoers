@@ -18,7 +18,7 @@ function LoadingFallback() {
 export default function RechargePage() {
   return (
     <Suspense fallback={<LoadingFallback />}>
-      <RechargePageClient />
+      <RechargePageClient userid={"690c1a08f32ebc5be9c5707c"}/>
     </Suspense>
   );
 }
