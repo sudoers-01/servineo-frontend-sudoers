@@ -65,7 +65,7 @@ export default function AddCardModalFixer({
 
       // Guardar la tarjeta si el usuario lo desea
       if (saveCard) {
-        const res = await fetch('http://localhost:4000/api/cardscreate', {
+        const res = await fetch('https://servineo-backend-m68a.onrender.com/api/cardscreate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
