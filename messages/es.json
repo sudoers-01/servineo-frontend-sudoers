@@ -1,3 +1,36 @@
 {
+    "HeroSection":
+    {
+        "title": "Encuentra el profesional perfecto",
+        "subtitle": "Conectamos tu hogar con expertos verificados en tu ciudad",
+        "placeholder": "¿Que servicio necesitas?",
+        "search": "Buscar"
+    },
+    "jobOffers": 
+    {
+        "pageTitle": "Ofertas de Trabajo",
+        "available": "disponibles",
+        "backToHome": "Inicio",
+        "viewModes": {
+        "list": "Lista",
+        "map": "Mapa"
+        },
+        "emptyState": {
+        "title": "No se encontraron ofertas",
+        "description": "No hay ofertas que coincidan con tu búsqueda o filtros actuales."
+        },
+        "map": {
+            "loading": "Loading map...",
+            "yourLocation": "Your location",
+            "jobOffers": "Job offers",
+            "radius": "Radius: ~1km",
+            "mapDetails": "Map details",
+            "availableOffers": {
+                "singular": "available offer",
+                "plural": "available offers"
+            },
+            "distance": "away"
+    }
+    }
     
 }

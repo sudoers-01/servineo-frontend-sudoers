@@ -1,3 +1,24 @@
 {
+    "HeroSection":
+    {
+        "title": "Find the perfect professional ",
+        "subtitle": "We connect your home with verified experts in your city.",
+        "placeholder": "what service do you need?",
+        "search": "Search"
+    },
+    "jobOffers":
+     {
+    "pageTitle": "Job Offers",
+    "available": "available",
+    "backToHome": "Home",
+    "viewModes": {
+      "list": "List",
+      "map": "Map"
+    },
+    "emptyState": {
+      "title": "No offers found",
+      "description": "There are no offers matching your current search or filters."
+    }
+  }
     
 }
