@@ -1,7 +1,6 @@
 'use client';
-import React from 'react';
-import { useProfile } from './hooks/useProfile';
 import { useRouter } from 'next/navigation';
+import { useProfile } from './hooks/useProfile';
 
 type FixerProfileProps = {
   userId: string;
