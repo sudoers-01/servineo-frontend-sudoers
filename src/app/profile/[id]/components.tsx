@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { jsonFetcher, type FixerRating } from './utils';
 import { apiUrl } from '@/config/api';
+import { DetailsModal } from '@/app/components/fixers/DetailsModal';
 
 function useFixerRatings(fixerId: string) {
   const [ratings, setRatings] = useState<FixerRating[]>([]);
@@ -84,6 +85,7 @@ export function StarRating({
 }
 
 export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; error?: string }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -126,13 +128,27 @@ export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; 
     <ul className='flex flex-col gap-4'>
       {ordered.map((r) => {
         const isLongComment = r.comment && r.comment.length > commentLengthLimit;
+        if (isModalOpen) {
+          return (
+            <DetailsModal
+              key={r.id}
+              isOpen={isModalOpen}
+              onClose={() => setIsModalOpen(false)}
+              onAccept={() => setIsModalOpen(false)}
+              dataId={r.id}
+            />
+          );
+        }
         return (
           <li
             key={r.id}
             className='flex items-start gap-4 p-4 rounded-xl hover:shadow-sm transition-shadow border'
             style={{ borderColor: 'var(--surface-border)', background: 'var(--surface-card)' }}
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
           >
-            <div className='h-10 w-10 shrink-0 rounded-full bg- flex items-center justify-center overflow-hidden'>
+            <div className='h-10 w-10 shrink-0 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden'>
               <span className='text-xs'>👤</span>
             </div>
 

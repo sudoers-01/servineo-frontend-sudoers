@@ -13,10 +13,24 @@ export default function RequestersLanding() {
             View Completed Jobs
           </Link>
           <Link
-            href='/profile/68ec99ddf39c7c140f42fcfa'
+            href='/profile/68e87a9cdae3b73d8040102f'
             className='px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition'
           >
             View Profile
+          </Link>
+          <Link
+            href='/job-request'
+            className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
+          >
+            Job Request
+          </Link>
+        </div>
+        <div>
+          <Link
+            href='/view-rate-jobs'
+            className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition inline-block'
+          >
+            View Rated Jobs
           </Link>
         </div>
       </div>

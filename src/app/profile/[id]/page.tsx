@@ -1,29 +1,48 @@
 'use client';
 import { useParams } from 'next/navigation';
-import FixerProfile from './fixer-profile-modal';
-import { useState } from 'react';
+import FixerProfile from './fixer-profile';
+import { ClientRatings } from './components';
+import './theme.css';
 
 export default function ProfilePage() {
   const { id } = useParams();
-  const [isOpen, setIsOpen] = useState(false);
 
-  const handleShowProfile = () => {
-    setIsOpen(true);
-  };
-  const closeShowProfile = () => {
-    setIsOpen(false);
-  };
-  return (
-    <>
+  if (!id) {
+    return (
       <div className='flex items-center justify-center min-h-screen bg-gray-100'>
-        <button
-          onClick={handleShowProfile}
-          className='px-4 py-2 text-sm font-medium text-black border border-black bg-white rounded-lg hover:bg-slate-100 cursor-pointer  transition-colors'
-        >
-          Ver perfil
-        </button>
+        <div className='bg-white p-6 rounded-lg shadow'>ID de usuario no proporcionado.</div>
       </div>
-      {isOpen && <FixerProfile isOpen={isOpen} onClose={closeShowProfile} userId={id as string} />}
-    </>
+    );
+  }
+
+  return (
+    <div className='min-h-screen bg-gray-100 flex flex-col'>
+      <header className='bg-white border-b border-gray-300 w-full fixed top-0 left-0 z-50'>
+        <div className='px-6 py-4'>
+          <h1 className='text-xl font-semibold text-gray-900'>Servineo</h1>
+        </div>
+      </header>
+
+      <main className='flex-grow pt-20 px-6 pb-12'>
+        <div className='max-w-4xl mx-auto space-y-8'>
+          <FixerProfile userId={id as string} />
+
+          <section
+            aria-labelledby='ratings-heading'
+            className='bg-white rounded-2xl border border-gray-200 p-6 shadow-sm'
+          >
+            <div className='flex items-center justify-between mb-4'>
+              <h2 id='ratings-heading' className='text-2xl font-semibold tracking-tight'>
+                Rating Details
+              </h2>
+            </div>
+
+            <div>
+              <ClientRatings fixerId={id as string} />
+            </div>
+          </section>
+        </div>
+      </main>
+    </div>
   );
 }
