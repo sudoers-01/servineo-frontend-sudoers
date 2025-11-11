@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
 import { Roboto } from 'next/font/google';
 import type { RatedJob } from './utils';
 import { apiFetch } from '../../config/api'; // corrige la ruta según tu estructura
+import Link from 'next/link';
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -203,11 +204,13 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
       </div>
 
       <div className='fixed bottom-6 right-40 z-50'>
-        <button
-          type='button'
-          className='px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 transition'
-        >
-          Go to comments
+        <button>
+          <Link
+            href='/fixers/68e87a9cdae3b73d8040102f/comments'
+            className='px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 transition'
+          >
+            Go to comments
+          </Link>
         </button>
       </div>
     </section>
