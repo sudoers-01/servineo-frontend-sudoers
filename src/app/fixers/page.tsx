@@ -24,12 +24,6 @@ export default function FixersLanding() {
           >
             Appointments
           </Link>
-          <Link
-            href='/fixers/68e87a9cdae3b73d8040102f/comments'
-            className='px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition'
-          >
-            View Comments
-          </Link>
         </div>
       </div>
     </main>
