@@ -126,7 +126,8 @@ function GenericDropdown({
           aria-expanded={open}
           aria-disabled={disabled}
         >
-          {label}{disabled && <span className='sr-only'>(deshabilitado)</span>}
+          {label}
+          {disabled && <span className='sr-only'>(deshabilitado)</span>}
           <svg
             className='w-3 h-3 ml-1 text-blue-600'
             viewBox='0 0 10 6'
