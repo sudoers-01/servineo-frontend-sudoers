@@ -20,5 +20,9 @@
     "Inspiration":{
         "insTitle": "Inspiration for your home",
         "insDescription": "Discover ideas and projects carried out by our expert professionals"
+    },
+    "Map":{
+        "mapTitle": "Find services near you",
+        "mapDescription": "Explore available professionals in your area"
     }
 }
