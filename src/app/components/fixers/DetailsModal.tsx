@@ -23,19 +23,19 @@ export const DetailsModal = ({ isOpen, onClose, onAccept, dataId }: ReviewModalP
       try {
         const response = await getJobForFixerInfo(dataId, fixerId);
         setData({
-            title: response.title,
-            date: response.createdAt ? new Date(response.createdAt).toLocaleDateString() : '',
-            rating: response.rating,
-            description: response.description,
-            serviceType: response.type ?? '',
-            comment: response.comment,
-          });
+          title: response.title,
+          date: response.createdAt ? new Date(response.createdAt).toLocaleDateString() : '',
+          rating: response.rating,
+          description: response.description,
+          serviceType: response.type ?? '',
+          comment: response.comment,
+        });
       } catch (error) {
         console.error('Error fetching job details:', error);
       }
     };
     fetchJobDetails();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

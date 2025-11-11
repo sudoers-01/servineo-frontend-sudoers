@@ -25,14 +25,17 @@ export async function getJobInfo(jobId: string): Promise<JobSummary> {
 }
 
 export const getJobForFixerInfo = async (jobId: string, fixerId: string): Promise<JobDetails> => {
-  const res = await fetch(`${API_BASE_URL}/api/job-rating-details/${encodeURIComponent(fixerId)}/${encodeURIComponent(jobId)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
+  const res = await fetch(
+    `${API_BASE_URL}/api/job-rating-details/${encodeURIComponent(fixerId)}/${encodeURIComponent(jobId)}`,
+    {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+    },
+  );
 
   if (!res.ok) {
     throw new Error(`getJobForFixerInfo failed: ${res.status}`);
   }
 
   return res.json();
-}
+};

@@ -30,10 +30,8 @@ export default function FixerProfile({ userId }: FixerProfileProps) {
 
   const displayPercentages = calculatePercentages();
 
-
   return (
     <div className='w-full bg-white rounded-2xl shadow-lg border border-gray-200 text-black p-8'>
-      
       {data ? (
         <>
           <h2 className='text-lg font-semibold uppercase tracking-wide mb-4'>Perfil del Fixer</h2>
