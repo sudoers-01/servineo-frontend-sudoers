@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 
 const BASE_API =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/controlC';
+  `${process.env.NEXT_PUBLIC_API_URL}/api/controlC` || 'http://localhost:8000/api/controlC';
 
 export default function ClientVerify({ token }: { token?: string }) {
   const [msg, setMsg] = useState('Verificando enlace de acceso...');

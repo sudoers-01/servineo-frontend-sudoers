@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''; 
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
 
 export interface User {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

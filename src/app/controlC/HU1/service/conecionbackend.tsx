@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || ''; 
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
 
 export interface User {
   email: string;
@@ -138,7 +138,6 @@ export async function enviarFotoPerfil(usuarioId: string, archivo: File): Promis
     return { success: false, message: data.message || "Error al subir la foto" };
   }
 
-  // 👇 Guarda el usuario actualizado en localStorage, si lo deseas
   if (data.user) {
     localStorage.setItem("servineo_user", JSON.stringify(data.user));
   }

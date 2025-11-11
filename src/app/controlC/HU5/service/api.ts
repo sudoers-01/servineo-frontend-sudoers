@@ -1,5 +1,5 @@
-const BASE_URL = 'http://localhost:8000'; 
-const MODIFICAR_DATOS_BASE = '/api/controlC/modificar-datos';
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC/modificar-datos`;
+
 
 export interface User {
   email: string;
@@ -36,7 +36,7 @@ export async function obtenerDatosUsuarioLogueado(): Promise<RequesterData> {
 
   try {
     // 👈 URL CORREGIDA: Agregando la ruta completa del router
-    const fullUrl = `${BASE_URL}${MODIFICAR_DATOS_BASE}/requester/data`;
+    const fullUrl = `${BASE_URL}/requester/data`;
 
     const res = await fetch(fullUrl, {
       method: "GET",
@@ -67,7 +67,7 @@ export async function actualizarDatosUsuario(
 
   try {
     // 👈 URL CORREGIDA: Agregando la ruta completa del router
-    const fullUrl = `${BASE_URL}${MODIFICAR_DATOS_BASE}/requester/update-profile`;
+    const fullUrl = `${BASE_URL}/requester/update-profile`;
 
     const res = await fetch(fullUrl, {
       method: "PUT",

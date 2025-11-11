@@ -4,6 +4,7 @@ import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { vincularGitHub } from "../service/api";
 
 interface VincularGithubProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -22,46 +23,18 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
 
     setLoading(true);
 
-    const state = encodeURIComponent(
-      JSON.stringify({
-        mode: "link",
-        token,
-      })
-    );
-
-    const popup = window.open(
-      `https://backdos.vercel.app/auth/github?state=${state}`,
-      "GitHubLink",
-      "width=600,height=700"
-    );
-
-    if (!popup) {
-      toast.error("No se pudo abrir la ventana de GitHub");
-      setLoading(false);
-      return;
-    }
-
-    const handleMessage = (event: MessageEvent) => {
-      if (event.origin !== "https://backdos.vercel.app") return;
-
-      const data = event.data;
-
-      if (data.type === "GITHUB_LINK_SUCCESS") {
+    vincularGitHub(
+      token,
+      (client) => {
         toast.success("Cuenta de GitHub vinculada con éxito");
         setLoading(false);
-        popup.close();
-        window.removeEventListener("message", handleMessage);
-
-        if (onLinked) onLinked(data.client);
-      } else if (data.type === "GITHUB_LINK_ERROR") {
-        toast.error(data.message || "Error al vincular cuenta GitHub");
+        onLinked?.(client);
+      },
+      (msg) => {
+        toast.error(msg);
         setLoading(false);
-        popup.close();
-        window.removeEventListener("message", handleMessage);
       }
-    };
-
-    window.addEventListener("message", handleMessage);
+    );
   };
 
   return (

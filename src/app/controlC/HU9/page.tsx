@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const BASE_API =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/controlC';
+  `${process.env.NEXT_PUBLIC_API_URL}/api/controlC` || 'http://localhost:8000/api/controlC';
 
 export default function RecuperacionCorreoPage() {
   const [email, setEmail] = useState('');

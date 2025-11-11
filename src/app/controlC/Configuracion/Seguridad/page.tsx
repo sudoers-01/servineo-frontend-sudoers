@@ -136,24 +136,6 @@ export default function SeguridadPage() {
                   Seguridad
                 </button>
               </Link>
-
-              {/* NUEVO: Cuentas vinculadas */}
-              <Link href="/controlC/HU7/registrarVinculo" className="block">
-                <button
-                  className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
-                    pathname === '/controlC/HU7'
-                      ? 'bg-blue-100 text-blue-600 font-semibold'
-                      : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
-                  }`}
-                >
-                  <img
-                    src="/icons/cuentas.png"
-                    alt="Cuentas vinculadas"
-                    className="w-7 h-7"
-                  />
-                  Cuentas vinculadas
-                </button>
-              </Link>
             </nav>
           </div>
 

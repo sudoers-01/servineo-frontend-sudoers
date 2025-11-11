@@ -5,9 +5,10 @@ import { FcGoogle } from "react-icons/fc";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { vincularGoogle } from "../service/api";
 
 interface VincularGoogleProps {
-  onLinked?: () => void;
+  onLinked?: (client: any) => void;
   tokenUsuario?: string;
 }
 
@@ -18,30 +19,23 @@ export default function VincularGoogle({ onLinked, tokenUsuario }: VincularGoogl
     const tokenGoogle = credentialResponse?.credential;
     if (!tokenGoogle) return console.error("Token de Google vacío");
 
-    setLoading(true);
-    try {
-      const res = await fetch("https://backdos.vercel.app/api/controlC/cliente/link-google", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${tokenUsuario}`,
-        },
-        body: JSON.stringify({ tokenGoogle }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        toast.success("Cuenta de Google vinculada correctamente");
-        onLinked?.();
-      } else {
-        toast.error(data.message || "Error al vincular Google");
-      }
-    } catch (err) {
-      console.error("Error vinculando Google:", err);
-      toast.error("Error al vincular con Google");
-    } finally {
-      setLoading(false);
+    if (!tokenUsuario) {
+      toast.error("No hay sesión activa para vincular cuenta");
+      return;
     }
+
+    setLoading(true);
+
+    const result = await vincularGoogle(tokenUsuario, tokenGoogle);
+
+    if (result.success) {
+      toast.success(result.message);
+      onLinked?.(result.client);
+    } else {
+      toast.error(result.message);
+    }
+
+    setLoading(false);
   };
 
   return (

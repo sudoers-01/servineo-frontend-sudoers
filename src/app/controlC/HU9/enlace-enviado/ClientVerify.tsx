@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from 'react';
 
 const BASE_API =
-  process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api/controlC';
+  `${process.env.NEXT_PUBLIC_API_URL}/api/controlC` || 'http://localhost:8000/api/controlC';
 
 const RESEND_COOLDOWN_MS = 60_000;     // 1 minuto
 const LINK_VALIDITY_SEC = 5 * 60;      // contador visible de 5 minutos
