@@ -1,6 +1,4 @@
-'use client';
 import Link from 'next/link';
-import { DetailsModal } from '../components/fixers/DetailsModal';
 
 export default function FixersLanding() {
   return (

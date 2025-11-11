@@ -132,7 +132,7 @@ export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; 
             className='flex items-start gap-4 p-4 rounded-xl hover:shadow-sm transition-shadow border'
             style={{ borderColor: 'var(--surface-border)', background: 'var(--surface-card)' }}
           >
-            <div className='h-10 w-10 shrink-0 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden'>
+            <div className='h-10 w-10 shrink-0 rounded-full bg- flex items-center justify-center overflow-hidden'>
               <span className='text-xs'>👤</span>
             </div>
 

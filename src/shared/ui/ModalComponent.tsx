@@ -1,3 +1,4 @@
+
 interface ModalProps {
     children: React.ReactNode;
     isOpen?: boolean;
@@ -15,7 +16,7 @@ export const ModalComponent = ({
 
     return (
         <div
-            className="bg-black bg-opacity-50 fixed inset-0 flex items-center justify-center z-50 w-full h-full"
+            className="bg-black/70 fixed inset-0 flex items-center justify-center z-50 w-full h-full"
             role="dialog"
             aria-modal
             onClick={
@@ -38,7 +39,7 @@ export const ModalComponent = ({
                     x
                 </button>
                 {children}
-                <button onClick={Accept}>Accept</button>
+                <button className="bg-black p-5 text-white rounded-lg" onClick={Accept}>Accept</button>
             </div>
         </div>
     );

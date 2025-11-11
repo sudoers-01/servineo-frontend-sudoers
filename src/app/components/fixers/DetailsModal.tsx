@@ -1,28 +1,57 @@
+import { getJobForFixerInfo } from '@/services/job-info';
 import { ModalComponent } from '@/shared/ui/ModalComponent';
+import { JobDetails } from '@/types/job';
+import { useEffect, useState } from 'react';
 
 interface ReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAccept: () => void;
+  dataId: string;
 }
 
-export const DetailsModal = ({ isOpen, onClose, onAccept }: ReviewModalProps) => {
+export const DetailsModal = ({ isOpen, onClose, onAccept, dataId }: ReviewModalProps) => {
+  const [data, setData] = useState<JobDetails | null>(null);
+
+  const url = window.location.href;
+  const fixerId = url.split('/').pop();
+
+  useEffect(() => {
+    if (!dataId || !fixerId) return;
+
+    const fetchJobDetails = async () => {
+      try {
+        const response = await getJobForFixerInfo(dataId, fixerId);
+        setData({
+            title: response.title,
+            date: response.createdAt ? new Date(response.createdAt).toLocaleDateString() : '',
+            rating: response.rating,
+            description: response.description,
+            serviceType: response.type ?? '',
+            comment: response.comment,
+          });
+      } catch (error) {
+        console.error('Error fetching job details:', error);
+      }
+    };
+    fetchJobDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <ModalComponent isOpen={isOpen} onClose={onClose} Accept={onAccept}>
       <div className='flex flex-col gap-4 w-[500px] max-w-[90%] text-left'>
         <div className='flex justify-between items-start'>
           <div>
-            <h2 className='text-lg font-semibold text-gray-800'>Reparación eléctrica</h2>
-            <p className='text-sm text-gray-400'>Date: 29/10/2025</p>
+            <h2 className='text-lg font-semibold text-gray-800'>{data?.title}</h2>
+            <p className='text-sm text-gray-400'>Date: {data?.date}</p>
           </div>
           <div className='flex gap-1'>
-            {Array.from({ length: 3 }).map((_, i) => (
-              <span key={i} className='text-yellow-400 text-xl'>
-                ★
-              </span>
-            ))}
-            {Array.from({ length: 2 }).map((_, i) => (
-              <span key={i} className='text-gray-300 text-xl'>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <span
+                key={i}
+                className={`${i < (data?.rating ?? 0) ? 'text-yellow-400' : 'text-gray-300'} text-xl`}
+              >
                 ★
               </span>
             ))}
@@ -31,24 +60,17 @@ export const DetailsModal = ({ isOpen, onClose, onAccept }: ReviewModalProps) =>
 
         <div className='text-sm text-gray-700 leading-relaxed'>
           <p className='font-semibold mb-1'>Descripción</p>
-          <p>
-            Instalación y reparación de un tomacorriente en mal estado. Se reemplazó el enchufe
-            dañado y se aseguró el correcto funcionamiento del circuito.
-          </p>
+          <p>{data?.description}</p>
         </div>
 
         <div className='text-sm text-gray-700'>
           <p className='font-semibold mb-1'>Tipo de servicio:</p>
-          <p>Eléctrico y mantenimiento</p>
+          <p>{data?.serviceType}</p>
         </div>
 
         <div className='text-sm text-gray-700'>
           <p className='font-semibold mb-1'>Comentario:</p>
-          <p>
-            El técnico llegó un poco tarde y, aunque logró reparar el tomacorriente, el trabajo no
-            quedó del todo prolijo. Los cables estaban algo sueltos y tuve que reajustar la tapa al
-            día siguiente. Aprecio que haya venido, pero esperaba un mejor acabado por el precio.
-          </p>
+          <p>{data?.comment}</p>
         </div>
       </div>
     </ModalComponent>
