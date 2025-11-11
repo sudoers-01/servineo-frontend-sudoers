@@ -472,6 +472,16 @@ const Header = () => {
             Centro de Pagos
           </Link>
         )}
+        {user?.role === 'fixer' && (
+          <Link 
+            href={`/payment/pages/confirmar-pagos?fixerId=${user._id}`}
+            id="confirmarPagosBtn" 
+            className="menu-item"
+            onClick={() => window.closeMenu?.()}
+          >
+            Confirmar Pagos
+          </Link>
+        )}
 
         {/* Botón 3: Convertirse en Fixer (Se muestra si el rol NO es 'fixer') */}
         {user?.role !== 'fixer' && (
