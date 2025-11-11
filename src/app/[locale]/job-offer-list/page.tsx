@@ -7,7 +7,7 @@ import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
 import { JobOfferModal } from "@/Components/Job-offers/Job-offer-modal"
 import { MapView } from "@/Components/Job-offers/maps/MapView"
 import { SearchHeader } from "@/Components/SearchHeader"
-import { useLogClickMutation } from "../redux/services/activityApi"
+import { useLogClickMutation } from "../../redux/services/activityApi"
 import { FiltersPanel } from "@/Components/FiltersPanel"
 import { useAppSelector } from "../../redux/hooks"
 import {
