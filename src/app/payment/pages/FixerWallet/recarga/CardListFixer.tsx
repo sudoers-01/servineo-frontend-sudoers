@@ -29,7 +29,7 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
 
     const fetchCards = async () => {
         try {
-            const res = await fetch(`http://localhost:4000/api/cards?userId=${fixerId}`);
+            const res = await fetch(`https://servineo-backend-m68a.onrender.com/api/cards?userId=${fixerId}`);
             if (!res.ok) throw new Error('Error fetching cards');
             const data = await res.json();
             setCards(data);
@@ -52,7 +52,7 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
         try {
             console.log(`💳 Recargando ${amount} BOB a la wallet del fixer ${fixerId}`);
 
-            const res = await fetch(`http://localhost:4000/api/wallet/update`, {
+            const res = await fetch(`https://servineo-backend-m68a.onrender.com/api/wallet/update`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, userId: fixerId }), // ✅ usar userId
