@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
 import { MapPin, Edit, Save, X, Briefcase, MessageSquare, Star, Phone, Mail } from "lucide-react"
 import Image from "next/image"
 import type { Fixer } from "@/app/lib/mock-data"
