@@ -10,3 +10,14 @@ export interface Job {
   rating?: number;
   comment?: string;
 }
+
+export interface JobDetails {
+  title: string;
+  date: string;
+  rating: number;
+  description: string;
+  serviceType: string;
+  comment: string;
+  createdAt?: string;
+  type?: string;
+}
