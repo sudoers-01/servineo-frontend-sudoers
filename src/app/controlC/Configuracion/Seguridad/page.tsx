@@ -104,11 +104,10 @@ export default function SeguridadPage() {
               {/* Editar Perfil */}
               <Link href="/controlC/HU5" className="block">
                 <button
-                  className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
-                    pathname === '/controlC/HU5'
-                      ? 'bg-blue-100 text-blue-600 font-semibold'
-                      : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
-                  }`}
+                  className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${pathname === '/controlC/HU5'
+                    ? 'bg-blue-100 text-blue-600 font-semibold'
+                    : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
+                    }`}
                 >
                   <img
                     src="/icons/edit-config.png"
@@ -122,11 +121,10 @@ export default function SeguridadPage() {
               {/* Seguridad */}
               <Link href="/controlC/Configuracion/Seguridad" className="block">
                 <button
-                  className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
-                    pathname === '/controlC/Configuracion/Seguridad'
-                      ? 'bg-blue-100 text-blue-600 font-semibold'
-                      : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
-                  }`}
+                  className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${pathname === '/controlC/Configuracion/Seguridad'
+                    ? 'bg-blue-100 text-blue-600 font-semibold'
+                    : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
+                    }`}
                 >
                   <img
                     src="/icons/seguridad-config.png"
@@ -177,7 +175,7 @@ export default function SeguridadPage() {
 
               {/* Dispositivos vinculados */}
               <button
-                onClick={() => router.push('/controlC/Configuracion/Seguridad/Inicios')}
+                onClick={() => router.push('/controlC/HU6/closeSession')}
                 className="flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out bg-white text-gray-800 cursor-pointer min-w-[220px]"
               >
                 <div className="p-2 rounded-md bg-blue-50">
