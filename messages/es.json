@@ -24,5 +24,10 @@
     "Map":{
         "mapTitle":"Encuentra servicios cerca de ti",
         "mapDescription": "Explora los profesionales disponibles en tu zona"
+    },
+    "RecentOffer":{
+        "recOfTitle":"Ofertas Recientes",
+        "recOfDescription": "Descubre las últimas ofertas publicadas",
+        "viewAll": "Ver todas →"
     }
 }
