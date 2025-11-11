@@ -23,11 +23,16 @@
     },
     "Map":{
         "mapTitle":"Encuentra servicios cerca de ti",
-        "mapDescription": "Explora los profesionales disponibles en tu zona"
+        "mapDescription": "Explora los profesionales disponibles en tu zona",
+        "mapInteractive": "Mapa interactivo aqui"
     },
     "RecentOffer":{
         "recOfTitle":"Ofertas Recientes",
         "recOfDescription": "Descubre las últimas ofertas publicadas",
         "viewAll": "Ver todas →"
+    },
+    "Services":{
+        "serTitle":"Nuestros Servicios",
+        "serDescription": "Encuentra el servicio perfecto para tus necesidades"
     }
 }

@@ -14,7 +14,7 @@ export default function MapSection() {
       </div>
       <div className="h-96 bg-gray-100 rounded-xl overflow-hidden">
         <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/5 to-primary/10">
-          <p className="text-gray-500 text-lg">Mapa interactivo aquí</p>
+          <p className="text-gray-500 text-lg">{t("mapInteractive")}</p>
         </div>
       </div>
     </div>

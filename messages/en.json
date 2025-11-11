@@ -23,11 +23,16 @@
     },
     "Map":{
         "mapTitle": "Find services near you",
-        "mapDescription": "Explore available professionals in your area"
+        "mapDescription": "Explore available professionals in your area",
+        "mapInteractive": "Interactive map here"
     },
     "RecentOffer":{
         "recOfTitle": "Recent Offers",
         "recOfDescription": "Discover the latest published offers",
         "viewAll": "View all →"
+    },
+    "Services":{
+    "serTitle": "Our Services",
+    "serDescription": "Find the perfect service for your needs"
     }
 }
