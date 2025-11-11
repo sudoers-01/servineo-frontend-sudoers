@@ -20,17 +20,17 @@
         "description": "No hay ofertas que coincidan con tu búsqueda o filtros actuales."
         },
         "map": {
-            "loading": "Loading map...",
-            "yourLocation": "Your location",
-            "jobOffers": "Job offers",
-            "radius": "Radius: ~1km",
-            "mapDetails": "Map details",
+            "loading": "Cargando mapa...",
+            "yourLocation": "Tu ubicación",
+            "jobOffers": "Ofertas de trabajo",
+            "radius": "Radio: ~1km",
+            "mapDetails": "Detalles del mapa",
             "availableOffers": {
-                "singular": "available offer",
-                "plural": "available offers"
+                "singular": "oferta disponible",
+                "plural": "ofertas disponibles"
             },
-            "distance": "away"
-    }
+            "distance": "de distancia"
+        }
     }
     
 }

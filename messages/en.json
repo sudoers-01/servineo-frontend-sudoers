@@ -18,6 +18,18 @@
     "emptyState": {
       "title": "No offers found",
       "description": "There are no offers matching your current search or filters."
+    },
+    "map": {
+            "loading": "Loading map...",
+            "yourLocation": "Your location",
+            "jobOffers": "Job offers",
+            "radius": "Radius: ~1km",
+            "mapDetails": "Map details",
+            "availableOffers": {
+                "singular": "available offer",
+                "plural": "available offers"
+            },
+            "distance": "away"
     }
   }
     
