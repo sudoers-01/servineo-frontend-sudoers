@@ -147,7 +147,7 @@ export default function FixerWalletDashboard() {
           </div>
           
           <Link
-            href={`/payment/FixerWallet/recharge?fixerId=${receivedFixerId}`}
+            href={`payment/pages/FixerWallet/recarga?fixerId=${receivedFixerId}`}
             className="w-full block text-center bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
           >
             Recargar Saldo
@@ -161,7 +161,7 @@ export default function FixerWalletDashboard() {
           <h2 className="text-gray-600 font-semibold text-lg">Movientos Recientes</h2>
           
           <Link
-            href={`/payment/FixerWallet/history?fixerId=${receivedFixerId}`}
+            href={`/payment/pages/FixerWallet/history?fixerId=${receivedFixerId}`}
             className="text-blue-600 font-semibold"
           >
             Ver todo
