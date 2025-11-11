@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import FixerRegisterForm from "@/Components/fixer/Fixer-register-form"
-import { FixerEnableWizard } from "@/Components/fixer/Filter-eneable-wizard"
-import { Navbar } from "@/Components/Shared/Navbar"
+import FixerRegisterForm from "@/Components/Fixer/Fixer-register-form"
+import { FixerEnableWizard } from "@/Components/Fixer/Filter-eneable-wizard"
+
 
 const defaultFormValues = {
   name: "Freddy Amin Zapata",
@@ -24,7 +24,6 @@ export default function BecomeFixerPage() {
 
   return (
     <div>
-    <Navbar />
     <div className="container mx-auto max-w-4xl p-4">
       <header className="mb-6 text-center">
         <h1 className="text-2xl font-bold">Conviertete en un Fixer</h1>

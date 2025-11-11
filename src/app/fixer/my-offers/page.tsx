@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { currentFixer, mockJobOfferService, type JobOffer } from "@/app/lib/mock-data"
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
-import { Navbar } from "@/Components/Shared/Navbar"
 import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
 import type { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
 import { ImageCarousel } from "@/Components/Shared/ImageCarousel"
@@ -36,7 +35,7 @@ export default function MyOffersPage() {
     offerId: string | null
   }>({ isOpen: false, offerId: null })
 
-  // Initialize fixer and offers from mock data on mount
+  
   useEffect(() => {
     if (!currentFixerRedux) {
       dispatch(setFixer(currentFixer))
@@ -80,7 +79,7 @@ export default function MyOffersPage() {
 
   const handleSubmit = (formData: JobOfferFormData) => {
     try {
-      // Convertir los servicios de objetos a strings
+      
       const servicesAsStrings = formData.services.map((service) => service.value)
       const defaultLocations: { [key: string]: { lat: number; lng: number } } = {
         Cochabamba: { lat: -17.3895, lng: -66.1568 },
@@ -92,6 +91,7 @@ export default function MyOffersPage() {
       const cityLocation = defaultLocations[formData.city] || defaultLocations["Cochabamba"]
 
       const offerData = {
+        title: formData.title,
         description: formData.description,
         city: formData.city,
         services: servicesAsStrings,
@@ -100,7 +100,7 @@ export default function MyOffersPage() {
         price: formData.price || 0,
         fixerId: currentFixer.id,
         fixerName: currentFixer.name,
-        whatsapp: currentFixer.whatsapp,
+        whatsapp: currentFixer.whatsapp || currentFixer.phone,
         location: {
           lat: cityLocation.lat,
           lng: cityLocation.lng,
@@ -149,17 +149,9 @@ export default function MyOffersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      <Navbar />
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Mis Ofertas de Trabajo
-            </h1>
-            <p className="text-sm text-blue-600 mt-1">
-              {currentFixer.name} • {currentFixer.whatsapp}
-            </p>
-          </div>
+          
           <button
             onClick={() => {
               setEditingOffer(null)
@@ -188,7 +180,7 @@ export default function MyOffersPage() {
           </div>
         )}
 
-        {/* Offers list */}
+        
         {offers.length === 0 ? (
           <div className="text-center py-16 animate-fade-in">
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl flex items-center justify-center">
@@ -218,7 +210,7 @@ export default function MyOffersPage() {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="relative w-full overflow-hidden rounded-xl border border-primary bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-                  {/* Carrusel de imágenes */}
+                  
                   <ImageCarousel
                     images={
                       offer.photos.length > 0 ? offer.photos : ["/placeholder.svg?height=180&width=320&text=Oferta"]
@@ -226,7 +218,7 @@ export default function MyOffersPage() {
                     alt={`Trabajo de ${offer.fixerName}`}
                   />
 
-                  {/* Ciudad y Precio */}
+                  
                   <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 border border-gray-200 shadow-sm">
                     <span className="font-medium text-blue-600">{offer.city}</span>
                   </div>
@@ -234,7 +226,7 @@ export default function MyOffersPage() {
                     {offer.price} Bs
                   </div>
 
-                  {/* Información y botones de acción */}
+                  
                   <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-black/0 p-4">
                     <div className="flex items-end justify-between">
                       <div className="text-white">
@@ -247,7 +239,7 @@ export default function MyOffersPage() {
                     </div>
                   </div>
 
-                  {/* Botones de edición y eliminación */}
+                  
                   <div className="absolute left-3 bottom-16 flex gap-2">
                     <button
                       onClick={(e) => {
@@ -277,7 +269,7 @@ export default function MyOffersPage() {
         )}
       </div>
 
-      {/* Notification Modal */}
+      
       <NotificationModal
         isOpen={notification.isOpen}
         onClose={() => setNotification({ ...notification, isOpen: false })}
