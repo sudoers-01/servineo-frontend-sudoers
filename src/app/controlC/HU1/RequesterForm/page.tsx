@@ -25,7 +25,8 @@ export default function RegistroForm() {
 
   const contrasenasCoinciden = password === confirmarPassword;
   const longitudValida = password.length >= 8;
-  const emailValido = /^[a-zA-Z0-9._%+-]+@gmail\.com$/.test(email);
+  // Acepta cualquier correo con formato válido (no solo gmail)
+  const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   const camposLlenos = nombre && apellido && email && password && confirmarPassword;
   const formularioValido = camposLlenos && contrasenasCoinciden && longitudValida && emailValido;
 
@@ -185,10 +186,11 @@ export default function RegistroForm() {
         />
 
         {email && !emailValido && (
-          <div className="absolute top-full left-0 mt-1 bg-red-50 border border-red-400 text-red-600 text-xs px-3 py-2 rounded-lg shadow-md animate-fade-in z-10">
-            Solo se permiten correos @gmail.com
-          </div>
-        )}
+        <div className="absolute top-full left-0 mt-1 bg-red-50 border border-red-400 text-red-600 text-xs px-3 py-2 rounded-lg shadow-md animate-fade-in z-10">
+            Ingresa un correo electrónico válido (ej: usuario@dominio.com)
+        </div>
+      )}
+
       </div>
 
       {/* Contraseña */}
