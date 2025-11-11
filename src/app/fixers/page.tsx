@@ -19,6 +19,12 @@ export default function FixersLanding() {
             View Profile
           </Link>
           <Link
+            href='/fixers/68e87a9cdae3b73d8040102f/appointments'
+            className='px-6 py-3 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition'
+          >
+            Appointments
+          </Link>
+          <Link
             href='/fixers/68e87a9cdae3b73d8040102f/comments'
             className='px-6 py-3 rounded-lg border border-gray-300 text-gray-700 hover:bg-gray-100 transition'
           >
