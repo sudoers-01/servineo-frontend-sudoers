@@ -2,7 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '../../atoms/button';
 import axios from 'axios';
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
-import { AlertPopup } from '../forms/popups/AlertPopup'; // Asegúrate de importar correctamente
+import { AlertPopup } from '../forms/popups/AlertPopup';
+
+interface Appointment {
+  _id: string;
+  selected_date: string;
+  client_name?: string;
+  service_type?: string;
+}
 
 interface DayWithAppointments {
   date: string;
@@ -11,6 +18,7 @@ interface DayWithAppointments {
   dayNumber: number;
   monthName: string;
   appointmentIds: string[];
+  appointments: Appointment[];
 }
 
 interface CancelDaysAppointmentsProps {
@@ -27,7 +35,7 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
   fixer_id
 }) => {
   
-  const FIXER_ID = fixer_id  ;
+  const FIXER_ID = fixer_id;
   
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [daysWithAppointments, setDaysWithAppointments] = useState<DayWithAppointments[]>([]);
@@ -37,7 +45,8 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
   const [cancelLoading, setCancelLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [showConfirmPopup, setShowConfirmPopup] = useState(false); // Nuevo estado para el popup
+  const [showConfirmPopup, setShowConfirmPopup] = useState(false);
+  const [totalAppointmentsToCancel, setTotalAppointmentsToCancel] = useState(0);
   
   const API_BASE = 'https://servineo-backend-lorem.onrender.com/api';
   
@@ -88,7 +97,7 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
       );
       
       if (response.data && response.data.appointments && Array.isArray(response.data.appointments)) {
-        const appointmentsByDay: { [key: string]: { count: number, ids: string[], localDate: Date } } = {};
+        const appointmentsByDay: { [key: string]: { count: number, ids: string[], localDate: Date, appointments: Appointment[] } } = {};
         
         response.data.appointments.forEach((appointment: any) => {
           if (appointment && appointment.selected_date && !appointment.cancelled_fixer) {
@@ -99,12 +108,14 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
                 appointmentsByDay[normalizedDate] = { 
                   count: 0, 
                   ids: [],
-                  localDate: localDate
+                  localDate: localDate,
+                  appointments: []
                 };
               }
               
               appointmentsByDay[normalizedDate].count += 1;
               appointmentsByDay[normalizedDate].ids.push(appointment._id);
+              appointmentsByDay[normalizedDate].appointments.push(appointment);
               
             } catch (dateError) {
               console.error('Error procesando fecha:', dateError);
@@ -121,7 +132,8 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
             dayName: dayNames[localDate.getDay()],
             dayNumber: localDate.getDate(),
             monthName: months[localDate.getMonth()],
-            appointmentIds: data.ids
+            appointmentIds: data.ids,
+            appointments: data.appointments
           };
         });
         
@@ -139,53 +151,54 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
     }
   };
 
-const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
-  let successCount = 0;
-  let failedCount = 0;
-  
-  for (const appointmentId of day.appointmentIds) {
-    try {
-      console.log('Canceling appointment ID:', appointmentId);
-      
-     const response = await axios.put(
-        `${API_BASE}/crud_update/appointments/update_cancell_appointment_fixer?appointment_id=${appointmentId}`,
-        {}, 
-        {
-          headers: {
-            'Content-Type': 'application/json'
+  const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
+    let successCount = 0;
+    let failedCount = 0;
+    
+    for (const appointmentId of day.appointmentIds) {
+      try {
+        console.log('Canceling appointment ID:', appointmentId);
+        
+        const response = await axios.put(
+          `${API_BASE}/crud_update/appointments/update_cancell_appointment_fixer?appointment_id=${appointmentId}`,
+          {}, 
+          {
+            headers: {
+              'Content-Type': 'application/json'
+            }
           }
-        }
-      );
+        );
 
-      
-      
-      if (response.data && response.data.succeed === true) {
-        successCount++;
-      } else {
+        if (response.data && response.data.succeed === true) {
+          successCount++;
+        } else {
+          failedCount++;
+        }
+      } catch (error: any) {
+        console.log('Error details:', error.response?.data);
         failedCount++;
       }
-    } catch (error: any) {
-      console.log('Error details:', error.response?.data);
-      failedCount++;
     }
-  }
-  
-  return { success: successCount, failed: failedCount };
-};
+    
+    return { success: successCount, failed: failedCount };
+  };
 
- const handleConfirm = async () => {
+  const handleConfirm = async () => {
     if (cancelLoading || selectedDays.length === 0) return;
     
-    // Mostrar el popup de confirmación en lugar de proceder directamente
+    // Calcular el total de citas a cancelar
+    const total = daysWithAppointments
+      .filter(day => selectedDays.includes(day.date))
+      .reduce((sum, day) => sum + day.appointmentCount, 0);
+    
+    setTotalAppointmentsToCancel(total);
     setShowConfirmPopup(true);
   };
 
-  // Nueva función que ejecuta la cancelación real
   const executeCancellation = async () => {
     const selectedDaysData = daysWithAppointments.filter(day => 
       selectedDays.includes(day.date)
     );
-    
     setError(null);
     setSuccessMessage(null);
     setCancelLoading(true);
@@ -210,18 +223,20 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
         
         setSelectedDays([]);
         
-        // Recargar datos
-        setTimeout(async () => {
-          const appointmentsData = await fetchDaysWithAppointments(currentMonth, currentYear);
-          setDaysWithAppointments(appointmentsData);
-        }, 1000);
+        // Cerrar el modal después de un breve delay y recargar la página
+        setTimeout(() => {
+          onClose();
+          window.location.reload();
+        }, 1500);
         
       } else {
         setError('No se pudo cancelar ninguna cita');
+        setShowConfirmPopup(false);
       }
       
     } catch (error: any) {
       setError('Error al cancelar las citas');
+      setShowConfirmPopup(false);
     } finally {
       setCancelLoading(false);
     }
@@ -235,6 +250,7 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
         setSelectedDays([]);
         setError(null);
         setSuccessMessage(null);
+        setTotalAppointmentsToCancel(0);
       }
     };
 
@@ -458,25 +474,24 @@ const cancelAppointmentsForDay = async (day: DayWithAppointments) => {
           </Button>
 
           <AlertPopup
-        open={showConfirmPopup}
-        onClose={() => setShowConfirmPopup(false)}
-        variant="confirm"
-        title="Confirmar Cancelación"
-        message={
-          <div>
-            ¿Estás seguro de que deseas cancelar las citas de {selectedDays.length} día{selectedDays.length !== 1 ? 's' : ''} seleccionado{selectedDays.length !== 1 ? 's' : ''}?
-            <br />
-            <span className="text-red-600 font-medium">Esta acción no se puede deshacer.</span>
-          </div>
-        }
-        confirmLabel="Sí, Cancelar"
-        cancelLabel="Volver"
-        onConfirm={executeCancellation} // Se ejecuta cuando confirman
-      />
+            open={showConfirmPopup}
+            onClose={() => setShowConfirmPopup(false)}
+            variant="confirm"
+            title="Confirmar Cancelación"
+            message={
+              <div>
+                ¿Está seguro de que desea cancelar las citas de {selectedDays.length} día{selectedDays.length !== 1 ? 's' : ''} ({totalAppointmentsToCancel} cita{totalAppointmentsToCancel !== 1 ? 's' : ''}) seleccionado{selectedDays.length !== 1 ? 's' : ''}?
+                <br />
+                <span className="text-red-600 font-medium">Esta acción no se puede deshacer.</span>
+              </div>
+            }
+            confirmLabel="Sí, Cancelar"
+            cancelLabel="Volver"
+            onConfirm={executeCancellation} 
+          />
         </div>
       </div>
     </div>
-    
   );
 };
 
