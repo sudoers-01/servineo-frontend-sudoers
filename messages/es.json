@@ -4,5 +4,17 @@
         "footerSubtitle": "Únete a miles de personas que ya encontraron al profesional perfecto para sus necesidades",
         "footerButton": "Registrarse gratis",
         "footerButtonView": "Ver servicios"
+    },
+    "HowItWorks":{
+        "question":"¿Cómo funciona?",
+        "questionResponse": "Encuentra y contrata al profesional ideal en simples pasos",
+        "HowItWorksSearch": "Busca",
+        "HowItWorksSearchDescription": "Encuentra el servicio que necesitas",
+        "HowItWorksCompare": "Compara",
+        "HowItWorksCompareDescription": "Revisa perfiles y calificaciones",
+        "HowItWorksContact": "Contacta",
+        "HowItWorksContactDescription": "Habla directamente con los profesionales",
+        "HowItWorksRate": "Califica",
+        "HowItWorksRateDescription": "Comparte tu experiencia"
     }
 }

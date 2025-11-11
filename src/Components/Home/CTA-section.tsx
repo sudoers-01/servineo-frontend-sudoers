@@ -2,7 +2,6 @@
 "use client";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { useTransition } from "react";
 
 export default function CTASection() {
   const t=useTranslations("cta");
