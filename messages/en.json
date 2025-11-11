@@ -1,3 +1,8 @@
 {
-    
+    "cta": { 
+        "footerTitle": "Ready to find the ideal professional?", 
+        "footerSubtitle": "Join thousands of people who have already found the perfect professional for their needs", 
+        "footerButton": "Sign up for free", 
+        "footerButtonView": "View services" 
+    }
 }
