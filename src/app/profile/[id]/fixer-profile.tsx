@@ -1,43 +1,44 @@
+'use client';
 import React from 'react';
-import Modal from './modal-window';
 import { useProfile } from './hooks/useProfile';
 import { useRouter } from 'next/navigation';
 
 type FixerProfileProps = {
-  isOpen: boolean;
-  onClose: () => void;
   userId: string;
 };
 
-export default function FixerProfile({ isOpen, onClose, userId }: FixerProfileProps) {
+export default function FixerProfile({ userId }: FixerProfileProps) {
   const { data, errors } = useProfile(userId);
   const router = useRouter();
 
   const calculatePercentages = () => {
     if (!data) return { 1: 0, 2: 0, 3: 0 };
-    const percentages = [3, 2, 1].map((rating) =>
-      Math.floor((data.ratings[rating as 1 | 2 | 3] / data.rating_count) * 100),
-    );
-    const sum = percentages.reduce((acc, val) => acc + val, 0);
+    const total = data.rating_count || 0;
+    if (total === 0) return { 1: 0, 2: 0, 3: 0 };
+
+    const p3 = Math.floor((data.ratings[3] / total) * 100);
+    const p2 = Math.floor((data.ratings[2] / total) * 100);
+    const p1 = Math.floor((data.ratings[1] / total) * 100);
+
+    const percentages = [p3, p2, p1];
+    const sum = percentages.reduce((acc, v) => acc + v, 0);
     const diff = 100 - sum;
+    // Ajustar el último para sumar 100%
     percentages[percentages.length - 1] += diff;
-    return {
-      3: percentages[0],
-      2: percentages[1],
-      1: percentages[2],
-    };
+
+    return { 3: percentages[0], 2: percentages[1], 1: percentages[2] };
   };
 
   const displayPercentages = calculatePercentages();
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <div className='w-full bg-white rounded-2xl shadow-lg border border-gray-200 text-black p-8'>
       {data ? (
-        <div className='w-[20rem] md:w-[40rem] md:min-w-[30rem] mx-auto p-8 bg-white rounded-2xl shadow-lg border border-gray-200 text-black'>
+        <>
           <h2 className='text-lg font-semibold uppercase tracking-wide mb-4'>Perfil del Fixer</h2>
           <div className='md:flex md:flex-row-reverse justify-between w-full'>
             <div className='flex flex-col items-center'>
-              {!data ? (
+              {!data.photo_url ? (
                 <div className='w-24 h-24 rounded-full bg-gray-100 border-2 border-gray-300 flex items-center justify-center mb-4'>
                   <svg
                     xmlns='http://www.w3.org/2000/svg'
@@ -62,6 +63,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                   className='w-24 h-24 rounded-full object-cover'
                 />
               )}
+
               <div className='flex gap-2 mb-4'>
                 {[1, 2, 3].map((star) => (
                   <svg
@@ -84,11 +86,12 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
 
               <button
                 className='px-4 py-2 text-xs font-medium bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors'
-                onClick={() => router.push(`/fixer-ratings-details/68e87a9cdae3b73d8040102f`)}
+                onClick={() => router.push(`/fixer-ratings-details/${userId}`)}
               >
                 VER DETALLES DE CALIFICACIONES
               </button>
             </div>
+
             <div className='mb-3 md:mr-5 md:w-[60%] mt-3'>
               <div className='flex items-baseline gap-2'>
                 <span className='md:text-sm font-medium text-xs'>Nombre:</span>
@@ -150,19 +153,12 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
                       {rating} {rating === 1 ? 'ESTRELLA' : 'ESTRELLAS'}
                     </span>
                     <div className='flex-1 h-2 bg-gray-200 rounded-full overflow-hidden'>
-                      {data ? (
-                        <div
-                          className='h-full bg-black rounded-full transition-all duration-300'
-                          style={{
-                            width: `${displayPercentages[rating as 1 | 2 | 3]}%`,
-                          }}
-                        />
-                      ) : (
-                        <div
-                          className='h-full bg-black rounded-full transition-all duration-300'
-                          style={{ width: `0%` }}
-                        />
-                      )}
+                      <div
+                        className='h-full bg-black rounded-full transition-all duration-300'
+                        style={{
+                          width: `${displayPercentages[rating as 1 | 2 | 3]}%`,
+                        }}
+                      />
                     </div>
                     <span className='text-xs font-medium w-8'>
                       {displayPercentages[rating as 1 | 2 | 3]}%
@@ -182,24 +178,22 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
             </div>
           </div>
 
-          <div className='md:flex md:justify-end'>
+          <div className='md:flex md:justify-end mt-6'>
             <button
-              onClick={() => {
-                onClose();
-              }}
+              onClick={() => router.back()}
               className='w-full md:w-32 py-3 px-6 cursor-pointer bg-black text-white font-medium rounded-lg hover:bg-black/90 transition-colors'
             >
               Aceptar
             </button>
           </div>
-        </div>
+        </>
       ) : errors ? (
         <div className='flex items-center justify-center'>
-          <div className='bg-white border  rounded-xl p-8 max-w-sm shadow-sm'>
+          <div className='bg-white border rounded-xl p-8 max-w-sm shadow-sm'>
             <h2 className='text-xl font-semibold text-red-600 mb-2'>Error</h2>
             <p className='text-gray-700 mb-6'>{errors}</p>
             <button
-              onClick={() => onClose()}
+              onClick={() => router.back()}
               className='cursor-pointer w-full bg-red-500 text-white py-2 rounded hover:bg-red-600 transition'
             >
               OK
@@ -207,7 +201,7 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
           </div>
         </div>
       ) : (
-        <div>
+        <div className='flex items-center justify-center py-10'>
           <svg
             xmlns='http://www.w3.org/2000/svg'
             width='35'
@@ -224,6 +218,6 @@ export default function FixerProfile({ isOpen, onClose, userId }: FixerProfilePr
           </svg>
         </div>
       )}
-    </Modal>
+    </div>
   );
 }
