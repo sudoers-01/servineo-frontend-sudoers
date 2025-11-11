@@ -10,7 +10,7 @@ import CardListFixer from '../../../pages/FixerWallet/recarga/CardListFixer';
 
 // Stripe público
 const stripePromise = loadStripe(
-  'pk_test_51SIL9sCiQE1vT29jMXy7gnJ1N2VvGHHvLLPyhlVqEWoCGLhsQJXcR4ZtROYiJgiezETeTV2B67cGaoGHuXPJwnCp003Ix0t5oI'
+  'pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU'
 );
 
 export default function FixerWalletRecharge({userid}) {
