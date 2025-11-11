@@ -55,11 +55,13 @@ function GenericDropdown({
   options,
   align = 'right',
   disabled = false,
+  onSelect,
 }: {
   label: string;
   options: { key: string; label: string }[];
   align?: 'right' | 'left';
   disabled?: boolean;
+  onSelect?: (key: string) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [coords, setCoords] = useState<{ left: number; top: number; width: number } | null>(null);
@@ -160,6 +162,7 @@ function GenericDropdown({
                 key={opt.key}
                 onClick={() => {
                   setOpen(false);
+                  onSelect?.(opt.key);
                 }}
                 className='w-full text-left px-3 py-2 text-sm hover:bg-gray-50 text-gray-800'
               >
@@ -219,32 +222,43 @@ export default function RatedJobsPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [slowLoading, setSlowLoading] = useState<boolean>(false);
+  const [sortByRating, setSortByRating] = useState<string>('rating_desc');
+  const [sortByDate, setSortByDate] = useState<string>('recent');
 
-  useEffect(() => {
+  const fetchJobs = async (sortParam: string) => {
     const slowTimer: ReturnType<typeof setTimeout> = setTimeout(() => {
       setSlowLoading(true);
-    }, 2000); // 2 seconds threshold
+    }, 2000);
+
     setLoading(true);
     setError(null);
 
-    apiFetch<{ data?: RatedJob[] }>('api/rated-jobs')
-      .then((result) => {
-        setJobs(result.data ?? []);
-      })
-      .catch((err) => {
-        console.error('Error fetching jobs:', err);
-        setError('Sin conexión. Intenta de nuevo más tarde');
-      })
-      .finally(() => {
-        setLoading(false);
-        clearTimeout(slowTimer);
-        setSlowLoading(false);
-      });
-
-    return () => {
+    try {
+      const result = await apiFetch<{ data?: RatedJob[] }>(`api/rated-jobs?sortBy=${sortParam}`);
+      setJobs(result.data ?? []);
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      setError('Sin conexión. Intenta de nuevo más tarde');
+    } finally {
+      setLoading(false);
       clearTimeout(slowTimer);
-    };
+      setSlowLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs('recent');
   }, []);
+
+  const handleRatingSort = (key: string) => {
+    setSortByRating(key);
+    fetchJobs(key);
+  };
+
+  const handleDateSort = (key: string) => {
+    setSortByDate(key);
+    fetchJobs(key);
+  };
 
   const disableDropdowns = !!error || (jobs.length === 0 && !loading);
 
@@ -317,15 +331,17 @@ export default function RatedJobsPage() {
             <GenericDropdown
               label='Ordenar por calificación'
               disabled={disableDropdowns}
+              onSelect={handleRatingSort}
               options={[
-                { key: 'descending', label: 'Descendente' },
-                { key: 'ascending', label: 'Ascendente' },
+                { key: 'rating_desc', label: 'Descendente' },
+                { key: 'rating_asc', label: 'Ascendente' },
               ]}
             />
 
             <GenericDropdown
               label='Filtrar por fecha'
               disabled={disableDropdowns}
+              onSelect={handleDateSort}
               options={[
                 { key: 'recent', label: 'Mas reciente' },
                 { key: 'oldest', label: 'Mas antiguo' },
