@@ -1,31 +1,38 @@
-'use client';
-import React, { useState, useEffect } from 'react';
+﻿'use client';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Briefcase, DollarSign, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
 
-// Modal de pago en efectivo (adaptado de tu segundo código)
+// Modal de pago en efectivo
 function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
   const [codigoIngresado, setCodigoIngresado] = useState("");
   const [loading, setLoading] = useState(true);
   const [patching, setPatching] = useState(false);
   const [mainMessage, setMainMessage] = useState(null);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [summary, setSummary] = useState(null);
+
+  // Intentos y bloqueo
   const [remainingAttempts, setRemainingAttempts] = useState(null);
   const [unlockAtISO, setUnlockAtISO] = useState(null);
   const [now, setNow] = useState(Date.now());
   const [wasLocked, setWasLocked] = useState(false);
+
+  // Expiración de Código
   const [codeExpired, setCodeExpired] = useState(false);
   const [codeExpiresAt, setCodeExpiresAt] = useState(null);
-  const [summary, setSummary] = useState(null);
 
-  const msLeft = unlockAtISO ? Math.max(0, new Date(unlockAtISO).getTime() - now) : 0;
-  const msUntilExpiration = codeExpiresAt ? Math.max(0, new Date(codeExpiresAt).getTime() - now) : 0;
-  
-  const minutesLeft = Math.floor(msLeft / 60000);
-  const secondsLeft = Math.floor((msLeft % 60000) / 1000);
-  const hoursUntilExpiration = Math.floor(msUntilExpiration / 3600000);
-  const minutesUntilExpiration = Math.floor((msUntilExpiration % 3600000) / 60000);
-  const secondsUntilExpiration = Math.floor((msUntilExpiration % 60000) / 1000);
-  const locked = !!unlockAtISO && msLeft > 0;
+  // Timers de bloqueo/expiración
+  const msLeft = useMemo(() => {
+    if (!unlockAtISO) return 0;
+    const unlockMs = new Date(unlockAtISO).getTime();
+    return Math.max(0, unlockMs - now);
+  }, [unlockAtISO, now]);
+
+  const msUntilExpiration = useMemo(() => {
+    if (!codeExpiresAt) return 0;
+    const expiresMs = new Date(codeExpiresAt).getTime();
+    return Math.max(0, expiresMs - now);
+  }, [codeExpiresAt, now]);
 
   useEffect(() => {
     if (!unlockAtISO && !codeExpiresAt) return;
@@ -33,11 +40,22 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
     return () => clearInterval(t);
   }, [unlockAtISO, codeExpiresAt]);
 
+  const minutesLeft = Math.floor(msLeft / 60000);
+  const secondsLeft = Math.floor((msLeft % 60000) / 1000);
+
+  const hoursUntilExpiration = Math.floor(msUntilExpiration / 3600000);
+  const minutesUntilExpiration = Math.floor((msUntilExpiration % 3600000) / 60000);
+  const secondsUntilExpiration = Math.floor((msUntilExpiration % 60000) / 1000);
+
+  const locked = !!unlockAtISO && msLeft > 0;
+
+  // Detectar cuando se desbloquea
   useEffect(() => {
     if (wasLocked && !locked && unlockAtISO) {
+      console.log("🔓 Cuenta desbloqueada");
       setMainMessage({
         type: 'success',
-        text: '🔓 El periodo de bloqueo ha finalizado. Ya puedes intentar nuevamente.'
+        text: '🔓 El periodo de bloqueo de 10 minutos ha finalizado. Ya puedes intentar nuevamente.'
       });
       setUnlockAtISO(null);
       setTimeout(() => setMainMessage(null), 5000);
@@ -53,7 +71,7 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
 
   async function fetchSummary() {
     if (!trabajo?.jobId) {
-      setMainMessage({ type: 'error', text: 'No hay ID de trabajo para consultar.' });
+      setMainMessage({ type: 'error', text: 'No hay paymentId para consultar.' });
       setLoading(false);
       return;
     }
@@ -62,59 +80,76 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
     setRemainingAttempts(null);
     setUnlockAtISO(null);
     setLoading(true);
+    console.log('🔍 Cargando summary para:', trabajo.jobId);
 
-  try {
-      // Si el id parece un ObjectId, consultar backend real
-      const isObjectId = typeof trabajo.jobId === 'string' && /^[a-fA-F0-9]{24}$/.test(trabajo.jobId);
+    try {
+      const isObjectId = /^[a-fA-F0-9]{24}$/.test(trabajo.jobId);
+      
       if (isObjectId) {
-        const ts = Date.now();
-        const res = await fetch(`/api/lab/payments/${trabajo.jobId}/summary?t=${ts}`, {
-          cache: 'no-store',
-          headers: {
-            'Cache-Control': 'no-cache, no-store, must-revalidate',
-            'Pragma': 'no-cache',
-            'Expires': '0'
-          }
-        });
-        if (!res.ok) {
-          const text = await res.text().catch(() => '');
-          throw new Error(text || `HTTP ${res.status}`);
-        }
+        const url = `/api/lab/payments/${trabajo.jobId}/summary?t=${Date.now()}`;
+        console.log('🔗 Llamando API:', url);
+        
+        const res = await fetch(url, { cache: 'no-store' });
+        console.log('📥 Status:', res.status);
+        
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        
         const data = await res.json();
+        console.log('✅ Datos:', data);
+        
         const d = data?.data ?? data;
-        const expiresAt = d?.codeExpiresAt ? String(d.codeExpiresAt) : null;
-        const expired = expiresAt ? new Date(expiresAt) < new Date() : false;
-        setCodeExpiresAt(expiresAt);
-        setCodeExpired(expired);
+
+        const total = typeof d?.total === "number" ? d.total : typeof d?.amount?.total === "number" ? d.amount.total : 0;
+
+        // Detectar código expirado
+        const backendExpired = d?.codeExpired === true;
+        const manualExpired = d?.codeExpiresAt && new Date(d.codeExpiresAt) < new Date();
+        const isExpired = backendExpired || manualExpired;
+
+        console.log("⏰ Verificación expiración:", {
+          backendExpired,
+          codeExpiresAt: d?.codeExpiresAt,
+          manualExpired,
+          isExpired
+        });
+
+        if (isExpired && !codeExpired) {
+          console.log("🔴 CÓDIGO EXPIRADO detectado");
+          setCodeExpired(true);
+          setMainMessage({
+            type: 'warning',
+            text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código desde su vista para continuar con el pago.'
+          });
+        } else if (!isExpired && codeExpired) {
+          console.log("✅ Código renovado");
+          setCodeExpired(false);
+          setMainMessage(null);
+        }
+
+        if (d?.codeExpiresAt) {
+          setCodeExpiresAt(d.codeExpiresAt);
+        }
+
         setSummary({
           id: String(d?.id ?? trabajo.jobId),
           code: d?.code ?? null,
           status: d?.status ?? 'pending',
           amount: {
-            total: typeof d?.total === 'number' ? d.total : (d?.amount?.total ?? 0),
-            currency: d?.amount?.currency ?? d?.currency ?? 'BOB',
+            total,
+            currency: d?.currency ?? d?.amount?.currency ?? 'BOB',
           },
         });
-        setLoading(false);
-        return;
+      } else {
+        await new Promise(r => setTimeout(r, 500));
+        setSummary({
+          id: trabajo.jobId,
+          status: trabajo.paymentStatus || "pending",
+          amount: { total: trabajo.totalPagar || 0, currency: "BOB" },
+        });
       }
-      // Simulación - reemplaza con tu endpoint real
-      // const res = await fetch(`/api/trabajos/${trabajo.jobId}/payment-summary`);
-      
-      // Datos simulados
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setSummary({
-        id: trabajo.jobId,
-        code: null,
-        status: trabajo.paymentStatus || "pending",
-        amount: {
-          total: trabajo.totalPagar || 0,
-          currency: "BOB",
-        },
-      });
     } catch (e) {
-      setMainMessage({ type: 'error', text: 'No se pudo cargar el resumen' });
+      console.error('❌ Error:', e);
+      setMainMessage({ type: 'error', text: e.message });
     } finally {
       setLoading(false);
     }
@@ -124,79 +159,134 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
     fetchSummary();
   }, [trabajo?.jobId]);
 
+  // Verificación automática de expiración
+  useEffect(() => {
+    if (!codeExpiresAt || codeExpired) return;
+
+    const checkExpiration = () => {
+      const expiresMs = new Date(codeExpiresAt).getTime();
+      const nowMs = Date.now();
+
+      if (nowMs >= expiresMs && !codeExpired) {
+        console.log("🔴 CÓDIGO EXPIRADO detectado por auto-check");
+        setCodeExpired(true);
+        setMainMessage({
+          type: 'warning',
+          text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código desde su vista para continuar con el pago.'
+        });
+      }
+    };
+
+    checkExpiration();
+    const interval = setInterval(checkExpiration, 1000);
+    return () => clearInterval(interval);
+  }, [codeExpiresAt, codeExpired]);
+
   const handleContinuar = async () => {
     if (!summary) return;
 
-    const provided = codigoIngresado.trim();
-    if (!provided) {
+    const code = codigoIngresado.trim();
+    if (!code) {
       setMainMessage({ type: 'error', text: 'Por favor, ingrese el código de 6 caracteres.' });
       return;
     }
-
-    if (provided.length !== 6) {
+    if (code.length !== 6) {
       setMainMessage({ type: 'error', text: 'El código debe tener exactamente 6 caracteres.' });
       return;
     }
 
     setMainMessage(null);
+    setRemainingAttempts(null);
+    setUnlockAtISO(null);
     setPatching(true);
 
-  try {
-      // Si el id parece ObjectId (pago real), confirmar contra backend
-      const isObjectId = typeof summary.id === 'string' && /^[a-fA-F0-9]{24}$/.test(summary.id);
+    try {
+      const isObjectId = /^[a-fA-F0-9]{24}$/.test(summary.id);
+      
       if (isObjectId) {
         const res = await fetch(`/api/lab/payments/${summary.id}/confirm`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ code: provided }),
+          body: JSON.stringify({ code }),
         });
-        const respData = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(respData?.error || 'Error al confirmar el pago');
+        const resp = await res.json().catch(() => ({}));
+        
+        if (res.ok) {
+          console.log("✅ Pago confirmado exitosamente");
+          setShowSuccessModal(true);
+          await fetchSummary();
+          setCodigoIngresado('');
+          return;
         }
+        
+        if (res.status === 429) {
+          if (resp.unlocksAt) setUnlockAtISO(String(resp.unlocksAt));
+          else if (resp.waitMinutes) {
+            const unlockDate = new Date(Date.now() + Number(resp.waitMinutes) * 60000);
+            setUnlockAtISO(unlockDate.toISOString());
+          }
+          setMainMessage({ type: 'error', text: '🔒 Has superado el número máximo de intentos (3). La cuenta está bloqueada temporalmente por 10 minutos.' });
+          return;
+        }
+        
+        if (res.status === 401) {
+          const attempts = Number(resp.remainingAttempts);
+          if (!Number.isNaN(attempts)) {
+            setRemainingAttempts(attempts);
+            setMainMessage({
+              type: 'error',
+              text: `❌ Código inválido. Te quedan ${attempts} intento${attempts !== 1 ? 's' : ''}.`
+            });
+          } else {
+            setMainMessage({ type: 'error', text: '❌ Código inválido.' });
+          }
+          return;
+        }
+        
+        if (res.status === 410) {
+          setCodeExpired(true);
+          setMainMessage({
+            type: 'warning',
+            text: '⏱️ El código ha expirado. Solicite al cliente que genere un nuevo código.'
+          });
+          return;
+        }
+        
+        if (res.status === 404) {
+          setMainMessage({ type: 'error', text: 'Pago no encontrado' });
+          return;
+        }
+        
+        if (res.status === 409) {
+          setMainMessage({ type: 'error', text: 'El pago ya fue procesado' });
+          return;
+        }
+        
+        setMainMessage({ type: 'error', text: resp?.error || `Error ${res.status}` });
+      } else {
+        await new Promise(r => setTimeout(r, 1000));
         setShowSuccessModal(true);
         setCodigoIngresado('');
-        return;
       }
-      // Simulación - reemplaza con tu endpoint real
-      // const res = await fetch(`/api/trabajos/${summary.id}/confirm-payment`, {
-      //   method: "PATCH",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ code: provided }),
-      // });
-
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Simulación de éxito
-      setShowSuccessModal(true);
-      setCodigoIngresado("");
-      
     } catch (e) {
-      setMainMessage({ type: 'error', text: 'Error al confirmar el pago' });
+      setMainMessage({ type: 'error', text: e.message });
     } finally {
       setPatching(false);
     }
-  };
-
-  const handleCloseSuccessModal = () => {
-    setShowSuccessModal(false);
-    onClose(true);
   };
 
   if (showSuccessModal) {
     return (
       <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
         <div className="bg-black rounded-lg shadow-2xl p-8 max-w-md w-full mx-4 text-center">
-          <div className="mb-4">
-            <div className="inline-flex items-center justify-center w-16 h-16 bg-[#16A34A] rounded-full mb-4">
-              <CheckCircle className="w-8 h-8 text-white" />
-            </div>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[#16A34A] rounded-full mb-4">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+            </svg>
           </div>
-          <h2 className="text-2xl font-bold text-white mb-2">
-            ✓ Código correcto! Pago confirmado
-          </h2>
+          <h2 className="text-2xl font-bold text-white mb-2">✓ Código correcto! Pago confirmado</h2>
           <button
-            onClick={handleCloseSuccessModal}
+            onClick={() => { setShowSuccessModal(false); onClose(true); }}
             className="mt-6 px-8 py-3 bg-[#2B31E0] hover:bg-[#2B6AE0] text-white text-lg font-semibold rounded transition-colors w-full"
           >
             OK
@@ -209,9 +299,9 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-        <div className="bg-[#F9FAFB] rounded-lg shadow-xl px-8 py-6 max-w-md">
+        <div className="bg-[#F9FAFB] rounded-lg shadow-xl px-8 py-6">
           <div className="flex flex-col items-center">
-            <Loader2 className="animate-spin h-12 w-12 text-[#2B31E0] mb-4" />
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2B31E0] mb-4"></div>
             <p className="text-[#111827]">Cargando datos del pago…</p>
           </div>
         </div>
@@ -225,19 +315,12 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
       <div className="bg-[#F9FAFB] w-full max-w-2xl rounded-lg shadow-xl max-h-[90vh] overflow-y-auto">
         <div className="bg-[#2B31E0] text-[#F9FAFB] px-6 py-4 flex items-center justify-between rounded-t-lg">
-          <h1 className="text-xl font-semibold">Confirmar Pago en Efectivo</h1>
-          <button
-            onClick={() => onClose()}
-            className="hover:bg-[#2B6AE0] px-3 py-1 rounded text-xl transition-colors"
-          >
-            ✕
-          </button>
+          <h1 className="text-xl font-semibold">Método de pago Efectivo — Vista FIXER</h1>
+          <button onClick={() => onClose()} className="hover:bg-[#2B6AE0] px-3 py-1 rounded text-xl transition-colors">✕</button>
         </div>
 
         <div className="px-8 py-12">
-          <div className="text-center mb-12">
-            <h2 className="text-2xl font-bold text-[#111827]">Confirmación del pago recibido</h2>
-          </div>
+          <h2 className="text-2xl font-bold text-[#111827] text-center mb-12">Confirmación del pago recibido</h2>
 
           {mainMessage && (
             <div className="mb-6 max-w-xl mx-auto">
@@ -247,14 +330,34 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
                 mainMessage.type === 'success' ? 'bg-green-50 border-[#16A34A]' :
                 'bg-blue-50 border-[#759AE0]'
               }`}>
-                <p className={`text-sm font-medium ${
-                  mainMessage.type === 'error' ? 'text-red-800' :
-                  mainMessage.type === 'warning' ? 'text-amber-800' :
-                  mainMessage.type === 'success' ? 'text-green-800' :
-                  'text-blue-800'
-                }`}>
-                  {mainMessage.text}
-                </p>
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className={`h-5 w-5 mt-0.5 ${
+                      mainMessage.type === 'error' ? 'text-[#EF4444]' :
+                      mainMessage.type === 'warning' ? 'text-[#F59E0B]' :
+                      mainMessage.type === 'success' ? 'text-[#16A34A]' :
+                      'text-[#759AE0]'
+                    }`} viewBox="0 0 20 20" fill="currentColor">
+                      {mainMessage.type === 'success' ? (
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      ) : mainMessage.type === 'error' ? (
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      ) : (
+                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                      )}
+                    </svg>
+                  </div>
+                  <div className="ml-3 flex-1">
+                    <p className={`text-sm font-medium ${
+                      mainMessage.type === 'error' ? 'text-red-800' :
+                      mainMessage.type === 'warning' ? 'text-amber-800' :
+                      mainMessage.type === 'success' ? 'text-green-800' :
+                      'text-blue-800'
+                    }`}>
+                      {mainMessage.text}
+                    </p>
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -263,10 +366,19 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
             <div className="mb-6 max-w-xl mx-auto">
               <div className="bg-red-50 border border-[#EF4444] rounded p-3">
                 <p className="text-red-700 text-sm font-medium text-center">
-                  🔒 Cuenta bloqueada. Intenta en:{" "}
-                  <b className="text-lg">
-                    {minutesLeft > 0 ? `${minutesLeft}m ` : ""}
-                    {secondsLeft}s
+                  🔒 Cuenta bloqueada. Intenta en: <b className="text-lg">{minutesLeft > 0 ? `${minutesLeft}m ` : ""}{secondsLeft}s</b>
+                </p>
+              </div>
+            </div>
+          )}
+
+          {!codeExpired && codeExpiresAt && msUntilExpiration > 0 && (
+            <div className="mb-6 max-w-xl mx-auto">
+              <div className="bg-blue-50 border border-[#759AE0] rounded p-3">
+                <p className="text-blue-700 text-sm text-center">
+                  ⏰ Código válido por: <b>
+                    {hoursUntilExpiration > 0 && `${hoursUntilExpiration}h `}
+                    {minutesUntilExpiration}m {secondsUntilExpiration}s
                   </b>
                 </p>
               </div>
@@ -274,51 +386,41 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
           )}
 
           <div className="space-y-6 max-w-xl mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-              <label className="text-lg font-semibold text-[#111827] sm:w-48">
-                Código de Trabajo
-              </label>
+            <div className="flex items-center gap-6">
+              <label className="text-lg font-semibold text-[#111827] w-48 text-left">Código de Trabajo</label>
               <input
                 type="text"
                 value={codigoIngresado}
                 onChange={handleCodigoChange}
                 placeholder="CODIGO"
-                disabled={locked || patching || codeExpired}
+                disabled={patching || locked || codeExpired}
                 maxLength={6}
                 className="flex-1 px-4 py-3 bg-white disabled:bg-[#E5E7EB] border-2 border-[#759AE0] rounded-md text-[#111827] text-lg focus:outline-none focus:ring-2 focus:ring-[#759AE0] disabled:cursor-not-allowed uppercase"
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-              <label className="text-lg font-semibold text-[#111827] sm:w-48">
-                Monto a Cobrar
-              </label>
+            <div className="flex items-center gap-6">
+              <label className="text-lg font-semibold text-[#111827] w-48 text-left">Monto a Cobrar</label>
               <input
                 type="text"
-                value={`${summary.amount.total} ${summary.amount.currency}`}
+                value={`${summary.amount.total.toFixed(2)} ${summary.amount.currency}`}
                 readOnly
                 className="flex-1 px-4 py-3 bg-[#E5E7EB] border border-[#D1D5DB] rounded-md text-[#111827] text-lg"
               />
             </div>
 
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6">
-              <label className="text-lg font-semibold text-[#111827] sm:w-48">
-                Estado
-              </label>
+            <div className="flex items-center gap-6">
+              <label className="text-lg font-semibold text-[#111827] w-48 text-left">Estado</label>
               <input
                 type="text"
-                value={
-                  summary.status === 'paid' ? 'CONFIRMADO' :
-                  summary.status === 'failed' ? 'ERROR' :
-                  'PENDIENTE'
-                }
+                value={summary.status === 'paid' ? 'CONFIRMADO' : summary.status === 'failed' ? 'ERROR' : 'PENDIENTE'}
                 readOnly
                 className="flex-1 px-4 py-3 bg-[#E5E7EB] border border-[#D1D5DB] rounded-md text-[#111827] text-lg"
               />
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 mt-12">
+          <div className="flex justify-center gap-6 mt-12">
             <button
               onClick={handleContinuar}
               disabled={!codigoIngresado || patching || locked || codeExpired}
@@ -331,7 +433,7 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
               {patching ? "Confirmando…" : locked ? "Bloqueado" : codeExpired ? "Código Expirado" : "Confirmar Pago Recibido"}
             </button>
             <button
-              onClick={onBack}
+              onClick={() => onBack({ refresh: true })}
               disabled={patching}
               className="px-12 py-3 bg-[#2BDDE0] text-[#111827] text-lg font-semibold rounded-md hover:bg-[#5E2BE0] transition-colors disabled:opacity-60"
             >
@@ -340,7 +442,7 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
           </div>
 
           <div className="mt-6 text-center text-sm text-gray-500">
-            ID trabajo: <span className="font-mono text-[#64748B]">{summary.id}</span>
+            ID pago: <span className="font-mono text-[#64748B]">{summary.id}</span>
           </div>
         </div>
       </div>
@@ -348,98 +450,122 @@ function PaymentMethodCashFixer({ trabajo, onClose, onBack }) {
   );
 }
 
-// Componente principal de lista de trabajos
+// Componente principal
 export default function TrabajosYPagos() {
   const [trabajos, setTrabajos] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [selectedTrabajo, setSelectedTrabajo] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [fixerId, setFixerId] = useState('');
 
   useEffect(() => {
-    fetchTrabajos();
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('fixerId') || localStorage.getItem('userId');
+      const urlParams = new URLSearchParams(window.location.search);
+      const urlFixerId = urlParams.get('fixerId');
+      
+      const id = '68ef1be7be38c7f1c3c2c78c';
+      
+      console.log('🔑 Fixer ID detectado:', id);
+      setFixerId(id);
+      
+      if (id && !stored) {
+        localStorage.setItem('fixerId', id);
+        try {
+          const url = new URL(window.location.href);
+          if (url.searchParams.get('fixerId') !== id) {
+            url.searchParams.set('fixerId', id);
+            window.history.replaceState({}, '', url.toString());
+          }
+        } catch {}
+      }
+    }
   }, []);
+
+  useEffect(() => {
+    if (fixerId) {
+      fetchTrabajos();
+    }
+  }, [fixerId]);
 
   const fetchTrabajos = async () => {
     setLoading(true);
-    try {
-      // Fallback: si no hay fixerId en storage, usar el fijo de prueba
-      const DEFAULT_FIXER_ID = '68e87a9cdae3b73d8040102f';
-      const rawFixerId = (typeof window !== 'undefined'
-        ? (localStorage.getItem('fixerId') || localStorage.getItem('userId') || DEFAULT_FIXER_ID)
-        : '');
-      const fixerId = rawFixerId;
-      if (typeof window !== 'undefined' && !localStorage.getItem('fixerId') && /^[a-fA-F0-9]{24}$/.test(fixerId)) {
-        localStorage.setItem('fixerId', fixerId);
-      }
+    setError(null);
+    
+    console.log('📋 Cargando trabajos para fixerId:', fixerId);
 
-      if (fixerId && /^[a-fA-F0-9]{24}$/.test(fixerId)) {
+    try {
+      const isValidId = /^[a-fA-F0-9]{24}$/.test(fixerId);
+      
+      if (isValidId) {
+        console.log('✅ ID válido, consultando API...');
+        
         const [pendingRes, paidRes] = await Promise.all([
           fetch(`/api/lab/payments/by-fixer/${fixerId}/summary?status=pending`, { cache: 'no-store' }),
           fetch(`/api/lab/payments/by-fixer/${fixerId}/summary?status=paid`, { cache: 'no-store' }),
         ]);
-        const pJson = pendingRes.ok ? await pendingRes.json() : { data: [] };
-        const dJson = paidRes.ok ? await paidRes.json() : { data: [] };
-        const pending = Array.isArray(pJson?.data) ? pJson.data : [];
-        const paid = Array.isArray(dJson?.data) ? dJson.data : [];
 
-        const mapped = [...pending, ...paid].map((x: any) => ({
-          jobId: String(x.id), // reutilizamos campo jobId como paymentId
-          titulo: `Pago ${String(x.id).slice(-6)}`,
-          descripcion: '',
-          totalPagar: x.total,
-          paymentStatus: x.status,
-          fecha: x.codeExpiresAt ? new Date(x.codeExpiresAt).toISOString().slice(0,10) : new Date().toISOString().slice(0,10),
+        console.log('📥 Pending response:', pendingRes.status);
+        console.log('📥 Paid response:', paidRes.status);
+
+        const pending = pendingRes.ok ? await pendingRes.json() : { data: [] };
+        const paid = paidRes.ok ? await paidRes.json() : { data: [] };
+
+        console.log('📦 Pending data:', pending);
+        console.log('📦 Paid data:', paid);
+
+        const pendingArray = Array.isArray(pending?.data) ? pending.data : [];
+        const paidArray = Array.isArray(paid?.data) ? paid.data : [];
+
+        console.log(`✅ Encontrados: ${pendingArray.length} pendientes, ${paidArray.length} pagados`);
+
+        const mapped = [...pendingArray, ...paidArray].map(x => ({
+          jobId: String(x.id || x._id),
+          titulo: `Pago #${String(x.id || x._id).slice(-6).toUpperCase()}`,
+          descripcion: `Monto: Bs. ${(x.total || 0).toFixed(2)}`,
+          totalPagar: x.total || 0,
+          paymentStatus: x.status || 'pending',
+          fecha: x.createdAt ? new Date(x.createdAt).toISOString().slice(0,10) : new Date().toISOString().slice(0,10),
         }));
-        setTrabajos(mapped);
-        return;
-      }
 
-      // Fallback a datos simulados si no hay fixerId disponible
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const trabajosSimulados = [
-        { jobId: "JOB-001", titulo: "Reparación de tubería", descripcion: "Reparación urgente de fuga en cocina", totalPagar: 250.00, paymentStatus: "pending", fecha: "2025-11-08" },
-        { jobId: "JOB-002", titulo: "Instalación eléctrica", descripcion: "Instalación de toma corriente adicional", totalPagar: 180.50, paymentStatus: "paid", fecha: "2025-11-07" },
-        { jobId: "JOB-003", titulo: "Pintura de sala", descripcion: "Pintura completa de sala de estar", totalPagar: 450.00, paymentStatus: "pending", fecha: "2025-11-09" },
-        { jobId: "JOB-004", titulo: "Limpieza profunda", descripcion: "Limpieza post construcción", totalPagar: 320.00, paymentStatus: "paid", fecha: "2025-11-06" },
-      ];
-      setTrabajos(trabajosSimulados);
-    } catch (error) {
-      console.error('Error al cargar trabajos:', error);
+        console.log('🎯 Trabajos mapeados:', mapped);
+        setTrabajos(mapped);
+        
+        if (mapped.length === 0) {
+          setError('No se encontraron trabajos para este fixer.');
+        }
+      } else {
+        console.log('⚠️ ID inválido, usando datos simulados');
+        await new Promise(r => setTimeout(r, 1000));
+        setTrabajos([
+          { jobId: "SIM-001", titulo: "Pago Simulado 1", descripcion: "Trabajo de prueba", totalPagar: 250.00, paymentStatus: "pending", fecha: "2025-11-08" },
+          { jobId: "SIM-002", titulo: "Pago Simulado 2", descripcion: "Trabajo completado", totalPagar: 180.50, paymentStatus: "paid", fecha: "2025-11-07" },
+        ]);
+      }
+    } catch (err) {
+      console.error('❌ Error:', err);
+      setError(err.message || 'Error al cargar trabajos');
+      
+      setTrabajos([
+        { jobId: "ERR-001", titulo: "Pago Ejemplo 1", descripcion: "Error al cargar, mostrando ejemplo", totalPagar: 100.00, paymentStatus: "pending", fecha: "2025-11-10" },
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
   const handleOpenPayment = (trabajo) => {
-    console.log('Abriendo modal de pago para:', trabajo);
+    console.log('💳 Abriendo modal para:', trabajo);
     setSelectedTrabajo(trabajo);
     setShowPaymentModal(true);
   };
 
-  const handleClosePayment = (paymentCompleted) => {
-    console.log('Cerrando modal. Pago completado:', paymentCompleted);
+  const handleClosePayment = (completed) => {
+    console.log('🔒 Cerrando modal. Completado:', completed);
     setShowPaymentModal(false);
     setSelectedTrabajo(null);
-    if (paymentCompleted) {
-      fetchTrabajos(); // Recargar lista si se completó el pago
-    }
-  };
-
-  const getStatusBadge = (status) => {
-    if (status === 'paid') {
-      return (
-        <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
-          <CheckCircle size={16} />
-          Pagado
-        </span>
-      );
-    }
-    return (
-      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-yellow-100 text-yellow-800">
-        <Clock size={16} />
-        Pendiente
-      </span>
-    );
+    if (completed) fetchTrabajos();
   };
 
   if (loading) {
@@ -455,17 +581,20 @@ export default function TrabajosYPagos() {
 
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Header */}
-      <div className="bg-[#2B31E0] text-white px-6 py-4 shadow-md">
+      <div className="bg-blue-600 text-white px-6 py-4 shadow-md">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-2xl font-bold">Gestión de Trabajos y Pagos</h1>
-          <p className="text-blue-200 text-sm mt-1">Administra tus trabajos y confirma pagos</p>
+          <p className="text-blue-200 text-sm mt-1">Fixer ID: {fixerId}</p>
         </div>
       </div>
 
-      {/* Content */}
       <div className="max-w-6xl mx-auto px-4 py-6">
-        {/* Stats */}
+        {error && (
+          <div className="mb-6 bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded">
+            <p className="text-yellow-800">{error}</p>
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-lg shadow p-4">
             <div className="flex items-center gap-3">
@@ -473,8 +602,8 @@ export default function TrabajosYPagos() {
                 <Briefcase className="text-blue-600" size={24} />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Total Trabajos</p>
-                <p className="text-2xl font-bold text-gray-800">{trabajos.length}</p>
+                <p className="text-sm text-gray-600">Total</p>
+                <p className="text-2xl font-bold">{trabajos.length}</p>
               </div>
             </div>
           </div>
@@ -486,9 +615,7 @@ export default function TrabajosYPagos() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Pagados</p>
-                <p className="text-2xl font-bold text-gray-800">
-                  {trabajos.filter(t => t.paymentStatus === 'paid').length}
-                </p>
+                <p className="text-2xl font-bold">{trabajos.filter(t => t.paymentStatus === 'paid').length}</p>
               </div>
             </div>
           </div>
@@ -500,75 +627,65 @@ export default function TrabajosYPagos() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Pendientes</p>
-                <p className="text-2xl font-bold text-gray-800">
-                  {trabajos.filter(t => t.paymentStatus === 'pending').length}
-                </p>
+                <p className="text-2xl font-bold">{trabajos.filter(t => t.paymentStatus === 'pending').length}</p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Lista de trabajos */}
         <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-xl font-semibold text-gray-800">Lista de Trabajos</h2>
+          <div className="px-6 py-4 border-b">
+            <h2 className="text-xl font-semibold">Lista de Trabajos</h2>
           </div>
 
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y">
             {trabajos.length === 0 ? (
               <div className="px-6 py-12 text-center text-gray-500">
-                <AlertCircle className="mx-auto mb-3 text-gray-400" size={48} />
+                <AlertCircle className="mx-auto mb-3" size={48} />
                 <p>No hay trabajos registrados</p>
               </div>
             ) : (
               trabajos.map((trabajo) => (
-                <div
-                  key={trabajo.jobId}
-                  className="px-6 py-5 hover:bg-gray-50 transition-colors"
-                >
+                <div key={trabajo.jobId} className="px-6 py-5 hover:bg-gray-50">
                   <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                    {/* Información del trabajo */}
                     <div className="flex-1">
-                      <div className="flex flex-wrap items-center gap-3 mb-2">
-                        <h3 className="text-lg font-semibold text-gray-800">
-                          {trabajo.titulo}
-                        </h3>
-                        {getStatusBadge(trabajo.paymentStatus)}
+                      <div className="flex items-center gap-3 mb-2">
+                        <h3 className="text-lg font-semibold">{trabajo.titulo}</h3>
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${
+                          trabajo.paymentStatus === 'paid' 
+                            ? 'bg-green-100 text-green-800' 
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {trabajo.paymentStatus === 'paid' ? <CheckCircle size={16} /> : <Clock size={16} />}
+                          {trabajo.paymentStatus === 'paid' ? 'Pagado' : 'Pendiente'}
+                        </span>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{trabajo.descripcion}</p>
-                      <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-                        <span className="font-mono bg-gray-100 px-2 py-1 rounded">ID: {trabajo.jobId}</span>
-                        <span className="hidden sm:inline">•</span>
-                        <span>Fecha: {trabajo.fecha}</span>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        <span className="font-mono bg-gray-100 px-2 py-1 rounded">{trabajo.jobId}</span>
+                        <span>•</span>
+                        <span>{trabajo.fecha}</span>
                       </div>
                     </div>
 
-                    {/* Monto y acción */}
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:text-right">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                       <div className="flex items-center gap-2">
                         <DollarSign className="text-gray-400" size={20} />
-                        <span className="text-2xl font-bold text-gray-800">
-                          Bs. {trabajo.totalPagar.toFixed(2)}
-                        </span>
+                        <span className="text-2xl font-bold">Bs. {trabajo.totalPagar.toFixed(2)}</span>
                       </div>
                       
-                      <div className="w-full sm:w-auto">
-                        {trabajo.paymentStatus === 'pending' ? (
-                          <button
-                            onClick={() => handleOpenPayment(trabajo)}
-                            className="w-full sm:w-auto px-6 py-2.5 bg-[#2B31E0] hover:bg-[#2B6AE0] text-white font-semibold rounded-lg transition-colors shadow-sm hover:shadow-md"
-                          >
-                            💰 Confirmar Pago
-                          </button>
-                        ) : (
-                          <button
-                            disabled
-                            className="w-full sm:w-auto px-6 py-2.5 bg-gray-200 text-gray-500 font-semibold rounded-lg cursor-not-allowed"
-                          >
-                            ✓ Ya Pagado
-                          </button>
-                        )}
-                      </div>
+                      {trabajo.paymentStatus === 'pending' ? (
+                        <button
+                          onClick={() => handleOpenPayment(trabajo)}
+                          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-sm hover:shadow-md"
+                        >
+                          💰 Confirmar Pago
+                        </button>
+                      ) : (
+                        <button disabled className="px-6 py-2.5 bg-gray-200 text-gray-500 font-semibold rounded-lg cursor-not-allowed">
+                          ✓ Pagado
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -578,7 +695,6 @@ export default function TrabajosYPagos() {
         </div>
       </div>
 
-      {/* Modal de pago */}
       {showPaymentModal && selectedTrabajo && (
         <PaymentMethodCashFixer
           trabajo={selectedTrabajo}
