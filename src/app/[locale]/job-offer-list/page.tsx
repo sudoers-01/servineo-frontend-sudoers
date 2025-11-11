@@ -7,6 +7,7 @@ import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
 import { JobOfferModal } from "@/Components/Job-offers/Job-offer-modal"
 import { MapView } from "@/Components/Job-offers/maps/MapView"
 import { SearchHeader } from "@/Components/SearchHeader"
+import { useLogClickMutation } from "../../redux/services/activityApi"
 import { FiltersPanel } from "@/Components/FiltersPanel"
 import { useAppSelector } from "../../redux/hooks"
 import {
@@ -34,8 +35,32 @@ export default function JobOffersPage() {
   const searchQuery = useAppSelector(selectSearchQuery)
   const selectedCities = useAppSelector(selectSelectedCities)
   const selectedJobTypes = useAppSelector(selectSelectedJobTypes)
-  
+  const persona = { id: "507f1f77bcf86cd799439011", nombre: "Usuario POC" }
+  const [logClick] = useLogClickMutation()
+  const handleCardClick = async (offer: JobOffer) => {
+    setSelectedOffer(offer)
+    setIsModalOpen(true)
 
+    const activityData = {
+      userId: persona.id,
+      date: new Date().toISOString(),
+      role: "requester",
+      type: "click",
+      metadata: {
+        button: "job_offer",
+        jobTitle: offer.title || "Sin título",
+        jobId: offer.id,
+      },
+      timestamp: new Date().toISOString(),
+    }
+
+    try {
+      await logClick(activityData).unwrap()
+      console.log("Click registrado:", offer.title || offer.title)
+    } catch (error) {
+      console.error("Error al registrar clic:")
+    }
+  }
   
   const filteredOffers = useMemo(() => {
     return [...offers]
@@ -73,10 +98,6 @@ export default function JobOffersPage() {
     setCurrentPage(1)
   }, [searchQuery, selectedCities, selectedJobTypes])
 
-  const handleCardClick = (offer: JobOffer) => {
-    setSelectedOffer(offer)
-    setIsModalOpen(true)
-  }
 
   return (
     <div className="min-h-screen bg-white">
