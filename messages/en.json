@@ -16,5 +16,9 @@
     "HowItWorksContactDescription": "Talk directly with professionals",
     "HowItWorksRate": "Rate",
     "HowItWorksRateDescription": "Share your experience"
-}
+    },
+    "Inspiration":{
+        "insTitle": "Inspiration for your home",
+        "insDescription": "Discover ideas and projects carried out by our expert professionals"
+    }
 }

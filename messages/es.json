@@ -16,5 +16,9 @@
         "HowItWorksContactDescription": "Habla directamente con los profesionales",
         "HowItWorksRate": "Califica",
         "HowItWorksRateDescription": "Comparte tu experiencia"
+    },
+    "Inspiration":{
+        "insTitle":"Inspiración para tu hogar",
+        "insDescription": "Descubre ideas y proyectos realizados por nuestros profesionales expertos"
     }
 }
