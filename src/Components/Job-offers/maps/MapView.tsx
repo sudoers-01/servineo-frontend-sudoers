@@ -314,4 +314,4 @@ export function MapView({ offers, onOfferClick }: MapViewProps) {
     </div>
   )
 }
-//
+
