@@ -50,7 +50,12 @@
         "fixerName": "Nombre de Fixer",
         "city": "Ciudad",
         "jobCategory": "Tipo de Trabajo"
-
+    },
+    "navigation": {
+        "home": "Inicio",
+        "jobOffers": "Ofertas de trabajo",
+        "login": "Iniciar Sesión",
+        "register": "Regístrate",
+        "logo": "LOGO"
     }
-    
 }
