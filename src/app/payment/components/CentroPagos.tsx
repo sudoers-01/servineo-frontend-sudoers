@@ -162,57 +162,64 @@ const CentroDePagos = () => {
         </div>
 
         <div className="pb-6">
-          <h3 className="text-base font-semibold text-gray-600 mb-3">Acciones Rápidas</h3>
+        <h3 className="text-base font-semibold text-gray-600 mb-3">Acciones Rápidas</h3>
+
+        <div>
           
-          <div className="space-y-3">
-            
-            {/* <-- CAMBIO 8: Actualizar el onClick del botón Fixer Wallet --> */}
-            <button
-              onClick={() => router.push(`/payment/pages/FixerWallet?fixerId=${fixerData.fixerId}`)}
-              disabled={!fixerData?.fixerId} // Deshabilitar si no hay fixerId
-              className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
-            >
-              <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
-                <Wallet className="text-blue-600" size={28} />
-              </div>
-              <div className="flex-1 text-left">
-                <h4 className="font-bold text-gray-800 text-base">Fixer Wallet</h4>
-                <p className="text-sm text-gray-500">Ver saldo, recargar y revisar movimientos</p>
-              </div>
-              <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
-            </button>
+          {/* Fixer Wallet */}
+          <button
+            onClick={() => router.push(`/payment/pages/FixerWallet?fixerId=${fixerData.fixerId}`)}
+            disabled={!fixerData?.fixerId} // Deshabilitar si no hay fixerId
+            className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
+          >
+            <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
+              <Wallet className="text-blue-600" size={28} />
+            </div>
+            <div className="flex-1 text-left">
+              <h4 className="font-bold text-gray-800 text-base">Fixer Wallet</h4>
+              <p className="text-sm text-gray-500">Ver saldo, recargar y revisar movimientos</p>
+            </div>
+            <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
+          </button>
 
-            <button 
-  // RUTA CORREGIDA: 
-  onClick={() => router.push(`/cuenta-bancaria?fixerId=${fixerData.fixerId}`)} 
-  disabled={!fixerData?.fixerId} 
-  className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
->
-              <div className="bg-cyan-100 p-3 rounded-xl group-hover:bg-cyan-200 transition-colors">
-                <Building2 className="text-cyan-600" size={28} />
-              </div>
-              <div className="flex-1 text-left">
-                <h4 className="font-bold text-gray-800 text-base">Mi cuenta bancaria</h4>
-                <p className="text-sm text-gray-500">Administración de la cuenta bancaria</p>
-              </div>
-              <ChevronRight className="text-gray-400 group-hover:text-cyan-600 transition-colors" size={24} />
-            </button>
+          {/* --- AÑADIR ESTE ESPACIADOR --- */}
+          <div className="h-4" /> 
 
-            <button 
-              onClick={() => router.push('/facturas')} 
-              className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
-            >
-              <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
-                <FileText className="text-blue-600" size={28} />
-              </div>
-              <div className="flex-1 text-left">
-                <h4 className="font-bold text-gray-800 text-base">Mis Facturas</h4>
-                <p className="text-sm text-gray-500">Ver registro de facturas</p>
-              </div>
-              <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
-            </button>
-          </div>
+          {/* Mi cuenta bancaria */}
+          <button 
+            onClick={() => router.push(`/cuenta-bancaria?fixerId=${fixerData.fixerId}`)} 
+            disabled={!fixerData?.fixerId} 
+            className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
+          >
+            <div className="bg-cyan-100 p-3 rounded-xl group-hover:bg-cyan-200 transition-colors">
+              <Building2 className="text-cyan-600" size={28} />
+            </div>
+            <div className="flex-1 text-left">
+              <h4 className="font-bold text-gray-800 text-base">Mi cuenta bancaria</h4>
+              <p className="text-sm text-gray-500">Administración de la cuenta bancaria</p>
+            </div>
+            <ChevronRight className="text-gray-400 group-hover:text-cyan-600 transition-colors" size={24} />
+          </button>
+
+          {/* --- AÑADIR ESTE ESPACIADOR --- */}
+          <div className="h-4" />
+
+          {/* Mis Facturas */}
+          <button 
+            onClick={() => router.push('/facturas')} 
+            className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
+          >
+            <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
+              <FileText className="text-blue-600" size={28} />
+            </div>
+            <div className="flex-1 text-left">
+              <h4 className="font-bold text-gray-800 text-base">Mis Facturas</h4>
+              <p className="text-sm text-gray-500">Ver registro de facturas</p>
+            </div>
+            <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
+          </button>
         </div>
+      </div>
 
         {error && !fixerData?.isTestData && (
           <div className="pb-6">
