@@ -4,6 +4,7 @@ import "./globals.css";
 import { roboto } from './fonts';
 import 'leaflet/dist/leaflet.css'
 import { ReduxProvider } from './redux/ReduxProvider';
+import { AuthProvider } from './lib/hooks/usoAutentificacion'; // ← AGREGAR ESTA LÍNEA
 import TopMenu from '@/Components/Navigation/TopMenu';
 
 const geistSans = Geist({
@@ -30,10 +31,12 @@ export default function RootLayout({
     <html lang="en" className={`${roboto.className} `}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReduxProvider>
-          <div className="">
-            <TopMenu/>
-          </div>
-          {children}
+          <AuthProvider> {/* ← AGREGAR ESTA LÍNEA */}
+            <div className="">
+              <TopMenu/>
+            </div>
+            {children}
+          </AuthProvider> {/* ← AGREGAR ESTA LÍNEA */}
         </ReduxProvider>
       </body>
     </html>
