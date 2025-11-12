@@ -31,6 +31,26 @@
             },
             "distance": "de distancia"
         }
+    },
+    "search": {
+    "placeholder": "¿Qué servicio necesitas?",
+    "buttonSearch": "Buscar",
+    "openFilters": "Abrir filtros",
+    "clearSearch": "Limpiar búsqueda",
+    "moreFilters": "Más filtros",
+    "recentSearches": "Búsquedas recientes",
+    "clear": "Borrar"
+    },
+    "filtersPanel": {
+        "filters": "Filtros",
+        "resetButton": {
+            "desktop": "Resetear",
+            "mobile": "Resetear Filtros"
+        },
+        "fixerName": "Nombre de Fixer",
+        "city": "Ciudad",
+        "jobCategory": "Tipo de Trabajo"
+
     }
     
 }
