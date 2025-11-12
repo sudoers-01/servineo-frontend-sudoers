@@ -5,6 +5,7 @@ import { useState } from 'react';
 export default function JobRequestPage() {
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const fakeFixerId = '507f1f77bcf86cd799439011';
+  const fakeOfferId = '691488a21fc4811a4400e6ac';
   return (
     <main className='min-h-screen bg-white flex items-center justify-center'>
       <div className='text-center space-y-8'>
@@ -25,6 +26,7 @@ export default function JobRequestPage() {
         onClose={() => setIsMapModalOpen(false)}
         onSubmit={(data) => console.log('Solicitud enviada:', data)}
         fixerId={fakeFixerId}
+        offerId={fakeOfferId}
       />
     </main>
   );
