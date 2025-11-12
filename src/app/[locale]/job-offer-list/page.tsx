@@ -20,8 +20,10 @@ import {
 } from '../../redux/slice/filterSlice';
 import { ArrowLeft, Briefcase, Map, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export default function JobOffersPage() {
+  const t= useTranslations('jobOffers');
   const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
@@ -293,13 +295,13 @@ export default function JobOffersPage() {
                 className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
               >
                 <ArrowLeft className="w-5 h-5 mr-1" />
-                <span className="font-medium">Inicio</span>
+                <span className="font-medium">{t('backToHome')}</span>
               </Link>
               <div className="hidden md:flex items-center gap-2">
                 <Briefcase className="w-5 h-5 text-blue-600" />
-                <h1 className="text-xl font-semibold text-gray-800">Ofertas de Trabajo</h1>
+                <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
                 <span className="text-sm text-gray-500 bg-blue-50 px-2 py-1 rounded-full">
-                  {filteredOffers.length} disponibles
+                  {filteredOffers.length} {t('available')}
                 </span>
               </div>
             </div>
@@ -315,7 +317,7 @@ export default function JobOffersPage() {
                 }`}
               >
                 <List className="w-4 h-4" />
-                <span>Lista</span>
+                <span>{t('viewModes.list')}</span>
               </button>
               <button
                 onClick={() => setViewMode('map')}
@@ -326,7 +328,7 @@ export default function JobOffersPage() {
                 }`}
               >
                 <Map className="w-4 h-4" />
-                <span>Mapa</span>
+                <span>{t('viewModes.map')}</span>
               </button>
             </div>
           </div>
@@ -425,10 +427,8 @@ export default function JobOffersPage() {
           {filteredOffers.length === 0 && (
             <div className="flex flex-col items-center justify-center py-16 text-center">
               <Briefcase className="w-12 h-12 text-gray-300 mb-4" />
-              <h3 className="text-lg font-medium text-gray-700">No se encontraron ofertas</h3>
-              <p className="text-gray-500 mt-1">
-                No hay ofertas que coincidan con tu búsqueda o filtros actuales.
-              </p>
+              <h3 className="text-lg font-medium text-gray-700">{t('emptyState.title')}</h3>
+              <p className="text-gray-500 mt-1">{t('emptyState.description')}</p>
             </div>
           )}
         </main>

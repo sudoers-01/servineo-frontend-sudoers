@@ -1,3 +1,63 @@
 {
-    
+    "HeroSection":
+    {
+        "title": "Find the perfect professional ",
+        "subtitle": "We connect your home with verified experts in your city.",
+        "placeholder": "what service do you need?",
+        "search": "Search"
+    },
+    "jobOffers":
+        {
+    "pageTitle": "Job Offers",
+    "available": "available",
+    "backToHome": "Home",
+    "viewModes": {
+        "list": "List",
+        "map": "Map"
+    },
+    "emptyState": {
+        "title": "No offers found",
+        "description": "There are no offers matching your current search or filters."
+    },
+    "map": {
+            "loading": "Loading map...",
+            "yourLocation": "Your location",
+            "jobOffers": "Job offers",
+            "radius": "Radius: ~1km",
+            "mapDetails": "Map details",
+            "availableOffers": {
+                "singular": "available offer",
+                "plural": "available offers"
+            },
+            "distance": "away"
+    }
+    },
+    "search": {
+        "placeholder": "What service do you need?",
+        "buttonSearch": "Search",
+        "openFilters": "Open filters",
+        "clearSearch": "Clear search",
+        "moreFilters": "More filters",
+        "recentSearches": "Recent searches",
+        "clear": "Clear"
+    },
+    "filtersPanel": {
+        "filters": "Filters",
+        "resetButton": {
+            "desktop": "Reset",
+            "mobile": "Reset Filters"
+        },
+        "fixerName": "Fixer Name",
+        "city": "City",
+        "jobCategory": "Job Type"
+    },
+    "navigation": {
+        "home": "Home",
+        "jobOffers": "Job Offers",
+        "login": "Sign In",
+        "register": "Sign Up",
+        "logo": "LOGO"
+    }
 }
+    
+    
