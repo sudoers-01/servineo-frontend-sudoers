@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ArrowLeft, Wallet, TrendingUp, TrendingDown, CreditCard, QrCode, Building2 } from 'lucide-react';
+import WalletFlagWatcher from "../components/WalletFlagWatcher";
+
 
 // Datos de ejemplo (en producción vienen del backend)
 const MOCK_FIXER_DATA = {
@@ -120,7 +122,8 @@ export default function FixerWalletApp() {
   // Pantalla 1: Wallet Principal
   if (screen === 'wallet') {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-balck-100">
+      <WalletFlagWatcher fixerId={receivedFixerId ?? "68e87a9cdae3b73d8040102f"} pollMs={4000} />
         {/* Header */}
         <div className="bg-blue-600 text-white px-6 py-4">
           <h1 className="text-2xl font-bold">Fixer Wallet</h1>
@@ -190,6 +193,7 @@ export default function FixerWalletApp() {
   if (screen === 'recharge') {
     return (
       <div className="min-h-screen bg-gray-100">
+        <WalletFlagWatcher fixerId={receivedFixerId ?? "68e87a9cdae3b73d8040102f"} pollMs={4000} />
         {/* Header */}
         <div className="bg-blue-600 text-white px-6 py-4">
           <h1 className="text-2xl font-bold">Recargar Saldo</h1>
@@ -282,6 +286,7 @@ export default function FixerWalletApp() {
   // Pantalla 3: Historial Completo
   return (
     <div className="min-h-screen bg-gray-100">
+      <WalletFlagWatcher fixerId={receivedFixerId ?? "68e87a9cdae3b73d8040102f"} pollMs={4000} />
       {/* Header */}
       <div className="bg-blue-600 text-white px-6 py-4 flex items-center gap-4">
         <button onClick={() => setScreen('wallet')}>
