@@ -26,6 +26,8 @@ export default function TransferBank({ fixerId, servineoId, amount }: TransferBa
   const [error, setError] = useState<string | null>(null);
   const [transferStatus, setTransferStatus] = useState<string | null>(null);
 
+ // const BACKEND_URL_DEPLOYADO = process.env.BACKEND_URL;
+
   useEffect(() => {
     console.log('TransferBank useEffect triggered', { fixerId, servineoId, amount });
 
@@ -40,7 +42,7 @@ export default function TransferBank({ fixerId, servineoId, amount }: TransferBa
       }
 
       try {
-        const res = await fetch(`https://servineo-backend-m68a.onrender.com/api/transferencia-bancaria/intent`   , {
+        const res = await fetch('/api/transferencia-bancaria/intent'   , {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fixerId, amount, servineoId }),

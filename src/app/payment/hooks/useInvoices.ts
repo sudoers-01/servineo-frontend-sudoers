@@ -40,8 +40,10 @@ interface Filters {
     endDate: string | null;
 }
 
+
+
 // URL base de tu API de backend (ajusta si es necesario)
-const API_BASE_URL = 'http://localhost:4000/api/v1/invoices'; 
+const API_BASE_URL = '/api/v1/invoices'; 
 
 // --- ID DE PRUEBA PROPORCIONADO POR EL USUARIO ---
 // Fixer ID usado para el listado por defecto: 60a5e8c1d5f2a1b9c7d4e3f3

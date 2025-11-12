@@ -7,11 +7,13 @@ export default function TrabajosList({ userId }) {
   const [loading, setLoading] = useState(true);
   const [selectedJob, setSelectedJob] = useState<any | null>(null); // trabajo seleccionado para pagar
 
+  //const BACKEND_URL_DEPLOYADO = process.env.BACKEND_URL;
+
   useEffect(() => {
     const fetchJobs = async () => {
       try {
         console.log("📡 Obteniendo trabajos para el usuario:", userId);
-        const res = await fetch(`https://servineo-backend-m68a.onrender.com/api/jobs?userId=${userId}`);
+        const res = await fetch(`/api/jobs?userId=${userId}`);
         if (!res.ok) throw new Error("Error al obtener trabajos");
         const data = await res.json();
         console.log("✅ Trabajos recibidos:", data);

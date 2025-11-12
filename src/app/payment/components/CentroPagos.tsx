@@ -29,12 +29,12 @@ const CentroDePagos = () => {
     setError(null);
     
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+      const BACKEND_URL_DEPLOYADO = process.env.BACKEND_URL;
       
       // <-- CAMBIO 6: Usar el fixerId del parámetro
-      console.log(`🔍 Intentando conectar a: ${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
+      console.log(`🔍 Intentando conectar a: ${BACKEND_URL_DEPLOYADO}/api/fixer/payment-center/${fixerId}`);
       
-      const response = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`, {
+      const response = await fetch(`/api/fixer/payment-center/${fixerId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

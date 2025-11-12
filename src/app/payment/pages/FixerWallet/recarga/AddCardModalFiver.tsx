@@ -29,6 +29,8 @@ export default function AddCardModalFixer({
   const [isValidHolder, setIsValidHolder] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
+  //const BACKEND_URL_DEPLOYADO = process.env.NEXT;
+
   useEffect(() => {
     const regex = /^(?=.*[a-zA-ZñÑáéíóúÁÉÍÓÚ])[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/;
     setIsValidHolder(regex.test(cardHolder.trim()));
@@ -65,7 +67,7 @@ export default function AddCardModalFixer({
 
       // Guardar la tarjeta si el usuario lo desea
       if (saveCard) {
-        const res = await fetch('https://servineo-backend-m68a.onrender.com/api/cardscreate', {
+        const res = await fetch('/api/cardscreate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -82,7 +84,9 @@ export default function AddCardModalFixer({
 
       cardElement.clear();
       setCardHolder('');
-      setSuccessMessage(saveCard ? 'Tarjeta guardada exitosamente ' : 'Tarjeta validada exitosamente ');
+      setSuccessMessage(
+        saveCard ? 'Tarjeta guardada exitosamente ' : 'Tarjeta validada exitosamente ',
+      );
 
       // Esperamos un poco antes de cerrar
       setTimeout(() => {
@@ -90,7 +94,6 @@ export default function AddCardModalFixer({
         onCardAdded();
         onClose();
       }, 1500);
-
     } catch (err: unknown) {
       console.error(err);
       if (err instanceof Error) setErrorMessage(err.message);

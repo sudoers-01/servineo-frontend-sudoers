@@ -20,7 +20,7 @@ type Intent = {
 type PaymentMethod = { qrImageUrl?: string; accountDisplay?: string };
 
 // Lee la URL del backend de tu .env.local
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:4000";
+//const BACKEND_URL_DEPLOYADO = process.env.BACKEND_URL;
 
 export default function PaymentsPage() {
   const searchParams = useSearchParams();
@@ -53,7 +53,7 @@ export default function PaymentsPage() {
         const payload = { bookingId, providerId, amount, currency };
         console.log("→ POST /api/payments/intent payload =", payload);
 
-        const res = await fetch(`${API_BASE}/api/payments/intent`, {
+        const res = await fetch('/api/payments/intent', {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bookingId, providerId, amount, currency }),
@@ -80,7 +80,7 @@ export default function PaymentsPage() {
   }, []);
 
   // [LOG A] — esto sale en la consola del navegador (DevTools > Console)
-  console.log("API_BASE =", API_BASE);
+  //console.log("API_BASE =", BACKEND_URL_DEPLOYADO);
 
   // Helper para formatear moneda (lo usamos en subtotal/comisión/total)
   const money = (n: number) =>

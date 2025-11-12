@@ -45,6 +45,7 @@ export default function AddCardModal({
   const [cardHolder, setCardHolder] = useState('');
   const [isValidHolder, setIsValidHolder] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  
 
   useEffect(() => {
     const regex = /^(?=.*[a-zA-ZñÑáéíóúÁÉÍÓÚ])[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/;
@@ -81,7 +82,7 @@ export default function AddCardModal({
 
       let cardId = null;
       if (saveCard) {
-        const cardRes = await fetch('https://servineo-backend-m68a.onrender.com/api/cardscreate', {
+        const cardRes = await fetch('/api/cardscreate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -96,7 +97,7 @@ export default function AddCardModal({
         cardId = savedCard._id;
       }
 
-      const paymentRes = await fetch('https://servineo-backend-m68a.onrender.com/api/createpayment', {
+      const paymentRes = await fetch('/api/createpayment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

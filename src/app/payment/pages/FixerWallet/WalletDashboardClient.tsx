@@ -61,8 +61,7 @@ export default function FixerWalletDashboard() {
     setLoading(true);
     setError(null);
     try {
-      const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
-      const res = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
+      const res = await fetch(`/api/fixer/payment-center/${fixerId}`);
       
       if (!res.ok) {
         const errData = await res.json();
