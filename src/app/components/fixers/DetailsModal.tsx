@@ -40,14 +40,14 @@ export const DetailsModal = ({ isOpen, onClose, onAccept, dataId }: ReviewModalP
 
   return (
     <ModalComponent isOpen={isOpen} onClose={onClose} Accept={onAccept}>
-      <div className='flex flex-col gap-4 w-[500px] max-w-[90%] text-left'>
+      <div className='flex flex-col gap-4 w-[500px] max-w-[90%] text-left bg-white rounded-xl p-6'>
         <div className='flex justify-between items-start'>
           <div>
             <h2 className='text-lg font-semibold text-gray-800'>{data?.title}</h2>
             <p className='text-sm text-gray-400'>Date: {data?.date}</p>
           </div>
           <div className='flex gap-1'>
-            {Array.from({ length: 5 }).map((_, i) => (
+            {Array.from({ length: 3 }).map((_, i) => (
               <span
                 key={i}
                 className={`${i < (data?.rating ?? 0) ? 'text-yellow-400' : 'text-gray-300'} text-xl`}

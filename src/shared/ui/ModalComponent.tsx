@@ -10,8 +10,7 @@ export const ModalComponent = ({ children, isOpen, onClose, Accept }: ModalProps
 
   return (
     <div
-      className='bg-black/70 fixed inset-0 flex items-center justify-center z-50 w-full h-full'
-      role='dialog'
+      className='fixed inset-0 flex items-center justify-center z-50 w-full h-full bg-transparent'
       aria-modal
       onClick={
         onClose ||
