@@ -3,7 +3,6 @@
 import { useState, useEffect } from "react"
 import { currentFixer, mockJobOfferService, type JobOffer } from "@/app/lib/mock-data"
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
-import { Navbar } from "@/Components/Shared/Navbar"
 import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
 import type { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
 import { ImageCarousel } from "@/Components/Shared/ImageCarousel"
@@ -150,17 +149,9 @@ export default function MyOffersPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      <Navbar />
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-              Mis Ofertas de Trabajo
-            </h1>
-            <p className="text-sm text-blue-600 mt-1">
-              {currentFixer.name} • {currentFixer.whatsapp}
-            </p>
-          </div>
+          
           <button
             onClick={() => {
               setEditingOffer(null)
