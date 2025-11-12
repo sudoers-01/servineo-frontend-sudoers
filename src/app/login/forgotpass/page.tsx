@@ -159,7 +159,7 @@ export default function RecuperacionCorreoPage() {
 
         <div className="mt-6 text-center text-sm text-muted-foreground">
           <Link
-            href="/userManagement/requester/signIn"
+            href="/login"
             className="text-primary hover:underline font-medium"
           >
             Volver al inicio de sesión

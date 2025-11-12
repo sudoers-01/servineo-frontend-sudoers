@@ -206,7 +206,7 @@ export default function LoginPage() {
             {/* Enlace auxiliar */}
             <div className="flex justify-end items-center">
               <Link
-                href="/app/login/forgotpass"
+                href="/login/forgotpass"
                 className="text-primary/90 hover:text-primary underline-offset-2 hover:underline text-sm font-medium"
               >
                 ¿Olvidaste tu contraseña?
@@ -241,7 +241,7 @@ export default function LoginPage() {
           <p className="mt-8 text-center text-sm text-muted-foreground">
             ¿No tienes cuenta?{" "}
             <button
-              onClick={() => router.push("../requester/signUp")}
+              onClick={() => router.push("../signUp")}
               className="text-primary/90 hover:text-primary font-medium underline-offset-2 hover:underline"
             >
               Regístrate
