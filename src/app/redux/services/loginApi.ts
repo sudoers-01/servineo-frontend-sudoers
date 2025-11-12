@@ -36,10 +36,13 @@ class ApiClient {
       const data = await response.json();
       return { success: response.ok, data, message: data.message };
     } 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (error: any) {
-      return { success: false, error: error.message };
-    } finally {
+    catch (error: unknown) {
+  if (error instanceof Error) {
+    return { success: false, error: error.message };
+  }
+  return { success: false, error: 'Error desconocido' };
+}
+  finally {
       clearTimeout(id);
     }
   }
@@ -47,8 +50,7 @@ class ApiClient {
   get<T>(url: string) {
     return this.request<T>(url, { method: 'GET' });
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  post<T>(url: string, body: any) {
+  post<T, B = unknown>(url: string, body: B) {
     return this.request<T>(url, {
       method: 'POST',
       body: JSON.stringify(body),

@@ -78,7 +78,6 @@ export default function LoginPage() {
         localStorage.setItem("servineo_user", JSON.stringify(datos.user));
 
         const mensajeExito = datos.message || `¡Bienvenido, ${datos.user.name}!`;
-        sessionStorage.setItem("toastMessage", mensajeExito);
 
         setNotification({
           isOpen: true,

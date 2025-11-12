@@ -5,7 +5,18 @@ import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
 import { api, ApiResponse } from "../../../app/redux/services/loginApi";
 
 interface LoginGoogleProps {
-  onMensajeChange: (mensaje: string, tipo: 'error') => void; // solo error
+  onMensajeChange: (mensaje: string, tipo: "error") => void;
+}
+
+interface GoogleLoginResponse {
+  token: string;
+  user: {
+    id: string | number;
+    name: string;
+    email: string;
+    picture?: string;
+  };
+  message?: string;
 }
 
 export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
@@ -15,23 +26,23 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
     setLoading(true);
 
     try {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const res: ApiResponse<any> = await api.post("/auth/google", {
-        credential: credentialResponse.credential,
-        token: credentialResponse.credential,
-        modo: "login",
-      });
+      const res: ApiResponse<GoogleLoginResponse> = await api.post(
+        "/auth/google",
+        {
+          credential: credentialResponse.credential,
+          token: credentialResponse.credential,
+          modo: "login",
+        }
+      );
 
       if (res.success && res.data) {
-        // Guardamos token y usuario
         localStorage.setItem("servineo_token", res.data.token);
         localStorage.setItem("servineo_user", JSON.stringify(res.data.user));
 
-        // Guardamos mensaje de exito en sessionStorage para Home
-        const mensajeExito = res.data?.message || `¡Inicio de sesión exitoso con Google! Bienvenido, ${res.data.user.name}!`;
-        sessionStorage.setItem("toastMessage", mensajeExito);
+        const mensajeExito =
+          res.data?.message ||
+          `¡Inicio de sesión exitoso con Google! Bienvenido, ${res.data.user.name}!`;
 
-        // Redirigimos al Home
         window.location.href = "/";
       } else {
         const mensajeError =
@@ -39,18 +50,21 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
           res.data?.message ||
           res.error ||
           "Error desconocido al iniciar sesión con Google.";
-        onMensajeChange(mensajeError, 'error');
+        onMensajeChange(mensajeError, "error");
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      onMensajeChange(err?.message ?? "No se pudo conectar con el servidor.", 'error');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        onMensajeChange(err.message, "error");
+      } else {
+        onMensajeChange("No se pudo conectar con el servidor.", "error");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   const handleError = () => {
-    onMensajeChange("Error al iniciar sesión con Google.", 'error');
+    onMensajeChange("Error al iniciar sesión con Google.", "error");
   };
 
   return (
