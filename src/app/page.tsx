@@ -11,6 +11,13 @@ import FooterSection from "@/Components/Home/Footer-section";
 
 
 export default function Home() {
+  const [randomName, setRandomName] = useState("John Doe");
+
+  useEffect(() => {
+    const randomIndex = Math.floor(Math.random() * availableNames.length);
+    setRandomName(availableNames[randomIndex]);
+  }, []);
+
   return (
     <div className="min-h-screen bg-white">
       <HeroSection />
