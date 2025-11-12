@@ -1,17 +1,13 @@
 "use client"
 
 import { Pie, PieChart, Cell, Tooltip } from "recharts"
+import { useGetJobStatisticsQuery, JobLog } from '../../app/redux/services/statisticsApi';
+
 const COLORS = {
     Completados: "#10B981",
     "En proceso": "#3B82F6",
     Pendientes: "#F59E0B",
 }
-
-const chartData = [
-    { estado: "Completados", cantidad: 45 },
-    { estado: "En proceso", cantidad: 25 },
-    { estado: "Pendientes", cantidad: 15 },
-]
 
 const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -26,7 +22,32 @@ const CustomTooltip = ({ active, payload }: any) => {
 
 
 export default function EstadisticasTrabajos() {
-    const totalTrabajos = chartData.reduce((sum, entry) => sum + entry.cantidad, 0)
+    const { data: jobLogs, isLoading, isError } = useGetJobStatisticsQuery();
+
+    if (isLoading) {
+        return <div className="text-center p-8">Cargando estadísticas...</div>;
+    }
+    if (isError || !jobLogs) {
+        return <div className="text-center p-8 text-red-600">Error al cargar datos o datos no disponibles.</div>;
+    }
+
+    const dailyStatusLog = jobLogs
+        .filter(log => log.type === 'daily_jobs_status')
+        .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
+
+    if (!dailyStatusLog) {
+        return <div className="text-center p-8 text-gray-500">No se encontraron logs de estado de trabajos.</div>;
+    }
+    
+    const stats = dailyStatusLog.metadata;
+
+    const chartData = [
+        { estado: "Completados", cantidad: stats.completed },
+        { estado: "En proceso", cantidad: stats.inProgress },
+        { estado: "Pendientes", cantidad: stats.pending },
+    ];
+
+    const totalTrabajos = stats.total;
 
     return (
         <div className="flex flex-col font-['Roboto'] shadow-md rounded-2xl p-4 bg-white max-w-sm mx-auto">
@@ -52,13 +73,11 @@ export default function EstadisticasTrabajos() {
                                 y={props.y}
                                 textAnchor={props.textAnchor}
                                 dominantBaseline={props.dominantBaseline}
-                                fill="#333" // Color de la etiqueta
-                                className="text-sm font-medium"
-                            >
+                                fill="#333" 
+                                className="text-sm font-medium">
                                 {`${payload.cantidad}`}
                             </text>
-                        )}
-                    >
+                        )}>
                         {chartData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[entry.estado as keyof typeof COLORS]} />
                         ))}
@@ -69,8 +88,7 @@ export default function EstadisticasTrabajos() {
                 {chartData.map((item, index) => (
                     <div 
                         key={item.estado} 
-                        className={`flex justify-between px-4 py-1 ${index < chartData.length - 1 ? 'border-b border-gray-200' : ''}`}
-                    >
+                        className={`flex justify-between px-4 py-1 ${index < chartData.length - 1 ? 'border-b border-gray-200' : ''}`}>
                         <span className="font-medium flex items-center">
                             <span 
                                 className="inline-block w-3 h-3 rounded-full mr-2" 
@@ -93,7 +111,6 @@ export default function EstadisticasTrabajos() {
                     <span>{totalTrabajos} trabajos</span>
                 </div>
             </div>
-
         </div>
     )
 }
