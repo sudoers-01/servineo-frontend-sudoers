@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { GoogleLogin, CredentialResponse } from "@react-oauth/google";
-import { api, ApiResponse } from "../../app/redux/services/loginApi";
+import { api, ApiResponse } from "../../../app/redux/services/loginApi";
 
 interface LoginGoogleProps {
   onMensajeChange: (mensaje: string, tipo: 'error') => void; // solo error

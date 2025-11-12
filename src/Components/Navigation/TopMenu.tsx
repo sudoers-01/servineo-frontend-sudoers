@@ -49,7 +49,7 @@ export default function TopMenu() {
 
             <div className="hidden md:flex items-center space-x-4">
               <Link 
-                href="/login" 
+                href="../login" 
                 className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
               >
                 Iniciar Sesión
@@ -87,7 +87,7 @@ export default function TopMenu() {
             ))}
             <div className="pt-4 pb-2 border-t border-gray-200 px-2">
               <Link
-                href="/login"
+                href="../login"
                 className="block w-full text-center text-primary px-4 py-2 rounded-md text-base font-medium hover:bg-gray-50"
                 onClick={() => setIsOpen(false)}
               >

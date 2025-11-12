@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import ClientView from '../../../../Components/login/clientResend';
+import ClientView from '../../../../Components/login/ClientResend';
 
 // ✅ Esquema de validación Zod para los searchParams
 const SearchParamsSchema = z.object({
