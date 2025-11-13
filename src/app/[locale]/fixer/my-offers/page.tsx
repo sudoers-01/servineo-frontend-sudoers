@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react"
 import { currentFixer, mockJobOfferService, type JobOffer } from "@/app/lib/mock-data"
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
+import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
 import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
 import type { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
-import { ImageCarousel } from "@/Components/Shared/ImageCarousel"
 import NotificationModal from "@/Components/Modal-notifications"
 import ConfirmationModal from "@/Components/Modal-confirmation"
 import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
@@ -35,7 +35,6 @@ export default function MyOffersPage() {
     offerId: string | null
   }>({ isOpen: false, offerId: null })
 
-  
   useEffect(() => {
     if (!currentFixerRedux) {
       dispatch(setFixer(currentFixer))
@@ -79,7 +78,6 @@ export default function MyOffersPage() {
 
   const handleSubmit = (formData: JobOfferFormData) => {
     try {
-      
       const servicesAsStrings = formData.services.map((service) => service.value)
       const defaultLocations: { [key: string]: { lat: number; lng: number } } = {
         Cochabamba: { lat: -17.3895, lng: -66.1568 },
@@ -151,7 +149,7 @@ export default function MyOffersPage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
       <div className="container mx-auto px-4 py-6">
         <div className="flex items-center justify-between">
-          
+          <h1 className="text-3xl font-bold text-gray-900">Mis Ofertas</h1>
           <button
             onClick={() => {
               setEditingOffer(null)
@@ -166,6 +164,7 @@ export default function MyOffersPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
+        {/* Form Modal */}
         {isFormOpen && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
             <JobOfferForm
@@ -180,7 +179,7 @@ export default function MyOffersPage() {
           </div>
         )}
 
-        
+        {/* Empty State */}
         {offers.length === 0 ? (
           <div className="text-center py-16 animate-fade-in">
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl flex items-center justify-center">
@@ -209,57 +208,30 @@ export default function MyOffersPage() {
                 className="animate-fade-in relative group"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="relative w-full overflow-hidden rounded-xl border border-primary bg-white transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg">
-                  
-                  <ImageCarousel
-                    images={
-                      offer.photos.length > 0 ? offer.photos : ["/placeholder.svg?height=180&width=320&text=Oferta"]
-                    }
-                    alt={`Trabajo de ${offer.fixerName}`}
-                  />
+                <div className="relative">
+                  <JobOfferCard offer={offer} showFixerInfo={true} />
 
-                  
-                  <div className="absolute left-3 top-3 inline-flex items-center gap-2 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 border border-gray-200 shadow-sm">
-                    <span className="font-medium text-blue-600">{offer.city}</span>
-                  </div>
-                  <div className="absolute right-3 top-3 rounded-xl bg-white/95 px-3 py-2 text-sm font-bold text-primary shadow-lg border border-primary/20">
-                    {offer.price} Bs
-                  </div>
-
-                  
-                  <div className="pointer-events-none absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-black/0 p-4">
-                    <div className="flex items-end justify-between">
-                      <div className="text-white">
-                        <div className="text-sm opacity-90">{offer.fixerName}</div>
-                        <div className="text-xs opacity-80">{offer.whatsapp}</div>
-                      </div>
-                      <div className="flex items-center gap-2 text-xs bg-gradient-to-r from-primary to-blue-600 px-3 py-1 rounded-full text-white font-medium">
-                        {offer.services[0]}
-                      </div>
-                    </div>
-                  </div>
-
-                  
-                  <div className="absolute left-3 bottom-16 flex gap-2">
+                  {/* Action Buttons - Positioned absolutely over the card */}
+                  <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         handleEdit(offer)
                       }}
-                      className="p-2 bg-white/95 text-primary rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
-                      title="Editar"
+                      className="p-2.5 bg-white text-primary rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-primary/20"
+                      title="Editar oferta"
                     >
-                      <Edit2 className="w-4 h-4" />
+                      <Edit2 className="w-5 h-5" />
                     </button>
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         handleDeleteClick(offer.id)
                       }}
-                      className="p-2 bg-white/95 text-destructive rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
-                      title="Eliminar"
+                      className="p-2.5 bg-white text-destructive rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-destructive/20"
+                      title="Eliminar oferta"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-5 h-5" />
                     </button>
                   </div>
                 </div>
@@ -269,7 +241,7 @@ export default function MyOffersPage() {
         )}
       </div>
 
-      
+      {/* Notification Modal */}
       <NotificationModal
         isOpen={notification.isOpen}
         onClose={() => setNotification({ ...notification, isOpen: false })}
