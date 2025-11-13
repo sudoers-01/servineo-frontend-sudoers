@@ -66,7 +66,7 @@ export interface Invoice {
 }
 
 // URL base de nuestro Backend (Puerto 4000). **Verifica que este puerto sea correcto**
-const API_URL = 'http://localhost:4000'; 
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
 
 // 3. FUNCIÓN PARA OBTENER LAS FACTURAS DESDE EL BACKEND
