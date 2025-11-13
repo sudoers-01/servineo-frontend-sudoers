@@ -158,7 +158,7 @@ export default function ClientResend({ email: emailProp }: { email?: string; tok
         </button>
 
         <a
-          href="/userManagement/requester/signIn"
+          href="/login"
           className="text-center rounded-xl p-3.5 font-semibold transition
                      bg-background text-foreground ring-1 ring-border hover:bg-muted"
         >
