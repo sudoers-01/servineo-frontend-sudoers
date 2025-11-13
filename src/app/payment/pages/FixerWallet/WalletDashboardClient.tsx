@@ -1,4 +1,4 @@
-// src/app/payment/FixerWallet/WalletDashboardClient.tsx
+// src/app/payment/pages/FixerWallet/WalletDashboardClient.tsx
 "use client";
 
 import { useState, useEffect } from 'react';
@@ -6,15 +6,12 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Wallet, TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
 
-// --- Tus datos de MOCK (Solo para transacciones por ahora) ---
 const MOCK_TRANSACTIONS = [
     { _id: "1", type: "deposit", amount: 50.00, description: "Recargar con Tarjeta", createdAt: "2025-10-25" },
     { _id: "2", type: "commission", amount: -2.50, description: "Comision - Trabajo #1234 (Efectivo)", jobId: "1234", createdAt: "2025-10-24" },
     { _id: "3", type: "commission", amount: -3.75, description: "Comision - Trabajo #1228 (Efectivo)", jobId: "1228", createdAt: "2025-10-23" }
 ];
-// --- Fin de Mocks ---
 
-// --- Interfaces para los datos ---
 interface WalletData {
   balance: number;
   currency: string;
@@ -55,13 +52,17 @@ export default function FixerWalletDashboard() {
     }
   }, [searchParams]);
   
-  // --- NUEVA FUNCIÓN DE FETCH ---
-  // Llama al MISMO endpoint que usa CentroPagos
+  // --- FUNCIÓN DE FETCH CORREGIDA ---
   const fetchWalletData = async (fixerId: string) => {
     setLoading(true);
     setError(null);
+    
+    // --- CORRECCIÓN: Definir BACKEND_URL ---
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+
     try {
-      const res = await fetch(`/api/fixer/payment-center/${fixerId}`);
+      // Llama al MISMO endpoint que usa CentroPagos
+      const res = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
       
       if (!res.ok) {
         const errData = await res.json();
@@ -75,8 +76,7 @@ export default function FixerWalletDashboard() {
           balance: result.data.saldoActual,
           currency: "BOB" // Asumimos BOB por ahora
         });
-        // NOTA: Tu endpoint 'payment-center' aún no devuelve transacciones.
-        // 'transactions' seguirá usando los datos MOCK por ahora.
+        // NOTA: 'transactions' seguirá usando los datos MOCK por ahora.
       } else {
         throw new Error(result.error || 'No se pudieron cargar los datos.');
       }
@@ -133,66 +133,70 @@ export default function FixerWalletDashboard() {
         <h1 className="text-2xl font-bold">Fixer Wallet</h1>
       </div>
 
-      {/* Balance Card */}
-      <div className="p-6">
-        <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg">
-          <div className="flex items-center gap-2 mb-2">
-            <Wallet size={20} />
-            <span className="text-sm opacity-90">Saldo Actual</span>
-          </div>
-          <div className="text-5xl font-bold mb-6">
-            {/* Usa el estado 'walletData' */}
-            Bs. {walletData?.balance?.toFixed(2) || '0.00'}
-          </div>
-          
-          <Link
-            href={`/payment/pages/FixerWallet/recarga?fixerId=${receivedFixerId}`}
-            className="w-full block text-center bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
-          >
-            Recargar Saldo
-          </Link>
-        </div>
-      </div>
+      {/* --- CORRECCIÓN: Contenedor para centrar y limitar el ancho --- */}
+      <div className="max-w-3xl mx-auto px-4">
 
-      {/* Movimientos Recientes */}
-      <div className="px-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-gray-600 font-semibold text-lg">Movientos Recientes</h2>
-          
-          <Link
-            href={`/payment/pages/FixerWallet/historial?fixerId=${receivedFixerId}`}
-            className="text-blue-600 font-semibold"
-          >
-            Ver todo
-          </Link>
-        </div>
-
-        {/* Los movimientos siguen usando el MOCK_TRANSACTIONS */}
-        <div className="space-y-3">
-          {transactions.map((tx) => (
-            <div key={tx._id} className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
-              <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                tx.amount > 0 ? 'bg-green-100' : 'bg-red-100'
-              }`}>
-                {tx.amount > 0 ? (
-                  <TrendingUp className="text-green-600" size={24} />
-                ) : (
-                  <TrendingDown className="text-red-600" size={24} />
-                )}
-              </div>
-              <div className="flex-1">
-                <p className="font-semibold text-gray-900">{tx.description}</p>
-                <p className="text-sm text-gray-500">{tx.createdAt}</p>
-              </div>
-              <div className={`font-bold text-lg ${
-                tx.amount > 0 ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {tx.amount > 0 ? '+' : '-'}{formatCurrency(tx.amount)}
-              </div>
+        {/* Balance Card */}
+        <div className="pt-6 pb-4"> {/* Ajustado el padding (quitado p-6) */}
+          <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg">
+            <div className="flex items-center gap-2 mb-2">
+              <Wallet size={20} />
+              <span className="text-sm opacity-90">Saldo Actual</span>
             </div>
-          ))}
+            <div className="text-5xl font-bold mb-6">
+              {/* Usa el estado 'walletData' */}
+              Bs. {walletData?.balance?.toFixed(2) || '0.00'}
+            </div>
+            
+            <Link
+              href={`/payment/pages/FixerWallet/recarga?fixerId=${receivedFixerId}`}
+              className="w-full block text-center bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
+            >
+              Recargar Saldo
+            </Link>
+          </div>
         </div>
-      </div>
+
+        {/* Movimientos Recientes */}
+        <div className="pb-6"> {/* Ajustado el padding (quitado px-6) */}
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-gray-600 font-semibold text-lg">Movientos Recientes</h2>
+            
+            <Link
+              href={`/payment/pages/FixerWallet/historial?fixerId=${receivedFixerId}`}
+              className="text-blue-600 font-semibold"
+            >
+              Ver todo
+            </Link>
+          </div>
+
+          {/* Los movimientos siguen usando el MOCK_TRANSACTIONS */}
+          <div className="space-y-3">
+            {transactions.map((tx) => (
+              <div key={tx._id} className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  tx.amount > 0 ? 'bg-green-100' : 'bg-red-100'
+                }`}>
+                  {tx.amount > 0 ? (
+                    <TrendingUp className="text-green-600" size={24} />
+                  ) : (
+                    <TrendingDown className="text-red-600" size={24} />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="font-semibold text-gray-900">{tx.description}</p>
+                  <p className="text-sm text-gray-500">{tx.createdAt}</p>
+                </div>
+                <div className={`font-bold text-lg ${
+                  tx.amount > 0 ? 'text-green-600' : 'text-red-600'
+                }`}>
+                  {tx.amount > 0 ? '+' : '-'}{formatCurrency(tx.amount)}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div> {/* --- FIN DEL CONTENEDOR --- */}
     </div>
   );
 }

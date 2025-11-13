@@ -12,7 +12,7 @@ export default function WalletFlagWatcher({ fixerId }: { fixerId: string }) {
     let alive = true;
     const tick = async () => {
       try {
-        const res = await fetch(`/api/dev/wallet/${fixerId}`, { cache: "no-store" });
+        const res = await fetch(`/api/fixer/payment-center/${fixerId}`, { cache: "no-store" });
         if (res.ok) {
           const w = await res.json();
           const f: Flags = w?.flags || {};
