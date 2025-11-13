@@ -5,8 +5,8 @@ import AppointmentForm from "../../appointments/forms/AppointmentForm";
 import type { AppointmentFormHandle } from "../../appointments/forms/AppointmentForm";
 import EditAppointmentForm from "../../appointments/forms/EditAppointmentForm";
 import type { EditAppointmentFormHandle, ExistingAppointment } from "../../appointments/forms/EditAppointmentForm";
-import AppointmentDetailsForm, { EditAppointmentFormHandle as DetailsFormHandle } from "@/components/appointments/forms/AppointmentDetails";
-import DatePicker from "@/components/list/DatePicker/DatePicker";
+import AppointmentDetailsForm, { EditAppointmentFormHandle as DetailsFormHandle } from "@/componentsLorem/appointments/forms/AppointmentDetails";
+import DatePicker from "@/componentsLorem/list/DatePicker/DatePicker";
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
 import { useAppointmentsContext } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 
