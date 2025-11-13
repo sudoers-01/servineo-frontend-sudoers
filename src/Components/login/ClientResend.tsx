@@ -14,7 +14,7 @@ const resendResponseSchema = z.object({
   message: z.string().optional(),
 });
 
-export default function ClientResend({ email: emailProp}: { email?: string; token?: string }) {
+export default function ClientResend({ email: emailProp }: { email?: string; token?: string }) {
   // Email: preferir prop; si no hay recuperar de sessionStorage
   const [email, setEmail] = useState<string | undefined>(emailProp);
   useEffect(() => {
@@ -50,7 +50,8 @@ export default function ClientResend({ email: emailProp}: { email?: string; toke
     if (typeof window === 'undefined' || !lastKey) return undefined;
     const raw = localStorage.getItem(lastKey);
     return raw ? Number(raw) : undefined;
-  }, [lastKey, now]);
+  }, [lastKey]); // <--- quitar now
+
 
   const msFromLast = lastTs ? now - lastTs : Infinity;
   const canResend = msFromLast >= RESEND_COOLDOWN_MS;
