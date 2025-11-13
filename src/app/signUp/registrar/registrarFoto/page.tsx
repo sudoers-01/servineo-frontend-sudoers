@@ -38,7 +38,7 @@ export default function FotoPerfil() {
 
       if (response.success) {
         alert("Foto actualizada correctamente");
-        router.push("/../registrarUbicacion"); 
+        router.push("/signUp/registrar/registrarUbicacion"); 
       } else {
         alert(response.message || "Error al subir la foto");
       }
@@ -117,7 +117,7 @@ export default function FotoPerfil() {
           {/* Botones de navegación */}
           <div className="flex justify-center gap-4 mt-8">
             <button
-              onClick={() => router.push("/userManagement/requester/signUp/registroDatos")}
+              onClick={() => router.push("/signUp/registrar/registrarServicios")}//<--------------
               className="px-5 py-2 bg-red-600 rounded-full hover:bg-red-700 transition"
             >
               Atrás

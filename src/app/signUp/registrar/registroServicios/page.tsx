@@ -98,7 +98,7 @@ export default function RegistroForm() {
           "toastMessage",
           `¡Cuenta creada exitosamente! ¡Bienvenido, ${nombreCompleto}!`
         );
-        router.push("../requester/signUp/RegistrarFotoDP");
+        router.push("/signUp/registrar/registrarFoto");
       } else {
       }
     } catch {
