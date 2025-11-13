@@ -7,7 +7,7 @@ import dynamic from 'next/dynamic'
 import {
   obtenerDatosUsuarioLogueado,
   actualizarDatosUsuario,
-} from '../../app/redux/services/editNumber'
+} from '../../../app/redux/services/editNumber'
 
 const MapContainer = dynamic(
   () => import('react-leaflet').then((m) => m.MapContainer),

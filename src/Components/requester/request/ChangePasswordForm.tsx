@@ -5,10 +5,10 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { cambiarContrasena } from '../../app/redux/services/editPassword';
-import { cerrarTodasSesiones } from '../../app/redux/services/logoutService';
+import { cambiarContrasena } from '../../../app/redux/services/editPassword';
+import { cerrarTodasSesiones } from '../../../app/redux/services/logoutService';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { obtenerUltimoCambio } from '../../app/redux/services/getLastChange';
+import { obtenerUltimoCambio } from '../../../app/redux/services/getLastChange';
 
 // 🎯 ESQUEMA DE VALIDACIÓN CON ZOD
 const changePasswordSchema = z.object({

@@ -4,11 +4,11 @@ import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { useAuth } from '../lib/hooks/usoAutentificacion';
-
 import AccountLoginSettings from './linkAccounts/page';
-import RequesterEditForm from '../../Components/request/RequesterEditForm';
-import ChangePasswordForm from '../../Components/request/ChangePasswordForm';
+import RequesterEditForm from '../../Components/requester/request/RequesterEditForm';
+import ChangePasswordForm from '../../Components/requester/request/ChangePasswordForm';
 import { obtenerDatosUsuarioLogueado } from '../redux/services/editNumber';
+import CloseSessionPage from '@/app/requesterEdit/closeSession/page';
 
 interface RequesterDataState {
   requesterId: string
@@ -51,7 +51,7 @@ export default function ConfiguracionPage() {
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
   }
 
-  // 🔧 Función para cargar datos de perfil (HU5)
+  //Función para cargar datos de perfil (HU5)
   const loadProfileData = useCallback(async () => {
     if (!user) return
 
@@ -81,14 +81,14 @@ export default function ConfiguracionPage() {
     }
   }, [user])
 
-  // 🔧 Cargar datos cuando se activa la sección de perfil
+  //Cargar datos cuando se activa la sección de perfil
   useEffect(() => {
     if (seccionActiva === 'perfil') {
       loadProfileData()
     }
   }, [seccionActiva, loadProfileData])
 
-  // 🔧 Callbacks para HU8 (Cambiar Contraseña)
+  //Callbacks para HU8 (Cambiar Contraseña)
   const handlePasswordCancel = () => {
     setSeccionActiva('inicio') // Volver al inicio
   }
@@ -100,7 +100,7 @@ export default function ConfiguracionPage() {
     }, 1500)
   }
 
-  // 🎯 Función para renderizar el contenido según la sección
+  // Función para renderizar el contenido según la sección
   const renderContenido = () => {
     switch (seccionActiva) {
       case 'perfil':
@@ -175,7 +175,7 @@ export default function ConfiguracionPage() {
 
               {/* Dispositivos vinculados */}
               <button
-                onClick={() => router.push('/controlC/HU6/closeSession')}
+                onClick={() => router.push('/requesterEdit/closeSession/')}
                 className="flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out bg-white text-gray-800 cursor-pointer min-w-[220px]"
               >
                 <div className="p-2 rounded-md bg-blue-50">
