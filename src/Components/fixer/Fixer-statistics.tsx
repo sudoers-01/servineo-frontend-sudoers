@@ -3,13 +3,30 @@
 import { Pie, PieChart, Cell, Tooltip } from "recharts"
 import { useGetJobStatisticsQuery, JobLog } from '../../app/redux/services/statisticsApi';
 
+
 const COLORS = {
     Completados: "#10B981",
     "En proceso": "#3B82F6",
     Pendientes: "#F59E0B",
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+
+
+interface TooltipPayload {
+    name: string;
+    value: number;
+    payload: {
+        estado: string;
+        cantidad: number;
+    };
+}
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: TooltipPayload[];
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
         return (
             <div className="p-2 bg-white border border-gray-300 shadow-md rounded-md text-sm">
