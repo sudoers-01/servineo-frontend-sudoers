@@ -206,9 +206,11 @@ export default function AccountLoginSettings({ token = "" }: Props) {
                     key="email"
                     token={token}
                     onLinked={(client) => {
+                      if (!client) return; 
                       const fullList = buildFullMethodsList(client.authProviders);
                       setMethods(fullList);
                     }}
+
                   />
                 );
               }

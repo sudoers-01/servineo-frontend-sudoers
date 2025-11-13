@@ -5,11 +5,10 @@ import { FcGoogle } from "react-icons/fc";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { vincularGoogle } from "../../../redux/services/services/api";
+import { vincularGoogle, Client } from "../../../redux/services/services/api";
 
 interface VincularGoogleProps {
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onLinked?: (client: any) => void;
+  onLinked?: (client?: Client) => void;
   tokenUsuario?: string;
 }
 
