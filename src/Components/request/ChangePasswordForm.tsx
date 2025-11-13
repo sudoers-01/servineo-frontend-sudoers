@@ -16,7 +16,7 @@ const changePasswordSchema = z.object({
     .string()
     .min(1, "Ingresa tu contraseña actual")
     .refine(val => !val.includes(' '), "No puede contener espacios"),
-  
+
   newPassword: z
     .string()
     .min(8, "Mínimo 8 caracteres")
@@ -24,7 +24,7 @@ const changePasswordSchema = z.object({
       message: "Debe tener mayúscula, minúscula y número"
     })
     .refine(val => !val.includes(' '), "No puede contener espacios"),
-  
+
   confirmPassword: z
     .string()
     .min(1, "Confirma tu nueva contraseña")
@@ -43,16 +43,15 @@ type Props = {
   onSaved?: () => void;
 };
 
-export default function ChangePasswordForm({ onCancel }: Props) {
+export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
   const router = useRouter();
-  
+
   // 🎯 REACT HOOK FORM + ZOD
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-    setError: setFormError,
     clearErrors
   } = useForm<ChangePasswordFormData>({
     resolver: zodResolver(changePasswordSchema),
@@ -112,24 +111,27 @@ export default function ChangePasswordForm({ onCancel }: Props) {
       if (result.success) {
         setSuccess('Contraseña actualizada exitosamente');
         reset(); // Limpiar formulario
+        onSaved?.();
         await actualizarFecha();
         setTimeout(() => setShowSuggestionModal(true), 2000);
       } else {
         setApiError(result.message || 'El cambio no se completó, error inesperado.');
-        
+
         if (result.forceLogout) {
           return;
         }
       }
-    } catch (err: any) {
-      console.error('Error al cambiar contraseña:', err);
-      
-      if (err.message?.includes('NetworkError') || err.message?.includes('Failed to fetch')) {
-        setApiError('El cambio no se completó, error de conexión.');
-      } else if (err.response?.status >= 500) {
-        setApiError('El cambio no se completó, error del servidor.');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        console.error('Error al cambiar contraseña:', err.message);
+        if (err.message.includes('NetworkError') || err.message.includes('Failed to fetch')) {
+          setApiError('El cambio no se completó, error de conexión.');
+        } else {
+          setApiError(err.message || 'El cambio no se completó, error inesperado.');
+        }
       } else {
-        setApiError(err.message || 'El cambio no se completó, error inesperado.');
+        console.error('Error desconocido:', err);
+        setApiError('El cambio no se completó, error inesperado.');
       }
     } finally {
       setTimeout(() => {
@@ -157,13 +159,12 @@ export default function ChangePasswordForm({ onCancel }: Props) {
               type={showCurrentPassword ? 'text' : 'password'}
               {...register('currentPassword')}
               placeholder="Ingresa tu contraseña actual"
-              className={`w-full rounded-md border px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:outline-none focus:ring-1 ${
-                errors.currentPassword 
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              className={`w-full rounded-md border px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:outline-none focus:ring-1 ${errors.currentPassword
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
                   : 'border-[#E5F4FB] bg-[#F5FAFE] focus:border-[#2BDDE0] focus:ring-[#2BDDE0]'
-              }`}
+                }`}
               disabled={isSubmitting}
-              onChange={(e) => {
+              onChange={() => {
                 clearErrors();
                 setApiError(null);
               }}
@@ -192,11 +193,10 @@ export default function ChangePasswordForm({ onCancel }: Props) {
               type={showNewPassword ? 'text' : 'password'}
               {...register('newPassword')}
               placeholder="Mínimo 8 caracteres, mayúscula, minúscula, número"
-              className={`w-full rounded-md border px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:outline-none focus:ring-1 ${
-                errors.newPassword 
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              className={`w-full rounded-md border px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:outline-none focus:ring-1 ${errors.newPassword
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
                   : 'border-[#E5F4FB] bg-[#F5FAFE] focus:border-[#2BDDE0] focus:ring-[#2BDDE0]'
-              }`}
+                }`}
               disabled={isSubmitting}
               onChange={() => {
                 clearErrors();
@@ -227,11 +227,10 @@ export default function ChangePasswordForm({ onCancel }: Props) {
               type={showConfirmPassword ? 'text' : 'password'}
               {...register('confirmPassword')}
               placeholder="Repita su nueva contraseña"
-              className={`w-full rounded-md border px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:outline-none focus:ring-1 ${
-                errors.confirmPassword 
-                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+              className={`w-full rounded-md border px-3 py-2 text-[#1A223F] placeholder-gray-400 focus:outline-none focus:ring-1 ${errors.confirmPassword
+                  ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
                   : 'border-[#E5F4FB] bg-[#F5FAFE] focus:border-[#2BDDE0] focus:ring-[#2BDDE0]'
-              }`}
+                }`}
               disabled={isSubmitting}
               onChange={() => {
                 clearErrors();
@@ -253,11 +252,10 @@ export default function ChangePasswordForm({ onCancel }: Props) {
 
         {/* Mensajes de API */}
         {apiError && (
-          <div className={`rounded-md p-3 text-sm transition-opacity duration-1000 ease-out ${
-            apiError.includes('bloqueada') || apiError.includes('Demasiados intentos') || apiError.includes('restantes')
-              ? 'bg-red-100 border border-red-300 text-red-800' 
+          <div className={`rounded-md p-3 text-sm transition-opacity duration-1000 ease-out ${apiError.includes('bloqueada') || apiError.includes('Demasiados intentos') || apiError.includes('restantes')
+              ? 'bg-red-100 border border-red-300 text-red-800'
               : 'bg-red-50 text-red-700'
-          }`}>
+            }`}>
             {(apiError.includes('bloqueada') || apiError.includes('Demasiados intentos')) && (
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-lg">🔒</span>
