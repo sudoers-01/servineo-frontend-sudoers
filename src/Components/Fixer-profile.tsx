@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl'
 import { MapPin, Edit, Save, X, Briefcase, MessageSquare, Star, Phone, Mail } from "lucide-react"
 import Image from "next/image"
 import type { Fixer } from "@/app/lib/mock-data"
-
+import JobStatistics from "@/Components/fixer/Fixer-statistics"
 export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner?: boolean }) {
   const t = useTranslations('fixerProfile.profile')
   
@@ -229,6 +229,11 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                 </div>
               )}
             </div>
+          </div>
+          {/* Statistics Section */}
+          <div className="pt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">Estadisticas de trabajos</h3>
+              <JobStatistics />
           </div>
         </div>
       </div>
