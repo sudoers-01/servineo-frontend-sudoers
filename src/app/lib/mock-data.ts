@@ -358,3 +358,4 @@ export const mockJobOfferService = {
 
 // Exportar también como mockJobOffers para compatibilidad
 export const mockJobOffers = _mockJobOffers
+

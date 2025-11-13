@@ -6,7 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import {
   validatePagination,
   JOBOFERT_ALLOWED_LIMITS,
-} from '../../../app/job-offer-list/validators/pagination.validator';
+} from '@/app/lib/validations/pagination.validator';
 
 interface PaginationSelectorProps {
   registrosPorPagina: number;

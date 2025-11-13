@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { roboto } from '../../../app/fonts';
-import { validateFilters } from '../../../app/job-offer-list/validators/filter.validator';
+import { roboto } from '@/app/fonts';
+import { validateFilters } from '@/app/lib/validations/filter.validator';
 
 interface FilterState {
   range: string[];

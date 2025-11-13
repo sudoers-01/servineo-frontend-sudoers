@@ -17,7 +17,7 @@ interface SortCardProps {
 
 export default function SortCard({ value, onSelect }: SortCardProps) {
   const sortOptions = [
-    'Destacados',
+    //'Destacados',
     'Los más recientes',
     'Los más antiguos',
     'Nombre A-Z',

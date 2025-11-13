@@ -1,9 +1,6 @@
-// src\app\job-offer\components_jo\Search\SearchBar.tsx
-'use client';
-
 import React from 'react';
-import { api } from '@/lib/api';
-import { ensureSessionId } from '@/lib/session';
+import { api } from '@/app/lib/api';
+import { ensureSessionId } from '@/app/lib/session';
 import { Input } from '@/Components/ui/input';
 import { SearchIcon } from './SearchIcon';
 import { Clock, X, Trash2, Star, ArrowUpLeft } from 'lucide-react';
@@ -11,8 +8,8 @@ import { ClearButton } from './ClearButton';
 import { SearchButton } from './SearchButton';
 import { AdvancedSearchButton } from './AdvancedSearchButton';
 import { FilterButton } from '../Filter/FilterButton';
-import { validateSearch } from '../../../app/job-offer-list/validators/search.validator';
-import { useAppSelector } from '../../../app/job-offer-list/hooks/hook';
+import { validateSearch } from '@/app/lib/validations/search.validator';
+import { useAppSelector } from '@/app/redux/hooks';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -25,7 +22,7 @@ interface SearchHistoryItem {
 
 export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   // Leer el valor de búsqueda desde Redux
-  const searchFromStore = useAppSelector((state) => state.jobOffers.search);
+  const searchFromStore = useAppSelector((state) => state.jobOfert.search);
 
   const [value, setValue] = React.useState('');
   const [error, setError] = React.useState<string | undefined>();

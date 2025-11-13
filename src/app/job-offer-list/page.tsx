@@ -1,4 +1,3 @@
-// src/app/job-offer/page.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -12,11 +11,9 @@ import {
   PaginationSelector,
   CardJob,
   SortCard,
-  Header,
-  Footer,
-} from '@/app/job-offer-list';
+} from '@/Components/Job-offers';
 
-import { useAppDispatch, useAppSelector } from './hooks/hook';
+import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
 import {
   fetchOffers,
   setSearch,
@@ -25,67 +22,49 @@ import {
   setRegistrosPorPagina,
   resetPagination,
   FilterState,
-} from './lib/slice';
-import { getSortValue, sortMapInverse } from './lib/constants/sortOptions';
-import { useSyncUrlParams } from './hooks/useSyncUrlParams';
-import useApplyQueryToStore from './hooks/useApplyQueryToStore';
+} from '@/app/redux/slice/jobOfert';
+import { getSortValue, sortMapInverse } from '../lib/constants/sortOptions';
+import { useSyncUrlParams } from '@/app/redux/job-offer-hooks/useSyncUrlParams';
+import useApplyQueryToStore from '@/app/redux/job-offer-hooks/useApplyQueryToStore';
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
 import { MapView } from '@/Components/Job-offers/maps/MapView';
 import { Map, List, LayoutGrid } from 'lucide-react';
-import { categoryImages } from './lib/constants/img';
-import { mockFixers } from '@/app/lib/mock-data';
+import { categoryImages } from '../lib/constants/img';
+import { mockJobOffers } from '@/app/lib/mock-data';
 
 const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
 
 // Type for the offer data from the backend
 interface OfferData {
   _id: string;
-  id?: string;
-  fixerId?: string;
-  userId?: string;
-  fixerName?: string;
-  fixerPhoto?: string;
-  title: string;
-  description: string;
-  tags?: string[];
-  contactPhone?: string;
-  photos?: string[];
-  imagenUrl?: string;
-  category?: string;
-  price: number;
-  createdAt: string | Date;
-  city?: string;
-  rating?: number;
-  completedJobs?: number;
-  location?: {
-    lat?: number;
-    lng?: number;
-    address?: string;
-  };
-}
-
-// Type for the adapted offer format
-interface AdaptedOffer {
-  id: string;
   fixerId: string;
-  fixerName: string;
-  fixerPhoto?: string;
+  name: string;
   title: string;
   description: string;
   tags: string[];
-  whatsapp: string;
+  phone: string;
+  photos?: string[];
+  imagenUrl?: string;
+  category: string;
+  price: number;
+  createdAt: string | Date;
+  city: string;
+}
+
+// Type for the adapted offer format (para el modal)
+interface AdaptedOffer {
+  _id: string;
+  fixerId: string;
+  name: string;
+  title: string;
+  description: string;
+  tags: string[];
+  phone: string;
   photos: string[];
   services: string[];
   price: number;
   createdAt: Date;
   city: string;
-  rating?: number;
-  completedJobs: number;
-  location: {
-    lat: number;
-    lng: number;
-    address: string;
-  };
 }
 
 export default function JobOffersPage() {
@@ -104,7 +83,7 @@ export default function JobOffersPage() {
     totalRegistros,
     date,
     rating,
-  } = useAppSelector((state) => state.jobOffers);
+  } = useAppSelector((state) => state.jobOfert);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const stickyRef = useRef<HTMLDivElement | null>(null);
@@ -113,8 +92,6 @@ export default function JobOffersPage() {
   const pageBeforeFilter = useRef<number>(1);
   const hasActiveFilters = useRef<boolean>(false);
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('list');
-
-  // Estados para el modal
   const [selectedOffer, setSelectedOffer] = useState<AdaptedOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -149,16 +126,9 @@ export default function JobOffersPage() {
     return selectedImages;
   };
 
-  // Función para adaptar datos de BD a formato mock
-  const adaptOfferToMockFormat = (offer: OfferData): AdaptedOffer | null => {
+  // Función para adaptar datos de BD a formato para modal
+  const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
     if (!offer) return null;
-
-    // Intentar obtener fixerId de la oferta, o usar uno por defecto
-    const fixerIdToUse = offer.fixerId || offer.userId || 'fixer-001';
-
-    // Buscar fixer en mockFixers
-    const fixer =
-      mockFixers.find((f) => f.id === fixerIdToUse) || mockFixers.find((f) => f.id === 'fixer-001');
 
     // Obtener imágenes
     let photos: string[] = [];
@@ -171,26 +141,18 @@ export default function JobOffersPage() {
     }
 
     return {
-      id: offer._id || offer.id || '',
-      fixerId: fixerIdToUse,
-      fixerName: fixer?.name || offer.fixerName || 'Usuario',
-      fixerPhoto: fixer?.photo || offer.fixerPhoto,
+      _id: offer._id,
+      fixerId: offer.fixerId,
+      name: offer.name,
       title: offer.title,
       description: offer.description,
       tags: offer.tags || [],
-      whatsapp: offer.contactPhone?.replace(/\D/g, '') || fixer?.whatsapp || '59170000000',
-      photos,
-      services: offer.category ? [offer.category] : fixer?.services || [],
+      phone: offer.phone,
+      photos: photos,
+      services: offer.category ? [offer.category] : [],
       price: offer.price,
       createdAt: new Date(offer.createdAt || Date.now()),
-      city: offer.city || fixer?.city || 'Cochabamba',
-      rating: fixer?.rating || offer.rating,
-      completedJobs: fixer?.completedJobs || offer.completedJobs || 0,
-      location: {
-        lat: offer.location?.lat || -17.3935,
-        lng: offer.location?.lng || -66.1468,
-        address: offer.location?.address || fixer?.city || `${offer.city || 'Cochabamba'}, Bolivia`,
-      },
+      city: offer.city,
     };
   };
 
@@ -225,7 +187,7 @@ export default function JobOffersPage() {
 
   // Restaurar posición del scroll
   useEffect(() => {
-    if (!loading && trabajos.length > 0 && !scrollRestoredRef.current) {
+    if (!loading && Array.isArray(trabajos) && trabajos.length > 0 && !scrollRestoredRef.current) {
       try {
         const savedPosition = sessionStorage.getItem(SCROLL_POSITION_KEY);
         if (savedPosition) {
@@ -426,18 +388,15 @@ export default function JobOffersPage() {
   };
 
   // Handler para abrir modal al hacer click en el área de la oferta
-  const handleCardClick = (id: string) => {
-    const offer = trabajos.find((t: OfferData) => t._id === id);
-    if (offer) {
-      const adaptedOffer = adaptOfferToMockFormat(offer);
-      setSelectedOffer(adaptedOffer);
-      setIsModalOpen(true);
-    }
+  const handleCardClick = (offer: OfferData) => {
+    const adaptedOffer = adaptOfferToModalFormat(offer);
+    setSelectedOffer(adaptedOffer);
+    setIsModalOpen(true);
   };
 
   // Handler para click en oferta desde el mapa
   const handleOfferClick = (offer: OfferData) => {
-    const adaptedOffer = adaptOfferToMockFormat(offer);
+    const adaptedOffer = adaptOfferToModalFormat(offer);
     setSelectedOffer(adaptedOffer);
     setIsModalOpen(true);
   };
@@ -446,8 +405,6 @@ export default function JobOffersPage() {
 
   return (
     <>
-      <Header />
-
       <h1 className="mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-0 text-center text-xl sm:text-2xl md:text-3xl font-bold pt-3 px-3">
         Ofertas de Trabajo
       </h1>
@@ -594,9 +551,7 @@ export default function JobOffersPage() {
               {viewMode === 'map' ? (
                 <div className="h-[calc(100vh-250px)] rounded-lg overflow-hidden border border-gray-200 bg-white mb-8">
                   <MapView
-                    offers={trabajos
-                      .map(adaptOfferToMockFormat)
-                      .filter((o): o is AdaptedOffer => o !== null)}
+                    offers={mockJobOffers}
                     onOfferClick={(offer) => {
                       // Find the original OfferData from trabajos
                       const originalOffer = trabajos.find((t: OfferData) => t._id === offer.id);
@@ -610,7 +565,7 @@ export default function JobOffersPage() {
                 <CardJob
                   trabajos={trabajos}
                   viewMode={viewMode === 'grid' ? 'grid' : 'list'}
-                  onCardClick={handleCardClick}
+                  onClick={handleCardClick}
                 />
               )}
             </>
@@ -637,8 +592,6 @@ export default function JobOffersPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
       />
-
-      <Footer />
     </>
   );
 }

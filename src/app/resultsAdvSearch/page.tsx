@@ -1,20 +1,14 @@
 'use client';
 import React, { Suspense } from 'react';
-import Header from '../../Components/ResultsAdvSearch/Header';
-import Footer from '../../Components/ResultsAdvSearch/Footer';
-import AppliedFilters from '../../Components/ResultsAdvSearch/AppliedFilters';
-import useAppliedFilters from '../job-offer-list/hooks/useAppliedFilters';
+import AppliedFilters from '@/Components/ResultsAdvSearch/AppliedFilters';
+import useAppliedFilters from '@/app/redux/job-offer-hooks/useAppliedFilters';
+import { CardJob, Paginacion, PaginationInfo, PaginationSelector } from '@/Components/Job-offers';
+import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
+import { fetchOffers, setRegistrosPorPagina, setPaginaActual } from '@/app/redux/slice/jobOfert';
+import { useInitialUrlParams } from '@/app/redux/job-offer-hooks/useInitialUrlParams';
+import { useSyncUrlParams } from '@/app/redux/job-offer-hooks/useSyncUrlParams';
 
-// Reutilizamos las cards y componentes de paginación desde job-offer
-import { CardJob, Paginacion, PaginationInfo, PaginationSelector } from '../job-offer-list';
-
-// Store hooks y acciones
-import { useAppDispatch, useAppSelector } from '../job-offer-list/hooks/hook';
-import { fetchOffers, setRegistrosPorPagina, setPaginaActual } from '../job-offer-list/lib/slice';
-import { useInitialUrlParams } from '../job-offer-list/hooks/useInitialUrlParams';
-import { useSyncUrlParams } from '../job-offer-list/hooks/useSyncUrlParams';
-
-export default function ResultsAdvSearchPage() {
+function ResultsAdvSearchPageContent() {
   const dispatch = useAppDispatch();
   // Only destructure what we need - appliedParams
   const { appliedParams } = useAppliedFilters();
@@ -36,7 +30,7 @@ export default function ResultsAdvSearchPage() {
     totalRegistros,
     date,
     rating,
-  } = useAppSelector((s) => s.jobOffers);
+  } = useAppSelector((s) => s.jobOfert);
 
   const handlePageChange = (newPage: number) => {
     // optimistically update current page in store so UI updates immediately
@@ -90,63 +84,68 @@ export default function ResultsAdvSearchPage() {
   });
 
   return (
-    <Suspense fallback={<div />}>
-      <>
-        <Header />
-        <main className="pt-20 lg:pt-24 px-4 sm:px-6 md:px-12 lg:px-24 pb-12">
-          <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-bold mb-8 mt-4">
-            Resultados de Búsqueda Avanzada
-          </h1>
+    <main className="pt-20 lg:pt-24 px-4 sm:px-6 md:px-12 lg:px-24 pb-12">
+      <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-bold mb-8 mt-4">
+        Resultados de Búsqueda Avanzada
+      </h1>
 
-          {/* Filtros aplicados: renderizo siempre el contenedor para evitar
-            desajustes de hidratación entre servidor/cliente. Si no hay
-            appliedParams se pasa un objeto vacío (no se muestran tags). */}
-          <AppliedFilters params={appliedParams ?? {}} />
+      <AppliedFilters params={appliedParams ?? {}} />
 
-          {/* Selector y resumen de paginación (components de job-offer) */}
-          {/* Alinéo el selector con el mismo ancho y padding que AppliedFilters */}
-          <div className="w-full max-w-5xl mx-auto mt-4 px-4 mb-2">
-            <PaginationSelector
-              registrosPorPagina={registrosPorPagina}
-              onChange={handleRegistrosChange}
-            />
+      <div className="w-full max-w-5xl mx-auto mt-4 px-4 mb-2">
+        <PaginationSelector
+          registrosPorPagina={registrosPorPagina}
+          onChange={handleRegistrosChange}
+        />
+      </div>
+
+      <div className="flex justify-center my-4">
+        <PaginationInfo
+          paginaActual={paginaActual}
+          registrosPorPagina={registrosPorPagina}
+          totalRegistros={totalRegistros}
+        />
+      </div>
+
+      {/* Cards de resultados (reutilizadas) */}
+      <div className="w-full max-w-5xl mx-auto">
+        {!loading && trabajos && trabajos.length > 0 ? (
+          <CardJob trabajos={trabajos} />
+        ) : !loading ? (
+          <div className="text-gray-500 text-center">No se encontraron resultados</div>
+        ) : (
+          <div className="text-blue-500 text-center mb-4 p-3 bg-blue-100 rounded">
+            Cargando resultados...
           </div>
+        )}
+      </div>
 
-          <div className="flex justify-center my-4">
-            <PaginationInfo
-              paginaActual={paginaActual}
-              registrosPorPagina={registrosPorPagina}
-              totalRegistros={totalRegistros}
-            />
+      {/* Paginación inferior (reutilizada) */}
+      {!loading && trabajos && trabajos.length > 0 && (
+        <div className="mt-8 mb-24 flex justify-center">
+          <Paginacion
+            paginaActual={paginaActual}
+            registrosPorPagina={registrosPorPagina}
+            totalRegistros={totalRegistros}
+            onChange={handlePageChange}
+          />
+        </div>
+      )}
+    </main>
+  );
+}
+
+export default function ResultsAdvSearchPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="pt-20 lg:pt-24 px-4 flex justify-center items-center min-h-screen">
+          <div className="text-blue-500 text-center p-3 bg-blue-100 rounded">
+            Cargando resultados...
           </div>
-
-          {/* Cards de resultados (reutilizadas) */}
-          <div className="w-full max-w-5xl mx-auto">
-            {!loading && trabajos && trabajos.length > 0 ? (
-              <CardJob trabajos={trabajos} />
-            ) : !loading ? (
-              <div className="text-gray-500 text-center">No se encontraron resultados</div>
-            ) : (
-              <div className="text-blue-500 text-center mb-4 p-3 bg-blue-100 rounded">
-                Cargando resultados...
-              </div>
-            )}
-          </div>
-
-          {/* Paginación inferior (reutilizada) */}
-          {!loading && trabajos && trabajos.length > 0 && (
-            <div className="mt-8 mb-24 flex justify-center">
-              <Paginacion
-                paginaActual={paginaActual}
-                registrosPorPagina={registrosPorPagina}
-                totalRegistros={totalRegistros}
-                onChange={handlePageChange}
-              />
-            </div>
-          )}
-        </main>
-        <Footer />
-      </>
+        </div>
+      }
+    >
+      <ResultsAdvSearchPageContent />
     </Suspense>
   );
 }
