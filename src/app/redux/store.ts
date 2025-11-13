@@ -1,16 +1,15 @@
-import { configureStore } from '@reduxjs/toolkit';
-import { setupListeners } from '@reduxjs/toolkit/query';
-import { userApi } from './services/userApi';
-import userReducer from './slice/userSlice';
-import fixerReducer from './slice/fixerSlice';
+import { configureStore } from "@reduxjs/toolkit"
+import { setupListeners } from "@reduxjs/toolkit/query"
+import { baseApi } from "./services/baseApi"
+import userReducer from "./slice/userSlice"
+import fixerReducer from "./slice/fixerSlice"
 import filterReducer from "./slice/filterSlice"
-import jobOffersReducer from './slice/jobOffersSlice';
-import logger from 'redux-logger';
-
+import jobOffersReducer from "./slice/jobOffersSlice"
+import logger from "redux-logger"
 
 export const store = configureStore({
   reducer: {
-    [userApi.reducerPath]: userApi.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
     user: userReducer,
     fixer: fixerReducer,
     filters: filterReducer,
@@ -18,12 +17,12 @@ export const store = configureStore({
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
-      .concat(userApi.middleware)
-      .concat(logger), 
-  devTools: process.env.NODE_ENV !== 'production',
-});
+      .concat(baseApi.middleware) 
+      .concat(logger),
+  devTools: process.env.NODE_ENV !== "production",
+})
 
-setupListeners(store.dispatch);
+setupListeners(store.dispatch)
 
-export type RootState = ReturnType<typeof store.getState>;
-export type AppDispatch = typeof store.dispatch;
+export type RootState = ReturnType<typeof store.getState>
+export type AppDispatch = typeof store.dispatch

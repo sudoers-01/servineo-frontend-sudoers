@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { currentFixer, mockJobOfferService, type JobOffer } from "@/app/lib/mock-data"
+import { currentFixer, type JobOffer } from "@/app/lib/mock-data"
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
 import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
 import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
@@ -11,19 +11,24 @@ import ConfirmationModal from "@/Components/Modal-confirmation"
 import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
 import { setFixer } from "@/app/redux/slice/fixerSlice"
 import {
-  setOffers,
-  addOffer,
-  updateOffer as updateOfferRedux,
-  deleteOffer as deleteOfferRedux,
-} from "@/app/redux/slice/jobOffersSlice"
+  useGetJobOffersByFixerQuery,
+  useCreateJobOfferMutation,
+  useUpdateJobOfferMutation,
+  useDeleteJobOfferMutation,
+} from "@/app/redux/services/jobOfferApi"
 
 export default function MyOffersPage() {
   const dispatch = useAppDispatch()
-  const offers = useAppSelector((state) => state.jobOffers.offers)
   const currentFixerRedux = useAppSelector((state) => state.fixer.currentFixer)
 
+  // RTK Query hooks
+  const { data: offers = [], isLoading, refetch } = useGetJobOffersByFixerQuery(currentFixer.id)
+  const [createJobOffer] = useCreateJobOfferMutation()
+  const [updateJobOffer] = useUpdateJobOfferMutation()
+  const [deleteJobOffer] = useDeleteJobOfferMutation()
+
   const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingOffer, setEditingOffer] = useState<JobOffer | null>(null)
+  const [editingOffer, setEditingOffer] = useState<any | null>(null)
   const [notification, setNotification] = useState<{
     isOpen: boolean
     type: "success" | "error" | "info" | "warning"
@@ -39,8 +44,6 @@ export default function MyOffersPage() {
     if (!currentFixerRedux) {
       dispatch(setFixer(currentFixer))
     }
-    const myOffers = mockJobOfferService.getMyOffers(currentFixer.id)
-    dispatch(setOffers(myOffers))
   }, [dispatch, currentFixerRedux])
 
   const handleEdit = (offer: JobOffer) => {
@@ -52,17 +55,17 @@ export default function MyOffersPage() {
     setConfirmDelete({ isOpen: true, offerId })
   }
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = async () => {
     if (confirmDelete.offerId) {
       try {
-        mockJobOfferService.deleteOffer(confirmDelete.offerId)
-        dispatch(deleteOfferRedux(confirmDelete.offerId))
+        await deleteJobOffer(confirmDelete.offerId).unwrap()
         setNotification({
           isOpen: true,
           type: "success",
           title: "Oferta eliminada",
           message: "La oferta se eliminó correctamente",
         })
+        refetch()
       } catch (error) {
         console.error("Error al eliminar la oferta:", error)
         setNotification({
@@ -76,7 +79,7 @@ export default function MyOffersPage() {
     setConfirmDelete({ isOpen: false, offerId: null })
   }
 
-  const handleSubmit = (formData: JobOfferFormData) => {
+  const handleSubmit = async (formData: JobOfferFormData) => {
     try {
       const servicesAsStrings = formData.services.map((service) => service.value)
       const defaultLocations: { [key: string]: { lat: number; lng: number } } = {
@@ -93,7 +96,6 @@ export default function MyOffersPage() {
         description: formData.description,
         city: formData.city,
         services: servicesAsStrings,
-        tags: formData.services.map((s) => s.value),
         photos: formData.photos || ["/placeholder.svg?height=300&width=400&text=trabajo"],
         price: formData.price || 0,
         fixerId: currentFixer.id,
@@ -107,23 +109,18 @@ export default function MyOffersPage() {
       }
 
       if (editingOffer) {
-        const updatedOffer = mockJobOfferService.updateOffer(editingOffer.id, {
-          ...offerData,
-          id: editingOffer.id,
-          createdAt: editingOffer.createdAt,
+        await updateJobOffer({
+          offerId: editingOffer._id || editingOffer.id,
+          data: offerData,
+        }).unwrap()
+        setNotification({
+          isOpen: true,
+          type: "success",
+          title: "Oferta actualizada",
+          message: "La oferta se actualizó correctamente",
         })
-        if (updatedOffer) {
-          dispatch(updateOfferRedux(updatedOffer))
-          setNotification({
-            isOpen: true,
-            type: "success",
-            title: "Oferta actualizada",
-            message: "La oferta se actualizó correctamente",
-          })
-        }
       } else {
-        const newOffer = mockJobOfferService.addOffer(offerData)
-        dispatch(addOffer(newOffer))
+        await createJobOffer(offerData).unwrap()
         setNotification({
           isOpen: true,
           type: "success",
@@ -134,6 +131,7 @@ export default function MyOffersPage() {
 
       setIsFormOpen(false)
       setEditingOffer(null)
+      refetch()
     } catch (error) {
       console.error("Error al procesar el formulario:", error)
       setNotification({
@@ -179,8 +177,13 @@ export default function MyOffersPage() {
           </div>
         )}
 
-        {/* Empty State */}
-        {offers.length === 0 ? (
+        {/* Loading State */}
+        {isLoading ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-muted-foreground">Cargando ofertas...</p>
+          </div>
+        ) : offers.length === 0 ? (
           <div className="text-center py-16 animate-fade-in">
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl flex items-center justify-center">
               <ImageIcon className="w-10 h-10 text-primary" />
@@ -202,41 +205,45 @@ export default function MyOffersPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {offers.map((offer, index) => (
-              <div
-                key={offer.id}
-                className="animate-fade-in relative group"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <div className="relative">
-                  <JobOfferCard offer={offer} showFixerInfo={true} />
+            {offers.map((offer, index) => {
+              const offerId = (offer as any)._id || (offer as any).id
+              const offerWithId = { ...offer, id: offerId }
+              return (
+                <div
+                  key={offerId}
+                  className="animate-fade-in relative group"
+                  style={{ animationDelay: `${index * 50}ms` }}
+                >
+                  <div className="relative">
+                    <JobOfferCard offer={offerWithId as any} showFixerInfo={true} />
 
-                  {/* Action Buttons - Positioned absolutely over the card */}
-                  <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEdit(offer)
-                      }}
-                      className="p-2.5 bg-white text-primary rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-primary/20"
-                      title="Editar oferta"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteClick(offer.id)
-                      }}
-                      className="p-2.5 bg-white text-destructive rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-destructive/20"
-                      title="Eliminar oferta"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
+                    {/* Action Buttons - Positioned absolutely over the card */}
+                    <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleEdit(offer as any)
+                        }}
+                        className="p-2.5 bg-white text-primary rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-primary/20"
+                        title="Editar oferta"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteClick(offerId)
+                        }}
+                        className="p-2.5 bg-white text-destructive rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-destructive/20"
+                        title="Eliminar oferta"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>

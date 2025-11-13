@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { mockJobOffers } from '../../lib/mock-data';
 import { JobOffer } from '../../lib/mock-data';
 import { JobOfferCard } from '@/Components/Job-offers/Job-offer-card';
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
@@ -9,6 +8,7 @@ import { MapView } from '@/Components/Job-offers/maps/MapView';
 import { SearchHeader } from '@/Components/SearchHeader';
 import { useLogClickMutation } from '../../redux/services/activityApi';
 import { useLogSearchMutation, useUpdateFiltersMutation } from '../../redux/services/searchApi';
+import { useGetAllJobOffersQuery } from '../../redux/services/jobOfferApi';
 import { FiltersPanel } from '@/Components/FiltersPanel';
 import { useAppSelector } from '../../redux/hooks';
 import {
@@ -23,25 +23,36 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 export default function JobOffersPage() {
-  const t= useTranslations('jobOffers');
+  const t = useTranslations('jobOffers');
   const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const [offers, setOffers] = useState<JobOffer[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Load offers on component mount
-  useEffect(() => {
-    setOffers(mockJobOffers);
-  }, []);
+  // Load offers from API
+  const { data: apiOffers = [], isLoading, isError } = useGetAllJobOffersQuery();
+
+  // Normalize API offers to UI shape
+  const offers: JobOffer[] = useMemo(
+    () =>
+      (apiOffers as any[]).map((o) => ({
+        ...o,
+        id: (o as any)._id || (o as any).id,
+        createdAt: o?.createdAt ? new Date(o.createdAt as any) : new Date(0),
+        tags: o?.tags || [],
+        photos: o?.photos || [],
+        location: o?.location || { lat: 0, lng: 0, address: '' },
+      })),
+    [apiOffers]
+  );
 
   const searchQuery = useAppSelector(selectSearchQuery);
   const selectedCities = useAppSelector(selectSelectedCities);
   const selectedJobTypes = useAppSelector(selectSelectedJobTypes);
   const selectedFixerNames = useAppSelector(selectSelectedFixerNames);
   const recentSearches = useAppSelector(selectRecentSearches);
-  const persona = { id: '507f1f77bcf86cd799439011', nombre: 'Usuario POC' };
+  const persona = { id: '691646c477c99dee64b21689', nombre: 'Usuario POC' };
   const [logClick] = useLogClickMutation();
   const handleCardClick = async (offer: JobOffer) => {
     setSelectedOffer(offer);
@@ -207,7 +218,7 @@ export default function JobOffersPage() {
           } catch (error) {
             console.error('Error al registrar búsqueda:', error);
             if (error && typeof error === 'object' && 'data' in error) {
-              console.error('Detalles del error:', error.data);
+              console.error('Detalles del error:', (error as any).data);
             }
           }
         }
@@ -271,7 +282,7 @@ export default function JobOffersPage() {
         } catch (error) {
           console.error('Error al actualizar filtros:', error);
           if (error && typeof error === 'object' && 'data' in error) {
-            console.error('Detalles del error:', error.data);
+            console.error('Detalles del error:', (error as any).data);
           }
         }
       }, 150); // Pequeño delay para que filteredOffers se actualice
@@ -282,6 +293,38 @@ export default function JobOffersPage() {
   // ============================================================================
   // END OF SEARCH AND FILTER TRACKING
   // ============================================================================
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
+            </div>
+          </div>
+        </header>
+        <main className="p-6">Cargando ofertas...</main>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
+            </div>
+          </div>
+        </header>
+        <main className="p-6">Error cargando ofertas.</main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -360,7 +403,7 @@ export default function JobOffersPage() {
                   <div
                     key={offer.id}
                     className="animate-fade-in"
-                    style={{ animationDelay: `${index * 50}ms` }}
+                    style={{ animationDelay: '${index * 50}ms' }}
                   >
                     <JobOfferCard offer={offer} onClick={() => handleCardClick(offer)} />
                   </div>

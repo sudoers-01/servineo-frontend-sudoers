@@ -42,13 +42,14 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
           <div className="flex flex-col md:flex-row items-center gap-6">
             <div className="relative">
               <div className="w-32 h-32 rounded-full border-4 border-white bg-white overflow-hidden">
-                {fixer.photo ? (
+                {fixer.photo && fixer.photo.startsWith('http') ? (
                   <Image
                     src={fixer.photo}
                     alt={fixer.name}
                     width={128}
                     height={128}
                     className="w-full h-full object-cover"
+                    unoptimized // ← Permite URLs externas
                   />
                 ) : (
                   <div className="w-full h-full bg-blue-100 flex items-center justify-center">
