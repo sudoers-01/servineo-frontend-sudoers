@@ -112,6 +112,9 @@ export default function PaymentMethods({
         <PaymentMethodUI
           paymentId={createdPaymentId}
           onClose={() => setShowCashPayment(false)}
+          jobId={jobId}
+          requesterId={requesterId}
+          fixerId={fixerId}
         />
       )}
 

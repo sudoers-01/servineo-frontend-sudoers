@@ -3,13 +3,21 @@
 import { useEffect, useState, useMemo } from "react";
 import PaymentMethodCashFixer from "./PaymentMethodCashFixer";
 
+// 1. ACTUALIZAR INTERFAZ DE PROPS
 interface PaymentMethodUIProps {
   paymentId: string | null;
+  jobId: string;       // <-- AÑADIDO
+  requesterId: string; // <-- AÑADIDO
+  fixerId: string;     // <-- AÑADIDO
   onClose: (paymentCompleted?: boolean) => void;
 }
 
+// 2. APLICAR LAS PROPS ACTUALIZADAS
 export default function PaymentMethodUI({
   paymentId,
+  jobId,       // <-- AÑADIDO
+  requesterId, // <-- AÑADIDO
+  fixerId,     // <-- AÑADIDO
   onClose,
 }: PaymentMethodUIProps) {
   const [showFixerView, setShowFixerView] = useState(false);
@@ -56,6 +64,7 @@ export default function PaymentMethodUI({
 
     try {
       const timestamp = new Date().getTime();
+      // --- Usamos la ruta relativa para el fetch (asumiendo rewrites) ---
       const res = await fetch(`/api/lab/payments/${paymentId}/summary?t=${timestamp}`, {
         cache: "no-store",
         headers: {
@@ -113,7 +122,7 @@ export default function PaymentMethodUI({
         setShowNotification(true);
       }
 
-    } catch (e: unknown | null) {
+    } catch (e: any) { // Tipado de 'e' como any
       console.error("❌ [REQUESTER] Error:", e);
       setErr(e.message || "No se pudo cargar el resumen");
     } finally {
@@ -172,7 +181,7 @@ export default function PaymentMethodUI({
     return { expired: false, hoursLeft, minutesLeft, secondsLeft };
   }, [summary?.codeExpiresAt, summary?.codeExpired, now]);
 
-  // Regenerar código
+  // --- 3. ACTUALIZAR handleRegenerateCode ---
   const handleRegenerateCode = async () => {
     if (!summary) return;
 
@@ -180,31 +189,50 @@ export default function PaymentMethodUI({
     setRegenerating(true);
 
     try {
+      // Usamos la ruta relativa (asumiendo rewrites en next.config)
       const res = await fetch(`/api/lab/payments/${summary.id}/regenerate-code`, {
         method: "POST",
+        // ¡AÑADIR HEADERS Y BODY!
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          jobId: jobId,
+          requesterId: requesterId,
+          fixerId: fixerId,
+        }),
       });
 
       const responseData = await res.json();
 
       if (!res.ok) {
+        // Captura el error del backend (ej. "fixerId is required")
         throw new Error(responseData.error || "Error al regenerar el código");
       }
 
       console.log("✅ [REQUESTER] Código regenerado");
 
-      // Recargar summary
+      // Recargar summary para obtener la nueva fecha de expiración y código
       await loadSummary();
       setShowNotification(true);
+      setIsExpired(false); // Asegúrate de resetear el estado de expiración
 
-    } catch (e: unknown | null) {
+    } catch (e: any) { // Tipado de 'e' como any
       console.error("❌ [REQUESTER] Error regenerando:", e);
       setErr(e.message || "Error al regenerar el código");
     } finally {
       setRegenerating(false);
     }
   };
-
-  const handleContinuar = () => setShowFixerView(true);
+  
+  // --- (El resto de tu código: handleContinuar, handleVolver, y todo el JSX/return) ---
+  // --- (No necesita cambios) ---
+  const handleContinuar = () => {
+    // Solo cierra si no está expirado
+    if (!isExpired) {
+      onClose(true); // Asume que "Continuar" significa que el pago se completó
+    }
+  };
 
   const handleVolver = async (opts?: { refresh?: boolean }) => {
     setShowFixerView(false);
@@ -231,12 +259,9 @@ export default function PaymentMethodUI({
   if (loading) {
     return (
       <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50">
-        {/* Fondo claro (principal): #F9FAFB */}
         <div className="bg-[#F9FAFB] rounded-lg shadow-xl px-8 py-6">
           <div className="flex flex-col items-center">
-            {/* Primary (Main Blue): #2B31E0 */}
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2B31E0] mb-4"></div>
-            {/* Texto principal (oscuro): #111827 */}
             <p className="text-[#111827]">Cargando resumen…</p>
           </div>
         </div>
@@ -248,14 +273,10 @@ export default function PaymentMethodUI({
   if (err && !summary) {
     return (
       <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-50">
-        {/* Fondo claro (principal): #F9FAFB */}
         <div className="bg-[#F9FAFB] rounded-lg shadow-xl px-8 py-6 space-y-3 max-w-md">
-          {/* Error: #EF4444 */}
           <div className="text-[#EF4444] font-medium text-lg">Error</div>
-          {/* Texto principal (oscuro): #111827 */}
           <div className="text-[#111827] text-sm">{err}</div>
           <div className="flex justify-end">
-            {/* CTA Secundario: Accent (Turquesa brillante) #2BDDE0 */}
             <button
               onClick={() => onClose()}
               className="px-4 py-2 rounded-md bg-[#2BDDE0] text-[#111827] hover:bg-[#5E2BE0]"
@@ -274,11 +295,10 @@ export default function PaymentMethodUI({
 
   // Vista inicial (REQUESTER)
   return (
-    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-2000">
-      {/* Fondo claro (principal): #F9FAFB */}
+    // Incrementado el z-index para que esté sobre el modal anterior si es necesario
+    <div className="fixed inset-0 bg-[rgba(0,0,0,0.5)] flex items-center justify-center z-[1200]"> 
       <div className="bg-[#F9FAFB] w-full max-w-2xl mx-4 rounded-lg shadow-xl">
         {/* Header */}
-        {/* Primary (Main Blue): #2B31E0, Texto: #F9FAFB */}
         <div className="bg-[#2B31E0] text-[#F9FAFB] px-6 py-4 flex items-center justify-between rounded-t-lg">
           <h1 className="text-xl font-semibold">
             Método de pago Efectivo — Vista REQUESTER
@@ -294,7 +314,6 @@ export default function PaymentMethodUI({
         {/* Content */}
         <div className="px-8 py-12">
           <div className="text-center mb-8">
-            {/* Texto principal (oscuro): #111827 */}
             <h2 className="text-2xl font-bold text-[#111827]">
               Muestra este código al proveedor
             </h2>
@@ -308,7 +327,6 @@ export default function PaymentMethodUI({
             <div className="max-w-xl mx-auto mb-8 relative">
               {isExpired ? (
                 // Código expirado
-                // Error: #EF4444
                 <div className="bg-red-50 border-l-4 border-[#EF4444] p-4 rounded shadow-lg">
                   <button
                     onClick={() => setShowNotification(false)}
@@ -341,7 +359,6 @@ export default function PaymentMethodUI({
                 </div>
               ) : (
                 // Código vigente
-                // Highlight (Azul suave): #759AE0
                 <div className="bg-blue-50 border-l-4 border-[#759AE0] p-4 rounded shadow-lg">
                   <button
                     onClick={() => setShowNotification(false)}
@@ -382,15 +399,12 @@ export default function PaymentMethodUI({
 
           {/* Campos del pago */}
           <div className="space-y-6 max-w-xl mx-auto">
-            {/* Código */}
             <LabeledReadOnly
               label="Código de Trabajo"
               value={isExpired ? "EXPIRADO" : (summary.code ?? "—")}
               highlight={!isExpired}
               expired={isExpired}
             />
-
-            {/* Total */}
             <LabeledReadOnly
               label="Monto a Pagar"
               value={
@@ -399,10 +413,7 @@ export default function PaymentMethodUI({
                   : "—"
               }
             />
-
-            {/* Estado */}
             <div className="flex items-center gap-6">
-              {/* Texto principal (oscuro): #111827 */}
               <label className="text-lg font-semibold text-[#111827] w-48 text-left">
                 Estado
               </label>
@@ -410,11 +421,10 @@ export default function PaymentMethodUI({
                 type="text"
                 value={
                   summary.status === 'paid' ? 'CONFIRMADO' :
-                    summary.status === 'failed' ? 'ERROR' :
-                      'PENDIENTE'
+                  summary.status === 'failed' ? 'ERROR' :
+                  'PENDIENTE'
                 }
                 readOnly
-                // Neutros: #E5E7EB, #D1D5DB, #111827
                 className="flex-1 px-4 py-3 rounded-md text-lg bg-[#E5E7EB] border border-[#D1D5DB] text-[#111827] text-center uppercase font-semibold"
               />
             </div>
@@ -424,7 +434,6 @@ export default function PaymentMethodUI({
           {err && (
             <div className="mt-6 max-w-xl mx-auto">
               <div className="bg-red-50 border border-red-200 rounded p-3">
-                {/* Error: #EF4444 */}
                 <p className="text-[#EF4444] font-medium text-sm">{err}</p>
               </div>
             </div>
@@ -437,17 +446,14 @@ export default function PaymentMethodUI({
               disabled={isExpired}
               className={`px-12 py-3 text-lg font-semibold rounded-md transition-colors ${
                 isExpired
-                  // Neutros (deshabilitado): #D1D5DB, #64748B
                   ? 'bg-[#D1D5DB] text-[#64748B] cursor-not-allowed'
-                  // Primary (Main Blue): #2B31E0, Hover: #2B6AE0, Texto: #F9FAFB
                   : 'bg-[#2B31E0] hover:bg-[#2B6AE0] text-[#F9FAFB]'
-                }`}
+              }`}
             >
               {isExpired ? 'Código Expirado' : 'Continuar'}
             </button>
             <button
               onClick={() => onClose()}
-              // CTA Secundario: Accent (Turquesa brillante) #2BDDE0
               className="px-12 py-3 bg-[#2BDDE0] text-[#111827] text-lg font-semibold rounded-md hover:bg-[#5E2BE0] transition-colors"
             >
               Volver
@@ -461,7 +467,6 @@ export default function PaymentMethodUI({
 
 /* ---------------- helpers UI ---------------- */
 
-// typescript: Tipar las props del helper
 interface LabeledReadOnlyProps {
   label: string;
   value: string;
@@ -477,7 +482,6 @@ function LabeledReadOnly({
 }: LabeledReadOnlyProps) {
   return (
     <div className="flex items-center gap-6">
-      {/* Texto principal (oscuro): #111827 */}
       <label className="text-lg font-semibold text-[#111827] w-48 text-left">
         {label}
       </label>
@@ -487,14 +491,11 @@ function LabeledReadOnly({
         readOnly
         className={`flex-1 px-4 py-3 rounded-md text-lg ${
           expired
-            // Error: #EF4444
             ? 'bg-red-50 border-2 border-[#EF4444] text-[#EF4444] font-bold text-center line-through'
-            // Highlight: #759AE0
             : highlight
               ? 'bg-blue-50 border-2 border-[#759AE0] text-blue-900 font-bold text-center tracking-widest'
-              // Neutros: #E5E7EB, #D1D5DB, #111827
               : 'bg-[#E5E7EB] border border-[#D1D5DB] text-[#111827]'
-          }`}
+        }`}
       />
     </div>
   );
