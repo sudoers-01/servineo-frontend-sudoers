@@ -90,44 +90,39 @@ export default function CardList({
   };
 
   // 8. Aplicar el tipo Card a la función 'handlePayWithCard'
-  const handlePayWithCard = async (card: Card) => {
-    if (processingCardId) return;
-    setProcessingCardId(card._id);
-    setConfirmModal(null);
+ const handlePayWithCard = async (card: Card) => {
+  if (processingCardId) return;
+  setProcessingCardId(card._id);
+  setConfirmModal(null);
 
-    try {
-      const paymentRes = await fetch('/api/createpayment', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          requesterId,
-          fixerId,
-          jobId,
-          cardId: card._id,
-          amount,
-        }),
-      });
+  try {
+    const paymentRes = await fetch('/api/createpayment', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        requesterId,
+        fixerId,
+        jobId,
+        cardId: card._id,
+        amount,
+      }),
+    });
 
-      const paymentData = await paymentRes.json();
+    const paymentData = await paymentRes.json();
+    if (!paymentRes.ok) throw new Error(paymentData?.error || 'Error desconocido');
 
-      if (!paymentRes.ok) {
-        alert(`Error en el pago: ${paymentData?.error || 'Desconocido'}`);
-        return;
-      }
+    // 💡 Actualizar tarjetas si es necesario
+    await fetchCards();
 
-      showSuccessModal(
-        `Pago realizado exitosamente: ${paymentData.payment.amount} BOB`,
-        onPaymentSuccess,
-      );
-
-      await fetchCards();
-    } catch (err) {
-      console.error(err);
-      alert('Error al procesar el pago. Revisa la consola.');
-    } finally {
-      setProcessingCardId(null);
-    }
-  };
+    // ✅ Llamar al callback real para refrescar trabajos
+    onPaymentSuccess?.(); 
+  } catch (err) {
+    console.error(err);
+    alert('Error al procesar el pago. Revisa la consola.');
+  } finally {
+    setProcessingCardId(null);
+  }
+};
 
   // 9. Tipar los parámetros de 'showSuccessModal'
   const showSuccessModal = (msg: string, onComplete: () => void) => {
