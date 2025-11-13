@@ -117,7 +117,7 @@ export default function LoginPage() {
     }
   };
 
-  const handleMensajeChange = (mensaje: string, _tipo: "error"): void => {
+  const handleMensajeChange = (mensaje: string): void => {
     setNotification({
       isOpen: true,
       type: "error",
