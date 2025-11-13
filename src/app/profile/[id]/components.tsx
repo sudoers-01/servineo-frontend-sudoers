@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { jsonFetcher, type FixerRating } from './utils';
 import { apiUrl } from '@/config/api';
 import { DetailsModal } from '@/app/components/fixers/DetailsModal';
 
-function useFixerRatings(fixerId: string) {
+function useFixerRatings(fixerId: string, pollInterval: number = 2000) {
   const [ratings, setRatings] = useState<FixerRating[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -20,7 +20,7 @@ function useFixerRatings(fixerId: string) {
     createdAt: string;
   };
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!url) return;
     try {
       const data = await jsonFetcher<RatingResponse[]>(url);
@@ -39,12 +39,21 @@ function useFixerRatings(fixerId: string) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [url]);
 
   useEffect(() => {
     setIsLoading(true);
     load();
-  }, [url]);
+  }, [url, load]);
+
+  // Polling automático cada pollInterval ms
+  useEffect(() => {
+    const interval = setInterval(() => {
+      load();
+    }, pollInterval);
+
+    return () => clearInterval(interval);
+  }, [load, pollInterval]);
 
   return { ratings, isLoading, error, refresh: load };
 }
