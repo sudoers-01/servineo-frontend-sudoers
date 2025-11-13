@@ -8,13 +8,11 @@ interface ReviewModalProps {
   onClose: () => void;
   onAccept: () => void;
   dataId: string;
+  fixerId: string;
 }
 
-export const DetailsModal = ({ isOpen, onClose, onAccept, dataId }: ReviewModalProps) => {
+export const DetailsModal = ({ isOpen, onClose, onAccept, dataId, fixerId }: ReviewModalProps) => {
   const [data, setData] = useState<JobDetails | null>(null);
-
-  const url = window.location.href;
-  const fixerId = url.split('/').pop();
 
   useEffect(() => {
     if (!dataId || !fixerId) return;
@@ -36,7 +34,7 @@ export const DetailsModal = ({ isOpen, onClose, onAccept, dataId }: ReviewModalP
     };
     fetchJobDetails();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dataId, fixerId]);
 
   return (
     <ModalComponent isOpen={isOpen} onClose={onClose} Accept={onAccept}>
