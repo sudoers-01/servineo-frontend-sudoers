@@ -1,50 +1,47 @@
-
 'use client';
 
-import { getSchedulesCont } from '@/utils/getSchedulesCont';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import useDayUtilities from '@/hooks/useDayUtilities';
+
+
+const today = new Date();
+
 interface DayCellProps {
     date: Date;
-    today: Date;
-    fixer_id: string;
-    selectedDate: Date | null;
+    selectedDate: Date;
+
     onSelectDate: (date: Date) => void;
+    color: number
 }
 
 export default function DayCell({
     date,
-    today,
-    fixer_id,
     selectedDate,
     onSelectDate,
+    color
 }: DayCellProps) {
+    const dayNumber = date.getDate();
+    const { isSameDay } = useDayUtilities(date);
+
     const {
         isToday,
-        isPast,
-        isSameDay,
         getColor
-    } = useDayUtilities({
-        date,
-        fixer_id
-    });
-    const dayNumber = date.getDate();
-    const isSelected = selectedDate && isSameDay(date, selectedDate);
+    } = useDayUtilities(
+        date
+    );
 
-
+    const isSelected = isSameDay(date, selectedDate);
     const todayRing = isToday ? 'ring-2 ring-blue-600 ring-offset-2' : '';
     return (
         <button
             onClick={() => onSelectDate(date)}
             className={`
         relative flex items-center justify-center w-10 h-10 mx-auto rounded-full 
-        transition-all duration-200 select-none font-medium cursor-pointer  
-        ${isSelected ? "bg-blue-500" : getColor()} ${todayRing}
-      `}
+        select-none font-medium cursor-pointer  
+        ${isSelected ? "bg-blue-500" : getColor(color)} ${todayRing}`}
         >
             <span>{dayNumber}</span>
 
         </button>
     );
 };
-

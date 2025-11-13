@@ -1,18 +1,45 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getSixMonthAppointments, Appointment } from '@/utils/Appointments/getSixMonthAppointments';
-import useSixMonthsAppointments from '@/hooks/Appointments/useSixMonthsAppointments';
+import { getSixMonthAppointments, Appointment } from '../../utils/Appointments/getSixMonthAppointments';
+import useSixMonthsAppointments from '../../hooks/Appointments/useSixMonthsAppointments';
+
+import useDailyConts from "../../utils/useDailyConts";
 const fixer_id = "68e87a9cdae3b73d8040102f";
 const requester_id = "68ec99ddf39c7c140f42fcfa";
 const today = new Date().toISOString().split('T')[0];
 
-const todi = new Date(2025, 10, 14);
+const todidi = new Date();
+const todi = new Date(2025, 11, 9);
 console.log(todi);
 export default function CalendarPage() {
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const {
+        getAppointmentsForDate,
+        count,
+        refetch
+    } = useDailyConts({ date: todidi, fixer_id });
+
+
+
+    useEffect(() => {
+        if (count) {
+            console.log('📊 Count completo recibido:', count);
+            console.log('📊 Claves disponibles:', Object.keys(count));
+
+            // Ver ambos formatos
+            console.log('📊 Formato 12-2025:', count["12-2025"]);
+            console.log('📊 Formato 2025-12:', count["2025-12"]);
+
+            // Ver resultado de la función
+            const resultado = getAppointmentsForDate(todi);
+            console.log('📊 Resultado getAppointmentsForDate:', resultado);
+        }
+    }, [count]);
+
+    console.log(getAppointmentsForDate(todi));
     const fetchAppointments = async () => {
         setLoading(true);
         setError(null);

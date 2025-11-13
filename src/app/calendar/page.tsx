@@ -13,40 +13,26 @@ import useSixMonthsAppointments from '@/hooks/Appointments/useSixMonthsAppointme
 import { AppointmentsProvider } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 import { AppointmentsStatusProvider } from "@/utils/contexts/DayliViewRequesterContext";
 
-//const fixer_id = "68ef1993be38c7f1c3c2c777";
-//const fixer_id = "68e87a9cdae3b73d8040102f";
-//const requester_id = "68ec99ddf39c7c140f42fcfa";
-//const requester_id = "68f3f37a44d9cf8aa91537fb";
-
-function cancelAppointments() {
-    console.log("Citas canceladas");
-}
-
-
-
 export default function CalendarPage() {
     const router = useRouter();
     const modeModalRef = useRef<ModeSelectionModalHandles>(null);
 
     const [fixer_id, setFixerId] = useState<string>('');
     const [requester_id, setRequesterId] = useState<string>('');
+    const [isLoading, setIsLoading] = useState(true);
 
     useEffect(() => {
         const storedFixerId = sessionStorage.getItem('fixer_id');
         const storedRequesterId = sessionStorage.getItem('requester_id');
 
-        if (storedFixerId && storedRequesterId) {
+        if (storedFixerId) {
             setFixerId(storedFixerId);
-            setRequesterId(storedRequesterId);
+            setRequesterId(storedRequesterId || '');
+            setIsLoading(false);
         } else {
             router.push('/');
         }
     }, [router]);
-
-
-    //    console.log(fixer_id);
-    //   console.log(requester_id);
-
 
     const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -82,10 +68,6 @@ export default function CalendarPage() {
         setIsCancelModalOpen(false);
     }
 
-    const handleConfirmCancel = (selectedDays: string[]) => {
-        //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
-    }
-
     const {
         isHourBookedFixer,
         isHourBooked,
@@ -100,8 +82,19 @@ export default function CalendarPage() {
         isEnabled,
         isCanceled,
         loading
+    }), [isHourBookedFixer, isHourBooked, isEnabled, isCanceled, loading]);
 
-    }), [isHourBooked, isEnabled, isCanceled, loading]);
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-white">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600">Cargando calendario...</p>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <UserRoleProvider
             role={userRole}

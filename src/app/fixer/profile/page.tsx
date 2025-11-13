@@ -29,7 +29,7 @@ const mockFixer: Fixer = {
                 lng: -66.1568,
                 address: "Av. América #123, Cochabamba"
             },
-            fixerId: "fixer-123",
+            fixerId: "68e87a9cdae3b73d8040102f",
             fixerName: "Carlos Méndez",
             tags: ["Urgente", "Casa", "Baño"],
             whatsapp: "59171234567",
