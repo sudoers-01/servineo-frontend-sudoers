@@ -97,5 +97,114 @@
     "Services":{
     "serTitle": "Our Services",
     "serDescription": "Find the perfect service for your needs"
+    },
+    "myOffers": {
+        "newOffer": "New Offer",
+        "noOffers": {
+        "title": "You have no published offers",
+        "description": "Create your first job offer so clients can find and contact you",
+        "createFirst": "Create First Offer"
+        },
+        "actions": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "saveChanges": "Save Changes",
+        "publishOffer": "Publish Offer"
+        },
+        "notifications": {
+        "offerDeleted": {
+            "title": "Offer deleted",
+            "message": "The offer was successfully deleted"
+        },
+        "offerUpdated": {
+            "title": "Offer updated",
+            "message": "The offer was successfully updated"
+        },
+        "offerCreated": {
+            "title": "Offer created",
+            "message": "The offer was successfully created"
+        },
+        "error": {
+            "title": "Error",
+            "deleteMessage": "Could not delete the offer. Please try again.",
+            "formMessage": "There was an error processing the form. Please try again."
+        }
+        },
+        "confirmDelete": {
+        "title": "Delete offer?",
+        "message": "This action cannot be undone. Are you sure you want to delete this offer?",
+        "confirm": "Delete",
+        "cancel": "Cancel"
+        }
+    },
+    "fixerProfile": {
+        "tabs": {
+            "home": "Home",
+            "services": "Services",
+            "reviews": "Reviews",
+            "gallery": "Gallery"
+        },
+            "actions": {
+            "contact": "Contact",
+            "writeReview": "Write review",
+            "viewAll": "View all"
+        },
+        "about": {
+            "title": "About",
+            "noDescription": "This professional has not yet added a description.",
+            "experience": "Experience",
+            "years": "years",
+            "completedJobs": "completed jobs"
+        },
+        "services": {
+            "title": "Services",
+            "myServices": "My Services",
+            "description": "Professional service specialized in"
+        },
+        "recentJobs": {
+        "title": "Recent Jobs"
+        },
+        "reviews": {
+        "title": "Reviews",
+        "new": "New",
+        "satisfied": "Satisfied Customer",
+        "ago": "",
+        "week": "week ago",
+        "weeks": "weeks ago",
+        "sampleReview": "Excellent service, very professional and punctual. The work was impeccable."
+        },
+        "gallery": {
+        "title": "Work Gallery",
+        "noPhotos": {
+            "title": "No photos yet",
+            "description": "This professional has not yet shared photos of their work."
+        },
+        "workLabel": "Work"
+        },
+        "profile": {
+        "edit": "Edit profile",
+        "save": "Save",
+        "contactWhatsApp": "Contact via WhatsApp",
+        "completedJobs": "completed jobs",
+        "new": "New",
+        "aboutMe": {
+            "title": "About me",
+            "placeholder": "Tell us about yourself and your services...",
+            "noDescription": "This professional has not yet added a description."
+        },
+        "contactInfo": {
+            "title": "Contact information",
+            "phonePlaceholder": "Phone number",
+            "whatsappPlaceholder": "WhatsApp (optional)"
+        },
+        "myServices": {
+            "title": "My Services",
+            "manage": "Manage",
+            "noServices": "No services added yet"
+        },
+        "paymentMethods": {
+            "title": "Payment methods"
+        }
+        }
     }
 }

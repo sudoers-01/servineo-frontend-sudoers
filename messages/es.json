@@ -94,5 +94,69 @@
     "Services":{
         "serTitle":"Nuestros Servicios",
         "serDescription": "Encuentra el servicio perfecto para tus necesidades"
+    },
+    "myOffers": {
+        "newOffer": "Nueva Oferta",
+        "noOffers": {
+        "title": "No tienes ofertas publicadas",
+        "description": "Crea tu primera oferta de trabajo para que los clientes puedan encontrarte y contactarte",
+        "createFirst": "Crear Primera Oferta"
+        },
+        "actions": {
+        "edit": "Editar",
+        "delete": "Eliminar",
+        "saveChanges": "Guardar Cambios",
+        "publishOffer": "Publicar Oferta"
+        },
+        "notifications": {
+        "offerDeleted": {
+            "title": "Oferta eliminada",
+            "message": "La oferta se eliminó correctamente"
+        },
+        "offerUpdated": {
+            "title": "Oferta actualizada",
+            "message": "La oferta se actualizó correctamente"
+        },
+        "offerCreated": {
+            "title": "Oferta creada",
+            "message": "La oferta se creó correctamente"
+        },
+        "error": {
+            "title": "Error",
+            "deleteMessage": "No se pudo eliminar la oferta. Por favor, intenta de nuevo.",
+            "formMessage": "Hubo un error al procesar el formulario. Por favor, intenta de nuevo."
+        }
+        },
+        "confirmDelete": {
+        "title": "¿Eliminar oferta?",
+        "message": "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar esta oferta?",
+        "confirm": "Eliminar",
+        "cancel": "Cancelar"
+        },
+        "profile": {
+        "edit": "Editar perfil",
+        "save": "Guardar",
+        "contactWhatsApp": "Contactar por WhatsApp",
+        "completedJobs": "trabajos realizados",
+        "new": "Nuevo",
+        "aboutMe": {
+            "title": "Acerca de mí",
+            "placeholder": "Cuéntanos sobre ti y tus servicios...",
+            "noDescription": "Este profesional aún no ha agregado una descripción."
+        },
+        "contactInfo": {
+            "title": "Información de contacto",
+            "phonePlaceholder": "Número de teléfono",
+            "whatsappPlaceholder": "WhatsApp (opcional)"
+        },
+        "myServices": {
+            "title": "Mis Servicios",
+            "manage": "Gestionar",
+            "noServices": "Aún no se han agregado servicios"
+        },
+        "paymentMethods": {
+            "title": "Métodos de pago"
+        }
+    }
     }
 }
