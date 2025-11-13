@@ -173,6 +173,6 @@ export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; 
 
 export function ClientRatings({ fixerId }: { fixerId: string }) {
   const { ratings, isLoading, error } = useFixerRatings(fixerId);
-  if (isLoading) return <div className='p-4 text-sm'>Loading...</div>;
+  if (isLoading) return <div className='p-4 text-sm'>Cargando...</div>;
   return <RatingDetailsList ratings={ratings} error={error?.message} />;
 }
