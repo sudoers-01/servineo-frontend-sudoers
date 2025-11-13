@@ -38,7 +38,7 @@ export default function SignUp() {
           <p>
             Al registrarte aceptas los{" "}
             <Link
-              href="./RegistarFormDP/Terminosycondiciones/page"
+              href="./registrar/Terminosycondiciones/page"
               className="underline text-blue-500 hover:text-blue-400 transition"
             >
               términos de uso
@@ -50,7 +50,7 @@ export default function SignUp() {
         <p className="mt-6 text-center text-gray-700 text-sm">
           ¿Ya tienes cuenta?{" "}
           <Link
-            href="../requester/signUp"
+            href="../login"
             className="text-blue-500 hover:text-blue-400 font-semibold hover:underline transition"
           >
             Inicia sesión

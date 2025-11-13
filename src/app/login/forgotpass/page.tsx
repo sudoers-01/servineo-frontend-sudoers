@@ -42,7 +42,7 @@ export default function RecuperacionCorreoPage() {
     }
   }, [serverError]);
 
-  // ✅ Lógica del envío (mantiene todo igual)
+  //  Lógica del envío (mantiene todo igual)
   const handleEnviar = async (data: ForgotFormData) => {
     setServerError(null);
     setLoading(true);
@@ -64,7 +64,7 @@ export default function RecuperacionCorreoPage() {
         if (typeof window !== 'undefined') {
           sessionStorage.setItem('servineo_last_email', data.email);
         }
-        router.push('/userManagement/requester/signIn/forgotpass/resend');
+        router.push('/login/forgotpass/resend');
       } else if (res.status === 404) {
         setServerError('El correo no está asociado a ninguna cuenta.');
       } else if (res.status === 429) {

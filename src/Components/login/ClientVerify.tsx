@@ -30,18 +30,18 @@ export default function ClientVerify({ token }: { token?: string }) {
           window.location.replace('/'); // hidratar UI logueado
         } else if (res.status === 410) {
           setMsg('El enlace ha expirado. Serás redirigido a la pantalla de recuperación.');
-          setTimeout(() => window.location.replace('/userManagment/requester/signIn/forgotpass'), 2500);
+          setTimeout(() => window.location.replace('/login/forgotpass'), 2500);
         } else if (res.status === 400) {
           setMsg('El enlace ya fue utilizado.');
-          setTimeout(() => window.location.replace('/userManagment/requester/signIn/forgotpass'), 2500);
+          setTimeout(() => window.location.replace('/login/forgotpass'), 2500);
         } else {
           setMsg(data.message || 'Error verificando enlace. Intenta nuevamente.');
-          setTimeout(() => window.location.replace('/userManagment/requester/signIn/forgotpass'), 2500);
+          setTimeout(() => window.location.replace('/login/forgotpass'), 2500);
         }
       } catch (err) {
         console.error('Error al verificar enlace:', err);
         setMsg('Error de conexión con el servidor.');
-        setTimeout(() => window.location.replace('/userManagment/requester/signIn/forgotpass'), 2500);
+        setTimeout(() => window.location.replace('/login/forgotpass'), 2500);
       }
     };
 
