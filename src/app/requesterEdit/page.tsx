@@ -7,39 +7,40 @@ import { useAuth } from '../lib/hooks/usoAutentificacion';
 import AccountLoginSettings from './linkAccounts/page';
 import RequesterEditForm from '../../Components/requester/request/RequesterEditForm';
 import ChangePasswordForm from '../../Components/requester/request/ChangePasswordForm';
-import { obtenerDatosUsuarioLogueado } from '../redux/services/editNumber';
+//import { obtenerDatosUsuarioLogueado } from '../redux/services/editNumber';
 //import CloseSessionPage from '@/app/requesterEdit/closeSession/page';
 import Image from 'next/image';
-
+/*
 interface RequesterDataState {
   requesterId: string
   phone: string
   direction: string
   coordinates: [number, number]
 }
-
+*/
+/*
 const INITIAL_DATA: RequesterDataState = {
   requesterId: '',
   phone: '',
   direction: '',
   coordinates: [0, 0],
 }
-
+*/
 export default function ConfiguracionPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
+  //const [menuOpen, setMenuOpen] = useState(false);
   
   // 🆕 Estado para controlar qué sección mostrar
   const [seccionActiva, setSeccionActiva] = useState('inicio'); // 'inicio', 'perfil', 'seguridad', 'password', 'cuentas'
 
   // 🆕 Estados para HU5 (Editar Perfil)
-  const [profileData, setProfileData] = useState<RequesterDataState>(INITIAL_DATA)
+  //const [profileData, setProfileData] = useState<RequesterDataState>(INITIAL_DATA)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState<string | null>(null)
 
   // 🆕 Estados para HU8 (Cambiar Contraseña)
-  const [passwordChanging, setPasswordChanging] = useState(false)
+  //onst [passwordChanging, setPasswordChanging] = useState(false)
 
   type SafeUser = { name?: string; email?: string; url_photo?: string };
   const safeUser = (user as SafeUser) ?? null;
@@ -60,8 +61,8 @@ export default function ConfiguracionPage() {
     setProfileError(null)
 
     try {
-      const rawData = await obtenerDatosUsuarioLogueado()
-
+      //const rawData = await obtenerDatosUsuarioLogueado()
+      /*
       const data: RequesterDataState = {
         requesterId: rawData.requesterId,
         phone: rawData.telefono || '',
@@ -71,12 +72,12 @@ export default function ConfiguracionPage() {
           rawData.ubicacion?.lng || 0,
         ],
       }
-
-      setProfileData(data)
+      */
+      //setProfileData(data)
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Error al cargar los datos del perfil.'
       setProfileError(message)
-      setProfileData(INITIAL_DATA)
+      //setProfileData(INITIAL_DATA)
     } finally {
       setProfileLoading(false)
     }
@@ -95,7 +96,7 @@ export default function ConfiguracionPage() {
   }
 
   const handlePasswordSaved = () => {
-    setPasswordChanging(false)
+    //setPasswordChanging(false)
     setTimeout(() => {
       setSeccionActiva('inicio') // Volver al inicio después de cambiar
     }, 1500)

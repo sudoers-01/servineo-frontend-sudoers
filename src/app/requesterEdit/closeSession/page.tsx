@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useDevices } from "../../lib/hooks/useDevices";
 import { Button } from "../buttonCS";
-import { Card, CardContent } from "../cardCS";
+//import { Card, CardContent } from "../cardCS";
 import {
   ArrowLeft,
   Laptop,
@@ -40,7 +40,7 @@ export default function CloseSessionPage() {
       const interval = setInterval(() => fetchSessions(), 30000);
       return () => clearInterval(interval);
     }
-  }, [userId]);
+  }, [userId , fetchSessions]);
 
   const handleCloseAllSessions = async () => {
     const result = await closeAllOtherSessions();
