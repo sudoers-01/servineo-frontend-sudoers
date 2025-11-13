@@ -28,12 +28,9 @@ const INITIAL_DATA: RequesterDataState = {
 export default function ConfiguracionPage() {
   const { user } = useAuth();
   const router = useRouter();
-  const [menuOpen, setMenuOpen] = useState(false);
   
-  // 🆕 Estado para controlar qué sección mostrar
-  const [seccionActiva, setSeccionActiva] = useState('inicio'); // 'inicio', 'perfil', 'seguridad', 'password', 'cuentas'
+  const [seccionActiva, setSeccionActiva] = useState('inicio');
 
-  // 🆕 Estados para HU5 (Editar Perfil)
   const [profileData, setProfileData] = useState<RequesterDataState>(INITIAL_DATA)
   const [profileLoading, setProfileLoading] = useState(false)
   const [profileError, setProfileError] = useState<string | null>(null)
