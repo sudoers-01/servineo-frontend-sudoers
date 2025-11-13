@@ -1,242 +1,235 @@
-import React, { useCallback, useState } from 'react';
-import { Download, Loader2 } from 'lucide-react';
-import { 
-    InvoiceDetailProps, 
-} from '@/app/lib/types'; 
+// src/app/payment/components/InvoiceDetail.tsx
+'use client';
 
-// Importar dinámicamente las librerías del navegador para evitar errores SSR
-let html2canvas: any;
-let jsPDF: any;
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { Download, ArrowLeft, Loader2 } from 'lucide-react';
+import { jsPDF } from 'jspdf';
+import QRCode from 'qrcode';
 
-if (typeof window !== 'undefined') {
-    try {
-        // @ts-ignore
-        html2canvas = require('html2canvas');
-        // @ts-ignore
-        jsPDF = require('jspdf').jsPDF;
-    } catch (e) {
-        console.warn("Librerías html2canvas/jspdf no cargadas. La descarga de PDF puede fallar si no están instaladas.");
-    }
+export interface InvoiceItem {
+  description: string;
+  quantity: number;
+  unitPrice: number;
+  total: number;
 }
 
+export interface InvoiceDetailData {
+  id: string;
+  clientName: string;
+  clientAddress: string;
+  clientVAT: string;
+  service: string;
+  date: string;
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  totalAmount: number;
+  items: InvoiceItem[];
+}
 
-// Componente auxiliar para las filas de detalle
-const DetailRow: React.FC<{ label: string; value: string | number }> = ({ label, value }) => (
-    <div className="flex justify-between border-b border-gray-200 py-2">
-        <span className="text-gray-600 font-medium">{label}</span>
-        <span className="font-semibold text-gray-800">{value}</span>
-    </div>
-);
+interface InvoiceDetailProps {
+  invoice: InvoiceDetailData;
+  onBack?: () => void;
+}
 
+const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
+  const router = useRouter();
+  const [downloading, setDownloading] = useState(false);
+  const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
-// Componente auxiliar StatusBadge
-const StatusBadge: React.FC<{ status: 'PAID' | 'PENDING' | 'CANCELLED' }> = ({ status }) => {
-    let colorClass = '';
-    let text = '';
-    switch (status) {
-        case 'PAID':
-            colorClass = 'bg-green-100 text-green-700';
-            text = 'Pagado';
-            break;
-        case 'PENDING':
-            colorClass = 'bg-yellow-100 text-yellow-700';
-            text = 'Pendiente';
-            break;
-        case 'CANCELLED':
-            colorClass = 'bg-red-100 text-red-700';
-            text = 'Cancelado';
-            break;
-        default:
-             colorClass = 'bg-gray-100 text-gray-700';
-            text = 'Desconocido';
+  // Generar QR al montar
+  useEffect(() => {
+    const generateQr = async () => {
+      const qrValue = `Factura ID: ${invoice.id} | Cliente: ${invoice.clientName} | Total: Bs. ${invoice.totalAmount ?? 0}`;
+      const dataUrl = await QRCode.toDataURL(qrValue, { width: 120, margin: 1 });
+      setQrDataUrl(dataUrl);
+    };
+    generateQr();
+  }, [invoice]);
+
+  if (!invoice) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <p className="text-red-500 font-bold">Factura no encontrada.</p>
+      </div>
+    );
+  }
+
+  const handleDownloadPDF = async () => {
+    setDownloading(true);
+    try {
+      const doc = new jsPDF();
+      let y = 10;
+
+      // Encabezado
+      doc.setFontSize(18);
+      doc.setTextColor(63, 81, 181);
+      doc.text(`Factura #${invoice.id}`, 10, y);
+      y += 10;
+      doc.setFontSize(12);
+      doc.setTextColor(0, 0, 0);
+      doc.text(`Fecha: ${invoice.date}`, 10, y);
+      y += 8;
+      doc.text(`Cliente: ${invoice.clientName}`, 10, y);
+      y += 6;
+      doc.text(`Dirección: ${invoice.clientAddress}`, 10, y);
+      y += 6;
+      doc.text(`RUC/VAT: ${invoice.clientVAT}`, 10, y);
+      y += 6;
+      doc.text(`Servicio: ${invoice.service}`, 10, y);
+      y += 10;
+
+      // Tabla de ítems
+      doc.text('Ítems:', 10, y);
+      y += 6;
+      invoice.items.forEach((item, idx) => {
+        doc.text(
+          `${idx + 1}. ${item.description} | Cant: ${item.quantity ?? 0} | P.Unit: ${(item.unitPrice ?? 0).toFixed(
+            2
+          )} | Total: ${(item.total ?? 0).toFixed(2)}`,
+          10,
+          y
+        );
+        y += 7;
+      });
+
+      y += 5;
+      doc.text(`Subtotal: Bs. ${(invoice.subtotal ?? 0).toFixed(2)}`, 10, y);
+      y += 6;
+      doc.text(`Impuestos (${((invoice.taxRate ?? 0) * 100).toFixed(0)}%): Bs. ${(invoice.taxAmount ?? 0).toFixed(2)}`, 10, y);
+      y += 6;
+      doc.setTextColor(63, 81, 181);
+      doc.setFont('helvetica', 'bold');
+      doc.text(`TOTAL: Bs. ${(invoice.totalAmount ?? 0).toFixed(2)}`, 10, y);
+
+      // Agregar QR si ya se generó
+      if (qrDataUrl) {
+        doc.addImage(qrDataUrl, 'PNG', 150, 10, 50, 50);
+      }
+
+      doc.save(`Factura_${invoice.id}.pdf`);
+    } catch (err) {
+      console.error('Error generando PDF:', err);
+    } finally {
+      setDownloading(false);
     }
-    return (
-        <span className={`px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider ${colorClass}`}>
-            {text}
-        </span>
-    );
-};
+  };
 
-
-const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice }) => {
-    const [isDownloading, setIsDownloading] = useState(false);
-    
-    const { 
-        id, 
-        requesterId, 
-        date, 
-        time, 
-        amount, 
-        currency, 
-        status, 
-        paymentMethod,
-        jobId,
-        jobAmount,
-        commission,
-        items 
-    } = invoice;
-
-    // Lógica para descargar el PDF
-    const handleDownloadPDF = useCallback(async () => {
-        if (!html2canvas || !jsPDF) {
-            console.error("No se pudo descargar: las librerías 'html2canvas' o 'jspdf' no están disponibles.");
-            alert('Error: La función de descarga requiere las librerías html2canvas y jspdf. ¡Instálalas!');
-            return;
-        }
-
-        setIsDownloading(true);
-
-        // 1. Obtener la tarjeta que queremos imprimir
-        const originalInput = document.getElementById('invoice-card'); 
-
-        if (!originalInput) {
-            setIsDownloading(false);
-            alert('Error: No se encontró el elemento de la factura.');
-            return;
-        }
-
-        // 2. Clonar el elemento (incluye todos los estilos de Tailwind)
-        const clonedInput = originalInput.cloneNode(true) as HTMLElement;
-
-        // 3. Crear un contenedor temporal, AISLADO y con fondo blanco garantizado.
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'fixed';
-        tempContainer.style.top = '-9999px'; // Lo sacamos de la vista
-        tempContainer.style.backgroundColor = '#ffffff'; // CLAVE: Garantizamos un fondo blanco simple
-        tempContainer.style.width = originalInput.offsetWidth + 'px'; // Mantenemos el ancho original
-
-        // 4. Agregar el clon al contenedor temporal y el contenedor al body
-        tempContainer.appendChild(clonedInput);
-        document.body.appendChild(tempContainer);
-        
-        let canvas: HTMLCanvasElement;
-        
-        try {
-            // 5. Capturar el HTML CLONADO dentro del contenedor simple
-            // El color de fondo aquí es crucial: debe ser simple.
-            canvas = await html2canvas(clonedInput, {
-                scale: 2, 
-                useCORS: true,
-                allowTaint: true,
-                backgroundColor: '#ffffff', 
-            });
-
-            // 6. Resto del proceso PDF (sin cambios)
-            const imgData = canvas.toDataURL('image/png');  
-            const pdf = new jsPDF('p', 'mm', 'a4'); 
-            
-            const imgWidth = 210; 
-            const pageHeight = 295; 
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            let heightLeft = imgHeight;
-            let position = 0;
-
-            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-            heightLeft -= pageHeight;
-
-            while (heightLeft >= 0) {
-                position = heightLeft - imgHeight;
-                pdf.addPage();
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-            }
-
-            pdf.save(`Comprobante_${id}.pdf`);
-            
-        } catch (error) {
-            console.error("Error al generar o descargar el PDF:", error);
-            // El error 'lab' debería aparecer aquí en la consola
-            alert('Ocurrió un error al generar el PDF. Revisa la consola para más detalles.');
-        } finally {
-            // 9. Limpiar: remover el contenedor temporal del DOM
-            document.body.removeChild(tempContainer);
-        }
-
-        setIsDownloading(false);
-    }, [id, requesterId, date, time, amount, currency, status, paymentMethod, jobId, jobAmount, commission, items]);
-
-
-    return (
-        // Estilos robustos
-        <div id="invoice-card" className="bg-white rounded-xl shadow-md p-6 sm:p-10 font-sans">
-            <header className="border-b border-gray-300 pb-4 mb-6">
-                <div className="flex justify-between items-center">
-                    <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900">
-                        Detalle de Comprobante
-                    </h1>
-                    <StatusBadge status={status} />
-                </div>
-                <p className="text-sm text-gray-500 mt-1">Factura ID: <span className="font-mono text-gray-700">{id}</span></p>
-            </header>
-
-            {/* Información principal y cliente */}
-            <div className="grid grid-cols-2 gap-4 mb-8">
-                <div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Cliente/a</h3>
-                    <p className="font-medium text-gray-800">Cliente desconocido</p>
-                    <p className="text-sm text-gray-500">Solicitante ID: <span className="font-mono text-gray-700">{requesterId}</span></p>
-                </div>
-                <div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">Fecha y Hora</h3>
-                    <p className="font-medium text-gray-800">{date}</p>
-                    <p className="text-sm text-gray-500">{time}</p>
-                </div>
-            </div>
-
-            {/* Tabla de Artículos (si existe) */}
-            {items && items.length > 0 && (
-                <div className="mb-8">
-                    <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Artículos del Servicio</h3>
-                    <div className="space-y-2">
-                        {items.map((item, index) => (
-                            <div key={index} className="flex justify-between text-sm text-gray-700">
-                                <span className="font-normal">{item.description}</span>
-                                <span className="font-medium">{item.amount.toFixed(2)} {currency}</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
+  return (
+    <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-sans">
+      <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
+        {/* Header */}
+        <div className="p-6 bg-indigo-600 text-white flex justify-between items-center">
+          <button
+            onClick={onBack || (() => router.back())}
+            className="flex items-center text-sm font-semibold hover:text-indigo-200 transition-colors"
+          >
+            <ArrowLeft className="w-5 h-5 mr-1" />
+            Volver
+          </button>
+          <h1 className="text-2xl font-extrabold">Detalle de Factura</h1>
+          <button
+            onClick={handleDownloadPDF}
+            disabled={downloading}
+            className="flex items-center bg-white text-indigo-600 font-bold py-2 px-4 rounded-xl shadow-lg hover:bg-indigo-100 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {downloading ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Generando...
+              </>
+            ) : (
+              <>
+                <Download className="w-5 h-5 mr-2" />
+                Descargar PDF
+              </>
             )}
-            
-            {/* Total */}
-            <div className="flex justify-between border-t border-gray-300 pt-3 mb-8">
-                <span className="text-xl font-bold text-gray-900">Total Facturado</span>
-                <span className="text-xl font-bold text-gray-900">{amount.toFixed(2)} {currency}</span>
-            </div>
-
-
-            {/* Detalles Adicionales */}
-            <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-300 pb-2">Detalles de Transacción</h3>
-            <div className="space-y-4">
-                <DetailRow label="ID de Solicitud" value={requesterId} />
-                <DetailRow label="Método de Pago" value={paymentMethod} />
-                <DetailRow label="ID de Trabajo" value={jobId} />
-                <DetailRow label="Monto del Trabajo" value={`${jobAmount.toFixed(2)} ${currency}`} />
-                <DetailRow label="Comisión" value={`${commission.toFixed(2)} ${currency}`} />
-            </div>
-
-            {/* Botón de Descarga */}
-            <div className="mt-10 text-center">
-                <button
-                    onClick={handleDownloadPDF}
-                    disabled={isDownloading}
-                    className="flex items-center justify-center mx-auto bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-6 rounded-xl shadow-md transition-colors disabled:opacity-50"
-                >
-                    {isDownloading ? (
-                        <>
-                            <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                            Generando PDF...
-                        </>
-                    ) : (
-                        <>
-                            <Download className="w-5 h-5 mr-2" />
-                            Descargar PDF
-                        </>
-                    )}
-                </button>
-            </div>
+          </button>
         </div>
-    );
+
+        {/* Contenido */}
+        <div className="p-8 space-y-8">
+          {/* Encabezado de Factura */}
+          <div className="flex justify-between items-start border-b pb-4">
+            <div>
+              <p className="text-sm text-gray-200">Factura Número</p>
+              <p className="text-3xl font-black text-white bg-indigo-600 inline-block px-3 py-1 rounded">{invoice.id}</p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-gray-200">Fecha de Emisión</p>
+              <p className="text-lg font-semibold text-gray-700">{invoice.date}</p>
+            </div>
+          </div>
+
+          {/* Datos Cliente y Servicio */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <h3 className="font-bold text-indigo-600 mb-2">Cliente</h3>
+              <p className="font-semibold">{invoice.clientName}</p>
+              <p className="text-sm text-gray-600">{invoice.clientAddress}</p>
+              <p className="text-sm text-gray-600">RUC/VAT: {invoice.clientVAT}</p>
+            </div>
+            <div>
+              <h3 className="font-bold text-indigo-600 mb-2">Servicio</h3>
+              <p className="font-semibold">{invoice.service}</p>
+            </div>
+          </div>
+
+          {/* Tabla de ítems */}
+          <div>
+            <h3 className="font-bold text-indigo-600 mb-4">Detalle de Cargos</h3>
+            <div className="overflow-x-auto rounded-xl shadow-lg">
+              <table className="min-w-full bg-white">
+                <thead className="bg-indigo-100 border-b border-indigo-200">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-indigo-600 uppercase tracking-wider">Descripción</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-indigo-600 uppercase tracking-wider">Cant.</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-indigo-600 uppercase tracking-wider">P. Unit. (Bs.)</th>
+                    <th className="px-6 py-3 text-right text-xs font-medium text-indigo-600 uppercase tracking-wider">Total (Bs.)</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-indigo-200">
+                  {invoice.items.map((item, idx) => (
+                    <tr key={idx} className="hover:bg-indigo-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.description}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">{item.quantity ?? 0}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">{(item.unitPrice ?? 0).toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-gray-900">{(item.total ?? 0).toFixed(2)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Totales y QR */}
+          <div className="flex justify-end pt-4">
+            <div className="w-full sm:w-80 space-y-3 p-4 bg-indigo-50 rounded-xl shadow-inner">
+              <div className="flex justify-between">
+                <span className="text-indigo-600 font-semibold">Subtotal:</span>
+                <span className="font-medium">{(invoice.subtotal ?? 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-indigo-600 font-semibold">Impuestos ({((invoice.taxRate ?? 0) * 100).toFixed(0)}%)</span>
+                <span className="font-medium">{(invoice.taxAmount ?? 0).toFixed(2)}</span>
+              </div>
+              <div className="flex justify-between border-t pt-3 border-indigo-200">
+                <span className="text-xl font-extrabold text-indigo-600">TOTAL:</span>
+                <span className="text-xl font-extrabold text-indigo-600">{(invoice.totalAmount ?? 0).toFixed(2)}</span>
+              </div>
+
+              {qrDataUrl && (
+                <div className="mt-4 flex justify-center">
+                  <img src={qrDataUrl} alt="QR Factura" width={120} height={120} />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default InvoiceDetail;
