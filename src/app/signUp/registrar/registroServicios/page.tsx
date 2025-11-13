@@ -7,7 +7,6 @@ import { z } from "zod";
 import { enviarRegistroManual } from "@/app/redux/services/auth/registro";
 import { generarContrasena } from "../Registrardecoder/generadorContrasena";
 
-// --- Esquema de validación con Zod ---
 const nameRegex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
 
 const registroSchema = z
@@ -96,7 +95,7 @@ export default function RegistroForm() {
       const data = await enviarRegistroManual(nombreCompleto, formData.email, formData.password);
 
       if (data.success) {
-        setMensaje("✅ Registro exitoso");
+        setMensaje("Registro exitoso");
         if (data.token) localStorage.setItem("servineo_token", data.token);
         sessionStorage.setItem(
           "toastMessage",
@@ -219,7 +218,6 @@ export default function RegistroForm() {
         )}
       </div>
 
-      {/* Confirmar contraseña */}
       <div>
         <label className="block text-sm font-semibold text-gray-600 mb-2">
           Confirmar contraseña*
@@ -250,7 +248,6 @@ export default function RegistroForm() {
         )}
       </div>
 
-      {/* Botón enviar */}
       <button
         type="submit"
         disabled={cargando}
