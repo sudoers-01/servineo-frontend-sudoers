@@ -5,7 +5,7 @@ import React, { useEffect, useState } from 'react';
 import InvoiceDetail, { InvoiceDetailData } from '../../payment/components/InvoiceDetail';
 import { useParams } from 'next/navigation';
 
-const API_URL = 'http://localhost:4000/api/v1';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
 const InvoiceDetailPage: React.FC = () => {
   const params = useParams();
@@ -18,7 +18,7 @@ const InvoiceDetailPage: React.FC = () => {
 
     const fetchInvoice = async () => {
       try {
-        const res = await fetch(`${API_URL}/invoices/${invoiceId}`);
+        const res = await fetch(`${API_URL}/api/v1/invoices/${invoiceId}`);
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const { data } = await res.json();
         setInvoiceData(data);
