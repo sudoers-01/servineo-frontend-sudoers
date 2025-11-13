@@ -4,7 +4,11 @@
         "title": "Encuentra el profesional perfecto",
         "subtitle": "Conectamos tu hogar con expertos verificados en tu ciudad",
         "placeholder": "¿Que servicio necesitas?",
-        "search": "Buscar"
+        "search": "Buscar",
+        "a": "Busquedas populares:",
+        "professional" : "Profesionales",
+        "Projects completed" : "Trabajos completados",
+        "Overall grade" : "Calificacion Promedio"
     },
     "jobOffers": 
     {
@@ -93,6 +97,15 @@
     },
     "Services":{
         "serTitle":"Nuestros Servicios",
-        "serDescription": "Encuentra el servicio perfecto para tus necesidades"
+        "serDescription": "Encuentra el servicio perfecto para tus necesidades",
+        "name services" : "Plomeria", 
+        "description" : "Reparaciones e instalaciones de fontanería"
+
+    },
+    "becomeFixer":{
+        "title": "Conviertete en un Fixer",
+        "description": "Completa tu registro y habilita tu cuenta como FIXER",
+        "InputData" : "Datos iniciales",
+        "button1" : "Continuar"
     }
 }
