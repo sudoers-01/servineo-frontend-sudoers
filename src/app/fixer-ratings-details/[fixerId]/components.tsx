@@ -45,7 +45,6 @@ function useFixerRatings(fixerId: string, pollInterval: number = 5000) {
     load();
   }, [url, load]);
 
-  // Polling automático cada pollInterval ms
   useEffect(() => {
     const interval = setInterval(() => {
       load();
