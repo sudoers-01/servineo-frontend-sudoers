@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from 'next-intl'
 import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
 import { MapPin, Star, Briefcase, MessageSquare, Share2 } from "lucide-react"
 import { useRouter } from "next/navigation"
@@ -12,6 +13,8 @@ interface FixerProfileContentProps {
 }
 
 export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
+  const t = useTranslations('fixerProfile')
+  
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("inicio")
 
@@ -42,9 +45,9 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
     <div className="space-y-6">
       {/* About Section */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Acerca de</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('about.title')}</h2>
         <p className="text-gray-600 mb-6">
-          {fixer.bio || "Este profesional aún no ha agregado una descripción."}
+          {fixer.bio || t('about.noDescription')}
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -53,9 +56,9 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
               <Briefcase className="w-5 h-5 text-blue-600" />
             </div>
             <div>
-              <p className="text-sm font-medium text-gray-900">Experiencia</p>
+              <p className="text-sm font-medium text-gray-900">{t('about.experience')}</p>
               <p className="text-sm text-gray-600">
-                {new Date().getFullYear() - new Date(fixer.joinDate).getFullYear()} años
+                {new Date().getFullYear() - new Date(fixer.joinDate).getFullYear()} {t('about.years')}
               </p>
             </div>
           </div>
@@ -65,7 +68,7 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
       {/* Services */}
       {fixer.services?.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-900 mb-4">Servicios</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-4">{t('services.title')}</h2>
           <div className="flex flex-wrap gap-2">
             {fixer.services.map((service, index) => (
               <span
@@ -83,12 +86,12 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
       {fixer.jobOffers?.length > 0 && (
         <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold text-gray-900">Trabajos Recientes</h2>
+            <h2 className="text-xl font-semibold text-gray-900">{t('recentJobs.title')}</h2>
             <button
               onClick={() => setActiveTab("servicios")}
               className="text-blue-600 text-sm font-medium hover:underline"
             >
-              Ver todos
+              {t('actions.viewAll')}
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -105,119 +108,120 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
     </div>
   )
 
- const renderServicesTab = () => (
-  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-    <h2 className="text-2xl font-semibold text-gray-900 mb-6">Mis Servicios</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {fixer.services.map((service, index) => (
-        <div
-          key={index}
-          className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
-        >
-          <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
-            <Briefcase className="w-6 h-6 text-blue-600" />
+  const renderServicesTab = () => (
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('services.myServices')}</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {fixer.services.map((service, index) => (
+          <div
+            key={index}
+            className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow"
+          >
+            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-3">
+              <Briefcase className="w-6 h-6 text-blue-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-gray-900 mb-2">{service}</h3>
+            <p className="text-gray-600 text-sm">
+              {t('services.description')} {service.toLowerCase()}.
+            </p>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">{service}</h3>
-          <p className="text-gray-600 text-sm">
-            Servicio profesional especializado en {service.toLowerCase()}.
-          </p>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
-  </div>
-)
+  )
 
-const renderReviewsTab = () => (
-  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-    <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-      <div>
-        <h2 className="text-2xl font-semibold text-gray-900 mb-2">Reseñas</h2>
-        <div className="flex items-center">
-          <div className="flex items-center bg-amber-50 px-3 py-1 rounded-full mr-4">
-            <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
-            <span className="ml-1 font-medium text-amber-700">
-              {fixer.rating?.toFixed(1) || "Nuevo"}
+  const renderReviewsTab = () => (
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
+        <div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">{t('reviews.title')}</h2>
+          <div className="flex items-center">
+            <div className="flex items-center bg-amber-50 px-3 py-1 rounded-full mr-4">
+              <Star className="w-5 h-5 text-amber-400 fill-amber-400" />
+              <span className="ml-1 font-medium text-amber-700">
+                {fixer.rating?.toFixed(1) || t('reviews.new')}
+              </span>
+            </div>
+            <span className="text-gray-600">
+              {fixer.completedJobs || 0} {t('about.completedJobs')}
             </span>
           </div>
-          <span className="text-gray-600">
-            {fixer.completedJobs || 0} trabajos realizados
-          </span>
         </div>
+        <button className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
+          {t('actions.writeReview')}
+        </button>
       </div>
-      <button className="mt-4 md:mt-0 px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors">
-        Escribir reseña
-      </button>
-    </div>
 
-    <div className="space-y-4">
-      {[1, 2, 3].map((_, i) => (
-        <div key={i} className="border border-gray-200 rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center">
-              <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
-                <span className="font-medium text-gray-600">C{i + 1}</span>
-              </div>
-              <div>
-                <h4 className="font-medium text-gray-900">Cliente Satisfecho {i + 1}</h4>
-                <div className="flex mt-1">
-                  {[1, 2, 3, 4, 5].map((star) => (
-                    <Star
-                      key={star}
-                      className={`w-4 h-4 ${star <= 5 ? "text-amber-400 fill-amber-400" : "text-gray-300"}`}
-                    />
-                  ))}
+      <div className="space-y-4">
+        {[1, 2, 3].map((_, i) => (
+          <div key={i} className="border border-gray-200 rounded-lg p-4">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center">
+                <div className="w-10 h-10 rounded-full bg-gray-200 mr-3 flex items-center justify-center">
+                  <span className="font-medium text-gray-600">C{i + 1}</span>
+                </div>
+                <div>
+                  <h4 className="font-medium text-gray-900">{t('reviews.satisfied')} {i + 1}</h4>
+                  <div className="flex mt-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star
+                        key={star}
+                        className={`w-4 h-4 ${star <= 5 ? "text-amber-400 fill-amber-400" : "text-gray-300"}`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
+              <span className="text-sm text-gray-500">
+                {t('reviews.ago')} {i + 1} {i === 0 ? t('reviews.week') : t('reviews.weeks')}
+              </span>
             </div>
-            <span className="text-sm text-gray-500">
-              Hace {i + 1} {i === 0 ? "semana" : "semanas"}
-            </span>
+            <p className="text-gray-700">
+              {t('reviews.sampleReview')}
+            </p>
           </div>
-          <p className="text-gray-700">
-            Excelente servicio, muy profesional y puntual. El trabajo quedó impecable.
+        ))}
+      </div>
+    </div>
+  )
+
+  const renderPhotosTab = () => (
+    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+      <h2 className="text-2xl font-semibold text-gray-900 mb-6">{t('gallery.title')}</h2>
+      
+      {fixer.jobOffers?.some(offer => offer.photos?.length > 0) ? (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {fixer.jobOffers.flatMap(offer => 
+            offer.photos?.map((photo, i) => (
+              <div 
+                key={`${offer.id}-${i}`}
+                className="aspect-square rounded-lg overflow-hidden group cursor-pointer"
+              >
+                <Image
+                  src={photo || "/placeholder.svg"}
+                  alt={`${t('gallery.workLabel')} ${i + 1}`}
+                  width={200}
+                  height={200}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                />
+              </div>
+            ))
+          )}
+        </div>
+      ) : (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
+            <Briefcase className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">{t('gallery.noPhotos.title')}</h3>
+          <p className="text-gray-600 max-w-md mx-auto">
+            {t('gallery.noPhotos.description')}
           </p>
         </div>
-      ))}
+      )}
     </div>
-  </div>
-)
+  )
 
-const renderPhotosTab = () => (
-  <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
-    <h2 className="text-2xl font-semibold text-gray-900 mb-6">Galería de Trabajos</h2>
-    
-    {fixer.jobOffers?.some(offer => offer.photos?.length > 0) ? (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {fixer.jobOffers.flatMap(offer => 
-          offer.photos?.map((photo, i) => (
-            <div 
-              key={`${offer.id}-${i}`}
-              className="aspect-square rounded-lg overflow-hidden group cursor-pointer"
-            >
-              <Image
-                src={photo || "/placeholder.svg"}
-                alt={`Trabajo ${i + 1}`}
-                width={200}
-                height={200}
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
-              />
-            </div>
-          ))
-        )}
-      </div>
-    ) : (
-      <div className="text-center py-12">
-        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-2xl flex items-center justify-center">
-          <Briefcase className="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">Aún no hay fotos</h3>
-        <p className="text-gray-600 max-w-md mx-auto">
-          Este profesional aún no ha compartido fotos de sus trabajos.
-        </p>
-      </div>
-    )}
-  </div>
-)
   return (
     <div className="bg-gray-50 min-h-screen">
       {/* Profile Header */}
@@ -251,9 +255,9 @@ const renderPhotosTab = () => (
                 </div>
                 <div className="flex items-center">
                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 mr-1" />
-                  <span>{fixer.rating?.toFixed(1) || 'Nuevo'}</span>
+                  <span>{fixer.rating?.toFixed(1) || t('reviews.new')}</span>
                   <span className="mx-1">•</span>
-                  <span>{fixer.completedJobs || 0} trabajos</span>
+                  <span>{fixer.completedJobs || 0} {t('about.completedJobs')}</span>
                 </div>
               </div>
               <div className="flex gap-3">
@@ -262,7 +266,7 @@ const renderPhotosTab = () => (
                   className="flex items-center gap-2 px-6 py-2.5 bg-white text-blue-700 rounded-lg font-medium hover:bg-gray-100 transition-colors"
                 >
                   <MessageSquare className="w-5 h-5" />
-                  Contactar
+                  {t('actions.contact')}
                 </button>
                 <button className="p-2.5 bg-white/10 text-white rounded-lg hover:bg-white/20 transition-colors">
                   <Share2 className="w-5 h-5" />
@@ -278,10 +282,10 @@ const renderPhotosTab = () => (
         {/* Tabs */}
         <div className="flex border-b border-gray-200 mb-8">
           {[
-            { id: "inicio", label: "Inicio" },
-            { id: "servicios", label: "Servicios" },
-            { id: "reseñas", label: "Reseñas" },
-            { id: "fotos", label: "Galería" },
+            { id: "inicio", label: t('tabs.home') },
+            { id: "servicios", label: t('tabs.services') },
+            { id: "reseñas", label: t('tabs.reviews') },
+            { id: "fotos", label: t('tabs.gallery') },
           ].map((tab) => (
             <button
               key={tab.id}

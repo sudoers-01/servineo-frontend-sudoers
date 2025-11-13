@@ -1,38 +1,36 @@
 {
-    "HeroSection":
-    {
-        "title": "Encuentra el profesional perfecto",
-        "subtitle": "Conectamos tu hogar con expertos verificados en tu ciudad",
-        "placeholder": "¿Que servicio necesitas?",
-        "search": "Buscar"
+  "HeroSection": {
+    "title": "Encuentra el profesional perfecto",
+    "subtitle": "Conectamos tu hogar con expertos verificados en tu ciudad",
+    "placeholder": "¿Que servicio necesitas?",
+    "search": "Buscar"
+  },
+  "jobOffers": {
+    "pageTitle": "Ofertas de Trabajo",
+    "available": "disponibles",
+    "backToHome": "Inicio",
+    "viewModes": {
+      "list": "Lista",
+      "map": "Mapa"
     },
-    "jobOffers": 
-    {
-        "pageTitle": "Ofertas de Trabajo",
-        "available": "disponibles",
-        "backToHome": "Inicio",
-        "viewModes": {
-        "list": "Lista",
-        "map": "Mapa"
-        },
-        "emptyState": {
-        "title": "No se encontraron ofertas",
-        "description": "No hay ofertas que coincidan con tu búsqueda o filtros actuales."
-        },
-        "map": {
-            "loading": "Cargando mapa...",
-            "yourLocation": "Tu ubicación",
-            "jobOffers": "Ofertas de trabajo",
-            "radius": "Radio: ~1km",
-            "mapDetails": "Detalles del mapa",
-            "availableOffers": {
-                "singular": "oferta disponible",
-                "plural": "ofertas disponibles"
-            },
-            "distance": "de distancia"
-        }
+    "emptyState": {
+      "title": "No se encontraron ofertas",
+      "description": "No hay ofertas que coincidan con tu búsqueda o filtros actuales."
     },
-    "search": {
+    "map": {
+      "loading": "Cargando mapa...",
+      "yourLocation": "Tu ubicación",
+      "jobOffers": "Ofertas de trabajo",
+      "radius": "Radio: ~1km",
+      "mapDetails": "Detalles del mapa",
+      "availableOffers": {
+        "singular": "oferta disponible",
+        "plural": "ofertas disponibles"
+      },
+      "distance": "de distancia"
+    }
+  },
+  "search": {
     "placeholder": "¿Qué servicio necesitas?",
     "buttonSearch": "Buscar",
     "openFilters": "Abrir filtros",
@@ -40,59 +38,193 @@
     "moreFilters": "Más filtros",
     "recentSearches": "Búsquedas recientes",
     "clear": "Borrar"
+  },
+  "filtersPanel": {
+    "filters": "Filtros",
+    "resetButton": {
+      "desktop": "Resetear",
+      "mobile": "Resetear Filtros"
     },
-    "filtersPanel": {
-        "filters": "Filtros",
-        "resetButton": {
-            "desktop": "Resetear",
-            "mobile": "Resetear Filtros"
-        },
-        "fixerName": "Nombre de Fixer",
-        "city": "Ciudad",
-        "jobCategory": "Tipo de Trabajo"
+    "fixerName": "Nombre de Fixer",
+    "city": "Ciudad",
+    "jobCategory": "Tipo de Trabajo"
+  },
+  "navigation": {
+    "home": "Inicio",
+    "jobOffers": "Ofertas de trabajo",
+    "login": "Iniciar Sesión",
+    "register": "Regístrate",
+    "logo": "LOGO"
+  },
+  "cta": {
+    "footerTitle": "¿Listo para encontrar al profesional ideal?",
+    "footerSubtitle": "Únete a miles de personas que ya encontraron al profesional perfecto para sus necesidades",
+    "footerButton": "Registrarse gratis",
+    "footerButtonView": "Ver servicios"
+  },
+  "HowItWorks": {
+    "question": "¿Cómo funciona?",
+    "questionResponse": "Encuentra y contrata al profesional ideal en simples pasos",
+    "HowItWorksSearch": "Busca",
+    "HowItWorksSearchDescription": "Encuentra el servicio que necesitas",
+    "HowItWorksCompare": "Compara",
+    "HowItWorksCompareDescription": "Revisa perfiles y calificaciones",
+    "HowItWorksContact": "Contacta",
+    "HowItWorksContactDescription": "Habla directamente con los profesionales",
+    "HowItWorksRate": "Califica",
+    "HowItWorksRateDescription": "Comparte tu experiencia"
+  },
+  "Inspiration": {
+    "insTitle": "Inspiración para tu hogar",
+    "insDescription": "Descubre ideas y proyectos realizados por nuestros profesionales expertos"
+  },
+  "Map": {
+    "mapTitle": "Encuentra servicios cerca de ti",
+    "mapDescription": "Explora los profesionales disponibles en tu zona",
+    "mapInteractive": "Mapa interactivo aqui"
+  },
+  "RecentOffer": {
+    "recOfTitle": "Ofertas Recientes",
+    "recOfDescription": "Descubre las últimas ofertas publicadas",
+    "viewAll": "Ver todas →"
+  },
+  "Services": {
+    "serTitle": "Nuestros Servicios",
+    "serDescription": "Encuentra el servicio perfecto para tus necesidades"
+  },
+  "myOffers": {
+    "newOffer": "Nueva Oferta",
+    "noOffers": {
+      "title": "No tienes ofertas publicadas",
+      "description": "Crea tu primera oferta de trabajo para que los clientes puedan encontrarte y contactarte",
+      "createFirst": "Crear Primera Oferta"
     },
-    "navigation": {
-        "home": "Inicio",
-        "jobOffers": "Ofertas de trabajo",
-        "login": "Iniciar Sesión",
-        "register": "Regístrate",
-        "logo": "LOGO"
+    "actions": {
+      "edit": "Editar",
+      "delete": "Eliminar",
+      "saveChanges": "Guardar Cambios",
+      "publishOffer": "Publicar Oferta"
     },
-
-    "cta":{
-        "footerTitle": "¿Listo para encontrar al profesional ideal?",
-        "footerSubtitle": "Únete a miles de personas que ya encontraron al profesional perfecto para sus necesidades",
-        "footerButton": "Registrarse gratis",
-        "footerButtonView": "Ver servicios"
+    "notifications": {
+      "offerDeleted": {
+        "title": "Oferta eliminada",
+        "message": "La oferta se eliminó correctamente"
+      },
+      "offerUpdated": {
+        "title": "Oferta actualizada",
+        "message": "La oferta se actualizó correctamente"
+      },
+      "offerCreated": {
+        "title": "Oferta creada",
+        "message": "La oferta se creó correctamente"
+      },
+      "error": {
+        "title": "Error",
+        "deleteMessage": "No se pudo eliminar la oferta. Por favor, intenta de nuevo.",
+        "formMessage": "Hubo un error al procesar el formulario. Por favor, intenta de nuevo."
+      }
     },
-    "HowItWorks":{
-        "question":"¿Cómo funciona?",
-        "questionResponse": "Encuentra y contrata al profesional ideal en simples pasos",
-        "HowItWorksSearch": "Busca",
-        "HowItWorksSearchDescription": "Encuentra el servicio que necesitas",
-        "HowItWorksCompare": "Compara",
-        "HowItWorksCompareDescription": "Revisa perfiles y calificaciones",
-        "HowItWorksContact": "Contacta",
-        "HowItWorksContactDescription": "Habla directamente con los profesionales",
-        "HowItWorksRate": "Califica",
-        "HowItWorksRateDescription": "Comparte tu experiencia"
-    },
-    "Inspiration":{
-        "insTitle":"Inspiración para tu hogar",
-        "insDescription": "Descubre ideas y proyectos realizados por nuestros profesionales expertos"
-    },
-    "Map":{
-        "mapTitle":"Encuentra servicios cerca de ti",
-        "mapDescription": "Explora los profesionales disponibles en tu zona",
-        "mapInteractive": "Mapa interactivo aqui"
-    },
-    "RecentOffer":{
-        "recOfTitle":"Ofertas Recientes",
-        "recOfDescription": "Descubre las últimas ofertas publicadas",
-        "viewAll": "Ver todas →"
-    },
-    "Services":{
-        "serTitle":"Nuestros Servicios",
-        "serDescription": "Encuentra el servicio perfecto para tus necesidades"
+    "confirmDelete": {
+      "title": "¿Eliminar oferta?",
+      "message": "Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar esta oferta?",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
     }
+  },
+  "fixerProfile": {
+    "tabs": {
+      "home": "Inicio",
+      "services": "Servicios",
+      "reviews": "Reseñas",
+      "gallery": "Galería"
+    },
+    "actions": {
+      "contact": "Contactar",
+      "writeReview": "Escribir reseña",
+      "viewAll": "Ver todos"
+    },
+    "about": {
+      "title": "Acerca de",
+      "noDescription": "Este profesional aún no ha agregado una descripción.",
+      "experience": "Experiencia",
+      "years": "años",
+      "completedJobs": "trabajos realizados"
+    },
+    "services": {
+      "title": "Servicios",
+      "myServices": "Mis Servicios",
+      "description": "Servicio profesional especializado en"
+    },
+    "recentJobs": {
+      "title": "Trabajos Recientes"
+    },
+    "reviews": {
+      "title": "Reseñas",
+      "new": "Nuevo",
+      "satisfied": "Cliente Satisfecho",
+      "ago": "Hace",
+      "week": "semana",
+      "weeks": "semanas",
+      "sampleReview": "Excelente servicio, muy profesional y puntual. El trabajo quedó impecable."
+    },
+    "gallery": {
+      "title": "Galería de Trabajos",
+      "noPhotos": {
+        "title": "Aún no hay fotos",
+        "description": "Este profesional aún no ha compartido fotos de sus trabajos."
+      },
+      "workLabel": "Trabajo"
+    },
+    "profile": {
+      "edit": "Editar perfil",
+      "save": "Guardar",
+      "contactWhatsApp": "Contactar por WhatsApp",
+      "completedJobs": "trabajos realizados",
+      "new": "Nuevo",
+      "aboutMe": {
+        "title": "Acerca de mí",
+        "placeholder": "Cuéntanos sobre ti y tus servicios...",
+        "noDescription": "Este profesional aún no ha agregado una descripción."
+      },
+      "contactInfo": {
+        "title": "Información de contacto",
+        "phonePlaceholder": "Número de teléfono",
+        "whatsappPlaceholder": "WhatsApp (opcional)"
+      },
+      "myServices": {
+        "title": "Mis Servicios",
+        "manage": "Gestionar",
+        "noServices": "Aún no se han agregado servicios"
+      },
+      "paymentMethods": {
+        "title": "Métodos de pago"
+      }
+    }
+  },
+  "statistics": {
+    "jobs": {
+      "title": "Estadísticas de trabajos",
+      "loading": "Cargando estadísticas...",
+      "error": "Error al cargar datos o datos no disponibles.",
+      "noLogs": "No se encontraron logs de estado de trabajos.",
+      "status": {
+        "completed": "Completados",
+        "inProgress": "En proceso",
+        "pending": "Pendientes"
+      },
+      "jobs": "trabajos",
+      "total": "Total"
+    }
+  },
+  "jobOfferModal": {
+    "closeModal": "Cerrar modal",
+    "description": "Descripción",
+    "servicesOffered": "Servicios Ofrecidos",
+    "gallery": "Galería de Trabajos",
+    "photo": "Foto",
+    "contactInfo": "Información de Contacto",
+    "whatsapp": "WhatsApp",
+    "city": "Ciudad",
+    "contactButton": "Contactar por WhatsApp"
+  }
 }
