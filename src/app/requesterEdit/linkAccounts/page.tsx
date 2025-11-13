@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { Mail, Github, LucideIcon } from "lucide-react";
+import { Mail } from "lucide-react";
 import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import {
@@ -23,11 +23,6 @@ const ALL_PROVIDERS_META = [
   { provider: "github", name: "GitHub" },
   { provider: "email", name: "Correo Electrónico" },
 ] as const;
-
-const iconMap: Partial<Record<AuthProvider["provider"], LucideIcon>> = {
-  github: Github,
-  email: Mail,
-};
 
 interface FullAuthProvider extends AuthProvider {
   isLinked: boolean;

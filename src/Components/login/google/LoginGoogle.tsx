@@ -38,11 +38,6 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
       if (res.success && res.data) {
         localStorage.setItem("servineo_token", res.data.token);
         localStorage.setItem("servineo_user", JSON.stringify(res.data.user));
-
-        const mensajeExito =
-          res.data?.message ||
-          `¡Inicio de sesión exitoso con Google! Bienvenido, ${res.data.user.name}!`;
-
         window.location.href = "/";
       } else {
         const mensajeError =
