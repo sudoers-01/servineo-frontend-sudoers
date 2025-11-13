@@ -2,7 +2,15 @@
 import React from "react";
 import DayCell from "./DayCell/DayCell"
 
+<<<<<<< Updated upstream:src/componentsLorem/calendar/mobile/MobileMonthView.tsx
 
+=======
+import { useUserRole } from "@/utils/contexts/UserRoleContext";
+import useAppointmentsDisable from "@/hooks/useAppointmentsDisable"
+import useDailyConts from "@/utils/useDailyConts";
+
+const today = new Date();
+>>>>>>> Stashed changes:src/components/calendar/mobile/MobileMonthView.tsx
 interface MobileMonthViewProps {
     year: number;
     month: number; // 0 = enero
@@ -22,27 +30,43 @@ export default function MobileMonthView({
     const today = new Date();
 
 
+
     const daysInMonth = new Date(year, month + 1, 0).getDate();
 
     const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
 
     const days: React.ReactNode[] = [];
 
+<<<<<<< Updated upstream:src/componentsLorem/calendar/mobile/MobileMonthView.tsx
+=======
+
+
+
+>>>>>>> Stashed changes:src/components/calendar/mobile/MobileMonthView.tsx
     for (let i = 0; i < firstDay; i++) {
         days.push(<div key={`empty-${i}`} className="h-12" />);
     }
 
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(year, month, day);
-
+        /*        const {
+                    isDisabledDay
+                } = useAppointmentsDisable(fixer_id, date*/
         days.push(
             <DayCell
                 key={day}
                 date={date}
+<<<<<<< Updated upstream:src/componentsLorem/calendar/mobile/MobileMonthView.tsx
                 fixer_id={fixer_id}
                 selectedDate={selectedDate}
                 onSelectDate={onSelectDate}
                 today={today}
+=======
+                selectedDate={selectedDate}
+                onSelectDate={onSelectDate}
+                isDisabled={true}
+                cont={getAppointmentsForDay(day, month, year)}
+>>>>>>> Stashed changes:src/components/calendar/mobile/MobileMonthView.tsx
 
             />
         );

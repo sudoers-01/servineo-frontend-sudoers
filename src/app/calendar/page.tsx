@@ -14,17 +14,39 @@ import { AppointmentsProvider } from "@/utils/contexts/AppointmentsContext/Appoi
 import { AppointmentsStatusProvider } from "@/utils/contexts/DayliViewRequesterContext";
 
 //const fixer_id = "68ef1993be38c7f1c3c2c777";
-const fixer_id = "68e87a9cdae3b73d8040102f";
-const requester_id = "68ec99ddf39c7c140f42fcfa";
+//const fixer_id = "68e87a9cdae3b73d8040102f";
+//const requester_id = "68ec99ddf39c7c140f42fcfa";
 //const requester_id = "68f3f37a44d9cf8aa91537fb";
 
 function cancelAppointments() {
     console.log("Citas canceladas");
 }
 
+
+
 export default function CalendarPage() {
     const router = useRouter();
     const modeModalRef = useRef<ModeSelectionModalHandles>(null);
+
+    const [fixer_id, setFixerId] = useState<string>('');
+    const [requester_id, setRequesterId] = useState<string>('');
+
+    useEffect(() => {
+        const storedFixerId = sessionStorage.getItem('fixer_id');
+        const storedRequesterId = sessionStorage.getItem('requester_id');
+
+        if (storedFixerId && storedRequesterId) {
+            setFixerId(storedFixerId);
+            setRequesterId(storedRequesterId);
+        } else {
+            router.push('/');
+        }
+    }, [router]);
+
+
+    //    console.log(fixer_id);
+    //   console.log(requester_id);
+
 
     const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
