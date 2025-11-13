@@ -9,7 +9,7 @@ export interface ChangePasswordRequest {
 export interface ChangePasswordResponse {
   success: boolean;
   message: string;
-  forceLogout?: boolean; // ← NUEVO: para manejar bloqueo
+  forceLogout?: boolean; 
 }
 
 export async function cambiarContrasena(
@@ -22,12 +22,11 @@ export async function cambiarContrasena(
   }
 
   try {
-    console.log('🔐 Intentando cambiar contraseña...');
+    console.log('Intentando cambiar contraseña...');
     
-    // ✅ URL corregida
     const url = `${BASE_URL}/api/controlC/cambiar-contrasena/change-password`;
     
-    console.log('🌐 URL final:', url);
+    console.log('URL final:', url);
     
     const response = await fetch(url, {
       method: 'POST',
@@ -41,31 +40,31 @@ export async function cambiarContrasena(
     const result: ChangePasswordResponse = await response.json();
     console.log('📡 Resultado del servidor:', result);
 
-    // 🚪 MANEJAR CIERRE FORZADO DE SESIÓN (BLOQUEO)
     if (result.forceLogout) {
-      console.log("🚨 Sesión cerrada por seguridad - demasiados intentos fallidos");
+      console.log("Sesión cerrada por seguridad - demasiados intentos fallidos");
       
-      // Limpiar sesión
       localStorage.removeItem("servineo_token");
       localStorage.removeItem("servineo_user");
       
-      // Mostrar alerta
-      alert(`🔒 ${result.message}\n\nSerás redirigido al inicio de sesión.`);
+      alert(`${result.message}\n\nSerás redirigido al inicio de sesión.`);
       
-      // Redirigir al login
       window.location.href = "/";
       
       return result;
     }
 
-    // Para otros errores
     if (!response.ok && response.status !== 423) {
       throw new Error(result.message || `Error ${response.status}: No se pudo cambiar la contraseña`);
     }
 
     return result;
-  } catch (error: any) {
-    console.error("❌ Error al cambiar contraseña:", error);
-    throw error;
+  } catch (error: unknown) {
+  if (error instanceof Error) {
+    console.error("Error al cambiar contraseña:", error.message);
+  } else {
+    console.error("Error desconocido al cambiar contraseña:", error);
   }
+  throw error;
+}
+
 }

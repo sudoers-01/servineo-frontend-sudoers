@@ -14,7 +14,7 @@ const resendResponseSchema = z.object({
   message: z.string().optional(),
 });
 
-export default function ClientResend({ email: emailProp, token }: { email?: string; token?: string }) {
+export default function ClientResend({ email: emailProp}: { email?: string; token?: string }) {
   // Email: preferir prop; si no hay recuperar de sessionStorage
   const [email, setEmail] = useState<string | undefined>(emailProp);
   useEffect(() => {

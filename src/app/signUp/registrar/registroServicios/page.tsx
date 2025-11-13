@@ -45,7 +45,6 @@ export default function RegistroForm() {
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmarPassword, setMostrarConfirmarPassword] = useState(false);
   const [mostrarTooltip, setMostrarTooltip] = useState(false);
-  const [mensaje, setMensaje] = useState("");
   const [cargando, setCargando] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,7 +71,6 @@ export default function RegistroForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMensaje("");
 
     const validation = registroSchema.safeParse(formData);
 
@@ -95,7 +93,6 @@ export default function RegistroForm() {
       const data = await enviarRegistroManual(nombreCompleto, formData.email, formData.password);
 
       if (data.success) {
-        setMensaje("Registro exitoso");
         if (data.token) localStorage.setItem("servineo_token", data.token);
         sessionStorage.setItem(
           "toastMessage",
@@ -103,10 +100,8 @@ export default function RegistroForm() {
         );
         router.push("../requester/signUp/RegistrarFotoDP");
       } else {
-        setMensaje(data.message || "Error al registrar el usuario.");
       }
     } catch {
-      setMensaje("Ocurrió un error al conectar con el servidor.");
     } finally {
       setCargando(false);
     }

@@ -71,14 +71,21 @@ export default function RegistroGoogle({ onSuccessClose, onNotify }: RegistroGoo
 
       if (onSuccessClose) onSuccessClose();
       setTimeout(() => router.push("/"), 2000);
-    } catch (error: any) {
+    }catch (error: unknown) {
       console.error("Error al enviar el token al backend:", error);
+
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "No se pudo conectar con el servidor. Intenta nuevamente.";
+
       onNotify?.({
         type: "error",
         title: "Error de conexión",
-        message: "No se pudo conectar con el servidor. Intenta nuevamente.",
+        message: errorMessage,
       });
     }
+
   };
 
   return (
