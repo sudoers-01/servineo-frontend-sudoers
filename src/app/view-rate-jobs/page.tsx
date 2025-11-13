@@ -272,7 +272,9 @@ export default function RatedJobsPage() {
     <main className={`min-h-screen bg-white text-gray-700 ${roboto.className}`}>
       <div className='max-w-3xl mx-auto p-6 space-y-6'>
         <header className='flex flex-col items-center w-full'>
-          <h1 className='text-2xl font-semibold tracking-tight text-center'>Lista de trabajos calificados</h1>
+          <h1 className='text-2xl font-semibold tracking-tight text-center'>
+            Lista de trabajos calificados
+          </h1>
           <div className='mt-3 flex items-center gap-4 w-full justify-end'>
             <div className='flex items-center mr-2 min-h-[32px]'>
               {loading && (
