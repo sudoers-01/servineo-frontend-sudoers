@@ -33,7 +33,6 @@ export const DetailsModal = ({ isOpen, onClose, onAccept, dataId, fixerId }: Rev
       }
     };
     fetchJobDetails();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataId, fixerId]);
 
   return (

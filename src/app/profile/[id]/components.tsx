@@ -84,7 +84,15 @@ export function StarRating({
   );
 }
 
-export function RatingDetailsList({ ratings, error, fixerId }: { ratings: FixerRating[]; error?: string; fixerId: string }) {
+export function RatingDetailsList({
+  ratings,
+  error,
+  fixerId,
+}: {
+  ratings: FixerRating[];
+  error?: string;
+  fixerId: string;
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedRatingId, setSelectedRatingId] = useState<string | null>(null);
   const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
@@ -153,38 +161,38 @@ export function RatingDetailsList({ ratings, error, fixerId }: { ratings: FixerR
                 setIsModalOpen(true);
               }}
             >
-            <div className='h-10 w-10 shrink-0 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden'>
-              <span className='text-xs'>👤</span>
-            </div>
-
-            <div className='flex-1 min-w-0'>
-              <div className='flex flex-wrap items-center justify-between gap-2'>
-                <p className='font-medium truncate'>{r.requester}</p>
-                <StarRating value={r.score} />
+              <div className='h-10 w-10 shrink-0 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden'>
+                <span className='text-xs'>👤</span>
               </div>
 
-              <p className='text-xs' style={{ color: 'var(--text-muted)' }}>
-                {new Date(r.createdAt).toLocaleDateString()}
-              </p>
+              <div className='flex-1 min-w-0'>
+                <div className='flex flex-wrap items-center justify-between gap-2'>
+                  <p className='font-medium truncate'>{r.requester}</p>
+                  <StarRating value={r.score} />
+                </div>
 
-              <p
-                className={`text-sm mt-1 leading-6 ${expandedCommentId === r.id ? '' : 'line-clamp-2'}`}
-                style={{ color: 'color-mix(in srgb, var(--foreground) 80%, transparent)' }}
-              >
-                {r.comment}
-              </p>
+                <p className='text-xs' style={{ color: 'var(--text-muted)' }}>
+                  {new Date(r.createdAt).toLocaleDateString()}
+                </p>
 
-              {isLongComment && (
-                <button
-                  className='mt-2 text-xs sm:hidden'
-                  style={{ color: 'var(--primary)' }}
-                  onClick={() => toggleComment(r.id)}
-                  aria-expanded={expandedCommentId === r.id}
+                <p
+                  className={`text-sm mt-1 leading-6 ${expandedCommentId === r.id ? '' : 'line-clamp-2'}`}
+                  style={{ color: 'color-mix(in srgb, var(--foreground) 80%, transparent)' }}
                 >
-                  {expandedCommentId === r.id ? 'See less' : 'See more'}
-                </button>
-              )}
-            </div>
+                  {r.comment}
+                </p>
+
+                {isLongComment && (
+                  <button
+                    className='mt-2 text-xs sm:hidden'
+                    style={{ color: 'var(--primary)' }}
+                    onClick={() => toggleComment(r.id)}
+                    aria-expanded={expandedCommentId === r.id}
+                  >
+                    {expandedCommentId === r.id ? 'See less' : 'See more'}
+                  </button>
+                )}
+              </div>
             </li>
           );
         })}
