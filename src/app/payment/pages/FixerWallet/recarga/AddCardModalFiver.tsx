@@ -31,10 +31,13 @@ export default function AddCardModalFixer({
 
   //const BACKEND_URL_DEPLOYADO = process.env.NEXT;
 
-  useEffect(() => {
-    const regex = /^(?=.*[a-zA-ZñÑáéíóúÁÉÍÓÚ])[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/;
-    setIsValidHolder(regex.test(cardHolder.trim()));
-  }, [cardHolder]);
+  const handleCardHolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite solo letras, tildes y espacios
+    const cleanValue = value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
+    setCardHolder(cleanValue);
+    setIsValidHolder(/^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/.test(cleanValue.trim()));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -130,7 +133,7 @@ export default function AddCardModalFixer({
             <input
               type="text"
               value={cardHolder}
-              onChange={(e) => setCardHolder(e.target.value)}
+              onChange={handleCardHolderChange}
               placeholder="Ej: Juan Pérez"
               className="w-full bg-[#E5E7EB] border-gray-200 rounded-xl px-3 py-2 text-black outline-none"
               required
@@ -174,11 +177,10 @@ export default function AddCardModalFixer({
             <button
               type="submit"
               disabled={!stripe || loading || !isValidHolder}
-              className={`px-5 py-2 rounded-xl font-semibold transition-all ${
-                !stripe || loading || !isValidHolder
+              className={`px-5 py-2 rounded-xl font-semibold transition-all ${!stripe || loading || !isValidHolder
                   ? 'bg-[#D1D5DB] cursor-not-allowed'
                   : 'bg-[#D1D5DB] hover:bg-[#2BDDE0]'
-              }`}
+                }`}
             >
               {loading ? 'Guardando...' : 'Guardar'}
             </button>

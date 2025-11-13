@@ -5,6 +5,9 @@ import { useSearchParams } from 'next/navigation';
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 import WalletFlagWatcher from "./WalletFlagWatcher";
 
+const MOCK_FIXER_ID = "68e87a9cdae3b73d8040102f";     // ← userId mock
+const MOCK_WALLET_ID = "6912a6bfbab17d15558bdfe4";    // ← NO lo usa el watcher (solo referencia)
+
 const CentroDePagos = () => {
   const router = useRouter();
 
@@ -113,10 +116,8 @@ const CentroDePagos = () => {
 
       <div className="max-w-3xl mx-auto px-4"> 
         
-        <WalletFlagWatcher
-        fixerId={(searchParams.get('fixerId') ?? (fixerData as any)?.fixerId ?? '68e87a9cdae3b73d8040102f')}
-        pollMs={4000}
-        />
+        <WalletFlagWatcher fixerId={MOCK_FIXER_ID} pollMs={4000} />
+
 
         {fixerData?.isTestData && (
           <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">

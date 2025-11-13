@@ -54,9 +54,8 @@ export default function TrabajosList({ userId }) {
             return (
               <li
                 key={job._id}
-                className={`p-5 rounded-2xl border transition shadow-sm hover:shadow-lg ${
-                  isPending ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"
-                }`}
+                className={`p-5 rounded-2xl border transition shadow-sm hover:shadow-lg ${isPending ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"
+                  }`}
               >
                 <h2 className="text-lg font-semibold text-gray-800">{job.title}</h2>
                 <p className="text-gray-600">{job.description}</p>
@@ -65,13 +64,12 @@ export default function TrabajosList({ userId }) {
                 <p className="mt-1">
                   <span className="font-semibold text-gray-700">Estado:</span>{" "}
                   <span
-                    className={`font-medium ${
-                      isPaid
-                        ? "text-green-600"
-                        : isPending
+                    className={`font-medium ${isPaid
+                      ? "text-green-600"
+                      : isPending
                         ? "text-red-600"
                         : "text-yellow-600"
-                    }`}
+                      }`}
                   >
                     {job.status}
                   </span>
@@ -110,8 +108,14 @@ export default function TrabajosList({ userId }) {
           requesterId={userId}
           fixerId={selectedJob.fixerId}
           onClose={() => setSelectedJob(null)}
+          onPaymentSuccess={async () => {
+            const res = await fetch(`/api/jobs?userId=${userId}`);
+            const data = await res.json();
+            setJobs(data); // actualiza el estado automáticamente
+            setSelectedJob(null); // cierra el modal
+          }}
         />
       )}
-    </div>
-  );
-}
+    </div> // <-- cierra el <div> principal del return
+  ); // <-- cierra el return
+} // <-- cierra la función export default

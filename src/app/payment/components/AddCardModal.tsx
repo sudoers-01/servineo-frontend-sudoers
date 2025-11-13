@@ -22,19 +22,19 @@ interface AddCardModalProps {
   jobId: string;
   amount: number;
   onClose: () => void;
-  onCardAdded: (payload: OnCardAddedPayload) => void; 
+  onCardAdded: (payload: OnCardAddedPayload) => void;
 }
 // --- FIN DE LA CORRECCIÓN ---
 
 
 // 3. APLICA LA INTERFAZ Y DESESTRUCTURA LAS PROPS
-export default function AddCardModal({ 
-  userId, 
-  fixerId, 
-  jobId, 
-  amount, 
-  onClose, 
-  onCardAdded 
+export default function AddCardModal({
+  userId,
+  fixerId,
+  jobId,
+  amount,
+  onClose,
+  onCardAdded
 }: AddCardModalProps) { // <-- ESTA LÍNEA ES LA CORRECTA
 
   const stripe = useStripe();
@@ -45,12 +45,15 @@ export default function AddCardModal({
   const [cardHolder, setCardHolder] = useState('');
   const [isValidHolder, setIsValidHolder] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  
 
-  useEffect(() => {
-    const regex = /^(?=.*[a-zA-ZñÑáéíóúÁÉÍÓÚ])[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/;
-    setIsValidHolder(regex.test(cardHolder.trim()));
-  }, [cardHolder]);
+
+  const handleCardHolderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Permite solo letras, tildes y espacios
+    const cleanValue = value.replace(/[^a-zA-ZñÑáéíóúÁÉÍÓÚ\s]/g, '');
+    setCardHolder(cleanValue);
+    setIsValidHolder(/^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]{3,50}$/.test(cleanValue.trim()));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -132,7 +135,7 @@ export default function AddCardModal({
         onClose();
       }, 2000);
 
-    } catch (err: unknown) { 
+    } catch (err: unknown) {
       console.error(err);
       if (err instanceof Error) {
         setErrorMessage(err.message);
@@ -171,7 +174,7 @@ export default function AddCardModal({
             <input
               type="text"
               value={cardHolder}
-              onChange={(e) => setCardHolder(e.target.value)}
+              onChange={handleCardHolderChange}
               placeholder="Ej: Juan Pérez"
               className="w-full bg-[#E5E7EB] border-gray-200 rounded-xl px-3 py-2 text-black outline-none"
               required
@@ -215,11 +218,10 @@ export default function AddCardModal({
             <button
               type="submit"
               disabled={!stripe || loading || !isValidHolder}
-              className={`px-5 py-2 rounded-xl font-semibold transition-all ${
-                !stripe || loading || !isValidHolder
-                  ? 'bg-[#D1D5DB] cursor-not-allowed'
-                  : 'bg-[#D1D5DB] hover:bg-[#2BDDE0]'
-              }`}
+              className={`px-5 py-2 rounded-xl font-semibold transition-all ${!stripe || loading || !isValidHolder
+                ? 'bg-[#D1D5DB] cursor-not-allowed'
+                : 'bg-[#D1D5DB] hover:bg-[#2BDDE0]'
+                }`}
             >
               {loading ? 'Procesando...' : 'Pagar'}
             </button>

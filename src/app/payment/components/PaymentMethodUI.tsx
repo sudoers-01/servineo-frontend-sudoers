@@ -182,48 +182,51 @@ export default function PaymentMethodUI({
   }, [summary?.codeExpiresAt, summary?.codeExpired, now]);
 
   // --- 3. ACTUALIZAR handleRegenerateCode ---
-  const handleRegenerateCode = async () => {
-    if (!summary) return;
+  // --- ACTUALIZAR handleRegenerateCode en PaymentMethodUI.tsx ---
+const handleRegenerateCode = async () => {
+  if (!jobId) {
+    setErr("No hay jobId disponible para regenerar el código");
+    return;
+  }
 
-    setErr(null);
-    setRegenerating(true);
+  setErr(null);
+  setRegenerating(true);
 
-    try {
-      // Usamos la ruta relativa (asumiendo rewrites en next.config)
-      const res = await fetch(`/api/lab/payments/${summary.id}/regenerate-code`, {
-        method: "POST",
-        // ¡AÑADIR HEADERS Y BODY!
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jobId: jobId,
-          requesterId: requesterId,
-          fixerId: fixerId,
-        }),
-      });
-
-      const responseData = await res.json();
-
-      if (!res.ok) {
-        // Captura el error del backend (ej. "fixerId is required")
-        throw new Error(responseData.error || "Error al regenerar el código");
+  try {
+    console.log(`🔄 [REQUESTER] Regenerando código para jobId: ${jobId}`);
+    
+    // Usar la nueva ruta que recibe jobId como parámetro
+    const res = await fetch(`/api/lab/payments/regenerate-code/${jobId}`, {
+      method: "PATCH",
+      headers: {
+        'Content-Type': 'application/json',
       }
+    });
 
-      console.log("✅ [REQUESTER] Código regenerado");
+    const responseData = await res.json();
+    console.log("📦 [REQUESTER] Respuesta de regeneración:", responseData);
 
-      // Recargar summary para obtener la nueva fecha de expiración y código
-      await loadSummary();
-      setShowNotification(true);
-      setIsExpired(false); // Asegúrate de resetear el estado de expiración
-
-    } catch (e: any) { // Tipado de 'e' como any
-      console.error("❌ [REQUESTER] Error regenerando:", e);
-      setErr(e.message || "Error al regenerar el código");
-    } finally {
-      setRegenerating(false);
+    if (!res.ok) {
+      throw new Error(responseData.error || "Error al regenerar el código");
     }
-  };
+
+    console.log("✅ [REQUESTER] Código regenerado exitosamente");
+    console.log("🆕 Nuevo código:", responseData.data?.code);
+    console.log("⏰ Nueva expiración:", responseData.data?.expiresAt);
+
+    // Recargar summary para obtener el nuevo código y fecha de expiración
+    await loadSummary();
+    
+    // Mostrar notificación de éxito
+    setShowNotification(true);
+
+  } catch (e: any) {
+    console.error("❌ [REQUESTER] Error regenerando código:", e);
+    setErr(e.message || "Error al regenerar el código");
+  } finally {
+    setRegenerating(false);
+  }
+};
   
   // --- (El resto de tu código: handleContinuar, handleVolver, y todo el JSX/return) ---
   // --- (No necesita cambios) ---
