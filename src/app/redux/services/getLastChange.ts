@@ -22,7 +22,6 @@ export async function obtenerUltimoCambio(): Promise<LastPasswordChangeResponse>
     console.log('🔍 Consultando último cambio...');
     console.log('🔑 Token disponible:', !!token);
     
-    // 👈 Usar mismo patrón que HU5
     const fullUrl = `${BASE_URL}${ULTIMO_CAMBIO_BASE}/fecha-ultimo-cambio`;
     console.log('🌐 URL completa:', fullUrl);
     
@@ -37,18 +36,23 @@ export async function obtenerUltimoCambio(): Promise<LastPasswordChangeResponse>
     console.log('📡 Response status:', response.status);
 
     if (!response.ok) {
-      // Mejorar el manejo de errores como en HU5
       const errorData = await response.json().catch(() => ({}));
       console.error('❌ Error response:', errorData);
       throw new Error(errorData.message || `Error ${response.status}: No se pudo obtener última modificación.`);
     }
 
-    const result = await response.json();
+    const result: LastPasswordChangeResponse = await response.json();
     console.log('✅ Resultado obtenido:', result);
     
     return result;
-  } catch (error: any) {
-    console.error("❌ Error al obtener último cambio:", error);
-    throw error;
+
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error('❌ Error al obtener último cambio:', error.message);
+      throw error; // <- siempre lanza, TypeScript ya sabe que no sigue
+    }
+
+    // 👇 Si no es una instancia de Error, igualmente lanzamos uno
+    throw new Error('Ocurrió un error desconocido al obtener el último cambio.');
   }
 }
