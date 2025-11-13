@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 
 const stripePromise = loadStripe(
   "pk_test_51SHGq0Fp8K0s2pYx4l5z1fkIcXSouAknc9gUV6PpYKR8TjexmaC3OiJR9jNIa09e280Pa6jGVRA6ZNY7kSCCGcLt002CEmfDnU"
-); 
+);
 
 interface PaymentProps {
   amount: number;
@@ -18,6 +18,7 @@ interface PaymentProps {
   requesterId: string;
   fixerId: string;
   onClose: () => void; // callback para cerrar modal
+  onPaymentSuccess?: () => void;
 }
 
 export default function PaymentMethods({
@@ -26,6 +27,7 @@ export default function PaymentMethods({
   requesterId,
   fixerId,
   onClose,
+  onPaymentSuccess,
 }: PaymentProps) {
   const [showCardPayment, setShowCardPayment] = useState(false);
   const [showCashPayment, setShowCashPayment] = useState(false);
@@ -60,7 +62,6 @@ export default function PaymentMethods({
       alert(e.message || "Error al crear pago en efectivo");
     }
   };
-
   return (
     <>
       {/* Overlay principal */}
@@ -144,7 +145,11 @@ export default function PaymentMethods({
                     fixerId={fixerId}
                     jobId={jobId}
                     amount={amount}
-                    onPaymentSuccess={() => setShowCardPayment(false)}
+                    onPaymentSuccess={() => {
+                      setShowCardPayment(false); // solo cierra modal de tarjetas
+                      // NO cierres overlay principal
+                      onPaymentSuccess?.(); // TrabajosList se encarga de cerrar el overlay y refrescar lista
+                    }}
                   />
                 </div>
               </div>
