@@ -146,7 +146,7 @@ export function RatingDetailsList({ ratings, error, fixerId }: { ratings: FixerR
           return (
             <li
               key={r.id}
-              className='flex items-start gap-4 p-4 rounded-xl hover:shadow-sm transition-shadow border cursor-pointer'
+              className='flex items-start gap-4 p-4 rounded-xl transition-colors border cursor-pointer hover:!bg-gray-200'
               style={{ borderColor: 'var(--surface-border)', background: 'var(--surface-card)' }}
               onClick={() => {
                 setSelectedRatingId(r.id);
