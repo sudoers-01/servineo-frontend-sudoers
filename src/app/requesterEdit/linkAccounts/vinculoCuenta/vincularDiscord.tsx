@@ -6,8 +6,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 interface VincularDiscordProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  onLinked?: (client: any) => void;
+  onLinked?: (client: undefined) => void;
 }
 
 export default function VincularDiscord({ onLinked }: VincularDiscordProps) {

@@ -31,8 +31,7 @@ export default function ConfiguracionPage() {
   const router = useRouter();
   //const [menuOpen, setMenuOpen] = useState(false);
   
-  // 🆕 Estado para controlar qué sección mostrar
-  const [seccionActiva, setSeccionActiva] = useState('inicio'); // 'inicio', 'perfil', 'seguridad', 'password', 'cuentas'
+  const [seccionActiva, setSeccionActiva] = useState('inicio');
 
   // 🆕 Estados para HU5 (Editar Perfil)
   //const [profileData, setProfileData] = useState<RequesterDataState>(INITIAL_DATA)

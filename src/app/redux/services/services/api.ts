@@ -15,6 +15,13 @@ interface APIResponse {
   };
 }
 
+export interface Client {
+  id: string;
+  email: string;
+  name?: string;
+  authProviders: AuthProvider[];
+}
+
 export async function obtenerMetodosCliente(): Promise<AuthProvider[]> {
   const token = localStorage.getItem("servineo_token");
   if (!token) throw new Error("No se encontró token de autenticación.");
@@ -61,14 +68,13 @@ export async function desvincularMetodo(provider: string): Promise<AuthProvider[
   }
 }
 
-// app/HU7/services/vincularCorreoService.ts
 
 export interface VincularResultado {
   success: boolean;
   message: string;
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client?: any;
+  client?: Client;
 }
+
 
 export async function vincularCorreoContrasena(
   token: string,
@@ -90,23 +96,22 @@ export async function vincularCorreoContrasena(
 
     return { success: true, message: "Método vinculado correctamente", client: data.client };
   } 
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  catch (err: any) {
-    return { success: false, message: err.message };
-  }
+catch (err: unknown) {
+  const message =
+    err instanceof Error ? err.message : String(err);
+  return { success: false, message };
 }
 
+}
 
-// app/HU7/services/vincularGithubService.ts
 
 export interface GitHubLinkResult {
   success: boolean;
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client?: any;
+  client?: Client;
   message?: string;
 }
- // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function vincularGitHub(token: string, onSuccess?: (client: any) => void, onError?: (msg: string) => void) {
+
+export function vincularGitHub(token: string, onSuccess?: (client: Client) => void, onError?: (msg: string) => void) {
   const state = encodeURIComponent(JSON.stringify({ mode: "link", token }));
 
   const popup = window.open(
@@ -141,8 +146,7 @@ export function vincularGitHub(token: string, onSuccess?: (client: any) => void,
 
 export interface GoogleLinkResult {
   success: boolean;
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  client?: any;
+  client?: Client;
   message?: string;
 }
 
@@ -165,8 +169,11 @@ export async function vincularGoogle(tokenUsuario: string, tokenGoogle: string):
 
     return { success: true, message: "Cuenta de Google vinculada correctamente", client: data.client };
   } 
-   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    catch (err: any) {
-    return { success: false, message: err.message || "Error al vincular Google" };
-  }
+
+  catch (err: unknown) {
+  const message =
+    err instanceof Error ? err.message : "Error al vincular Google";
+  return { success: false, message };
+}
+
 }
