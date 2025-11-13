@@ -8,7 +8,8 @@ import AccountLoginSettings from './linkAccounts/page';
 import RequesterEditForm from '../../Components/requester/request/RequesterEditForm';
 import ChangePasswordForm from '../../Components/requester/request/ChangePasswordForm';
 import { obtenerDatosUsuarioLogueado } from '../redux/services/editNumber';
-import CloseSessionPage from '@/app/requesterEdit/closeSession/page';
+//import CloseSessionPage from '@/app/requesterEdit/closeSession/page';
+import Image from 'next/image';
 
 interface RequesterDataState {
   requesterId: string
@@ -168,7 +169,12 @@ export default function ConfiguracionPage() {
                 className="flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out bg-white text-gray-800 cursor-pointer min-w-[220px]"
               >
                 <div className="p-2 rounded-md bg-blue-50">
-                  <img src="/icons/edit-pass.png" alt="Cambiar contraseña" className="w-8 h-8 object-contain text-blue-600" />
+                  <Image 
+                  src="/icons/edit-pass.png" 
+                  alt="Cambiar contraseña" 
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 object-contain text-blue-600" />
                 </div>
                 <span className="font-medium">Cambiar contraseña</span>
               </button>
@@ -179,7 +185,12 @@ export default function ConfiguracionPage() {
                 className="flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out bg-white text-gray-800 cursor-pointer min-w-[220px]"
               >
                 <div className="p-2 rounded-md bg-blue-50">
-                  <img src="/icons/logins.png" alt="Dispositivos vinculados" className="w-6 h-6 object-contain text-blue-600" />
+                  <Image 
+                  src="/icons/logins.png" 
+                  alt="Dispositivos vinculados" 
+                  width={24}
+                  height={24}
+                  className="w-6 h-6 object-contain text-blue-600" />
                 </div>
                 <span className="font-medium">Dispositivos vinculados</span>
               </button>
@@ -197,7 +208,12 @@ export default function ConfiguracionPage() {
               <>
                 <div className="mb-4">
                   {safeUser.url_photo ? (
-                    <img src={safeUser.url_photo} alt="Foto de perfil" className="w-28 h-28 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm"/>
+                    <Image 
+                    src={safeUser.url_photo} 
+                    alt="Foto de perfil" 
+                    width={112} 
+                    height={112} 
+                    className="w-28 h-28 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm"/>
                   ) : (
                     <div className="w-28 h-28 rounded-full bg-blue-100 flex items-center justify-center text-2xl font-semibold text-blue-700 mb-4 shadow-sm border-4 border-blue-200">
                       {getInitials(safeUser.name ?? safeUser.email ?? '')}
@@ -246,7 +262,12 @@ export default function ConfiguracionPage() {
                     : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
                 }`}
               >
-                <img src="/icons/edit-config.png" alt="Editar Perfil" className="w-6 h-6" />
+                <Image 
+                src="/icons/edit-config.png" 
+                alt="Editar Perfil" 
+                width={24}
+                height={24}
+                className="w-6 h-6" />
                 Editar Perfil
               </button>
 
@@ -259,7 +280,12 @@ export default function ConfiguracionPage() {
                     : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
                 }`}
               >
-                <img src="/icons/seguridad-config.png" alt="Seguridad" className="w-7 h-7" />
+                <Image 
+                src="/icons/seguridad-config.png" 
+                alt="Seguridad" 
+                width={28}
+                height={28}
+                className="w-7 h-7" />
                 Seguridad
               </button>
 
@@ -272,7 +298,12 @@ export default function ConfiguracionPage() {
                     : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
                 }`}
               >
-                <img src="/icons/cuentas.png" alt="Cuentas" className="w-7 h-7" />
+                <Image 
+                src="/icons/cuentas.png" 
+                alt="Cuentas" 
+                width={28}
+                height={28}
+                className="w-7 h-7" />
                 Cuentas vinculadas
               </button>
             </nav>
