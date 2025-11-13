@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import FixerRegisterForm from "@/Components/fixer/Fixer-register-form"
-import { FixerEnableWizard } from "@/Components/fixer/Filter-eneable-wizard"
+import FixerRegisterForm from "@/componentsLumonis/fixer/Fixer-register-form"
+import { FixerEnableWizard } from "@/componentsLumonis/fixer/Filter-eneable-wizard"
 
 
 const defaultFormValues = {

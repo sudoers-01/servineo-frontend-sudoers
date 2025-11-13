@@ -3,11 +3,11 @@
 import { useState, useEffect, useMemo } from "react"
 import { mockJobOffers } from "../lib/mock-data"
 import { JobOffer } from "../lib/mock-data"
-import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
-import { JobOfferModal } from "@/Components/Job-offers/Job-offer-modal"
-import { MapView } from "@/Components/Job-offers/maps/MapView"
-import { SearchHeader } from "@/Components/SearchHeader"
-import { FiltersPanel } from "@/Components/FiltersPanel"
+import { JobOfferCard } from "@/componentsLumonis/Job-offers/Job-offer-card"
+import { JobOfferModal } from "@/componentsLumonis/Job-offers/Job-offer-modal"
+import { MapView } from "@/componentsLumonis/Job-offers/maps/MapView"
+import { SearchHeader } from "@/componentsLumonis/SearchHeader"
+import { FiltersPanel } from "@/componentsLumonis/FiltersPanel"
 import { useAppSelector } from "../redux/hooks"
 import {
   selectSearchQuery,

@@ -1,7 +1,7 @@
 "use client"
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
-import { Card } from "@/Components/Card"
+import { Card } from "@/componentsLumonis/Card"
 
 interface Location {
   lat: number

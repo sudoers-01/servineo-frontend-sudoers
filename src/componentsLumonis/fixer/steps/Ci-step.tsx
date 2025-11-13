@@ -1,6 +1,6 @@
 "use client"
 
-import { Card } from "@/Components/Card"
+import { Card } from "@/componentsLumonis/Card"
 import { AlertCircle, CreditCard } from "lucide-react"
 
 interface CIStepProps {
