@@ -50,11 +50,8 @@ export default function EstadisticasTrabajos() {
     const totalTrabajos = stats.total;
 
     return (
-        <div className="flex flex-col font-['Roboto'] shadow-md rounded-2xl p-4 bg-white max-w-sm mx-auto">
+        <div className="flex flex-col font-['Roboto'] rounded-2xl p-4 bg-white">
             <div className="flex justify-center pb-2">
-                <h2 className="text-xl font-semibold text-gray-800">
-                    Estadísticas de trabajos
-                </h2>
             </div>
             <div className="flex flex-col items-center justify-center">
                 <PieChart width={300} height={300}>
