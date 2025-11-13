@@ -1,8 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import { MapPin, Edit, Save, X, Briefcase, MessageSquare, Star, Phone, Mail } from "lucide-react"
+import { MapPin, Edit, Save, X, Briefcase, MessageSquare, Star, Phone, Mail, Calendar } from "lucide-react"
 import Image from "next/image"
+import Link from 'next/link';
 import type { Fixer } from "@/app/lib/mock-data"
 
 export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner?: boolean }) {
@@ -62,7 +63,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                 </button>
               )}
             </div>
-            <div className="text-center md:text-left">
+            <div className="text-center md:text-left flex-1">
               <h1 className="text-2xl font-bold">{fixer.name}</h1>
               <div className="flex items-center justify-center md:justify-start gap-2 mt-2">
                 <MapPin className="w-4 h-4" />
@@ -77,15 +78,26 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                   {fixer.completedJobs} trabajos realizados
                 </span>
               </div>
-              {!isOwner && fixer.whatsapp && (
-                <button
-                  onClick={handleContact}
-                  className="mt-4 px-4 py-2 bg-white text-blue-700 rounded-lg font-medium flex items-center gap-2 mx-auto md:mx-0 hover:bg-gray-50 transition-colors"
-                >
-                  <MessageSquare className="w-4 h-4" />
-                  Contactar por WhatsApp
-                </button>
-              )}
+              <div className="flex flex-col sm:flex-row gap-3 mt-4 justify-center md:justify-start">
+                {!isOwner && fixer.whatsapp && (
+                  <button
+                    onClick={handleContact}
+                    className="px-4 py-2 bg-white text-blue-700 rounded-lg font-medium flex items-center gap-2 justify-center hover:bg-gray-50 transition-colors"
+                  >
+                    <MessageSquare className="w-4 h-4" />
+                    Contactar por WhatsApp
+                  </button>
+                )}
+                {isOwner && (
+                  <Link
+                    href="../calendar"
+                    className="px-4 py-2 bg-white text-blue-700 rounded-lg font-medium flex items-center gap-2 justify-center hover:bg-gray-50 transition-colors"
+                  >
+                    <Calendar className="w-4 h-4" />
+                    Ver Calendario
+                  </Link>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -98,9 +110,10 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                 <div className="flex gap-2">
                   <button
                     onClick={() => setIsEditing(false)}
-                    className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+                    className="px-3 py-1.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg flex items-center gap-1"
                   >
                     <X className="w-4 h-4" />
+                    Cancelar
                   </button>
                   <button
                     onClick={handleSave}

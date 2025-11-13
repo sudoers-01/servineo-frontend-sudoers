@@ -1,8 +1,9 @@
 "use client"
 
 import type { JobOffer } from "@/app/lib/mock-data"
-import { X, MessageCircle, MapPin, Sparkles } from "lucide-react"
+import { X, MessageCircle, MapPin, Sparkles, Calendar } from "lucide-react"
 import Image from "next/image"
+import Link from 'next/link'
 
 interface Props {
   offer: JobOffer | null
@@ -18,7 +19,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative bg-white w-full max-w-3xl rounded-2xl border-primary border-2 shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-white via-white to-primary/5 backdrop-blur-lg border-b border-primary  p-6 flex items-center justify-between z-10 ">
+        <div className="sticky top-0 bg-gradient-to-r from-white via-white to-primary/5 backdrop-blur-lg border-b border-primary p-6 flex items-center justify-between z-10">
           <div className="flex-1">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
               {offer.fixerName}
@@ -64,7 +65,6 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {offer.photos.map((photo, index) => (
                   <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted group cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
-                    {/* Using next/image for better optimization; fallback to img if needed */}
                     <Image
                       src={photo || "/placeholder.svg"}
                       alt={`Foto ${index + 1}`}
@@ -103,15 +103,26 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             </div>
           </div>
 
-          <a
-            href={`https://wa.me/${offer.whatsapp.replace(/\s/g, "")}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-primary to-blue-600 text-primary-foreground py-4 rounded-xl text-center font-bold hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
-          >
-            <MessageCircle className="w-5 h-5" />
-            Contactar por WhatsApp
-          </a>
+          {/* Action Buttons - Siempre se muestran ambos */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <a
+              href={`https://wa.me/${offer.whatsapp.replace(/\s/g, "")}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-primary to-blue-600 text-white py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
+            >
+              <MessageCircle className="w-5 h-5" />
+              WhatsApp
+            </a>
+
+            <Link
+              href="../calendar"
+              className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-primary to-blue-600 text-white py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
+            >
+              <Calendar className="w-5 h-5" />
+              Agendar Cita +
+            </Link>
+          </div>
         </div>
       </div>
     </div>
