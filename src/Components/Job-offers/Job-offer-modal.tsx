@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from 'next-intl'
 import type { JobOffer } from "@/app/lib/mock-data"
 import { X, MessageCircle, MapPin, Sparkles } from "lucide-react"
 import Image from "next/image"
@@ -11,6 +12,8 @@ interface Props {
 }
 
 export function JobOfferModal({ offer, isOpen, onClose }: Props) {
+  const t = useTranslations('jobOfferModal')
+  
   if (!isOpen || !offer) return null
 
   return (
@@ -31,7 +34,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <button
             onClick={onClose}
             className="p-2.5 hover:bg-muted rounded-xl transition-all hover:rotate-90 duration-300"
-            aria-label="Cerrar modal"
+            aria-label={t('closeModal')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -42,13 +45,13 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="w-5 h-5 text-primary" />
-              <h3 className="font-bold text-lg">Descripción</h3>
+              <h3 className="font-bold text-lg">{t('description')}</h3>
             </div>
             <p className="text-foreground/80 leading-relaxed bg-muted/30 p-4 rounded-xl">{offer.description}</p>
           </div>
 
           <div>
-            <h3 className="font-bold text-lg mb-3">Servicios Ofrecidos</h3>
+            <h3 className="font-bold text-lg mb-3">{t('servicesOffered')}</h3>
             <div className="flex flex-wrap gap-2">
               {offer.tags.map((tag) => (
                 <span key={tag} className="px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 text-primary text-sm rounded-full font-medium border border-primary/20 hover:border-primary/40 hover:scale-105 transition-all">
@@ -60,14 +63,13 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
 
           {offer.photos.length > 0 && (
             <div>
-              <h3 className="font-bold text-lg mb-4">Galería de Trabajos</h3>
+              <h3 className="font-bold text-lg mb-4">{t('gallery')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {offer.photos.map((photo, index) => (
                   <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted group cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
-                    {/* Using next/image for better optimization; fallback to img if needed */}
                     <Image
                       src={photo || "/placeholder.svg"}
-                      alt={`Foto ${index + 1}`}
+                      alt={`${t('photo')} ${index + 1}`}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
                     />
@@ -79,14 +81,14 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           )}
 
           <div className="pt-4 border-t border-border/50">
-            <h3 className="font-bold text-lg mb-4">Información de Contacto</h3>
+            <h3 className="font-bold text-lg mb-4">{t('contactInfo')}</h3>
             <div className="grid md:grid-cols-2 gap-3">
               <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl hover:bg-muted transition-colors">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20">
                   <MessageCircle className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">WhatsApp</p>
+                  <p className="text-xs text-muted-foreground">{t('whatsapp')}</p>
                   <p className="font-semibold">{offer.whatsapp}</p>
                 </div>
               </div>
@@ -96,7 +98,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
                   <MapPin className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Ciudad</p>
+                  <p className="text-xs text-muted-foreground">{t('city')}</p>
                   <p className="font-semibold">{offer.city}</p>
                 </div>
               </div>
@@ -110,7 +112,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-primary to-blue-600 text-primary-foreground py-4 rounded-xl text-center font-bold hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
           >
             <MessageCircle className="w-5 h-5" />
-            Contactar por WhatsApp
+            {t('contactButton')}
           </a>
         </div>
       </div>
