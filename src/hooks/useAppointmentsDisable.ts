@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import { getAppointmentsByDate, Appointment } from '@/utils/getAppointmentsByDate';
 import { getAppointmentsDisable, Days } from "@/utils/getAppointmentsDisable";
 
 export type DayOfWeek = keyof Days;
@@ -21,8 +20,7 @@ const DAY_MAP: { [key: number]: DayOfWeek } = {
 
 
 
-export default function useAppointmentsByDate(fixer_id: string, date: Date) {
-    const [appointments, setAppointments] = useState<Appointment[]>([]);
+export default function useAppointmentsDisable(fixer_id: string, date: Date) {
     const [appointmentsDis, setAppointmentsDis] = useState<Days>({
         lunes: [],
         martes: [],
@@ -50,18 +48,15 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
 
 
             try {
-                const [appointmentsData, availabilityData] = await Promise.all([
-                    getAppointmentsByDate(fixer_id, date.toISOString().split('T')[0]),
+                const [availabilityData] = await Promise.all([
                     getAppointmentsDisable(fixer_id)
                 ]);
 
-                setAppointments(appointmentsData);
                 setAppointmentsDis(availabilityData);
                 setError(null);
             } catch (err) {
                 setError('Error al cargar los datos');
                 console.error('Error en fetchData:', err);
-                setAppointments([]);
                 setAppointmentsDis({
                     lunes: [],
                     martes: [],
@@ -84,19 +79,19 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
 
 
 
-    const isHourBooked = useCallback((day: Date, hour: number): boolean => {
-        return appointments.some((apt: Appointment) => {
-            const aptDate = new Date(apt.starting_time);
-            return (
-                aptDate.getFullYear() === day.getFullYear() &&
-                aptDate.getMonth() === day.getMonth() &&
-                aptDate.getDate() === day.getDate() &&
-                aptDate.getUTCHours() === hour
-            );
-        });
-    }, [appointments]);
 
     /// todosa <= isHourBooked
+
+
+    const isDisabledDay = useCallback((day: Date): boolean => {
+        const dayOfWeek = day.getDay();
+
+        const dayName = DAY_MAP[dayOfWeek];
+
+        return appointmentsDis[dayName].length === 24;
+    }, [appointmentsDis]);
+
+
 
     const isDisabled = useCallback((day: Date, hour: number): boolean => {
         const dayOfWeek = day.getDay();
@@ -113,7 +108,7 @@ export default function useAppointmentsByDate(fixer_id: string, date: Date) {
 
 
     return {
-        isHourBooked,
+        isDisabledDay,
         isDisabled,
         loading,
         error
