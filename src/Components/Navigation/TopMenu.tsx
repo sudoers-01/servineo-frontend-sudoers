@@ -1,10 +1,14 @@
 "use client"
 
 import { useState, useEffect } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 
 export default function TopMenu() {
+  const t = useTranslations('navigation')
+  const locale = useLocale()
+  
   const [isOpen, setIsOpen] = useState(false)
   const [scrolled, setScrolled] = useState(false)
 
@@ -17,11 +21,8 @@ export default function TopMenu() {
   }, [])
 
   const navItems = [
-    { name: 'Inicio', href: '/' },
-    { name: 'Ofertas de trabajo', href: '/job-offer-list' },
-    { name: 'Convertir-fixer', href: '/become-fixer' },  //quitar estos campos porque son de prueba
-    { name: 'mis ofertas', href: '/fixer/my-offers' },
-    { name: 'perfil', href: '/fixer/profile' },
+    { name: t('home'), href: `/${locale}` },
+    { name: t('jobOffers'), href: `/${locale}/job-offer-list` }
   ]
 
   return (
@@ -52,13 +53,13 @@ export default function TopMenu() {
                 href="/login" 
                 className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
               >
-                Iniciar Sesión
+                {t('login')}
               </Link>
               <Link
                 href="/registro"
                 className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
               >
-                Regístrate
+                {t('register')}
               </Link>
             </div>
 
@@ -91,14 +92,14 @@ export default function TopMenu() {
                 className="block w-full text-center text-primary px-4 py-2 rounded-md text-base font-medium hover:bg-gray-50"
                 onClick={() => setIsOpen(false)}
               >
-                Iniciar Sesión
+                {t('login')}
               </Link>
               <Link
                 href="/registro"
                 className="block w-full text-center text-white bg-primary mt-2 px-4 py-2 rounded-md text-base font-medium hover:bg-primary/90"
                 onClick={() => setIsOpen(false)}
               >
-                Regístrate
+                {t('register')}
               </Link>
             </div>
           </div>
