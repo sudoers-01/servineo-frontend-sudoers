@@ -20,8 +20,15 @@ export default function RateJobModal({ isOpen, onClose }) {
   // 🔹 2. Función para cerrar y limpiar
   // -----------------------------
   const handleClose = () => {
-    resetForm(); // Limpia los datos ingresados
-    onClose(); // Cierra el modal
+    if (selectedStars > 0 || comment.trim() !== '') {
+      const confirmClose = window.confirm(
+        'No has enviado tu review. ¿Seguro que quieres cerrar? Los datos se perderán.',
+      );
+      if (!confirmClose) return;
+    }
+
+    resetForm();
+    onClose();
   };
 
   // -----------------------------
