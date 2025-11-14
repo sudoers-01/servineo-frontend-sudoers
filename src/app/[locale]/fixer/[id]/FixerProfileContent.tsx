@@ -1,7 +1,7 @@
 "use client"
 
 import { useTranslations } from 'next-intl'
-import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
+import { JobOfferCard } from "@/componentsLumonis/Job-offers/Job-offer-card"
 import { MapPin, Star, Briefcase, MessageSquare, Share2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
