@@ -186,17 +186,22 @@ function GenericDropdown({
 function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
   return (
     <section className='space-y-6 relative w-full'>
-      <div className='relative'>
+      <div className='relative max-h-[65vh] overflow-y-auto pr-1'>
         {jobs.length === 0 ? (
           <div className='flex items-center justify-center min-h-[220px]'>
             <p className='text-sm text-gray-500'>No hay trabajos calificados aún</p>
           </div>
         ) : (
-          <ul className='flex flex-col gap-4 min-h-[220px]'>
+          <ul className='flex flex-col gap-4'>
             {jobs.map((job) => (
               <li
                 key={job.id}
-                className='flex items-center justify-between gap-4 p-4 rounded-xl border bg-white border-gray-200 w-full shadow-[0_6px_8px_rgba(0,0,0,0.06)]'
+                className='
+    flex items-center justify-between gap-4 p-4 rounded-xl border bg-white 
+    border-gray-200 w-full shadow-[0_6px_8px_rgba(0,0,0,0.06)]
+    transition-all duration-200 transform
+    hover:-translate-y-1 hover:shadow-[0_12px_16px_rgba(0,0,0,0.15)]
+  '
               >
                 <div className='min-w-0'>
                   <p className='font-medium truncate text-gray-800'>{job.title}</p>
@@ -212,15 +217,13 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
         )}
       </div>
 
-      <div className='fixed bottom-6 right-40 z-50'>
-        <button>
-          <Link
-            href='/fixers/68e87a9cdae3b73d8040102f/comments'
-            className='px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 transition'
-          >
-            Go to comments
-          </Link>
-        </button>
+      <div className='w-full flex justify-end mt-4'>
+        <Link
+          href='/fixers/68e87a9cdae3b73d8040102f/comments'
+          className='px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 transition'
+        >
+          Ir a los comentarios
+        </Link>
       </div>
     </section>
   );
@@ -274,7 +277,9 @@ export default function RatedJobsPage() {
     <main className={`min-h-screen bg-white text-gray-700 ${roboto.className}`}>
       <div className='max-w-3xl mx-auto p-6 space-y-6'>
         <header className='flex flex-col items-center w-full'>
-          <h1 className='text-2xl font-semibold tracking-tight text-center'>Rated Jobs List</h1>
+          <h1 className='text-2xl font-semibold tracking-tight text-center'>
+            Lista de trabajos calificados
+          </h1>
           <div className='mt-3 flex items-center gap-4 w-full justify-end'>
             <div className='flex items-center mr-2 min-h-[32px]'>
               {loading && (
@@ -350,7 +355,7 @@ export default function RatedJobsPage() {
             />
 
             <GenericDropdown
-              label='Filtrar por fecha'
+              label='Ordenar por fecha'
               disabled={disableDropdowns}
               onSelect={handleDateSort}
               selectedKey={['recent', 'oldest'].includes(currentSort) ? currentSort : undefined}
