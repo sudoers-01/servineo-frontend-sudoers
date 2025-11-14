@@ -39,6 +39,30 @@ export interface Fixer {
   whatsapp?: string
 }
 
+export type JobOfferBackend = {
+  _id?: string
+  id?: string
+  title: string
+  description: string
+  city: string
+  services: string[]
+  photos: string[]
+  price: number
+  fixerId: string
+  fixerName: string
+  whatsapp: string
+  location: {
+    lat: number
+    lng: number
+    address: string
+  }
+  createdAt: string
+  tags?: string[]
+  fixerPhoto?: string
+  rating?: number
+  completedJobs?: number
+}
+
 // Mock de ubicación del usuario
 export const userLocation = {
   lat: -17.394,

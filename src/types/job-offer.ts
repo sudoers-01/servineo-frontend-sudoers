@@ -1,4 +1,3 @@
-// In src/types/job-offer.ts
 export interface JobOffer {
   id: string
   fixerId: string
@@ -13,6 +12,11 @@ export interface JobOffer {
   tags: string[]
   whatsapp: string
   createdAt: Date
+  location?: {
+    lat: number
+    lng: number
+    address?: string
+  }
   // Add other fields as needed
 }
 
@@ -85,7 +89,11 @@ export interface IUserProfile {
   };
 }
 
-
+export interface Location {
+  lat: number
+  lng: number
+  address?: string
+}
 
 export interface IJob {
   _id?: string;

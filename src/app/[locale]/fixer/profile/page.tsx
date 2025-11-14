@@ -1,21 +1,18 @@
 'use client';
-
 import { FixerProfile } from "@/Components/Fixer-profile";
 import { useGetFixerByIdQuery, useGetJobsByFixerQuery } from "@/app/redux/services/fixerApi";
 import { useParams } from "next/navigation";
 import { useAppSelector } from "@/app/redux/hooks";
 import { useEffect, useState } from "react";
 import type { Fixer } from "@/types/fixer-component";
-import type { IUserProfile, JobOffer } from "@/types/job-offer";
+import type { JobOffer, Location } from "@/types/job-offer"; // ← Quitamos IUserProfile, agregamos Location
 
 export default function FixerProfilePage() {
   const params = useParams();
   const fixerId = (params.id as string) || "691646c477c99dee64b21689";
-
   const { data: fixerProfile, isLoading: loadingFixer, error: errorFixer } = useGetFixerByIdQuery(fixerId);
   const { data: jobOffers = [], isLoading: loadingJobs } = useGetJobsByFixerQuery(fixerId);
 
-  // CORREGIDO: usar state.user.user
   const userFromStore = useAppSelector((state) => state.user.user);
   const [isOwner, setIsOwner] = useState(false);
 
@@ -25,7 +22,7 @@ export default function FixerProfilePage() {
     }
   }, [userFromStore, fixerId]);
 
-  // Esqueleto sin Loader
+  // Esqueleto de carga
   if (loadingFixer || loadingJobs) {
     return (
       <div className="max-w-4xl mx-auto py-8 px-4">
@@ -57,9 +54,8 @@ export default function FixerProfilePage() {
     );
   }
 
-  // Mapeo de servicios y pagos
   const formatService = (svc: { id: string; name: string }) => {
-    return svc.name; // No hay .custom en el backend → solo usar .name
+    return svc.name;
   };
 
   const formatPayment = (pay: { type: string }) => {
@@ -71,8 +67,8 @@ export default function FixerProfilePage() {
     return map[pay.type] || pay.type.charAt(0).toUpperCase() + pay.type.slice(1);
   };
 
-  // Asegurar dirección
-  const getAddress = (location: any): string => {
+  // Eliminamos el any – ahora usamos el tipo Location (puede ser undefined)
+  const getAddress = (location?: Location): string => {
     return location?.address || "Dirección no disponible";
   };
 
@@ -87,9 +83,9 @@ export default function FixerProfilePage() {
     completedJobs: 0,
     services: fixerProfile.profile.services.map(formatService),
     bio: fixerProfile.profile.additionalInfo?.bio || "Técnico con experiencia en reparaciones del hogar.",
-    joinDate: fixerProfile.profile.createdAt 
-  ? new Date(fixerProfile.profile.createdAt).toISOString().split('T')[0] 
-  : "2024-01-01",
+    joinDate: fixerProfile.profile.createdAt
+      ? new Date(fixerProfile.profile.createdAt).toISOString().split('T')[0]
+      : "2024-01-01",
     jobOffers: jobOffers.map((job: JobOffer) => ({
       id: job.id,
       title: job.title,
@@ -101,9 +97,9 @@ export default function FixerProfilePage() {
       rating: 4.8,
       completedJobs: 5,
       location: {
-        lat: -17.3935, // puedes mejorar con job.location
-        lng: -66.1468,
-        address: getAddress({}),
+        lat: job.location?.lat ?? -17.3935,
+        lng: job.location?.lng ?? -66.1468,
+        address: getAddress(job.location), // Ahora usa el location real cuando exista
       },
       fixerId: job.fixerId,
       fixerName: job.fixerName,

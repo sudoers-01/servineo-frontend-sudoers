@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { JobOffer } from '../../lib/mock-data';
+import { JobOffer, JobOfferBackend } from '../../lib/mock-data';
 import { JobOfferCard } from '@/Components/Job-offers/Job-offer-card';
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
 import { MapView } from '@/Components/Job-offers/maps/MapView';
@@ -31,15 +31,18 @@ export default function JobOffersPage() {
   const itemsPerPage = 6;
 
   // Load offers from API
-  const { data: apiOffers = [], isLoading, isError } = useGetAllJobOffersQuery();
+  const { data: apiOffersRaw = [], isLoading, isError } = useGetAllJobOffersQuery();
+  
+  // Cast to the correct backend type
+  const apiOffers = apiOffersRaw as unknown as JobOfferBackend[];
 
   // Normalize API offers to UI shape
   const offers: JobOffer[] = useMemo(
     () =>
-      (apiOffers as any[]).map((o) => ({
+      apiOffers.map((o) => ({
         ...o,
-        id: (o as any)._id || (o as any).id,
-        createdAt: o?.createdAt ? new Date(o.createdAt as any) : new Date(0),
+        id: o._id || o.id || '',
+        createdAt: o?.createdAt ? new Date(o.createdAt) : new Date(0),
         tags: o?.tags || [],
         photos: o?.photos || [],
         location: o?.location || { lat: 0, lng: 0, address: '' },
@@ -54,6 +57,7 @@ export default function JobOffersPage() {
   const recentSearches = useAppSelector(selectRecentSearches);
   const persona = { id: '691646c477c99dee64b21689', nombre: 'Usuario POC' };
   const [logClick] = useLogClickMutation();
+  
   const handleCardClick = async (offer: JobOffer) => {
     setSelectedOffer(offer);
     setIsModalOpen(true);
@@ -61,8 +65,8 @@ export default function JobOffersPage() {
     const activityData = {
       userId: persona.id,
       date: new Date().toISOString(),
-      role: 'requester',
-      type: 'click',
+      role: 'requester' as const,
+      type: 'click' as const,
       metadata: {
         button: 'job_offer',
         jobTitle: offer.title || 'Sin título',
@@ -73,9 +77,9 @@ export default function JobOffersPage() {
 
     try {
       await logClick(activityData).unwrap();
-      console.log('Click registrado:', offer.title || offer.title);
+      console.log('Click registrado:', offer.title);
     } catch (error) {
-      console.error('Error al registrar clic:');
+      console.error('Error al registrar clic:', error);
     }
   };
 
@@ -113,6 +117,7 @@ export default function JobOffersPage() {
   }, [searchQuery, selectedCities, selectedJobTypes]);
 
   // Mantener actualizado el count de filteredOffers en un ref
+  const filteredOffersCountRef = useRef<number>(0);
   useEffect(() => {
     filteredOffersCountRef.current = filteredOffers.length;
   }, [filteredOffers.length]);
@@ -131,7 +136,6 @@ export default function JobOffersPage() {
   const previousJobTypesRef = useRef<string[]>([]);
   const isInitialMountRef = useRef<boolean>(true);
   const lastSearchSentRef = useRef<string>('');
-  const filteredOffersCountRef = useRef<number>(0);
 
   // Función helper para obtener el valor del filtro fixer_name
   const getFixerNameValue = (): string => {
@@ -195,9 +199,9 @@ export default function JobOffersPage() {
           const searchCount = filteredOffersCountRef.current;
 
           const searchData = {
-            user_type: 'visitor',
+            user_type: 'visitor' as const,
             search_query: currentQuery,
-            search_type: 'search_box',
+            search_type: 'search_box' as const,
             filters: {
               filter_1: {
                 fixer_name: getFixerNameValue(),
@@ -218,7 +222,7 @@ export default function JobOffersPage() {
           } catch (error) {
             console.error('Error al registrar búsqueda:', error);
             if (error && typeof error === 'object' && 'data' in error) {
-              console.error('Detalles del error:', (error as any).data);
+              console.error('Detalles del error:', error.data);
             }
           }
         }
@@ -282,7 +286,7 @@ export default function JobOffersPage() {
         } catch (error) {
           console.error('Error al actualizar filtros:', error);
           if (error && typeof error === 'object' && 'data' in error) {
-            console.error('Detalles del error:', (error as any).data);
+            console.error('Detalles del error:', error.data);
           }
         }
       }, 150); // Pequeño delay para que filteredOffers se actualice
@@ -403,7 +407,7 @@ export default function JobOffersPage() {
                   <div
                     key={offer.id}
                     className="animate-fade-in"
-                    style={{ animationDelay: '${index * 50}ms' }}
+                    style={{ animationDelay: `${index * 50}ms` }}
                   >
                     <JobOfferCard offer={offer} onClick={() => handleCardClick(offer)} />
                   </div>
