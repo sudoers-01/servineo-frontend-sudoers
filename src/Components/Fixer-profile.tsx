@@ -232,7 +232,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
           </div>
           {/* Statistics Section */}
           <div className="pt-8">
-            <h3 className="text-lg font-semibold text-gray-900 mb-3">Estadisticas de trabajos</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t("title2")}</h3>
               <JobStatistics />
           </div>
         </div>
