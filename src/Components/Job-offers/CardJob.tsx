@@ -188,7 +188,7 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                     <Image
                       key={idx}
                       src={img}
-                      alt={t.title || 'Oferta de trabajo'}
+                      alt={t.title}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       className={`object-cover transition-opacity duration-500 ${
@@ -436,7 +436,7 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   <Image
                     key={idx}
                     src={img}
-                    alt={t.title || 'Oferta de trabajo'}
+                    alt={t.title}
                     fill
                     sizes="16rem"
                     className={`object-cover transition-opacity duration-500 ${

@@ -16,7 +16,6 @@ const DropdownList: React.FC<DropdownListProps> = ({
   searchQuery = '',
   categoryFilters = [],
 }) => {
-  const t = useTranslations('advancedSearch.tags');
   const tCommon = useTranslations('advancedSearch');
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);

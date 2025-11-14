@@ -39,6 +39,7 @@ interface FetchOffersResult {
   limit: number;
   totalPages: number;
   requestedPage: number;
+  isInitialSearch?: boolean;
 }
 
 export interface FilterState {
@@ -64,6 +65,7 @@ interface JobOffersState {
   paginaActual: number;
   registrosPorPagina: number;
   totalRegistros: number;
+  preservedTotalRegistros: number;
   totalPages: number;
   paginaciones: Record<string, PaginationState>;
 }
@@ -117,6 +119,7 @@ const getInitialJobOffersState = (): JobOffersState => {
     paginaActual: savedPage,
     registrosPorPagina: savedPageSize,
     totalRegistros: 0,
+    preservedTotalRegistros: 0,
     totalPages: 0,
     paginaciones: {
       offers: {
@@ -140,9 +143,9 @@ interface FetchOffersParams {
   titleOnly?: boolean;
   exact?: boolean;
   date?: string;
-  // optional integer rating (1..5) meaning filter for that integer range (1 -> 1.0-1.9)
   rating?: number;
   listKey?: string;
+  isInitialSearch?: boolean;
 }
 
 export const fetchOffers = createAsyncThunk<FetchOffersResult, FetchOffersParams>(
@@ -227,6 +230,7 @@ export const fetchOffers = createAsyncThunk<FetchOffersResult, FetchOffersParams
           limit: params.limit,
           totalPages: totalPages,
           requestedPage: params.page,
+          isInitialSearch: params.isInitialSearch,
         };
       } else {
         return rejectWithValue(response.error || 'Error al cargar las ofertas');
@@ -315,6 +319,7 @@ const jobOffersSlice = createSlice({
       state.sortBy = 'recent';
       state.search = '';
       state.paginaActual = 1;
+      state.preservedTotalRegistros = 0;
 
       // Guardar en localStorage
       saveToStorage('jobOffers_filters', state.filters);
@@ -381,7 +386,13 @@ const jobOffersSlice = createSlice({
         const payload = action.payload as FetchOffersResult;
         const key = payload.listKey || 'offers';
 
-        // Asegurar que exista la entrada para esta clave
+        if (payload.page < 1) {
+          state.error = `La página ${payload.page} no es válida. Debe ser mayor o igual a 1.`;
+          state.paginaActual = 1;
+          saveToStorage('jobOffers_paginaActual', 1);
+          return;
+        }
+
         if (!state.paginaciones[key]) {
           state.paginaciones[key] = {
             paginaActual: 1,
@@ -400,10 +411,15 @@ const jobOffersSlice = createSlice({
         state.paginaciones[key].totalRegistros = payload.total;
         state.paginaciones[key].totalPages = payload.totalPages;
 
+        if (payload.page === 1 && payload.isInitialSearch) {
+          state.preservedTotalRegistros = payload.total;
+        }
+        const totalToUse = state.preservedTotalRegistros > 0 ? state.preservedTotalRegistros : payload.total;
+
         // Sincronizar campos top-level para compatibilidad
         state.paginaActual = state.paginaciones[key].paginaActual;
         state.registrosPorPagina = state.paginaciones[key].registrosPorPagina;
-        state.totalRegistros = state.paginaciones[key].totalRegistros;
+        state.totalRegistros = totalToUse;
         state.totalPages = state.paginaciones[key].totalPages;
 
         // Guardar en localStorage

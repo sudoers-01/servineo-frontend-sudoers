@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
+import { useAppSelector } from '@/app/redux/hooks';
 
 interface FilterState {
   range: string[];
@@ -18,10 +19,6 @@ interface FilterDrawerProps {
   onReset?: () => void;
 }
 
-// ============================================
-// VALORES QUE SE ENVÍAN AL BACKEND (ESPAÑOL)
-// La BD está en español, así que enviamos estos valores
-// ============================================
 const DB_VALUES = {
   ranges: [
     'De (A-C)',
@@ -68,6 +65,9 @@ const DB_VALUES = {
 } as const;
 
 export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: FilterDrawerProps) {
+
+  const filtersFromStore = useAppSelector((state) => state.jobOfert.filters);
+
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
     fixer: false,
     ciudad: false,
@@ -79,10 +79,17 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const tCity = useTranslations('advancedSearch.city');
   const tJob = useTranslations('advancedSearch.jobType');
 
-  // Estado interno guarda valores en ESPAÑOL (para enviar al backend)
-  const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
-  const [selectedCity, setSelectedCity] = useState<string>('');
-  const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
+  // ✅ REFACTOR: Estado interno inicializado con valores del store
+  const [selectedRanges, setSelectedRanges] = useState<string[]>(filtersFromStore.range || []);
+  const [selectedCity, setSelectedCity] = useState<string>(filtersFromStore.city || '');
+  const [selectedJobs, setSelectedJobs] = useState<string[]>(filtersFromStore.category || []);
+
+  // ✅ AGREGADO: useEffect para sincronización con el store
+  useEffect(() => {
+    setSelectedRanges(filtersFromStore.range || []);
+    setSelectedCity(filtersFromStore.city || '');
+    setSelectedJobs(filtersFromStore.category || []);
+  }, [filtersFromStore]);
 
   useEffect(() => {
     if (isOpen) {
@@ -161,7 +168,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   // Configuración de UI: dbValue en español, label traducido
   const nameRanges = [
     [
-      { dbValue: DB_VALUES.ranges[0], label: tName('ranges.ac') }, // "De (A-C)" → "From (A-C)" o "De (A-C)"
+      { dbValue: DB_VALUES.ranges[0], label: tName('ranges.ac') },
       { dbValue: DB_VALUES.ranges[1], label: tName('ranges.df') },
       { dbValue: DB_VALUES.ranges[2], label: tName('ranges.gi') },
       { dbValue: DB_VALUES.ranges[3], label: tName('ranges.jl') },
