@@ -1,19 +1,13 @@
 {
-    "HeroSection":
-    {
-        "title": "Encuentra el profesional perfecto",
-        "subtitle": "Conectamos tu hogar con expertos verificados en tu ciudad",
-        "placeholder": "¿Que servicio necesitas?",
-        "search": "Buscar",
-        "a": "Busquedas populares:",
-        "professional" : "Profesionales",
-        "Projects completed" : "Trabajos completados",
-        "Overall grade" : "Calificacion Promedio"
   "HeroSection": {
     "title": "Encuentra el profesional perfecto",
     "subtitle": "Conectamos tu hogar con expertos verificados en tu ciudad",
     "placeholder": "¿Que servicio necesitas?",
-    "search": "Buscar"
+    "search": "Buscar",
+    "a": "Búsquedas populares:",
+    "professional": "profesionales",
+    "Projects completed": "Trabajos completados",
+    "Overall grade": "Calificación Promedio"
   },
   "jobOffers": {
     "pageTitle": "Ofertas de Trabajo",
@@ -100,7 +94,19 @@
   },
   "Services": {
     "serTitle": "Nuestros Servicios",
-    "serDescription": "Encuentra el servicio perfecto para tus necesidades"
+    "serDescription": "Encuentra el servicio perfecto para tus necesidades",
+    "name services": "Plomería",
+    "Description": "Reparaciones e instalaciones de fontanería"
+  },
+  "becomeFixer": {
+    "title": "Conviértete en un Fixer",
+    "description": "Completa tu registro y habilita tu cuenta como FIXER",
+    "InputData": "Datos iniciales",
+    "button1": "Continuar",
+    "completeName": "Nombre completo",
+    "eMail": "Correo Electronico",
+    "phone": "Teléfono",
+    "digits": "digitos"
   },
   "myOffers": {
     "newOffer": "Nueva Oferta",
@@ -185,18 +191,6 @@
       },
       "workLabel": "Trabajo"
     },
-    "Services":{
-        "serTitle":"Nuestros Servicios",
-        "serDescription": "Encuentra el servicio perfecto para tus necesidades",
-        "name services" : "Plomeria", 
-        "description" : "Reparaciones e instalaciones de fontanería"
-
-    },
-    "becomeFixer":{
-        "title": "Conviertete en un Fixer",
-        "description": "Completa tu registro y habilita tu cuenta como FIXER",
-        "InputData" : "Datos iniciales",
-        "button1" : "Continuar"
     "profile": {
       "edit": "Editar perfil",
       "save": "Guardar",
@@ -248,5 +242,11 @@
     "whatsapp": "WhatsApp",
     "city": "Ciudad",
     "contactButton": "Contactar por WhatsApp"
+  },
+  "navbar": {
+    "logo": "Logo",
+    "jobOffers": "Ofertas de Trabajo",
+    "becomeFixer": "Convertirse en Fixer",
+    "myOffers": "Mis Ofertas"
   }
 }
