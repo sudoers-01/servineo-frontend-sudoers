@@ -2,13 +2,12 @@
 
 import Link from 'next/link';
 import { Briefcase, UserCog, ClipboardList } from 'lucide-react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useAppDispatch } from '@/app/redux/hooks';
 import { resetFilters } from '@/app/redux/slice/jobOfert';
 
 export function Navbar() {
   const pathname = usePathname();
-  const router = useRouter();
 
   const isActive = (path: string) => pathname === path;
 
