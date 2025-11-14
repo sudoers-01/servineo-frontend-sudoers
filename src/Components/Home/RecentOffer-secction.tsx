@@ -4,8 +4,9 @@ import { JobOfferCard } from "../Job-offers/Job-offer-card";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { mockJobOffers } from "@/app/lib/mock-data";
-
+import { useTranslations } from "next-intl";
 export default function RecentOffersSection() {
+  const t=useTranslations("RecentOffer");
   const [recentOffers, setRecentOffers] = useState<JobOffer[]>([]);
 
   useEffect(() => {
@@ -22,17 +23,17 @@ export default function RecentOffersSection() {
         <div className="flex justify-between items-center mb-8">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
-              Ofertas Recientes
+              {t("recOfTitle")}
             </h2>
             <p className="text-lg text-gray-600">
-              Descubre las últimas ofertas publicadas
+              {t("recOfDescription")}
             </p>
           </div>
           <Link 
             href="/ofertas" 
             className="text-primary hover:underline font-medium"
           >
-            Ver todas →
+            {t("viewAll")}
           </Link>
         </div>
 
