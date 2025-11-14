@@ -50,7 +50,7 @@ export default async function RootLayout({
             <TopMenu/>
           </div>
           {children}
-          <div className='text-black fixed bottom-7 right-7'><TranslationButton/></div>
+          <TranslationButton/>
         </ReduxProvider>
         </NextIntlClientProvider>
       </body>
