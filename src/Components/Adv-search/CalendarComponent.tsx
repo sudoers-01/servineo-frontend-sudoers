@@ -1,5 +1,6 @@
 'use client';
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface CalendarProps {
   selectedDate: Date;
@@ -8,25 +9,36 @@ interface CalendarProps {
 }
 
 const CalendarComponent: React.FC<CalendarProps> = ({ selectedDate, onDateSelect, onClose }) => {
+  const t = useTranslations('calendar');
   const [currentMonth, setCurrentMonth] = useState(selectedDate.getMonth());
   const [currentYear, setCurrentYear] = useState(selectedDate.getFullYear());
 
+  // Usar traducciones para meses
   const monthsFull = [
-    'enero',
-    'febrero',
-    'marzo',
-    'abril',
-    'mayo',
-    'junio',
-    'julio',
-    'agosto',
-    'septiembre',
-    'octubre',
-    'noviembre',
-    'diciembre',
+    t('months.january'),
+    t('months.february'),
+    t('months.march'),
+    t('months.april'),
+    t('months.may'),
+    t('months.june'),
+    t('months.july'),
+    t('months.august'),
+    t('months.september'),
+    t('months.october'),
+    t('months.november'),
+    t('months.december'),
   ];
 
-  const daysOfWeek = ['L', 'M', 'X', 'J', 'V', 'S', 'D'];
+  // Usar traducciones para días de la semana
+  const daysOfWeek = [
+    t('daysShort.monday'),
+    t('daysShort.tuesday'),
+    t('daysShort.wednesday'),
+    t('daysShort.thursday'),
+    t('daysShort.friday'),
+    t('daysShort.saturday'),
+    t('daysShort.sunday'),
+  ];
 
   const getDaysInMonth = (month: number, year: number) => new Date(year, month + 1, 0).getDate();
   const getFirstDayOfMonth = (month: number, year: number) => {
@@ -40,7 +52,15 @@ const CalendarComponent: React.FC<CalendarProps> = ({ selectedDate, onDateSelect
   };
 
   const getDayOfWeekName = (date: Date) => {
-    const days = ['dom.', 'lun.', 'mar.', 'mié.', 'jue.', 'vie.', 'sáb.'];
+    const days = [
+      t('daysAbbrev.sunday'),
+      t('daysAbbrev.monday'),
+      t('daysAbbrev.tuesday'),
+      t('daysAbbrev.wednesday'),
+      t('daysAbbrev.thursday'),
+      t('daysAbbrev.friday'),
+      t('daysAbbrev.saturday'),
+    ];
     return days[date.getDay()];
   };
 
@@ -119,13 +139,14 @@ const CalendarComponent: React.FC<CalendarProps> = ({ selectedDate, onDateSelect
               }
             }}
             className="text-cyan-600 hover:text-cyan-800 text-xl font-bold"
+            aria-label={t('navigation.previousMonth')}
           >
             ←
           </button>
 
           {/* Mes y año */}
           <div className="font-medium text-gray-800">
-            {monthsFull[currentMonth]} de {currentYear}
+            {monthsFull[currentMonth]} {t('navigation.of')} {currentYear}
           </div>
 
           {/* Flecha derecha */}
@@ -139,6 +160,7 @@ const CalendarComponent: React.FC<CalendarProps> = ({ selectedDate, onDateSelect
               }
             }}
             className="text-cyan-600 hover:text-cyan-800 text-xl font-bold"
+            aria-label={t('navigation.nextMonth')}
           >
             →
           </button>
@@ -162,7 +184,7 @@ const CalendarComponent: React.FC<CalendarProps> = ({ selectedDate, onDateSelect
             onClick={onClose}
             className="px-4 py-2 text-sm text-cyan-600 hover:bg-cyan-50 rounded transition-colors"
           >
-            Cancelar
+            {t('buttons.cancel')}
           </button>
           <button
             onClick={() => {
@@ -171,7 +193,7 @@ const CalendarComponent: React.FC<CalendarProps> = ({ selectedDate, onDateSelect
             }}
             className="px-4 py-2 text-sm bg-cyan-500 text-white rounded hover:bg-cyan-600 transition-colors"
           >
-            Aceptar
+            {t('buttons.accept')}
           </button>
         </div>
       </div>

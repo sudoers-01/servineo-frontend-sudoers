@@ -7,6 +7,7 @@ import {
   validatePagination,
   JOBOFERT_ALLOWED_LIMITS,
 } from '@/app/lib/validations/pagination.validator';
+import { useTranslations } from 'next-intl';
 
 interface PaginationSelectorProps {
   registrosPorPagina: number;
@@ -17,18 +18,18 @@ const PaginationSelector: React.FC<PaginationSelectorProps> = ({
   registrosPorPagina,
   onChange,
 }) => {
+  const t = useTranslations('pagination');
   const opciones = [...JOBOFERT_ALLOWED_LIMITS];
 
   const handleChange = (valor: number) => {
-    // Validamos usando Zod
-    const { isValid, data } = validatePagination(1, valor); // page=1 solo para validar limit
-    if (!isValid || !data) return; // ignoramos valores inválidos
+    const { isValid, data } = validatePagination(1, valor);
+    if (!isValid || !data) return;
     onChange(data.limit);
   };
 
   return (
     <div className="flex items-center gap-2 mt-4">
-      <span className="text-sm text-gray-600">Mostrar:</span>
+      <span className="text-sm text-gray-600">{t('show')}</span>
       <Listbox value={registrosPorPagina} onChange={handleChange}>
         <div className="relative">
           <Listbox.Button className="relative w-20 cursor-pointer border border-gray-300 rounded-lg bg-white px-2 py-1 text-left text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
@@ -62,7 +63,7 @@ const PaginationSelector: React.FC<PaginationSelectorProps> = ({
           </Transition>
         </div>
       </Listbox>
-      <span className="text-sm text-gray-600">por página</span>
+      <span className="text-sm text-gray-600">{t('perPage')}</span>
     </div>
   );
 };

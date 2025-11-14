@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface SearchCheckboxesProps {
   titleOnly: boolean;
@@ -15,6 +16,8 @@ export function SearchCheckboxes({
   exactWords,
   setExactWords,
 }: SearchCheckboxesProps) {
+  const t = useTranslations('search');
+
   return (
     <div className="w-full bg-gray-100 border border-gray-200 rounded-lg p-4 mt-4">
       <div className="flex flex-col gap-3">
@@ -24,15 +27,12 @@ export function SearchCheckboxes({
             checked={titleOnly}
             onChange={(e) => {
               const checked = e.target.checked;
-              // If selecting titleOnly, ensure exactWords is deselected
               setTitleOnly(checked);
               if (checked) setExactWords(false);
             }}
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
           />
-          <span className="text-sm text-gray-700">
-            Buscar solo en el título de la Oferta de Trabajo
-          </span>
+          <span className="text-sm text-gray-700">{t('titleOnly')}</span>
         </label>
 
         <label className="flex items-center gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded transition-colors">
@@ -41,13 +41,12 @@ export function SearchCheckboxes({
             checked={exactWords}
             onChange={(e) => {
               const checked = e.target.checked;
-              // If selecting exactWords, ensure titleOnly is deselected
               setExactWords(checked);
               if (checked) setTitleOnly(false);
             }}
             className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 focus:ring-2 cursor-pointer"
           />
-          <span className="text-sm text-gray-700">Palabras Exactas</span>
+          <span className="text-sm text-gray-700">{t('exactWords')}</span>
         </label>
       </div>
     </div>

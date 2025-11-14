@@ -4,6 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { Button } from '@/Components/ui/button';
+import { useTranslations } from 'next-intl';
 
 interface AdvancedSearchButtonProps {
   src?: string;
@@ -12,21 +13,21 @@ interface AdvancedSearchButtonProps {
 
 export function AdvancedSearchButton({
   src = '/img/advSearch.jpg',
-  alt = 'Búsqueda avanzada',
+  alt,
 }: AdvancedSearchButtonProps) {
+  const t = useTranslations('search');
   const router = useRouter();
 
   const handleClick = () => {
-    // Navega a la página AdvSearch (src/app/AdvancedSearch/page.tsx)
     router.push('/adv-search');
   };
 
   return (
     <Button
       onClick={handleClick}
-      aria-label="Ir a búsqueda avanzada"
+      aria-label={t('goToAdvancedSearch')}
       size="lg"
-      className={`
+      className="
         bg-[#2B6AE0] text-white
         hover:bg-[#2B6AE0]/90
         shrink-0
@@ -38,11 +39,16 @@ export function AdvancedSearchButton({
         shadow
         transition-all duration-200
         flex items-center justify-center
-      `}
+      "
     >
-      {/* Imagen que se adapta al tamaño del botón */}
       <div className="flex-shrink-0">
-        <Image src={src} alt={alt} width={32} height={32} className="rounded-full object-cover" />
+        <Image
+          src={src}
+          alt={alt ?? t('advancedSearch')}
+          width={32}
+          height={32}
+          className="rounded-full object-cover"
+        />
       </div>
     </Button>
   );

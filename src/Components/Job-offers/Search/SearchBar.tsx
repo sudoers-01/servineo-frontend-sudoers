@@ -12,6 +12,7 @@ import { AdvancedSearchButton } from './AdvancedSearchButton';
 import { FilterButton } from '../Filter/FilterButton';
 import { validateSearch } from '@/app/lib/validations/search.validator';
 import { useAppSelector } from '@/app/redux/hooks';
+import { useTranslations } from 'next-intl';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -23,6 +24,8 @@ interface SearchHistoryItem {
 }
 
 export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
+  const t = useTranslations('search');
+
   // Leer el valor de búsqueda desde Redux
   const searchFromStore = useAppSelector((state) => state.jobOfert.search);
 
@@ -385,7 +388,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
           <SearchIcon hasError={hasError} />
           <Input
             type="text"
-            placeholder="¿Qué servicio necesitas?"
+            placeholder={t('placeholder')}
             className={inputClasses}
             value={previewValue ?? value}
             onChange={handleChange}
@@ -409,7 +412,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-slate-500" />
                   <span className="text-xs font-semibold uppercase text-slate-500">
-                    Búsquedas recientes
+                    {t('recentSearches')}
                   </span>
                 </div>
                 <div className="w-8 flex items-center justify-center sm:justify-end sm:w-auto">
@@ -420,16 +423,16 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
                       await clearHistory();
                     }}
                     className="mr-1 flex items-center gap-1 text-sm text-red-500 cursor-pointer px-2 py-1 rounded hover:bg-red-50 whitespace-nowrap"
-                    aria-label="Borrar historial"
+                    aria-label={t('clearHistory')}
                   >
                     <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />
-                    <span className="ml-1 text-sm hidden sm:inline">Borrar historial</span>
+                    <span className="ml-1 text-sm hidden sm:inline">{t('clearHistory')}</span>
                   </button>
                 </div>
               </div>
 
               {history.length === 0 ? (
-                <div className="p-3 text-sm text-slate-500">Aún no hay búsquedas recientes</div>
+                <div className="p-3 text-sm text-slate-500">{t('noRecentSearches')}</div>
               ) : (
                 <ul>
                   {visibleHistory.map((item, idx) => (
@@ -437,8 +440,9 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
                       {longPressedItem === item ? (
                         <div className="w-full flex items-center justify-between px-2 py-2 bg-red-50 border-l-4 border-red-500 min-w-0">
                           <div className="flex-1 min-w-0 text-xs sm:text-sm text-red-700 font-medium sm:truncate">
-                            <span className="block sm:inline leading-tight">Eliminar</span>
-                            <span className="block sm:inline leading-tight sm:ml-1">búsqueda</span>
+                            <span className="block sm:inline leading-tight">
+                              {t('deleteSearch')}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2 flex-shrink-0 ml-2">
                             <button
@@ -447,20 +451,20 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
                                 await deleteHistoryItem(item);
                                 setLongPressedItem(null);
                               }}
-                              aria-label={`Eliminar búsqueda ${item}`}
+                              aria-label={`${t('delete')} ${item}`}
                               className="bg-red-500 text-white px-2 py-0.5 rounded text-xs sm:text-sm flex items-center gap-1 max-[420px]:px-1"
                             >
                               <Trash2 className="hidden max-[420px]:inline w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              <span className="ml-1 max-[420px]:hidden">Eliminar</span>
+                              <span className="ml-1 max-[420px]:hidden">{t('delete')}</span>
                             </button>
                             <button
                               type="button"
                               onClick={() => setLongPressedItem(null)}
-                              aria-label="Cancelar"
+                              aria-label={t('cancel')}
                               className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-xs sm:text-sm text-slate-700 hover:bg-slate-200 flex items-center gap-1 max-[420px]:px-1"
                             >
                               <X className="hidden max-[420px]:inline w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              <span className="ml-1 max-[420px]:hidden">Cancelar</span>
+                              <span className="ml-1 max-[420px]:hidden">{t('cancel')}</span>
                             </button>
                           </div>
                         </div>
@@ -504,7 +508,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
                                 previewItem(item);
                               }}
                               className="sm:hidden p-1 rounded text-slate-400"
-                              aria-label={`Previsualizar ${item}`}
+                              aria-label={`${t('preview')} ${item}`}
                             >
                               <ArrowUpLeft className="w-4 h-4" />
                             </button>
@@ -516,7 +520,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
                                 await deleteHistoryItem(item);
                               }}
                               className="hidden sm:inline-flex opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-opacity cursor-pointer"
-                              aria-label={`Eliminar ${item}`}
+                              aria-label={`${t('delete')} ${item}`}
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -534,13 +538,13 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
                     <div className="flex items-center gap-2">
                       <Star className="w-4 h-4 text-yellow-400" />
                       <span className="text-xs font-semibold uppercase text-slate-500">
-                        Sugerencias
+                        {t('suggestions')}
                       </span>
                     </div>
                   </div>
 
                   {visibleSuggestions.length === 0 ? (
-                    <div className="p-3 text-sm text-slate-500">No hay sugerencias</div>
+                    <div className="p-3 text-sm text-slate-500">{t('noSuggestions')}</div>
                   ) : (
                     <ul>
                       {visibleSuggestions.map((sugg, i) => {

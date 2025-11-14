@@ -1,5 +1,6 @@
 'use client';
 import React, { Suspense } from 'react';
+import { useTranslations } from 'next-intl';
 import AppliedFilters from '@/Components/ResultsAdvSearch/AppliedFilters';
 import useAppliedFilters from '@/app/redux/job-offer-hooks/useAppliedFilters';
 import { CardJob, Paginacion, PaginationInfo, PaginationSelector } from '@/Components/Job-offers';
@@ -9,6 +10,7 @@ import { useInitialUrlParams } from '@/app/redux/job-offer-hooks/useInitialUrlPa
 import { useSyncUrlParams } from '@/app/redux/job-offer-hooks/useSyncUrlParams';
 
 function ResultsAdvSearchPageContent() {
+  const t = useTranslations('resultsAdvSearch');
   const dispatch = useAppDispatch();
   // Only destructure what we need - appliedParams
   const { appliedParams } = useAppliedFilters();
@@ -86,7 +88,7 @@ function ResultsAdvSearchPageContent() {
   return (
     <main className="pt-20 lg:pt-24 px-4 sm:px-6 md:px-12 lg:px-24 pb-12">
       <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-bold mb-8 mt-4">
-        Resultados de Búsqueda Avanzada
+        {t('pageTitle')}
       </h1>
 
       <AppliedFilters params={appliedParams ?? {}} />
@@ -111,10 +113,10 @@ function ResultsAdvSearchPageContent() {
         {!loading && trabajos && trabajos.length > 0 ? (
           <CardJob trabajos={trabajos} />
         ) : !loading ? (
-          <div className="text-gray-500 text-center">No se encontraron resultados</div>
+          <div className="text-gray-500 text-center">{t('noResults')}</div>
         ) : (
           <div className="text-blue-500 text-center mb-4 p-3 bg-blue-100 rounded">
-            Cargando resultados...
+            {t('loading')}
           </div>
         )}
       </div>
@@ -135,12 +137,14 @@ function ResultsAdvSearchPageContent() {
 }
 
 export default function ResultsAdvSearchPage() {
+  const t = useTranslations('resultsAdvSearch');
+
   return (
     <Suspense
       fallback={
         <div className="pt-20 lg:pt-24 px-4 flex justify-center items-center min-h-screen">
           <div className="text-blue-500 text-center p-3 bg-blue-100 rounded">
-            Cargando resultados...
+            {t('loadingFallback')}
           </div>
         </div>
       }

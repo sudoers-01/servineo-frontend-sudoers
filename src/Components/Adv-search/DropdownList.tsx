@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface DropdownListProps {
   onFilterChange?: (filters: { categories: string[] }) => void;
@@ -15,6 +16,9 @@ const DropdownList: React.FC<DropdownListProps> = ({
   searchQuery = '',
   categoryFilters = [],
 }) => {
+  const t = useTranslations('advancedSearch.tags');
+  const tCommon = useTranslations('advancedSearch');
+
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,7 +44,10 @@ const DropdownList: React.FC<DropdownListProps> = ({
     } else {
       const t = sp.get('tags');
       if (t != null) {
-        urlTags = t.split(',').map((s) => s.trim()).filter(Boolean);
+        urlTags = t
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
       }
     }
 
@@ -144,7 +151,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
   useEffect(() => {
     if (!hasRestoredFromUrl) return; // Wait until URL restoration is done
     if (clearSignal === previousClearSignal) return; // Only act if clearSignal actually changed
-    
+
     setSelectedCategories([]);
     onFilterChange?.({ categories: [] });
     setPreviousClearSignal(clearSignal);
@@ -168,7 +175,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
           <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
           <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
         </div>
-        <p className="text-gray-500 text-xs mt-2">Cargando categorías...</p>
+        <p className="text-gray-500 text-xs mt-2">{tCommon('resultsCounter.loading')}</p>
       </div>
     );
   }
@@ -205,7 +212,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
   if (categories.length === 0) {
     return (
       <div className="w-full border border-gray-300 rounded-lg p-4">
-        <p className="text-gray-500 text-sm text-center">No hay categorías disponibles</p>
+        <p className="text-gray-500 text-sm text-center">{tCommon('resultsCounter.noResults')}</p>
       </div>
     );
   }

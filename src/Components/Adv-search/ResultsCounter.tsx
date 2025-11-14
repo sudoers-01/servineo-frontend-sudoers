@@ -1,5 +1,29 @@
 'use client';
 import React from 'react';
+import { useTranslations } from 'next-intl';
+
+type NoResultsMessageProps = {
+  search: string;
+};
+
+export const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ search }) => {
+  const t = useTranslations('search');
+  const trimmed = search?.trim();
+
+  return (
+    <div className="text-center py-12">
+      <p className="text-gray-500 text-xl font-roboto font-normal">
+        {t('noResults')}
+        {trimmed && (
+          <>
+            {' '}
+            {t('for')} <span className="font-bold">"{trimmed}"</span>
+          </>
+        )}
+      </p>
+    </div>
+  );
+};
 
 interface ResultsCounterProps {
   total: number;
@@ -7,14 +31,13 @@ interface ResultsCounterProps {
 }
 
 export function ResultsCounter({ total, loading = false }: ResultsCounterProps) {
+  const t = useTranslations('search'); // o 'resultsAdvSearch', donde tengas la key
+
   return (
-    <div
-      className="flex items-center gap-2"
-      style={{ fontFamily: 'Roboto, sans-serif' }}
-    >
-      {/* MÓVIL: Sin escudo, solo texto */}
+    <div className="flex items-center gap-2" style={{ fontFamily: 'Roboto, sans-serif' }}>
+      {/* Móvil */}
       <p className="block md:hidden text-sm font-bold text-gray-900 whitespace-nowrap">
-        CANTIDAD DE RESULTADOS:{' '}
+        {t('resultsCountLabel')}{' '}
         {loading ? (
           <span className="inline-block w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin align-middle ml-1" />
         ) : (
@@ -22,9 +45,8 @@ export function ResultsCounter({ total, loading = false }: ResultsCounterProps) 
         )}
       </p>
 
-      {/* DESKTOP: Con escudo pequeño */}
+      {/* Desktop */}
       <div className="hidden md:flex items-center gap-2">
-        {/* Escudo mini */}
         <div className="relative w-10 h-10 flex-shrink-0">
           <svg viewBox="0 0 120 150" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -46,9 +68,9 @@ export function ResultsCounter({ total, loading = false }: ResultsCounterProps) 
           </div>
         </div>
 
-        {/* Texto en línea */}
+        {/* Texto */}
         <p className="text-sm font-bold text-gray-900 whitespace-nowrap">
-          CANTIDAD DE RESULTADOS:{' '}
+          {t('resultsCountLabel')}{' '}
           {loading ? (
             <span className="inline-block w-4 h-4 border-2 border-gray-900 border-t-transparent rounded-full animate-spin align-middle ml-1" />
           ) : (

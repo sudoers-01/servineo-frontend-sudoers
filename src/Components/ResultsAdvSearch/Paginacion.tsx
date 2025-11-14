@@ -1,6 +1,6 @@
-// Paginacion.tsx
 'use client';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface PaginacionProps {
   paginaActual: number;
@@ -15,22 +15,22 @@ const Paginacion: React.FC<PaginacionProps> = ({
   registrosPorPagina,
   onChange,
 }) => {
-  // Calcular total de páginas
+  const t = useTranslations('pagination');
+
   const totalPaginas = Math.max(Math.ceil(totalRegistros / registrosPorPagina), 1);
   const paginas = Array.from({ length: totalPaginas }, (_, i) => i + 1);
-  // Calcular si ya se alcanzó el último registro
+
   const registrosMostrados = paginaActual * registrosPorPagina;
   const yaLlegoAlFinal = registrosMostrados >= totalRegistros;
 
   return (
     <div className="flex gap-1 flex-wrap justify-center mt-4">
-      {/* Botón Anterior (solo se muestra si no estamos en la primera página) */}
       {paginaActual > 1 && (
         <button
           onClick={() => onChange(paginaActual - 1)}
           className="px-3 py-1 rounded bg-gray-200 hover:bg-blue-500 hover:text-white"
         >
-          Anterior
+          {t('previous')}
         </button>
       )}
 
@@ -58,7 +58,7 @@ const Paginacion: React.FC<PaginacionProps> = ({
               : 'bg-gray-200 hover:bg-blue-500 hover:text-white'
           }`}
         >
-          Siguiente
+          {t('next')}
         </button>
       )}
     </div>

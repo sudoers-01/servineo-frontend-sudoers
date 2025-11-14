@@ -5,6 +5,30 @@ import { Input } from '@/Components/ui/input';
 import { SearchIcon } from './SearchIcon';
 import { ClearButton } from './ClearButton';
 import { validateSearch } from '@/app/lib/validations/search.validator';
+import { useTranslations } from 'next-intl';
+
+type NoResultsMessageProps = {
+  search: string;
+};
+export const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ search }) => {
+  const t = useTranslations('search');
+  const trimmed = search?.trim();
+
+  return (
+    <div className="text-center py-12">
+      <p className="text-gray-500 text-xl font-roboto font-normal">
+        {t('noResults')}
+        {trimmed && (
+          <>
+            {' '}
+            {t('for')} <span className="font-bold">"{trimmed}"</span>
+          </>
+        )}
+      </p>
+    </div>
+  );
+};
+
 
 interface InputOnlySearchProps {
   onSearch: (query: string) => void;
@@ -12,6 +36,7 @@ interface InputOnlySearchProps {
 }
 
 export const InputOnlySearch = ({ onSearch, onValueChange }: InputOnlySearchProps) => {
+  const t = useTranslations('search');
   const [value, setValue] = React.useState('');
   const [error, setError] = React.useState<string | undefined>();
 
@@ -74,7 +99,7 @@ export const InputOnlySearch = ({ onSearch, onValueChange }: InputOnlySearchProp
         <SearchIcon hasError={hasError} />
         <Input
           type="text"
-          placeholder="¿Qué servicio necesitas?"
+          placeholder={t('placeholder')}
           className={inputClasses}
           value={value}
           onChange={handleChange}

@@ -1,8 +1,11 @@
-//SearchButton
+'use client';
+
 import { Button } from '@/Components/ui/button';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 export function SearchButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  const t = useTranslations('search'); 
   const { disabled, ...rest } = props;
 
   return (
@@ -23,7 +26,7 @@ export function SearchButton(props: React.ButtonHTMLAttributes<HTMLButtonElement
       disabled={disabled}
       {...rest}
     >
-      Buscar
+      {t('buttonSearch')} 
     </Button>
   );
 }

@@ -9,22 +9,31 @@ import {
 } from '@/Components/ui/dropdown-menu';
 import React from 'react';
 import { ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
+import { SORT_OPTIONS } from '@/app/lib/constants/sortOptions';
 
 interface SortCardProps {
-  value: string;
-  onSelect: (option: string) => void;
+  value: string; // Valor del backend: 'rating', 'recent', etc.
+  onSelect: (backendValue: string) => void;
 }
 
 export default function SortCard({ value, onSelect }: SortCardProps) {
+  const t = useTranslations();
+
+  // Opciones con valor backend y label traducido
   const sortOptions = [
-    'Destacados',
-    'Los más recientes',
-    'Los más antiguos',
-    'Nombre A-Z',
-    'Nombre Z-A',
-    'Num de contacto asc',
-    'Num de contacto desc',
+    { value: SORT_OPTIONS.DESTACADOS, label: t('sortBy.featured') },
+    { value: SORT_OPTIONS.RECIENTES, label: t('sortBy.mostRecent') },
+    { value: SORT_OPTIONS.ANTIGUOS, label: t('sortBy.oldest') },
+    { value: SORT_OPTIONS.NOMBRE_ASC, label: t('sortBy.nameAZ') },
+    { value: SORT_OPTIONS.NOMBRE_DESC, label: t('sortBy.nameZA') },
+    { value: SORT_OPTIONS.CONTACTO_ASC, label: t('sortBy.contactAsc') },
+    { value: SORT_OPTIONS.CONTACTO_DESC, label: t('sortBy.contactDesc') },
   ];
+
+  // Obtener el label traducido del valor actual
+  const currentLabel =
+    sortOptions.find((opt) => opt.value === value)?.label || t('sortBy.mostRecent');
 
   return (
     <DropdownMenu>
@@ -33,7 +42,7 @@ export default function SortCard({ value, onSelect }: SortCardProps) {
           variant="outline"
           className="flex font-bold items-center gap-2 !border-black hover:!bg-[#2B6AE0] hover:!text-white !transition-colors"
         >
-          {value}
+          {currentLabel}
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
@@ -43,15 +52,15 @@ export default function SortCard({ value, onSelect }: SortCardProps) {
       >
         {sortOptions.map((option) => (
           <DropdownMenuItem
-            key={option}
-            onClick={() => onSelect(option)} // Solo notificamos al padre
+            key={option.value}
+            onClick={() => onSelect(option.value)} // Envía valor backend
             className={`cursor-pointer !px-3 !py-2 !rounded-md !transition-colors ${
-              value === option
+              value === option.value // Comparación correcta con valor backend
                 ? '!bg-[#2B6AE0] !text-white'
                 : 'hover:!bg-[#1AA7ED] hover:!text-white'
             }`}
           >
-            {option}
+            {option.label}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>

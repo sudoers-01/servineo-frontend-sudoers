@@ -1,5 +1,6 @@
 'use client';
 import React from 'react';
+import { useTranslations } from 'next-intl';
 
 interface PaginationInfoProps {
   paginaActual: number;
@@ -12,8 +13,14 @@ const PaginationInfo: React.FC<PaginationInfoProps> = ({
   registrosPorPagina,
   totalRegistros,
 }) => {
+  const t = useTranslations('pagination');
+
   if (totalRegistros === 0) {
-    return <div className="text-sm text-gray-600 mt-3">Mostrando 0 de 0 resultados</div>;
+    return (
+      <div className="text-sm text-gray-600 mt-3">
+        {t('showingResults', { start: 0, end: 0, total: 0 })}
+      </div>
+    );
   }
 
   const inicioRegistro = (paginaActual - 1) * registrosPorPagina + 1;
@@ -21,7 +28,7 @@ const PaginationInfo: React.FC<PaginationInfoProps> = ({
 
   return (
     <div className="text-sm text-gray-600 mt-3">
-      Mostrando {inicioRegistro} - {finRegistro} de {totalRegistros} resultados
+      {t('showingResults', { start: inicioRegistro, end: finRegistro, total: totalRegistros })}
     </div>
   );
 };

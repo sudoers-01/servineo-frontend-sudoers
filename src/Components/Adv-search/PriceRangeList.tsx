@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { api } from '@/app/lib/api';
 
 type RangeItem = { label: string; min: number | null; max: number | null };
@@ -17,6 +18,7 @@ interface PriceRangeListProps {
 }
 
 const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSignal }) => {
+  const t = useTranslations('advancedSearch');
   const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
   const [ranges, setRanges] = useState<RangeItem[]>([]);
   // Start in loading state to avoid rendering any static/previous markup during mount
@@ -64,7 +66,7 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
             // ignore storage errors
           }
         } else {
-          setError(res.error || 'No se pudieron cargar los rangos de precio');
+          setError(res.error || t('resultsCounter.noResults'));
         }
       })
       .catch((err: unknown) => {
@@ -80,7 +82,7 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [t]);
 
   const handleCheckboxChange = (rangeValue: string) => {
     const newSelectedRanges = selectedRanges.includes(rangeValue)
@@ -103,7 +105,7 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
   }, [clearSignal]);
 
   if (loading) {
-    return <div className="p-4 text-sm text-gray-500">Cargando rangos de precio...</div>;
+    return <div className="p-4 text-sm text-gray-500">{t('resultsCounter.loading')}</div>;
   }
 
   if (error) {
@@ -111,7 +113,7 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
   }
 
   if (!ranges.length) {
-    return <div className="p-4 text-sm text-gray-500">No hay rangos disponibles</div>;
+    return <div className="p-4 text-sm text-gray-500">{t('resultsCounter.noResults')}</div>;
   }
 
   function formatRangeLabel(label: string) {

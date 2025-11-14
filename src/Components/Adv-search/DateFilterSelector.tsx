@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import { Calendar, ChevronDown } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import CalendarComponent from './CalendarComponent';
 
 interface Props {
@@ -11,7 +12,13 @@ interface Props {
   onCalendarToggle?: (isOpen: boolean) => void;
 }
 
-const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onChange, onCalendarToggle }) => {
+const DateFilterSelector: React.FC<Props> = ({
+  selectedFilter,
+  selectedDate,
+  onChange,
+  onCalendarToggle,
+}) => {
+  const t = useTranslations('advancedSearch.date');
   const [showCalendar, setShowCalendar] = useState(false);
   const [day, setDay] = useState('');
   const [month, setMonth] = useState('');
@@ -55,17 +62,25 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
     if (typeof window === 'undefined') return;
 
     // Solo si el filtro es 'specific' y hay una entrada completa.
-    if (selectedFilter !== 'specific' || day.length !== 2 || month.length !== 2 || year.length !== 4) {
+    if (
+      selectedFilter !== 'specific' ||
+      day.length !== 2 ||
+      month.length !== 2 ||
+      year.length !== 4
+    ) {
       // Limpiar URL si no estamos en 'specific' o si la entrada está incompleta
       const sp = new URLSearchParams(window.location.search);
       if (sp.has('date') && selectedFilter !== 'specific') {
-         sp.delete('date');
-         const qs = sp.toString();
-         const target = qs ? `${pathname}?${qs}` : pathname;
-         router.replace(target, { scroll: false });
-      } else if (selectedFilter === 'specific' && (day.length !== 2 || month.length !== 2 || year.length !== 4)) {
-         // Asegurarse de que el padre sabe que la fecha es inválida/incompleta
-         onChange('specific', null);
+        sp.delete('date');
+        const qs = sp.toString();
+        const target = qs ? `${pathname}?${qs}` : pathname;
+        router.replace(target, { scroll: false });
+      } else if (
+        selectedFilter === 'specific' &&
+        (day.length !== 2 || month.length !== 2 || year.length !== 4)
+      ) {
+        // Asegurarse de que el padre sabe que la fecha es inválida/incompleta
+        onChange('specific', null);
       }
       return;
     }
@@ -79,12 +94,11 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
         const iso = `${year}-${month}-${day}`;
         sp.set('date', iso);
         const newDate = new Date(Number(year), Number(month) - 1, Number(day));
-        
+
         // Notificar al padre solo si la fecha válida actual es diferente a la almacenada.
         if (!selectedDate || newDate.getTime() !== selectedDate.getTime()) {
-           onChange('specific', newDate);
+          onChange('specific', newDate);
         }
-
       } else {
         sp.delete('date');
         // Notificar al padre que la fecha es inválida
@@ -99,7 +113,6 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
 
     return () => clearTimeout(handler);
   }, [day, month, year, selectedFilter, pathname, router, isValidDate, onChange, selectedDate]);
-
 
   // 🖱️ Detectar clics fuera del calendario para cerrarlo
   useEffect(() => {
@@ -147,10 +160,9 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
         : 'border-gray-300 focus:ring-[#2B6AE0]'
       : 'border-gray-300';
 
-
   return (
     <div>
-      <h3 className="text-base mb-2">Fecha de publicación:</h3>
+      <h3 className="text-base mb-2">{t('label')}</h3>
 
       <div className="bg-white rounded-lg border border-gray-300 p-4 space-y-3 w-fit">
         {/* Opciones de radio: Los más recientes y Los más antiguos */}
@@ -167,9 +179,7 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
               onChange={() => onChange(filter, null)}
               className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded-full border-gray-300 focus:ring-[#2B6AE0]"
             />
-            <span className="text-gray-700 whitespace-nowrap">
-              {filter === 'recent' ? 'Los más recientes' : 'Los más antiguos'}
-            </span>
+            <span className="text-gray-700 whitespace-nowrap">{t(`filters.${filter}`)}</span>
           </label>
         ))}
 
@@ -184,7 +194,9 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
               onChange={() => onChange('specific', null)}
               className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded-full border-gray-300 focus:ring-[#2B6AE0]"
             />
-            <span className="text-gray-700 font-medium whitespace-nowrap">Fecha específica:</span>
+            <span className="text-gray-700 font-medium whitespace-nowrap">
+              {t('filters.specific')}
+            </span>
           </label>
 
           {/* Inputs de fecha y botón de calendario - solo visible cuando "specific" está seleccionado */}
@@ -201,7 +213,9 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
                   className={`w-12 px-2 py-2 border rounded-lg text-sm font-mono text-center bg-white focus:outline-none focus:ring-2 transition-all ${inputBorderClass}`}
                 />
 
-                <span className="text-gray-500 text-xl flex items-center justify-center h-full">/</span>
+                <span className="text-gray-500 text-xl flex items-center justify-center h-full">
+                  /
+                </span>
 
                 {/* Mes */}
                 <input
@@ -213,7 +227,9 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
                   className={`w-12 px-2 py-2 border rounded-lg text-sm font-mono text-center bg-white focus:outline-none focus:ring-2 transition-all ${inputBorderClass}`}
                 />
 
-                <span className="text-gray-500 text-xl flex items-center justify-center h-full">/</span>
+                <span className="text-gray-500 text-xl flex items-center justify-center h-full">
+                  /
+                </span>
 
                 {/* Año */}
                 <input
@@ -238,7 +254,7 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
 
                   {/* Calendario desplegable */}
                   {showCalendar && (
-                    <div className="absolute z-50 mt-2 -left-100"> {/* Ajuste de posición para mejor UX */}
+                    <div className="absolute z-50 mt-2 -left-100">
                       <CalendarComponent
                         selectedDate={selectedDate || new Date()}
                         onDateSelect={handleDateSelect}
@@ -252,7 +268,7 @@ const DateFilterSelector: React.FC<Props> = ({ selectedFilter, selectedDate, onC
                 </div>
               </div>
 
-              {/* Mensaje de fecha inválida (funcionalidad del segundo código) */}
+              {/* Mensaje de fecha inválida */}
               {day.length === 2 && month.length === 2 && year.length === 4 && !isValidDate() && (
                 <p className="text-red-500 text-sm">Fecha inválida</p>
               )}

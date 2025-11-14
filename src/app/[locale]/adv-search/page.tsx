@@ -14,49 +14,109 @@ import DateFilterSelector from '@/Components/Adv-search/DateFilterSelector';
 import CalificacionEstrella from '@/Components/Adv-search/CalificacionEstrella';
 import ButtonAplicarBus from '@/Components/Adv-search/ButtonAplicarBus';
 import ClearButton from '@/Components/Adv-search/ClearButton';
+import { useTranslations } from 'next-intl';
 
-const FIXER_RANGES = [
-  ['De (A-C)', 'De (D-F)', 'De (G-I)', 'De (J-L)', 'De (M-Ñ)'],
-  ['De (O-Q)', 'De (R-T)', 'De (U-W)', 'De (X-Z)'],
-];
-
-const CITIES = [
-  'Beni',
-  'Chuquisaca',
-  'Cochabamba',
-  'La Paz',
-  'Oruro',
-  'Pando',
-  'Potosí',
-  'Santa Cruz',
-  'Tarija',
-];
-
-const JOBS = [
-  'Albañil',
-  'Carpintero',
-  'Cerrajero',
-  'Decorador',
-  'Electricista',
-  'Fontanero',
-  'Fumigador',
-  'Instalador',
-  'Jardinero',
-  'Limpiador',
-  'Mecánico',
-  'Montador',
-  'Pintor',
-  'Pulidor',
-  'Soldador',
-  'Techador',
-  'Vidriero',
-  'Yesero',
-];
-
-// removed unused FilterState and parsePriceRange to eliminate lint warnings
+// ============================================
+// VALORES QUE SE ENVÍAN AL BACKEND (ESPAÑOL)
+// ============================================
+const DB_VALUES = {
+  ranges: [
+    'De (A-C)',
+    'De (D-F)',
+    'De (G-I)',
+    'De (J-L)',
+    'De (M-Ñ)',
+    'De (O-Q)',
+    'De (R-T)',
+    'De (U-W)',
+    'De (X-Z)',
+  ],
+  cities: [
+    'Beni',
+    'Chuquisaca',
+    'Cochabamba',
+    'La Paz',
+    'Oruro',
+    'Pando',
+    'Potosí',
+    'Santa Cruz',
+    'Tarija',
+  ],
+  jobTypes: [
+    'Albañil',
+    'Carpintero',
+    'Cerrajero',
+    'Decorador',
+    'Electricista',
+    'Fontanero',
+    'Fumigador',
+    'Instalador',
+    'Jardinero',
+    'Limpiador',
+    'Mecánico',
+    'Montador',
+    'Pintor',
+    'Pulidor',
+    'Soldador',
+    'Techador',
+    'Vidriero',
+    'Yesero',
+  ],
+} as const;
 
 function AdvancedSearchPage() {
+  const t = useTranslations('advancedSearch');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+
+  // Configuración de UI: dbValue en español, label traducido
+  const FIXER_RANGES = [
+    [
+      { dbValue: DB_VALUES.ranges[0], label: t('fixerName.ranges.ac') },
+      { dbValue: DB_VALUES.ranges[1], label: t('fixerName.ranges.df') },
+      { dbValue: DB_VALUES.ranges[2], label: t('fixerName.ranges.gi') },
+      { dbValue: DB_VALUES.ranges[3], label: t('fixerName.ranges.jl') },
+      { dbValue: DB_VALUES.ranges[4], label: t('fixerName.ranges.mn') },
+    ],
+    [
+      { dbValue: DB_VALUES.ranges[5], label: t('fixerName.ranges.oq') },
+      { dbValue: DB_VALUES.ranges[6], label: t('fixerName.ranges.rt') },
+      { dbValue: DB_VALUES.ranges[7], label: t('fixerName.ranges.uw') },
+      { dbValue: DB_VALUES.ranges[8], label: t('fixerName.ranges.xz') },
+    ],
+  ];
+
+  const CITIES = [
+    { dbValue: DB_VALUES.cities[0], label: t('city.options.beni') },
+    { dbValue: DB_VALUES.cities[1], label: t('city.options.chuquisaca') },
+    { dbValue: DB_VALUES.cities[2], label: t('city.options.cochabamba') },
+    { dbValue: DB_VALUES.cities[3], label: t('city.options.laPaz') },
+    { dbValue: DB_VALUES.cities[4], label: t('city.options.oruro') },
+    { dbValue: DB_VALUES.cities[5], label: t('city.options.pando') },
+    { dbValue: DB_VALUES.cities[6], label: t('city.options.potosi') },
+    { dbValue: DB_VALUES.cities[7], label: t('city.options.santaCruz') },
+    { dbValue: DB_VALUES.cities[8], label: t('city.options.tarija') },
+  ];
+
+  const JOBS = [
+    { dbValue: DB_VALUES.jobTypes[0], label: t('jobType.options.mason') },
+    { dbValue: DB_VALUES.jobTypes[1], label: t('jobType.options.carpenter') },
+    { dbValue: DB_VALUES.jobTypes[2], label: t('jobType.options.locksmith') },
+    { dbValue: DB_VALUES.jobTypes[3], label: t('jobType.options.decorator') },
+    { dbValue: DB_VALUES.jobTypes[4], label: t('jobType.options.electrician') },
+    { dbValue: DB_VALUES.jobTypes[5], label: t('jobType.options.plumber') },
+    { dbValue: DB_VALUES.jobTypes[6], label: t('jobType.options.fumigator') },
+    { dbValue: DB_VALUES.jobTypes[7], label: t('jobType.options.installer') },
+    { dbValue: DB_VALUES.jobTypes[8], label: t('jobType.options.gardener') },
+    { dbValue: DB_VALUES.jobTypes[9], label: t('jobType.options.cleaner') },
+    { dbValue: DB_VALUES.jobTypes[10], label: t('jobType.options.mechanic') },
+    { dbValue: DB_VALUES.jobTypes[11], label: t('jobType.options.assembler') },
+    { dbValue: DB_VALUES.jobTypes[12], label: t('jobType.options.painter') },
+    { dbValue: DB_VALUES.jobTypes[13], label: t('jobType.options.polisher') },
+    { dbValue: DB_VALUES.jobTypes[14], label: t('jobType.options.welder') },
+    { dbValue: DB_VALUES.jobTypes[15], label: t('jobType.options.roofer') },
+    { dbValue: DB_VALUES.jobTypes[16], label: t('jobType.options.glazier') },
+    { dbValue: DB_VALUES.jobTypes[17], label: t('jobType.options.plasterer') },
+  ];
 
   const {
     // state
@@ -161,7 +221,7 @@ function AdvancedSearchPage() {
         className={`pt-20 lg:pt-24 px-4 sm:px-6 md:px-12 lg:px-24 transition-all duration-300 ${isCalendarOpen ? 'pb-96' : 'pb-12'}`}
       >
         <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-bold mb-8 mt-4">
-          Búsqueda Avanzada
+          {t('pageTitle')}
         </h1>
 
         <div className="max-w-7xl mx-auto">
@@ -190,11 +250,12 @@ function AdvancedSearchPage() {
             </div>
 
             <div className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-bold mb-6 rounded-lg text-left">
-              Parámetros Seleccionables:
+              {t('selectableParams')}
             </div>
 
+            {/* Filtro: Nombre de Fixer */}
             <div className="mb-6">
-              <h3 className="text-base mb-2">Nombre del fixer :</h3>
+              <h3 className="text-base mb-2">{t('fixerName.label')}</h3>
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
                   ${
@@ -204,7 +265,7 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('fixer')}
               >
-                <span className="truncate">Seleccionar Rangos de Nombre</span>
+                <span className="truncate">{t('fixerName.placeholder')}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.fixer ? 'rotate-180' : 'rotate-0'}`}
@@ -222,16 +283,16 @@ function AdvancedSearchPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                     {FIXER_RANGES.flat().map((range) => (
                       <label
-                        key={range}
+                        key={range.dbValue}
                         className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors"
                       >
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
-                          checked={selectedRanges.includes(range)}
-                          onChange={() => handleRangeChange(range)}
+                          checked={selectedRanges.includes(range.dbValue)}
+                          onChange={() => handleRangeChange(range.dbValue)}
                         />
-                        <span className="truncate">{range}</span>
+                        <span className="truncate">{range.label}</span>
                       </label>
                     ))}
                   </div>
@@ -239,8 +300,9 @@ function AdvancedSearchPage() {
               )}
             </div>
 
+            {/* Filtro: Ciudad */}
             <div className="mb-6">
-              <h3 className="text-base mb-2">Ciudad :</h3>
+              <h3 className="text-base mb-2">{t('city.label')}</h3>
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
                   ${
@@ -250,7 +312,7 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('ciudad')}
               >
-                <span className="truncate">Seleccionar Ciudad</span>
+                <span className="truncate">{t('city.placeholder')}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.ciudad ? 'rotate-180' : 'rotate-0'}`}
@@ -268,16 +330,16 @@ function AdvancedSearchPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {CITIES.map((city) => (
                       <label
-                        key={city}
+                        key={city.dbValue}
                         className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors"
                       >
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
-                          checked={selectedCity === city}
-                          onChange={() => handleCityChange(city)}
+                          checked={selectedCity === city.dbValue}
+                          onChange={() => handleCityChange(city.dbValue)}
                         />
-                        <span className="truncate">{city}</span>
+                        <span className="truncate">{city.label}</span>
                       </label>
                     ))}
                   </div>
@@ -285,8 +347,9 @@ function AdvancedSearchPage() {
               )}
             </div>
 
+            {/* Filtro: Tipo de Trabajo */}
             <div className="mb-6">
-              <h3 className="text-base mb-2">Tipo de Trabajo :</h3>
+              <h3 className="text-base mb-2">{t('jobType.label')}</h3>
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
                   ${
@@ -296,7 +359,7 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('trabajo')}
               >
-                <span className="truncate">Seleccionar Tipo de Trabajo</span>
+                <span className="truncate">{t('jobType.placeholder')}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.trabajo ? 'rotate-180' : 'rotate-0'}`}
@@ -314,16 +377,16 @@ function AdvancedSearchPage() {
                   <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                     {JOBS.map((job) => (
                       <label
-                        key={job}
+                        key={job.dbValue}
                         className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors"
                       >
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
-                          checked={selectedJobs.includes(job)}
-                          onChange={() => handleJobChange(job)}
+                          checked={selectedJobs.includes(job.dbValue)}
+                          onChange={() => handleJobChange(job.dbValue)}
                         />
-                        <span className="truncate">{job}</span>
+                        <span className="truncate">{job.label}</span>
                       </label>
                     ))}
                   </div>
@@ -331,8 +394,9 @@ function AdvancedSearchPage() {
               )}
             </div>
 
+            {/* Filtro: Etiquetas */}
             <div className="mb-6">
-              <h3 className="text-base mb-2">Etiquetas :</h3>
+              <h3 className="text-base mb-2">{t('tags.label')}</h3>
 
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
@@ -343,7 +407,7 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('categorias')}
               >
-                <span className="truncate">Seleccionar etiquetas</span>
+                <span className="truncate">{t('tags.placeholder')}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.categorias ? 'rotate-180' : 'rotate-0'}`}
@@ -367,8 +431,10 @@ function AdvancedSearchPage() {
                 </div>
               )}
             </div>
+
+            {/* Filtro: Precio */}
             <div className="mb-6">
-              <h3 className="text-base mb-2">Precio :</h3>
+              <h3 className="text-base mb-2">{t('price.label')}</h3>
 
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
@@ -379,7 +445,7 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('precio')}
               >
-                <span className="truncate">Seleccionar Rangos de Precio</span>
+                <span className="truncate">{t('price.placeholder')}</span>
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.precio ? 'rotate-180' : 'rotate-0'}`}
@@ -401,8 +467,8 @@ function AdvancedSearchPage() {
                 </div>
               )}
             </div>
-            {/* NUEVO: Filtro de Fecha y Calificación */}
-            {/* Responsive: en móvil mostrar Calificación encima de Fecha; en md+ mantener fila */}
+
+            {/* Filtro de Fecha y Calificación */}
             <div className="mb-6 flex flex-col md:flex-row gap-6 items-start">
               <div className="flex-shrink-0 order-2 md:order-1 w-full md:w-auto">
                 <DateFilterSelector
@@ -420,7 +486,7 @@ function AdvancedSearchPage() {
               </div>
             </div>
 
-            {/* Botones: Aplicar Búsqueda y Limpiar Datos (misma altura y alineación) */}
+            {/* Botones: Aplicar Búsqueda y Limpiar Datos */}
             <div className="flex justify-center items-center gap-4 mt-8">
               <ButtonAplicarBus
                 onClick={() => handleSearch(searchQuery)}
@@ -428,7 +494,6 @@ function AdvancedSearchPage() {
               />
               <ClearButton
                 onClick={() => {
-                  // Limpia todos los filtros y la búsqueda a nivel de página
                   setSearchQuery('');
                   setSelectedRanges([]);
                   setSelectedCity('');
@@ -438,12 +503,9 @@ function AdvancedSearchPage() {
                   setTitleOnly(false);
                   setExactWords(false);
                   setResultsCount(null);
-                  // reset date filter
                   setSelectedDateFilter('specific');
                   setSelectedSpecificDate(null);
-                  // reset rating
                   setSelectedRating(null);
-                  // notify children (DropdownList, PriceRangeList) to clear
                   setClearSignal((s) => s + 1);
                   try {
                     window.sessionStorage.removeItem('advSearch_state');
@@ -452,7 +514,6 @@ function AdvancedSearchPage() {
                   } catch {
                     /* noop */
                   }
-                  // fetch global total again (hook exposes helper)
                   fetchGlobalTotal();
                 }}
               />

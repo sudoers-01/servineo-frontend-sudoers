@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
+import { useTranslations } from 'next-intl';
 
 interface FilterState {
   range: string[];
@@ -14,8 +15,57 @@ interface FilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onFiltersApply?: (filters: FilterState) => void;
-  onReset?: () => void; // Nuevo: callback para resetear a resultados iniciales
+  onReset?: () => void;
 }
+
+// ============================================
+// VALORES QUE SE ENVÍAN AL BACKEND (ESPAÑOL)
+// La BD está en español, así que enviamos estos valores
+// ============================================
+const DB_VALUES = {
+  ranges: [
+    'De (A-C)',
+    'De (D-F)',
+    'De (G-I)',
+    'De (J-L)',
+    'De (M-Ñ)',
+    'De (O-Q)',
+    'De (R-T)',
+    'De (U-W)',
+    'De (X-Z)',
+  ],
+  cities: [
+    'Beni',
+    'Chuquisaca',
+    'Cochabamba',
+    'La Paz',
+    'Oruro',
+    'Pando',
+    'Potosí',
+    'Santa Cruz',
+    'Tarija',
+  ],
+  jobTypes: [
+    'Albañil',
+    'Carpintero',
+    'Cerrajero',
+    'Decorador',
+    'Electricista',
+    'Fontanero',
+    'Fumigador',
+    'Instalador',
+    'Jardinero',
+    'Limpiador',
+    'Mecánico',
+    'Montador',
+    'Pintor',
+    'Pulidor',
+    'Soldador',
+    'Techador',
+    'Vidriero',
+    'Yesero',
+  ],
+} as const;
 
 export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: FilterDrawerProps) {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -24,13 +74,18 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     trabajo: false,
   });
 
+  const t = useTranslations('filtersPanel');
+  const tName = useTranslations('advancedSearch.fixerName');
+  const tCity = useTranslations('advancedSearch.city');
+  const tJob = useTranslations('advancedSearch.jobType');
+
+  // Estado interno guarda valores en ESPAÑOL (para enviar al backend)
   const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
-      // En lugar de 'hidden', usa 'scroll' para mantener el espacio de la scrollbar
       document.body.style.overflowY = 'scroll';
     } else {
       document.body.style.overflowY = 'unset';
@@ -47,41 +102,39 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }));
   };
 
-  // Aplicar filtro automáticamente cuando cambia un rango
-  const handleRangeChange = (range: string) => {
-    const newRanges = selectedRanges.includes(range)
-      ? selectedRanges.filter((r) => r !== range)
-      : [...selectedRanges, range];
+  // Trabajamos con valores en ESPAÑOL (los que están en la BD)
+  const handleRangeChange = (dbValue: string) => {
+    const newRanges = selectedRanges.includes(dbValue)
+      ? selectedRanges.filter((r) => r !== dbValue)
+      : [...selectedRanges, dbValue];
 
     setSelectedRanges(newRanges);
     applyFilters(newRanges, selectedCity, selectedJobs);
   };
 
-  // Aplicar filtro automáticamente cuando cambia la ciudad
-  const handleCityChange = (city: string) => {
-    const newCity = selectedCity === city ? '' : city;
+  const handleCityChange = (dbValue: string) => {
+    const newCity = selectedCity === dbValue ? '' : dbValue;
     setSelectedCity(newCity);
     applyFilters(selectedRanges, newCity, selectedJobs);
   };
 
-  // Aplicar filtro automáticamente cuando cambia el trabajo
-  const handleJobChange = (job: string) => {
-    const newJobs = selectedJobs.includes(job)
-      ? selectedJobs.filter((j) => j !== job)
-      : [...selectedJobs, job];
+  const handleJobChange = (dbValue: string) => {
+    const newJobs = selectedJobs.includes(dbValue)
+      ? selectedJobs.filter((j) => j !== dbValue)
+      : [...selectedJobs, dbValue];
 
     setSelectedJobs(newJobs);
     applyFilters(selectedRanges, selectedCity, newJobs);
   };
 
-  // Función para aplicar filtros
   const applyFilters = (ranges: string[], city: string, jobs: string[]) => {
     const filtersToValidate = { range: ranges, city, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
-    if (!isValid || !data) return; // ignoramos filtros inválidos
+    if (!isValid || !data) return;
 
     if (onFiltersApply) {
+      // Se envían valores en ESPAÑOL al backend
       onFiltersApply({
         ...data,
         city: data.city || '',
@@ -89,14 +142,13 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }
   };
 
-  // Resetear y aplicar los resultados iniciales
   const handleReset = () => {
     setSelectedRanges([]);
     setSelectedCity('');
     setSelectedJobs([]);
 
     if (onReset) {
-      onReset(); // Restaura los resultados iniciales
+      onReset();
     } else if (onFiltersApply) {
       onFiltersApply({
         range: [],
@@ -106,10 +158,60 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }
   };
 
+  // Configuración de UI: dbValue en español, label traducido
+  const nameRanges = [
+    [
+      { dbValue: DB_VALUES.ranges[0], label: tName('ranges.ac') }, // "De (A-C)" → "From (A-C)" o "De (A-C)"
+      { dbValue: DB_VALUES.ranges[1], label: tName('ranges.df') },
+      { dbValue: DB_VALUES.ranges[2], label: tName('ranges.gi') },
+      { dbValue: DB_VALUES.ranges[3], label: tName('ranges.jl') },
+      { dbValue: DB_VALUES.ranges[4], label: tName('ranges.mn') },
+    ],
+    [
+      { dbValue: DB_VALUES.ranges[5], label: tName('ranges.oq') },
+      { dbValue: DB_VALUES.ranges[6], label: tName('ranges.rt') },
+      { dbValue: DB_VALUES.ranges[7], label: tName('ranges.uw') },
+      { dbValue: DB_VALUES.ranges[8], label: tName('ranges.xz') },
+    ],
+  ];
+
+  const cities = [
+    { dbValue: DB_VALUES.cities[0], label: tCity('options.beni') },
+    { dbValue: DB_VALUES.cities[1], label: tCity('options.chuquisaca') },
+    { dbValue: DB_VALUES.cities[2], label: tCity('options.cochabamba') },
+    { dbValue: DB_VALUES.cities[3], label: tCity('options.laPaz') },
+    { dbValue: DB_VALUES.cities[4], label: tCity('options.oruro') },
+    { dbValue: DB_VALUES.cities[5], label: tCity('options.pando') },
+    { dbValue: DB_VALUES.cities[6], label: tCity('options.potosi') },
+    { dbValue: DB_VALUES.cities[7], label: tCity('options.santaCruz') },
+    { dbValue: DB_VALUES.cities[8], label: tCity('options.tarija') },
+  ];
+
+  const jobTypes = [
+    { dbValue: DB_VALUES.jobTypes[0], label: tJob('options.mason') },
+    { dbValue: DB_VALUES.jobTypes[1], label: tJob('options.carpenter') },
+    { dbValue: DB_VALUES.jobTypes[2], label: tJob('options.locksmith') },
+    { dbValue: DB_VALUES.jobTypes[3], label: tJob('options.decorator') },
+    { dbValue: DB_VALUES.jobTypes[4], label: tJob('options.electrician') },
+    { dbValue: DB_VALUES.jobTypes[5], label: tJob('options.plumber') },
+    { dbValue: DB_VALUES.jobTypes[6], label: tJob('options.fumigator') },
+    { dbValue: DB_VALUES.jobTypes[7], label: tJob('options.installer') },
+    { dbValue: DB_VALUES.jobTypes[8], label: tJob('options.gardener') },
+    { dbValue: DB_VALUES.jobTypes[9], label: tJob('options.cleaner') },
+    { dbValue: DB_VALUES.jobTypes[10], label: tJob('options.mechanic') },
+    { dbValue: DB_VALUES.jobTypes[11], label: tJob('options.assembler') },
+    { dbValue: DB_VALUES.jobTypes[12], label: tJob('options.painter') },
+    { dbValue: DB_VALUES.jobTypes[13], label: tJob('options.polisher') },
+    { dbValue: DB_VALUES.jobTypes[14], label: tJob('options.welder') },
+    { dbValue: DB_VALUES.jobTypes[15], label: tJob('options.roofer') },
+    { dbValue: DB_VALUES.jobTypes[16], label: tJob('options.glazier') },
+    { dbValue: DB_VALUES.jobTypes[17], label: tJob('options.plasterer') },
+  ];
+
   return (
     <>
       <div
-        className={`fixed inset-0 duration-300 z-40 ${
+        className={`fixed inset-0 bg-black duration-300 z-40 ${
           isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
@@ -139,14 +241,14 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
 
         <div className="p-4 sm:p-6 h-full flex flex-col">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-base sm:text-lg font-bold">Filtros</h2>
+            <h2 className="text-base sm:text-lg font-bold">{t('filters')}</h2>
 
             <div className="flex items-center gap-2">
               <button
                 onClick={handleReset}
                 className="bg-[#2B6AE0] text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#2B31E0] transition-colors"
               >
-                Resetear
+                {t('resetButton.desktop')}
               </button>
               <button
                 onClick={onClose}
@@ -168,28 +270,25 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
                 onClick={() => toggleSection('fixer')}
               >
-                <span className="truncate">Nombre de Fixer</span>
+                <span className="truncate">{t('fixerName')}</span>
               </div>
               {openSections.fixer && (
                 <div className="bg-white border border-gray-200 p-4 rounded">
                   <div className="flex gap-2">
-                    {[
-                      ['De (A-C)', 'De (D-F)', 'De (G-I)', 'De (J-L)', 'De (M-Ñ)'],
-                      ['De (O-Q)', 'De (R-T)', 'De (U-W)', 'De (X-Z)'],
-                    ].map((column, colIndex) => (
+                    {nameRanges.map((column, colIndex) => (
                       <div key={colIndex} className="flex flex-col gap-2 flex-1">
                         {column.map((range) => (
                           <label
-                            key={range}
+                            key={range.dbValue}
                             className="flex items-center gap-2 text-xs cursor-pointer hover:text-[#2B31E0] transition-colors"
                           >
                             <input
                               type="checkbox"
                               className="w-4 h-4 cursor-pointer flex-shrink-0"
-                              checked={selectedRanges.includes(range)}
-                              onChange={() => handleRangeChange(range)}
+                              checked={selectedRanges.includes(range.dbValue)}
+                              onChange={() => handleRangeChange(range.dbValue)}
                             />
-                            <span className="truncate">{range}</span>
+                            <span className="truncate">{range.label}</span>
                           </label>
                         ))}
                       </div>
@@ -205,33 +304,23 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
                 onClick={() => toggleSection('ciudad')}
               >
-                <span className="truncate">Ciudad</span>
+                <span className="truncate">{t('city')}</span>
               </div>
               {openSections.ciudad && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {[
-                      'Beni',
-                      'Chuquisaca',
-                      'Cochabamba',
-                      'La Paz',
-                      'Oruro',
-                      'Pando',
-                      'Potosí',
-                      'Santa Cruz',
-                      'Tarija',
-                    ].map((city) => (
+                    {cities.map((city) => (
                       <label
-                        key={city}
+                        key={city.dbValue}
                         className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
                       >
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedCity === city}
-                          onChange={() => handleCityChange(city)}
+                          checked={selectedCity === city.dbValue}
+                          onChange={() => handleCityChange(city.dbValue)}
                         />
-                        <span className="truncate">{city}</span>
+                        <span className="truncate">{city.label}</span>
                       </label>
                     ))}
                   </div>
@@ -245,42 +334,23 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
                 onClick={() => toggleSection('trabajo')}
               >
-                <span className="truncate">Tipo de Trabajo</span>
+                <span className="truncate">{t('jobCategory')}</span>
               </div>
               {openSections.trabajo && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {[
-                      'Albañil',
-                      'Carpintero',
-                      'Cerrajero',
-                      'Decorador',
-                      'Electricista',
-                      'Fontanero',
-                      'Fumigador',
-                      'Instalador',
-                      'Jardinero',
-                      'Limpiador',
-                      'Mecánico',
-                      'Montador',
-                      'Pintor',
-                      'Pulidor',
-                      'Soldador',
-                      'Techador',
-                      'Vidriero',
-                      'Yesero',
-                    ].map((job) => (
+                    {jobTypes.map((job) => (
                       <label
-                        key={job}
+                        key={job.dbValue}
                         className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
                       >
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedJobs.includes(job)}
-                          onChange={() => handleJobChange(job)}
+                          checked={selectedJobs.includes(job.dbValue)}
+                          onChange={() => handleJobChange(job.dbValue)}
                         />
-                        <span className="truncate">{job}</span>
+                        <span className="truncate">{job.label}</span>
                       </label>
                     ))}
                   </div>

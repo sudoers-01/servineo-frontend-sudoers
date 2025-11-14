@@ -8,6 +8,16 @@ export const SORT_OPTIONS = {
   CONTACTO_DESC: 'contact_desc',
 } as const;
 
+export const SORT_TRANSLATION_KEYS = {
+  rating: 'sortBy.featured',
+  recent: 'sortBy.mostRecent',
+  oldest: 'sortBy.oldest',
+  name_asc: 'sortBy.nameAZ',
+  name_desc: 'sortBy.nameZA',
+  contact_asc: 'sortBy.contactAsc',
+  contact_desc: 'sortBy.contactDesc',
+} as const;
+
 export const sortMap: Record<string, string> = {
   Destacados: SORT_OPTIONS.DESTACADOS,
   'Los más recientes': SORT_OPTIONS.RECIENTES,
@@ -22,9 +32,9 @@ export const sortMapInverse: Record<string, string> = Object.fromEntries(
   Object.entries(sortMap).map(([key, value]) => [value, key]),
 );
 
-// Función helper para obtener el valor backend
-export const getSortValue = (displayName: string): string => {
-  return sortMap[displayName] || SORT_OPTIONS.RECIENTES;
+// Función helper para obtener el valor backend (siempre los mismos valores)
+export const getSortValue = (backendValue: string): string => {
+  return backendValue || SORT_OPTIONS.RECIENTES;
 };
 
 // Función helper para obtener el nombre de visualización
