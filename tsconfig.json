@@ -22,6 +22,13 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/ctrlC/home-tsx"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    "src/app/ctrl/home-tsx",
+    "src/components/calendar/mobile/MobileDayliView.tsx"
+  ],
   "exclude": ["node_modules"]
 }
