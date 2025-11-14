@@ -60,8 +60,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
         setLoading(true);
         setError(null);
 
-        const API_URL =
-          process.env.NEXT_PUBLIC_API_URL || 'https://devmastersservineobackend-ashy.vercel.app';
+        const API_URL = 'http://localhost:3000';
 
         // Build query params: if searchQuery or categoryFilters provided, request tags derived from matching offers.
         // Otherwise (no search, no category) ask for recent tags (from latest offers).
@@ -185,7 +184,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
             <ul className="text-gray-600 text-xs space-y-1 list-disc list-inside">
               <li>
                 Backend en desarrollo:{' '}
-                <code className="bg-gray-100 px-1 rounded">http://localhost:8000</code>
+                <code className="bg-gray-100 px-1 rounded">http://localhost:3000</code>
               </li>
               <li>
                 Backend en producción:{' '}

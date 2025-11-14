@@ -1,36 +1,38 @@
-"use client"
+'use client';
 
-import Link from "next/link"
-import { Briefcase, UserCog, ClipboardList } from "lucide-react"
-import { usePathname } from "next/navigation"
-import { useAppDispatch } from "@/app/redux/hooks"
-import { resetFilters } from "@/app/redux/slice/jobOfert"
+import Link from 'next/link';
+import { Briefcase, UserCog, ClipboardList } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { useAppDispatch } from '@/app/redux/hooks';
+import { resetFilters } from '@/app/redux/slice/jobOfert';
 
 export function Navbar() {
-  const pathname = usePathname()
+  const pathname = usePathname();
+  const router = useRouter();
 
-  const isActive = (path: string) => pathname === path
+  const isActive = (path: string) => pathname === path;
 
   const dispatch = useAppDispatch();
 
-    const handleJobOffersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-      e.preventDefault();
-  
-      // Reset store filters so URL sync won't re-add params, and clear storage
-      dispatch(resetFilters());
-      try {
-        localStorage.removeItem('jobOffers_paginaActual');
-        localStorage.removeItem('jobOffers_registrosPorPagina');
-        localStorage.removeItem('jobOffers_search');
-        localStorage.removeItem('jobOffers_filters');
-        localStorage.removeItem('jobOffers_sortBy');
-      } catch {
-        // ignore
-      }
-  
-      // Force a full navigation to /job-offer without query params
-      window.location.href = '/job-offer-list';
-    };
+  const handleJobOffersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+
+    // Reset store filters so URL sync won't re-add params, and clear storage
+    dispatch(resetFilters());
+    try {
+      localStorage.removeItem('jobOffers_paginaActual');
+      localStorage.removeItem('jobOffers_registrosPorPagina');
+      localStorage.removeItem('jobOffers_search');
+      localStorage.removeItem('jobOffers_filters');
+      localStorage.removeItem('jobOffers_sortBy');
+    } catch {
+      // ignore
+    }
+
+    // Construir URL limpia sin query params
+    const baseUrl = window.location.origin;
+    window.location.href = `${baseUrl}/job-offer-list`;
+  };
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-blue-100 shadow-sm">

@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { api } from '@/app/lib/api';
 import { ensureSessionId } from '@/app/lib/session';
@@ -163,11 +165,12 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     const success = await deleteFromBackend(item);
 
     if (success) {
-      const updatedHistory = await fetchHistoryFromBackend('');
-      console.log('Updated history after delete:', updatedHistory);
-
-      setHistory(updatedHistory);
-      persistHistory(updatedHistory);
+      // En lugar de hacer otra llamada al backend, actualizar el estado local
+      setHistory((prev) => {
+        const updated = prev.filter((h) => h !== item);
+        persistHistory(updated);
+        return updated;
+      });
     } else {
       console.error('Failed to delete from backend');
     }
@@ -222,7 +225,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     hasError ? 'border-red-500 border-[1.5px] outline-none shadow-[0_0_0_1px_red]' : ''
   }`;
 
-  // Cargar historial inicial
+  // Cargar historial inicial SOLO UNA VEZ
   React.useEffect(() => {
     const loadInitialHistory = async () => {
       const backendHistory = await fetchHistoryFromBackend('');
@@ -230,43 +233,51 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
         setHistory(backendHistory);
         persistHistory(backendHistory);
       } else {
-        setHistory(loadHistory());
+        const localHistory = loadHistory();
+        if (localHistory.length > 0) {
+          setHistory(localHistory);
+        }
       }
     };
 
     loadInitialHistory();
   }, [fetchHistoryFromBackend]);
 
-  // Filtrado dinámico mientras escribe
+  // Filtrado dinámico mientras escribe - SEPARADO del historial inicial
   React.useEffect(() => {
     const timer = setTimeout(async () => {
       const q = value.trim();
-      const [filteredHistory, fetchedSuggestions] = await Promise.all([
-        fetchHistoryFromBackend(q),
-        (async () => {
-          try {
-            if (!q || q.length === 0) return [] as string[];
-            const endpoint = `/api/devmaster/offers?search=${encodeURIComponent(q)}&limit=6&record=false`;
-            const resp = await api.get<SuggestionsPayload>(endpoint);
-            if (resp.success && resp.data && Array.isArray(resp.data.suggestions)) {
-              return resp.data.suggestions.map((s) => String(s.term ?? ''));
-            }
-            return [] as string[];
-          } catch (e) {
-            console.error('Error fetching suggestions from backend', e);
-            return [] as string[];
-          }
-        })(),
-      ]);
 
-      setHistory(filteredHistory);
-      setSuggestionsFromBackend(fetchedSuggestions);
+      // Solo buscar sugerencias si hay texto
+      if (q.length > 0) {
+        try {
+          const endpoint = `/api/devmaster/offers?search=${encodeURIComponent(q)}&limit=6&record=false`;
+          const resp = await api.get<SuggestionsPayload>(endpoint);
+          if (resp.success && resp.data && Array.isArray(resp.data.suggestions)) {
+            setSuggestionsFromBackend(resp.data.suggestions.map((s) => String(s.term ?? '')));
+          } else {
+            setSuggestionsFromBackend([]);
+          }
+        } catch (e) {
+          console.error('Error fetching suggestions from backend', e);
+          setSuggestionsFromBackend([]);
+        }
+      } else {
+        setSuggestionsFromBackend([]);
+      }
     }, 300);
 
     return () => clearTimeout(timer);
-  }, [value, fetchHistoryFromBackend]);
+  }, [value]);
 
-  const visibleHistory = React.useMemo(() => history.slice(0, 5), [history]);
+  // Filtrar historial local basado en el valor del input
+  const visibleHistory = React.useMemo(() => {
+    const q = value.trim().toLowerCase();
+    if (q.length === 0) {
+      return history.slice(0, 5);
+    }
+    return history.filter((h) => h.toLowerCase().includes(q)).slice(0, 5);
+  }, [history, value]);
 
   const visibleSuggestions = React.useMemo(() => {
     if (!suggestionsFromBackend || suggestionsFromBackend.length === 0) return [] as string[];
