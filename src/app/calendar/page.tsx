@@ -20,21 +20,21 @@ export default function CalendarPage() {
     const [fixer_id, setFixerId] = useState<string>('');
     const [requester_id, setRequesterId] = useState<string>('');
     const [isLoading, setIsLoading] = useState(true);
-
+    const [userRole, setUserRole] = useState<'requester' | 'fixer'>('requester');// OJO QUITAR 'requester'
     useEffect(() => {
         const storedFixerId = sessionStorage.getItem('fixer_id');
         const storedRequesterId = sessionStorage.getItem('requester_id');
-
+        const storedRoleUser = sessionStorage.getItem('roluser');
         if (storedFixerId) {
             setFixerId(storedFixerId);
             setRequesterId(storedRequesterId || '');
+            setUserRole(storedRoleUser === 'fixer' ? 'fixer' : 'requester');
             setIsLoading(false);
         } else {
             router.push('/');
         }
     }, [router]);
 
-    const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
@@ -46,14 +46,6 @@ export default function CalendarPage() {
 
     const handleDataChange = (newDate: Date) => {
         setSelectedDate(newDate);
-    }
-
-    const switchRole = () => {
-        if (userRole === 'requester') {
-            setUserRole('fixer');
-        } else {
-            setUserRole('requester');
-        }
     }
 
     const handleOpenAvailabilityModal = () => {
@@ -160,19 +152,10 @@ export default function CalendarPage() {
                                         </button>
                                     </div>
                                 )}
-                                <button
-                                    onClick={switchRole}
-                                    className="w-full bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors cursor-pointer text-sm">
-                                    Vista Actual: {userRole}
-                                </button>
+                                
                             </div>
 
                             <div className="hidden md:flex md:items-center md:ml-auto md:mr-4 md:gap-4">
-                                <button
-                                    onClick={switchRole}
-                                    className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-600 transition-colors cursor-pointer whitespace-nowrap">
-                                    Vista Actual: {userRole}
-                                </button>
 
                                 {userRole === 'fixer' && (
                                     <div className="flex items-center gap-2">
