@@ -11,13 +11,13 @@ import React from 'react';
 import { ChevronDown } from 'lucide-react';
 
 interface SortCardProps {
-  value: string; // valor actual seleccionado desde el padre
-  onSelect: (option: string) => void; // callback al cambiar
+  value: string;
+  onSelect: (option: string) => void;
 }
 
 export default function SortCard({ value, onSelect }: SortCardProps) {
   const sortOptions = [
-    //'Destacados',
+    'Destacados',
     'Los más recientes',
     'Los más antiguos',
     'Nombre A-Z',

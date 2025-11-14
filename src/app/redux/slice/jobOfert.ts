@@ -5,14 +5,14 @@ import { JOBOFERT_ALLOWED_LIMITS } from '../../lib/validations/pagination.valida
 export interface OfferData {
   _id: string;
   fixerId: string;
-  name: string;
+  fixerName: string;
   title: string;
   description: string;
   category: string;
   tags: string[];
   price: number;
   city: string;
-  phone: string;
+  contactPhone: string;
   createdAt: string;
   rating: number;
 }

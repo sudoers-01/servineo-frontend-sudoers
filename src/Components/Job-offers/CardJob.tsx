@@ -2,22 +2,23 @@
 'use client';
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
-import { MapPin, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { MapPin, Star, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { categoryImages } from '@/app/lib/constants/img';
 
 interface OfferData {
   _id: string;
   fixerId: string;
-  name: string;
+  fixerName: string;
   title: string;
   description: string;
   category: string;
   tags: string[];
   price: number;
   city: string;
-  phone: string;
+  contactPhone: string;
   createdAt: string;
+  rating?: number;
   fixerPhoto?: string;
   imagenUrl?: string;
   photos?: string[];
@@ -32,17 +33,16 @@ interface CardJobProps {
 const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
   const router = useRouter();
 
-  const handleWhatsAppClick = (e: React.MouseEvent, phone: string) => {
+  const handleWhatsAppClick = (e: React.MouseEvent, contactPhone: string) => {
     e.stopPropagation();
-    const cleanPhone = phone.replace(/\D/g, '');
+    const cleanPhone = contactPhone.replace(/\D/g, '');
     window.open(`https://wa.me/${cleanPhone}`, '_blank');
   };
 
   const handleFixerClick = (e: React.MouseEvent, fixerId?: string) => {
     e.stopPropagation();
     if (fixerId) {
-      //router.push(`/fixer/${fixerId}`);
-      router.push(`/fixer/fixer-001`);
+      router.push(`/fixer/${fixerId}`);
     }
   };
 
@@ -88,7 +88,6 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
 
     return mappedTrabajos;
   }, [trabajos, getImagesForJob]);
-
 
   const GridView = () => {
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -182,7 +181,7 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
               className="group relative w-full overflow-hidden rounded-xl border-primary border-2 bg-white transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
             >
               {/* Área clickeable para abrir modal */}
-              <div onClick={() => handleCardClick} className="cursor-pointer">
+              <div onClick={() => handleCardClick(t)} className="cursor-pointer">
                 {/* Imagen con controles */}
                 <div className="h-48 w-full relative">
                   {t.allImages?.map((img, idx) => (
@@ -258,10 +257,24 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   </div>
 
                   <div className="space-y-1.5 mb-3">
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2 flex-wrap">
                       <span className="bg-primary/10 text-primary px-2 py-1 rounded-full font-medium text-xs">
                         {t.category}
                       </span>
+                      {t.tags && t.tags.length > 0 && (
+                        <>
+                          {t.tags.slice(0, 2).map((tag, idx) => (
+                            <span
+                              key={idx}
+                              className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"
+                            >
+                              {tag}
+                            </span>
+                          ))}
+                        </>
+                      )}
+                    </div>
+                    <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-gray-400">
                         {new Date(t.createdAt).toLocaleDateString()}
                       </span>
@@ -280,31 +293,40 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                     {t.fixerPhoto ? (
                       <Image
                         src={t.fixerPhoto}
-                        alt={t.name || 'Fixer'}
+                        alt={t.fixerName || 'Fixer'}
                         className="w-full h-full object-cover"
                         width={32}
                         height={32}
                       />
                     ) : (
                       <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                        {t.name?.[0]?.toUpperCase() || 'U'}
+                        {t.fixerName?.[0]?.toUpperCase() || 'U'}
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900 truncate text-left">
-                      {t.name || 'Usuario'}
+                      {t.fixerName || 'Usuario'}
                     </p>
-                    <div className="flex items-center gap-1 text-xs text-gray-500"></div>
+                    <div className="flex items-center gap-1 text-xs text-gray-500">
+                      {t.rating && (
+                        <div className="flex items-center text-amber-400">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          <span className="ml-1 text-xs font-medium text-gray-600">
+                            {t.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <button
-                  onClick={(e) => handleWhatsAppClick(e, t.phone)}
+                  onClick={(e) => handleWhatsAppClick(e, t.contactPhone)}
                   className="bg-[#1AA7ED] hover:bg-[#1AA7ED] px-3 py-2 rounded-full transition-colors shadow-sm flex items-center gap-2 flex-shrink-0"
                   aria-label="Contactar por WhatsApp"
                 >
                   <MessageCircle className="w-4 h-4 text-white" />
-                  <span className="text-white text-xs font-medium hidden sm:inline">{t.phone}</span>
+                  <span className="text-white text-xs font-medium hidden sm:inline">{t.contactPhone}</span>
                 </button>
               </div>
             </div>
@@ -512,31 +534,40 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                       {t.fixerPhoto ? (
                         <Image
                           src={t.fixerPhoto}
-                          alt={t.name || 'Fixer'}
+                          alt={t.fixerName || 'Fixer'}
                           className="w-full h-full object-cover"
                           width={32}
                           height={32}
                         />
                       ) : (
                         <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                          {t.name?.[0]?.toUpperCase() || 'U'}
+                          {t.fixerName?.[0]?.toUpperCase() || 'U'}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-900 truncate text-left">
-                        {t.name || 'Usuario'}
+                        {t.fixerName || 'Usuario'}
                       </p>
-                      <div className="flex items-center gap-1 text-xs text-gray-500"></div>
+                      <div className="flex items-center gap-1 text-xs text-gray-500">
+                        {t.rating && (
+                          <div className="flex items-center text-amber-400">
+                            <Star className="w-3.5 h-3.5 fill-current" />
+                            <span className="ml-1 text-xs font-medium text-gray-600">
+                              {t.rating.toFixed(1)}
+                            </span>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <button
-                    onClick={(e) => handleWhatsAppClick(e, t.phone)}
+                    onClick={(e) => handleWhatsAppClick(e, t.contactPhone)}
                     className="bg-[#1AA7ED] hover:bg-[#1AA7ED] px-3 py-2 rounded-full transition-colors shadow-sm flex items-center gap-2 flex-shrink-0"
                     aria-label="Contactar por WhatsApp"
                   >
                     <MessageCircle className="w-4 h-4 text-white" />
-                    <span className="text-white text-xs font-medium">{t.phone}</span>
+                    <span className="text-white text-xs font-medium">{t.contactPhone}</span>
                   </button>
                 </div>
               </div>

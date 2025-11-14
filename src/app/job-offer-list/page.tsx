@@ -38,11 +38,11 @@ const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
 interface OfferData {
   _id: string;
   fixerId: string;
-  name: string;
+  fixerName: string;
   title: string;
   description: string;
   tags: string[];
-  phone: string;
+  contactPhone: string;
   photos?: string[];
   imagenUrl?: string;
   category: string;
@@ -142,12 +142,12 @@ export default function JobOffersPage() {
 
     return {
       _id: offer._id,
-      fixerId: offer.fixerId,
-      name: offer.name,
+      fixerId: "fixer-001",
+      name: offer.fixerName,
       title: offer.title,
       description: offer.description,
       tags: offer.tags || [],
-      phone: offer.phone,
+      phone: offer.contactPhone,
       photos: photos,
       services: offer.category ? [offer.category] : [],
       price: offer.price,
