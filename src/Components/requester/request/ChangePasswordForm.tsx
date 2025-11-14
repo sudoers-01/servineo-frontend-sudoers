@@ -43,7 +43,7 @@ type Props = {
   onSaved?: () => void;
 };
 
-export default function ChangePasswordForm({ onCancel, onSaved }: Props) {
+export default function ChangePasswordForm({ onCancel}: Props) {
   const router = useRouter();
 
   // 🎯 REACT HOOK FORM + ZOD
