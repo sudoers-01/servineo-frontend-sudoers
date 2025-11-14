@@ -66,7 +66,7 @@ export default function CloseSessionPage() {
     (s) => s.deviceId !== currentDeviceId
   );
 
-  if (!userId) {
+/*  if (!userId) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="bg-white border border-gray-200 rounded-2xl shadow-md p-8 text-center">
@@ -79,7 +79,7 @@ export default function CloseSessionPage() {
         </div>
       </div>
     );
-  }
+  }*/
 
   if (loading && activeSessions.length === 0) {
     return (
@@ -95,7 +95,7 @@ export default function CloseSessionPage() {
   return (
     <div className="w-full max-w-4xl bg-white border border-gray-200 rounded-2xl shadow-md p-8 mx-auto my-10">
       <button
-        onClick={() => router.push("/controlC/Configuracion")}
+        onClick={() => router.push("/requesterEdit/")}
         className="flex items-center text-gray-600 hover:text-gray-800 mb-6"
       >
         <ArrowLeft className="w-5 h-5 mr-2" /> Volver
