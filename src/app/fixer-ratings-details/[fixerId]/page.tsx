@@ -12,7 +12,7 @@ export default async function RatingsPage({ params }: { params: Promise<Params> 
       <header className='flex items-center justify-between'>
         <h1 className='text-2xl font-semibold tracking-tight'>Detalles de la calificación</h1>
         <a
-          href='..'
+          href={`/profile/${fixerId}`}
           className='text-sm px-3 py-1.5 border rounded-lg transition-colors hover:bg-white/60'
           style={{ borderColor: 'var(--surface-border)' }}
           aria-label='Back to profile'

@@ -51,7 +51,7 @@ export default function CommentsPage() {
           <h1 className='text-2xl font-bold text-gray-900'>Jobs Comments</h1>
           <div className='flex gap-2'>
             <button
-              onClick={() => setFilter('positive')}
+              onClick={() => (filter === 'positive' ? setFilter('all') : setFilter('positive'))}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                 filter === 'positive'
                   ? 'bg-green-500 text-white'
@@ -61,7 +61,7 @@ export default function CommentsPage() {
               Positive
             </button>
             <button
-              onClick={() => setFilter('negative')}
+              onClick={() => (filter === 'negative' ? setFilter('all') : setFilter('negative'))}
               className={`px-4 py-2 rounded-md text-sm font-medium transition-colors cursor-pointer ${
                 filter === 'negative'
                   ? 'bg-red-500 text-white'
@@ -72,53 +72,7 @@ export default function CommentsPage() {
             </button>
           </div>
         </div>
-        <div className='mb-4 flex gap-x-2 flex-row-reverse justify-between align-middle text-black'>
-          {/* Here Heidy's DropDown will be implemented or idk */}
-          <button
-            onClick={() => alert('Otro equipo hace esta parte')}
-            className='flex align-middle  gap-x-2 hover:bg-gray-200 h-full text-sm cursor-pointer rounded-3xl p-2 font-bold transition duration-150'
-          >
-            <svg
-              xmlns='http://www.w3.org/2000/svg'
-              width='15'
-              height='15'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='2'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              className='my-auto lucide lucide-funnel-icon lucide-funnel'
-            >
-              <path d='M10 20a1 1 0 0 0 .553.895l2 1A1 1 0 0 0 14 21v-7a2 2 0 0 1 .517-1.341L21.74 4.67A1 1 0 0 0 21 3H3a1 1 0 0 0-.742 1.67l7.225 7.989A2 2 0 0 1 10 14z' />
-            </svg>
-            <span className='leading-5'>Ordenar</span>
-          </button>
-
-          {filter !== 'all' && (
-            <button
-              onClick={() => setFilter('all')}
-              className='hover:bg-gray-200  text-sm cursor-pointer rounded-3xl p-2 text-black font-bold flex gap-x-2 align-middle leading-5 transition duration-150'
-            >
-              <svg
-                xmlns='http://www.w3.org/2000/svg'
-                width='20'
-                height='20'
-                viewBox='0 0 24 24'
-                fill='none'
-                stroke='currentColor'
-                strokeWidth='2'
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                className='lucide lucide-arrow-left-icon lucide-arrow-left'
-              >
-                <path d='m12 19-7-7 7-7' />
-                <path d='M19 12H5' />
-              </svg>
-              Show all comments
-            </button>
-          )}
-        </div>
+        <div className='mb-4 flex gap-x-2 flex-row-reverse justify-between align-middle text-black'></div>
         {loading ? (
           <div className='flex justify-center items-center py-12'>
             <svg
@@ -148,8 +102,8 @@ export default function CommentsPage() {
           <div className='space-y-4'>
             {data.map((comment) => (
               <div
-                key={comment._id}
-                className='bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow'
+                key={comment._id} // The color can be change here for negative or positive, I knew you would ask xdd
+                className={`${filter === 'all' && 'bg-white'} ${filter === 'negative' ? 'bg-red-200' : 'bg-green-100'} border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow`}
               >
                 <div className='flex justify-between items-start mb-3'>
                   <div>

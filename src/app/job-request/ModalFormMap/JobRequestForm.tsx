@@ -25,6 +25,23 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
 
   const [newLocation, setNewLocation] = useState<Location | null>(null);
   const [timeError, setTimeError] = useState<string>('');
+  const [fieldErrors, setFieldErrors] = useState<{ [key: string]: string }>({});
+
+  const isFormValid = useMemo(() => {
+    return (
+      formData.jobMotive.trim() !== '' &&
+      formData.jobDescription.trim() !== '' &&
+      formData.startTime !== '' &&
+      formData.endTime !== '' &&
+      !timeError
+    );
+  }, [
+    formData.jobMotive,
+    formData.jobDescription,
+    formData.startTime,
+    formData.endTime,
+    timeError,
+  ]);
 
   const currentMapLocation = useMemo(() => {
     if (formData.locationOption === 'modify' && newLocation) {
@@ -70,6 +87,52 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
     return '';
   }, []);
 
+  const validateTextOnly = (text: string): string => {
+    return text.replace(/[0-9]/g, '');
+  };
+
+  const validateDependentFields = useCallback(
+    (name: string) => {
+      if (name === 'jobDescription' && !formData.jobMotive.trim()) {
+        setFieldErrors((prev) => ({
+          ...prev,
+          jobDescription: 'Primero debe completar el motivo del trabajo',
+        }));
+      } else {
+        setFieldErrors((prev) => ({
+          ...prev,
+          [name]: '',
+        }));
+      }
+    },
+    [formData.jobMotive],
+  );
+
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      const { name, value } = e.target;
+      let processedValue = value;
+
+      if (name === 'jobMotive' || name === 'jobDescription') {
+        processedValue = validateTextOnly(value);
+        validateDependentFields(name);
+      }
+
+      setFormData((prev) => ({ ...prev, [name]: processedValue }));
+    },
+    [validateDependentFields],
+  );
+
+  const handleTextAreaFocus = () => {
+    if (!formData.jobMotive.trim()) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        jobDescription: 'Primero debe completar el motivo del trabajo',
+      }));
+      document.getElementById('jobMotive')?.focus();
+    }
+  };
+
   useEffect(() => {
     if (formData.startTime && formData.endTime) {
       const error = validateTimes(formData.startTime, formData.endTime);
@@ -83,16 +146,18 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
     setNewLocation({ lat: pos.lat, lng: pos.lng });
   }, []);
 
-  const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const { name, value } = e.target;
-      setFormData((prev) => ({ ...prev, [name]: value }));
-    },
-    [],
-  );
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.jobMotive.trim()) {
+      setFieldErrors((prev) => ({ ...prev, jobMotive: 'Este campo es requerido' }));
+      return;
+    }
+
+    if (!formData.jobDescription.trim()) {
+      setFieldErrors((prev) => ({ ...prev, jobDescription: 'Este campo es requerido' }));
+      return;
+    }
 
     if (formData.startTime && formData.endTime) {
       const finalError = validateTimes(formData.startTime, formData.endTime);
@@ -125,8 +190,13 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
           placeholder='Ingrese el motivo del trabajo...'
           required
           disabled={loading}
-          className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900 placeholder-gray-500'
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900 placeholder-gray-500 ${
+            fieldErrors.jobMotive ? 'border-red-500' : 'border-gray-300'
+          }`}
         />
+        {fieldErrors.jobMotive && (
+          <p className='text-red-500 text-xs mt-1'>{fieldErrors.jobMotive}</p>
+        )}
       </div>
 
       <div>
@@ -138,12 +208,23 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
           name='jobDescription'
           value={formData.jobDescription}
           onChange={handleInputChange}
+          onFocus={handleTextAreaFocus}
           placeholder='Describa el trabajo a realizar...'
           required
-          disabled={loading}
+          disabled={loading || !formData.jobMotive.trim()}
           rows={4}
-          className='w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900 placeholder-gray-500 resize-none'
+          className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-100 text-gray-900 placeholder-gray-500 resize-none ${
+            fieldErrors.jobDescription ? 'border-red-500' : 'border-gray-300'
+          }`}
         />
+        {fieldErrors.jobDescription && (
+          <p className='text-red-500 text-xs mt-1'>{fieldErrors.jobDescription}</p>
+        )}
+        {!formData.jobMotive.trim() && (
+          <p className='text-gray-500 text-xs mt-1'>
+            Complete primero el motivo del trabajo para habilitar este campo
+          </p>
+        )}
       </div>
 
       <fieldset className='border border-gray-300 rounded-md p-4'>
@@ -278,7 +359,7 @@ const JobRequestForm: React.FC<JobRequestFormProps> = ({
         </button>
         <button
           type='submit'
-          disabled={loading || !!timeError}
+          disabled={loading || !!timeError || !isFormValid}
           className='px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50'
         >
           {loading ? 'Guardando...' : 'Guardar'}

@@ -19,6 +19,7 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
   onSubmit,
   fixerId,
   appointmentData,
+  offerId,
 }) => {
   const [initialLocation, setInitialLocation] = useState<Location | null>(null);
   const [loading, setLoading] = useState(false);
@@ -210,6 +211,7 @@ const JobRequestModal: React.FC<JobRequestModalProps> = ({
         fixerId: finalFixerId,
         requesterId: requesterId,
         appointmentId: appointmentData?._id,
+        offerId: offerId,
       };
 
       const data: JobRequest = await createJobRequest(payload, token);
