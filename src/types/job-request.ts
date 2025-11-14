@@ -43,6 +43,7 @@ export interface CreateJobRequestPayload {
   fixerId: string;
   requesterId: string;
   appointmentId?: string;
+  offerId?: string;
 }
 
 export interface JobRequest {
@@ -86,6 +87,7 @@ export interface JobRequestModalProps {
   onSubmit: (data: JobRequest) => void;
   fixerId: string;
   appointmentData?: Appointment;
+  offerId?: string;
 }
 
 export interface JobRequestFormProps {
