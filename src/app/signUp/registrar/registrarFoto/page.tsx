@@ -5,7 +5,6 @@ import { Trash2 } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { getUserIdFromToken } from "../Registrardecoder/getID";
-import { enviarFotoPerfil } from "@/app/redux/services/auth/registroDatos"; 
 
 export default function FotoPerfil() {
   const router = useRouter();
@@ -13,6 +12,7 @@ export default function FotoPerfil() {
   const [fotoPreview, setFotoPreview] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
 
+  // Manejar cambio de archivo
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -21,11 +21,22 @@ export default function FotoPerfil() {
     }
   };
 
+  // Eliminar foto seleccionada
   const eliminarFoto = () => {
     setArchivo(null);
     setFotoPreview(null);
   };
 
+  // Convertir File a Base64
+  const fileToBase64 = (file: File) =>
+    new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (error) => reject(error);
+    });
+
+  // Continuar: enviar foto al backend
   const continuar = async () => {
     if (!archivo) return alert("Primero selecciona una foto");
 
@@ -34,13 +45,29 @@ export default function FotoPerfil() {
 
     try {
       setCargando(true);
-      const response = await enviarFotoPerfil(usuarioId, archivo);
+      const fotoBase64 = await fileToBase64(archivo);
 
-      if (response.success) {
+      const response = await fetch(
+        "http://localhost:8000/api/controlC/foto-perfil/usuarios/foto",
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            usuarioId,
+            fotoPerfil: fotoBase64,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.success) {
         alert("Foto actualizada correctamente");
-        router.push("/signUp/registrar/registrarUbicacion"); 
+        router.push("/signUp/registrar/registrarUbicacion");
       } else {
-        alert(response.message || "Error al subir la foto");
+        alert(data.message || "Error al subir la foto");
       }
     } catch (error) {
       console.error("Error al subir la foto:", error);
@@ -94,7 +121,7 @@ export default function FotoPerfil() {
               onChange={manejarCambio}
             />
 
-            {/* Botones de subir/eliminar */}
+            {/* Botones subir/eliminar */}
             <div className="flex gap-2 mt-3">
               <label
                 htmlFor="input-foto"
@@ -117,7 +144,7 @@ export default function FotoPerfil() {
           {/* Botones de navegación */}
           <div className="flex justify-center gap-4 mt-8">
             <button
-              onClick={() => router.push("/signUp/registrar/registrarServicios")}//<--------------
+              onClick={() => router.push("/signUp/registrar/registrarServicios")}
               className="px-5 py-2 bg-red-600 rounded-full hover:bg-red-700 transition"
             >
               Atrás
