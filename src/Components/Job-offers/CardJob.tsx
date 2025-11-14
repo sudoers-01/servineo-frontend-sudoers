@@ -1,9 +1,9 @@
-//actual
 'use client';
 import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { MapPin, Star, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { categoryImages } from '@/app/lib/constants/img';
 
 interface OfferData {
@@ -32,6 +32,7 @@ interface CardJobProps {
 
 const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
   const router = useRouter();
+  const t = useTranslations('cardJob');
 
   const handleWhatsAppClick = (e: React.MouseEvent, contactPhone: string) => {
     e.stopPropagation();
@@ -98,7 +99,7 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
       setHoveredCard(cardId);
       intervalRefs.current[cardId] = setInterval(() => {
         setCurrentImageIndex((prev) => {
-          const trabajoConImagenes = trabajosConImagenes.find((t) => t._id === cardId);
+          const trabajoConImagenes = trabajosConImagenes.find((trabajo) => trabajo._id === cardId);
           const totalImages = trabajoConImagenes?.allImages?.length || 1;
           return {
             ...prev,
@@ -169,26 +170,26 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
 
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-        {trabajosConImagenes.map((t, index) => {
-          const currentIndex = currentImageIndex[t._id] || 0;
-          const totalImages = t.allImages?.length || 1;
+        {trabajosConImagenes.map((trabajo, index) => {
+          const currentIndex = currentImageIndex[trabajo._id] || 0;
+          const totalImages = trabajo.allImages?.length || 1;
 
           return (
             <div
-              key={`${t._id}-${index}`}
-              onMouseEnter={() => handleMouseEnter(t._id)}
-              onMouseLeave={() => handleMouseLeave(t._id)}
+              key={`${trabajo._id}-${index}`}
+              onMouseEnter={() => handleMouseEnter(trabajo._id)}
+              onMouseLeave={() => handleMouseLeave(trabajo._id)}
               className="group relative w-full overflow-hidden rounded-xl border-primary border-2 bg-white transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
             >
               {/* Área clickeable para abrir modal */}
-              <div onClick={() => handleCardClick(t)} className="cursor-pointer">
+              <div onClick={() => handleCardClick(trabajo)} className="cursor-pointer">
                 {/* Imagen con controles */}
                 <div className="h-48 w-full relative">
-                  {t.allImages?.map((img, idx) => (
+                  {trabajo.allImages?.map((img, idx) => (
                     <Image
                       key={idx}
                       src={img}
-                      alt={t.title}
+                      alt={`${trabajo.title} - ${t('imageAlt', { current: idx + 1, total: totalImages })}`}
                       fill
                       sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
                       className={`object-cover transition-opacity duration-500 ${
@@ -199,19 +200,19 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                     />
                   ))}
 
-                  {totalImages > 1 && hoveredCard === t._id && (
+                  {totalImages > 1 && hoveredCard === trabajo._id && (
                     <>
                       <button
-                        onClick={(e) => handlePrevImage(e, t._id, totalImages)}
+                        onClick={(e) => handlePrevImage(e, trabajo._id, totalImages)}
                         className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                        aria-label="Imagen anterior"
+                        aria-label={t('prevImage')}
                       >
                         <ChevronLeft className="w-4 h-4 text-gray-800" />
                       </button>
                       <button
-                        onClick={(e) => handleNextImage(e, t._id, totalImages)}
+                        onClick={(e) => handleNextImage(e, trabajo._id, totalImages)}
                         className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                        aria-label="Imagen siguiente"
+                        aria-label={t('nextImage')}
                       >
                         <ChevronRight className="w-4 h-4 text-gray-800" />
                       </button>
@@ -234,12 +235,12 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   {/* City Badge */}
                   <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 shadow-sm border border-primary">
                     <MapPin className="w-3 h-3 text-primary" />
-                    <span className="font-medium text-gray-700">{t.city}</span>
+                    <span className="font-medium text-gray-700">{trabajo.city}</span>
                   </div>
 
                   {/* Price */}
                   <div className="absolute right-3 top-3 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-semibold text-primary shadow-sm border border-primary/20">
-                    {t.price?.toLocaleString()} Bs
+                    {trabajo.price?.toLocaleString()} Bs
                   </div>
                 </div>
 
@@ -248,10 +249,10 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex-1 min-w-0">
                       <h3 className="text-base font-semibold text-gray-900 truncate text-left">
-                        {t.title}
+                        {trabajo.title}
                       </h3>
                       <p className="mt-1 text-sm text-gray-500 line-clamp-2 text-left">
-                        {t.description}
+                        {trabajo.description}
                       </p>
                     </div>
                   </div>
@@ -259,11 +260,11 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   <div className="space-y-1.5 mb-3">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="bg-primary/10 text-primary px-2 py-1 rounded-full font-medium text-xs">
-                        {t.category}
+                        {trabajo.category}
                       </span>
-                      {t.tags && t.tags.length > 0 && (
+                      {trabajo.tags && trabajo.tags.length > 0 && (
                         <>
-                          {t.tags.slice(0, 2).map((tag, idx) => (
+                          {trabajo.tags.slice(0, 2).map((tag, idx) => (
                             <span
                               key={idx}
                               className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"
@@ -276,7 +277,7 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                     </div>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-xs text-gray-400">
-                        {new Date(t.createdAt).toLocaleDateString()}
+                        {new Date(trabajo.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </div>
@@ -286,34 +287,41 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
               {/* Información del Fixer - Clickeable para ir al perfil */}
               <div
                 className="pt-3 border-t border-gray-100 flex items-center justify-between hover:bg-gray-50 px-4 pb-4 transition-colors cursor-pointer"
-                onClick={(e) => handleFixerClick(e, t.fixerId)}
+                onClick={(e) => handleFixerClick(e, trabajo.fixerId)}
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                    {t.fixerPhoto ? (
+                    {trabajo.fixerPhoto ? (
                       <Image
-                        src={t.fixerPhoto}
-                        alt={t.fixerName || 'Fixer'}
+                        src={trabajo.fixerPhoto}
+                        alt={t('fixerPhotoAlt', { name: trabajo.fixerName })}
                         className="w-full h-full object-cover"
                         width={32}
                         height={32}
                       />
                     ) : (
-                      <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                        {t.fixerName?.[0]?.toUpperCase() || 'U'}
+                      <div
+                        className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium"
+                        aria-label={
+                          trabajo.fixerName
+                            ? t('fixerPhotoAlt', { name: trabajo.fixerName })
+                            : t('fixerDefaultAlt')
+                        }
+                      >
+                        {trabajo.fixerName?.[0]?.toUpperCase() || 'U'}
                       </div>
                     )}
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-900 truncate text-left">
-                      {t.fixerName || 'Usuario'}
+                      {trabajo.fixerName || 'Usuario'}
                     </p>
                     <div className="flex items-center gap-1 text-xs text-gray-500">
-                      {t.rating && (
+                      {trabajo.rating && (
                         <div className="flex items-center text-amber-400">
                           <Star className="w-3.5 h-3.5 fill-current" />
                           <span className="ml-1 text-xs font-medium text-gray-600">
-                            {t.rating.toFixed(1)}
+                            {trabajo.rating.toFixed(1)}
                           </span>
                         </div>
                       )}
@@ -321,12 +329,14 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   </div>
                 </div>
                 <button
-                  onClick={(e) => handleWhatsAppClick(e, t.contactPhone)}
+                  onClick={(e) => handleWhatsAppClick(e, trabajo.contactPhone)}
                   className="bg-[#1AA7ED] hover:bg-[#1AA7ED] px-3 py-2 rounded-full transition-colors shadow-sm flex items-center gap-2 flex-shrink-0"
-                  aria-label="Contactar por WhatsApp"
+                  aria-label={t('contactWhatsApp')}
                 >
                   <MessageCircle className="w-4 h-4 text-white" />
-                  <span className="text-white text-xs font-medium hidden sm:inline">{t.contactPhone}</span>
+                  <span className="text-white text-xs font-medium hidden sm:inline">
+                    {trabajo.contactPhone}
+                  </span>
                 </button>
               </div>
             </div>
@@ -345,7 +355,7 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
       setHoveredCard(cardId);
       intervalRefs.current[cardId] = setInterval(() => {
         setCurrentImageIndex((prev) => {
-          const trabajoConImagenes = trabajosConImagenes.find((t) => t._id === cardId);
+          const trabajoConImagenes = trabajosConImagenes.find((trabajo) => trabajo._id === cardId);
           const totalImages = trabajoConImagenes?.allImages?.length || 1;
           return {
             ...prev,
@@ -416,27 +426,27 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
 
     return (
       <div className="flex flex-col gap-4">
-        {trabajosConImagenes.map((t) => {
-          const currentIndex = currentImageIndex[t._id] || 0;
-          const totalImages = t.allImages?.length || 1;
+        {trabajosConImagenes.map((trabajo) => {
+          const currentIndex = currentImageIndex[trabajo._id] || 0;
+          const totalImages = trabajo.allImages?.length || 1;
 
           return (
             <div
-              key={t._id}
-              onMouseEnter={() => handleMouseEnter(t._id)}
-              onMouseLeave={() => handleMouseLeave(t._id)}
+              key={trabajo._id}
+              onMouseEnter={() => handleMouseEnter(trabajo._id)}
+              onMouseLeave={() => handleMouseLeave(trabajo._id)}
               className="group relative w-full overflow-hidden rounded-xl border-primary border-2 bg-white transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 flex flex-row"
             >
               {/* Imagen - clickeable para modal */}
               <div
                 className="relative w-64 h-48 flex-shrink-0 overflow-hidden bg-gray-200 cursor-pointer"
-                onClick={() => handleCardClick(t)}
+                onClick={() => handleCardClick(trabajo)}
               >
-                {t.allImages?.map((img, idx) => (
+                {trabajo.allImages?.map((img, idx) => (
                   <Image
                     key={idx}
                     src={img}
-                    alt={t.title}
+                    alt={`${trabajo.title} - ${t('imageAlt', { current: idx + 1, total: totalImages })}`}
                     fill
                     sizes="16rem"
                     className={`object-cover transition-opacity duration-500 ${
@@ -447,19 +457,19 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   />
                 ))}
 
-                {totalImages > 1 && hoveredCard === t._id && (
+                {totalImages > 1 && hoveredCard === trabajo._id && (
                   <>
                     <button
-                      onClick={(e) => handlePrevImage(e, t._id, totalImages)}
+                      onClick={(e) => handlePrevImage(e, trabajo._id, totalImages)}
                       className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                      aria-label="Imagen anterior"
+                      aria-label={t('prevImage')}
                     >
                       <ChevronLeft className="w-4 h-4 text-gray-800" />
                     </button>
                     <button
-                      onClick={(e) => handleNextImage(e, t._id, totalImages)}
+                      onClick={(e) => handleNextImage(e, trabajo._id, totalImages)}
                       className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                      aria-label="Imagen siguiente"
+                      aria-label={t('nextImage')}
                     >
                       <ChevronRight className="w-4 h-4 text-gray-800" />
                     </button>
@@ -481,34 +491,36 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
 
                 <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 shadow-sm border border-primary">
                   <MapPin className="w-3 h-3 text-primary" />
-                  <span className="font-medium text-gray-700">{t.city}</span>
+                  <span className="font-medium text-gray-700">{trabajo.city}</span>
                 </div>
               </div>
 
               {/* Información - clickeable para modal */}
               <div
                 className="flex-1 p-4 flex flex-col relative cursor-pointer"
-                onClick={() => handleCardClick(t)}
+                onClick={() => handleCardClick(trabajo)}
               >
                 <div className="absolute right-4 top-4 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary border border-primary/20">
-                  {t.price?.toLocaleString()} Bs
+                  {trabajo.price?.toLocaleString()} Bs
                 </div>
 
                 <div className="mb-2 pr-32">
-                  <h3 className="text-base font-semibold text-gray-900 text-left">{t.title}</h3>
+                  <h3 className="text-base font-semibold text-gray-900 text-left">
+                    {trabajo.title}
+                  </h3>
                   <p className="mt-1 text-sm text-gray-500 line-clamp-2 text-left">
-                    {t.description}
+                    {trabajo.description}
                   </p>
                 </div>
 
                 <div className="mb-3">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="bg-primary/10 text-primary px-2 py-1 rounded-full font-medium text-xs">
-                      {t.category}
+                      {trabajo.category}
                     </span>
-                    {t.tags && t.tags.length > 0 && (
+                    {trabajo.tags && trabajo.tags.length > 0 && (
                       <>
-                        {t.tags.slice(0, 2).map((tag, idx) => (
+                        {trabajo.tags.slice(0, 2).map((tag, idx) => (
                           <span
                             key={idx}
                             className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"
@@ -519,7 +531,7 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                       </>
                     )}
                     <span className="text-xs text-gray-400 ml-auto">
-                      {new Date(t.createdAt).toLocaleDateString()}
+                      {new Date(trabajo.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
@@ -527,34 +539,41 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                 {/* Información del Fixer - Clickeable para ir al perfil */}
                 <div
                   className="pt-3 border-t border-gray-100 flex items-center justify-between mt-auto hover:bg-gray-50 -mx-4 px-4 -mb-4 pb-4 transition-colors cursor-pointer"
-                  onClick={(e) => handleFixerClick(e, t.fixerId)}
+                  onClick={(e) => handleFixerClick(e, trabajo.fixerId)}
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
                     <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                      {t.fixerPhoto ? (
+                      {trabajo.fixerPhoto ? (
                         <Image
-                          src={t.fixerPhoto}
-                          alt={t.fixerName || 'Fixer'}
+                          src={trabajo.fixerPhoto}
+                          alt={t('fixerPhotoAlt', { name: trabajo.fixerName })}
                           className="w-full h-full object-cover"
                           width={32}
                           height={32}
                         />
                       ) : (
-                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium">
-                          {t.fixerName?.[0]?.toUpperCase() || 'U'}
+                        <div
+                          className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium"
+                          aria-label={
+                            trabajo.fixerName
+                              ? t('fixerPhotoAlt', { name: trabajo.fixerName })
+                              : t('fixerDefaultAlt')
+                          }
+                        >
+                          {trabajo.fixerName?.[0]?.toUpperCase() || 'U'}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-900 truncate text-left">
-                        {t.fixerName || 'Usuario'}
+                        {trabajo.fixerName || 'Usuario'}
                       </p>
                       <div className="flex items-center gap-1 text-xs text-gray-500">
-                        {t.rating && (
+                        {trabajo.rating && (
                           <div className="flex items-center text-amber-400">
                             <Star className="w-3.5 h-3.5 fill-current" />
                             <span className="ml-1 text-xs font-medium text-gray-600">
-                              {t.rating.toFixed(1)}
+                              {trabajo.rating.toFixed(1)}
                             </span>
                           </div>
                         )}
@@ -562,12 +581,12 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                     </div>
                   </div>
                   <button
-                    onClick={(e) => handleWhatsAppClick(e, t.contactPhone)}
+                    onClick={(e) => handleWhatsAppClick(e, trabajo.contactPhone)}
                     className="bg-[#1AA7ED] hover:bg-[#1AA7ED] px-3 py-2 rounded-full transition-colors shadow-sm flex items-center gap-2 flex-shrink-0"
-                    aria-label="Contactar por WhatsApp"
+                    aria-label={t('contactWhatsApp')}
                   >
                     <MessageCircle className="w-4 h-4 text-white" />
-                    <span className="text-white text-xs font-medium">{t.contactPhone}</span>
+                    <span className="text-white text-xs font-medium">{trabajo.contactPhone}</span>
                   </button>
                 </div>
               </div>
@@ -581,11 +600,11 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
   return (
     <div className="w-full">
       <h1 className="text-lg font-semibold mb-4 border-b border-gray-400 pb-2">
-        Resultados de la búsqueda
+        {t('searchResults')}
       </h1>
 
       {trabajosConImagenes.length === 0 ? (
-        <p className="text-gray-500 text-center">No se encontraron resultados</p>
+        <p className="text-gray-500 text-center">{t('noResults')}</p>
       ) : (
         <>
           <div className="lg:hidden">

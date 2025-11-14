@@ -199,6 +199,16 @@
     "next": "Next",
     "showingResults": "Showing {start} - {end} of {total} results"
   },
+  "cardJob": {
+    "imageAlt": "Image {current} of {total}",
+    "fixerPhotoAlt": "Profile photo of {name}",
+    "fixerDefaultAlt": "User profile photo",
+    "prevImage": "Previous image",
+    "nextImage": "Next image",
+    "contactWhatsApp": "Contact via WhatsApp",
+    "searchResults": "Search results",
+    "noResults": "No results found"
+  },
   "calendar": {
     "months": {
       "january": "January",

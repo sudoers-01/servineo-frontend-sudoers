@@ -182,6 +182,16 @@
     "loading": "Cargando resultados...",
     "loadingFallback": "Cargando resultados..."
   },
+  "cardJob": {
+    "imageAlt": "Imagen {current} de {total}",
+    "fixerPhotoAlt": "Foto de perfil de {name}",
+    "fixerDefaultAlt": "Foto de perfil del usuario",
+    "prevImage": "Imagen anterior",
+    "nextImage": "Imagen siguiente",
+    "contactWhatsApp": "Contactar por WhatsApp",
+    "searchResults": "Resultados de la búsqueda",
+    "noResults": "No se encontraron resultados"
+  },
   "calendar": {
     "months": {
       "january": "enero",
