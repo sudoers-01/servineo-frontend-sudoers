@@ -4,10 +4,13 @@ import { useState } from "react"
 import { MapPin, Edit, Save, X, Briefcase, MessageSquare, Star, Phone, Mail, Calendar } from "lucide-react"
 import Image from "next/image"
 import Link from 'next/link';
-import type { Fixer } from "@/app/lib/mock-data"
+import type { Fixer } from "@/app/lib/mock-data";
+import JobStatistics from "@/Components/fixer/Fixer-statistics"
+import { useTranslations } from 'next-intl'
 
 export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner?: boolean }) {
-    const [isEditing, setIsEditing] = useState(false)
+  const t = useTranslations('fixerProfile.profile')  
+  const [isEditing, setIsEditing] = useState(false)
     const [formData, setFormData] = useState({
         bio: fixer.bio || "",
         phone: fixer.phone || "",
@@ -79,10 +82,10 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                             <div className="flex items-center justify-center md:justify-start gap-4 mt-4">
                                 <div className="flex items-center gap-1 bg-white/20 px-3 py-1 rounded-full">
                                     <Star className="w-4 h-4 text-yellow-300 fill-yellow-300" />
-                                    <span>{fixer.rating?.toFixed(1) || "Nuevo"}</span>
+                                    <span>{fixer.rating?.toFixed(1) || t('new')}</span>
                                 </div>
                                 <span className="text-sm opacity-80">
-                                    {fixer.completedJobs} trabajos realizados
+                                    {fixer.completedJobs} {t('completedJobs')}
                                 </span>
                             </div>
                             <div className="flex flex-col sm:flex-row gap-3 mt-4 justify-center md:justify-start">
@@ -92,7 +95,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                                         className="px-4 py-2 bg-white text-blue-700 rounded-lg font-medium flex items-center gap-2 justify-center hover:bg-gray-50 transition-colors"
                                     >
                                         <MessageSquare className="w-4 h-4" />
-                                        Contactar por WhatsApp
+                                        {t('contactWhatsApp')}
                                     </button>
                                 )}
                                 {isOwner && (
@@ -129,7 +132,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                                         className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 flex items-center gap-1"
                                     >
                                         <Save className="w-4 h-4" />
-                                        Guardar
+                                        {t('save')}
                                     </button>
                                 </div>
                             ) : (
@@ -138,7 +141,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                                     className="px-3 py-1.5 text-sm text-blue-600 hover:bg-blue-50 rounded-lg flex items-center gap-1"
                                 >
                                     <Edit className="w-4 h-4" />
-                                    Editar perfil
+                                    {t('edit')}
                                 </button>
                             )}
                         </div>
@@ -146,7 +149,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
 
                     {/* Bio Section */}
                     <div className="mb-8">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3">Acerca de mí</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3">{t('aboutMe.title')}</h3>
                         {isEditing ? (
                             <textarea
                                 name="bio"
@@ -154,11 +157,11 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                                 onChange={handleInputChange}
                                 className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 rows={4}
-                                placeholder="Cuéntanos sobre ti y tus servicios..."
+                                placeholder={t('aboutMe.placeholder')}
                             />
                         ) : (
                             <p className="text-gray-700 whitespace-pre-line">
-                                {fixer.bio || "Este profesional aún no ha agregado una descripción."}
+                                {fixer.bio || t('aboutMe.noDescription')}
                             </p>
                         )}
                     </div>
@@ -167,7 +170,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {/* Contact Info */}
                         <div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Información de contacto</h3>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('contactInfo.title')}</h3>
                             <div className="space-y-3">
                                 {fixer.email && (
                                     <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
@@ -184,7 +187,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                                             value={formData.phone}
                                             onChange={handleInputChange}
                                             className="flex-1 p-2 border border-gray-300 rounded-lg"
-                                            placeholder="Número de teléfono"
+                                            placeholder={t('contactInfo.phonePlaceholder')}
                                         />
                                     ) : (
                                         <span>{fixer.phone}</span>
@@ -199,7 +202,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                                             value={formData.whatsapp}
                                             onChange={handleInputChange}
                                             className="flex-1 p-2 border border-gray-300 rounded-lg"
-                                            placeholder="WhatsApp (opcional)"
+                                            placeholder={t('contactInfo.whatsappPlaceholder')}
                                         />
                                     </div>
                                 )}
@@ -212,7 +215,7 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                                 <h3 className="text-lg font-semibold text-gray-900">Mis Servicios</h3>
                                 {isOwner && (
                                     <button className="text-blue-600 text-sm hover:underline">
-                                        Gestionar
+                                        {t('myServices.manage')}
                                     </button>
                                 )}
                             </div>
@@ -249,6 +252,11 @@ export function FixerProfile({ fixer, isOwner = false }: { fixer: Fixer, isOwner
                             )}
                         </div>
                     </div>
+                    {/* Statistics Section */}
+          <div className="pt-8">
+            <h3 className="text-lg font-semibold text-gray-900 mb-3">{t("title2")}</h3>
+              <JobStatistics />
+          </div>
                 </div>
             </div>
         </div>
