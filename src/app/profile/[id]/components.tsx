@@ -1,11 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { jsonFetcher, type FixerRating } from './utils';
 import { apiUrl } from '@/config/api';
 import { DetailsModal } from '@/app/components/fixers/DetailsModal';
 
-function useFixerRatings(fixerId: string) {
+function useFixerRatings(fixerId: string, pollInterval: number = 2000) {
   const [ratings, setRatings] = useState<FixerRating[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
@@ -20,7 +20,7 @@ function useFixerRatings(fixerId: string) {
     createdAt: string;
   };
 
-  const load = async () => {
+  const load = useCallback(async () => {
     if (!url) return;
     try {
       const data = await jsonFetcher<RatingResponse[]>(url);
@@ -39,12 +39,20 @@ function useFixerRatings(fixerId: string) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [url]);
 
   useEffect(() => {
     setIsLoading(true);
     load();
-  }, [url]);
+  }, [url, load]);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      load();
+    }, pollInterval);
+
+    return () => clearInterval(interval);
+  }, [load, pollInterval]);
 
   return { ratings, isLoading, error, refresh: load };
 }
@@ -84,8 +92,17 @@ export function StarRating({
   );
 }
 
-export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; error?: string }) {
+export function RatingDetailsList({
+  ratings,
+  error,
+  fixerId,
+}: {
+  ratings: FixerRating[];
+  error?: string;
+  fixerId: string;
+}) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedRatingId, setSelectedRatingId] = useState<string | null>(null);
   const [expandedCommentId, setExpandedCommentId] = useState<string | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -125,70 +142,75 @@ export function RatingDetailsList({ ratings, error }: { ratings: FixerRating[]; 
   const ordered = [...ratings].sort((a, b) => +new Date(b.createdAt) - +new Date(a.createdAt));
 
   return (
-    <ul className='flex flex-col gap-4'>
-      {ordered.map((r) => {
-        const isLongComment = r.comment && r.comment.length > commentLengthLimit;
-        if (isModalOpen) {
+    <>
+      <DetailsModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedRatingId(null);
+        }}
+        onAccept={() => {
+          setIsModalOpen(false);
+          setSelectedRatingId(null);
+        }}
+        dataId={selectedRatingId || ''}
+        fixerId={fixerId}
+      />
+      <ul className='flex flex-col gap-4'>
+        {ordered.map((r) => {
+          const isLongComment = r.comment && r.comment.length > commentLengthLimit;
           return (
-            <DetailsModal
+            <li
               key={r.id}
-              isOpen={isModalOpen}
-              onClose={() => setIsModalOpen(false)}
-              onAccept={() => setIsModalOpen(false)}
-              dataId={r.id}
-            />
-          );
-        }
-        return (
-          <li
-            key={r.id}
-            className='flex items-start gap-4 p-4 rounded-xl hover:shadow-sm transition-shadow border'
-            style={{ borderColor: 'var(--surface-border)', background: 'var(--surface-card)' }}
-            onClick={() => {
-              setIsModalOpen(true);
-            }}
-          >
-            <div className='h-10 w-10 shrink-0 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden'>
-              <span className='text-xs'>👤</span>
-            </div>
-
-            <div className='flex-1 min-w-0'>
-              <div className='flex flex-wrap items-center justify-between gap-2'>
-                <p className='font-medium truncate'>{r.requester}</p>
-                <StarRating value={r.score} />
+              className='flex items-start gap-4 p-4 rounded-xl transition-colors border cursor-pointer hover:!bg-gray-200'
+              style={{ borderColor: 'var(--surface-border)', background: 'var(--surface-card)' }}
+              onClick={() => {
+                setSelectedRatingId(r.id);
+                setIsModalOpen(true);
+              }}
+            >
+              <div className='h-10 w-10 shrink-0 rounded-full bg-neutral-200 flex items-center justify-center overflow-hidden'>
+                <span className='text-xs'>👤</span>
               </div>
 
-              <p className='text-xs' style={{ color: 'var(--text-muted)' }}>
-                {new Date(r.createdAt).toLocaleDateString()}
-              </p>
+              <div className='flex-1 min-w-0'>
+                <div className='flex flex-wrap items-center justify-between gap-2'>
+                  <p className='font-medium truncate'>{r.requester}</p>
+                  <StarRating value={r.score} />
+                </div>
 
-              <p
-                className={`text-sm mt-1 leading-6 ${expandedCommentId === r.id ? '' : 'line-clamp-2'}`}
-                style={{ color: 'color-mix(in srgb, var(--foreground) 80%, transparent)' }}
-              >
-                {r.comment}
-              </p>
+                <p className='text-xs' style={{ color: 'var(--text-muted)' }}>
+                  {new Date(r.createdAt).toLocaleDateString()}
+                </p>
 
-              {isLongComment && (
-                <button
-                  className='mt-2 text-xs sm:hidden'
-                  style={{ color: 'var(--primary)' }}
-                  onClick={() => toggleComment(r.id)}
-                  aria-expanded={expandedCommentId === r.id}
+                <p
+                  className={`text-sm mt-1 leading-6 ${expandedCommentId === r.id ? '' : 'line-clamp-2'}`}
+                  style={{ color: 'color-mix(in srgb, var(--foreground) 80%, transparent)' }}
                 >
-                  {expandedCommentId === r.id ? 'See less' : 'See more'}
-                </button>
-              )}
-            </div>
-          </li>
-        );
-      })}
-    </ul>
+                  {r.comment}
+                </p>
+
+                {isLongComment && (
+                  <button
+                    className='mt-2 text-xs sm:hidden'
+                    style={{ color: 'var(--primary)' }}
+                    onClick={() => toggleComment(r.id)}
+                    aria-expanded={expandedCommentId === r.id}
+                  >
+                    {expandedCommentId === r.id ? 'See less' : 'See more'}
+                  </button>
+                )}
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    </>
   );
 }
 
 export function ClientRatings({ fixerId }: { fixerId: string }) {
   const { ratings, isLoading, error } = useFixerRatings(fixerId);
   if (isLoading) return <div className='p-4 text-sm'>Loading...</div>;
-  return <RatingDetailsList ratings={ratings} error={error?.message} />;
+  return <RatingDetailsList ratings={ratings} error={error?.message} fixerId={fixerId} />;
 }
