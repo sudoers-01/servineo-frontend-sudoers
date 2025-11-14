@@ -123,7 +123,7 @@ export default function FixerWalletApp() {
   if (screen === 'wallet') {
     return (
       <div className="min-h-screen bg-balck-100">
-      <WalletFlagWatcher fixerId={receivedFixerId ?? "68e87a9cdae3b73d8040102f"} pollMs={4000} />
+      <WalletFlagWatcher fixerId={receivedFixerId ?? "68ef1be7be38c7f1c3c2c78c"} pollMs={4000} />
         {/* Header */}
         <div className="bg-blue-600 text-white px-6 py-4">
           <h1 className="text-2xl font-bold">Fixer Wallet</h1>
@@ -193,7 +193,7 @@ export default function FixerWalletApp() {
   if (screen === 'recharge') {
     return (
       <div className="min-h-screen bg-gray-100">
-        <WalletFlagWatcher fixerId={receivedFixerId ?? "68e87a9cdae3b73d8040102f"} pollMs={4000} />
+        <WalletFlagWatcher fixerId={receivedFixerId ?? "68ef1be7be38c7f1c3c2c78c"} pollMs={4000} />
         {/* Header */}
         <div className="bg-blue-600 text-white px-6 py-4">
           <h1 className="text-2xl font-bold">Recargar Saldo</h1>
@@ -286,7 +286,7 @@ export default function FixerWalletApp() {
   // Pantalla 3: Historial Completo
   return (
     <div className="min-h-screen bg-gray-100">
-      <WalletFlagWatcher fixerId={receivedFixerId ?? "68e87a9cdae3b73d8040102f"} pollMs={4000} />
+      <WalletFlagWatcher fixerId={receivedFixerId ?? "68ef1be7be38c7f1c3c2c78c"} pollMs={4000} />
       {/* Header */}
       <div className="bg-blue-600 text-white px-6 py-4 flex items-center gap-4">
         <button onClick={() => setScreen('wallet')}>

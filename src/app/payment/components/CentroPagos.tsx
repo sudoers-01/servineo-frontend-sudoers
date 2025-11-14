@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 import WalletFlagWatcher from "./WalletFlagWatcher";
 
-const MOCK_FIXER_ID = "68e87a9cdae3b73d8040102f";     // ← userId mock
+const MOCK_FIXER_ID = "68ef1be7be38c7f1c3c2c78c";     // ← userId mock
 const MOCK_WALLET_ID = "6912a6bfbab17d15558bdfe4";    // ← NO lo usa el watcher (solo referencia)
 
 const CentroDePagos = () => {
