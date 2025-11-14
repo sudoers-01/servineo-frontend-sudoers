@@ -1,23 +1,13 @@
 {
-    "HeroSection":
-    {
-        "title": "Find the perfect professional ",
-        "subtitle": "We connect your home with verified experts in your city.",
-        "placeholder": "what service do you need?",
-        "search": "Search",
-        "a": "Popular searches:",
-        "professional" : "professionals",
-        "Projects completed": "Projects completed",
-        "Overall grade" : "Overall grade"
-        
-    },
-    "jobOffers":
-        {
   "HeroSection": {
     "title": "Find the perfect professional",
     "subtitle": "We connect your home with verified experts in your city.",
     "placeholder": "what service do you need?",
-    "search": "Search"
+    "search": "Search",
+    "a": "Popular searches:",
+    "professional": "professionals",
+    "Projects completed": "Projects completed",
+    "Overall grade": "Overall grade"
   },
   "jobOffers": {
     "pageTitle": "Job Offers",
@@ -104,7 +94,20 @@
   },
   "Services": {
     "serTitle": "Our Services",
-    "serDescription": "Find the perfect service for your needs"
+    "serDescription": "Find the perfect service for your needs",
+    "name services": "Plumbing",
+    "Description": "Plumbing repairs and installations"
+  },
+  "becomeFixer": {
+    "title": "Become a Fixer",
+    "description": "Complete your registration and enable your account as a Fixer",
+    "InputData": "Initial Data",
+    "button1": "Continue",
+    "completeName": "Full Name",
+    "eMail": "Email",
+    "phone": "Phone",
+    "digits": "digits"
+
   },
   "myOffers": {
     "newOffer": "New Offer",
@@ -152,17 +155,6 @@
       "reviews": "Reviews",
       "gallery": "Gallery"
     },
-    "Services":{
-    "serTitle": "Our Services",
-    "serDescription": "Find the perfect service for your needs",
-    "name services" :"Plumbing",
-    "Description" : " Plumbing repairs and installations"
-    },
-    "becomeFixer":{
-        "title": "Become a Fixer", 
-        "description": "Complete your registration and enable your account as a Fixer",
-        "InputData" : "Initial Data",
-        "button1" : "Continue"
     "actions": {
       "contact": "Contact",
       "writeReview": "Write review",
@@ -240,8 +232,8 @@
       "jobs": "jobs",
       "total": "Total"
     }
-    },
-    "jobOfferModal": {
+  },
+  "jobOfferModal": {
     "closeModal": "Close modal",
     "description": "Description",
     "servicesOffered": "Services Offered",
@@ -251,5 +243,12 @@
     "whatsapp": "WhatsApp",
     "city": "City",
     "contactButton": "Contact via WhatsApp"
+  },
+  "navbar": {
+    "logo": "Logo",
+    "jobOffers": "Job Offers",
+    "becomeFixer": "Become a Fixer",
+    "myOffers": "My Offers"
   }
+  
 }
