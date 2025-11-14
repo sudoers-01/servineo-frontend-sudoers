@@ -13,67 +13,70 @@
     },
     "jobOffers":
         {
+  "HeroSection": {
+    "title": "Find the perfect professional",
+    "subtitle": "We connect your home with verified experts in your city.",
+    "placeholder": "what service do you need?",
+    "search": "Search"
+  },
+  "jobOffers": {
     "pageTitle": "Job Offers",
     "available": "available",
     "backToHome": "Home",
     "viewModes": {
-        "list": "List",
-        "map": "Map"
+      "list": "List",
+      "map": "Map"
     },
     "emptyState": {
-        "title": "No offers found",
-        "description": "There are no offers matching your current search or filters."
+      "title": "No offers found",
+      "description": "There are no offers matching your current search or filters."
     },
     "map": {
-            "loading": "Loading map...",
-            "yourLocation": "Your location",
-            "jobOffers": "Job offers",
-            "radius": "Radius: ~1km",
-            "mapDetails": "Map details",
-            "availableOffers": {
-                "singular": "available offer",
-                "plural": "available offers"
-            },
-            "distance": "away"
+      "loading": "Loading map...",
+      "yourLocation": "Your location",
+      "jobOffers": "Job offers",
+      "radius": "Radius: ~1km",
+      "mapDetails": "Map details",
+      "availableOffers": {
+        "singular": "available offer",
+        "plural": "available offers"
+      },
+      "distance": "away"
     }
+  },
+  "search": {
+    "placeholder": "What service do you need?",
+    "buttonSearch": "Search",
+    "openFilters": "Open filters",
+    "clearSearch": "Clear search",
+    "moreFilters": "More filters",
+    "recentSearches": "Recent searches",
+    "clear": "Clear"
+  },
+  "filtersPanel": {
+    "filters": "Filters",
+    "resetButton": {
+      "desktop": "Reset",
+      "mobile": "Reset Filters"
     },
-    "search": {
-        "placeholder": "What service do you need?",
-        "buttonSearch": "Search",
-        "openFilters": "Open filters",
-        "clearSearch": "Clear search",
-        "moreFilters": "More filters",
-        "recentSearches": "Recent searches",
-        "clear": "Clear"
-    },
-    "filtersPanel": {
-        "filters": "Filters",
-        "resetButton": {
-            "desktop": "Reset",
-            "mobile": "Reset Filters"
-        },
-        "fixerName": "Fixer Name",
-        "city": "City",
-        "jobCategory": "Job Type"
-    },
-    "navigation": {
-        "home": "Home",
-        "jobOffers": "Job Offers",
-        "login": "Sign In",
-        "register": "Sign Up",
-        "logo": "LOGO"
-    },
-
-    
-    
-
-    "cta": { 
-        "footerTitle": "Ready to find the ideal professional?", 
-        "footerSubtitle": "Join thousands of people who have already found the perfect professional for their needs", 
-        "footerButton": "Sign up for free", 
-        "footerButtonView": "View services" 
-    },
-    "HowItWorks": {
+    "fixerName": "Fixer Name",
+    "city": "City",
+    "jobCategory": "Job Type"
+  },
+  "navigation": {
+    "home": "Home",
+    "jobOffers": "Job Offers",
+    "login": "Sign In",
+    "register": "Sign Up",
+    "logo": "LOGO"
+  },
+  "cta": {
+    "footerTitle": "Ready to find the ideal professional?",
+    "footerSubtitle": "Join thousands of people who have already found the perfect professional for their needs",
+    "footerButton": "Sign up for free",
+    "footerButtonView": "View services"
+  },
+  "HowItWorks": {
     "question": "How does it work?",
     "questionResponse": "Find and hire the ideal professional in simple steps",
     "HowItWorksSearch": "Search",
@@ -84,20 +87,70 @@
     "HowItWorksContactDescription": "Talk directly with professionals",
     "HowItWorksRate": "Rate",
     "HowItWorksRateDescription": "Share your experience"
+  },
+  "Inspiration": {
+    "insTitle": "Inspiration for your home",
+    "insDescription": "Discover ideas and projects carried out by our expert professionals"
+  },
+  "Map": {
+    "mapTitle": "Find services near you",
+    "mapDescription": "Explore available professionals in your area",
+    "mapInteractive": "Interactive map here"
+  },
+  "RecentOffer": {
+    "recOfTitle": "Recent Offers",
+    "recOfDescription": "Discover the latest published offers",
+    "viewAll": "View all →"
+  },
+  "Services": {
+    "serTitle": "Our Services",
+    "serDescription": "Find the perfect service for your needs"
+  },
+  "myOffers": {
+    "newOffer": "New Offer",
+    "noOffers": {
+      "title": "You have no published offers",
+      "description": "Create your first job offer so clients can find and contact you",
+      "createFirst": "Create First Offer"
     },
-    "Inspiration":{
-        "insTitle": "Inspiration for your home",
-        "insDescription": "Discover ideas and projects carried out by our expert professionals"
+    "actions": {
+      "edit": "Edit",
+      "delete": "Delete",
+      "saveChanges": "Save Changes",
+      "publishOffer": "Publish Offer"
     },
-    "Map":{
-        "mapTitle": "Find services near you",
-        "mapDescription": "Explore available professionals in your area",
-        "mapInteractive": "Interactive map here"
+    "notifications": {
+      "offerDeleted": {
+        "title": "Offer deleted",
+        "message": "The offer was successfully deleted"
+      },
+      "offerUpdated": {
+        "title": "Offer updated",
+        "message": "The offer was successfully updated"
+      },
+      "offerCreated": {
+        "title": "Offer created",
+        "message": "The offer was successfully created"
+      },
+      "error": {
+        "title": "Error",
+        "deleteMessage": "Could not delete the offer. Please try again.",
+        "formMessage": "There was an error processing the form. Please try again."
+      }
     },
-    "RecentOffer":{
-        "recOfTitle": "Recent Offers",
-        "recOfDescription": "Discover the latest published offers",
-        "viewAll": "View all →"
+    "confirmDelete": {
+      "title": "Delete offer?",
+      "message": "This action cannot be undone. Are you sure you want to delete this offer?",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    }
+  },
+  "fixerProfile": {
+    "tabs": {
+      "home": "Home",
+      "services": "Services",
+      "reviews": "Reviews",
+      "gallery": "Gallery"
     },
     "Services":{
     "serTitle": "Our Services",
@@ -110,5 +163,93 @@
         "description": "Complete your registration and enable your account as a Fixer",
         "InputData" : "Initial Data",
         "button1" : "Continue"
+    "actions": {
+      "contact": "Contact",
+      "writeReview": "Write review",
+      "viewAll": "View all"
+    },
+    "about": {
+      "title": "About",
+      "noDescription": "This professional has not yet added a description.",
+      "experience": "Experience",
+      "years": "years",
+      "completedJobs": "completed jobs"
+    },
+    "services": {
+      "title": "Services",
+      "myServices": "My Services",
+      "description": "Professional service specialized in"
+    },
+    "recentJobs": {
+      "title": "Recent Jobs"
+    },
+    "reviews": {
+      "title": "Reviews",
+      "new": "New",
+      "satisfied": "Satisfied Customer",
+      "ago": "",
+      "week": "week ago",
+      "weeks": "weeks ago",
+      "sampleReview": "Excellent service, very professional and punctual. The work was impeccable."
+    },
+    "gallery": {
+      "title": "Work Gallery",
+      "noPhotos": {
+        "title": "No photos yet",
+        "description": "This professional has not yet shared photos of their work."
+      },
+      "workLabel": "Work"
+    },
+    "profile": {
+      "edit": "Edit profile",
+      "save": "Save",
+      "contactWhatsApp": "Contact via WhatsApp",
+      "completedJobs": "completed jobs",
+      "new": "New",
+      "aboutMe": {
+        "title": "About me",
+        "placeholder": "Tell us about yourself and your services...",
+        "noDescription": "This professional has not yet added a description."
+      },
+      "contactInfo": {
+        "title": "Contact information",
+        "phonePlaceholder": "Phone number",
+        "whatsappPlaceholder": "WhatsApp (optional)"
+      },
+      "myServices": {
+        "title": "My Services",
+        "manage": "Manage",
+        "noServices": "No services added yet"
+      },
+      "paymentMethods": {
+        "title": "Payment methods"
+      }
     }
+  },
+  "statistics": {
+    "jobs": {
+      "title": "Job Statistics",
+      "loading": "Loading statistics...",
+      "error": "Error loading data or data unavailable.",
+      "noLogs": "No job status logs found.",
+      "status": {
+        "completed": "Completed",
+        "inProgress": "In Progress",
+        "pending": "Pending"
+      },
+      "jobs": "jobs",
+      "total": "Total"
+    }
+    },
+    "jobOfferModal": {
+    "closeModal": "Close modal",
+    "description": "Description",
+    "servicesOffered": "Services Offered",
+    "gallery": "Work Gallery",
+    "photo": "Photo",
+    "contactInfo": "Contact Information",
+    "whatsapp": "WhatsApp",
+    "city": "City",
+    "contactButton": "Contact via WhatsApp"
+  }
 }

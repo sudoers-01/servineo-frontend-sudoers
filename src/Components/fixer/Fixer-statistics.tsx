@@ -1,13 +1,8 @@
 "use client"
 
+import { useTranslations } from 'next-intl'
 import { Pie, PieChart, Cell, Tooltip } from "recharts"
 import { useGetJobStatisticsQuery, JobLog } from '../../app/redux/services/statisticsApi';
-
-const COLORS = {
-    Completados: "#10B981",
-    "En proceso": "#3B82F6",
-    Pendientes: "#F59E0B",
-}
 
 const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
@@ -20,15 +15,23 @@ const CustomTooltip = ({ active, payload }: any) => {
     return null
 }
 
-
 export default function EstadisticasTrabajos() {
+    const t = useTranslations('statistics.jobs')
+    
     const { data: jobLogs, isLoading, isError } = useGetJobStatisticsQuery();
 
+    // Definir colores usando las claves traducibles
+    const COLORS = {
+        completed: "#10B981",
+        inProgress: "#3B82F6",
+        pending: "#F59E0B",
+    }
+
     if (isLoading) {
-        return <div className="text-center p-8">Cargando estadísticas...</div>;
+        return <div className="text-center p-8">{t('loading')}</div>;
     }
     if (isError || !jobLogs) {
-        return <div className="text-center p-8 text-red-600">Error al cargar datos o datos no disponibles.</div>;
+        return <div className="text-center p-8 text-red-600">{t('error')}</div>;
     }
 
     const dailyStatusLog = jobLogs
@@ -36,24 +39,25 @@ export default function EstadisticasTrabajos() {
         .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
 
     if (!dailyStatusLog) {
-        return <div className="text-center p-8 text-gray-500">No se encontraron logs de estado de trabajos.</div>;
+        return <div className="text-center p-8 text-gray-500">{t('noLogs')}</div>;
     }
     
     const stats = dailyStatusLog.metadata;
 
+    // Usar claves en inglés internamente para la lógica
     const chartData = [
-        { estado: "Completados", cantidad: stats.completed },
-        { estado: "En proceso", cantidad: stats.inProgress },
-        { estado: "Pendientes", cantidad: stats.pending },
+        { estado: "completed", estadoLabel: t('status.completed'), cantidad: stats.completed },
+        { estado: "inProgress", estadoLabel: t('status.inProgress'), cantidad: stats.inProgress },
+        { estado: "pending", estadoLabel: t('status.pending'), cantidad: stats.pending },
     ];
 
     const totalTrabajos = stats.total;
 
     return (
-        <div className="flex flex-col font-['Roboto'] shadow-md rounded-2xl p-4 bg-white max-w-sm mx-auto">
+        <div className="flex flex-col font-['Roboto'] rounded-2xl p-4 bg-white">
             <div className="flex justify-center pb-2">
                 <h2 className="text-xl font-semibold text-gray-800">
-                    Estadísticas de trabajos
+                    {t('title')}
                 </h2>
             </div>
             <div className="flex flex-col items-center justify-center">
@@ -62,7 +66,7 @@ export default function EstadisticasTrabajos() {
                     <Pie
                         data={chartData}
                         dataKey="cantidad"
-                        nameKey="estado"
+                        nameKey="estadoLabel"
                         outerRadius={100}
                         labelLine={false}
                         label={({ payload, ...props }) => (
@@ -79,7 +83,10 @@ export default function EstadisticasTrabajos() {
                             </text>
                         )}>
                         {chartData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[entry.estado as keyof typeof COLORS]} />
+                            <Cell 
+                                key={`cell-${index}`} 
+                                fill={COLORS[entry.estado as keyof typeof COLORS]} 
+                            />
                         ))}
                     </Pie>
                 </PieChart>
@@ -94,11 +101,11 @@ export default function EstadisticasTrabajos() {
                                 className="inline-block w-3 h-3 rounded-full mr-2" 
                                 style={{ backgroundColor: COLORS[item.estado as keyof typeof COLORS] }}
                             ></span>
-                            {item.estado}
+                            {item.estadoLabel}
                         </span>
                         
                         <span>
-                            {item.cantidad} trabajos 
+                            {item.cantidad} {t('jobs')}
                             <span className="ml-2 font-normal text-gray-500">
                                 ({((item.cantidad / totalTrabajos) * 100).toFixed(0)}%)
                             </span>
@@ -107,8 +114,8 @@ export default function EstadisticasTrabajos() {
                 ))}
                 
                 <div className="flex justify-between px-4 py-1 mt-2 border-t-2 border-gray-300 font-bold">
-                    <span>Total</span>
-                    <span>{totalTrabajos} trabajos</span>
+                    <span>{t('total')}</span>
+                    <span>{totalTrabajos} {t('jobs')}</span>
                 </div>
             </div>
         </div>
