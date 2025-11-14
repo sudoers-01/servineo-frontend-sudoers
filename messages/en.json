@@ -1,4 +1,18 @@
 {
+    "HeroSection":
+    {
+        "title": "Find the perfect professional ",
+        "subtitle": "We connect your home with verified experts in your city.",
+        "placeholder": "what service do you need?",
+        "search": "Search",
+        "a": "Popular searches:",
+        "professional" : "professionals",
+        "Projects completed": "Projects completed",
+        "Overall grade" : "Overall grade"
+        
+    },
+    "jobOffers":
+        {
   "HeroSection": {
     "title": "Find the perfect professional",
     "subtitle": "We connect your home with verified experts in your city.",
@@ -138,6 +152,17 @@
       "reviews": "Reviews",
       "gallery": "Gallery"
     },
+    "Services":{
+    "serTitle": "Our Services",
+    "serDescription": "Find the perfect service for your needs",
+    "name services" :"Plumbing",
+    "Description" : " Plumbing repairs and installations"
+    },
+    "becomeFixer":{
+        "title": "Become a Fixer", 
+        "description": "Complete your registration and enable your account as a Fixer",
+        "InputData" : "Initial Data",
+        "button1" : "Continue"
     "actions": {
       "contact": "Contact",
       "writeReview": "Write review",
