@@ -196,7 +196,12 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
             {jobs.map((job) => (
               <li
                 key={job.id}
-                className='flex items-center justify-between gap-4 p-4 rounded-xl border bg-white border-gray-200 w-full shadow-[0_6px_8px_rgba(0,0,0,0.06)]'
+                className='
+    flex items-center justify-between gap-4 p-4 rounded-xl border bg-white 
+    border-gray-200 w-full shadow-[0_6px_8px_rgba(0,0,0,0.06)]
+    transition-all duration-200 transform
+    hover:-translate-y-1 hover:shadow-[0_12px_16px_rgba(0,0,0,0.15)]
+  '
               >
                 <div className='min-w-0'>
                   <p className='font-medium truncate text-gray-800'>{job.title}</p>
@@ -350,7 +355,7 @@ export default function RatedJobsPage() {
             />
 
             <GenericDropdown
-              label='Filtrar por fecha'
+              label='Ordenar por fecha'
               disabled={disableDropdowns}
               onSelect={handleDateSort}
               selectedKey={['recent', 'oldest'].includes(currentSort) ? currentSort : undefined}
