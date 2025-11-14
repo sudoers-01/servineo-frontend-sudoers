@@ -171,7 +171,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
     }))
   }
 
-  function addExperience(experience: Experience) {
+  function addExperience(experience: Omit<Experience, "id">) {
     setDraft((d) => ({
       ...d,
       experiences: [...d.experiences, { ...experience, id: `exp-${Date.now()}` }],

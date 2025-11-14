@@ -87,7 +87,9 @@ export default function FixerProfilePage() {
     completedJobs: 0,
     services: fixerProfile.profile.services.map(formatService),
     bio: fixerProfile.profile.additionalInfo?.bio || "Técnico con experiencia en reparaciones del hogar.",
-    joinDate: new Date(fixerProfile.profile.createdAt),
+    joinDate: fixerProfile.profile.createdAt 
+  ? new Date(fixerProfile.profile.createdAt).toISOString().split('T')[0] 
+  : "2024-01-01",
     jobOffers: jobOffers.map((job: JobOffer) => ({
       id: job.id,
       title: job.title,

@@ -33,7 +33,7 @@ export interface Fixer {
   completedJobs: number;
   services: string[];
   bio: string;
-  joinDate: Date;
+  joinDate: string;
   jobOffers: ComponentJobOffer[];
   paymentMethods: string[];
   whatsapp: string;

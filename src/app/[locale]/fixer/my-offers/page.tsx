@@ -132,13 +132,45 @@ export default function MyOffersPage() {
       setIsFormOpen(false)
       setEditingOffer(null)
       refetch()
-    } catch (error) {
-      console.error("Error al procesar el formulario:", error)
+      } catch (error: any) {
+      console.error("Error completo:", error)
+
+      let errorMessage = "Error desconocido al crear la oferta"
+
+      // Errores de validación del backend (Zod, etc.)
+      if (error?.data?.message) {
+        errorMessage = error.data.message
+      }
+      // Errores de red o servidor
+      else if (error?.error) {
+        errorMessage = error.error
+      }
+      // Errores de status (401, 500, etc.)
+      else if (error?.status) {
+        switch (error.status) {
+          case 400:
+            errorMessage = "Datos inválidos. Revisa el formulario."
+            break
+          case 401:
+            errorMessage = "No estás autorizado. Inicia sesión nuevamente."
+            break
+          case 500:
+            errorMessage = "Error en el servidor. Intenta más tarde."
+            break
+          default:
+            errorMessage = `Error ${error.status}: No se pudo conectar`
+        }
+      }
+      // Último recurso
+      else if (typeof error === "string") {
+        errorMessage = error
+      }
+
       setNotification({
         isOpen: true,
         type: "error",
-        title: "Error",
-        message: "Hubo un error al procesar el formulario. Por favor, intenta de nuevo.",
+        title: "Error al crear oferta",
+        message: errorMessage,
       })
     }
   }
