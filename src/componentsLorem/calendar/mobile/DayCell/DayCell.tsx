@@ -11,7 +11,7 @@ interface DayCellProps {
     selectedDate: Date;
 
     onSelectDate: (date: Date) => void;
-    color: number
+    color: string
 }
 
 export default function DayCell({
@@ -25,20 +25,35 @@ export default function DayCell({
 
     const {
         isToday,
-        getColor
+        isPast
     } = useDayUtilities(
         date
     );
 
     const isSelected = isSameDay(date, selectedDate);
     const todayRing = isToday ? 'ring-2 ring-blue-600 ring-offset-2' : '';
+
+    const colorControl = () => {
+        if (isSelected) {
+            return "bg-blue-500 text-white";
+        } else {
+            if (!isPast) {
+
+                return `${color} text-white`;
+            } else {
+                return 'text-black';
+            }
+        }
+
+    }
+
     return (
         <button
             onClick={() => onSelectDate(date)}
             className={`
         relative flex items-center justify-center w-10 h-10 mx-auto rounded-full 
-        select-none font-medium cursor-pointer  
-        ${isSelected ? "bg-blue-500" : getColor(color)} ${todayRing}`}
+        select-none font-medium cursor-pointer 
+        ${colorControl()} ${todayRing}`}
         >
             <span>{dayNumber}</span>
 

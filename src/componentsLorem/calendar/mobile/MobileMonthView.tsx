@@ -16,6 +16,7 @@ interface MobileMonthViewProps {
     onSelectDate: (date: Date) => void;
 }
 
+
 export default function MobileMonthView({
     year,
     month,
@@ -26,7 +27,11 @@ export default function MobileMonthView({
 }: MobileMonthViewProps) {
     const { fixer_id } = useUserRole();
 
-
+    const {
+        getColor
+    } = useDayUtilities(
+        today
+    );
 
     const {
         getAppointmentsForDay,
@@ -55,7 +60,7 @@ export default function MobileMonthView({
                 date={date}
                 selectedDate={selectedDate}
                 onSelectDate={onSelectDate}
-                color={getAppointmentsForDay(day, month, year)}
+                color={getColor(getAppointmentsForDay(day, month, year))}
             />
         );
 
