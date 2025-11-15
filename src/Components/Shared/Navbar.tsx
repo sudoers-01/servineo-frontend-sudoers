@@ -2,35 +2,23 @@
 
 import Link from 'next/link';
 import { Briefcase, UserCog, ClipboardList } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/app/redux/hooks';
-import { resetFilters } from '@/app/redux/slice/jobOfert';
+import { resetFilters, clearJobOffersStorage } from '@/app/redux/slice/jobOfert';
 
 export function Navbar() {
   const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const isActive = (path: string) => pathname === path;
-
-  const dispatch = useAppDispatch();
 
   const handleJobOffersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
 
-    // Reset store filters so URL sync won't re-add params, and clear storage
+    clearJobOffersStorage();
     dispatch(resetFilters());
-    try {
-      localStorage.removeItem('jobOffers_paginaActual');
-      localStorage.removeItem('jobOffers_registrosPorPagina');
-      localStorage.removeItem('jobOffers_search');
-      localStorage.removeItem('jobOffers_filters');
-      localStorage.removeItem('jobOffers_sortBy');
-    } catch {
-      // ignore
-    }
-
-    // Construir URL limpia sin query params
-    const baseUrl = window.location.origin;
-    window.location.href = `${baseUrl}/job-offer-list`;
+    router.push('/job-offer-list');
   };
 
   return (

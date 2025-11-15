@@ -1,10 +1,10 @@
 'use client';
-import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import React, { useMemo, useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { MapPin, Star, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { categoryImages } from '@/app/lib/constants/img';
+import { getImagesForJob } from '@/app/lib/constants/img';
 
 interface OfferData {
   _id: string;
@@ -33,6 +33,7 @@ interface CardJobProps {
 const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
   const router = useRouter();
   const t = useTranslations('cardJob');
+  const tCat = useTranslations('Categories');
 
   const handleWhatsAppClick = (e: React.MouseEvent, contactPhone: string) => {
     e.stopPropagation();
@@ -41,31 +42,13 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
   };
 
   const handleFixerClick = (e: React.MouseEvent, fixerId?: string) => {
-    console.warn(fixerId);
     e.stopPropagation();
     if (fixerId) {
       router.push(`/fixer/${fixerId}`);
-    }else{ router.push(`/fixer/fixer-001`);}
+    } else {
+      router.push(`/fixer/fixer-001`);
+    }
   };
-
-  const getImagesForJob = useCallback((jobId: string, category: string): string[] => {
-    const images = categoryImages[category] || categoryImages['Default'];
-    let hash = 0;
-    for (let i = 0; i < jobId.length; i++) {
-      hash = jobId.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    const numImages = (Math.abs(hash) % 3) + 1;
-    const startIndex = Math.abs(hash) % images.length;
-
-    const selectedImages: string[] = [];
-    for (let i = 0; i < numImages; i++) {
-      const index = (startIndex + i) % images.length;
-      selectedImages.push(images[index]);
-    }
-
-    return selectedImages;
-  }, []);
 
   const trabajosConImagenes = useMemo(() => {
     const mappedTrabajos = trabajos.map((trabajo) => {
@@ -86,10 +69,8 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
       };
     });
 
-    console.warn(`Cantidad de trabajos: ${mappedTrabajos.length}`);
-
     return mappedTrabajos;
-  }, [trabajos, getImagesForJob]);
+  }, [trabajos]);
 
   const GridView = () => {
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
@@ -122,13 +103,6 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
       }));
     };
 
-    useEffect(() => {
-      const intervals = intervalRefs.current;
-      return () => {
-        Object.values(intervals).forEach(clearInterval);
-      };
-    }, []);
-
     const handlePrevImage = (e: React.MouseEvent, cardId: string, totalImages: number) => {
       e.stopPropagation();
       if (intervalRefs.current[cardId]) {
@@ -138,12 +112,6 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
         ...prev,
         [cardId]: ((prev[cardId] || 0) - 1 + totalImages) % totalImages,
       }));
-      intervalRefs.current[cardId] = setInterval(() => {
-        setCurrentImageIndex((prev) => ({
-          ...prev,
-          [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
-        }));
-      }, 2000);
     };
 
     const handleNextImage = (e: React.MouseEvent, cardId: string, totalImages: number) => {
@@ -155,13 +123,14 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
         ...prev,
         [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
       }));
-      intervalRefs.current[cardId] = setInterval(() => {
-        setCurrentImageIndex((prev) => ({
-          ...prev,
-          [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
-        }));
-      }, 2000);
     };
+
+    useEffect(() => {
+      const intervals = intervalRefs.current;
+      return () => {
+        Object.values(intervals).forEach(clearInterval);
+      };
+    }, []);
 
     const handleCardClick = (offer: OfferData) => {
       if (onClick) {
@@ -180,53 +149,58 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
               key={`${trabajo._id}-${index}`}
               onMouseEnter={() => handleMouseEnter(trabajo._id)}
               onMouseLeave={() => handleMouseLeave(trabajo._id)}
-              className="group relative w-full overflow-hidden rounded-xl border-primary border-2 bg-white transition-all duration-300 hover:shadow-md hover:-translate-y-0.5"
+              className="group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1"
             >
-              {/* Área clickeable para abrir modal */}
+              {/* Área clickeable para modal */}
               <div onClick={() => handleCardClick(trabajo)} className="cursor-pointer">
-                {/* Imagen con controles */}
-                <div className="h-48 w-full relative">
+                {/* Imagen */}
+                <div className="h-48 w-full relative overflow-hidden">
                   {trabajo.allImages?.map((img, idx) => (
                     <Image
                       key={idx}
                       src={img}
-                      alt={`${trabajo.title} - ${t('imageAlt', { current: idx + 1, total: totalImages })}`}
+                      alt={trabajo.title}
                       fill
-                      sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                      className={`object-cover transition-opacity duration-500 ${
-                        idx === currentIndex ? 'opacity-100' : 'opacity-0'
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                      className={`object-cover transition-all duration-500 ${
+                        idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                       }`}
                       style={{ position: 'absolute' }}
                       priority={idx === 0}
                     />
                   ))}
 
+                  {/* Flechitas de navegación */}
                   {totalImages > 1 && hoveredCard === trabajo._id && (
                     <>
                       <button
                         onClick={(e) => handlePrevImage(e, trabajo._id, totalImages)}
-                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                        aria-label={t('prevImage')}
+                        className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110"
+                        aria-label="Imagen anterior"
                       >
                         <ChevronLeft className="w-4 h-4 text-gray-800" />
                       </button>
                       <button
                         onClick={(e) => handleNextImage(e, trabajo._id, totalImages)}
-                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                        aria-label={t('nextImage')}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110"
+                        aria-label="Siguiente imagen"
                       >
                         <ChevronRight className="w-4 h-4 text-gray-800" />
                       </button>
                     </>
                   )}
 
+                  {/* Overlay gradient */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                  {/* Indicadores de imágenes */}
                   {totalImages > 1 && (
-                    <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+                    <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
                       {Array.from({ length: totalImages }).map((_, idx) => (
                         <div
                           key={idx}
-                          className={`h-1 rounded-full transition-all ${
-                            idx === currentIndex ? 'w-4 bg-white' : 'w-1 bg-white/50'
+                          className={`h-1 rounded-full transition-all duration-300 ${
+                            idx === currentIndex ? 'w-6 bg-white shadow-lg' : 'w-1.5 bg-white/60'
                           }`}
                         />
                       ))}
@@ -234,111 +208,93 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                   )}
 
                   {/* City Badge */}
-                  <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 shadow-sm border border-primary">
-                    <MapPin className="w-3 h-3 text-primary" />
-                    <span className="font-medium text-gray-700">{trabajo.city}</span>
+                  <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-medium shadow-sm border border-primary">
+                    <MapPin className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-gray-700">{trabajo.city}</span>
                   </div>
 
                   {/* Price */}
-                  <div className="absolute right-3 top-3 rounded-lg bg-white/90 px-3 py-1.5 text-sm font-semibold text-primary shadow-sm border border-primary/20">
-                    {trabajo.price?.toLocaleString()} Bs
+                  <div className="absolute right-3 top-3 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20">
+                    <span className="text-primary">{trabajo.price?.toLocaleString()} Bs</span>
                   </div>
                 </div>
 
                 {/* Información de la oferta */}
                 <div className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-gray-900 truncate text-left">
-                        {trabajo.title}
-                      </h3>
-                      <p className="mt-1 text-sm text-gray-500 line-clamp-2 text-left">
-                        {trabajo.description}
-                      </p>
-                    </div>
-                  </div>
+                  <h3 className="text-base font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
+                    {trabajo.title}
+                  </h3>
+                  <p className="mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                    {trabajo.description}
+                  </p>
 
-                  <div className="space-y-1.5 mb-3">
+                  <div className="mt-2 flex items-center justify-between">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="bg-primary/10 text-primary px-2 py-1 rounded-full font-medium text-xs">
-                        {trabajo.category}
+                      <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                        {tCat(trabajo.category)}
                       </span>
                       {trabajo.tags && trabajo.tags.length > 0 && (
-                        <>
-                          {trabajo.tags.slice(0, 2).map((tag, idx) => (
-                            <span
-                              key={idx}
-                              className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                        </>
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                          {trabajo.tags[0]}
+                        </span>
                       )}
                     </div>
-                    <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-gray-400">
-                        {new Date(trabajo.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
+                    <span className="text-xs text-gray-400 font-medium">
+                      {new Date(trabajo.createdAt).toLocaleDateString()}
+                    </span>
                   </div>
                 </div>
               </div>
 
-              {/* Información del Fixer - Clickeable para ir al perfil */}
-              <div
-                className="pt-3 border-t border-gray-100 flex items-center justify-between hover:bg-gray-50 px-4 pb-4 transition-colors cursor-pointer"
-                onClick={(e) => handleFixerClick(e, trabajo.fixerId)}
-              >
-                <div className="flex items-center gap-3 flex-1 min-w-0">
-                  <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                    {trabajo.fixerPhoto ? (
-                      <Image
-                        src={trabajo.fixerPhoto}
-                        alt={t('fixerPhotoAlt', { name: trabajo.fixerName })}
-                        className="w-full h-full object-cover"
-                        width={32}
-                        height={32}
-                      />
-                    ) : (
-                      <div
-                        className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium"
-                        aria-label={
-                          trabajo.fixerName
-                            ? t('fixerPhotoAlt', { name: trabajo.fixerName })
-                            : t('fixerDefaultAlt')
-                        }
-                      >
-                        {trabajo.fixerName?.[0]?.toUpperCase() || 'U'}
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900 truncate text-left">
-                      {trabajo.fixerName || 'Usuario'}
-                    </p>
-                    <div className="flex items-center gap-1 text-xs text-gray-500">
+              {/* Información del Fixer */}
+              <div className="border-t border-gray-100">
+                <div className="p-3 flex items-center justify-between gap-3">
+                  {/* Perfil clickeable */}
+                  <div
+                    className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={(e) => handleFixerClick(e, trabajo.fixerId)}
+                  >
+                    <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100">
+                      {trabajo.fixerPhoto ? (
+                        <Image
+                          src={trabajo.fixerPhoto}
+                          alt={trabajo.fixerName}
+                          width={36}
+                          height={36}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
+                          {trabajo.fixerName?.[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="min-w-0 flex-1">
+                      <p className="text-sm font-medium text-gray-900 truncate">
+                        {trabajo.fixerName || t('defaultUserName')}
+                      </p>
                       {trabajo.rating && (
-                        <div className="flex items-center text-amber-400">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          <span className="ml-1 text-xs font-medium text-gray-600">
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span className="text-xs font-semibold text-gray-600">
                             {trabajo.rating.toFixed(1)}
                           </span>
                         </div>
                       )}
                     </div>
                   </div>
+
+                  {/* Botón WhatsApp */}
+                  <button
+                    onClick={(e) => handleWhatsAppClick(e, trabajo.contactPhone)}
+                    className="flex-shrink-0 bg-[#1AA7ED] hover:bg-[#1AA7ED]/90 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-110 flex items-center gap-2 px-3 py-2"
+                    aria-label={t('contactWhatsApp')}
+                  >
+                    <MessageCircle className="w-4 h-4 text-white" />
+                    <span className="text-white text-xs font-medium">{trabajo.contactPhone}</span>
+                  </button>
                 </div>
-                <button
-                  onClick={(e) => handleWhatsAppClick(e, trabajo.contactPhone)}
-                  className="bg-[#1AA7ED] hover:bg-[#1AA7ED] px-3 py-2 rounded-full transition-colors shadow-sm flex items-center gap-2 flex-shrink-0"
-                  aria-label={t('contactWhatsApp')}
-                >
-                  <MessageCircle className="w-4 h-4 text-white" />
-                  <span className="text-white text-xs font-medium hidden sm:inline">
-                    {trabajo.contactPhone}
-                  </span>
-                </button>
               </div>
             </div>
           );
@@ -378,13 +334,6 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
       }));
     };
 
-    useEffect(() => {
-      const intervals = intervalRefs.current;
-      return () => {
-        Object.values(intervals).forEach(clearInterval);
-      };
-    }, []);
-
     const handlePrevImage = (e: React.MouseEvent, cardId: string, totalImages: number) => {
       e.stopPropagation();
       if (intervalRefs.current[cardId]) {
@@ -394,12 +343,6 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
         ...prev,
         [cardId]: ((prev[cardId] || 0) - 1 + totalImages) % totalImages,
       }));
-      intervalRefs.current[cardId] = setInterval(() => {
-        setCurrentImageIndex((prev) => ({
-          ...prev,
-          [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
-        }));
-      }, 2000);
     };
 
     const handleNextImage = (e: React.MouseEvent, cardId: string, totalImages: number) => {
@@ -411,13 +354,14 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
         ...prev,
         [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
       }));
-      intervalRefs.current[cardId] = setInterval(() => {
-        setCurrentImageIndex((prev) => ({
-          ...prev,
-          [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
-        }));
-      }, 2000);
     };
+
+    useEffect(() => {
+      const intervals = intervalRefs.current;
+      return () => {
+        Object.values(intervals).forEach(clearInterval);
+      };
+    }, []);
 
     const handleCardClick = (offer: OfferData) => {
       if (onClick) {
@@ -436,63 +380,69 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
               key={trabajo._id}
               onMouseEnter={() => handleMouseEnter(trabajo._id)}
               onMouseLeave={() => handleMouseLeave(trabajo._id)}
-              className="group relative w-full overflow-hidden rounded-xl border-primary border-2 bg-white transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 flex flex-row"
+              className="group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 flex flex-row"
             >
               {/* Imagen - clickeable para modal */}
               <div
-                className="relative w-64 h-48 flex-shrink-0 overflow-hidden bg-gray-200 cursor-pointer"
+                className="relative w-64 h-48 flex-shrink-0 overflow-hidden cursor-pointer"
                 onClick={() => handleCardClick(trabajo)}
               >
                 {trabajo.allImages?.map((img, idx) => (
                   <Image
                     key={idx}
                     src={img}
-                    alt={`${trabajo.title} - ${t('imageAlt', { current: idx + 1, total: totalImages })}`}
+                    alt={trabajo.title}
                     fill
                     sizes="16rem"
-                    className={`object-cover transition-opacity duration-500 ${
-                      idx === currentIndex ? 'opacity-100' : 'opacity-0'
+                    className={`object-cover transition-all duration-500 ${
+                      idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
                     }`}
                     style={{ position: 'absolute' }}
                     priority={idx === 0}
                   />
                 ))}
 
+                {/* Flechitas de navegación */}
                 {totalImages > 1 && hoveredCard === trabajo._id && (
                   <>
                     <button
                       onClick={(e) => handlePrevImage(e, trabajo._id, totalImages)}
-                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                      aria-label={t('prevImage')}
+                      className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110"
+                      aria-label="Imagen anterior"
                     >
                       <ChevronLeft className="w-4 h-4 text-gray-800" />
                     </button>
                     <button
                       onClick={(e) => handleNextImage(e, trabajo._id, totalImages)}
-                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-md transition-all z-10"
-                      aria-label={t('nextImage')}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110"
+                      aria-label="Siguiente imagen"
                     >
                       <ChevronRight className="w-4 h-4 text-gray-800" />
                     </button>
                   </>
                 )}
 
+                {/* Overlay gradient */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                {/* Indicadores de imágenes */}
                 {totalImages > 1 && (
-                  <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1 z-10">
+                  <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
                     {Array.from({ length: totalImages }).map((_, idx) => (
                       <div
                         key={idx}
-                        className={`h-1 rounded-full transition-all ${
-                          idx === currentIndex ? 'w-4 bg-white' : 'w-1 bg-white/50'
+                        className={`h-1 rounded-full transition-all duration-300 ${
+                          idx === currentIndex ? 'w-6 bg-white shadow-lg' : 'w-1.5 bg-white/60'
                         }`}
                       />
                     ))}
                   </div>
                 )}
 
-                <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-3 py-1 text-xs text-slate-700 shadow-sm border border-primary">
-                  <MapPin className="w-3 h-3 text-primary" />
-                  <span className="font-medium text-gray-700">{trabajo.city}</span>
+                {/* City Badge */}
+                <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-medium shadow-sm border border-primary">
+                  <MapPin className="w-3.5 h-3.5 text-primary" />
+                  <span className="text-gray-700">{trabajo.city}</span>
                 </div>
               </div>
 
@@ -501,89 +451,83 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
                 className="flex-1 p-4 flex flex-col relative cursor-pointer"
                 onClick={() => handleCardClick(trabajo)}
               >
-                <div className="absolute right-4 top-4 rounded-lg bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary border border-primary/20">
-                  {trabajo.price?.toLocaleString()} Bs
+                {/* Price */}
+                <div className="absolute right-4 top-4 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20">
+                  <span className="text-primary">{trabajo.price?.toLocaleString()} Bs</span>
                 </div>
 
                 <div className="mb-2 pr-32">
-                  <h3 className="text-base font-semibold text-gray-900 text-left">
+                  <h3 className="text-base font-semibold text-gray-900 text-left group-hover:text-primary transition-colors">
                     {trabajo.title}
                   </h3>
-                  <p className="mt-1 text-sm text-gray-500 line-clamp-2 text-left">
+                  <p className="mt-1.5 text-sm text-gray-500 line-clamp-2 text-left leading-relaxed">
                     {trabajo.description}
                   </p>
                 </div>
 
-                <div className="mb-3">
+                <div>
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="bg-primary/10 text-primary px-2 py-1 rounded-full font-medium text-xs">
-                      {trabajo.category}
+                    <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+                      {tCat(trabajo.category)}
                     </span>
                     {trabajo.tags && trabajo.tags.length > 0 && (
                       <>
                         {trabajo.tags.slice(0, 2).map((tag, idx) => (
                           <span
                             key={idx}
-                            className="bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs"
+                            className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
                           >
                             {tag}
                           </span>
                         ))}
                       </>
                     )}
-                    <span className="text-xs text-gray-400 ml-auto">
+                    <span className="text-xs text-gray-400 font-medium ml-auto">
                       {new Date(trabajo.createdAt).toLocaleDateString()}
                     </span>
                   </div>
                 </div>
 
-                {/* Información del Fixer - Clickeable para ir al perfil */}
-                <div
-                  className="pt-3 border-t border-gray-100 flex items-center justify-between mt-auto hover:bg-gray-50 -mx-4 px-4 -mb-4 pb-4 transition-colors cursor-pointer"
-                  onClick={(e) => handleFixerClick(e, trabajo.fixerId)}
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                {/* Información del Fixer */}
+                <div className="pt-2 border-t border-gray-100 flex items-center justify-between mt-auto hover:bg-gray-50 transition-colors">
+                  <div
+                    className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={(e) => handleFixerClick(e, trabajo.fixerId)}
+                  >
+                    <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100">
                       {trabajo.fixerPhoto ? (
                         <Image
                           src={trabajo.fixerPhoto}
-                          alt={t('fixerPhotoAlt', { name: trabajo.fixerName })}
+                          alt={trabajo.fixerName}
+                          width={36}
+                          height={36}
                           className="w-full h-full object-cover"
-                          width={32}
-                          height={32}
                         />
                       ) : (
-                        <div
-                          className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-medium"
-                          aria-label={
-                            trabajo.fixerName
-                              ? t('fixerPhotoAlt', { name: trabajo.fixerName })
-                              : t('fixerDefaultAlt')
-                          }
-                        >
+                        <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
                           {trabajo.fixerName?.[0]?.toUpperCase() || 'U'}
                         </div>
                       )}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium text-gray-900 truncate text-left">
-                        {trabajo.fixerName || 'Usuario'}
+                        {trabajo.fixerName || t('defaultUserName')}
                       </p>
-                      <div className="flex items-center gap-1 text-xs text-gray-500">
-                        {trabajo.rating && (
-                          <div className="flex items-center text-amber-400">
-                            <Star className="w-3.5 h-3.5 fill-current" />
-                            <span className="ml-1 text-xs font-medium text-gray-600">
-                              {trabajo.rating.toFixed(1)}
-                            </span>
-                          </div>
-                        )}
-                      </div>
+                      {trabajo.rating && (
+                        <div className="flex items-center gap-1 mt-0.5">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span className="text-xs font-semibold text-gray-600">
+                            {trabajo.rating.toFixed(1)}
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
+
+                  {/* Botón WhatsApp */}
                   <button
                     onClick={(e) => handleWhatsAppClick(e, trabajo.contactPhone)}
-                    className="bg-[#1AA7ED] hover:bg-[#1AA7ED] px-3 py-2 rounded-full transition-colors shadow-sm flex items-center gap-2 flex-shrink-0"
+                    className="flex-shrink-0 bg-[#1AA7ED] hover:bg-[#1AA7ED]/90 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-110 flex items-center gap-2 px-3 py-2"
                     aria-label={t('contactWhatsApp')}
                   >
                     <MessageCircle className="w-4 h-4 text-white" />

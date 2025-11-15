@@ -68,9 +68,18 @@ interface JobOffersState {
   preservedTotalRegistros: number;
   totalPages: number;
   paginaciones: Record<string, PaginationState>;
+  shouldPersist: boolean; // Nueva flag para controlar persistencia
 }
 
-// Helper para leer localStorage de forma segura (genérico)
+const STORAGE_KEYS = {
+  PAGE: 'jobOffers_paginaActual',
+  PAGE_SIZE: 'jobOffers_registrosPorPagina',
+  SEARCH: 'jobOffers_search',
+  FILTERS: 'jobOffers_filters',
+  SORT: 'jobOffers_sortBy',
+} as const;
+
+// Helper para leer localStorage de forma segura
 const getStoredValue = <T>(key: string, defaultValue: T): T => {
   if (typeof window === 'undefined') return defaultValue;
   try {
@@ -82,7 +91,7 @@ const getStoredValue = <T>(key: string, defaultValue: T): T => {
   }
 };
 
-// Helper para guardar en localStorage (genérico)
+// Helper para guardar en localStorage
 const saveToStorage = <T>(key: string, value: T): void => {
   if (typeof window !== 'undefined') {
     try {
@@ -93,46 +102,52 @@ const saveToStorage = <T>(key: string, value: T): void => {
   }
 };
 
-// Estado inicial con valores de localStorage
-const getInitialJobOffersState = (): JobOffersState => {
-  const savedPage = getStoredValue('jobOffers_paginaActual', 1);
-  const savedPageSize = getStoredValue('jobOffers_registrosPorPagina', 10);
-  const savedSearch = getStoredValue('jobOffers_search', '');
-  const savedFilters = getStoredValue('jobOffers_filters', {
+// Helper para limpiar TODO el localStorage relacionado
+export const clearJobOffersStorage = (): void => {
+  if (typeof window !== 'undefined') {
+    try {
+      Object.values(STORAGE_KEYS).forEach(key => {
+        localStorage.removeItem(key);
+      });
+    } catch (error) {
+      console.error('Error clearing localStorage:', error);
+    }
+  }
+};
+
+// Estado inicial con valores por defecto (sin localStorage en inicio)
+const getDefaultState = (): JobOffersState => ({
+  trabajos: [],
+  loading: true,
+  error: null,
+  filters: {
     range: [],
     city: '',
     category: [],
-  });
-  const savedSortBy = getStoredValue('jobOffers_sortBy', 'recent');
-
-  return {
-    trabajos: [],
-    loading: true,
-    error: null,
-    filters: savedFilters,
-    sortBy: savedSortBy,
-    search: savedSearch,
-    date: null,
-    rating: null,
-    titleOnly: false,
-    exact: false,
-    paginaActual: savedPage,
-    registrosPorPagina: savedPageSize,
-    totalRegistros: 0,
-    preservedTotalRegistros: 0,
-    totalPages: 0,
-    paginaciones: {
-      offers: {
-        paginaActual: savedPage,
-        registrosPorPagina: savedPageSize,
-        totalRegistros: 0,
-        totalPages: 0,
-      },
+  },
+  sortBy: 'recent',
+  search: '',
+  date: null,
+  rating: null,
+  titleOnly: false,
+  exact: false,
+  paginaActual: 1,
+  registrosPorPagina: 10,
+  totalRegistros: 0,
+  preservedTotalRegistros: 0,
+  totalPages: 0,
+  paginaciones: {
+    offers: {
+      paginaActual: 1,
+      registrosPorPagina: 10,
+      totalRegistros: 0,
+      totalPages: 0,
     },
-  };
-};
+  },
+  shouldPersist: true,
+});
 
-const initialState: JobOffersState = getInitialJobOffersState();
+const initialState: JobOffersState = getDefaultState();
 
 interface FetchOffersParams {
   searchText: string;
@@ -152,7 +167,6 @@ export const fetchOffers = createAsyncThunk<FetchOffersResult, FetchOffersParams
   'jobOffers/fetchOffers',
   async (params, { rejectWithValue }) => {
     try {
-      // Validar que el límite sea uno de los permitidos
       if (!JOBOFERT_ALLOWED_LIMITS.includes(params.limit)) {
         return rejectWithValue(
           `Límite no permitido. Valores permitidos: ${JOBOFERT_ALLOWED_LIMITS.join(', ')}`,
@@ -183,12 +197,10 @@ export const fetchOffers = createAsyncThunk<FetchOffersResult, FetchOffersParams
         urlParams.append('sortBy', params.sortBy);
       }
 
-      // optional exact date filter (YYYY-MM-DD)
       if (params.date) {
         urlParams.append('date', params.date);
       }
 
-      // optional rating integer 1..5 -> backend should interpret as range [n, n+0.9]
       if (params.rating != null) {
         urlParams.append('rating', String(params.rating));
       }
@@ -200,7 +212,6 @@ export const fetchOffers = createAsyncThunk<FetchOffersResult, FetchOffersParams
         urlParams.append('exact', 'true');
       }
 
-      // Extended filters: tags, minPrice, maxPrice
       if (params.filters.tags && params.filters.tags.length) {
         urlParams.append('tags', params.filters.tags.join(','));
       }
@@ -220,8 +231,9 @@ export const fetchOffers = createAsyncThunk<FetchOffersResult, FetchOffersParams
       if (response.success && response.data) {
         const totalPages = Math.ceil(response.data.total / params.limit) || 1;
         const key = params.listKey || 'offers';
- // Mostrar cantidad de trabajos cargados
+        
         console.warn(`Cantidad de trabajos cargados: ${response.data.data.length}`);
+        
         return {
           listKey: key,
           data: response.data.data,
@@ -248,43 +260,54 @@ const jobOffersSlice = createSlice({
   reducers: {
     setSearch: (state, action: PayloadAction<string>) => {
       state.search = action.payload;
-      saveToStorage('jobOffers_search', action.payload);
+      if (state.shouldPersist) {
+        saveToStorage(STORAGE_KEYS.SEARCH, action.payload);
+      }
     },
 
     setFilters: (state, action: PayloadAction<FilterState>) => {
       state.filters = action.payload;
-      saveToStorage('jobOffers_filters', action.payload);
+      if (state.shouldPersist) {
+        saveToStorage(STORAGE_KEYS.FILTERS, action.payload);
+      }
     },
+
     setTitleOnly: (state, action: PayloadAction<boolean>) => {
       state.titleOnly = action.payload;
     },
+
     setExact: (state, action: PayloadAction<boolean>) => {
       state.exact = action.payload;
     },
 
     setSortBy: (state, action: PayloadAction<string>) => {
       state.sortBy = action.payload;
-      saveToStorage('jobOffers_sortBy', action.payload);
+      if (state.shouldPersist) {
+        saveToStorage(STORAGE_KEYS.SORT, action.payload);
+      }
     },
+
     setDate: (state, action: PayloadAction<string | null>) => {
       state.date = action.payload;
     },
+
     setRating: (state, action: PayloadAction<number | null>) => {
       state.rating = action.payload;
     },
 
     setRegistrosPorPagina: (state, action: PayloadAction<number>) => {
-      // Validar que el límite sea permitido
       if (!JOBOFERT_ALLOWED_LIMITS.includes(action.payload)) {
         return;
       }
 
       state.registrosPorPagina = action.payload;
       state.paginaActual = 1;
-      saveToStorage('jobOffers_registrosPorPagina', action.payload);
-      saveToStorage('jobOffers_paginaActual', 1);
+      
+      if (state.shouldPersist) {
+        saveToStorage(STORAGE_KEYS.PAGE_SIZE, action.payload);
+        saveToStorage(STORAGE_KEYS.PAGE, 1);
+      }
 
-      // Actualizar paginaciones['offers']
       if (!state.paginaciones['offers']) {
         state.paginaciones['offers'] = {
           paginaActual: 1,
@@ -300,7 +323,10 @@ const jobOffersSlice = createSlice({
 
     setPaginaActual: (state, action: PayloadAction<number>) => {
       state.paginaActual = action.payload;
-      saveToStorage('jobOffers_paginaActual', action.payload);
+      
+      if (state.shouldPersist) {
+        saveToStorage(STORAGE_KEYS.PAGE, action.payload);
+      }
 
       if (!state.paginaciones['offers']) {
         state.paginaciones['offers'] = {
@@ -314,18 +340,18 @@ const jobOffersSlice = createSlice({
       }
     },
 
+    // Nueva acción para limpiar completamente sin guardar
     resetFilters: (state) => {
-      state.filters = { range: [], city: '', category: [] };
-      state.sortBy = 'recent';
-      state.search = '';
+      const defaultState = getDefaultState();
+      state.filters = defaultState.filters;
+      state.sortBy = defaultState.sortBy;
+      state.search = defaultState.search;
       state.paginaActual = 1;
       state.preservedTotalRegistros = 0;
+      state.shouldPersist = false; // Desactivar persistencia temporalmente
 
-      // Guardar en localStorage
-      saveToStorage('jobOffers_filters', state.filters);
-      saveToStorage('jobOffers_sortBy', state.sortBy);
-      saveToStorage('jobOffers_search', state.search);
-      saveToStorage('jobOffers_paginaActual', 1);
+      // Limpiar localStorage explícitamente
+      clearJobOffersStorage();
 
       if (!state.paginaciones['offers']) {
         state.paginaciones['offers'] = {
@@ -339,9 +365,17 @@ const jobOffersSlice = createSlice({
       }
     },
 
+    // Nueva acción para reactivar persistencia
+    enablePersistence: (state) => {
+      state.shouldPersist = true;
+    },
+
     resetPagination: (state) => {
       state.paginaActual = 1;
-      saveToStorage('jobOffers_paginaActual', 1);
+      
+      if (state.shouldPersist) {
+        saveToStorage(STORAGE_KEYS.PAGE, 1);
+      }
 
       if (!state.paginaciones['offers']) {
         state.paginaciones['offers'] = {
@@ -357,13 +391,13 @@ const jobOffersSlice = createSlice({
 
     restoreSavedState: (state) => {
       // Restaurar desde localStorage
-      state.search = getStoredValue('jobOffers_search', '');
-      state.filters = getStoredValue('jobOffers_filters', { range: [], city: '', category: [] });
-      state.sortBy = getStoredValue('jobOffers_sortBy', 'recent');
-      state.paginaActual = getStoredValue('jobOffers_paginaActual', 1);
-      state.registrosPorPagina = getStoredValue('jobOffers_registrosPorPagina', 10);
+      state.search = getStoredValue(STORAGE_KEYS.SEARCH, '');
+      state.filters = getStoredValue(STORAGE_KEYS.FILTERS, { range: [], city: '', category: [] });
+      state.sortBy = getStoredValue(STORAGE_KEYS.SORT, 'recent');
+      state.paginaActual = getStoredValue(STORAGE_KEYS.PAGE, 1);
+      state.registrosPorPagina = getStoredValue(STORAGE_KEYS.PAGE_SIZE, 10);
+      state.shouldPersist = true; 
 
-      // Actualizar paginaciones['offers']
       if (!state.paginaciones['offers']) {
         state.paginaciones['offers'] = {
           paginaActual: state.paginaActual,
@@ -389,7 +423,9 @@ const jobOffersSlice = createSlice({
         if (payload.page < 1) {
           state.error = `La página ${payload.page} no es válida. Debe ser mayor o igual a 1.`;
           state.paginaActual = 1;
-          saveToStorage('jobOffers_paginaActual', 1);
+          if (state.shouldPersist) {
+            saveToStorage(STORAGE_KEYS.PAGE, 1);
+          }
           return;
         }
 
@@ -402,10 +438,8 @@ const jobOffersSlice = createSlice({
           };
         }
 
-        // Actualizar datos
         state.trabajos = payload.data;
 
-        // Actualizar paginación en la clave específica
         state.paginaciones[key].paginaActual = payload.page;
         state.paginaciones[key].registrosPorPagina = payload.limit;
         state.paginaciones[key].totalRegistros = payload.total;
@@ -416,33 +450,33 @@ const jobOffersSlice = createSlice({
         }
         const totalToUse = state.preservedTotalRegistros > 0 ? state.preservedTotalRegistros : payload.total;
 
-        // Sincronizar campos top-level para compatibilidad
         state.paginaActual = state.paginaciones[key].paginaActual;
         state.registrosPorPagina = state.paginaciones[key].registrosPorPagina;
         state.totalRegistros = totalToUse;
         state.totalPages = state.paginaciones[key].totalPages;
 
-        // Guardar en localStorage
-        saveToStorage('jobOffers_paginaActual', state.paginaActual);
+        if (state.shouldPersist) {
+          saveToStorage(STORAGE_KEYS.PAGE, state.paginaActual);
+        }
 
-        // Manejo de páginas que no existen
         if (
           action.payload.requestedPage > action.payload.totalPages &&
           action.payload.totalPages > 0
         ) {
           state.error = `Página ${action.payload.requestedPage} no existe. Total de páginas: ${action.payload.totalPages}. Ajustando a página 1.`;
           state.paginaActual = 1;
-          saveToStorage('jobOffers_paginaActual', 1);
+          if (state.shouldPersist) {
+            saveToStorage(STORAGE_KEYS.PAGE, 1);
+          }
         } else {
           state.error = null;
         }
       })
       .addCase(fetchOffers.rejected, (state, action) => {
-  state.loading = false;
-  state.error = (action.payload as string) || action.error.message || 'Error desconocido';
-  state.trabajos = [];
-});
-
+        state.loading = false;
+        state.error = (action.payload as string) || action.error.message || 'Error desconocido';
+        state.trabajos = [];
+      });
   },
 });
 
@@ -457,11 +491,11 @@ export const {
   setRegistrosPorPagina,
   setPaginaActual,
   resetFilters,
+  enablePersistence,
   resetPagination,
   restoreSavedState,
 } = jobOffersSlice.actions;
 
-// Selector para obtener la paginación por clave (por defecto 'offers')
 export const selectPaginationByKey = (
   state: { jobOffers: JobOffersState },
   key: string = 'offers',

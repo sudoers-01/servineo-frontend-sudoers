@@ -29,7 +29,7 @@ import useApplyQueryToStore from '@/app/redux/job-offer-hooks/useApplyQueryToSto
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
 import { MapView } from '@/Components/Job-offers/maps/MapView';
 import { Map, List, LayoutGrid } from 'lucide-react';
-import { categoryImages } from '../../lib/constants/img';
+import { getImagesForJob } from '../../lib/constants/img';
 import { mockJobOffers } from '@/app/lib/mock-data';
 import { useTranslations } from 'next-intl';
 
@@ -111,23 +111,6 @@ export default function JobOffersPage() {
     exact,
   });
 
-  // Función para obtener imágenes de categoría
-  const getImagesForCategory = (jobId: string, category: string): string[] => {
-    const images = categoryImages[category] || categoryImages['Default'];
-    let hash = 0;
-    for (let i = 0; i < jobId.length; i++) {
-      hash = jobId.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const numImages = (Math.abs(hash) % 3) + 1;
-    const startIndex = Math.abs(hash) % images.length;
-    const selectedImages: string[] = [];
-    for (let i = 0; i < numImages; i++) {
-      const index = (startIndex + i) % images.length;
-      selectedImages.push(images[index]);
-    }
-    return selectedImages;
-  };
-
   // Función para adaptar datos de BD a formato para modal
   const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
     if (!offer) return null;
@@ -139,7 +122,7 @@ export default function JobOffersPage() {
     } else if (offer.imagenUrl) {
       photos = [offer.imagenUrl];
     } else {
-      photos = getImagesForCategory(offer._id, offer.category || 'Default');
+      photos = getImagesForJob(offer._id, offer.category || 'Default');
     }
 
     return {

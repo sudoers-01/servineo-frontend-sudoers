@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import RecentOfferCard from './RecentOfferCard';
 import { JobOfferModal } from '../Job-offers/Job-offer-modal';
-import { categoryImages } from '@/app/lib/constants/img';
+import { getImagesForJob } from '@/app/lib/constants/img';
 import { api } from '@/app/lib/api';
 
 // Tipos
@@ -161,30 +161,22 @@ export default function RecentOffersSection() {
     return () => container.removeEventListener('scroll', checkScroll);
   }, [selectedCategory]);
 
-  const getImagesForCategory = (jobId: string, category: string): string[] => {
-    const images = categoryImages[category] || categoryImages['Default'];
-    let hash = 0;
-    for (let i = 0; i < jobId.length; i++) {
-      hash = jobId.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    const numImages = (Math.abs(hash) % 3) + 1;
-    const startIndex = Math.abs(hash) % images.length;
-    const selectedImages: string[] = [];
-    for (let i = 0; i < numImages; i++) {
-      const index = (startIndex + i) % images.length;
-      selectedImages.push(images[index]);
-    }
-    return selectedImages;
-  };
-
   const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer => {
+    // CORREGIDO: Usar allImages si está disponible, o generarlas
     let photos: string[] = [];
-    if (offer.photos && offer.photos.length > 0) {
+
+    if (offer.allImages && offer.allImages.length > 0) {
+      // Si ya tenemos allImages del map, usarlas
+      photos = offer.allImages;
+    } else if (offer.photos && offer.photos.length > 0) {
+      // Si tiene photos del API
       photos = offer.photos;
     } else if (offer.imagenUrl) {
+      // Si tiene una sola imagen
       photos = [offer.imagenUrl];
     } else {
-      photos = getImagesForCategory(offer._id, offer.category || 'Default');
+      // Generar imágenes basadas en categoría
+      photos = getImagesForJob(offer._id, offer.category || 'Default');
     }
 
     return {
@@ -204,7 +196,7 @@ export default function RecentOffersSection() {
   };
 
   const trabajosConImagenes = trabajos.map((trabajo) => {
-    const allImages = getImagesForCategory(trabajo._id, trabajo.category);
+    const allImages = getImagesForJob(trabajo._id, trabajo.category);
     return {
       ...trabajo,
       allImages: allImages,

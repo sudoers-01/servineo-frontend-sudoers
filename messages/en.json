@@ -228,7 +228,8 @@
     "nextImage": "Next image",
     "contactWhatsApp": "Contact via WhatsApp",
     "searchResults": "Search results",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "defaultUserName": "User"
   },
   "calendar": {
     "months": {

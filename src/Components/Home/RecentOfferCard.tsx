@@ -4,7 +4,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { MapPin, Star, MessageCircle } from 'lucide-react';
+import { MapPin, Star, MessageCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 interface OfferData {
@@ -30,6 +30,8 @@ interface RecentOfferCardProps {
   currentImageIndex: number;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
+  onPrevImage: (e: React.MouseEvent) => void;
+  onNextImage: (e: React.MouseEvent) => void;
 }
 
 export default function RecentOfferCard({
@@ -39,9 +41,12 @@ export default function RecentOfferCard({
   currentImageIndex,
   onMouseEnter,
   onMouseLeave,
+  onPrevImage,
+  onNextImage,
 }: RecentOfferCardProps) {
   const router = useRouter();
   const tCat = useTranslations('Categories');
+  const t = useTranslations('cardJob');
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -55,6 +60,7 @@ export default function RecentOfferCard({
   };
 
   const totalImages = offer.allImages?.length || 1;
+  const isHovered = hoveredCard === offer._id;
 
   return (
     <div
@@ -80,6 +86,26 @@ export default function RecentOfferCard({
               priority={idx === 0}
             />
           ))}
+
+          {/* Flechitas de navegación */}
+          {totalImages > 1 && isHovered && (
+            <>
+              <button
+                onClick={onPrevImage}
+                className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110"
+                aria-label="Imagen anterior"
+              >
+                <ChevronLeft className="w-4 h-4 text-gray-800" />
+              </button>
+              <button
+                onClick={onNextImage}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110"
+                aria-label="Siguiente imagen"
+              >
+                <ChevronRight className="w-4 h-4 text-gray-800" />
+              </button>
+            </>
+          )}
 
           {/* Overlay gradient */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
@@ -119,7 +145,7 @@ export default function RecentOfferCard({
             {offer.description}
           </p>
 
-          <div className="mt-3 flex items-center justify-between">
+          <div className="mt-2 flex items-center justify-between">
             <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
               {tCat(offer.category)}
             </span>
@@ -132,7 +158,7 @@ export default function RecentOfferCard({
 
       {/* Información del Fixer */}
       <div className="border-t border-gray-100">
-        <div className="p-4 flex items-center justify-between gap-3">
+        <div className="p-3 flex items-center justify-between gap-3">
           {/* Perfil clickeable */}
           <div
             className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
@@ -172,11 +198,11 @@ export default function RecentOfferCard({
           {/* Botón WhatsApp */}
           <button
             onClick={handleWhatsAppClick}
-            className="flex-shrink-0 bg-[#1AA7ED] hover:bg-[#1AA7ED]/90 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-110 flex items-center gap-2 px-3 py-2 sm:p-2.5"
-            aria-label="Contactar por WhatsApp"
+            className="flex-shrink-0 bg-[#1AA7ED] hover:bg-[#1AA7ED]/90 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-110 flex items-center gap-2 px-3 py-2"
+            aria-label={t('contactWhatsApp')}
           >
             <MessageCircle className="w-4 h-4 text-white" />
-            <span className="text-white text-xs font-medium sm:hidden">{offer.contactPhone}</span>
+            <span className="text-white text-xs font-medium">{offer.contactPhone}</span>
           </button>
         </div>
       </div>

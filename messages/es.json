@@ -5,6 +5,27 @@
     "placeholder": "¿Que servicio necesitas?",
     "search": "Buscar"
   },
+  "Categories": {
+    "Todos": "Todos",
+    "Albañil": "Albañil",
+    "Carpintero": "Carpintero",
+    "Cerrajero": "Cerrajero",
+    "Decorador": "Decorador",
+    "Electricista": "Electricista",
+    "Fontanero": "Fontanero",
+    "Fumigador": "Fumigador",
+    "Instalador": "Instalador",
+    "Jardinero": "Jardinero",
+    "Limpiador": "Limpiador",
+    "Mecánico": "Mecánico",
+    "Montador": "Montador",
+    "Pintor": "Pintor",
+    "Pulidor": "Pulidor",
+    "Soldador": "Soldador",
+    "Techador": "Techador",
+    "Vidriero": "Vidriero",
+    "Yesero": "Yesero"
+  },
   "jobOffers": {
     "pageTitle": "Ofertas de Trabajo",
     "available": "disponibles",
@@ -190,7 +211,8 @@
     "nextImage": "Imagen siguiente",
     "contactWhatsApp": "Contactar por WhatsApp",
     "searchResults": "Resultados de la búsqueda",
-    "noResults": "No se encontraron resultados"
+    "noResults": "No se encontraron resultados",
+    "defaultUserName": "Usuario"
   },
   "calendar": {
     "months": {
