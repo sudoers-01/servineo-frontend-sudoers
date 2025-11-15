@@ -2,6 +2,7 @@
 
 import { Search, Clock, X, Trash2, Star, ArrowUpLeft } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
 
 interface SearchBarProps {
   value: string;
@@ -9,6 +10,7 @@ interface SearchBarProps {
   placeholder?: string;
   className?: string;
   disabled?: boolean;
+  onSearch?: (query: string) => void; // Nueva prop opcional
 }
 
 export function SearchBar({
@@ -17,7 +19,9 @@ export function SearchBar({
   placeholder = 'Buscar trabajos, ubicaciones, servicios...',
   className = '',
   disabled = false,
+  onSearch,
 }: SearchBarProps) {
+  const router = useRouter();
   const [isFocused, setIsFocused] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
@@ -31,6 +35,31 @@ export function SearchBar({
   const touchTimerRef = useRef<number | null>(null);
 
   const HISTORY_KEY = 'job_search_history_v1';
+
+  // Función para realizar la búsqueda con redirección
+  const performSearch = useCallback(
+    (query: string) => {
+      const trimmedQuery = query.trim();
+
+      if (trimmedQuery) {
+        // Si hay callback personalizado, usarlo
+        if (onSearch) {
+          onSearch(trimmedQuery);
+        } else {
+          // Redirección por defecto
+          router.push(`/job-offer-list?search=${encodeURIComponent(trimmedQuery)}`);
+        }
+      } else {
+        // Si está vacío, ir a la página sin parámetros
+        if (onSearch) {
+          onSearch('');
+        } else {
+          router.push('/job-offer-list');
+        }
+      }
+    },
+    [router, onSearch],
+  );
 
   // Cargar historial inicial desde localStorage
   const loadHistory = useCallback(() => {
@@ -119,7 +148,7 @@ export function SearchBar({
   const visibleSuggestions = suggestions.slice(0, 5);
   const visibleCombined = [...visibleHistory, ...visibleSuggestions];
 
-  // Seleccionar item
+  // Seleccionar item (historial o sugerencia)
   const selectItem = useCallback(
     (item: string) => {
       onChange(item);
@@ -127,8 +156,11 @@ export function SearchBar({
       setIsOpen(false);
       setHighlighted(-1);
       setPreviewValue(null);
+
+      // Realizar la búsqueda automáticamente
+      performSearch(item);
     },
-    [onChange, addToHistory],
+    [onChange, addToHistory, performSearch],
   );
 
   // Preview item
@@ -154,6 +186,9 @@ export function SearchBar({
         addToHistory(searchValue.trim());
         setIsOpen(false);
         setPreviewValue(null);
+
+        // Realizar la búsqueda
+        performSearch(searchValue.trim());
       }
       return;
     }

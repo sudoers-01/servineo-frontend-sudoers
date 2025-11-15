@@ -1,20 +1,29 @@
 "use client";
 import { SearchBar } from './Searchbar-section';
 import { useState } from "react";
+import { useRouter } from 'next/navigation';
 import StatCard from "../Common/StatCard";
 import { useTranslations } from "next-intl";
 
 export default function HeroSection() {
   const t= useTranslations("HeroSection");
-  
+  const router = useRouter();
   const [searchText, setSearchText] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchText.trim()) {
-      console.log("Searching for:", searchText);
+    const trimmedSearch = searchText.trim();
+
+    if (trimmedSearch) {
+      router.push(`/job-offer-list?search=${encodeURIComponent(trimmedSearch)}`);
+    } else {
+      router.push('/job-offer-list');
     }
   };
+
+    const handleTagClick = (tag: string) => {
+      router.push(`/job-offer-list?search=${encodeURIComponent(tag)}`);
+    };
 
   return (
     <section className="relative w-full pt-28 pb-16 px-4 md:px-12 text-center bg-gradient-to-br from-primary/5 via-white to-primary/10">
@@ -50,7 +59,7 @@ export default function HeroSection() {
                 <button
                   key={tag}
                   type="button"
-                  onClick={() => setSearchText(tag)}
+                  onClick={() => handleTagClick(tag)}
                   className="px-4 py-2 text-sm bg-white border border-gray-200 text-gray-800 rounded-full hover:bg-primary/10 hover:text-primary hover:border-primary/30 transition-all duration-300 shadow-sm hover:shadow"
                 >
                   {tag}
