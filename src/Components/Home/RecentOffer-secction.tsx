@@ -238,6 +238,22 @@ export default function RecentOffersSection() {
     }));
   };
 
+  const handlePrevImage = (cardId: string, totalImages: number) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => ({
+      ...prev,
+      [cardId]: ((prev[cardId] || 0) - 1 + totalImages) % totalImages,
+    }));
+  };
+
+  const handleNextImage = (cardId: string, totalImages: number) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => ({
+      ...prev,
+      [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
+    }));
+  };
+
   const handleCardClick = (offer: OfferData) => {
     const adaptedOffer = adaptOfferToModalFormat(offer);
     setSelectedOffer(adaptedOffer);
@@ -384,6 +400,8 @@ export default function RecentOffersSection() {
                 currentImageIndex={currentImageIndex[trabajo._id] || 0}
                 onMouseEnter={() => handleMouseEnter(trabajo._id, trabajo.allImages?.length || 1)}
                 onMouseLeave={() => handleMouseLeave(trabajo._id)}
+                onPrevImage={handlePrevImage(trabajo._id, trabajo.allImages?.length || 1)}
+                onNextImage={handleNextImage(trabajo._id, trabajo.allImages?.length || 1)}
               />
             ))}
           </div>

@@ -65,7 +65,7 @@ export const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ search }) =>
         {trimmed && (
           <>
             {' '}
-            {t('for')} <span className="font-bold">"{trimmed}"</span>
+            {t('for')} <span className="font-bold">&quot;{trimmed}&quot;</span>
           </>
         )}
       </p>
@@ -94,9 +94,10 @@ export default function AppliedFilters({ params, onModify }: Props) {
   const translateDbValue = (value: string): string => {
     const translationKey = DB_TO_TRANSLATION_KEY[value];
     if (translationKey) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return tAdv(translationKey as any);
     }
-    return value; // Si no hay traducción, mostrar el valor original
+    return value;
   };
 
   const handleModify = () => {

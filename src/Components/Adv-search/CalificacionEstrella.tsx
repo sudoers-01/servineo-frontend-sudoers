@@ -18,7 +18,7 @@ export const NoResultsMessage: React.FC<NoResultsMessageProps> = ({ search }) =>
         {trimmed && (
           <>
             {' '}
-            {t('for')} <span className="font-bold">"{trimmed}"</span>
+            {t('for')} <span className="font-bold">&quot;{trimmed}&quot;</span>
           </>
         )}
       </p>

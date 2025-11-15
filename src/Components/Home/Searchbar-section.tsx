@@ -302,7 +302,7 @@ export function SearchBar({
           setIsFocused(true);
           setIsOpen(true);
         }}
-        onBlur={(e) => {
+        onBlur={() => {
           setIsFocused(false);
           // Delay para permitir clicks en el dropdown
           setTimeout(() => {
