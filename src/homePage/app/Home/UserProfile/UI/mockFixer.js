@@ -1,5 +1,5 @@
 export const mockFixer = {
-  _id: '68ef1be7be38c7f1c3c2c78c', 
+  _id: '690c1a08f32ebc5be9c5707c', 
   loggedIn: false,
   name: 'Paolo Fixer',
   email: 'fixer@gmail.com',

@@ -154,8 +154,6 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
             {showModal && (
                 <AddCardModalFixer
                     userId={fixerId}
-                    fixerId={fixerId}
-                    jobId=""
                     amount={amount}
                     onClose={() => setShowModal(false)}
                     onCardAdded={() => fetchCards()}
