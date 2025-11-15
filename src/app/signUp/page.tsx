@@ -58,7 +58,7 @@ export default function SignUp() {
           <div className="flex flex-col items-center space-y-3 mt-3">
             <RegistroGoogle onNotify={handleNotify} />
             <GithubButton onNotify={handleNotify} />
-            <DiscordButton />
+            <DiscordButton onNotify={handleNotify} />
           </div>
 
           <div className="flex items-start mt-5 text-sm text-gray-600">
