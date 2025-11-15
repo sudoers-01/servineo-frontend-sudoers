@@ -105,7 +105,7 @@ export default function PaymentsPage() {
   //fin agregado
   
 return (
-  <div className="min-h-screen bg-white mt-16 border-8 border-red-700">
+  <div className="min-h-screen bg-white mt-16 border-8">
     {/* Barra superior */}
     <header className="bg-[#2B6AE0]">
       <div className="max-w-5xl px-6 py-6">
