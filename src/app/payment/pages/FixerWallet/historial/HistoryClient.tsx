@@ -14,7 +14,7 @@ interface Transaction {
   method?: string;
   createdAt: string; 
   jobId?: string;
-  status?: string; 
+  status?: string; // Status es opcional aquí
 }
 
 interface FilterSettings {
@@ -135,6 +135,7 @@ export default function FixerWalletHistory() {
   if (error) {
      return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        {/* ... (Error UI) ... */}
         <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-sm">
           <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error al cargar el Historial</h2>
@@ -253,6 +254,7 @@ export default function FixerWalletHistory() {
 // ===================================================================
 // --- Componente del Modal de Filtro (CORREGIDO) ---
 // ===================================================================
+// Componente del Modal de Filtro - VALIDACION MIENTRAS ESCRIBE
 interface FilterModalProps {
   onClose: () => void;
   onApply: (settings: FilterSettings) => void;
@@ -260,80 +262,169 @@ interface FilterModalProps {
 }
 
 function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
-  const [fromDate, setFromDate] = useState(currentFilters.fromDate);
-  const [toDate, setToDate] = useState(currentFilters.toDate);
+  // Convertir YYYY-MM-DD a MM/DD/YYYY para mostrar
+  const formatToDisplay = (isoDate: string): string => {
+    if (!isoDate) return '';
+    const [year, month, day] = isoDate.split('-');
+    return `${month}/${day}/${year}`;
+  };
+
+  // Convertir MM/DD/YYYY a YYYY-MM-DD para guardar
+  const formatToISO = (displayDate: string): string => {
+    if (!displayDate || displayDate.length !== 10) return '';
+    const parts = displayDate.split('/');
+    if (parts.length !== 3) return '';
+    const [month, day, year] = parts;
+    return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
+  };
+
+  const [fromDateDisplay, setFromDateDisplay] = useState(formatToDisplay(currentFilters.fromDate));
+  const [toDateDisplay, setToDateDisplay] = useState(formatToDisplay(currentFilters.toDate));
   const [selectedTypes, setSelectedTypes] = useState<string[]>(currentFilters.type);
   const [dateError, setDateError] = useState<string | null>(null);
 
-  // --- ================================== ---
-  // --- FUNCIÓN 'isValidDate' CORREGIDA ---
-  // --- ================================== ---
-  /**
-   * Comprueba si un string YYYY-MM-DD es una fecha calendario válida.
-   * Evita fechas como '2025-11-31'.
-   */
-  const isValidDate = (dateString: string): boolean => {
-    if (!dateString) return true; // Un campo vacío es válido
+  const isValidDate = (month: number, day: number, year: number): boolean => {
+    if (month < 1 || month > 12) return false;
+    if (day < 1 || day > 31) return false;
+    if (year < 1900 || year > 2100) return false;
 
-    // 1. Comprueba el formato YYYY-MM-DD
-    const regex = /^\d{4}-\d{2}-\d{2}$/;
-    if (!regex.test(dateString)) return false;
-
-    // 2. Parsea los números del string
-    const parts = dateString.split('-');
-    const inYear = parseInt(parts[0], 10);
-    const inMonth = parseInt(parts[1], 10); // (1-12)
-    const inDay = parseInt(parts[2], 10);
-
-    // 3. Crea la fecha usando los números.
-    //    Date(año, mesIndex (0-11), dia)
-    //    Si ponemos 'new Date(2025, 10, 31)' (31 de Nov), 
-    //    se convertirá automáticamente en '1 de Dic'.
-    const d = new Date(inYear, inMonth - 1, inDay);
-
-    // 4. Comparamos si la fecha creada sigue coincidiendo con lo que entró.
-    //    Si la fecha "rebalsó" (ej. 31 de Nov se volvió 1 de Dic),
-    //    d.getFullYear() (2025) será igual a inYear (2025)
-    //    d.getMonth()+1 (12) NO será igual a inMonth (11)
-    //    d.getDate() (1) NO será igual a inDay (31)
+    const d = new Date(year, month - 1, day);
     return (
-      d.getFullYear() === inYear &&
-      d.getMonth() + 1 === inMonth &&
-      d.getDate() === inDay
+      d.getFullYear() === year &&
+      d.getMonth() + 1 === month &&
+      d.getDate() === day
     );
   };
-  // --- ================================== ---
-  // --- FIN DE LA CORRECCIÓN ---
-  // --- ================================== ---
+
+  const validateDateString = (dateStr: string, fieldName: string): string | null => {
+    if (!dateStr) return null;
+    
+    if (dateStr.length !== 10) {
+      return `La fecha "${fieldName}" esta incompleta. Use formato MM/DD/YYYY`;
+    }
+
+    const parts = dateStr.split('/');
+    if (parts.length !== 3) {
+      return `La fecha "${fieldName}" tiene formato incorrecto`;
+    }
+
+    const month = parseInt(parts[0], 10);
+    const day = parseInt(parts[1], 10);
+    const year = parseInt(parts[2], 10);
+
+    if (isNaN(month) || isNaN(day) || isNaN(year)) {
+      return `La fecha "${fieldName}" contiene valores no numericos`;
+    }
+
+    if (!isValidDate(month, day, year)) {
+      if (month === 2 && day > 29) {
+        return `Fecha invalida: Febrero solo tiene hasta 29 dias`;
+      } else if ([4, 6, 9, 11].includes(month) && day > 30) {
+        return `Fecha invalida: Este mes solo tiene 30 dias`;
+      } else if (day > 31) {
+        return `Fecha invalida: Ningun mes tiene mas de 31 dias`;
+      } else if (month < 1 || month > 12) {
+        return `Fecha invalida: El mes debe estar entre 01 y 12`;
+      }
+      return `La fecha "${fieldName}" no existe en el calendario`;
+    }
+
+    return null;
+  };
+
+  const handleTextInput = (
+    value: string,
+    setter: (val: string) => void,
+    fieldName: string
+  ) => {
+    // Permitir solo numeros y /
+    let cleaned = value.replace(/[^\d/]/g, '');
+    
+    // Auto-agregar / despues de MM y DD
+    if (cleaned.length === 2 && !cleaned.includes('/')) {
+      cleaned = cleaned + '/';
+    } else if (cleaned.length === 5 && cleaned.split('/').length === 2) {
+      cleaned = cleaned + '/';
+    }
+    
+    // Limitar a 10 caracteres
+    if (cleaned.length > 10) {
+      cleaned = cleaned.substring(0, 10);
+    }
+
+    setter(cleaned);
+
+    // Validar si esta completo
+    if (cleaned.length === 10) {
+      const error = validateDateString(cleaned, fieldName);
+      console.log(`Validando ${cleaned}: ${error || 'VALIDA'}`);
+      setDateError(error);
+    } else {
+      setDateError(null);
+    }
+  };
+
+  const handleDatePickerChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    setter: (val: string) => void,
+    pickerSetter: (val: boolean) => void
+  ) => {
+    const isoDate = e.target.value;
+    if (isoDate) {
+      const displayDate = formatToDisplay(isoDate);
+      setter(displayDate);
+      pickerSetter(false);
+      setDateError(null);
+    }
+  };
 
   const handleSubmit = () => {
-    // 1. Validación de fecha real (CORREGIDA)
-    if (!isValidDate(fromDate) || !isValidDate(toDate)) {
-      setDateError("Por favor, introduce una fecha real (ej. '30/11' pero no '31/11').");
+    const fromError = validateDateString(fromDateDisplay, 'Desde');
+    if (fromError) {
+      setDateError(fromError);
+      return;
+    }
+    
+    const toError = validateDateString(toDateDisplay, 'Hasta');
+    if (toError) {
+      setDateError(toError);
       return;
     }
 
-    // 2. Validación de rango
-    if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
-      setDateError("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
-      return; 
+    const fromISO = formatToISO(fromDateDisplay);
+    const toISO = formatToISO(toDateDisplay);
+
+    if (fromISO && toISO) {
+      const fromDateObj = new Date(fromISO + 'T00:00:00');
+      const toDateObj = new Date(toISO + 'T00:00:00');
+      
+      if (fromDateObj > toDateObj) {
+        setDateError("La fecha 'Desde' no puede ser posterior a 'Hasta'");
+        return;
+      }
+    }
+    
+    if (!fromDateDisplay && !toDateDisplay && selectedTypes.length === 0) {
+      setDateError("Selecciona al menos un criterio de filtro");
+      return;
     }
     
     setDateError(null);
-    onApply({ fromDate, toDate, type: selectedTypes });
-  };
-  
-  const handleDateChange = (setter: (val: string) => void, value: string) => {
-    setter(value);
-    setDateError(null); 
+    onApply({ 
+      fromDate: fromISO, 
+      toDate: toISO, 
+      type: selectedTypes 
+    });
   };
 
   const handleTypeChange = (value: string) => {
     setSelectedTypes(prev => 
-      prev.includes(value)
-        ? prev.filter(type => type !== value) 
-        : [...prev, value] 
+      prev.includes(value) ? prev.filter(t => t !== value) : [...prev, value]
     );
+  };
+
+  const hasError = (dateDisplay: string): boolean => {
+    return dateDisplay.length === 10 && validateDateString(dateDisplay, '') !== null;
   };
 
   return (
@@ -343,7 +434,9 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
         <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Añadir Filtro</h2>
           <button onClick={onClose} className="text-white hover:text-gray-200">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
           </button>
         </div>
 
@@ -353,61 +446,101 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
           </h2>
           
           <div className="space-y-5">
-            {/* Fila "Desde" */}
+            {/* Campo Desde */}
             <div className="flex items-center gap-4">
-              <label htmlFor="fromDate" className="w-16 font-semibold text-gray-700">Desde</label>
+              <label className="w-16 font-semibold text-gray-700">Desde</label>
               <div className="relative flex-1">
                 <input 
-                  id="fromDate"
-                  type="date"
-                  placeholder="mm/dd/yyyy"
-                  value={fromDate}
-                  onChange={(e) => handleDateChange(setFromDate, e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="text"
+                  placeholder="MM/DD/YYYY"
+                  value={fromDateDisplay}
+                  onChange={(e) => handleTextInput(e.target.value, setFromDateDisplay, 'Desde')}
+                  maxLength={10}
+                  className={`w-full p-3 pr-10 border-2 rounded-lg focus:outline-none focus:ring-2 ${
+                    hasError(fromDateDisplay)
+                      ? 'border-red-500 bg-red-50 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                 />
-                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                <input
+                  type="date"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const displayDate = formatToDisplay(e.target.value);
+                      setFromDateDisplay(displayDate);
+                      setDateError(null);
+                    }
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 w-8 h-8 cursor-pointer"
+                  title="Abrir calendario"
+                />
+                <Calendar 
+                  size={20} 
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${
+                    hasError(fromDateDisplay) ? 'text-red-400' : 'text-gray-400'
+                  }`} 
+                />
               </div>
             </div>
 
-            {/* Fila "Hasta" */}
+            {/* Campo Hasta */}
             <div className="flex items-center gap-4">
-              <label htmlFor="toDate" className="w-16 font-semibold text-gray-700">Hasta</label>
+              <label className="w-16 font-semibold text-gray-700">Hasta</label>
               <div className="relative flex-1">
                 <input 
-                  id="toDate"
-                  type="date"
-                  placeholder="mm/dd/yyyy"
-                  value={toDate}
-                  onChange={(e) => handleDateChange(setToDate, e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  type="text"
+                  placeholder="MM/DD/YYYY"
+                  value={toDateDisplay}
+                  onChange={(e) => handleTextInput(e.target.value, setToDateDisplay, 'Hasta')}
+                  onFocus={() => setShowToPicker(false)}
+                  maxLength={10}
+                  className={`w-full p-3 pr-10 border-2 rounded-lg focus:outline-none focus:ring-2 ${
+                    hasError(toDateDisplay)
+                      ? 'border-red-500 bg-red-50 focus:ring-red-500'
+                      : 'border-gray-300 focus:ring-blue-500'
+                  }`}
                 />
-                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                <input
+                  type="date"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const displayDate = formatToDisplay(e.target.value);
+                      setToDateDisplay(displayDate);
+                      setDateError(null);
+                    }
+                  }}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 w-8 h-8 cursor-pointer"
+                  title="Abrir calendario"
+                />
+                <Calendar 
+                  size={20} 
+                  className={`absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none ${
+                    hasError(toDateDisplay) ? 'text-red-400' : 'text-gray-400'
+                  }`} 
+                />
               </div>
             </div>
             
-            {/* Checkboxes para "Incluir" */}
             <div className="flex items-start gap-4">
               <label className="w-16 font-semibold text-gray-700 pt-2">Incluir</label>
               <div className="flex-1 flex flex-col gap-2 pt-2">
-                <label htmlFor="filter-recargas" className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
                   <input 
                     type="checkbox" 
-                    id="filter-recargas" 
                     value="deposit"
                     checked={selectedTypes.includes('deposit')}
                     onChange={() => handleTypeChange('deposit')}
-                    className="w-5 h-5 accent-blue-600 rounded"
+                    className="w-5 h-5 accent-blue-600"
                   />
                   <span className="font-medium text-gray-700">Recargas</span>
                 </label>
-                <label htmlFor="filter-comisiones" className="flex items-center gap-2 cursor-pointer">
+                <label className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded">
                   <input 
                     type="checkbox" 
-                    id="filter-comisiones" 
                     value="commission"
                     checked={selectedTypes.includes('commission')}
                     onChange={() => handleTypeChange('commission')}
-                    className="w-5 h-5 accent-blue-600 rounded"
+                    className="w-5 h-5 accent-blue-600"
                   />
                   <span className="font-medium text-gray-700">Comisiones</span>
                 </label>
@@ -415,22 +548,28 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
             </div>
 
             {dateError && (
-              <p className="text-red-500 text-sm text-center font-medium">
-                {dateError}
-              </p>
+              <div className="bg-red-50 border-2 border-red-400 rounded-lg p-4 flex gap-3">
+                <AlertCircle className="text-red-600 flex-shrink-0" size={24} />
+                <div>
+                  <p className="text-red-800 font-bold text-sm">¡Error!</p>
+                  <p className="text-red-700 text-sm">{dateError}</p>
+                </div>
+              </div>
             )}
             
-            <div className="flex items-center justify-between gap-4 pt-4"> 
+            <div className="flex gap-4 pt-4"> 
               <button
                 onClick={handleSubmit}
-                className="flex-1 px-6 py-3 rounded-lg font-semibold text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+                disabled={!!dateError}
+                className={`flex-1 px-6 py-3 rounded-lg font-semibold text-white ${
+                  dateError
+                    ? 'bg-gray-300 cursor-not-allowed'
+                    : 'bg-blue-600 hover:bg-blue-700'
+                }`}
               >
                 Añadir Filtro
               </button>
-              <button
-                onClick={onClose}
-                className="flex-1 px-6 py-3 rounded-lg font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200 transition-colors"
-              >
+              <button onClick={onClose} className="flex-1 px-6 py-3 rounded-lg font-semibold text-gray-700 bg-gray-100 hover:bg-gray-200">
                 Cancelar
               </button>
             </div>
