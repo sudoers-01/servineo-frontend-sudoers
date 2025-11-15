@@ -90,12 +90,15 @@ export default function FixerWalletHistory() {
     if (filterSettings.type.length > 0) {
       tempTxs = tempTxs.filter(tx => filterSettings.type.includes(tx.type));
     }
+    // Ajuste: Usar 'T00:00:00' para 'fromDate' para evitar problemas de zona horaria
     if (filterSettings.fromDate) {
       try {
-        const from = new Date(filterSettings.fromDate + 'T00:00:00');
+        // Compara en la zona horaria local
+        const from = new Date(filterSettings.fromDate + 'T00:00:00'); 
         tempTxs = tempTxs.filter(tx => new Date(tx.createdAt) >= from);
       } catch (e) { console.error("Fecha 'desde' inválida:", filterSettings.fromDate); }
     }
+    // Ajuste: Usar 'T23:59:59' para 'toDate' para incluir el día completo
     if (filterSettings.toDate) {
       try {
         const to = new Date(filterSettings.toDate + 'T23:59:59');
@@ -121,6 +124,7 @@ export default function FixerWalletHistory() {
     return `Bs. ${Math.abs(value).toFixed(2)}`;
   };
 
+
   // --- (Estados de Carga y Error SIN CAMBIOS) ---
   if (loading) {
     return (
@@ -133,6 +137,17 @@ export default function FixerWalletHistory() {
      return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         {/* ... (Error UI) ... */}
+        <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-sm">
+          <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Error al cargar el Historial</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-6 bg-blue-600 text-white font-semibold py-2 px-6 rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            Volver
+          </button>
+        </div>
       </div>
     );
   }
@@ -280,7 +295,9 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
 
     // 4. Comparamos si la fecha creada sigue coincidiendo con lo que entró.
     //    Si la fecha "rebalsó" (ej. 31 de Nov se volvió 1 de Dic),
-    //    d.getMonth()+1 (12) no será igual a inMonth (11).
+    //    d.getFullYear() (2025) será igual a inYear (2025)
+    //    d.getMonth()+1 (12) NO será igual a inMonth (11)
+    //    d.getDate() (1) NO será igual a inDay (31)
     return (
       d.getFullYear() === inYear &&
       d.getMonth() + 1 === inMonth &&
@@ -325,7 +342,6 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl relative overflow-hidden">
         
-        {/* Header */}
         <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Añadir Filtro</h2>
           <button onClick={onClose} className="text-white hover:text-gray-200">
@@ -333,7 +349,6 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
           </button>
         </div>
 
-        {/* Contenido del Modal */}
         <div className="p-6">
           <h2 className="text-xl font-bold text-center text-gray-800 mb-6">
             Seleccione los campos para que se añada un filtro
