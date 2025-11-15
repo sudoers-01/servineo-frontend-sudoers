@@ -1,40 +1,28 @@
+// src/app/payment/pages/FixerWallet/historial/HistoryPageClient.tsx
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react'; // <-- Añadido useMemo
 import { useRouter, useSearchParams } from 'next/navigation';
-import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { ArrowLeft, Wallet, TrendingUp, TrendingDown, Calendar, Loader2, AlertCircle } from 'lucide-react';
 
-// --- Tus datos de MOCK (con más variedad para filtrar) ---
-const MOCK_FIXER_DATA = {
-  wallet: { balance: 13.00, currency: "BOB" },
-  allTransactions: [
-    { _id: "1", type: "deposit", amount: 50.00, description: "Recarga con Tarjeta", method: "Recarga con Tarjeta", createdAt: "2025-10-25", status: "completed" },
-    { _id: "2", type: "commission", amount: -2.50, description: "Comision - Trabajo #1234 (Efectivo)", jobId: "1234", createdAt: "2025-10-24", status: "completed" },
-    { _id: "3", type: "commission", amount: -3.75, description: "Comision - Trabajo #1228 (Efectivo)", jobId: "1228", createdAt: "2025-10-23", status: "completed" },
-    { _id: "4", type: "deposit", amount: 50.00, description: "Recarga con QR", method: "Recarga con QR", createdAt: "2025-10-23", status: "completed" },
-    { _id: "5", type: "deposit", amount: 75.00, description: "Recarga con QR", method: "Recarga con QR", createdAt: "2025-10-22", status: "completed" },
-    { _id: "6", type: "deposit", amount: 30.00, description: "Recarga con Tarjeta", method: "Recarga con Tarjeta", createdAt: "2025-10-15", status: "completed" }
-  ]
-};
-// --- Fin de Mocks ---
+// --- MOCK_FIXER_DATA (ELIMINADO) ---
 
-// Tipado para una transacción (basado en el mock)
+// --- Interfaces (SIN CAMBIOS) ---
 interface Transaction {
   _id: string;
-  type: 'deposit' | 'commission' | string; // 'deposit' = Recarga, 'commission' = Comisión
+  type: string; // 'deposit' o 'commission'
   amount: number;
   description: string;
   method?: string;
-  createdAt: string; // Formato YYYY-MM-DD
+  createdAt: string; 
   jobId?: string;
-  status: string;
+  status?: string; // Status es opcional aquí
 }
 
-// Tipado para los filtros (con 'type' como array)
 interface FilterSettings {
   fromDate: string;
   toDate: string;
-  type: string[]; // <-- AHORA ES UN ARRAY DE STRINGS
+  type: string[]; 
 }
 
 export default function FixerWalletHistory() {
@@ -42,92 +30,136 @@ export default function FixerWalletHistory() {
   const searchParams = useSearchParams();
   const [receivedFixerId, setReceivedFixerId] = useState<string | null>(null);
 
-  // --- Estados para la Lógica de Filtros ---
+  // --- Estados de Filtros (SIN CAMBIOS) ---
   const [showFilterModal, setShowFilterModal] = useState(false);
   const [isFiltered, setIsFiltered] = useState(false);
-  
-  // Estado para guardar TODOS los movimientos (la fuente "real")
-  const [allTransactions, setAllTransactions] = useState<Transaction[]>(MOCK_FIXER_DATA.allTransactions);
-  // Estado para los movimientos que se MUESTRAN en la UI
-  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>(MOCK_FIXER_DATA.allTransactions);
-  
-  // Estado para los filtros seleccionados
   const [filterSettings, setFilterSettings] = useState<FilterSettings>({
     fromDate: '',
     toDate: '',
-    type: [], // <-- AHORA INICIA COMO ARRAY VACÍO
+    type: [], 
   });
+  
+  // --- Estados de Datos (ACTUALIZADOS) ---
+  const [walletData, setWalletData] = useState<{ balance: number } | null>(null);
+  const [allTransactions, setAllTransactions] = useState<Transaction[]>([]); // Inicia vacío
+  const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([]); // Inicia vacío
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  // --- Fin de Estados de Filtros ---
-
-  // Aquí cargarías los datos del Fixer usando el ID
-  const [walletData, setWalletData] = useState(MOCK_FIXER_DATA.wallet);
-
+  // --- 1. Carga de Datos Reales ---
   useEffect(() => {
     const fixerId = searchParams.get('fixerId');
     if (fixerId) {
       setReceivedFixerId(fixerId);
-      console.log("Fixer ID Recibido en Historial:", fixerId);
-      // --- FUTURO: Carga de Datos Reales ---
-      // fetchHistoryData(fixerId).then(data => {
-      //   setAllTransactions(data.allTransactions);
-      //   setFilteredTransactions(data.allTransactions);
-      //   setWalletData(data.wallet);
-      // });
+      fetchHistoryData(fixerId); 
+    } else {
+      setError("No se proporcionó un ID de Fixer.");
+      setLoading(false);
     }
   }, [searchParams]);
 
-  // --- EFECTO PARA APLICAR FILTROS (ACTUALIZADO) ---
+  const fetchHistoryData = async (fixerId: string) => {
+    setLoading(true);
+    setError(null);
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+    
+    try {
+      // Usamos el mismo endpoint
+      const res = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.error || "Error al cargar los datos");
+      }
+
+      const result = await res.json();
+      if (result.success && result.data) {
+        setWalletData({ balance: result.data.saldoActual });
+        setAllTransactions(result.data.transactions || []);
+        setFilteredTransactions(result.data.transactions || []); // Inicialmente muestra todo
+      } else {
+        throw new Error(result.error || "No se pudieron cargar los datos.");
+      }
+    } catch (err: any) {
+      setError(err.message || "Un error inesperado ocurrió.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  
+  // --- 2. Lógica de Filtro (ACTUALIZADA) ---
+  // (Ahora 'now' y 'expiryInfo' no se usan, se limpian)
   useEffect(() => {
     let tempTxs = [...allTransactions];
 
-    // 1. Filtrar por Tipo (MODIFICADO PARA MANEJAR ARRAY)
-    // Si hay tipos seleccionados (ej. ['deposit'] o ['commission'] o ['deposit', 'commission'])
+    // Filtrar por Tipo (deposit o commission)
     if (filterSettings.type.length > 0) {
       tempTxs = tempTxs.filter(tx => filterSettings.type.includes(tx.type));
     }
-    // Si el array 'type' está vacío, no se aplica filtro de tipo (se muestran todos)
 
-    // 2. Filtrar por Fecha "Desde"
+    // Filtrar por Fecha "Desde"
     if (filterSettings.fromDate) {
       try {
-        const from = new Date(filterSettings.fromDate + 'T00:00:00'); // Asume hora local
+        const from = new Date(filterSettings.fromDate + 'T00:00:00');
         tempTxs = tempTxs.filter(tx => new Date(tx.createdAt) >= from);
       } catch (e) { console.error("Fecha 'desde' inválida:", filterSettings.fromDate); }
     }
 
-    // 3. Filtrar por Fecha "Hasta"
+    // Filtrar por Fecha "Hasta"
     if (filterSettings.toDate) {
       try {
-        const to = new Date(filterSettings.toDate + 'T23:59:59'); // Incluye todo el día
+        const to = new Date(filterSettings.toDate + 'T23:59:59');
         tempTxs = tempTxs.filter(tx => new Date(tx.createdAt) <= to);
       } catch (e) { console.error("Fecha 'hasta' inválida:", filterSettings.toDate); }
     }
 
     setFilteredTransactions(tempTxs);
   }, [filterSettings, allTransactions]);
-  // --- FIN DEL EFECTO ---
-
-  // Función que se llama desde el Modal
+  
+  // --- (Funciones de helper no cambian) ---
   const handleApplyFilter = (newFilters: FilterSettings) => {
     setFilterSettings(newFilters);
-    // Un filtro se considera "aplicado" si tiene fechas o tipos seleccionados
     const active = newFilters.fromDate !== '' || newFilters.toDate !== '' || newFilters.type.length > 0;
     setIsFiltered(active);
     setShowFilterModal(false);
   };
-
-  // Función para el botón "Eliminar Filtro"
   const clearFilter = () => {
-    setFilterSettings({ fromDate: '', toDate: '', type: [] }); // <-- RESETEA A ARRAY VACÍO
+    setFilterSettings({ fromDate: '', toDate: '', type: [] });
     setIsFiltered(false);
   };
-
   const formatCurrency = (value: number) => {
     return `Bs. ${Math.abs(value).toFixed(2)}`;
   };
 
-  // Pantalla 3: Historial Completo
+
+  // --- ESTADO DE CARGA ---
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+         <Loader2 className="animate-spin text-blue-600" size={48} />
+      </div>
+    );
+  }
+  
+  // --- ESTADO DE ERROR ---
+  if (error) {
+     return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-sm">
+          <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Error al cargar el Historial</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <button
+            onClick={() => router.back()}
+            className="mt-6 bg-blue-600 text-white font-semibold py-2 px-6 rounded-xl hover:bg-blue-700 transition-colors"
+          >
+            Volver
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // --- PANTALLA PRINCIPAL (con datos) ---
   return (
     <>
       <div className="min-h-screen bg-gray-100">
@@ -139,79 +171,83 @@ export default function FixerWalletHistory() {
           <h1 className="text-2xl font-bold">Historial de Movimientos</h1>
         </div>
 
-        {/* Balance Card (como en el mockup) */}
-        <div className="p-6">
-          <div className="bg-white rounded-2xl p-5 shadow-sm flex items-center justify-between">
-            <div>
-              <p className="text-gray-600 text-sm mb-1">Saldo Actual</p>
-              <p className="text-blue-600 text-3xl font-bold">
-                Bs. {walletData.balance.toFixed(2)}
-              </p>
-            </div>
-            <Wallet size={32} className="text-blue-600 opacity-70" />
-          </div>
-        </div>
-
-        {/* Todos los movimientos */}
-        <div className="px-6 pb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-gray-700 font-semibold text-lg">Todos los Movimientos</h2>
-            
-            {/* --- BOTÓN DE FILTRO DINÁMICO --- */}
-            {isFiltered ? (
-              <button
-                onClick={clearFilter}
-                className="text-red-500 font-semibold text-sm"
-              >
-                Eliminar Filtro
-              </button>
-            ) : (
-              <button
-                onClick={() => setShowFilterModal(true)}
-                className="text-blue-600 font-semibold text-sm"
-              >
-                Añadir Filtro
-              </button>
-            )}
-          </div>
-          
-          {/* --- LISTA FILTRADA --- */}
-          <div className="space-y-3">
-            {filteredTransactions.length > 0 ? (
-              filteredTransactions.map((tx) => (
-                <div key={tx._id} className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    tx.amount > 0 ? 'bg-green-100' : 'bg-red-100'
-                  }`}>
-                    {tx.amount > 0 ? (
-                      <TrendingUp className="text-green-600" size={20} />
-                    ) : (
-                      <TrendingDown className="text-red-600" size={20} />
-                    )}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-gray-900 truncate">
-                      {tx.type === 'deposit' ? tx.method : tx.description}
-                    </p>
-                    <p className="text-sm text-gray-500">{tx.createdAt}</p>
-                  </div>
-                  <p className={`font-bold text-lg whitespace-nowrap ${
-                    tx.amount > 0 ? 'text-green-600' : 'text-red-600'
-                  }`}>
-                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}
-                  </p>
-                </div>
-              ))
-            ) : (
-              <div className="text-center text-gray-500 py-10">
-                <p>No se encontraron movimientos que coincidan con su filtro.</p>
+        {/* --- Contenedor (para centrar) --- */}
+        <div className="max-w-3xl mx-auto px-4">
+          {/* Balance Card (con datos reales) */}
+          <div className="p-6">
+            <div className="bg-white rounded-2xl p-5 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-gray-600 text-sm mb-1">Saldo Actual</p>
+                <p className="text-blue-600 text-3xl font-bold">
+                  Bs. {walletData?.balance?.toFixed(2) || '0.00'}
+                </p>
               </div>
-            )}
+              <Wallet size={32} className="text-blue-600 opacity-70" />
+            </div>
           </div>
-        </div>
+
+          {/* Todos los movimientos */}
+          <div className="px-6 pb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-gray-700 font-semibold text-lg">Todos los Movimientos</h2>
+              
+              {isFiltered ? (
+                <button
+                  onClick={clearFilter}
+                  className="text-red-500 font-semibold text-sm"
+                >
+                  Eliminar Filtro
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowFilterModal(true)}
+                  className="text-blue-600 font-semibold text-sm"
+                >
+                  Añadir Filtro
+                </button>
+              )}
+            </div>
+            
+            {/* --- LISTA FILTRADA --- */}
+            <div className="space-y-3">
+              {filteredTransactions.length > 0 ? (
+                filteredTransactions.map((tx) => (
+                  <div key={tx._id} className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      tx.amount > 0 ? 'bg-green-100' : 'bg-red-100'
+                    }`}>
+                      {tx.amount > 0 ? (
+                        <TrendingUp className="text-green-600" size={20} />
+                      ) : (
+                        <TrendingDown className="text-red-600" size={20} />
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-gray-900 truncate">
+                        {tx.description}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {new Date(tx.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                      </p>
+                    </div>
+                    <p className={`font-bold text-lg whitespace-nowrap ${
+                      tx.amount > 0 ? 'text-green-600' : 'text-red-600'
+                    }`}>
+                      {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="bg-white rounded-xl p-4 shadow-sm text-center text-gray-500 py-10">
+                  <p>No se encontraron movimientos que coincidan con su filtro.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div> {/* --- Fin Contenedor --- */}
       </div>
 
-      {/* --- MODAL DE FILTRO --- */}
+      {/* --- MODAL DE FILTRO (Sin cambios) --- */}
       {showFilterModal && (
         <FilterModal
           onClose={() => setShowFilterModal(false)}
@@ -225,7 +261,7 @@ export default function FixerWalletHistory() {
 
 
 // ===================================================================
-// --- Componente del Modal de Filtro (ACTUALIZADO) ---
+// --- Componente del Modal de Filtro (Sin cambios) ---
 // ===================================================================
 interface FilterModalProps {
   onClose: () => void;
@@ -234,51 +270,37 @@ interface FilterModalProps {
 }
 
 function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
-  // Estado interno del modal
   const [fromDate, setFromDate] = useState(currentFilters.fromDate);
   const [toDate, setToDate] = useState(currentFilters.toDate);
-  
-  // --- CAMBIO: Estado para almacenar los tipos seleccionados (checkboxes) ---
   const [selectedTypes, setSelectedTypes] = useState<string[]>(currentFilters.type);
-  
-  // Estado para el error de fecha
   const [dateError, setDateError] = useState<string | null>(null);
 
   const handleSubmit = () => {
-    // Validación de Fechas
     if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
       setDateError("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
-      return; // Detiene la ejecución
+      return; 
     }
-    
-    // Si pasa la validación, limpia el error y aplica
     setDateError(null);
-    onApply({ fromDate, toDate, type: selectedTypes }); // <-- CAMBIO: Pasa selectedTypes
+    onApply({ fromDate, toDate, type: selectedTypes }); 
   };
   
-  // Limpia el error cuando el usuario cambia una fecha
   const handleDateChange = (setter: (val: string) => void, value: string) => {
     setter(value);
     setDateError(null); 
   };
 
-  // --- NUEVA FUNCIÓN: Manejar cambio de checkbox ---
   const handleTypeChange = (value: string) => {
     setSelectedTypes(prev => 
       prev.includes(value)
-        ? prev.filter(type => type !== value) // Desmarcar
-        : [...prev, value] // Marcar
+        ? prev.filter(type => type !== value) 
+        : [...prev, value] 
     );
   };
 
   return (
-    // Fondo oscuro
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4">
-      
-      {/* Contenedor del Modal (con overflow-hidden para bordes redondeados) */}
       <div className="bg-white w-full max-w-md rounded-2xl shadow-xl relative overflow-hidden">
         
-        {/* --- NUEVO: Header azul del Modal --- */}
         <div className="bg-blue-600 text-white px-6 py-4 flex items-center justify-between">
           <h2 className="text-xl font-bold">Añadir Filtro</h2>
           <button
@@ -289,8 +311,7 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
           </button>
         </div>
 
-        {/* Contenido del Modal */}
-        <div className="p-6"> {/* Padding para el contenido */}
+        <div className="p-6">
           <h2 className="text-xl font-bold text-center text-gray-800 mb-6">
             Seleccione los campos para que se añada un filtro
           </h2>
@@ -328,11 +349,10 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
               </div>
             </div>
             
-            {/* --- CAMBIO: Checkboxes para "Incluir" --- */}
+            {/* Checkboxes para "Incluir" */}
             <div className="flex items-start gap-4">
               <label className="w-16 font-semibold text-gray-700 pt-2">Incluir</label>
               <div className="flex-1 flex flex-col gap-2 pt-2">
-                {/* Checkbox Recargas */}
                 <label htmlFor="filter-recargas" className="flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox" 
@@ -344,7 +364,6 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
                   />
                   <span className="font-medium text-gray-700">Recargas</span>
                 </label>
-                {/* Checkbox Comisiones */}
                 <label htmlFor="filter-comisiones" className="flex items-center gap-2 cursor-pointer">
                   <input 
                     type="checkbox" 
@@ -359,14 +378,12 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
               </div>
             </div>
 
-            {/* Mensaje de Error de Fecha */}
             {dateError && (
               <p className="text-red-500 text-sm text-center font-medium">
                 {dateError}
               </p>
             )}
             
-            {/* --- CAMBIO: Botones de Acción (Orden nuevo) --- */}
             <div className="flex items-center justify-between gap-4 pt-4"> 
               <button
                 onClick={handleSubmit}

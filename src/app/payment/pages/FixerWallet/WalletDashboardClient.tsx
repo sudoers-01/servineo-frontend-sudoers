@@ -6,24 +6,19 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Wallet, TrendingUp, TrendingDown, Loader2, AlertCircle } from 'lucide-react';
 
-const MOCK_TRANSACTIONS = [
-    { _id: "1", type: "deposit", amount: 50.00, description: "Recargar con Tarjeta", createdAt: "2025-10-25" },
-    { _id: "2", type: "commission", amount: -2.50, description: "Comision - Trabajo #1234 (Efectivo)", jobId: "1234", createdAt: "2025-10-24" },
-    { _id: "3", type: "commission", amount: -3.75, description: "Comision - Trabajo #1228 (Efectivo)", jobId: "1228", createdAt: "2025-10-23" }
-];
-
+// --- Interfaces para los datos ---
 interface WalletData {
   balance: number;
   currency: string;
 }
 
 interface Transaction {
-    _id: string;
-    type: string;
-    amount: number;
-    description: string;
-    jobId?: string;
-    createdAt: string;
+  _id: string;
+  type: string;
+  amount: number;
+  description: string;
+  jobId?: string;
+  createdAt: string;
 }
 
 export default function FixerWalletDashboard() {
@@ -31,9 +26,9 @@ export default function FixerWalletDashboard() {
   const searchParams = useSearchParams();
   const [receivedFixerId, setReceivedFixerId] = useState<string | null>(null);
   
-  // --- Estados separados para los datos ---
+  // --- Estados para datos reales (inician vacíos) ---
   const [walletData, setWalletData] = useState<WalletData | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>(MOCK_TRANSACTIONS); // <-- Aún usa mocks
+  const [transactions, setTransactions] = useState<Transaction[]>([]); // Inicia vacío
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,7 +38,7 @@ export default function FixerWalletDashboard() {
     if (fixerId) {
       setReceivedFixerId(fixerId);
       console.log("Fixer ID Recibido en Wallet:", fixerId);
-      // Llama a la nueva función de fetch
+      // Llama a la función de fetch
       fetchWalletData(fixerId); 
     } else {
       console.warn("No se recibió fixerId en la URL.");
@@ -57,11 +52,10 @@ export default function FixerWalletDashboard() {
     setLoading(true);
     setError(null);
     
-    // --- CORRECCIÓN: Definir BACKEND_URL ---
     const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
 
     try {
-      // Llama al MISMO endpoint que usa CentroPagos
+      // Llama al endpoint que ya funciona
       const res = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
       
       if (!res.ok) {
@@ -71,12 +65,16 @@ export default function FixerWalletDashboard() {
       
       const result = await res.json();
       if (result.success && result.data) {
-        // Establece el saldo de la wallet desde la respuesta
+        // Establece el saldo de la wallet
         setWalletData({
           balance: result.data.saldoActual,
-          currency: "BOB" // Asumimos BOB por ahora
+          currency: "BOB"
         });
-        // NOTA: 'transactions' seguirá usando los datos MOCK por ahora.
+        
+        // --- CAMBIO: Usa las transacciones de la API ---
+        // Mostramos solo los 3 más recientes en el dashboard
+        setTransactions(result.data.transactions.slice(0, 3) || []);
+
       } else {
         throw new Error(result.error || 'No se pudieron cargar los datos.');
       }
@@ -115,7 +113,7 @@ export default function FixerWalletDashboard() {
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error al cargar la Billetera</h2>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
-            onClick={() => router.push('/')} // Botón para volver al inicio
+            onClick={() => router.push('/')}
             className="mt-6 bg-blue-600 text-white font-semibold py-2 px-6 rounded-xl hover:bg-blue-700 transition-colors"
           >
             Volver al Inicio
@@ -133,21 +131,21 @@ export default function FixerWalletDashboard() {
         <h1 className="text-2xl font-bold">Fixer Wallet</h1>
       </div>
 
-      {/* --- CORRECCIÓN: Contenedor para centrar y limitar el ancho --- */}
+      {/* --- Contenedor para centrar y limitar el ancho --- */}
       <div className="max-w-3xl mx-auto px-4">
 
         {/* Balance Card */}
-        <div className="pt-6 pb-4"> {/* Ajustado el padding (quitado p-6) */}
+        <div className="pt-6 pb-4">
           <div className="bg-blue-600 rounded-2xl p-6 text-white shadow-lg">
             <div className="flex items-center gap-2 mb-2">
               <Wallet size={20} />
               <span className="text-sm opacity-90">Saldo Actual</span>
             </div>
             <div className="text-5xl font-bold mb-6">
-              {/* Usa el estado 'walletData' */}
               Bs. {walletData?.balance?.toFixed(2) || '0.00'}
             </div>
             
+            {/* CORRECCIÓN: Ruta a 'recarga' (en español) */}
             <Link
               href={`/payment/pages/FixerWallet/recarga?fixerId=${receivedFixerId}`}
               className="w-full block text-center bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
@@ -158,10 +156,11 @@ export default function FixerWalletDashboard() {
         </div>
 
         {/* Movimientos Recientes */}
-        <div className="pb-6"> {/* Ajustado el padding (quitado px-6) */}
+        <div className="pb-6">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-gray-600 font-semibold text-lg">Movientos Recientes</h2>
+            <h2 className="text-gray-600 font-semibold text-lg">Movimientos Recientes</h2>
             
+            {/* CORRECCIÓN: Ruta a 'historial' (en español) */}
             <Link
               href={`/payment/pages/FixerWallet/historial?fixerId=${receivedFixerId}`}
               className="text-blue-600 font-semibold"
@@ -170,33 +169,41 @@ export default function FixerWalletDashboard() {
             </Link>
           </div>
 
-          {/* Los movimientos siguen usando el MOCK_TRANSACTIONS */}
+          {/* --- RENDERIZADO DINÁMICO --- */}
           <div className="space-y-3">
-            {transactions.map((tx) => (
-              <div key={tx._id} className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
-                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
-                  tx.amount > 0 ? 'bg-green-100' : 'bg-red-100'
-                }`}>
-                  {tx.amount > 0 ? (
-                    <TrendingUp className="text-green-600" size={24} />
-                  ) : (
-                    <TrendingDown className="text-red-600" size={24} />
-                  )}
+            {transactions.length > 0 ? (
+              transactions.map((tx) => (
+                <div key={tx._id} className="bg-white rounded-xl p-4 shadow-sm flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                    tx.amount > 0 ? 'bg-green-100' : 'bg-red-100'
+                  }`}>
+                    {tx.amount > 0 ? (
+                      <TrendingUp className="text-green-600" size={24} />
+                    ) : (
+                      <TrendingDown className="text-red-600" size={24} />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-gray-900">{tx.description}</p>
+                    <p className="text-sm text-gray-500">
+                      {new Date(tx.createdAt).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })}
+                    </p>
+                  </div>
+                  <div className={`font-bold text-lg ${
+                    tx.amount > 0 ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {tx.amount > 0 ? '+' : ''}{formatCurrency(tx.amount)}
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{tx.description}</p>
-                  <p className="text-sm text-gray-500">{tx.createdAt}</p>
-                </div>
-                <div className={`font-bold text-lg ${
-                  tx.amount > 0 ? 'text-green-600' : 'text-red-600'
-                }`}>
-                  {tx.amount > 0 ? '+' : '-'}{formatCurrency(tx.amount)}
-                </div>
+              ))
+            ) : (
+              <div className="bg-white rounded-xl p-4 shadow-sm text-center text-gray-500">
+                <p>No se encontraron movimientos recientes.</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
-      </div> {/* --- FIN DEL CONTENEDOR --- */}
+      </div>
     </div>
   );
 }

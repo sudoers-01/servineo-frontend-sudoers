@@ -3,42 +3,49 @@ import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation'; 
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
-import WalletFlagWatcher from "./WalletFlagWatcher";
+// import WalletFlagWatcher from "./WalletFlagWatcher"; // <-- 4. ELIMINADO
 
-const MOCK_FIXER_ID = "690c1a08f32ebc5be9c5707c";     // ← userId mock
-const MOCK_WALLET_ID = "6917ca234f50d0d44bff1173";    // ← NO lo usa el watcher (solo referencia)
+// --- 5. AÑADIDA INTERFAZ DE DATOS ---
+interface FixerData {
+  saldoActual: number;
+  totalGanado: number;
+  trabajosCompletados: number;
+  fixerId?: string; // Es opcional, ya que la API no lo devuelve
+  isTestData?: boolean;
+}
 
 const CentroDePagos = () => {
   const router = useRouter();
-
   const searchParams = useSearchParams(); 
+  
+  // Guardamos el fixerId de la URL en una variable
+  const fixerIdFromUrl = searchParams.get('fixerId');
 
-  const [fixerData, setFixerData] = useState<unknown | null>(null); 
+  const [fixerData, setFixerData] = useState<FixerData | null>(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
-    const fixerIdFromUrl = searchParams.get('fixerId');
-
     if (fixerIdFromUrl) {
       fetchFixerData(fixerIdFromUrl);
     } else {
       setError("No se especificó un ID de Fixer.");
       setLoading(false);
     }
-  }, [searchParams]); // Se ejecuta cada vez que los parámetros de la URL cambian
+  }, [fixerIdFromUrl]); // Se ejecuta cuando fixerIdFromUrl cambia
 
   const fetchFixerData = async (fixerId: string) => {
     setLoading(true);
     setError(null);
     
+    // --- 1. CORRECCIÓN DE VARIABLE DE ENTORNO ---
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:4000';
+    
     try {
-      const BACKEND_URL_DEPLOYADO = process.env.BACKEND_URL;
+      console.log(`🔍 Intentando conectar a: ${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
       
-      // <-- CAMBIO 6: Usar el fixerId del parámetro
-      console.log(`🔍 Intentando conectar a: ${BACKEND_URL_DEPLOYADO}/api/fixer/payment-center/${fixerId}`);
-      
-      const response = await fetch(`/api/fixer/payment-center/${fixerId}`, {
+      // --- 2. CORRECCIÓN DE RUTA DE FETCH ---
+      const response = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -48,7 +55,8 @@ const CentroDePagos = () => {
       console.log('📡 Response status:', response.status);
       
       if (!response.ok) {
-        throw new Error(`Error ${response.status}: ${response.statusText}`);
+        const errData = await response.json(); // Intentar leer el error del backend
+        throw new Error(errData.error || `Error ${response.status}: ${response.statusText}`);
       }
       
       const result = await response.json();
@@ -59,16 +67,16 @@ const CentroDePagos = () => {
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
-    } catch (err: unknown | null) {
+    } catch (err: any) { // Usamos 'any' para poder acceder a err.message
       console.error('❌ Error fetching fixer data:', err);
-      setError(err instanceof Error ? err.message : 'Error desconocido');
+      setError(err.message || 'Error desconocido');
       
       console.log('⚠️ Usando datos de prueba');
       setFixerData({
         saldoActual: 13.00,
         totalGanado: 15420.00,
         trabajosCompletados: 23,
-        fixerId: fixerId, // <-- CAMBIO 7: Usar el ID dinámico en los datos de prueba
+        fixerId: fixerId, 
         isTestData: true 
       });
     } finally {
@@ -116,8 +124,7 @@ const CentroDePagos = () => {
 
       <div className="max-w-3xl mx-auto px-4"> 
         
-        <WalletFlagWatcher fixerId={MOCK_FIXER_ID} pollMs={4000} />
-
+        {/* <WalletFlagWatcher ... /> */} {/* <-- 4. ELIMINADO */}
 
         {fixerData?.isTestData && (
           <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">
@@ -148,20 +155,14 @@ const CentroDePagos = () => {
               <div className="bg-[#759ae0] rounded-xl p-4">
                 <p className="text-xs text-white opacity-75 mb-1">Total Ganado</p>
                 <p className="text-xl font-bold text-white">
-                  Bs. {typeof fixerData?.totalGanado === 'number' 
-                    ? fixerData.totalGanado.toFixed(2) 
-                    : typeof fixerData?.totalGanado === 'string'
-                    ? parseFloat(fixerData.totalGanado).toFixed(2)
-                    : '0.00'}
+                  Bs. {fixerData?.totalGanado?.toFixed(2) || '0.00'}
                 </p>
               </div>
 
               <div className="bg-[#759ae0] rounded-xl p-4">
                 <p className="text-xs text-white opacity-75 mb-1">Trabajos Completados</p>
                 <p className="text-3xl font-bold text-white">
-                  {fixerData?.trabajosCompletados !== undefined 
-                    ? fixerData.trabajosCompletados 
-                    : '0'}
+                  {fixerData?.trabajosCompletados || 0}
                 </p>
               </div>
             </div>
@@ -169,69 +170,66 @@ const CentroDePagos = () => {
         </div>
 
         <div className="pb-6">
-        <h3 className="text-base font-semibold text-gray-600 mb-3">Acciones Rápidas</h3>
+          <h3 className="text-base font-semibold text-gray-600 mb-3">Acciones Rápidas</h3>
 
-        <div>
-          
-          {/* Fixer Wallet */}
-          <button
-            onClick={() => router.push(`/payment/pages/FixerWallet?fixerId=${fixerData.fixerId}`)}
-            disabled={!fixerData?.fixerId} // Deshabilitar si no hay fixerId
-            className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
-          >
-            <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
-              <Wallet className="text-blue-600" size={28} />
-            </div>
-            <div className="flex-1 text-left">
-              <h4 className="font-bold text-gray-800 text-base">Fixer Wallet</h4>
-              <p className="text-sm text-gray-500">Ver saldo, recargar y revisar movimientos</p>
-            </div>
-            <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
-          </button>
+          {/* Usamos 'div' simple porque 'space-y' estaba fallando, añadimos 'div' espaciadores */}
+          <div>
+            
+            {/* --- 3. CORRECCIÓN DE BOTONES --- */}
+            <button
+              onClick={() => router.push(`/payment/pages/FixerWallet?fixerId=${fixerIdFromUrl}`)}
+              disabled={!fixerIdFromUrl} // Usa el ID de la URL
+              className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
+            >
+              <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
+                <Wallet className="text-blue-600" size={28} />
+              </div>
+              <div className="flex-1 text-left">
+                <h4 className="font-bold text-gray-800 text-base">Fixer Wallet</h4>
+                <p className="text-sm text-gray-500">Ver saldo, recargar y revisar movimientos</p>
+              </div>
+              <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
+            </button>
 
-          {/* --- AÑADIR ESTE ESPACIADOR --- */}
-          <div className="h-4" /> 
+            <div className="h-4" /> 
 
-          {/* Mi cuenta bancaria */}
-          <button 
-            onClick={() => router.push(`/cuenta-bancaria?fixerId=${fixerData.fixerId}`)} 
-            disabled={!fixerData?.fixerId} 
-            className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
-          >
-            <div className="bg-cyan-100 p-3 rounded-xl group-hover:bg-cyan-200 transition-colors">
-              <Building2 className="text-cyan-600" size={28} />
-            </div>
-            <div className="flex-1 text-left">
-              <h4 className="font-bold text-gray-800 text-base">Mi cuenta bancaria</h4>
-              <p className="text-sm text-gray-500">Administración de la cuenta bancaria</p>
-            </div>
-            <ChevronRight className="text-gray-400 group-hover:text-cyan-600 transition-colors" size={24} />
-          </button>
+            <button 
+              onClick={() => router.push(`/cuenta-bancaria?fixerId=${fixerIdFromUrl}`)} 
+              disabled={!fixerIdFromUrl} // Usa el ID de la URL
+              className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
+            >
+              <div className="bg-cyan-100 p-3 rounded-xl group-hover:bg-cyan-200 transition-colors">
+                <Building2 className="text-cyan-600" size={28} />
+              </div>
+              <div className="flex-1 text-left">
+                <h4 className="font-bold text-gray-800 text-base">Mi cuenta bancaria</h4>
+                <p className="text-sm text-gray-500">Administración de la cuenta bancaria</p>
+              </div>
+              <ChevronRight className="text-gray-400 group-hover:text-cyan-600 transition-colors" size={24} />
+            </button>
 
-          {/* --- AÑADIR ESTE ESPACIADOR --- */}
-          <div className="h-4" />
+            <div className="h-4" />
 
-          {/* Mis Facturas */}
-          <button 
-            onClick={() => router.push('/facturas')} 
-            className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
-          >
-            <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
-              <FileText className="text-blue-600" size={28} />
-            </div>
-            <div className="flex-1 text-left">
-              <h4 className="font-bold text-gray-800 text-base">Mis Facturas</h4>
-              <p className="text-sm text-gray-500">Ver registro de facturas</p>
-            </div>
-            <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
-          </button>
+            <button 
+              onClick={() => router.push('/facturas')} 
+              className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
+            >
+              <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
+                <FileText className="text-blue-600" size={28} />
+              </div>
+              <div className="flex-1 text-left">
+                <h4 className="font-bold text-gray-800 text-base">Mis Facturas</h4>
+                <p className="text-sm text-gray-500">Ver registro de facturas</p>
+              </div>
+              <ChevronRight className="text-gray-400 group-hover:text-blue-600 transition-colors" size={24} />
+            </button>
+          </div>
         </div>
-      </div>
 
         {error && !fixerData?.isTestData && (
           <div className="pb-6">
             <button
-              onClick={() => fetchFixerData(searchParams.get('fixerId') || '')} // Reintentar con el ID de la URL
+              onClick={() => fetchFixerData(fixerIdFromUrl || '')} // Reintentar con el ID de la URL
               className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors"
             >
               Reintentar carga
