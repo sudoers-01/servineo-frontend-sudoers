@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from "react";
+import { useRef } from "react";
 import EditAppointmentForm, { EditAppointmentFormHandle, ExistingAppointment } from "@/componentsLorem/appointments/forms/EditAppointmentForm";
 import { useUserRole } from "@/utils/contexts/UserRoleContext";
 import type { AppointmentFormHandle } from "@/componentsLorem/appointments/forms/AppointmentForm";
@@ -75,18 +75,23 @@ export default function HourCell({
 
     const estado = getEstado();
     const getColor = () => {
-
-        if (estado === 'disponible')
-            return "bg-[#16A34A]"
-
-        if (estado === 'cancelFixer' || estado === 'cancelOtherRequester' || estado === 'cancelRequester')
-            return "bg-[#FF3E17]"
-
         if (estado === 'reservado' || estado === 'ocupado' || estado === 'reservadoOtro')
             return "bg-[#FFC857]";
-
-        if (estado === 'inhabilitado' || estado === 'cancelOtherFixer')
+        if (estado === 'cancelFixer' || estado === 'cancelOtherRequester' || estado === 'cancelRequester')
+            return "bg-[#FF3E17] text-sm "
+        if (estado === 'inhabilitado')
             return "bg-[#64748B]";
+        if (isFixer) {
+            if (estado === 'cancelOtherFixer')
+                return "bg-[#FF3E17]"
+
+        } else {
+            if (estado === 'disponible')
+                return "bg-[#16A34A]"
+            if (estado === 'cancelOtherFixer')
+                return "bg-[#64748B]"
+
+        }
     }
 
     const getText = () => {
@@ -94,10 +99,10 @@ export default function HourCell({
             if (estado === 'disponible')
                 return 'Disponible';
             if (estado === 'cancelOtherFixer' || estado === 'cancelFixer')
-                return "Cancelado por Fixer";
+                return "Cancelado";
 
             if (estado === 'cancelOtherRequester' || estado === 'cancelRequester')
-                return "Cancelado por requester"
+                return "Cancelado (Requester)"
 
             if (estado === 'reservado' || estado === 'ocupado' || estado === 'reservadoOtro')
                 return "Reservado";
@@ -109,9 +114,9 @@ export default function HourCell({
             if (estado === 'disponible' || estado === 'cancelOtherRequester')
                 return "Disponible";
             if (estado === 'cancelFixer')
-                return "Cancelado por Fixer";
+                return "Cancelado (Fixer)";
             if (estado === 'cancelRequester')
-                return "Cancelado por Requester";
+                return "Cancelado";
 
             if (estado === 'reservado')
                 return "Reservado";
@@ -226,7 +231,7 @@ export default function HourCell({
             <div className="w-full">
                 {showHourCell() && (
                     <div
-                        className={`mx-3 py-3 rounded-md text-center text-white ${getColor()} cursor-pointer`}
+                        className={`mx-2  rounded-md text-center text-white ${getColor()} py-3 cursor-pointer`}
                         onClick={handleClick}
                     >
                         <p>{getText()}</p>
