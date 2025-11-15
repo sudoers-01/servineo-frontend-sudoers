@@ -297,10 +297,14 @@
     "mapInteractive": "Mapa interactivo aqui"
   },
   "RecentOffer": {
-    "recOfTitle": "Ofertas Recientes",
-    "recOfDescription": "Descubre las últimas ofertas publicadas",
-    "viewAll": "Ver todas →"
-  },
+  "recOfTitle": "Ofertas Recientes",
+  "recOfDescription": "Descubre las últimas ofertas publicadas",
+  "viewAll": "Ver todas",
+  "filterByCategory": "Filtrar por categoría",
+  "noOffersAvailable": "No hay ofertas disponibles",
+  "noOffersCategory": "No se encontraron ofertas para esta categoría",
+  "closeModal": "Cerrar"
+},
   "Services": {
     "serTitle": "Nuestros Servicios",
     "serDescription": "Encuentra el servicio perfecto para tus necesidades"

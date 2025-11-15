@@ -5,6 +5,27 @@
     "placeholder": "what service do you need?",
     "search": "Search"
   },
+  "Categories": {
+    "Todos": "All",
+    "Albañil": "Mason",
+    "Carpintero": "Carpenter",
+    "Cerrajero": "Locksmith",
+    "Decorador": "Decorator",
+    "Electricista": "Electrician",
+    "Fontanero": "Plumber",
+    "Fumigador": "Fumigator",
+    "Instalador": "Installer",
+    "Jardinero": "Gardener",
+    "Limpiador": "Cleaner",
+    "Mecánico": "Mechanic",
+    "Montador": "Assembler",
+    "Pintor": "Painter",
+    "Pulidor": "Polisher",
+    "Soldador": "Welder",
+    "Techador": "Roofer",
+    "Vidriero": "Glazier",
+    "Yesero": "Plasterer"
+  },
   "jobOffers": {
     "pageTitle": "Job Offers",
     "available": "available",
@@ -49,8 +70,8 @@
     "suggestions": "Suggestions",
     "noSuggestions": "No suggestions",
     "noResults": "No results found",
-    "advancedSearch": "Búsqueda avanzada",
-    "goToAdvancedSearch": "Ir a búsqueda avanzada",
+    "advancedSearch": "Advanced Search",
+    "goToAdvancedSearch": "Go to advanced search",
     "searchPlaceholder": "Search:",
     "for": "for",
     "price": "Price",
@@ -252,7 +273,7 @@
       "accept": "Accept"
     }
   },
-   "sortBy": {
+  "sortBy": {
     "featured": "Featured",
     "mostRecent": "Most Recent",
     "oldest": "Oldest",
@@ -268,7 +289,6 @@
     "register": "Sign Up",
     "logo": "LOGO"
   },
-
   "cta": {
     "footerTitle": "Ready to find the ideal professional?",
     "footerSubtitle": "Join thousands of people who have already found the perfect professional for their needs",
@@ -299,7 +319,11 @@
   "RecentOffer": {
     "recOfTitle": "Recent Offers",
     "recOfDescription": "Discover the latest published offers",
-    "viewAll": "View all →"
+    "viewAll": "View all",
+    "filterByCategory": "Filter by category",
+    "noOffersAvailable": "No offers available",
+    "noOffersCategory": "No offers found for this category",
+    "closeModal": "Close"
   },
   "Services": {
     "serTitle": "Our Services",

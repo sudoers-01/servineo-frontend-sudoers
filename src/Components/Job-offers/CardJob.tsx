@@ -41,10 +41,11 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
   };
 
   const handleFixerClick = (e: React.MouseEvent, fixerId?: string) => {
+    console.warn(fixerId);
     e.stopPropagation();
     if (fixerId) {
       router.push(`/fixer/${fixerId}`);
-    }
+    }else{ router.push(`/fixer/fixer-001`);}
   };
 
   const getImagesForJob = useCallback((jobId: string, category: string): string[] => {

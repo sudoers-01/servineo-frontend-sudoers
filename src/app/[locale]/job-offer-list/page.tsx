@@ -144,7 +144,7 @@ export default function JobOffersPage() {
 
     return {
       _id: offer._id,
-      fixerId: 'fixer-001',
+      fixerId: offer.fixerId,
       name: offer.fixerName,
       title: offer.title,
       description: offer.description,
