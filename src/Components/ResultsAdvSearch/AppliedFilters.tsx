@@ -227,17 +227,20 @@ export default function AppliedFilters({ params, onModify }: Props) {
                 }
 
                 // Rating
-                if (k === 'rating' && typeof v === 'number') {
-                  tags.push(
-                    <span
-                      key={k}
-                      className="inline-block bg-sky-50 text-sky-500 text-sm px-3 py-1 rounded"
-                    >
-                      {`⭐ ${v}+`}
-                    </span>,
-                  );
-                  return;
-                }
+                  if (k === 'rating' && (typeof v === 'number' || typeof v === 'string')) {
+                    const ratingNum = typeof v === 'string' ? parseFloat(v) : v;
+                    if (!Number.isNaN(ratingNum)) {
+                      tags.push(
+                        <span
+                          key={k}
+                          className="inline-block bg-sky-50 text-sky-500 text-sm px-3 py-1 rounded"
+                        >
+                          {`Calificación: ${ratingNum.toFixed(1)}`}
+                        </span>,
+                      );
+                      return;
+                    }
+                  }
 
                 // Otros valores (range, city, category, tags) - TRADUCIR
                 let value = renderTranslatedValue(v as FilterParamValue);

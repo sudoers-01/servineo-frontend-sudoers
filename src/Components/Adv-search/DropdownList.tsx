@@ -78,7 +78,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
         if (!searchQuery && (!categoryFilters || categoryFilters.length === 0))
           params.push('recent=true');
         // limit how many offers to inspect / tags to return
-        params.push('limit=10');
+        params.push('limit=20');
 
         const endpoint = `${API_URL}/api/devmaster/tags${params.length ? `?${params.join('&')}` : ''}`;
 
@@ -208,7 +208,14 @@ const DropdownList: React.FC<DropdownListProps> = ({
     );
   }
 
-  if (categories.length === 0) {
+  const selectedButNotInFilter = selectedCategories.filter(
+    (selectedTag) => !categories.includes(selectedTag),
+  );
+
+  // Create display list: filtered categories + selected ones that don't match current filter
+  const displayCategories = [...categories, ...selectedButNotInFilter];
+
+  if (displayCategories.length === 0) {
     return (
       <div className="w-full border border-gray-300 rounded-lg p-4">
         <p className="text-gray-500 text-sm text-center">{tCommon('resultsCounter.noResults')}</p>
