@@ -1,3 +1,5 @@
+//src/app/facturas/page.tsx
+//src/app/facturas/page.tsx
 'use client';
 
 import React from 'react';

@@ -1,4 +1,4 @@
-// src/app/payment/components/InvoiceDetail.tsx
+//src/app/components/InvoiceDetail.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,7 +11,7 @@ export interface InvoiceItem {
   description: string;
   quantity: number;
   unitPrice: number;
-  total: number;
+  total?: number;
 }
 
 export interface InvoiceDetailData {
@@ -21,10 +21,10 @@ export interface InvoiceDetailData {
   clientVAT: string;
   service: string;
   date: string;
-  subtotal: number;
-  taxRate: number;
-  taxAmount: number;
-  totalAmount: number;
+  subtotal?: number;
+  taxRate?: number;
+  taxAmount?: number;
+  totalAmount?: number;
   items: InvoiceItem[];
 }
 
@@ -38,15 +38,26 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
   const [downloading, setDownloading] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
 
-  // Generar QR al montar
+  // Generar QR
   useEffect(() => {
     const generateQr = async () => {
-      const qrValue = `Factura ID: ${invoice.id} | Cliente: ${invoice.clientName} | Total: Bs. ${invoice.totalAmount ?? 0}`;
+      const total = invoice.totalAmount ?? invoice.items.reduce((acc, i) => acc + ((i.quantity ?? 0) * (i.unitPrice ?? 0)), 0);
+      const qrValue = `Factura ID: ${invoice.id} | Cliente: ${invoice.clientName} | Total: Bs. ${total.toFixed(2)}`;
       const dataUrl = await QRCode.toDataURL(qrValue, { width: 120, margin: 1 });
       setQrDataUrl(dataUrl);
     };
     generateQr();
   }, [invoice]);
+
+  // Recalcular totales por ítem
+  const itemsWithTotals = invoice.items.map(i => ({
+    ...i,
+    total: (i.quantity ?? 0) * (i.unitPrice ?? 0)
+  }));
+
+  const subtotal = invoice.subtotal ?? itemsWithTotals.reduce((acc, i) => acc + (i.total ?? 0), 0);
+  const taxAmount = invoice.taxAmount ?? ((invoice.taxRate ?? 0) * subtotal);
+  const totalAmount = invoice.totalAmount ?? (subtotal + taxAmount);
 
   if (!invoice) {
     return (
@@ -62,7 +73,6 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
       const doc = new jsPDF();
       let y = 10;
 
-      // Encabezado
       doc.setFontSize(18);
       doc.setTextColor(63, 81, 181);
       doc.text(`Factura #${invoice.id}`, 10, y);
@@ -70,7 +80,7 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
       doc.setFontSize(12);
       doc.setTextColor(0, 0, 0);
       doc.text(`Fecha: ${invoice.date}`, 10, y);
-      y += 8;
+      y += 6;
       doc.text(`Cliente: ${invoice.clientName}`, 10, y);
       y += 6;
       doc.text(`Dirección: ${invoice.clientAddress}`, 10, y);
@@ -80,14 +90,11 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
       doc.text(`Servicio: ${invoice.service}`, 10, y);
       y += 10;
 
-      // Tabla de ítems
       doc.text('Ítems:', 10, y);
       y += 6;
-      invoice.items.forEach((item, idx) => {
+      itemsWithTotals.forEach((item, idx) => {
         doc.text(
-          `${idx + 1}. ${item.description} | Cant: ${item.quantity ?? 0} | P.Unit: ${(item.unitPrice ?? 0).toFixed(
-            2
-          )} | Total: ${(item.total ?? 0).toFixed(2)}`,
+          `${idx + 1}. ${item.description} | Cant: ${item.quantity} | P.Unit: ${item.unitPrice.toFixed(2)} | Total: ${item.total?.toFixed(2)}`,
           10,
           y
         );
@@ -95,15 +102,14 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
       });
 
       y += 5;
-      doc.text(`Subtotal: Bs. ${(invoice.subtotal ?? 0).toFixed(2)}`, 10, y);
+      doc.text(`Subtotal: Bs. ${subtotal.toFixed(2)}`, 10, y);
       y += 6;
-      doc.text(`Impuestos (${((invoice.taxRate ?? 0) * 100).toFixed(0)}%): Bs. ${(invoice.taxAmount ?? 0).toFixed(2)}`, 10, y);
+      doc.text(`Impuestos (${((invoice.taxRate ?? 0) * 100).toFixed(0)}%): Bs. ${taxAmount.toFixed(2)}`, 10, y);
       y += 6;
       doc.setTextColor(63, 81, 181);
       doc.setFont('helvetica', 'bold');
-      doc.text(`TOTAL: Bs. ${(invoice.totalAmount ?? 0).toFixed(2)}`, 10, y);
+      doc.text(`TOTAL: Bs. ${totalAmount.toFixed(2)}`, 10, y);
 
-      // Agregar QR si ya se generó
       if (qrDataUrl) {
         doc.addImage(qrDataUrl, 'PNG', 150, 10, 50, 50);
       }
@@ -117,10 +123,10 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 sm:p-8 font-sans">
+    <div className="min-h-screen bg-gray-50 pt-16 sm:pt-20 pb-8 px-4 sm:px-6 font-sans">
       <div className="max-w-3xl mx-auto bg-white rounded-3xl shadow-2xl overflow-hidden">
         {/* Header */}
-        <div className="p-6 bg-indigo-600 text-white flex justify-between items-center">
+        <div className="p-6 bg-indigo-600 text-white flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 sm:gap-0">
           <button
             onClick={onBack || (() => router.back())}
             className="flex items-center text-sm font-semibold hover:text-indigo-200 transition-colors"
@@ -148,17 +154,16 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
           </button>
         </div>
 
-        {/* Contenido */}
         <div className="p-8 space-y-8">
           {/* Encabezado de Factura */}
-          <div className="flex justify-between items-start border-b pb-4">
-            <div>
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b pb-4 gap-4 sm:gap-0">
+            <div className="min-w-0">
               <p className="text-sm text-gray-200">Factura Número</p>
-              <p className="text-3xl font-black text-white bg-indigo-600 inline-block px-3 py-1 rounded">{invoice.id}</p>
+              <p className="text-3xl font-black text-white bg-indigo-600 inline-block px-3 py-1 rounded truncate">{invoice.id}</p>
             </div>
-            <div className="text-right">
-              <p className="text-sm text-gray-200">Fecha de Emisión</p>
-              <p className="text-lg font-semibold text-gray-700">{invoice.date}</p>
+            <div className="text-left sm:text-right min-w-0">
+              <p className="text-sm text-gray-400">Fecha de Emisión</p>
+              <p className="text-lg font-semibold text-gray-700 truncate">{invoice.date}</p>
             </div>
           </div>
 
@@ -166,13 +171,13 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
               <h3 className="font-bold text-indigo-600 mb-2">Cliente</h3>
-              <p className="font-semibold">{invoice.clientName}</p>
-              <p className="text-sm text-gray-600">{invoice.clientAddress}</p>
-              <p className="text-sm text-gray-600">RUC/VAT: {invoice.clientVAT}</p>
+              <p className="font-semibold truncate">{invoice.clientName}</p>
+              <p className="text-sm text-gray-600 truncate">{invoice.clientAddress}</p>
+              <p className="text-sm text-gray-600 truncate">RUC/VAT: {invoice.clientVAT}</p>
             </div>
             <div>
               <h3 className="font-bold text-indigo-600 mb-2">Servicio</h3>
-              <p className="font-semibold">{invoice.service}</p>
+              <p className="font-semibold truncate">{invoice.service}</p>
             </div>
           </div>
 
@@ -190,12 +195,12 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-indigo-200">
-                  {invoice.items.map((item, idx) => (
+                  {itemsWithTotals.map((item, idx) => (
                     <tr key={idx} className="hover:bg-indigo-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.description}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">{item.quantity ?? 0}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-right text-gray-500">{(item.unitPrice ?? 0).toFixed(2)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-right text-gray-900">{(item.total ?? 0).toFixed(2)}</td>
+                      <td className="px-6 py-4 whitespace-normal text-sm font-medium text-gray-900">{item.description}</td>
+                      <td className="px-6 py-4 text-right text-sm text-gray-500">{item.quantity ?? 0}</td>
+                      <td className="px-6 py-4 text-right text-sm text-gray-500">{(item.unitPrice ?? 0).toFixed(2)}</td>
+                      <td className="px-6 py-4 text-right text-sm font-semibold text-gray-900">{(item.total ?? 0).toFixed(2)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -204,19 +209,19 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
           </div>
 
           {/* Totales y QR */}
-          <div className="flex justify-end pt-4">
-            <div className="w-full sm:w-80 space-y-3 p-4 bg-indigo-50 rounded-xl shadow-inner">
+          <div className="flex flex-col sm:flex-row justify-end gap-4">
+            <div className="w-full sm:w-80 space-y-3 p-4 bg-indigo-50 rounded-xl shadow-inner flex-shrink-0">
               <div className="flex justify-between">
                 <span className="text-indigo-600 font-semibold">Subtotal:</span>
-                <span className="font-medium">{(invoice.subtotal ?? 0).toFixed(2)}</span>
+                <span className="font-medium">{subtotal.toFixed(2)}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-indigo-600 font-semibold">Impuestos ({((invoice.taxRate ?? 0) * 100).toFixed(0)}%)</span>
-                <span className="font-medium">{(invoice.taxAmount ?? 0).toFixed(2)}</span>
+                <span className="font-medium">{taxAmount.toFixed(2)}</span>
               </div>
               <div className="flex justify-between border-t pt-3 border-indigo-200">
                 <span className="text-xl font-extrabold text-indigo-600">TOTAL:</span>
-                <span className="text-xl font-extrabold text-indigo-600">{(invoice.totalAmount ?? 0).toFixed(2)}</span>
+                <span className="text-xl font-extrabold text-indigo-600">{totalAmount.toFixed(2)}</span>
               </div>
 
               {qrDataUrl && (
@@ -226,6 +231,7 @@ const InvoiceDetail: React.FC<InvoiceDetailProps> = ({ invoice, onBack }) => {
               )}
             </div>
           </div>
+
         </div>
       </div>
     </div>
