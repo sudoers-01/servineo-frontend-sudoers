@@ -62,9 +62,26 @@ export default function FixerWalletRecharge({userid}) {
     if (amount === '' || amount === '.') setAmount('0.00');
   };
 
+  const [amountError, setAmountError] = useState('');
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    if (/^\d*\.?\d{0,2}$/.test(value)) setAmount(value);
+    let value = e.target.value;
+
+    // Permitir solo números y hasta 2 decimales
+    if (!/^\d*\.?\d{0,2}$/.test(value)) return;
+
+    // Extraer parte entera antes del punto
+    const integerPart = value.split('.')[0];
+
+    // Validar máximo 4 dígitos
+    if (integerPart.length > 4) {
+      setAmountError('El monto máximo permitido es de 4 dígitos.');
+      return;
+    }
+
+    // Si está OK
+    setAmountError('');
+    setAmount(value);
   };
 
   // Pantalla principal
@@ -94,6 +111,7 @@ export default function FixerWalletRecharge({userid}) {
               className="w-full px-4 py-4 border-2 text-black border-gray-300 rounded-lg text-2xl font-semibold focus:border-blue-500 focus:outline-none"
               placeholder="0.00"
             />
+            {amountError && <p className="text-red-500 text-sm mt-1">{amountError}</p>}
           </div>
 
           {/* Montos rápidos */}
