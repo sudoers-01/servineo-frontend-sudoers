@@ -14,7 +14,7 @@ interface Transaction {
   method?: string;
   createdAt: string; 
   jobId?: string;
-  status?: string; // Status es opcional aquí
+  status?: string; 
 }
 
 interface FilterSettings {
@@ -90,15 +90,14 @@ export default function FixerWalletHistory() {
     if (filterSettings.type.length > 0) {
       tempTxs = tempTxs.filter(tx => filterSettings.type.includes(tx.type));
     }
-    // Ajuste: Usar 'T00:00:00' para 'fromDate' para evitar problemas de zona horaria
+    // Usamos 'T00:00:00' para 'fromDate' para que la comparación sea en la zona local
     if (filterSettings.fromDate) {
       try {
-        // Compara en la zona horaria local
         const from = new Date(filterSettings.fromDate + 'T00:00:00'); 
         tempTxs = tempTxs.filter(tx => new Date(tx.createdAt) >= from);
       } catch (e) { console.error("Fecha 'desde' inválida:", filterSettings.fromDate); }
     }
-    // Ajuste: Usar 'T23:59:59' para 'toDate' para incluir el día completo
+    // Usamos 'T23:59:59' para 'toDate' para incluir el día completo
     if (filterSettings.toDate) {
       try {
         const to = new Date(filterSettings.toDate + 'T23:59:59');
@@ -136,7 +135,6 @@ export default function FixerWalletHistory() {
   if (error) {
      return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
-        {/* ... (Error UI) ... */}
         <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-sm">
           <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error al cargar el Historial</h2>
