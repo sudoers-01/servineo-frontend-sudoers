@@ -465,7 +465,7 @@ export default function TrabajosYPagos() {
       const urlParams = new URLSearchParams(window.location.search);
       const urlFixerId = urlParams.get('fixerId');
       
-      const id = '690c1a08f32ebc5be9c5707c';
+      const id = '68ef1be7be38c7f1c3c2c78c';
       
       console.log('🔑 Fixer ID detectado:', id);
       setFixerId(id);
