@@ -270,20 +270,61 @@ interface FilterModalProps {
 }
 
 function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
+  // Estado interno del modal
   const [fromDate, setFromDate] = useState(currentFilters.fromDate);
   const [toDate, setToDate] = useState(currentFilters.toDate);
   const [selectedTypes, setSelectedTypes] = useState<string[]>(currentFilters.type);
   const [dateError, setDateError] = useState<string | null>(null);
 
+  // --- NUEVA FUNCIÓN HELPER para validar la fecha ---
+  /**
+   * Comprueba si un string YYYY-MM-DD es una fecha calendario válida.
+   * (Evita fechas como 31 de noviembre)
+   */
+  const isValidDate = (dateString: string): boolean => {
+    if (!dateString) return true; // Si está vacío, es válido (sin filtro)
+    
+    const d = new Date(dateString);
+    
+    // Los inputs tipo 'date' usan la zona local. Si escribes '2025-11-31',
+    // 'd' se convertirá en '2025-12-01'.
+    // Comprobamos si la fecha que JS creó coincide con la que el usuario escribió.
+    
+    // Obtenemos los componentes de la fecha en la zona horaria local (no UTC)
+    const year = d.getFullYear();
+    const month = d.getMonth() + 1; // getMonth() es 0-11
+    const day = d.getDate();
+    
+    // Obtenemos los componentes del string original
+    const [inYear, inMonth, inDay] = dateString.split('-').map(Number);
+    
+    // Si '2025-11-31' se convirtió en '2025-12-01',
+    // 'month' (12) no coincidirá con 'inMonth' (11).
+    return year === inYear && month === inMonth && day === inDay;
+  }
+  // --- FIN DE LA FUNCIÓN HELPER ---
+
+
   const handleSubmit = () => {
+    // --- 1. NUEVA VALIDACIÓN DE FECHA REAL ---
+    if (!isValidDate(fromDate) || !isValidDate(toDate)) {
+      setDateError("Por favor, introduce una fecha real (ej. '30/11' pero no '31/11').");
+      return;
+    }
+    // --- FIN DE NUEVA VALIDACIÓN ---
+
+    // 2. Validación de rango (la que ya tenías)
     if (fromDate && toDate && new Date(fromDate) > new Date(toDate)) {
       setDateError("La fecha 'Desde' no puede ser posterior a la fecha 'Hasta'.");
       return; 
     }
+    
+    // Si todo está bien
     setDateError(null);
-    onApply({ fromDate, toDate, type: selectedTypes }); 
+    onApply({ fromDate, toDate, type: selectedTypes });
   };
   
+  // Limpia el error cuando el usuario cambia una fecha
   const handleDateChange = (setter: (val: string) => void, value: string) => {
     setter(value);
     setDateError(null); 
@@ -378,6 +419,7 @@ function FilterModal({ onClose, onApply, currentFilters }: FilterModalProps) {
               </div>
             </div>
 
+            {/* --- MOSTRAR CUALQUIER ERROR DE FECHA AQUÍ --- */}
             {dateError && (
               <p className="text-red-500 text-sm text-center font-medium">
                 {dateError}
