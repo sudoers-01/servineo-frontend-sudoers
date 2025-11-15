@@ -21,6 +21,7 @@
     "autoprefixer": "^10.4.21",
     "axios": "^1.13.2",
     "ci": "^2.3.0",
+    "clsx": "^2.1.1",
     "cn": "^0.1.1",
     "leaflet": "^1.9.4",
     "leaflet-defaulticon-compatibility": "^0.1.2",
@@ -36,6 +37,7 @@
     "react-redux": "^9.2.0",
     "recharts": "^3.4.1",
     "redux-logger": "^3.0.6",
+    "tailwind-merge": "^3.4.0",
     "zod": "^4.1.12"
   },
   "devDependencies": {
