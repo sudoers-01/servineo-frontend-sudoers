@@ -146,7 +146,7 @@ export default function CalendarPage() {
                                     <h2 className="text-black p-4 text-xl text-center flex-1">Mi Calendario</h2>
                                 )}
                                 {userRole === 'requester' && (
-                                    <h2 className="text-black p-4 text-xl text-center flex-1">Calendario Diego Paredes</h2>
+                                    <h2 className="text-black p-4 text-xl text-center flex-1">Calendario de Juan Carlos Peréz</h2>
                                 )}
                             </div>
 
