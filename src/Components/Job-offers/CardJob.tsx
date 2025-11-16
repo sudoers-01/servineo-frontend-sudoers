@@ -4,7 +4,6 @@ import Image from 'next/image';
 import { MapPin, Star, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import { getImagesForJob } from '@/app/lib/constants/img';
 
 interface OfferData {
   _id: string;
@@ -59,7 +58,8 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
       } else if (trabajo.imagenUrl) {
         allImages = [trabajo.imagenUrl];
       } else {
-        allImages = getImagesForJob(trabajo._id, trabajo.category);
+        // Si no hay imágenes, usar array vacío o imagen por defecto
+        allImages = [];
       }
 
       return {
@@ -71,7 +71,6 @@ const CardJob = ({ trabajos, viewMode = 'list', onClick }: CardJobProps) => {
 
     return mappedTrabajos;
   }, [trabajos]);
-
   const GridView = () => {
     const [hoveredCard, setHoveredCard] = useState<string | null>(null);
     const [currentImageIndex, setCurrentImageIndex] = useState<{ [key: string]: number }>({});

@@ -1,13 +1,12 @@
 // src/Components/Home/RecentOffer-section.tsx
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import RecentOfferCard from './RecentOfferCard';
 import { JobOfferModal } from '../Job-offers/Job-offer-modal';
-import { getImagesForJob } from '@/app/lib/constants/img';
 import { api } from '@/app/lib/api';
 
 // Tipos
@@ -161,27 +160,21 @@ export default function RecentOffersSection() {
     return () => container.removeEventListener('scroll', checkScroll);
   }, [selectedCategory]);
 
-  const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer => {
-    // CORREGIDO: Usar allImages si está disponible, o generarlas
-    let photos: string[] = [];
+  const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
+    if (!offer) return null;
 
-    if (offer.allImages && offer.allImages.length > 0) {
-      // Si ya tenemos allImages del map, usarlas
-      photos = offer.allImages;
-    } else if (offer.photos && offer.photos.length > 0) {
-      // Si tiene photos del API
+    // Obtener imágenes solo de la BD
+    let photos: string[] = [];
+    if (offer.photos && offer.photos.length > 0) {
       photos = offer.photos;
     } else if (offer.imagenUrl) {
-      // Si tiene una sola imagen
       photos = [offer.imagenUrl];
-    } else {
-      // Generar imágenes basadas en categoría
-      photos = getImagesForJob(offer._id, offer.category || 'Default');
     }
+    // Si no hay imágenes, photos queda como array vacío []
 
     return {
       _id: offer._id,
-      fixerId: offer.fixerId || 'fixer-001',
+      fixerId: offer.fixerId,
       name: offer.fixerName,
       title: offer.title,
       description: offer.description,
@@ -195,13 +188,29 @@ export default function RecentOffersSection() {
     };
   };
 
-  const trabajosConImagenes = trabajos.map((trabajo) => {
-    const allImages = getImagesForJob(trabajo._id, trabajo.category);
-    return {
-      ...trabajo,
-      allImages: allImages,
-    };
-  });
+
+  const trabajosConImagenes = useMemo(() => {
+    const mappedTrabajos = trabajos.map((trabajo) => {
+      let allImages: string[];
+
+      if (trabajo.photos && trabajo.photos.length > 0) {
+        allImages = trabajo.photos;
+      } else if (trabajo.imagenUrl) {
+        allImages = [trabajo.imagenUrl];
+      } else {
+        // Si no hay imágenes, usar array vacío o imagen por defecto
+        allImages = [];
+      }
+
+      return {
+        ...trabajo,
+        imagenAsignada: allImages[0],
+        allImages: allImages,
+      };
+    });
+
+    return mappedTrabajos;
+  }, [trabajos]);
 
   const handleMouseEnter = (cardId: string, totalImages: number) => {
     setHoveredCard(cardId);

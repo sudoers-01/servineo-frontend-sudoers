@@ -29,7 +29,6 @@ import useApplyQueryToStore from '@/app/redux/job-offer-hooks/useApplyQueryToSto
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
 import { MapView } from '@/Components/Job-offers/maps/MapView';
 import { Map, List, LayoutGrid } from 'lucide-react';
-import { getImagesForJob } from '../../lib/constants/img';
 import { mockJobOffers } from '@/app/lib/mock-data';
 import { useTranslations } from 'next-intl';
 
@@ -112,35 +111,33 @@ export default function JobOffersPage() {
   });
 
   // Función para adaptar datos de BD a formato para modal
-  const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
-    if (!offer) return null;
+const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
+  if (!offer) return null;
 
-    // Obtener imágenes
-    let photos: string[] = [];
-    if (offer.photos && offer.photos.length > 0) {
-      photos = offer.photos;
-    } else if (offer.imagenUrl) {
-      photos = [offer.imagenUrl];
-    } else {
-      photos = getImagesForJob(offer._id, offer.category || 'Default');
-    }
+  // Obtener imágenes solo de la BD
+  let photos: string[] = [];
+  if (offer.photos && offer.photos.length > 0) {
+    photos = offer.photos;
+  } else if (offer.imagenUrl) {
+    photos = [offer.imagenUrl];
+  }
+  // Si no hay imágenes, photos queda como array vacío []
 
-    return {
-      _id: offer._id,
-      fixerId: offer.fixerId,
-      name: offer.fixerName,
-      title: offer.title,
-      description: offer.description,
-      tags: offer.tags || [],
-      phone: offer.contactPhone,
-      photos: photos,
-      services: offer.category ? [offer.category] : [],
-      price: offer.price,
-      createdAt: new Date(offer.createdAt || Date.now()),
-      city: offer.city,
-    };
+  return {
+    _id: offer._id,
+    fixerId: offer.fixerId,
+    name: offer.fixerName,
+    title: offer.title,
+    description: offer.description,
+    tags: offer.tags || [],
+    phone: offer.contactPhone,
+    photos: photos,
+    services: offer.category ? [offer.category] : [],
+    price: offer.price,
+    createdAt: new Date(offer.createdAt || Date.now()),
+    city: offer.city,
   };
-
+};
   // Limpiar búsqueda si se navega directamente sin parámetros
   useEffect(() => {
     if (typeof window !== 'undefined') {
