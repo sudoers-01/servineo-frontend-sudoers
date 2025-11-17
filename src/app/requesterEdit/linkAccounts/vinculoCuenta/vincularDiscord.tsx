@@ -23,16 +23,10 @@ export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
     vincularDiscord(
       token,
 
-      // ÉXITO
       (client) => {
         onLinked?.(client);
         setLoading(false);
       },
-
-      // ERROR
-      (msg) => {
-        setLoading(false);
-      }
     );
   };
 

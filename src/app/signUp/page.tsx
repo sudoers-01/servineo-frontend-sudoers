@@ -47,7 +47,7 @@ export default function SignUp() {
             Modo requester
           </p>
 
-          <RegistroForm />
+          <RegistroForm onNotify={handleNotify} />
 
           <div className="flex items-center my-6">
             <div className="flex-1 h-px bg-gray-300" />

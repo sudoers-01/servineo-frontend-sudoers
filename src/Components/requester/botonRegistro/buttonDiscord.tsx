@@ -67,7 +67,7 @@ export default function DiscordButton({ onNotify }: DiscordButtonProps) {
             router.push("/signUp/registrar/registroUbicacion");
           } else {
             setTimeout(() => {
-              router.push("/");
+              window.location.href = "/";
             }, 2000);
           }
         }, 2000);

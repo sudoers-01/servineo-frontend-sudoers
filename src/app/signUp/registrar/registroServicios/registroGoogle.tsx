@@ -70,7 +70,7 @@ export default function RegistroGoogle({ onSuccessClose, onNotify }: RegistroGoo
       });
 
       if (onSuccessClose) onSuccessClose();
-      setTimeout(() => router.push("/"), 2000);
+      setTimeout(() => window.location.href = "/", 2000);
     }catch (error: unknown) {
       console.error("Error al enviar el token al backend:", error);
 
