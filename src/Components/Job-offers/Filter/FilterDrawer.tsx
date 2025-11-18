@@ -5,6 +5,7 @@ import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
+import { DB_VALUES } from '@/app/redux/contants';
 
 interface FilterState {
   range: string[];
@@ -19,53 +20,7 @@ interface FilterDrawerProps {
   onReset?: () => void;
 }
 
-const DB_VALUES = {
-  ranges: [
-    'De (A-C)',
-    'De (D-F)',
-    'De (G-I)',
-    'De (J-L)',
-    'De (M-Ñ)',
-    'De (O-Q)',
-    'De (R-T)',
-    'De (U-W)',
-    'De (X-Z)',
-  ],
-  cities: [
-    'Beni',
-    'Chuquisaca',
-    'Cochabamba',
-    'La Paz',
-    'Oruro',
-    'Pando',
-    'Potosí',
-    'Santa Cruz',
-    'Tarija',
-  ],
-  jobTypes: [
-    'Albañil',
-    'Carpintero',
-    'Cerrajero',
-    'Decorador',
-    'Electricista',
-    'Fontanero',
-    'Fumigador',
-    'Instalador',
-    'Jardinero',
-    'Limpiador',
-    'Mecánico',
-    'Montador',
-    'Pintor',
-    'Pulidor',
-    'Soldador',
-    'Techador',
-    'Vidriero',
-    'Yesero',
-  ],
-} as const;
-
 export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: FilterDrawerProps) {
-
   const filtersFromStore = useAppSelector((state) => state.jobOfert.filters);
 
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -79,12 +34,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const tCity = useTranslations('advancedSearch.city');
   const tJob = useTranslations('advancedSearch.jobType');
 
-  // ✅ REFACTOR: Estado interno inicializado con valores del store
   const [selectedRanges, setSelectedRanges] = useState<string[]>(filtersFromStore.range || []);
   const [selectedCity, setSelectedCity] = useState<string>(filtersFromStore.city || '');
   const [selectedJobs, setSelectedJobs] = useState<string[]>(filtersFromStore.category || []);
 
-  // ✅ AGREGADO: useEffect para sincronización con el store
   useEffect(() => {
     setSelectedRanges(filtersFromStore.range || []);
     setSelectedCity(filtersFromStore.city || '');
@@ -109,7 +62,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }));
   };
 
-  // Trabajamos con valores en ESPAÑOL (los que están en la BD)
   const handleRangeChange = (dbValue: string) => {
     const newRanges = selectedRanges.includes(dbValue)
       ? selectedRanges.filter((r) => r !== dbValue)
@@ -141,7 +93,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     if (!isValid || !data) return;
 
     if (onFiltersApply) {
-      // Se envían valores en ESPAÑOL al backend
       onFiltersApply({
         ...data,
         city: data.city || '',
@@ -165,7 +116,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }
   };
 
-  // Configuración de UI: dbValue en español, label traducido
   const nameRanges = [
     [
       { dbValue: DB_VALUES.ranges[0], label: tName('ranges.ac') },
@@ -182,38 +132,19 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ],
   ];
 
-  const cities = [
-    { dbValue: DB_VALUES.cities[0], label: tCity('options.beni') },
-    { dbValue: DB_VALUES.cities[1], label: tCity('options.chuquisaca') },
-    { dbValue: DB_VALUES.cities[2], label: tCity('options.cochabamba') },
-    { dbValue: DB_VALUES.cities[3], label: tCity('options.laPaz') },
-    { dbValue: DB_VALUES.cities[4], label: tCity('options.oruro') },
-    { dbValue: DB_VALUES.cities[5], label: tCity('options.pando') },
-    { dbValue: DB_VALUES.cities[6], label: tCity('options.potosi') },
-    { dbValue: DB_VALUES.cities[7], label: tCity('options.santaCruz') },
-    { dbValue: DB_VALUES.cities[8], label: tCity('options.tarija') },
-  ];
+  const cities = DB_VALUES.cities.map((dbValue, index) => ({
+    dbValue,
+    label: tCity(
+      `options.${['beni', 'chuquisaca', 'cochabamba', 'laPaz', 'oruro', 'pando', 'potosi', 'santaCruz', 'tarija'][index]}`,
+    ),
+  }));
 
-  const jobTypes = [
-    { dbValue: DB_VALUES.jobTypes[0], label: tJob('options.mason') },
-    { dbValue: DB_VALUES.jobTypes[1], label: tJob('options.carpenter') },
-    { dbValue: DB_VALUES.jobTypes[2], label: tJob('options.locksmith') },
-    { dbValue: DB_VALUES.jobTypes[3], label: tJob('options.decorator') },
-    { dbValue: DB_VALUES.jobTypes[4], label: tJob('options.electrician') },
-    { dbValue: DB_VALUES.jobTypes[5], label: tJob('options.plumber') },
-    { dbValue: DB_VALUES.jobTypes[6], label: tJob('options.fumigator') },
-    { dbValue: DB_VALUES.jobTypes[7], label: tJob('options.installer') },
-    { dbValue: DB_VALUES.jobTypes[8], label: tJob('options.gardener') },
-    { dbValue: DB_VALUES.jobTypes[9], label: tJob('options.cleaner') },
-    { dbValue: DB_VALUES.jobTypes[10], label: tJob('options.mechanic') },
-    { dbValue: DB_VALUES.jobTypes[11], label: tJob('options.assembler') },
-    { dbValue: DB_VALUES.jobTypes[12], label: tJob('options.painter') },
-    { dbValue: DB_VALUES.jobTypes[13], label: tJob('options.polisher') },
-    { dbValue: DB_VALUES.jobTypes[14], label: tJob('options.welder') },
-    { dbValue: DB_VALUES.jobTypes[15], label: tJob('options.roofer') },
-    { dbValue: DB_VALUES.jobTypes[16], label: tJob('options.glazier') },
-    { dbValue: DB_VALUES.jobTypes[17], label: tJob('options.plasterer') },
-  ];
+  const jobTypes = DB_VALUES.jobTypes.map((dbValue, index) => ({
+    dbValue,
+    label: tJob(
+      `options.${['mason', 'carpenter', 'locksmith', 'decorator', 'electrician', 'plumber', 'fumigator', 'installer', 'gardener', 'cleaner', 'mechanic', 'assembler', 'painter', 'polisher', 'welder', 'roofer', 'glazier', 'plasterer'][index]}`,
+    ),
+  }));
 
   return (
     <>

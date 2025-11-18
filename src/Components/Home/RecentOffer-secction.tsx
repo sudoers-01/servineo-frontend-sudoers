@@ -1,4 +1,3 @@
-// src/Components/Home/RecentOffer-section.tsx
 'use client';
 
 import { useEffect, useState, useRef, useMemo } from 'react';
@@ -7,7 +6,8 @@ import { ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import RecentOfferCard from './RecentOfferCard';
 import { JobOfferModal } from '../Job-offers/Job-offer-modal';
-import { api } from '@/app/lib/api';
+import { useGetRecentOffersQuery } from '@/app/redux/services/jobOffersApi';
+import { DB_VALUES } from '@/app/redux/contants';
 
 // Tipos
 interface OfferData {
@@ -29,13 +29,6 @@ interface OfferData {
   allImages?: string[];
 }
 
-interface OfferResponse {
-  total: number;
-  count: number;
-  data: OfferData[];
-  currentPage?: number;
-}
-
 interface AdaptedOffer {
   _id: string;
   fixerId: string;
@@ -51,36 +44,12 @@ interface AdaptedOffer {
   city: string;
 }
 
-const CATEGORIES = [
-  'Todos',
-  'Albañil',
-  'Carpintero',
-  'Cerrajero',
-  'Decorador',
-  'Electricista',
-  'Fontanero',
-  'Fumigador',
-  'Instalador',
-  'Jardinero',
-  'Limpiador',
-  'Mecánico',
-  'Montador',
-  'Pintor',
-  'Pulidor',
-  'Soldador',
-  'Techador',
-  'Vidriero',
-  'Yesero',
-];
-
 export default function RecentOffersSection() {
   const t = useTranslations('RecentOffer');
   const tCat = useTranslations('Categories');
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const CATEGORIES = DB_VALUES.categories;
 
-  const [trabajos, setTrabajos] = useState<OfferData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedCategory, setSelectedCategory] = useState('Todos');
   const [selectedOffer, setSelectedOffer] = useState<AdaptedOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -91,7 +60,20 @@ export default function RecentOffersSection() {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // Detectar si es móvil
+  // ✅ RTK Query: Fetch ofertas recientes
+  const {
+    data: offersData,
+    isLoading,
+    error: fetchError,
+  } = useGetRecentOffersQuery({
+    category: selectedCategory !== 'Todos' ? selectedCategory : undefined,
+    limit: 8,
+  });
+
+  const trabajos = offersData?.data || [];
+  const error = fetchError ? 'Error al cargar ofertas' : null;
+
+  // Detectar móvil
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
@@ -101,42 +83,6 @@ export default function RecentOffersSection() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
-
-  // Fetch offers
-  useEffect(() => {
-    const fetchOffers = async () => {
-      setLoading(true);
-
-      try {
-        const urlParams = new URLSearchParams({
-          sortBy: 'recent',
-          page: '1',
-          limit: '8',
-        });
-
-        if (selectedCategory !== 'Todos') {
-          urlParams.append('category', selectedCategory);
-        }
-
-        const endpoint = `/api/devmaster/offers?${urlParams.toString()}`;
-        const response = await api.get<OfferResponse>(endpoint);
-
-        if (response.success && response.data) {
-          setTrabajos(response.data.data || []);
-          setError(null);
-        } else {
-          const errorMsg = response.error || 'Error al cargar ofertas';
-          setError(errorMsg);
-        }
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Error de conexión');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOffers();
-  }, [selectedCategory]);
 
   // Cleanup intervals
   useEffect(() => {
@@ -163,14 +109,12 @@ export default function RecentOffersSection() {
   const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
     if (!offer) return null;
 
-    // Obtener imágenes solo de la BD
     let photos: string[] = [];
     if (offer.photos && offer.photos.length > 0) {
       photos = offer.photos;
     } else if (offer.imagenUrl) {
       photos = [offer.imagenUrl];
     }
-    // Si no hay imágenes, photos queda como array vacío []
 
     return {
       _id: offer._id,
@@ -188,9 +132,8 @@ export default function RecentOffersSection() {
     };
   };
 
-
   const trabajosConImagenes = useMemo(() => {
-    const mappedTrabajos = trabajos.map((trabajo) => {
+    return trabajos.map((trabajo) => {
       let allImages: string[];
 
       if (trabajo.photos && trabajo.photos.length > 0) {
@@ -198,7 +141,6 @@ export default function RecentOffersSection() {
       } else if (trabajo.imagenUrl) {
         allImages = [trabajo.imagenUrl];
       } else {
-        // Si no hay imágenes, usar array vacío o imagen por defecto
         allImages = [];
       }
 
@@ -208,8 +150,6 @@ export default function RecentOffersSection() {
         allImages: allImages,
       };
     });
-
-    return mappedTrabajos;
   }, [trabajos]);
 
   const handleMouseEnter = (cardId: string, totalImages: number) => {
@@ -313,7 +253,6 @@ export default function RecentOffersSection() {
         {/* Category Filter */}
         <div className="mb-6">
           {isMobile ? (
-            // Mobile: Scrollable horizontal
             <div className="relative">
               <div className="flex items-center gap-2">
                 <button
@@ -364,7 +303,6 @@ export default function RecentOffersSection() {
               </div>
             </div>
           ) : (
-            // Desktop: Wrap layout
             <div className="flex flex-wrap gap-2">
               {CATEGORIES.map((cat) => (
                 <button
@@ -384,21 +322,21 @@ export default function RecentOffersSection() {
         </div>
 
         {/* Loading State */}
-        {loading && (
+        {isLoading && (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
           </div>
         )}
 
         {/* Error State */}
-        {error && !loading && (
+        {error && !isLoading && (
           <div className="text-center py-12">
             <p className="text-red-500 mb-4">{error}</p>
           </div>
         )}
 
         {/* Offers Grid */}
-        {!loading && !error && trabajosConImagenes.length > 0 && (
+        {!isLoading && !error && trabajosConImagenes.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {trabajosConImagenes.map((trabajo) => (
               <RecentOfferCard
@@ -417,7 +355,7 @@ export default function RecentOffersSection() {
         )}
 
         {/* Empty State */}
-        {!loading && !error && trabajosConImagenes.length === 0 && (
+        {!isLoading && !error && trabajosConImagenes.length === 0 && (
           <div className="text-center py-12">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
               <SlidersHorizontal className="w-8 h-8 text-gray-400" />

@@ -2,53 +2,7 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-
-// ============================================
-// MAPEO DE VALORES DE BD A KEYS DE TRADUCCIÓN
-// ============================================
-const DB_TO_TRANSLATION_KEY: Record<string, string> = {
-  // Rangos de nombres
-  'De (A-C)': 'fixerName.ranges.ac',
-  'De (D-F)': 'fixerName.ranges.df',
-  'De (G-I)': 'fixerName.ranges.gi',
-  'De (J-L)': 'fixerName.ranges.jl',
-  'De (M-Ñ)': 'fixerName.ranges.mn',
-  'De (O-Q)': 'fixerName.ranges.oq',
-  'De (R-T)': 'fixerName.ranges.rt',
-  'De (U-W)': 'fixerName.ranges.uw',
-  'De (X-Z)': 'fixerName.ranges.xz',
-
-  // Ciudades
-  Beni: 'city.options.beni',
-  Chuquisaca: 'city.options.chuquisaca',
-  Cochabamba: 'city.options.cochabamba',
-  'La Paz': 'city.options.laPaz',
-  Oruro: 'city.options.oruro',
-  Pando: 'city.options.pando',
-  Potosí: 'city.options.potosi',
-  'Santa Cruz': 'city.options.santaCruz',
-  Tarija: 'city.options.tarija',
-
-  // Tipos de trabajo
-  Albañil: 'jobType.options.mason',
-  Carpintero: 'jobType.options.carpenter',
-  Cerrajero: 'jobType.options.locksmith',
-  Decorador: 'jobType.options.decorator',
-  Electricista: 'jobType.options.electrician',
-  Fontanero: 'jobType.options.plumber',
-  Fumigador: 'jobType.options.fumigator',
-  Instalador: 'jobType.options.installer',
-  Jardinero: 'jobType.options.gardener',
-  Limpiador: 'jobType.options.cleaner',
-  Mecánico: 'jobType.options.mechanic',
-  Montador: 'jobType.options.assembler',
-  Pintor: 'jobType.options.painter',
-  Pulidor: 'jobType.options.polisher',
-  Soldador: 'jobType.options.welder',
-  Techador: 'jobType.options.roofer',
-  Vidriero: 'jobType.options.glazier',
-  Yesero: 'jobType.options.plasterer',
-};
+import { DB_TO_TRANSLATION_KEY } from '@/app/redux/contants';
 
 type NoResultsMessageProps = {
   search: string;
@@ -90,11 +44,9 @@ export default function AppliedFilters({ params, onModify }: Props) {
   const t = useTranslations('search');
   const tAdv = useTranslations('advancedSearch');
 
-  // Función para traducir valores de BD
   const translateDbValue = (value: string): string => {
-    const translationKey = DB_TO_TRANSLATION_KEY[value];
+    const translationKey = DB_TO_TRANSLATION_KEY[value as keyof typeof DB_TO_TRANSLATION_KEY];
     if (translationKey) {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       return tAdv(translationKey as any);
     }
     return value;
@@ -114,17 +66,14 @@ export default function AppliedFilters({ params, onModify }: Props) {
     router.push(`/adv-search?${sp.toString()}`);
   };
 
-  // Función mejorada para renderizar valores con traducción
   const renderTranslatedValue = (v: FilterParamValue): string | null => {
     if (v == null) return null;
 
     if (Array.isArray(v)) {
-      // Traducir cada elemento del array
       const translated = v.map((item) => translateDbValue(String(item)));
       return translated.join(', ');
     }
 
-    // Traducir valor individual
     return translateDbValue(String(v));
   };
 
@@ -142,7 +91,6 @@ export default function AppliedFilters({ params, onModify }: Props) {
               const hasMin = minRaw != null && minRaw !== '';
               const hasMax = maxRaw != null && maxRaw !== '';
 
-              // Tag de precio
               if (hasMin || hasMax) {
                 const minN = Number(minRaw);
                 const maxN = Number(maxRaw);
@@ -167,11 +115,9 @@ export default function AppliedFilters({ params, onModify }: Props) {
                 );
               }
 
-              // Procesar otros parámetros
               Object.entries(params).forEach(([k, v]) => {
                 if (k === 'minPrice' || k === 'maxPrice') return;
 
-                // SortBy
                 if (k === 'sortBy' && typeof v === 'string') {
                   const txt =
                     v === 'recent' ? t('mostRecent') : v === 'oldest' ? t('oldest') : String(v);
@@ -186,7 +132,6 @@ export default function AppliedFilters({ params, onModify }: Props) {
                   return;
                 }
 
-                // Title Only
                 if (k === 'titleOnly' && v === true) {
                   tags.push(
                     <span
@@ -199,7 +144,6 @@ export default function AppliedFilters({ params, onModify }: Props) {
                   return;
                 }
 
-                // Exact Words
                 if (k === 'exact' && v === true) {
                   tags.push(
                     <span
@@ -212,7 +156,6 @@ export default function AppliedFilters({ params, onModify }: Props) {
                   return;
                 }
 
-                // Date
                 if (k === 'date' && typeof v === 'string') {
                   const m = v.match(/^(\d{4})-(\d{2})-(\d{2})$/);
                   const dateLabel = m ? `${m[3]}/${m[2]}/${m[1]}` : String(v);
@@ -227,23 +170,21 @@ export default function AppliedFilters({ params, onModify }: Props) {
                   return;
                 }
 
-                // Rating
-                  if (k === 'rating' && (typeof v === 'number' || typeof v === 'string')) {
-                    const ratingNum = typeof v === 'string' ? parseFloat(v) : v;
-                    if (!Number.isNaN(ratingNum)) {
-                      tags.push(
-                        <span
-                          key={k}
-                          className="inline-block bg-sky-50 text-sky-500 text-sm px-3 py-1 rounded"
-                        >
-                          {`Calificación: ${ratingNum.toFixed(1)}`}
-                        </span>,
-                      );
-                      return;
-                    }
+                if (k === 'rating' && (typeof v === 'number' || typeof v === 'string')) {
+                  const ratingNum = typeof v === 'string' ? parseFloat(v) : v;
+                  if (!Number.isNaN(ratingNum)) {
+                    tags.push(
+                      <span
+                        key={k}
+                        className="inline-block bg-sky-50 text-sky-500 text-sm px-3 py-1 rounded"
+                      >
+                        {`Calificación: ${ratingNum.toFixed(1)}`}
+                      </span>,
+                    );
+                    return;
                   }
+                }
 
-                // Otros valores (range, city, category, tags) - TRADUCIR
                 let value = renderTranslatedValue(v as FilterParamValue);
                 if (!value) return;
                 if (value.includes('$')) value = formatPriceString(value);

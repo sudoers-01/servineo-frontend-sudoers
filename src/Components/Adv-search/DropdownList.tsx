@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useTranslations } from 'next-intl';
+import { useGetTagsQuery } from '@/app/redux/services/jobOffersApi';
 
 interface DropdownListProps {
   onFilterChange?: (filters: { categories: string[] }) => void;
@@ -19,15 +20,28 @@ const DropdownList: React.FC<DropdownListProps> = ({
   const tCommon = useTranslations('advancedSearch');
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false);
   const [previousClearSignal, setPreviousClearSignal] = useState<number | undefined>(clearSignal);
 
-  const categoryFiltersKey = useMemo(() => JSON.stringify(categoryFilters), [categoryFilters]);
+  const {
+    data: tagsData,
+    isLoading,
+    error: fetchError,
+  } = useGetTagsQuery({
+    search: searchQuery?.trim() || undefined,
+    category: categoryFilters.length > 0 ? categoryFilters : undefined,
+  });
 
-  // Restaurar etiquetas desde la URL al montar (solo una vez)
+  // Normalizar respuesta del backend
+  const categories = useMemo(() => {
+    if (!tagsData) return [];
+    if (Array.isArray(tagsData)) return tagsData;
+    return [];
+  }, [tagsData]);
+
+  const error = fetchError ? 'Error al cargar categorías' : null;
+
+  // Restaurar desde URL
   useEffect(() => {
     if (typeof window === 'undefined' || hasRestoredFromUrl) return;
 
@@ -56,105 +70,16 @@ const DropdownList: React.FC<DropdownListProps> = ({
     }
 
     setHasRestoredFromUrl(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Limpiar selección cuando cambia clearSignal
   useEffect(() => {
-    let mounted = true;
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        setError(null);
-
-        const API_URL = 'http://localhost:3000';
-
-        // Build query params: if searchQuery or categoryFilters provided, request tags derived from matching offers.
-        // Otherwise (no search, no category) ask for recent tags (from latest offers).
-        const params: string[] = [];
-        if (searchQuery && searchQuery.trim())
-          params.push(`search=${encodeURIComponent(searchQuery.trim())}`);
-        if (categoryFilters && categoryFilters.length)
-          params.push(`category=${encodeURIComponent(categoryFilters.join(','))}`);
-        if (!searchQuery && (!categoryFilters || categoryFilters.length === 0))
-          params.push('recent=true');
-        // limit how many offers to inspect / tags to return
-        params.push('limit=20');
-
-        const endpoint = `${API_URL}/api/devmaster/tags${params.length ? `?${params.join('&')}` : ''}`;
-
-        const response = await fetch(endpoint, {
-          method: 'GET',
-          headers: { 'Content-Type': 'application/json' },
-        });
-        if (!response.ok) throw new Error(`Error ${response.status}: ${response.statusText}`);
-        const data: unknown = await response.json();
-
-        // Normalize different possible backend shapes into an array of strings.
-        let incoming: string[] = [];
-        const isStringArray = (arr: unknown): arr is string[] =>
-          Array.isArray(arr) && arr.every((it) => typeof it === 'string');
-
-        const getFieldStringArray = (obj: unknown, key: string): string[] | undefined => {
-          if (!obj || typeof obj !== 'object') return undefined;
-          const v = (obj as Record<string, unknown>)[key];
-          return isStringArray(v) ? (v as string[]) : undefined;
-        };
-
-        if (isStringArray(data)) incoming = data;
-        else if (getFieldStringArray(data, 'tags')) incoming = getFieldStringArray(data, 'tags')!;
-        else if (getFieldStringArray((data as Record<string, unknown>)?.data, 'tags'))
-          incoming = getFieldStringArray((data as Record<string, unknown>)?.data, 'tags')!;
-        else if (getFieldStringArray(data, 'result'))
-          incoming = getFieldStringArray(data, 'result')!;
-        else if (getFieldStringArray(data, 'items')) incoming = getFieldStringArray(data, 'items')!;
-        else {
-          // Fallback: try to find the first array-of-strings value in the object
-          const vals =
-            data && typeof data === 'object' ? Object.values(data as Record<string, unknown>) : [];
-          const found = vals.find((v) => isStringArray(v));
-          if (isStringArray(found)) incoming = found as string[];
-        }
-
-        if (!mounted) return;
-        if (!Array.isArray(incoming) || incoming.length === 0) {
-          // No tags found — set empty list but don't throw to avoid breaking the UI.
-          setCategories([]);
-          setError('No se encontraron etiquetas con el formato esperado desde el backend');
-        } else {
-          setCategories(incoming);
-          setError(null);
-        }
-      } catch (err) {
-        let errorMessage = 'Error desconocido';
-        if (err instanceof TypeError && err.message === 'Failed to fetch') {
-          errorMessage =
-            'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
-        } else if (err instanceof Error) {
-          errorMessage = err.message;
-        }
-        if (!mounted) return;
-        setError(errorMessage);
-        console.error('❌ Error completo:', err);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    fetchCategories();
-
-    return () => {
-      mounted = false;
-    };
-  }, [searchQuery, categoryFilters, categoryFiltersKey, clearSignal]);
-
-  useEffect(() => {
-    if (!hasRestoredFromUrl) return; // Wait until URL restoration is done
-    if (clearSignal === previousClearSignal) return; // Only act if clearSignal actually changed
+    if (!hasRestoredFromUrl) return;
+    if (clearSignal === previousClearSignal) return;
 
     setSelectedCategories([]);
     onFilterChange?.({ categories: [] });
     setPreviousClearSignal(clearSignal);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearSignal, hasRestoredFromUrl]);
 
   const handleCheckboxChange = (categoryValue: string) => {
@@ -166,7 +91,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
     onFilterChange?.({ categories: newSelectedCategories });
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="w-full border border-gray-300 rounded-lg p-8 text-center">
         <div className="animate-pulse space-y-3">
@@ -185,24 +110,6 @@ const DropdownList: React.FC<DropdownListProps> = ({
         <div className="text-center">
           <p className="text-red-600 text-sm font-semibold mb-2">⚠️ Error al cargar categorías</p>
           <p className="text-red-500 text-xs mb-3">{error}</p>
-          <div className="bg-white border border-red-200 rounded p-3 text-left">
-            <p className="text-gray-700 text-xs font-semibold mb-1">Verifica:</p>
-            <ul className="text-gray-600 text-xs space-y-1 list-disc list-inside">
-              <li>
-                Backend en desarrollo:{' '}
-                <code className="bg-gray-100 px-1 rounded">http://localhost:3000</code>
-              </li>
-              <li>
-                Backend en producción:{' '}
-                <code className="bg-gray-100 px-1 rounded text-[10px]">
-                  https://devmastersservineobackend-ashy.vercel.app
-                </code>
-              </li>
-              <li>
-                Endpoint: <code className="bg-gray-100 px-1 rounded">/api/devmaster/tags</code>
-              </li>
-            </ul>
-          </div>
         </div>
       </div>
     );
@@ -212,7 +119,6 @@ const DropdownList: React.FC<DropdownListProps> = ({
     (selectedTag) => !categories.includes(selectedTag),
   );
 
-  // Create display list: filtered categories + selected ones that don't match current filter
   const displayCategories = [...categories, ...selectedButNotInFilter];
 
   if (displayCategories.length === 0) {
@@ -226,11 +132,11 @@ const DropdownList: React.FC<DropdownListProps> = ({
   return (
     <div className="w-full border border-gray-300 rounded-lg overflow-hidden">
       <div className="max-h-64 overflow-y-auto">
-        {categories.map((category, index) => (
+        {displayCategories.map((category, index) => (
           <label
             key={`${category}-${index}`}
             className={`flex items-center px-4 py-3 cursor-pointer hover:bg-gray-50 transition-colors ${
-              index !== categories.length - 1 ? 'border-b border-gray-200' : ''
+              index !== displayCategories.length - 1 ? 'border-b border-gray-200' : ''
             }`}
           >
             <input

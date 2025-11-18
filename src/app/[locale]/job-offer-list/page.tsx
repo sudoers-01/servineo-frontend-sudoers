@@ -15,17 +15,22 @@ import {
 
 import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
 import {
-  fetchOffers,
   setSearch,
   setFilters,
   setSortBy,
   setRegistrosPorPagina,
   resetPagination,
-  FilterState,
+  setPaginaActual,
+  resetFilters,
+  enablePersistence,
 } from '@/app/redux/slice/jobOfert';
+import type { FilterState } from '@/app/redux/features/jobOffers/types';
 import { getSortValue } from '../../lib/constants/sortOptions';
-import { useSyncUrlParams } from '@/app/redux/job-offer-hooks/useSyncUrlParams';
-import useApplyQueryToStore from '@/app/redux/job-offer-hooks/useApplyQueryToStore';
+import {
+  useJobOffers,
+  useInitialUrlParams,
+  useSyncUrlParams,
+} from '@/app/redux/features/jobOffers/jobOffersHooks';
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
 import { MapView } from '@/Components/Job-offers/maps/MapView';
 import { Map, List, LayoutGrid } from 'lucide-react';
@@ -70,25 +75,22 @@ interface AdaptedOffer {
 export default function JobOffersPage() {
   const t = useTranslations('jobOffers');
   const dispatch = useAppDispatch();
+
+  useInitialUrlParams();
+
+  const { offers, total, isLoading, error } = useJobOffers();
+
   const {
-    trabajos,
-    loading,
-    error,
-    filters,
     sortBy,
     search,
-    titleOnly,
-    exact,
     paginaActual,
     registrosPorPagina,
-    totalRegistros,
-    date,
-    rating,
   } = useAppSelector((state) => state.jobOfert);
+
+  useSyncUrlParams();
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const stickyRef = useRef<HTMLDivElement | null>(null);
-  const isInitialMount = useRef(true);
   const scrollRestoredRef = useRef(false);
   const pageBeforeFilter = useRef<number>(1);
   const hasActiveFilters = useRef<boolean>(false);
@@ -96,54 +98,38 @@ export default function JobOffersPage() {
   const [selectedOffer, setSelectedOffer] = useState<AdaptedOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useApplyQueryToStore();
-
-  useSyncUrlParams({
-    search,
-    filters,
-    sortBy,
-    date,
-    rating,
-    paginaActual,
-    registrosPorPagina,
-    titleOnly,
-    exact,
-  });
-
   // Función para adaptar datos de BD a formato para modal
-const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
-  if (!offer) return null;
+  const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
+    if (!offer) return null;
 
-  // Obtener imágenes solo de la BD
-  let photos: string[] = [];
-  if (offer.photos && offer.photos.length > 0) {
-    photos = offer.photos;
-  } else if (offer.imagenUrl) {
-    photos = [offer.imagenUrl];
-  }
-  // Si no hay imágenes, photos queda como array vacío []
+    let photos: string[] = [];
+    if (offer.photos && offer.photos.length > 0) {
+      photos = offer.photos;
+    } else if (offer.imagenUrl) {
+      photos = [offer.imagenUrl];
+    }
 
-  return {
-    _id: offer._id,
-    fixerId: offer.fixerId,
-    name: offer.fixerName,
-    title: offer.title,
-    description: offer.description,
-    tags: offer.tags || [],
-    phone: offer.contactPhone,
-    photos: photos,
-    services: offer.category ? [offer.category] : [],
-    price: offer.price,
-    createdAt: new Date(offer.createdAt || Date.now()),
-    city: offer.city,
+    return {
+      _id: offer._id,
+      fixerId: offer.fixerId,
+      name: offer.fixerName,
+      title: offer.title,
+      description: offer.description,
+      tags: offer.tags || [],
+      phone: offer.contactPhone,
+      photos: photos,
+      services: offer.category ? [offer.category] : [],
+      price: offer.price,
+      createdAt: new Date(offer.createdAt || Date.now()),
+      city: offer.city,
+    };
   };
-};
+
   // Limpiar búsqueda si se navega directamente sin parámetros
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
 
-      // Si la URL no tiene parámetros Y hay búsqueda guardada, limpiarla
       if (params.toString() === '' && search !== '') {
         console.log('Navegación directa detectada, limpiando búsqueda guardada');
         dispatch(setSearch(''));
@@ -169,7 +155,7 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
 
   // Restaurar posición del scroll
   useEffect(() => {
-    if (!loading && Array.isArray(trabajos) && trabajos.length > 0 && !scrollRestoredRef.current) {
+    if (!isLoading && Array.isArray(offers) && offers.length > 0 && !scrollRestoredRef.current) {
       try {
         const savedPosition = sessionStorage.getItem(SCROLL_POSITION_KEY);
         if (savedPosition) {
@@ -186,28 +172,7 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
         // ignorar errores
       }
     }
-  }, [loading, trabajos]);
-
-  // Carga inicial
-  useEffect(() => {
-    if (!isInitialMount.current) return;
-
-    if (typeof window !== 'undefined' && window.location.search && window.location.search !== '') {
-      isInitialMount.current = false;
-      return;
-    }
-
-    dispatch(
-      fetchOffers({
-        searchText: '',
-        filters: { range: [], city: '', category: [] },
-        sortBy: 'recent',
-        page: 1,
-        limit: 10,
-      }),
-    );
-    isInitialMount.current = false;
-  }, [dispatch]);
+  }, [isLoading, offers]);
 
   // Sticky header
   useEffect(() => {
@@ -240,19 +205,6 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
     scrollRestoredRef.current = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     dispatch(setRegistrosPorPagina(valor));
-    dispatch(
-      fetchOffers({
-        searchText: search,
-        filters,
-        sortBy,
-        date: date || undefined,
-        rating: rating ?? undefined,
-        page: 1,
-        limit: valor,
-        titleOnly,
-        exact,
-      }),
-    );
   };
 
   const handleFiltersApply = (appliedFilters: FilterState) => {
@@ -275,19 +227,6 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
 
     dispatch(setFilters(appliedFilters));
     dispatch(resetPagination());
-    dispatch(
-      fetchOffers({
-        searchText: search,
-        filters: appliedFilters,
-        sortBy,
-        date: date || undefined,
-        rating: rating ?? undefined,
-        page: 1,
-        limit: registrosPorPagina,
-        titleOnly,
-        exact,
-      }),
-    );
   };
 
   const handleSortChange = (option: string) => {
@@ -295,20 +234,6 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     const backendSort = getSortValue(option);
     dispatch(setSortBy(backendSort));
-
-    dispatch(
-      fetchOffers({
-        searchText: search,
-        filters,
-        sortBy: backendSort,
-        date: date || undefined,
-        rating: rating ?? undefined,
-        page: paginaActual,
-        limit: registrosPorPagina,
-        titleOnly,
-        exact,
-      }),
-    );
   };
 
   const handleSearchSubmit = (query: string) => {
@@ -316,57 +241,24 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     dispatch(setSearch(query));
     dispatch(resetPagination());
-    dispatch(
-      fetchOffers({
-        searchText: query,
-        filters,
-        sortBy,
-        date: date || undefined,
-        rating: rating ?? undefined,
-        page: 1,
-        limit: registrosPorPagina,
-        titleOnly,
-        exact,
-      }),
-    );
   };
 
   const handleResetFilters = () => {
     const pageToRestore = hasActiveFilters.current ? pageBeforeFilter.current : 1;
     hasActiveFilters.current = false;
 
-    dispatch(setFilters({ range: [], city: '', category: [] }));
+    dispatch(resetFilters());
 
-    dispatch(
-      fetchOffers({
-        searchText: search,
-        filters: { range: [], city: '', category: [] },
-        sortBy,
-        date: date || undefined,
-        rating: rating ?? undefined,
-        page: pageToRestore,
-        limit: registrosPorPagina,
-        titleOnly,
-        exact,
-      }),
-    );
+    setTimeout(() => {
+      dispatch(enablePersistence());
+      dispatch(setPaginaActual(pageToRestore));
+    }, 0);
   };
 
   const handlePageChange = (newPage: number) => {
     scrollRestoredRef.current = true;
-    dispatch(
-      fetchOffers({
-        searchText: search,
-        filters,
-        sortBy,
-        date: date || undefined,
-        rating: rating ?? undefined,
-        page: newPage,
-        limit: registrosPorPagina,
-        titleOnly,
-        exact,
-      }),
-    );
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    dispatch(setPaginaActual(newPage));
   };
 
   // Handler para abrir modal al hacer click en el área de la oferta
@@ -402,16 +294,13 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
           <SearchBar onSearch={handleSearchSubmit} />
         </div>
 
-        {!loading && Array.isArray(trabajos) && trabajos.length > 0 && (
+        {!isLoading && Array.isArray(offers) && offers.length > 0 && (
           <div className="flex flex-col gap-2 mt-2">
-            {/* Fila superior: Sort y View Mode icons */}
             <div className="flex justify-between items-center gap-2">
-              {/* Sort a la izquierda */}
               <div className="w-auto">
                 <SortCard value={sortBy} onSelect={handleSortChange} />
               </div>
 
-              {/* Botones de vista - Solo Cuadrícula y Mapa en móvil */}
               <div className="flex lg:hidden gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1 shadow-sm">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -437,7 +326,6 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
                 </button>
               </div>
 
-              {/* Botones de vista - Desktop centrados */}
               <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 gap-2 bg-gray-50 border border-gray-200 rounded-xl p-1.5 shadow-sm">
                 <button
                   onClick={() => setViewMode('grid')}
@@ -477,7 +365,6 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
                 </button>
               </div>
 
-              {/* Selector de registros por página a la derecha en Desktop */}
               <div className="hidden lg:block w-auto">
                 <PaginationSelector
                   registrosPorPagina={registrosPorPagina}
@@ -486,7 +373,6 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
               </div>
             </div>
 
-            {/* Fila inferior: Selector de registros por página centrado solo en móvil */}
             <div className="flex justify-center lg:hidden">
               <PaginationSelector
                 registrosPorPagina={registrosPorPagina}
@@ -502,7 +388,7 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
           <div className="text-red-500 text-center mb-4 p-3 bg-red-100 rounded">{error}</div>
         )}
 
-        {loading && (
+        {isLoading && (
           <div className="text-blue-500 text-center mb-4 p-3 bg-blue-100 rounded">
             {t('loading', { default: 'Cargando ofertas...' })}
           </div>
@@ -515,28 +401,27 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
           onReset={handleResetFilters}
         />
 
-        {!loading && Array.isArray(trabajos) && trabajos.length > 0 && (
+        {!isLoading && Array.isArray(offers) && offers.length > 0 && (
           <div className="w-full max-w-5xl mx-auto mb-4">
             <div className="flex justify-center">
               <PaginationInfo
                 paginaActual={paginaActual}
                 registrosPorPagina={registrosPorPagina}
-                totalRegistros={totalRegistros}
+                totalRegistros={total}
               />
             </div>
           </div>
         )}
 
         <div className="w-full max-w-5xl mx-auto">
-          {!loading && Array.isArray(trabajos) && trabajos.length > 0 ? (
+          {!isLoading && Array.isArray(offers) && offers.length > 0 ? (
             <>
               {viewMode === 'map' ? (
                 <div className="h-[calc(100vh-250px)] rounded-lg overflow-hidden border border-gray-200 bg-white mb-8">
                   <MapView
                     offers={mockJobOffers}
                     onOfferClick={(offer) => {
-                      // Find the original OfferData from trabajos
-                      const originalOffer = trabajos.find((t: OfferData) => t._id === offer.id);
+                      const originalOffer = offers.find((t: OfferData) => t._id === offer.id);
                       if (originalOffer) {
                         handleOfferClick(originalOffer);
                       }
@@ -545,30 +430,29 @@ const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
                 </div>
               ) : (
                 <CardJob
-                  trabajos={trabajos}
+                  trabajos={offers}
                   viewMode={viewMode === 'grid' ? 'grid' : 'list'}
                   onClick={handleCardClick}
                 />
               )}
             </>
-          ) : !loading ? (
+          ) : !isLoading ? (
             <NoResultsMessage search={search} />
           ) : null}
         </div>
 
-        {!loading && Array.isArray(trabajos) && trabajos.length > 0 && viewMode !== 'map' && (
+        {!isLoading && Array.isArray(offers) && offers.length > 0 && viewMode !== 'map' && (
           <div className="mt-8 mb-24 flex justify-center">
             <Paginacion
               paginaActual={paginaActual}
               registrosPorPagina={registrosPorPagina}
-              totalRegistros={totalRegistros}
+              totalRegistros={total}
               onChange={handlePageChange}
             />
           </div>
         )}
       </main>
 
-      {/* Modal de detalles de oferta */}
       <JobOfferModal
         offer={selectedOffer}
         isOpen={isModalOpen}

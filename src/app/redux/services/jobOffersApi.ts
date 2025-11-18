@@ -1,0 +1,77 @@
+import { baseApi } from './baseApi';
+import { OfferParams, OfferResponse } from '@/app/redux/features/jobOffers/types';
+
+// Extender el baseApi con endpoints específicos de ofertas
+export const jobOffersApi = baseApi.injectEndpoints({
+  endpoints: (builder) => ({
+    // 1. Query principal
+    getOffers: builder.query<OfferResponse, OfferParams>({
+      query: (params) => {
+        const urlParams = new URLSearchParams();
+        
+        if (params.search?.trim()) urlParams.append('search', params.search);
+        if (params.filters?.range?.length) params.filters.range.forEach(r => urlParams.append('range', r));
+        if (params.filters?.city) urlParams.append('city', params.filters.city);
+        if (params.filters?.category?.length) params.filters.category.forEach(c => urlParams.append('category', c));
+        if (params.filters?.tags?.length) urlParams.append('tags', params.filters.tags.join(','));
+        if (params.filters?.minPrice != null) urlParams.append('minPrice', String(params.filters.minPrice));
+        if (params.filters?.maxPrice != null) urlParams.append('maxPrice', String(params.filters.maxPrice));
+        if (params.sortBy) urlParams.append('sortBy', params.sortBy);
+        if (params.date) urlParams.append('date', params.date);
+        if (params.rating != null) urlParams.append('rating', String(params.rating));
+        if (params.titleOnly) urlParams.append('titleOnly', 'true');
+        if (params.exact) urlParams.append('exact', 'true');
+        
+        urlParams.append('page', String(params.page || 1));
+        urlParams.append('limit', String(params.limit || 10));
+        
+        return `/devmaster/offers?${urlParams.toString()}`;
+      },
+      providesTags: ['JobOffer'],
+    }),
+    
+    // 2. Ofertas recientes (Home)
+    getRecentOffers: builder.query<OfferResponse, { category?: string; limit?: number }>({
+      query: ({ category, limit = 8 }) => {
+        const params = new URLSearchParams({
+          sortBy: 'recent',
+          page: '1',
+          limit: String(limit)
+        });
+        if (category && category !== 'Todos') params.append('category', category);
+        return `/devmaster/offers?${params.toString()}`;
+      },
+      providesTags: ['JobOffer'],
+    }),
+    
+    // 3. Tags dinámicos
+    getTags: builder.query<string[], { search?: string; category?: string[] }>({
+      query: ({ search, category }) => {
+        const params = new URLSearchParams({ limit: '20' });
+        if (search?.trim()) params.append('search', search);
+        if (category?.length) params.append('category', category.join(','));
+        if (!search && !category?.length) params.append('recent', 'true');
+        return `/devmaster/tags?${params.toString()}`;
+      },
+      transformResponse: (response: any) => {
+        if (Array.isArray(response)) return response;
+        if (response.tags) return response.tags;
+        if (response.data?.tags) return response.data.tags;
+        return [];
+      },
+    }),
+    
+    // 4. Rangos de precios
+    getPriceRanges: builder.query<any, void>({
+      query: () => '/devmaster/offers?action=getPriceRanges',
+    }),
+  }),
+});
+
+export const {
+  useGetOffersQuery,
+  useLazyGetOffersQuery,
+  useGetRecentOffersQuery,
+  useGetTagsQuery,
+  useGetPriceRangesQuery
+} = jobOffersApi;

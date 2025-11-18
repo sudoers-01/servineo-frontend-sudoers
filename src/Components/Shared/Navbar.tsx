@@ -4,7 +4,8 @@ import Link from 'next/link';
 import { Briefcase, UserCog, ClipboardList } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/app/redux/hooks';
-import { resetFilters, clearJobOffersStorage } from '@/app/redux/slice/jobOfert';
+import { resetFilters } from '@/app/redux/slice/jobOfert';
+import { clearJobOffersStorage } from '@/app/redux/features/jobOffers/storage';
 
 export function Navbar() {
   const pathname = usePathname();

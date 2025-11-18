@@ -7,68 +7,20 @@ import { InputOnlySearch } from '@/Components/Job-offers/Search/InputOnlySearch'
 import { SearchCheckboxes } from '@/Components/Adv-search/SearchCheckboxes';
 import { HelpButton } from '@/Components/Adv-search/HelpButton';
 import DropdownList from '@/Components/Adv-search/DropdownList';
-import useSyncUrlParamsAdv from '@/app/redux/adv-search-hooks/useSyncUrlParams';
-import useAdvSearchLogic from '@/app/redux/adv-search-hooks/useAdvSearchLogic';
+import useSyncUrlParamsAdv from '@/app/redux/features/adv-search/useSyncUrlParams';
+import useAdvSearchLogic from '@/app/redux/features/adv-search/useAdvSearchLogic';
 import PriceRangeList from '@/Components/Adv-search/PriceRangeList';
 import DateFilterSelector from '@/Components/Adv-search/DateFilterSelector';
 import CalificacionEstrella from '@/Components/Adv-search/CalificacionEstrella';
 import ButtonAplicarBus from '@/Components/Adv-search/ButtonAplicarBus';
 import ClearButton from '@/Components/Adv-search/ClearButton';
 import { useTranslations } from 'next-intl';
-
-// ============================================
-// VALORES QUE SE ENVÍAN AL BACKEND (ESPAÑOL)
-// ============================================
-const DB_VALUES = {
-  ranges: [
-    'De (A-C)',
-    'De (D-F)',
-    'De (G-I)',
-    'De (J-L)',
-    'De (M-Ñ)',
-    'De (O-Q)',
-    'De (R-T)',
-    'De (U-W)',
-    'De (X-Z)',
-  ],
-  cities: [
-    'Beni',
-    'Chuquisaca',
-    'Cochabamba',
-    'La Paz',
-    'Oruro',
-    'Pando',
-    'Potosí',
-    'Santa Cruz',
-    'Tarija',
-  ],
-  jobTypes: [
-    'Albañil',
-    'Carpintero',
-    'Cerrajero',
-    'Decorador',
-    'Electricista',
-    'Fontanero',
-    'Fumigador',
-    'Instalador',
-    'Jardinero',
-    'Limpiador',
-    'Mecánico',
-    'Montador',
-    'Pintor',
-    'Pulidor',
-    'Soldador',
-    'Techador',
-    'Vidriero',
-    'Yesero',
-  ],
-} as const;
+import { DB_VALUES } from '@/app/redux/contants';
 
 function AdvancedSearchPage() {
   const t = useTranslations('advancedSearch');
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  // Configuración de UI: dbValue en español, label traducido
   const FIXER_RANGES = [
     [
       { dbValue: DB_VALUES.ranges[0], label: t('fixerName.ranges.ac') },
@@ -85,38 +37,17 @@ function AdvancedSearchPage() {
     ],
   ];
 
-  const CITIES = [
-    { dbValue: DB_VALUES.cities[0], label: t('city.options.beni') },
-    { dbValue: DB_VALUES.cities[1], label: t('city.options.chuquisaca') },
-    { dbValue: DB_VALUES.cities[2], label: t('city.options.cochabamba') },
-    { dbValue: DB_VALUES.cities[3], label: t('city.options.laPaz') },
-    { dbValue: DB_VALUES.cities[4], label: t('city.options.oruro') },
-    { dbValue: DB_VALUES.cities[5], label: t('city.options.pando') },
-    { dbValue: DB_VALUES.cities[6], label: t('city.options.potosi') },
-    { dbValue: DB_VALUES.cities[7], label: t('city.options.santaCruz') },
-    { dbValue: DB_VALUES.cities[8], label: t('city.options.tarija') },
-  ];
+  const CITIES = DB_VALUES.cities.map((dbValue, index) => ({
+    dbValue,
+    label: t(`city.options.${['beni', 'chuquisaca', 'cochabamba', 'laPaz', 'oruro', 'pando', 'potosi', 'santaCruz', 'tarija'][index]}`),
+  }));
 
-  const JOBS = [
-    { dbValue: DB_VALUES.jobTypes[0], label: t('jobType.options.mason') },
-    { dbValue: DB_VALUES.jobTypes[1], label: t('jobType.options.carpenter') },
-    { dbValue: DB_VALUES.jobTypes[2], label: t('jobType.options.locksmith') },
-    { dbValue: DB_VALUES.jobTypes[3], label: t('jobType.options.decorator') },
-    { dbValue: DB_VALUES.jobTypes[4], label: t('jobType.options.electrician') },
-    { dbValue: DB_VALUES.jobTypes[5], label: t('jobType.options.plumber') },
-    { dbValue: DB_VALUES.jobTypes[6], label: t('jobType.options.fumigator') },
-    { dbValue: DB_VALUES.jobTypes[7], label: t('jobType.options.installer') },
-    { dbValue: DB_VALUES.jobTypes[8], label: t('jobType.options.gardener') },
-    { dbValue: DB_VALUES.jobTypes[9], label: t('jobType.options.cleaner') },
-    { dbValue: DB_VALUES.jobTypes[10], label: t('jobType.options.mechanic') },
-    { dbValue: DB_VALUES.jobTypes[11], label: t('jobType.options.assembler') },
-    { dbValue: DB_VALUES.jobTypes[12], label: t('jobType.options.painter') },
-    { dbValue: DB_VALUES.jobTypes[13], label: t('jobType.options.polisher') },
-    { dbValue: DB_VALUES.jobTypes[14], label: t('jobType.options.welder') },
-    { dbValue: DB_VALUES.jobTypes[15], label: t('jobType.options.roofer') },
-    { dbValue: DB_VALUES.jobTypes[16], label: t('jobType.options.glazier') },
-    { dbValue: DB_VALUES.jobTypes[17], label: t('jobType.options.plasterer') },
-  ];
+  const JOBS = DB_VALUES.jobTypes.map((dbValue, index) => ({
+    dbValue,
+    label: t(
+      `jobType.options.${['mason', 'carpenter', 'locksmith', 'decorator', 'electrician', 'plumber', 'fumigator', 'installer', 'gardener', 'cleaner', 'mechanic', 'assembler', 'painter', 'polisher', 'welder', 'roofer', 'glazier', 'plasterer'][index]}`,
+    ),
+  }));
 
   const {
     // state
@@ -170,7 +101,7 @@ function AdvancedSearchPage() {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        router.push('/jobOfert');
+        router.push('/job-offer-list');
       }
     };
 

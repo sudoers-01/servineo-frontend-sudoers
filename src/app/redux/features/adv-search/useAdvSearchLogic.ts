@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
-import { fetchOffers as fetchOffersThunk } from '@/app/redux/slice/jobOfert';
+import { useAppSelector } from '@/app/redux/hooks';
+import { useLazyGetOffersQuery } from '@/app/redux/services/jobOffersApi';
+import { parsePriceRange } from '@/app/redux/features/jobOffers/parsers';
 
 interface FilterStateLocal {
   range: string[];
@@ -11,33 +12,6 @@ interface FilterStateLocal {
   priceRanges: string[];
   minPrice: number | null;
   maxPrice: number | null;
-}
-
-function parsePriceRange(key: string): { minPrice: number | null; maxPrice: number | null } {
-  if (!key) return { minPrice: null, maxPrice: null };
-  const normalized = key.replace(/[$€£,]/g, '').trim();
-  const lowerLabel = normalized.toLowerCase();
-  const matches = normalized.match(/-?\d+(?:\.\d+)?/g) || [];
-
-  // Detect "Menos de" (less than) => max = number
-  if (/(^|\s)menos(\s|$)|menos\s+de|^<\s*/i.test(lowerLabel)) {
-    if (matches[0]) return { minPrice: null, maxPrice: Number(matches[0]) };
-    return { minPrice: null, maxPrice: null };
-  }
-
-  // Detect "Más de" (greater than) => min = number
-  if (/(^|\s)m(a|á)s(\s|$)|m(a|á)s\s+de|^>\s*/i.test(lowerLabel)) {
-    if (matches[0]) return { minPrice: Number(matches[0]), maxPrice: null };
-    return { minPrice: null, maxPrice: null };
-  }
-
-  // Range with two numbers
-  if (matches.length >= 2) return { minPrice: Number(matches[0]), maxPrice: Number(matches[1]) };
-
-  // Single number without qualifiers -> treat as min (>=)
-  if (matches.length === 1) return { minPrice: Number(matches[0]), maxPrice: null };
-
-  return { minPrice: null, maxPrice: null };
 }
 
 type UpdateParams = {
@@ -52,9 +26,13 @@ type UpdateParams = {
   newExactWords?: boolean;
 };
 
+/**
+ * Hook principal para la lógica de Advanced Search
+ * Maneja todo el estado local y la interacción con RTK Query
+ */
 export default function useAdvSearchLogic() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [titleOnly, setTitleOnly] = useState(false);
+  const [titleOnly, setTitleOnlyState] = useState(false);
   const [exactWords, setExactWords] = useState(false);
 
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -64,28 +42,29 @@ export default function useAdvSearchLogic() {
     categorias: false,
     precio: false,
   });
+  
   const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
   const [selectedCity, setSelectedCity] = useState<string>('');
   const [selectedJobs, setSelectedJobs] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
-
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [selectedPriceKey, setSelectedPriceKey] = useState<string>('');
-
   const [resultsCount, setResultsCount] = useState<number | null>(null);
-  const [loading] = useState(false);
+  
   // Date filter state: 'recent' | 'oldest' | 'specific'
   const [selectedDateFilter, setSelectedDateFilter] = useState<string>('specific');
   const [selectedSpecificDate, setSelectedSpecificDate] = useState<Date | null>(null);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
-  const dispatch = useAppDispatch();
   const totalRegistros = useAppSelector((s) => s.jobOfert.totalRegistros);
   const storeLoading = useAppSelector((s) => s.jobOfert.loading);
   const router = useRouter();
   const skipSyncRef = useRef<boolean | null>(null);
   const [clearSignal, setClearSignal] = useState<number>(0);
+
+  // ✅ RTK Query: lazy query para el contador de resultados
+  const [triggerGetOffers, { data: offersData, isLoading: isQueryLoading }] = useLazyGetOffersQuery();
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -124,10 +103,9 @@ export default function useAdvSearchLogic() {
       maxPrice,
     };
 
-    // local optimistic state update (keeps behavior identical)
+    // local optimistic state update
     setResultsCount(null);
 
-    // the actual fetch is handled by the shared thunk via effects
     return currentFilters;
   };
 
@@ -164,43 +142,38 @@ export default function useAdvSearchLogic() {
   const handlePriceRangeChange = (filters: { priceRanges: string[]; priceKey?: string }) => {
     const newPriceRanges = Array.isArray(filters.priceRanges) ? filters.priceRanges : [];
     setSelectedPriceRanges(newPriceRanges);
-    // If a single range was selected, the component may send a priceKey that can be parsed
     if (filters.priceKey && typeof filters.priceKey === 'string') {
       setSelectedPriceKey(filters.priceKey);
       updateSearchOnStateChange({ newPriceRanges, newPriceKey: filters.priceKey });
     } else {
-      // Clear priceKey if multiple or none selected
       setSelectedPriceKey('');
       updateSearchOnStateChange({ newPriceRanges, newPriceKey: '' });
     }
   };
 
   const fetchGlobalTotal = () => {
-    dispatch(
-      fetchOffersThunk({
-        searchText: '',
-        filters: { range: [], city: '', category: [], tags: [], minPrice: null, maxPrice: null },
-        sortBy: 'recent',
-        page: 1,
-        limit: 1,
-      }),
-    );
+    // ✅ RTK Query: trigger query para obtener el total global
+    triggerGetOffers({
+      search: '',
+      filters: { range: [], city: '', category: [], tags: [], minPrice: null, maxPrice: null },
+      sortBy: 'recent',
+      page: 1,
+      limit: 1,
+    });
   };
 
-  // On mount: if the page was opened with query params (e.g. via "Modificar"), restore the local UI state.
-  // Keep this minimal and local to the hook so we don't modify page.tsx.
+  // On mount: restore state from URL if present
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const sp = new URLSearchParams(window.location.search);
     if (!sp.toString()) return;
 
-    // prevent immediate URL sync from overwriting restored values
     if (skipSyncRef) skipSyncRef.current = true;
 
     const search = sp.get('search');
     if (search != null) setSearchQuery(search);
     const titleOnlyP = sp.get('titleOnly');
-    if (titleOnlyP != null) setTitleOnly(titleOnlyP === 'true');
+    if (titleOnlyP != null) setTitleOnlyState(titleOnlyP === 'true');
     const exactP = sp.get('exact');
     if (exactP != null) setExactWords(exactP === 'true');
 
@@ -210,11 +183,7 @@ export default function useAdvSearchLogic() {
     const city = sp.get('city');
     if (city != null) setSelectedCity(city);
 
-    // `category` and `tags` may be encoded either as repeated params (category=A&category=B)
-    // or as a single comma-joined value (category=A,B). Support both formats for backward compatibility.
     const categoriesFromAll = sp.getAll('category') || [];
-    // categoriesFromAll may already contain comma-joined values or multiple entries.
-    // Normalize by splitting on commas and flattening.
     let urlCategory: string[] = [];
     if (categoriesFromAll.length) {
       urlCategory = categoriesFromAll
@@ -270,7 +239,6 @@ export default function useAdvSearchLogic() {
       if (!Number.isNaN(r)) setSelectedRating(r);
     }
 
-    // Open relevant sections so user sees applied filters when returning
     const shouldOpenFixer = ranges.length > 0;
     const shouldOpenCiudad = !!city;
     const shouldOpenTrabajo = !!(urlCategory && urlCategory.length);
@@ -285,7 +253,6 @@ export default function useAdvSearchLogic() {
       categorias: shouldOpenCategorias || prev.categorias,
       precio: shouldOpenPrecio || prev.precio,
     }));
-    // run only once on mount
   }, []);
 
   const handleSearch = (query: string) => {
@@ -300,13 +267,12 @@ export default function useAdvSearchLogic() {
     if (selectedJobs.length) params.set('category', selectedJobs.join(','));
     if (selectedTags.length) params.set('tags', selectedTags.join(','));
     const { minPrice, maxPrice } = parsePriceRange(selectedPriceKey);
-    // Apply date/sort choices
+    
     if (selectedDateFilter === 'recent') {
       params.set('sortBy', 'recent');
     } else if (selectedDateFilter === 'oldest') {
       params.set('sortBy', 'oldest');
     } else if (selectedDateFilter === 'specific' && selectedSpecificDate) {
-      // format date as YYYY-MM-DD
       const y = selectedSpecificDate.getFullYear();
       const m = String(selectedSpecificDate.getMonth() + 1).padStart(2, '0');
       const d = String(selectedSpecificDate.getDate()).padStart(2, '0');
@@ -314,19 +280,18 @@ export default function useAdvSearchLogic() {
     }
     if (minPrice != null) params.set('minPrice', String(minPrice));
     if (maxPrice != null) params.set('maxPrice', String(maxPrice));
-    // rating: integer 1..5 -> backend will interpret as range 1.0-1.9 etc
     if (selectedRating != null) params.set('rating', String(selectedRating));
     params.set('page', '1');
     params.set('limit', '10');
+    
     if (typeof window !== 'undefined') {
       try {
         window.sessionStorage.setItem('fromAdv', 'true');
       } catch {
         // ignore
       }
-      // ensure the query also contains the flag (backup)
       params.set('fromAdv', 'true');
-      // persist the current AdvSearch UI state so returning to this page restores selections
+      
       try {
         const state = {
           search: searchQuery,
@@ -345,30 +310,27 @@ export default function useAdvSearchLogic() {
       } catch {
         // ignore
       }
-      // Navigate to the new results page
+      
       window.location.href = `/resultsAdvSearch?${params.toString()}`;
     } else {
       params.set('fromAdv', 'true');
-      // server-side/navigation fallback
       router.push(`/resultsAdvSearch?${params.toString()}`);
     }
   };
 
-  // initial fetch: global total
+  // ✅ Initial fetch: global total usando RTK Query
   useEffect(() => {
-    dispatch(
-      fetchOffersThunk({
-        searchText: '',
-        filters: { range: [], city: '', category: [], tags: [], minPrice: null, maxPrice: null },
-        sortBy: 'recent',
-        page: 1,
-        limit: 1,
-      }),
-    );
+    triggerGetOffers({
+      search: '',
+      filters: { range: [], city: '', category: [], tags: [], minPrice: null, maxPrice: null },
+      sortBy: 'recent',
+      page: 1,
+      limit: 1,
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // debounced fetch when filters change
+  // ✅ Debounced fetch cuando cambian los filtros usando RTK Query
   useEffect(() => {
     const { minPrice, maxPrice } = parsePriceRange(selectedPriceKey);
     const apiFilters = {
@@ -380,7 +342,6 @@ export default function useAdvSearchLogic() {
       maxPrice,
     };
 
-    // include date/sort in the small fetch used to update the results counter
     let dateParam: string | undefined = undefined;
     let sortParam = 'recent';
     if (selectedDateFilter === 'recent') sortParam = 'recent';
@@ -393,19 +354,17 @@ export default function useAdvSearchLogic() {
     }
 
     const t = window.setTimeout(() => {
-      dispatch(
-        fetchOffersThunk({
-          searchText: searchQuery ?? '',
-          filters: apiFilters,
-          sortBy: sortParam,
-          date: dateParam,
-          rating: selectedRating ?? undefined,
-          page: 1,
-          limit: 1,
-          titleOnly: titleOnly ?? false,
-          exact: exactWords ?? false,
-        }),
-      );
+      triggerGetOffers({
+        search: searchQuery ?? '',
+        filters: apiFilters,
+        sortBy: sortParam,
+        date: dateParam,
+        rating: selectedRating ?? undefined,
+        page: 1,
+        limit: 1,
+        titleOnly: titleOnly ?? false,
+        exact: exactWords ?? false,
+      });
     }, 150);
 
     return () => clearTimeout(t);
@@ -425,6 +384,13 @@ export default function useAdvSearchLogic() {
     selectedRating,
   ]);
 
+  // ✅ Actualizar resultsCount cuando llega la respuesta de RTK Query
+  useEffect(() => {
+    if (offersData) {
+      setResultsCount(offersData.total);
+    }
+  }, [offersData]);
+
   return {
     // state
     searchQuery,
@@ -439,14 +405,14 @@ export default function useAdvSearchLogic() {
     selectedTags,
     selectedPriceKey,
     resultsCount,
-    loading,
+    loading: isQueryLoading,
     totalRegistros,
     storeLoading,
     clearSignal,
     skipSyncRef,
     // setters / handlers
     setSearchQuery,
-    setTitleOnly,
+    setTitleOnly: setTitleOnlyState,
     setExactWords,
     toggleSection,
     handleRangeChange,
