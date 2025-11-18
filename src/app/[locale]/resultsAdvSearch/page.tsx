@@ -1,3 +1,4 @@
+// src\app\[locale]\resultsAdvSearch\page.tsx
 'use client';
 import React, { Suspense } from 'react';
 import { useTranslations } from 'next-intl';

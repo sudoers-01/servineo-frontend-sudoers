@@ -1,3 +1,4 @@
+// src\Components\Home\RecentOffer-secction.tsx
 'use client';
 
 import { useEffect, useState, useRef, useMemo } from 'react';
@@ -60,7 +61,6 @@ export default function RecentOffersSection() {
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
 
-  // ✅ RTK Query: Fetch ofertas recientes
   const {
     data: offersData,
     isLoading,

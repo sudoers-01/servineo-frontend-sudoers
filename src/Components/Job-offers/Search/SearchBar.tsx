@@ -1,11 +1,9 @@
+// src/Components/Job-offers/Search/SearchBar.tsx
 'use client';
 
 import React from 'react';
-import { api } from '@/app/lib/api';
-import { ensureSessionId } from '@/app/lib/session';
 import { Input } from '@/Components/ui/input';
 import { SearchIcon } from './SearchIcon';
-import { Clock, X, Trash2, Star, ArrowUpLeft } from 'lucide-react';
 import { ClearButton } from './ClearButton';
 import { SearchButton } from './SearchButton';
 import { AdvancedSearchButton } from './AdvancedSearchButton';
@@ -13,40 +11,46 @@ import { FilterButton } from '../Filter/FilterButton';
 import { validateSearch } from '@/app/lib/validations/search.validator';
 import { useAppSelector } from '@/app/redux/hooks';
 import { useTranslations } from 'next-intl';
+import { useSearchHistory } from '@/app/redux/features/searchHistory/useSearchHistory';
+import { useSearchSuggestions } from '@/app/redux/features/searchHistory/useSearchSuggestions';
+import { useSearchKeyboard } from '@/app/redux/features/searchHistory/useSearchKeyboard';
+import { useSearchTouch } from '@/app/redux/features/searchHistory/useSearchTouch';
+import { SearchDropdown } from '@/Components/Shared/SearchDropdown';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
   onFilter?: () => void;
 }
 
-interface SearchHistoryItem {
-  searchTerm: string;
-}
-
 export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const t = useTranslations('search');
 
-  // Leer el valor de búsqueda desde Redux
   const searchFromStore = useAppSelector((state) => state.jobOfert.search);
 
   const [value, setValue] = React.useState('');
   const [error, setError] = React.useState<string | undefined>();
   const [isOpen, setIsOpen] = React.useState(false);
-  const [history, setHistory] = React.useState<string[]>([]);
-  const [suggestionsFromBackend, setSuggestionsFromBackend] = React.useState<string[]>([]);
   const [highlighted, setHighlighted] = React.useState<number>(-1);
-  const containerRef = React.useRef<HTMLDivElement | null>(null);
-  const inputRef = React.useRef<HTMLInputElement | null>(null);
+  const [longPressedItem, setLongPressedItem] = React.useState<string | null>(null);
   const [previewValue, setPreviewValue] = React.useState<string | null>(null);
 
-  const HISTORY_KEY = 'job_search_history_v1';
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
-  // Track previous Redux value to prevent unnecessary updates
   const prevSearchFromStore = React.useRef(searchFromStore);
 
-  // Sincronizar el input con el valor de Redux cuando cambie
+  // Hooks personalizados
+  const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory({
+    useBackend: true,
+  });
+
+  const { suggestions } = useSearchSuggestions(value, {
+    enabled: isOpen && value.trim().length > 0,
+    minLength: 1,
+  });
+
+  // Sincronizar con Redux
   React.useEffect(() => {
-    // Only update if Redux value actually changed and differs from current input
     if (searchFromStore !== prevSearchFromStore.current && searchFromStore !== value) {
       setValue(searchFromStore);
       setError(undefined);
@@ -54,78 +58,10 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     }
   }, [searchFromStore, value]);
 
-  const deleteFromBackend = async (searchTerm: string) => {
-    try {
-      ensureSessionId();
-      const endpoint = `/api/devmaster/offers?action=deleteHistory&searchTerm=${encodeURIComponent(searchTerm)}`;
-      const resp = await api.get<unknown>(endpoint);
-      console.log('Delete response:', resp);
-      return resp.success;
-    } catch (error) {
-      console.error('Error eliminando del backend:', error);
-      return false;
-    }
-  };
-
-  const clearAllHistoryBackend = async () => {
-    try {
-      ensureSessionId();
-      const endpoint = `/api/devmaster/offers?action=clearAllHistory`;
-      const resp = await api.get<unknown>(endpoint);
-      console.log('Clear all response:', resp);
-      return resp.success;
-    } catch (error) {
-      console.error('Error limpiando historial del backend:', error);
-      return false;
-    }
-  };
-
-  interface HistoryPayload {
-    searchHistory?: SearchHistoryItem[];
-  }
-  interface SuggestionsPayload {
-    suggestions?: Array<{ term?: string; count?: number; score?: number; source?: string }>;
-  }
-
-  const fetchHistoryFromBackend = React.useCallback(async (searchTerm: string = '') => {
-    try {
-      ensureSessionId();
-      const endpoint = `/api/devmaster/offers?action=getHistory&search=${encodeURIComponent(searchTerm)}`;
-      const resp = await api.get<HistoryPayload>(endpoint);
-      console.log('Fetch history response:', resp);
-      if (resp.success && resp.data && resp.data.searchHistory) {
-        return (resp.data.searchHistory as SearchHistoryItem[]).map((item) => item.searchTerm);
-      }
-      return [];
-    } catch (error) {
-      console.error('Error obteniendo historial del backend:', error);
-      return [];
-    }
-  }, []);
-
-  const loadHistory = () => {
-    try {
-      const raw = localStorage.getItem(HISTORY_KEY);
-      if (!raw) return [] as string[];
-      const parsed = JSON.parse(raw);
-      return Array.isArray(parsed) ? parsed : [];
-    } catch {
-      return [] as string[];
-    }
-  };
-
-  const persistHistory = (items: string[]) => {
-    try {
-      localStorage.setItem(HISTORY_KEY, JSON.stringify(items));
-    } catch {
-      // ignorar errores de almacenamiento
-    }
-  };
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setValue(newValue);
-    setPreviewValue(null); // Clear preview when user types
+    setPreviewValue(null);
     const { isValid, error } = validateSearch(newValue);
     setError(isValid ? undefined : error);
     setHighlighted(-1);
@@ -137,78 +73,21 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     onSearch('');
   };
 
-  const addToHistory = (q: string) => {
-    if (!q || q.trim().length === 0) return;
-    setHistory((prev) => {
-      const uniq = [q, ...prev.filter((p) => p !== q)].slice(0, 10);
-      persistHistory(uniq);
-      return uniq;
-    });
-  };
-
-  const clearHistory = async () => {
-    const success = await clearAllHistoryBackend();
-    if (success) {
-      persistHistory([]);
-      setHistory([]);
-    }
-    setIsOpen(true);
-  };
-
-  const selectHistory = (item: string) => {
+  const selectItem = (item: string) => {
     setValue(item);
+    onSearch(item);
+    addToHistory(item);
     setIsOpen(false);
     setHighlighted(-1);
-    onSearch(item);
+    setPreviewValue(null);
   };
 
-  const deleteHistoryItem = async (item: string) => {
-    console.log('Deleting item:', item);
-
-    const success = await deleteFromBackend(item);
-
-    if (success) {
-      // En lugar de hacer otra llamada al backend, actualizar el estado local
-      setHistory((prev) => {
-        const updated = prev.filter((h) => h !== item);
-        persistHistory(updated);
-        return updated;
-      });
-    } else {
-      console.error('Failed to delete from backend');
-    }
-
+  const previewItem = (item: string) => {
+    setValue(item);
+    setError(undefined);
+    setIsOpen(true);
     setHighlighted(-1);
-  };
-
-  // Soporte de toque / pulsación larga en móvil
-  const [longPressedItem, setLongPressedItem] = React.useState<string | null>(null);
-  const touchTimerRef = React.useRef<number | null>(null);
-
-  const handleTouchStart = (item: string) => () => {
-    clearTouchTimer();
-    touchTimerRef.current = window.setTimeout(() => {
-      setLongPressedItem(item);
-    }, 600) as unknown as number;
-  };
-
-  const handlePointerDown = (item: string) => (e: React.PointerEvent) => {
-    if (e.pointerType === 'mouse') return;
-    clearTouchTimer();
-    touchTimerRef.current = window.setTimeout(() => {
-      setLongPressedItem(item);
-    }, 600) as unknown as number;
-  };
-
-  const clearTouchTimer = () => {
-    if (touchTimerRef.current) {
-      window.clearTimeout(touchTimerRef.current as unknown as number);
-      touchTimerRef.current = null;
-    }
-  };
-
-  const handleTouchEnd = () => {
-    clearTouchTimer();
+    inputRef.current?.focus();
   };
 
   const handleSearch = () => {
@@ -221,59 +100,10 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     onSearch(query);
     addToHistory(query);
     setIsOpen(false);
+    setPreviewValue(null);
   };
 
-  const hasError = !!error;
-  const inputClasses = `pl-10 ${value.length > 0 ? 'pr-10' : 'pr-9'} w-full sm:min-w-80 rounded overflow-hidden text-ellipsis ${
-    hasError ? 'border-red-500 border-[1.5px] outline-none shadow-[0_0_0_1px_red]' : ''
-  }`;
-
-  // Cargar historial inicial SOLO UNA VEZ
-  React.useEffect(() => {
-    const loadInitialHistory = async () => {
-      const backendHistory = await fetchHistoryFromBackend('');
-      if (backendHistory.length > 0) {
-        setHistory(backendHistory);
-        persistHistory(backendHistory);
-      } else {
-        const localHistory = loadHistory();
-        if (localHistory.length > 0) {
-          setHistory(localHistory);
-        }
-      }
-    };
-
-    loadInitialHistory();
-  }, [fetchHistoryFromBackend]);
-
-  // Filtrado dinámico mientras escribe - SEPARADO del historial inicial
-  React.useEffect(() => {
-    const timer = setTimeout(async () => {
-      const q = value.trim();
-
-      // Solo buscar sugerencias si hay texto
-      if (q.length > 0) {
-        try {
-          const endpoint = `/api/devmaster/offers?search=${encodeURIComponent(q)}&limit=6&record=false`;
-          const resp = await api.get<SuggestionsPayload>(endpoint);
-          if (resp.success && resp.data && Array.isArray(resp.data.suggestions)) {
-            setSuggestionsFromBackend(resp.data.suggestions.map((s) => String(s.term ?? '')));
-          } else {
-            setSuggestionsFromBackend([]);
-          }
-        } catch (e) {
-          console.error('Error fetching suggestions from backend', e);
-          setSuggestionsFromBackend([]);
-        }
-      } else {
-        setSuggestionsFromBackend([]);
-      }
-    }, 300);
-
-    return () => clearTimeout(timer);
-  }, [value]);
-
-  // Filtrar historial local basado en el valor del input
+  // Filtrar historial visible
   const visibleHistory = React.useMemo(() => {
     const q = value.trim().toLowerCase();
     if (q.length === 0) {
@@ -282,91 +112,31 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     return history.filter((h) => h.toLowerCase().includes(q)).slice(0, 5);
   }, [history, value]);
 
-  const visibleSuggestions = React.useMemo(() => {
-    if (!suggestionsFromBackend || suggestionsFromBackend.length === 0) return [] as string[];
-    return suggestionsFromBackend.slice(0, 5);
-  }, [suggestionsFromBackend]);
+  const visibleSuggestions = suggestions.slice(0, 5);
+  const visibleCombined = [...visibleHistory, ...visibleSuggestions];
 
-  const visibleCombined = React.useMemo(() => {
-    return [...visibleHistory, ...visibleSuggestions];
-  }, [visibleHistory, visibleSuggestions]);
-
-  const selectItem = (item: string) => {
-    setValue(item);
-    onSearch(item);
-    addToHistory(item);
-    setIsOpen(false);
-    setHighlighted(-1);
-  };
-
-  const previewItem = (item: string) => {
-    setValue(item);
-    setError(undefined);
-    setIsOpen(true);
-    setHighlighted(-1);
-    const input = inputRef.current;
-    if (input) {
-      input.focus();
-      try {
-        const len = input.value.length;
-        input.setSelectionRange(len, len);
-      } catch {
-        // ignorar errores al mover el cursor
-      }
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
-      const combinedLen = visibleCombined.length;
-      if (isOpen && highlighted >= 0 && highlighted < combinedLen) {
-        const item = visibleCombined[highlighted];
-        selectItem(item);
-        return;
-      }
-      handleSearch();
-      return;
-    }
-
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      setIsOpen(true);
-      setHighlighted((h) => {
-        const max = visibleCombined.length - 1;
-        const next = h < max ? h + 1 : 0;
-
-        if (typeof window !== 'undefined' && window.innerWidth >= 640 && visibleCombined[next]) {
-          setPreviewValue(visibleCombined[next]);
-        }
-
-        return next;
-      });
-      return;
-    }
-
-    if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      setIsOpen(true);
-      setHighlighted((h) => {
-        const max = visibleCombined.length - 1;
-        const next = h > 0 ? h - 1 : Math.max(0, max);
-
-        if (typeof window !== 'undefined' && window.innerWidth >= 640 && visibleCombined[next]) {
-          setPreviewValue(visibleCombined[next]);
-        }
-
-        return next;
-      });
-      return;
-    }
-
-    if (e.key === 'Escape') {
+  // Hook de teclado
+  const { handleKeyDown: handleKeyDownBase } = useSearchKeyboard({
+    isOpen,
+    highlighted,
+    combinedItems: visibleCombined,
+    onSelect: selectItem,
+    onSearch: handleSearch,
+    onClose: () => {
       setIsOpen(false);
       setHighlighted(-1);
       setPreviewValue(null);
-      return;
-    }
-  };
+    },
+    setHighlighted,
+    setPreviewValue,
+    enablePreview: typeof window !== 'undefined' && window.innerWidth >= 640,
+  });
+
+  // Hook de touch
+  const { handleTouchStart, handleTouchEnd, handlePointerDown, handlePointerUp } = useSearchTouch(
+    (item) => setLongPressedItem(item),
+    600,
+  );
 
   // Click fuera para cerrar
   React.useEffect(() => {
@@ -380,6 +150,11 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     document.addEventListener('mousedown', onDocClick);
     return () => document.removeEventListener('mousedown', onDocClick);
   }, []);
+
+  const hasError = !!error;
+  const inputClasses = `pl-10 ${value.length > 0 ? 'pr-10' : 'pr-9'} w-full sm:min-w-80 rounded overflow-hidden text-ellipsis ${
+    hasError ? 'border-red-500 border-[1.5px] outline-none shadow-[0_0_0_1px_red]' : ''
+  }`;
 
   return (
     <div className="w-full" ref={containerRef}>
@@ -395,195 +170,40 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
             ref={(el) => {
               inputRef.current = el as HTMLInputElement | null;
             }}
-            onKeyDown={handleKeyDown}
-            onFocus={() => {
-              setIsOpen(true);
-            }}
+            onKeyDown={handleKeyDownBase}
+            onFocus={() => setIsOpen(true)}
           />
           {value.length > 0 && <ClearButton onClick={handleClear} />}
 
-          {isOpen && (
-            <div
-              className="absolute left-0 right-0 mt-2 bg-white border rounded shadow-md z-50"
-              onMouseLeave={() => setHighlighted(-1)}
-              onPointerLeave={() => setHighlighted(-1)}
-            >
-              <div className="px-2 py-1 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Clock className="w-4 h-4 text-slate-500" />
-                  <span className="text-xs font-semibold uppercase text-slate-500">
-                    {t('recentSearches')}
-                  </span>
-                </div>
-                <div className="w-8 flex items-center justify-center sm:justify-end sm:w-auto">
-                  <button
-                    type="button"
-                    onClick={async (e) => {
-                      e.stopPropagation();
-                      await clearHistory();
-                    }}
-                    className="mr-1 flex items-center gap-1 text-sm text-red-500 cursor-pointer px-2 py-1 rounded hover:bg-red-50 whitespace-nowrap"
-                    aria-label={t('clearHistory')}
-                  >
-                    <Trash2 className="w-5 h-5 sm:w-4 sm:h-4" />
-                    <span className="ml-1 text-sm hidden sm:inline">{t('clearHistory')}</span>
-                  </button>
-                </div>
-              </div>
-
-              {history.length === 0 ? (
-                <div className="p-3 text-sm text-slate-500">{t('noRecentSearches')}</div>
-              ) : (
-                <ul>
-                  {visibleHistory.map((item, idx) => (
-                    <li key={`${item}-${idx}`}>
-                      {longPressedItem === item ? (
-                        <div className="w-full flex items-center justify-between px-2 py-2 bg-red-50 border-l-4 border-red-500 min-w-0">
-                          <div className="flex-1 min-w-0 text-xs sm:text-sm text-red-700 font-medium sm:truncate">
-                            <span className="block sm:inline leading-tight">
-                              {t('deleteSearch')}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                            <button
-                              type="button"
-                              onClick={async () => {
-                                await deleteHistoryItem(item);
-                                setLongPressedItem(null);
-                              }}
-                              aria-label={`${t('delete')} ${item}`}
-                              className="bg-red-500 text-white px-2 py-0.5 rounded text-xs sm:text-sm flex items-center gap-1 max-[420px]:px-1"
-                            >
-                              <Trash2 className="hidden max-[420px]:inline w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              <span className="ml-1 max-[420px]:hidden">{t('delete')}</span>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setLongPressedItem(null)}
-                              aria-label={t('cancel')}
-                              className="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded text-xs sm:text-sm text-slate-700 hover:bg-slate-200 flex items-center gap-1 max-[420px]:px-1"
-                            >
-                              <X className="hidden max-[420px]:inline w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                              <span className="ml-1 max-[420px]:hidden">{t('cancel')}</span>
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div
-                          role="button"
-                          tabIndex={0}
-                          onMouseDown={(e) => e.preventDefault()}
-                          onClick={() => selectHistory(item)}
-                          onKeyDown={(e) => {
-                            if (e.key === 'Enter') selectHistory(item);
-                          }}
-                          onMouseEnter={() => setHighlighted(idx)}
-                          onTouchStart={handleTouchStart(item)}
-                          onTouchEnd={handleTouchEnd}
-                          onTouchMove={handleTouchEnd}
-                          onTouchCancel={handleTouchEnd}
-                          onPointerDown={handlePointerDown(item)}
-                          onPointerUp={handleTouchEnd}
-                          onPointerMove={handleTouchEnd}
-                          onPointerCancel={handleTouchEnd}
-                          className={`group w-full flex items-center justify-between gap-2 px-2 py-1 hover:bg-slate-50 focus:bg-slate-50 ${
-                            highlighted === idx ? 'bg-slate-50' : ''
-                          }`}
-                        >
-                          <div className="flex items-center gap-1 min-w-0 flex-1">
-                            <Clock className="w-4 h-4 text-slate-400 flex-shrink-0" />
-                            <span
-                              className="text-sm text-slate-700 overflow-hidden text-ellipsis whitespace-nowrap flex-1"
-                              title={item}
-                            >
-                              {item}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center justify-end gap-2 flex-shrink-0">
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                previewItem(item);
-                              }}
-                              className="2xl:hidden p-1 rounded text-slate-400"
-                              aria-label={`${t('preview')} ${item}`}
-                            >
-                              <ArrowUpLeft className="w-4 h-4" />
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={async (e) => {
-                                e.stopPropagation();
-                                await deleteHistoryItem(item);
-                              }}
-                              className="hidden 2xl:inline-flex opacity-0 group-hover:opacity-100 text-slate-400 hover:text-red-500 transition-opacity cursor-pointer"
-                              aria-label={`${t('delete')} ${item}`}
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {value.trim().length > 0 && (
-                <div className="mt-2">
-                  <div className="px-2 py-1">
-                    <div className="flex items-center gap-2">
-                      <Star className="w-4 h-4 text-yellow-400" />
-                      <span className="text-xs font-semibold uppercase text-slate-500">
-                        {t('suggestions')}
-                      </span>
-                    </div>
-                  </div>
-
-                  {visibleSuggestions.length === 0 ? (
-                    <div className="p-3 text-sm text-slate-500">{t('noSuggestions')}</div>
-                  ) : (
-                    <ul>
-                      {visibleSuggestions.map((sugg, i) => {
-                        const combinedIndex = visibleHistory.length + i;
-                        return (
-                          <li key={sugg}>
-                            <div
-                              role="button"
-                              tabIndex={0}
-                              onMouseDown={(e) => e.preventDefault()}
-                              onClick={() => selectItem(sugg)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') selectItem(sugg);
-                              }}
-                              onMouseEnter={() => setHighlighted(combinedIndex)}
-                              className={`w-full flex items-center gap-2 px-2 py-1 hover:bg-slate-50 cursor-pointer min-w-0 ${
-                                highlighted === combinedIndex ? 'bg-slate-50' : ''
-                              }`}
-                            >
-                              <Star className="w-4 h-4 text-yellow-400 flex-shrink-0" />
-                              <span
-                                className="text-sm text-slate-700 overflow-hidden text-ellipsis whitespace-nowrap"
-                                title={sugg}
-                              >
-                                {sugg}
-                              </span>
-                            </div>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          <SearchDropdown
+            isOpen={isOpen}
+            history={history}
+            suggestions={suggestions}
+            highlighted={highlighted}
+            longPressedItem={longPressedItem}
+            query={value}
+            onSelectItem={selectItem}
+            onPreviewItem={previewItem}
+            onDeleteItem={removeFromHistory}
+            onClearHistory={async () => {
+              await clearHistory();
+              setIsOpen(true);
+            }}
+            onHighlight={setHighlighted}
+            onLongPressStart={(item) => {
+              const handler = handleTouchStart(item);
+              handler();
+              const pointerHandler = handlePointerDown(item);
+              return pointerHandler;
+            }}
+            onLongPressEnd={() => {
+              handleTouchEnd();
+              handlePointerUp();
+            }}
+            onCancelDelete={() => setLongPressedItem(null)}
+          />
         </div>
 
-        {/* Contenedor de botones: Buscar + Búsqueda avanzada + Filtro */}
         <div className="flex gap-2 items-center shrink-0">
           <SearchButton onClick={handleSearch} />
           <AdvancedSearchButton />
