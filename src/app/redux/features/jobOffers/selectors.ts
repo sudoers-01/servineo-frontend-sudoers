@@ -1,5 +1,6 @@
 // src\app\redux\hook\jobOffersSelectors.ts
 import { JobOffersState, PaginationState } from './types';
+import { createSelector } from '@reduxjs/toolkit';
 
 type RootState = { jobOfert: JobOffersState };
 
@@ -48,14 +49,27 @@ export const selectError = (state: RootState) => state.jobOfert.error;
 export const selectShouldPersist = (state: RootState) => state.jobOfert.shouldPersist;
 
 // Selector compuesto para obtener todos los parámetros de búsqueda
-export const selectSearchParams = (state: RootState) => ({
-  search: state.jobOfert.search,
-  filters: state.jobOfert.filters,
-  sortBy: state.jobOfert.sortBy,
-  date: state.jobOfert.date,
-  rating: state.jobOfert.rating,
-  page: state.jobOfert.paginaActual,
-  limit: state.jobOfert.registrosPorPagina,
-  titleOnly: state.jobOfert.titleOnly,
-  exact: state.jobOfert.exact,
-});
+export const selectSearchParams = createSelector(
+  [
+    (state: RootState) => state.jobOfert.search,
+    (state: RootState) => state.jobOfert.filters,
+    (state: RootState) => state.jobOfert.sortBy,
+    (state: RootState) => state.jobOfert.date,
+    (state: RootState) => state.jobOfert.rating,
+    (state: RootState) => state.jobOfert.paginaActual,
+    (state: RootState) => state.jobOfert.registrosPorPagina,
+    (state: RootState) => state.jobOfert.titleOnly,
+    (state: RootState) => state.jobOfert.exact,
+  ],
+  (search, filters, sortBy, date, rating, page, limit, titleOnly, exact) => ({
+    search,
+    filters,
+    sortBy,
+    date,
+    rating,
+    page,
+    limit,
+    titleOnly,
+    exact,
+  })
+);

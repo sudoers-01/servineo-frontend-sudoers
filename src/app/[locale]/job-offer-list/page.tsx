@@ -1,4 +1,4 @@
-// src\app\[locale]\job-offer-list\page.tsx
+// src/app/[locale]/job-offer-list/page.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -10,7 +10,6 @@ import {
   Paginacion,
   PaginationInfo,
   PaginationSelector,
-  CardJob,
   SortCard,
 } from '@/Components/Job-offers';
 
@@ -33,45 +32,13 @@ import {
   useSyncUrlParams,
 } from '@/app/redux/features/jobOffers/jobOffersHooks';
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
-import { MapView } from '@/Components/Job-offers/maps/MapView';
-import { Map, List, LayoutGrid } from 'lucide-react';
-import { mockJobOffers } from '@/app/lib/mock-data';
+import { JobOffersView, type ViewMode } from '@/Components/Job-offers/JobOffersView';
+import { ViewModeToggle } from '@/Components/Job-offers/ViewModeToggle';
 import { useTranslations } from 'next-intl';
+import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
+import { adaptOfferToModalFormat } from '@/types/jobOffers';
 
 const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
-
-// Type for the offer data from the backend
-interface OfferData {
-  _id: string;
-  fixerId: string;
-  fixerName: string;
-  title: string;
-  description: string;
-  tags: string[];
-  contactPhone: string;
-  photos?: string[];
-  imagenUrl?: string;
-  category: string;
-  price: number;
-  createdAt: string | Date;
-  city: string;
-}
-
-// Type for the adapted offer format (para el modal)
-interface AdaptedOffer {
-  _id: string;
-  fixerId: string;
-  name: string;
-  title: string;
-  description: string;
-  tags: string[];
-  phone: string;
-  photos: string[];
-  services: string[];
-  price: number;
-  createdAt: Date;
-  city: string;
-}
 
 export default function JobOffersPage() {
   const t = useTranslations('jobOffers');
@@ -81,12 +48,9 @@ export default function JobOffersPage() {
 
   const { offers, total, isLoading, error } = useJobOffers();
 
-  const {
-    sortBy,
-    search,
-    paginaActual,
-    registrosPorPagina,
-  } = useAppSelector((state) => state.jobOfert);
+  const { sortBy, search, paginaActual, registrosPorPagina } = useAppSelector(
+    (state) => state.jobOfert,
+  );
 
   useSyncUrlParams();
 
@@ -95,36 +59,9 @@ export default function JobOffersPage() {
   const scrollRestoredRef = useRef(false);
   const pageBeforeFilter = useRef<number>(1);
   const hasActiveFilters = useRef<boolean>(false);
-  const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('list');
-  const [selectedOffer, setSelectedOffer] = useState<AdaptedOffer | null>(null);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  // Función para adaptar datos de BD a formato para modal
-  const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
-    if (!offer) return null;
-
-    let photos: string[] = [];
-    if (offer.photos && offer.photos.length > 0) {
-      photos = offer.photos;
-    } else if (offer.imagenUrl) {
-      photos = [offer.imagenUrl];
-    }
-
-    return {
-      _id: offer._id,
-      fixerId: offer.fixerId,
-      name: offer.fixerName,
-      title: offer.title,
-      description: offer.description,
-      tags: offer.tags || [],
-      phone: offer.contactPhone,
-      photos: photos,
-      services: offer.category ? [offer.category] : [],
-      price: offer.price,
-      createdAt: new Date(offer.createdAt || Date.now()),
-      city: offer.city,
-    };
-  };
 
   // Limpiar búsqueda si se navega directamente sin parámetros
   useEffect(() => {
@@ -263,14 +200,7 @@ export default function JobOffersPage() {
   };
 
   // Handler para abrir modal al hacer click en el área de la oferta
-  const handleCardClick = (offer: OfferData) => {
-    const adaptedOffer = adaptOfferToModalFormat(offer);
-    setSelectedOffer(adaptedOffer);
-    setIsModalOpen(true);
-  };
-
-  // Handler para click en oferta desde el mapa
-  const handleOfferClick = (offer: OfferData) => {
+  const handleCardClick = (offer: JobOfferData) => {
     const adaptedOffer = adaptOfferToModalFormat(offer);
     setSelectedOffer(adaptedOffer);
     setIsModalOpen(true);
@@ -302,69 +232,21 @@ export default function JobOffersPage() {
                 <SortCard value={sortBy} onSelect={handleSortChange} />
               </div>
 
-              <div className="flex lg:hidden gap-1 bg-gray-50 border border-gray-200 rounded-lg p-1 shadow-sm">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === 'grid'
-                      ? 'bg-primary text-white shadow-md'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
-                  }`}
-                  title={t('viewModes.grid', { default: 'Vista cuadrícula' })}
-                >
-                  <LayoutGrid className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode('map')}
-                  className={`p-2 rounded-md transition-all duration-200 ${
-                    viewMode === 'map'
-                      ? 'bg-primary text-white shadow-md'
-                      : 'bg-white text-gray-600 hover:bg-gray-100'
-                  }`}
-                  title={t('viewModes.map')}
-                >
-                  <Map className="w-5 h-5" />
-                </button>
-              </div>
+              {/* Mobile view toggle */}
+              <ViewModeToggle
+                viewMode={viewMode}
+                onChange={setViewMode}
+                variant="mobile"
+                className="flex lg:hidden"
+              />
 
-              <div className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2 gap-2 bg-gray-50 border border-gray-200 rounded-xl p-1.5 shadow-sm">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                    viewMode === 'grid'
-                      ? 'bg-primary text-white shadow-md scale-105'
-                      : 'bg-white text-gray-600 hover:bg-gray-100 hover:shadow-sm'
-                  }`}
-                  title={t('viewModes.grid', { default: 'Vista cuadrícula' })}
-                >
-                  <LayoutGrid className="w-4 h-4" />
-                  <span className="text-sm">{t('viewModes.grid', { default: 'Cuadrícula' })}</span>
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                    viewMode === 'list'
-                      ? 'bg-primary text-white shadow-md scale-105'
-                      : 'bg-white text-gray-600 hover:bg-gray-100 hover:shadow-sm'
-                  }`}
-                  title={t('viewModes.list')}
-                >
-                  <List className="w-4 h-4" />
-                  <span className="text-sm">{t('viewModes.list')}</span>
-                </button>
-                <button
-                  onClick={() => setViewMode('map')}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
-                    viewMode === 'map'
-                      ? 'bg-primary text-white shadow-md scale-105'
-                      : 'bg-white text-gray-600 hover:bg-gray-100 hover:shadow-sm'
-                  }`}
-                  title={t('viewModes.map')}
-                >
-                  <Map className="w-4 h-4" />
-                  <span className="text-sm">{t('viewModes.map')}</span>
-                </button>
-              </div>
+              {/* Desktop view toggle */}
+              <ViewModeToggle
+                viewMode={viewMode}
+                onChange={setViewMode}
+                variant="desktop"
+                className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2"
+              />
 
               <div className="hidden lg:block w-auto">
                 <PaginationSelector
@@ -416,27 +298,7 @@ export default function JobOffersPage() {
 
         <div className="w-full max-w-5xl mx-auto">
           {!isLoading && Array.isArray(offers) && offers.length > 0 ? (
-            <>
-              {viewMode === 'map' ? (
-                <div className="h-[calc(100vh-250px)] rounded-lg overflow-hidden border border-gray-200 bg-white mb-8">
-                  <MapView
-                    offers={mockJobOffers}
-                    onOfferClick={(offer) => {
-                      const originalOffer = offers.find((t: OfferData) => t._id === offer.id);
-                      if (originalOffer) {
-                        handleOfferClick(originalOffer);
-                      }
-                    }}
-                  />
-                </div>
-              ) : (
-                <CardJob
-                  trabajos={offers}
-                  viewMode={viewMode === 'grid' ? 'grid' : 'list'}
-                  onClick={handleCardClick}
-                />
-              )}
-            </>
+            <JobOffersView offers={offers} viewMode={viewMode} onOfferClick={handleCardClick} />
           ) : !isLoading ? (
             <NoResultsMessage search={search} />
           ) : null}

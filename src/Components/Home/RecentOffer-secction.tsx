@@ -1,49 +1,16 @@
-// src\Components\Home\RecentOffer-secction.tsx
+// src/Components/Home/RecentOffer-section.tsx
 'use client';
 
-import { useEffect, useState, useRef, useMemo } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { ChevronLeft, ChevronRight, SlidersHorizontal } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import RecentOfferCard from './RecentOfferCard';
+import { JobOfferCard } from '@/Components/Job-offers/JobOfferCard';
 import { JobOfferModal } from '../Job-offers/Job-offer-modal';
 import { useGetRecentOffersQuery } from '@/app/redux/services/jobOffersApi';
 import { DB_VALUES } from '@/app/redux/contants';
-
-// Tipos
-interface OfferData {
-  _id: string;
-  fixerId: string;
-  fixerName: string;
-  fixerPhoto?: string;
-  title: string;
-  description: string;
-  category: string;
-  tags?: string[];
-  price: number;
-  city: string;
-  contactPhone: string;
-  createdAt: string;
-  rating?: number;
-  photos?: string[];
-  imagenUrl?: string;
-  allImages?: string[];
-}
-
-interface AdaptedOffer {
-  _id: string;
-  fixerId: string;
-  name: string;
-  title: string;
-  description: string;
-  tags: string[];
-  phone: string;
-  photos: string[];
-  services: string[];
-  price: number;
-  createdAt: Date;
-  city: string;
-}
+import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
+import { adaptOfferToModalFormat } from '@/types/jobOffers';
 
 export default function RecentOffersSection() {
   const t = useTranslations('RecentOffer');
@@ -52,11 +19,8 @@ export default function RecentOffersSection() {
   const CATEGORIES = DB_VALUES.categories;
 
   const [selectedCategory, setSelectedCategory] = useState('Todos');
-  const [selectedOffer, setSelectedOffer] = useState<AdaptedOffer | null>(null);
+  const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [hoveredCard, setHoveredCard] = useState<string | null>(null);
-  const [currentImageIndex, setCurrentImageIndex] = useState<Record<string, number>>({});
-  const [intervals, setIntervals] = useState<Record<string, NodeJS.Timeout>>({});
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
   const [isMobile, setIsMobile] = useState(false);
@@ -84,13 +48,6 @@ export default function RecentOffersSection() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Cleanup intervals
-  useEffect(() => {
-    return () => {
-      Object.values(intervals).forEach(clearInterval);
-    };
-  }, [intervals]);
-
   // Check scroll state
   useEffect(() => {
     const container = scrollContainerRef.current;
@@ -106,104 +63,7 @@ export default function RecentOffersSection() {
     return () => container.removeEventListener('scroll', checkScroll);
   }, [selectedCategory]);
 
-  const adaptOfferToModalFormat = (offer: OfferData): AdaptedOffer | null => {
-    if (!offer) return null;
-
-    let photos: string[] = [];
-    if (offer.photos && offer.photos.length > 0) {
-      photos = offer.photos;
-    } else if (offer.imagenUrl) {
-      photos = [offer.imagenUrl];
-    }
-
-    return {
-      _id: offer._id,
-      fixerId: offer.fixerId,
-      name: offer.fixerName,
-      title: offer.title,
-      description: offer.description,
-      tags: offer.tags || [],
-      phone: offer.contactPhone,
-      photos: photos,
-      services: offer.category ? [offer.category] : [],
-      price: offer.price,
-      createdAt: new Date(offer.createdAt || Date.now()),
-      city: offer.city,
-    };
-  };
-
-  const trabajosConImagenes = useMemo(() => {
-    return trabajos.map((trabajo) => {
-      let allImages: string[];
-
-      if (trabajo.photos && trabajo.photos.length > 0) {
-        allImages = trabajo.photos;
-      } else if (trabajo.imagenUrl) {
-        allImages = [trabajo.imagenUrl];
-      } else {
-        allImages = [];
-      }
-
-      return {
-        ...trabajo,
-        imagenAsignada: allImages[0],
-        allImages: allImages,
-      };
-    });
-  }, [trabajos]);
-
-  const handleMouseEnter = (cardId: string, totalImages: number) => {
-    setHoveredCard(cardId);
-    if (totalImages > 1) {
-      const interval = setInterval(() => {
-        setCurrentImageIndex((prev) => ({
-          ...prev,
-          [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
-        }));
-      }, 2000);
-
-      setIntervals((prev) => ({
-        ...prev,
-        [cardId]: interval,
-      }));
-    }
-  };
-
-  const handleMouseLeave = (cardId: string) => {
-    setHoveredCard(null);
-
-    if (intervals[cardId]) {
-      clearInterval(intervals[cardId]);
-      setIntervals((prev) => {
-        const newIntervals = { ...prev };
-        delete newIntervals[cardId];
-        return newIntervals;
-      });
-    }
-
-    setCurrentImageIndex((prev) => ({
-      ...prev,
-      [cardId]: 0,
-    }));
-  };
-
-  const handlePrevImage = (cardId: string, totalImages: number) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => ({
-      ...prev,
-      [cardId]: ((prev[cardId] || 0) - 1 + totalImages) % totalImages,
-    }));
-  };
-
-  const handleNextImage = (cardId: string, totalImages: number) => (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setCurrentImageIndex((prev) => ({
-      ...prev,
-      [cardId]: ((prev[cardId] || 0) + 1) % totalImages,
-    }));
-  };
-
-  const handleCardClick = (offer: OfferData) => {
+  const handleCardClick = (offer: JobOfferData) => {
     const adaptedOffer = adaptOfferToModalFormat(offer);
     setSelectedOffer(adaptedOffer);
     setIsModalOpen(true);
@@ -336,26 +196,21 @@ export default function RecentOffersSection() {
         )}
 
         {/* Offers Grid */}
-        {!isLoading && !error && trabajosConImagenes.length > 0 && (
+        {!isLoading && !error && trabajos.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trabajosConImagenes.map((trabajo) => (
-              <RecentOfferCard
+            {trabajos.map((trabajo) => (
+              <JobOfferCard
                 key={trabajo._id}
                 offer={trabajo}
-                onCardClick={handleCardClick}
-                hoveredCard={hoveredCard}
-                currentImageIndex={currentImageIndex[trabajo._id] || 0}
-                onMouseEnter={() => handleMouseEnter(trabajo._id, trabajo.allImages?.length || 1)}
-                onMouseLeave={() => handleMouseLeave(trabajo._id)}
-                onPrevImage={handlePrevImage(trabajo._id, trabajo.allImages?.length || 1)}
-                onNextImage={handleNextImage(trabajo._id, trabajo.allImages?.length || 1)}
+                viewMode="grid"
+                onClick={handleCardClick}
               />
             ))}
           </div>
         )}
 
         {/* Empty State */}
-        {!isLoading && !error && trabajosConImagenes.length === 0 && (
+        {!isLoading && !error && trabajos.length === 0 && (
           <div className="text-center py-12">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">
               <SlidersHorizontal className="w-8 h-8 text-gray-400" />
