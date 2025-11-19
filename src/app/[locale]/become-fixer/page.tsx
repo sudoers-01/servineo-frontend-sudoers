@@ -4,6 +4,7 @@ import { useState } from 'react';
 import FixerRegisterForm from '@/Components/fixer/Fixer-register-form';
 import { FixerEnableWizard } from '@/Components/fixer/Filter-eneable-wizard';
 import { Navbar } from '@/Components/Shared/Navbar';
+import { useGetAllJobsQuery } from '@/app/redux/services/jobApi';
 
 const defaultFormValues = {
   name: 'Freddy Amin Zapata',
@@ -19,19 +20,23 @@ type RequesterUser = {
   role: 'requester' | 'fixer';
 };
 
+
 export default function BecomeFixerPage() {
   const [requester, setRequester] = useState<RequesterUser | null>(null);
+  const { data: jobs, error, isLoading } = useGetAllJobsQuery();
+
+  
 
   return (
     <div>
-      <Navbar />
+     
       <div className="container mx-auto max-w-4xl p-4">
         <header className="mb-6 text-center">
           <h1 className="text-2xl font-bold">Conviertete en un Fixer</h1>
           <p className="text-sm text-gray-500">
             Completa tu registro y habilita tu cuenta como FIXER
           </p>
-        </header>
+        </header>  
 
         <section className="space-y-6">
           <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">

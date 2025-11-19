@@ -18,7 +18,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
       <div className="relative bg-white w-full max-w-3xl rounded-2xl border-primary border-2 shadow-xl overflow-hidden">
         {/* Header */}
-        <div className="sticky top-0 bg-gradient-to-r from-white via-white to-primary/5 backdrop-blur-lg border-b border-primary  p-6 flex items-center justify-between z-10 ">
+        <div className="sticky top-0 bg-gradient-to-r from-white via-white to-primary/5 backdrop-blur-lg border-b border-primary p-6 flex items-center justify-between z-10">
           <div className="flex-1">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
               {offer.fixerName}
@@ -44,15 +44,20 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
               <Sparkles className="w-5 h-5 text-primary" />
               <h3 className="font-bold text-lg">Descripción</h3>
             </div>
-            <p className="text-foreground/80 leading-relaxed bg-muted/30 p-4 rounded-xl">{offer.description}</p>
+            <p className="text-foreground/80 leading-relaxed bg-muted/30 p-4 rounded-xl">
+              {offer.description}
+            </p>
           </div>
 
           <div>
             <h3 className="font-bold text-lg mb-3">Servicios Ofrecidos</h3>
             <div className="flex flex-wrap gap-2">
-              {offer.tags.map((tag) => (
-                <span key={tag} className="px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 text-primary text-sm rounded-full font-medium border border-primary/20 hover:border-primary/40 hover:scale-105 transition-all">
-                  {tag}
+              {(offer.services && offer.services.length > 0 ? offer.services : offer.tags).map((service) => (
+                <span
+                  key={service}
+                  className="px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 text-primary text-sm rounded-full font-medium border border-primary/20 hover:border-primary/40 hover:scale-105 transition-all"
+                >
+                  {service}
                 </span>
               ))}
             </div>
@@ -63,13 +68,16 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
               <h3 className="font-bold text-lg mb-4">Galería de Trabajos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {offer.photos.map((photo, index) => (
-                  <div key={index} className="relative aspect-video rounded-xl overflow-hidden bg-muted group cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl">
-                    {/* Using next/image for better optimization; fallback to img if needed */}
+                  <div
+                    key={index}
+                    className="relative aspect-video rounded-xl overflow-hidden bg-muted group cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg hover:shadow-xl"
+                  >
                     <Image
                       src={photo || "/placeholder.svg"}
                       alt={`Foto ${index + 1}`}
                       fill
                       className="object-cover group-hover:scale-110 transition-transform duration-300"
+                      unoptimized
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                   </div>
