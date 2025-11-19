@@ -17,6 +17,7 @@ export interface JobOffer {
     lng: number
     address?: string
   }
+  status: 'pending' | 'accepted' | 'in_progress' | 'completed' | 'cancelled';
   // Add other fields as needed
 }
 
