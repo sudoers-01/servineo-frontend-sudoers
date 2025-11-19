@@ -253,9 +253,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     >
       {/* Imagen - clickeable para modal */}
       <div
-        className={`h-48 w-full relative overflow-hidden transition-transform ${
-          isTouching ? 'scale-[0.98]' : 'scale-100'
-        }`}
+        className="relative w-64 h-48 flex-shrink-0 overflow-hidden cursor-pointer"
         onClick={handleCardClick}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -277,7 +275,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         ))}
 
         {/* Flechitas - Mostrar en hover (desktop) o cuando está visible (mobile) */}
-        {totalImages > 1 && (isHovered) && (
+        {totalImages > 1 && isHovered && (
           <>
             <button
               onClick={handlePrevImage}
