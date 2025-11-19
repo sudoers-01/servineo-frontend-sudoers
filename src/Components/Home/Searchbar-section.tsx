@@ -41,13 +41,13 @@ export function SearchBar({
 
   // Hooks personalizados para historial y sugerencias
   const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory({
-    useBackend: false,
-  }); // Usa localStorage
+    useBackend: true,
+  });
 
   const { suggestions } = useSearchSuggestions(value, {
-    enabled: isOpen && value.trim().length > 0,
+    enabled: value.trim().length > 0,
     debounceMs: 300,
-    maxResults: 7,
+    maxResults: 6,
   });
 
   // Función para realizar la búsqueda con redirección

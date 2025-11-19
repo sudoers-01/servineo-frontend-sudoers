@@ -45,8 +45,10 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   });
 
   const { suggestions } = useSearchSuggestions(value, {
-    enabled: isOpen && value.trim().length > 0,
+    enabled: value.trim().length > 0,
     minLength: 1,
+    debounceMs: 300,
+    maxResults: 6,
   });
 
   // Sincronizar con Redux

@@ -14,6 +14,18 @@ interface HistoryPayload {
   searchHistory?: SearchHistoryItem[];
 }
 
+interface DeleteHistoryResponse {
+  success: boolean;
+  searchHistory?: SearchHistoryItem[];
+  deleted?: boolean;
+}
+
+interface ClearHistoryResponse {
+  success: boolean;
+  searchHistory?: SearchHistoryItem[];
+  cleared?: number;
+}
+
 interface UseSearchHistoryOptions {
   useBackend?: boolean;
   maxItems?: number;
@@ -31,7 +43,7 @@ interface UseSearchHistoryReturn {
 
 /**
  * Hook centralizado para gestionar el historial de búsqueda
- * Soporta localStorage y backend opcional
+ * Soporta localStorage y backend con sincronización completa
  */
 export function useSearchHistory(
   options: UseSearchHistoryOptions = {}
@@ -67,8 +79,16 @@ export function useSearchHistory(
     try {
       ensureSessionId();
       const endpoint = `/api/devmaster/offers?action=deleteHistory&searchTerm=${encodeURIComponent(searchTerm)}`;
-      const resp = await api.get<unknown>(endpoint);
-      return resp.success;
+      const resp = await api.get<DeleteHistoryResponse>(endpoint);
+      
+      if (resp.success && resp.data?.searchHistory) {
+        return {
+          success: true,
+          updatedHistory: resp.data.searchHistory.map((item) => item.searchTerm)
+        };
+      }
+      
+      return { success: resp.success, updatedHistory: [] };
     } catch (error) {
       console.error('Error eliminando del backend:', error);
       throw error;
@@ -79,8 +99,16 @@ export function useSearchHistory(
     try {
       ensureSessionId();
       const endpoint = `/api/devmaster/offers?action=clearAllHistory`;
-      const resp = await api.get<unknown>(endpoint);
-      return resp.success;
+      const resp = await api.get<ClearHistoryResponse>(endpoint);
+      
+      if (resp.success) {
+        return {
+          success: true,
+          updatedHistory: resp.data?.searchHistory?.map(item => item.searchTerm) || []
+        };
+      }
+      
+      return { success: false, updatedHistory: [] };
     } catch (error) {
       console.error('Error limpiando historial del backend:', error);
       throw error;
@@ -116,24 +144,16 @@ export function useSearchHistory(
 
       try {
         if (useBackend) {
-          // Cargar desde backend
           const backendHistory = await fetchHistoryFromBackend('');
-          if (backendHistory.length > 0) {
-            setHistory(backendHistory);
-            persistToLocalStorage(backendHistory);
-          } else {
-            // Fallback a localStorage si backend está vacío
-            const localHistory = loadFromLocalStorage();
-            setHistory(localHistory);
-          }
+          setHistory(backendHistory);
+          persistToLocalStorage(backendHistory);
         } else {
-          // Solo localStorage
           const localHistory = loadFromLocalStorage();
           setHistory(localHistory);
         }
       } catch (err) {
         setError('Error al cargar historial');
-        // Fallback a localStorage en caso de error
+        console.error('Load history error:', err);
         const localHistory = loadFromLocalStorage();
         setHistory(localHistory);
       } finally {
@@ -150,12 +170,15 @@ export function useSearchHistory(
       const trimmed = query.trim();
       if (!trimmed) return;
 
+      // Actualizar estado optimísticamente
       setHistory((prev) => {
         const filtered = prev.filter((item) => item !== trimmed);
         const updated = [trimmed, ...filtered].slice(0, maxItems);
         persistToLocalStorage(updated);
         return updated;
       });
+
+      // El backend ya guarda automáticamente cuando se hace onSearch()
     },
     [maxItems, persistToLocalStorage]
   );
@@ -164,47 +187,88 @@ export function useSearchHistory(
   const removeFromHistory = useCallback(
     async (item: string) => {
       setError(null);
+      setIsLoading(true);
 
       try {
         if (useBackend) {
-          const success = await deleteFromBackend(item);
-          if (!success) {
+          const result = await deleteFromBackend(item);
+          
+          if (!result.success) {
             throw new Error('Backend deletion failed');
           }
-        }
 
-        setHistory((prev) => {
-          const updated = prev.filter((h) => h !== item);
-          persistToLocalStorage(updated);
-          return updated;
-        });
+          // Incluye automáticamente items re-encolados
+          setHistory(result.updatedHistory);
+          persistToLocalStorage(result.updatedHistory);
+          
+          console.log('History updated after delete:', result.updatedHistory);
+        } else {
+          // Solo localStorage
+          setHistory((prev) => {
+            const updated = prev.filter((h) => h !== item);
+            persistToLocalStorage(updated);
+            return updated;
+          });
+        }
       } catch (err) {
         setError('Error al eliminar del historial');
         console.error('Remove from history error:', err);
+        
+        // Recargar desde backend en caso de error
+        if (useBackend) {
+          try {
+            const backendHistory = await fetchHistoryFromBackend('');
+            setHistory(backendHistory);
+            persistToLocalStorage(backendHistory);
+          } catch (reloadErr) {
+            console.error('Error reloading history after failed delete:', reloadErr);
+          }
+        }
+      } finally {
+        setIsLoading(false);
       }
     },
-    [useBackend, deleteFromBackend, persistToLocalStorage]
+    [useBackend, deleteFromBackend, persistToLocalStorage, fetchHistoryFromBackend]
   );
 
   // ===== LIMPIAR TODO =====
   const clearHistory = useCallback(async () => {
     setError(null);
+    setIsLoading(true);
 
     try {
       if (useBackend) {
-        const success = await clearAllHistoryBackend();
-        if (!success) {
+        const result = await clearAllHistoryBackend();
+        if (!result.success) {
           throw new Error('Backend clear failed');
         }
+        
+        setHistory(result.updatedHistory);
+        persistToLocalStorage(result.updatedHistory);
+        
+        console.log('History cleared, updated:', result.updatedHistory);
+      } else {
+        setHistory([]);
+        persistToLocalStorage([]);
       }
-
-      setHistory([]);
-      persistToLocalStorage([]);
     } catch (err) {
       setError('Error al limpiar historial');
       console.error('Clear history error:', err);
+      
+      // Recargar desde backend en caso de error
+      if (useBackend) {
+        try {
+          const backendHistory = await fetchHistoryFromBackend('');
+          setHistory(backendHistory);
+          persistToLocalStorage(backendHistory);
+        } catch (reloadErr) {
+          console.error('Error reloading history after failed clear:', reloadErr);
+        }
+      }
+    } finally {
+      setIsLoading(false);
     }
-  }, [useBackend, clearAllHistoryBackend, persistToLocalStorage]);
+  }, [useBackend, clearAllHistoryBackend, persistToLocalStorage, fetchHistoryFromBackend]);
 
   return {
     history,
