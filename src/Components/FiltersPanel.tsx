@@ -27,6 +27,7 @@ const JOB_TYPES = [
   "Jardinero",
   "Mecánico",
   "Pintor",
+  "Plomero",
 ]
 
 export function FiltersPanel() {
