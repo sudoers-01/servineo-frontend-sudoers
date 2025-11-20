@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { mockJobOffers } from '../../lib/mock-data';
-import { JobOffer } from '../../lib/mock-data';
+import { JobOffer, JobOfferBackend } from '../../lib/mock-data';
 import { JobOfferCard } from '@/Components/Job-offers/Job-offer-card';
 import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
 import { MapView } from '@/Components/Job-offers/maps/MapView';
 import { SearchHeader } from '@/Components/SearchHeader';
 import { useLogClickMutation } from '../../redux/services/activityApi';
 import { useLogSearchMutation, useUpdateFiltersMutation } from '../../redux/services/searchApi';
+import { useGetAllJobOffersQuery } from '../../redux/services/jobOfferApi';
 import { FiltersPanel } from '@/Components/FiltersPanel';
 import { useAppSelector } from '../../redux/hooks';
 import {
@@ -23,26 +23,41 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 export default function JobOffersPage() {
-  const t= useTranslations('jobOffers');
+  const t = useTranslations('jobOffers');
   const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
-  const [offers, setOffers] = useState<JobOffer[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 6;
 
-  // Load offers on component mount
-  useEffect(() => {
-    setOffers(mockJobOffers);
-  }, []);
+  // Load offers from API
+  const { data: apiOffersRaw = [], isLoading, isError } = useGetAllJobOffersQuery();
+  
+  // Cast to the correct backend type
+  const apiOffers = apiOffersRaw as unknown as JobOfferBackend[];
+
+  // Normalize API offers to UI shape
+  const offers: JobOffer[] = useMemo(
+    () =>
+      apiOffers.map((o) => ({
+        ...o,
+        id: o._id || o.id || '',
+        createdAt: o?.createdAt ? new Date(o.createdAt) : new Date(0),
+        tags: o?.tags || [],
+        photos: o?.photos || [],
+        location: o?.location || { lat: 0, lng: 0, address: '' },
+      })),
+    [apiOffers]
+  );
 
   const searchQuery = useAppSelector(selectSearchQuery);
   const selectedCities = useAppSelector(selectSelectedCities);
   const selectedJobTypes = useAppSelector(selectSelectedJobTypes);
   const selectedFixerNames = useAppSelector(selectSelectedFixerNames);
   const recentSearches = useAppSelector(selectRecentSearches);
-  const persona = { id: '507f1f77bcf86cd799439011', nombre: 'Usuario POC' };
+  const persona = { id: '691646c477c99dee64b21689', nombre: 'Usuario POC' };
   const [logClick] = useLogClickMutation();
+  
   const handleCardClick = async (offer: JobOffer) => {
     setSelectedOffer(offer);
     setIsModalOpen(true);
@@ -50,8 +65,8 @@ export default function JobOffersPage() {
     const activityData = {
       userId: persona.id,
       date: new Date().toISOString(),
-      role: 'requester',
-      type: 'click',
+      role: 'requester' as const,
+      type: 'click' as const,
       metadata: {
         button: 'job_offer',
         jobTitle: offer.title || 'Sin título',
@@ -62,9 +77,9 @@ export default function JobOffersPage() {
 
     try {
       await logClick(activityData).unwrap();
-      console.log('Click registrado:', offer.title || offer.title);
+      console.log('Click registrado:', offer.title);
     } catch (error) {
-      console.error('Error al registrar clic:');
+      console.error('Error al registrar clic:', error);
     }
   };
 
@@ -102,6 +117,7 @@ export default function JobOffersPage() {
   }, [searchQuery, selectedCities, selectedJobTypes]);
 
   // Mantener actualizado el count de filteredOffers en un ref
+  const filteredOffersCountRef = useRef<number>(0);
   useEffect(() => {
     filteredOffersCountRef.current = filteredOffers.length;
   }, [filteredOffers.length]);
@@ -120,7 +136,6 @@ export default function JobOffersPage() {
   const previousJobTypesRef = useRef<string[]>([]);
   const isInitialMountRef = useRef<boolean>(true);
   const lastSearchSentRef = useRef<string>('');
-  const filteredOffersCountRef = useRef<number>(0);
 
   // Función helper para obtener el valor del filtro fixer_name
   const getFixerNameValue = (): string => {
@@ -184,9 +199,9 @@ export default function JobOffersPage() {
           const searchCount = filteredOffersCountRef.current;
 
           const searchData = {
-            user_type: 'visitor',
+            user_type: 'visitor' as const,
             search_query: currentQuery,
-            search_type: 'search_box',
+            search_type: 'search_box' as const,
             filters: {
               filter_1: {
                 fixer_name: getFixerNameValue(),
@@ -282,6 +297,38 @@ export default function JobOffersPage() {
   // ============================================================================
   // END OF SEARCH AND FILTER TRACKING
   // ============================================================================
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
+            </div>
+          </div>
+        </header>
+        <main className="p-6">Cargando ofertas...</main>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
+            </div>
+          </div>
+        </header>
+        <main className="p-6">Error cargando ofertas.</main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">
@@ -434,7 +481,6 @@ export default function JobOffersPage() {
         </main>
       </div>
 
-      {/* Offer Details Modal */}
       <JobOfferModal
         offer={selectedOffer}
         isOpen={isModalOpen}
