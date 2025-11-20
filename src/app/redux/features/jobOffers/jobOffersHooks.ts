@@ -16,6 +16,7 @@ import {
   restoreSavedState,
   resetFilters,
   enablePersistence,
+  setError,
 } from '@/app/redux/slice/jobOfert';
 import {
   selectSearchParams,
@@ -31,31 +32,102 @@ import {
   clearAppliedFilters 
 } from './session';
 import { ParamsMap } from './types';
+import { JOBOFERT_ALLOWED_LIMITS } from '@/app/lib/validations/pagination.validator';
 
 /**
  * Hook principal que combina RTK Query con el slice de Redux
- * Reemplaza el useEffect que disparaba fetchOffers
  */
 export function useJobOffers() {
   const dispatch = useAppDispatch();
   const params = useAppSelector(selectSearchParams);
+  const [skipQuery, setSkipQuery] = useState(false);
+  const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const shouldClearErrorRef = useRef(true);
   
-  // ✅ Usar RTK Query en lugar de thunk
-  const { data, error, isLoading, isFetching } = useGetOffersQuery({
-    search: params.search,
-    filters: params.filters,
-    sortBy: params.sortBy,
-    date: params.date || undefined,
-    rating: params.rating || undefined,
-    page: params.page,
-    limit: params.limit,
-    titleOnly: params.titleOnly,
-    exact: params.exact,
-  });
+  // ✅ Validar página < 1
+  useEffect(() => {
+    if (params.page < 1) {
+      dispatch(setError(`La página ${params.page} no es válida. Debe ser mayor o igual a 1.`));
+      setSkipQuery(true);
+      shouldClearErrorRef.current = false;
+      
+      errorTimeoutRef.current = setTimeout(() => {
+        dispatch(setPaginaActual(1));
+        setSkipQuery(false);
+        shouldClearErrorRef.current = true;
+      }, 2500);
+      
+      return () => {
+        if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      };
+    }
+  }, [params.page, dispatch]);
 
+  // ✅ Validar límite inválido
+  useEffect(() => {
+    if (!JOBOFERT_ALLOWED_LIMITS.includes(params.limit)) {
+      dispatch(setError(
+        `Límite no permitido. Valores permitidos: ${JOBOFERT_ALLOWED_LIMITS.join(', ')}`
+      ));
+      setSkipQuery(true);
+      shouldClearErrorRef.current = false;
+      
+      errorTimeoutRef.current = setTimeout(() => {
+        dispatch(setRegistrosPorPagina(10));
+        setSkipQuery(false);
+        shouldClearErrorRef.current = true;
+      }, 2500);
+      
+      return () => {
+        if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+      };
+    }
+  }, [params.limit, dispatch]);
+
+  const { data, error, isLoading, isFetching } = useGetOffersQuery(
+    {
+      search: params.search,
+      filters: params.filters,
+      sortBy: params.sortBy,
+      date: params.date || undefined,
+      rating: params.rating || undefined,
+      page: params.page,
+      limit: params.limit,
+      titleOnly: params.titleOnly,
+      exact: params.exact,
+    },
+    {
+      skip: skipQuery,
+    }
+  );
+
+  // ✅ NUEVO - Capturar error 400 del backend
+  useEffect(() => {
+    if (error && 'status' in error) {
+      const fetchError = error as any;
+      
+      if (fetchError.status === 400 && fetchError.data?.message) {
+        console.log('❌ API ERROR 400:', fetchError.data.message);
+        dispatch(setError(fetchError.data.message));
+        shouldClearErrorRef.current = false;
+        
+        errorTimeoutRef.current = setTimeout(() => {
+          dispatch(setPaginaActual(1));
+          shouldClearErrorRef.current = true;
+        }, 2500);
+        
+        return () => {
+          if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+        };
+      }
+    }
+  }, [error, dispatch]);
+
+  // ✅ Actualizar paginación
   useEffect(() => {
     if (data) {
       const totalPages = Math.ceil(data.total / params.limit) || 1;
+
       dispatch(updatePagination({
         total: data.total,
         page: params.page,
@@ -63,20 +135,26 @@ export function useJobOffers() {
         totalPages,
         isInitialSearch: params.page === 1,
       }));
+
+      if (shouldClearErrorRef.current) {
+        dispatch(setError(null));
+      }
     }
+
+    return () => {
+      if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+    };
   }, [data, dispatch, params.page, params.limit]);
 
   return {
     offers: data?.data || [],
     total: data?.total || 0,
     isLoading: isLoading || isFetching,
-    error: error ? 'Error al cargar ofertas' : null,
   };
 }
 
 /**
  * Hook para inicializar desde URL en el primer render
- * Reemplaza useInitialUrlParams y useApplyQueryToStore
  */
 export function useInitialUrlParams() {
   const searchParams = useSearchParams();
@@ -87,7 +165,6 @@ export function useInitialUrlParams() {
     if (hasInitialized.current) return;
     hasInitialized.current = true;
 
-    // Si hay parámetros en URL, usarlos
     if ([...searchParams.keys()].length > 0) {
       const parsed = parseUrlToFilters(searchParams);
       
@@ -96,12 +173,12 @@ export function useInitialUrlParams() {
       dispatch(setSortBy(parsed.sortBy));
       dispatch(setDate(parsed.date));
       dispatch(setRating(parsed.rating));
-      dispatch(setPaginaActual(parsed.page));
-      dispatch(setRegistrosPorPagina(parsed.limit));
       dispatch(setTitleOnly(parsed.titleOnly));
       dispatch(setExact(parsed.exact));
+      dispatch(setRegistrosPorPagina(parsed.limit));
+      dispatch(setPaginaActual(parsed.page));
+      dispatch(enablePersistence());
     } else {
-      // Si no hay URL params, intentar restaurar desde localStorage
       const restored = restoreFromStorage();
       dispatch(restoreSavedState(restored));
     }
@@ -110,7 +187,6 @@ export function useInitialUrlParams() {
 
 /**
  * Hook para sincronizar Redux state con URL
- * Reemplaza useSyncUrlParams - Versión mejorada sin duplicación
  */
 export function useSyncUrlParams() {
   const router = useRouter();
@@ -120,7 +196,6 @@ export function useSyncUrlParams() {
   useEffect(() => {
     const currentParams = JSON.stringify(params);
     
-    // Evitar actualizaciones innecesarias
     if (currentParams === prevParamsRef.current) return;
     prevParamsRef.current = currentParams;
 
@@ -139,7 +214,6 @@ export function useSyncUrlParams() {
     const queryString = urlParams.toString();
     const target = queryString ? `?${queryString}` : '';
 
-    // Evitar replace si ya es el mismo
     if (typeof window !== 'undefined' && window.location.search === target) return;
 
     router.replace(target, { scroll: false });
@@ -171,7 +245,6 @@ export function useJobOffersState() {
 
 /**
  * Hook para manejar Applied Filters en ResultsAdvSearch
- * Consolida la lógica de job-offer-hooks/useAppliedFilters.ts
  */
 export function useAppliedFilters() {
   const [showAppliedFilters, setShowAppliedFilters] = useState<boolean>(false);
@@ -182,21 +255,15 @@ export function useAppliedFilters() {
     if (typeof window === 'undefined') return;
 
     try {
-      // Verificar si viene de búsqueda avanzada
       if (isFromAdvSearch()) {
         const sp = new URLSearchParams(window.location.search);
         const params = parseAppliedParams(sp);
         
         setAppliedParams(params);
         setShowAppliedFilters(true);
-        
-        // Persistir en sessionStorage para mantener en refresh
         saveAppliedFilters(params);
-        
-        // Limpiar la marca de origen
         clearAdvSearchMark();
       } else {
-        // Si no viene de AdvSearch, intentar restaurar desde sessionStorage
         const saved = getAppliedFilters();
         if (saved) {
           setAppliedParams(saved);
@@ -211,15 +278,10 @@ export function useAppliedFilters() {
   const handleClearApplied = () => {
     setShowAppliedFilters(false);
     setAppliedParams(null);
-    
-    // Resetear filtros en Redux
     dispatch(resetFilters());
-    
-    // Limpiar sessionStorage
     clearAppliedFilters();
     
     if (typeof window !== 'undefined') {
-      // Navegar a job-offer sin parámetros
       window.location.href = '/job-offer-list';
     }
   };
@@ -229,4 +291,25 @@ export function useAppliedFilters() {
     appliedParams, 
     handleClearApplied 
   };
+}
+
+/**
+ * Hook para debug/logging en desarrollo
+ */
+export function useJobOffersDebug() {
+  const state = useAppSelector(selectJobOffersState);
+  const params = useAppSelector(selectSearchParams);
+
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.group('🔍 JobOffers State');
+      console.log('Current Page:', state.paginaActual);
+      console.log('Total Pages:', state.totalPages);
+      console.log('Total Records:', state.totalRegistros);
+      console.log('Preserved Total:', state.preservedTotalRegistros);
+      console.log('Params:', params);
+      console.log('Error:', state.error);
+      console.groupEnd();
+    }
+  }, [state, params]);
 }

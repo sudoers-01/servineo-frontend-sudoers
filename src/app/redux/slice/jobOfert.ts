@@ -1,3 +1,4 @@
+// src\app\redux\slice\jobOfert.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { JOBOFERT_ALLOWED_LIMITS } from '@/app/lib/validations/pagination.validator';
 import { FilterState, JobOffersState, PaginationState } from '../features/jobOffers/types';
@@ -93,10 +94,6 @@ const jobOffersSlice = createSlice({
     },
 
     setRegistrosPorPagina: (state, action: PayloadAction<number>) => {
-      if (!JOBOFERT_ALLOWED_LIMITS.includes(action.payload)) {
-        return;
-      }
-
       state.registrosPorPagina = action.payload;
       state.paginaActual = 1;
       

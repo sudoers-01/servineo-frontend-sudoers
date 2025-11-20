@@ -46,9 +46,9 @@ export default function JobOffersPage() {
 
   useInitialUrlParams();
 
-  const { offers, total, isLoading, error } = useJobOffers();
+  const { offers, total, isLoading } = useJobOffers();
 
-  const { sortBy, search, paginaActual, registrosPorPagina } = useAppSelector(
+  const { sortBy, search, paginaActual, registrosPorPagina, error: reduxError} = useAppSelector(
     (state) => state.jobOfert,
   );
 
@@ -267,8 +267,8 @@ export default function JobOffersPage() {
       </div>
 
       <main className="px-4 sm:px-6 md:px-12 lg:px-24">
-        {error && (
-          <div className="text-red-500 text-center mb-4 p-3 bg-red-100 rounded">{error}</div>
+        {reduxError && (
+          <div className="text-red-500 text-center mb-4 p-3 bg-red-100 rounded">{reduxError}</div>
         )}
 
         {isLoading && (
@@ -279,10 +279,7 @@ export default function JobOffersPage() {
 
         {/* Overlay cuando el drawer está abierto */}
         {isDrawerOpen && (
-          <div
-            className="fixed bg-black z-40"
-            onClick={() => setIsDrawerOpen(false)}
-          />
+          <div className="fixed bg-black z-40" onClick={() => setIsDrawerOpen(false)} />
         )}
 
         <FilterDrawer

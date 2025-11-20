@@ -50,7 +50,7 @@ export function navigateToResults(params: {
  */
 export function navigateToJobOfferClean() {
   if (typeof window !== 'undefined') {
-    window.location.href = '/job-offer';
+    window.location.href = '/job-offer-list';
   }
 }
 
