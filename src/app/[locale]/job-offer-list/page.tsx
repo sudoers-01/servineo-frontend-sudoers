@@ -277,6 +277,14 @@ export default function JobOffersPage() {
           </div>
         )}
 
+        {/* Overlay cuando el drawer está abierto */}
+        {isDrawerOpen && (
+          <div
+            className="fixed bg-black z-40"
+            onClick={() => setIsDrawerOpen(false)}
+          />
+        )}
+
         <FilterDrawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
