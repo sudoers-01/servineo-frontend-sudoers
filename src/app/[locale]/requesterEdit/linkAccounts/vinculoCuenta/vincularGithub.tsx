@@ -4,7 +4,7 @@ import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { vincularGitHub, Client} from "../../../redux/services/services/api";
+import { vincularGitHub, Client } from "@/app/redux/services/services/api";
 
 interface VincularGithubProps {
   onLinked?: (client?: Client) => void;

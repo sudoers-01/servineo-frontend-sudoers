@@ -5,7 +5,7 @@ import { FcGoogle } from "react-icons/fc";
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import { vincularGoogle, Client } from "../../../redux/services/services/api";
+import { vincularGoogle,Client } from "@/app/redux/services/services/api";
 
 interface VincularGoogleProps {
   onLinked?: (client?: Client) => void;

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Mail, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
-import { vincularCorreoContrasena, Client} from "../../../redux/services/services/api";
+import { vincularCorreoContrasena, Client } from "@/app/redux/services/services/api";
 import { z } from "zod";
 
 const schema = z

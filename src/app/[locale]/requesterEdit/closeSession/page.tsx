@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useDevices } from "../../lib/hooks/useDevices";
+import { useDevices } from "@/app/lib/hooks/useDevices";
 import { Button } from "../buttonCS";
 //import { Card, CardContent } from "../cardCS";
 import {

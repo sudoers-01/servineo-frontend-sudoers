@@ -3,10 +3,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
-import { useAuth } from '../lib/hooks/usoAutentificacion';
+import { useAuth } from '@/app/lib/hooks/usoAutentificacion';
 import AccountLoginSettings from './linkAccounts/page';
-import RequesterEditForm from '../../Components/requester/request/RequesterEditForm';
-import ChangePasswordForm from '../../Components/requester/request/ChangePasswordForm';
+import RequesterEditForm from '@/Components/requester/request/RequesterEditForm';
+import ChangePasswordForm from '@/Components/requester/request/ChangePasswordForm';
 //import { obtenerDatosUsuarioLogueado } from '../redux/services/editNumber';
 //import CloseSessionPage from '@/app/requesterEdit/closeSession/page';
 import Image from 'next/image';

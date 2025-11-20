@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import ClientVerify from '../../../../Components/login/ClientVerify';
+import ClientVerify from '@/Components/login/ClientVerify';
 
 
 const SearchParamsSchema = z.object({

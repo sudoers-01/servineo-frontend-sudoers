@@ -8,7 +8,7 @@ import {
   obtenerMetodosCliente,
   desvincularMetodo,
   AuthProvider,
-} from "../../redux/services/services/api";
+} from "@/app/redux/services/services/api";
 import VincularCorreo from "./vinculoCuenta/vincularCorreo";
 import VincularGoogle from "./vinculoCuenta/vincularGoogle";
 import VincularGithub from "./vinculoCuenta/vincularGithub";

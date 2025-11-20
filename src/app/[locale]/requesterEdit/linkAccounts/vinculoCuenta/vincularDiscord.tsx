@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
 import { Loader2 } from "lucide-react";
-import { vincularDiscord, Client } from "../../../redux/services/services/api";
+import { vincularDiscord, Client } from "@/app/redux/services/services/api";
 
 interface VincularDiscordProps {
   onLinked?: (client?: Client) => void;

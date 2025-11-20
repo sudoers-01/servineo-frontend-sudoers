@@ -3,12 +3,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { api, ApiResponse } from "../../app/redux/services/loginApi";
+import { api, ApiResponse } from "@/app/redux/services/loginApi";
 import { Eye, EyeOff } from "lucide-react";
-import LoginGoogle from "../../Components/login/google/LoginGoogle";
+import LoginGoogle from "@/Components/login/google/LoginGoogle";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import NotificationModal from "../../Components/Modal-notifications";
+import NotificationModal from "@/Components/Modal-notifications";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
 /* ----------------------------- Zod schema ----------------------------- */

@@ -33,12 +33,12 @@ export default function RootLayout({
     <html lang="en" className={`${roboto.className} `}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ReduxProvider>
-          <AuthProvider> {/* ← AGREGAR ESTA LÍNEA */}
+          <AuthProvider> 
             <div className="">
               <TopMenu/>
             </div>
             {children}
-          </AuthProvider> {/* ← AGREGAR ESTA LÍNEA */}
+          </AuthProvider> 
         </ReduxProvider>
       </body>
     </html>
