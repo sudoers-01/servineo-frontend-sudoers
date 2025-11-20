@@ -14,7 +14,6 @@ export const store = configureStore({
     fixer: fixerReducer,
     filters: filterReducer,
     jobOffers: jobOffersReducer,
-    fixersByJob: fixersByJobReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()
