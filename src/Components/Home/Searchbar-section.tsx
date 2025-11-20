@@ -2,7 +2,7 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useSearchHistory } from '@/app/redux/features/searchHistory/useSearchHistory';
 import { useSearchSuggestions } from '@/app/redux/features/searchHistory/useSearchSuggestions';
@@ -46,6 +46,7 @@ export function SearchBar({
 
   const { suggestions } = useSearchSuggestions(value, {
     enabled: value.trim().length > 0,
+    minLength: 1,
     debounceMs: 300,
     maxResults: 6,
   });
@@ -72,17 +73,22 @@ export function SearchBar({
     [router, onSearch],
   );
 
-  // Filtrar elementos visibles
-  const visibleHistory = useCallback(() => {
+  // Filtrar elementos visibles con useMemo (CORREGIDO)
+  const visibleHistory = useMemo(() => {
     const q = value.trim().toLowerCase();
     if (q.length === 0) {
       return history.slice(0, 5);
     }
     return history.filter((h) => h.toLowerCase().includes(q)).slice(0, 5);
-  }, [history, value])();
+  }, [history, value]);
 
-  const visibleSuggestions = suggestions.slice(0, 5);
-  const visibleCombined = [...visibleHistory, ...visibleSuggestions];
+  const visibleSuggestions = useMemo(() => {
+    return suggestions.slice(0, 5);
+  }, [suggestions]);
+
+  const visibleCombined = useMemo(() => {
+    return [...visibleHistory, ...visibleSuggestions];
+  }, [visibleHistory, visibleSuggestions]);
 
   // Seleccionar item (historial o sugerencia)
   const selectItem = useCallback(
@@ -117,6 +123,7 @@ export function SearchBar({
     if (trimmed) {
       addToHistory(trimmed);
       setIsOpen(false);
+      setHighlighted(-1);
       setPreviewValue(null);
       performSearch(trimmed);
     }
@@ -146,11 +153,14 @@ export function SearchBar({
   );
 
   // Manejar cambios en el input
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    onChange(e.target.value);
-    setPreviewValue(null);
-    setHighlighted(-1);
-  };
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      onChange(e.target.value);
+      setPreviewValue(null);
+      setHighlighted(-1);
+    },
+    [onChange],
+  );
 
   // Click fuera para cerrar dropdown
   useEffect(() => {
@@ -258,7 +268,7 @@ export function SearchBar({
           const touchHandler = handleTouchStart(item);
           touchHandler();
           const pointerHandler = handlePointerDown(item);
-          return () => {};
+          return pointerHandler;
         }}
         onLongPressEnd={() => {
           handleTouchEnd();

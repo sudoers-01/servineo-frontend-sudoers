@@ -105,7 +105,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     setPreviewValue(null);
   };
 
-  // Filtrar historial visible
+  // Filtrar historial visible (CORREGIDO: usar useMemo)
   const visibleHistory = React.useMemo(() => {
     const q = value.trim().toLowerCase();
     if (q.length === 0) {
@@ -114,8 +114,15 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     return history.filter((h) => h.toLowerCase().includes(q)).slice(0, 5);
   }, [history, value]);
 
-  const visibleSuggestions = suggestions.slice(0, 5);
-  const visibleCombined = [...visibleHistory, ...visibleSuggestions];
+  // Filtrar sugerencias visibles (CORREGIDO: usar useMemo)
+  const visibleSuggestions = React.useMemo(() => {
+    return suggestions.slice(0, 5);
+  }, [suggestions]);
+
+  // Combinar arrays (CORREGIDO: usar useMemo)
+  const visibleCombined = React.useMemo(() => {
+    return [...visibleHistory, ...visibleSuggestions];
+  }, [visibleHistory, visibleSuggestions]);
 
   // Hook de teclado
   const { handleKeyDown: handleKeyDownBase } = useSearchKeyboard({
@@ -179,8 +186,8 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
 
           <SearchDropdown
             isOpen={isOpen}
-            history={history}
-            suggestions={suggestions}
+            history={visibleHistory}
+            suggestions={visibleSuggestions}
             highlighted={highlighted}
             longPressedItem={longPressedItem}
             query={value}

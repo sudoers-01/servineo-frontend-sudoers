@@ -15,6 +15,25 @@ interface PriceRangesResponse {
   ranges: PriceRangeItem[];
 }
 
+// ===== TIPOS PARA RESPUESTAS DE LA API =====
+interface TagsApiResponse {
+  tags?: string[];
+  data?: {
+    tags?: string[];
+  };
+}
+
+interface PriceRangesApiResponse {
+  min?: number | null;
+  max?: number | null;
+  ranges?: PriceRangeItem[];
+  data?: {
+    min?: number | null;
+    max?: number | null;
+    ranges?: PriceRangeItem[];
+  };
+}
+
 // Extender el baseApi con endpoints específicos de ofertas
 export const jobOffersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -67,7 +86,7 @@ export const jobOffersApi = baseApi.injectEndpoints({
         if (!search && !category?.length) params.append('recent', 'true');
         return `/devmaster/tags?${params.toString()}`;
       },
-      transformResponse: (response: any) => {
+      transformResponse: (response: TagsApiResponse | string[]) => {
         if (Array.isArray(response)) return response;
         if (response.tags) return response.tags;
         if (response.data?.tags) return response.data.tags;
@@ -80,16 +99,24 @@ export const jobOffersApi = baseApi.injectEndpoints({
       query: () => {
         return '/devmaster/offers?action=getPriceRanges';
       },
-      transformResponse: (response: any) => {
+      transformResponse: (response: PriceRangesApiResponse) => {
         
         // Si la respuesta ya tiene el formato correcto
         if (response.ranges) {
-          return response as PriceRangesResponse;
+          return {
+            min: response.min ?? null,
+            max: response.max ?? null,
+            ranges: response.ranges,
+          };
         }
         
         // Si viene envuelto en data
         if (response.data?.ranges) {
-          return response.data as PriceRangesResponse;
+          return {
+            min: response.data.min ?? null,
+            max: response.data.max ?? null,
+            ranges: response.data.ranges,
+          };
         }
         
         // Fallback: estructura vacía

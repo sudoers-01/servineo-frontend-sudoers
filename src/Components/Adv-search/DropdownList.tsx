@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { useTranslations } from 'next-intl';
 import { useGetTagsQuery } from '@/app/redux/services/jobOffersApi';
 
@@ -21,7 +21,6 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false);
-  const [previousClearSignal, setPreviousClearSignal] = useState<number | undefined>(clearSignal);
 
   const {
     data: tagsData,
@@ -41,7 +40,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
   const error = fetchError ? 'Error al cargar categorías' : null;
 
-  // Restaurar desde URL
+  // Restaurar desde URL (solo se ejecuta una vez)
   useEffect(() => {
     if (typeof window === 'undefined' || hasRestoredFromUrl) return;
 
@@ -70,26 +69,34 @@ const DropdownList: React.FC<DropdownListProps> = ({
     }
 
     setHasRestoredFromUrl(true);
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Solo se ejecuta al montar el componente
 
   // Limpiar selección cuando cambia clearSignal
   useEffect(() => {
     if (!hasRestoredFromUrl) return;
-    if (clearSignal === previousClearSignal) return;
 
     setSelectedCategories([]);
     onFilterChange?.({ categories: [] });
-    setPreviousClearSignal(clearSignal);
-  }, [clearSignal, hasRestoredFromUrl]);
+  }, [clearSignal, hasRestoredFromUrl, onFilterChange]);
 
-  const handleCheckboxChange = (categoryValue: string) => {
-    const newSelectedCategories = selectedCategories.includes(categoryValue)
-      ? selectedCategories.filter((cat) => cat !== categoryValue)
-      : [...selectedCategories, categoryValue];
+  const handleCheckboxChange = useCallback(
+    (categoryValue: string) => {
+      setSelectedCategories((prev) => {
+        const newSelectedCategories = prev.includes(categoryValue)
+          ? prev.filter((cat) => cat !== categoryValue)
+          : [...prev, categoryValue];
 
-    setSelectedCategories(newSelectedCategories);
-    onFilterChange?.({ categories: newSelectedCategories });
-  };
+        // Llamar a onFilterChange después de actualizar el estado
+        setTimeout(() => {
+          onFilterChange?.({ categories: newSelectedCategories });
+        }, 0);
+
+        return newSelectedCategories;
+      });
+    },
+    [onFilterChange],
+  );
 
   if (isLoading) {
     return (

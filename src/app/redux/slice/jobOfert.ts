@@ -1,7 +1,6 @@
 // src\app\redux\slice\jobOfert.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { JOBOFERT_ALLOWED_LIMITS } from '@/app/lib/validations/pagination.validator';
-import { FilterState, JobOffersState, PaginationState } from '../features/jobOffers/types';
+import { FilterState, JobOffersState } from '../features/jobOffers/types';
 import { 
   saveToStorage, 
   clearJobOffersStorage, 

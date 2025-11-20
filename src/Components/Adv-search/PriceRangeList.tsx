@@ -4,12 +4,20 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
 import { useGetPriceRangesQuery } from '@/app/redux/services/jobOffersApi';
+import { SerializedError } from '@reduxjs/toolkit';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
 type RangeItem = { label: string; min: number | null; max: number | null };
 
 interface PriceRangeListProps {
   onFilterChange?: (filters: { priceRanges: string[]; priceKey?: string }) => void;
   clearSignal?: number;
+}
+
+// Tipo para el error de la API
+interface ApiErrorData {
+  message?: string;
+  [key: string]: unknown;
 }
 
 const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSignal }) => {
@@ -39,7 +47,6 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
   // ===== SINCRONIZAR CON RESPUESTA DE RTK QUERY =====
   useEffect(() => {
     if (priceRangesData) {
-
       const items: RangeItem[] = Array.isArray(priceRangesData.ranges)
         ? priceRangesData.ranges.map((r) => ({
             label: r.label,
@@ -88,6 +95,20 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
     return label.replace(/\$\s*([0-9]+(?:\.[0-9]+)?)/g, '$1bs');
   }
 
+  // ===== FUNCIÓN AUXILIAR PARA EXTRAER MENSAJE DE ERROR =====
+  function getErrorMessage(error: FetchBaseQueryError | SerializedError): string {
+    if ('status' in error) {
+      // FetchBaseQueryError
+      if (error.data && typeof error.data === 'object') {
+        const apiError = error.data as ApiErrorData;
+        return apiError.message || JSON.stringify(error.data);
+      }
+      return `Error ${error.status}`;
+    }
+    // SerializedError
+    return error.message || 'Error desconocido';
+  }
+
   // ===== ESTADOS DE CARGA Y ERROR =====
   // Mostrar loading solo si NO hay datos en caché
   if (isLoading && ranges.length === 0) {
@@ -95,10 +116,7 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
   }
 
   if (queryError) {
-    const errorMessage =
-      'data' in queryError && queryError.data
-        ? String((queryError.data as any).message || queryError.data)
-        : 'Error desconocido';
+    const errorMessage = getErrorMessage(queryError);
     return <div className="p-4 text-sm text-red-500">Error: {errorMessage}</div>;
   }
 

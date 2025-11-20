@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
 import { useGetOffersQuery } from '@/app/redux/services/jobOffersApi';
+import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 import {
   setSearch,
   setFilters,
@@ -102,26 +103,31 @@ export function useJobOffers() {
   );
 
   // ✅ NUEVO - Capturar error 400 del backend
-  useEffect(() => {
-    if (error && 'status' in error) {
-      const fetchError = error as any;
-      
-      if (fetchError.status === 400 && fetchError.data?.message) {
-        console.log('❌ API ERROR 400:', fetchError.data.message);
-        dispatch(setError(fetchError.data.message));
+useEffect(() => {
+  if (error && 'status' in error) {
+    const fetchError = error as FetchBaseQueryError;
+
+    if (fetchError.status === 400 && fetchError.data && typeof fetchError.data === 'object') {
+      const message = (fetchError.data as { message?: string }).message;
+
+      if (message) {
+        console.log('❌ API ERROR 400:', message);
+        dispatch(setError(message));
         shouldClearErrorRef.current = false;
-        
+
         errorTimeoutRef.current = setTimeout(() => {
           dispatch(setPaginaActual(1));
           shouldClearErrorRef.current = true;
         }, 2500);
-        
+
         return () => {
           if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
         };
       }
     }
-  }, [error, dispatch]);
+  }
+}, [error, dispatch]);
+
 
   // ✅ Actualizar paginación
   useEffect(() => {

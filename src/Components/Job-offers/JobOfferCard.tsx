@@ -44,7 +44,6 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     currentIndex,
     isHovered,
     isTouching,
-    isVisible,
     elementRef,
     handleMouseEnter,
     handleMouseLeave,

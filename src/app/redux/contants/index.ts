@@ -5,7 +5,8 @@ export * from './dbValues';
 export * from './translations';
 
 // Helper function para traducir valores DB
-export function getTranslationKey(dbValue: string): string | null {
-  // @ts-ignore - dynamic lookup
-  return DB_TO_TRANSLATION_KEY[dbValue] || null;
+import { DB_TO_TRANSLATION_KEY, TranslatableValue, TranslationKey } from './translations';
+
+export function getTranslationKey(dbValue: TranslatableValue): TranslationKey | null {
+  return DB_TO_TRANSLATION_KEY[dbValue] ?? null;
 }

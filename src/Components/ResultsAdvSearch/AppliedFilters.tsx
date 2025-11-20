@@ -47,7 +47,7 @@ export default function AppliedFilters({ params, onModify }: Props) {
   const translateDbValue = (value: string): string => {
     const translationKey = DB_TO_TRANSLATION_KEY[value as keyof typeof DB_TO_TRANSLATION_KEY];
     if (translationKey) {
-      return tAdv(translationKey as any);
+      return tAdv(translationKey as Parameters<typeof tAdv>[0]);
     }
     return value;
   };

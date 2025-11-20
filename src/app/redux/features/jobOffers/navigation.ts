@@ -2,6 +2,17 @@ import { filtersToUrlParams } from './parsers';
 import { markFromAdvSearch, saveAdvSearchState } from './session';
 import { FilterState } from './types';
 
+export interface AdvSearchState {
+  search: string;
+  filters: FilterState;
+  sortBy: string;
+  date?: string | null;
+  rating?: number | null;
+  titleOnly?: boolean;
+  exact?: boolean;
+  // Agrega otros campos según tu necesidad
+}
+
 /**
  * Navegación desde AdvSearch a ResultsAdvSearch
  */
@@ -14,7 +25,7 @@ export function navigateToResults(params: {
   titleOnly?: boolean;
   exact?: boolean;
   // Estado completo de AdvSearch para persistir
-  advSearchState?: any;
+  advSearchState?: AdvSearchState;
 }) {
   const urlParams = filtersToUrlParams({
     search: params.search,
