@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
@@ -12,6 +13,19 @@ export default function TopMenu() {
 
   // CORRECCIÓN TS
   const dropdownRef = useRef<HTMLDivElement | null>(null);
+=======
+import { useState, useEffect } from 'react'
+import { useTranslations, useLocale } from 'next-intl'
+import Link from 'next/link'
+import { Menu, X } from 'lucide-react'
+
+export default function TopMenu() {
+  const t = useTranslations('navigation')
+  const locale = useLocale()
+  
+  const [isOpen, setIsOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+>>>>>>> dev
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
@@ -40,6 +54,7 @@ export default function TopMenu() {
   }, []);
 
   const navItems = [
+<<<<<<< HEAD
     { name: "Inicio", href: "/" },
     { name: "Ofertas de trabajo", href: "/job-offer-list" },
     // quitar campos de prueba
@@ -47,6 +62,11 @@ export default function TopMenu() {
     { name: "mis ofertas", href: "/fixer/my-offers" },
     { name: "perfil", href: "/fixer/profile" },
   ];
+=======
+    { name: t('home'), href: `/${locale}` },
+    { name: t('jobOffers'), href: `/${locale}/job-offer-list` }
+  ]
+>>>>>>> dev
 
   return (
     <>
@@ -79,6 +99,7 @@ export default function TopMenu() {
 
             {/* DERECHA */}
             <div className="hidden md:flex items-center space-x-4">
+<<<<<<< HEAD
               {!isLogged ? (
                 <>
                   <Link
@@ -126,6 +147,20 @@ export default function TopMenu() {
                   )}
                 </div>
               )}
+=======
+              <Link 
+                href="/login" 
+                className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                {t('login')}
+              </Link>
+              <Link
+                href="/registro"
+                className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+              >
+                {t('register')}
+              </Link>
+>>>>>>> dev
             </div>
 
             <div className="md:hidden flex items-center">
@@ -158,6 +193,7 @@ export default function TopMenu() {
             ))}
 
             <div className="pt-4 pb-2 border-t border-gray-200 px-2">
+<<<<<<< HEAD
               {!isLogged ? (
                 <>
                   <Link
@@ -205,6 +241,22 @@ export default function TopMenu() {
                   </button>
                 </>
               )}
+=======
+              <Link
+                href="/login"
+                className="block w-full text-center text-primary px-4 py-2 rounded-md text-base font-medium hover:bg-gray-50"
+                onClick={() => setIsOpen(false)}
+              >
+                {t('login')}
+              </Link>
+              <Link
+                href="/registro"
+                className="block w-full text-center text-white bg-primary mt-2 px-4 py-2 rounded-md text-base font-medium hover:bg-primary/90"
+                onClick={() => setIsOpen(false)}
+              >
+                {t('register')}
+              </Link>
+>>>>>>> dev
             </div>
           </div>
         </div>
