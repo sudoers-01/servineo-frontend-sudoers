@@ -1,5 +1,19 @@
+// src/app/redux/services/jobOffersApi.ts
 import { baseApi } from './baseApi';
 import { OfferParams, OfferResponse } from '@/app/redux/features/jobOffers/types';
+
+// ===== TIPOS PARA PRICE RANGES =====
+interface PriceRangeItem {
+  label: string;
+  min?: number | null;
+  max?: number | null;
+}
+
+interface PriceRangesResponse {
+  min: number | null;
+  max: number | null;
+  ranges: PriceRangeItem[];
+}
 
 // Extender el baseApi con endpoints específicos de ofertas
 export const jobOffersApi = baseApi.injectEndpoints({
@@ -62,8 +76,29 @@ export const jobOffersApi = baseApi.injectEndpoints({
     }),
     
     // 4. Rangos de precios
-    getPriceRanges: builder.query<any, void>({
-      query: () => '/devmaster/offers?action=getPriceRanges',
+    getPriceRanges: builder.query<PriceRangesResponse, void>({
+      query: () => {
+        return '/devmaster/offers?action=getPriceRanges';
+      },
+      transformResponse: (response: any) => {
+        
+        // Si la respuesta ya tiene el formato correcto
+        if (response.ranges) {
+          return response as PriceRangesResponse;
+        }
+        
+        // Si viene envuelto en data
+        if (response.data?.ranges) {
+          return response.data as PriceRangesResponse;
+        }
+        
+        // Fallback: estructura vacía
+        return {
+          min: null,
+          max: null,
+          ranges: [],
+        };
+      },
     }),
   }),
 });
@@ -73,5 +108,5 @@ export const {
   useLazyGetOffersQuery,
   useGetRecentOffersQuery,
   useGetTagsQuery,
-  useGetPriceRangesQuery
+  useGetPriceRangesQuery,
 } = jobOffersApi;

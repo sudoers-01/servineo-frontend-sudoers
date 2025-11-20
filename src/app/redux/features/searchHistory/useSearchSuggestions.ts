@@ -1,38 +1,20 @@
 // src/app/redux/features/searchHistory/useSearchSuggestions.ts
-import { useState, useEffect, useCallback, useRef } from 'react';
-import { api } from '@/app/lib/api';
-
-interface SuggestionItem {
-  term?: string;
-  count?: number;
-  score?: number;
-  source?: string;
-}
-
-interface SuggestionsPayload {
-  suggestions?: SuggestionItem[];
-}
+import { useState, useEffect, useRef } from 'react';
+import { useLazyGetSearchSuggestionsQuery } from '@/app/redux/services/searchHistoryApi';
 
 interface UseSearchSuggestionsOptions {
   enabled?: boolean;
   minLength?: number;
   debounceMs?: number;
   maxResults?: number;
-  endpoint?: string;
-  useCache?: boolean;
 }
 
 interface UseSearchSuggestionsReturn {
   suggestions: string[];
   isLoading: boolean;
   error: string | null;
-  clearCache: () => void;
 }
 
-/**
- * Hook para obtener sugerencias de búsqueda desde el backend
- * Con debounce automático, caché y cancelación de peticiones
- */
 export function useSearchSuggestions(
   query: string,
   options: UseSearchSuggestionsOptions = {}
@@ -42,108 +24,73 @@ export function useSearchSuggestions(
     minLength = 1,
     debounceMs = 300,
     maxResults = 6,
-    endpoint = '/api/devmaster/offers',
-    useCache = true,
   } = options;
 
   const [suggestions, setSuggestions] = useState<string[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [localError, setLocalError] = useState<string | null>(null);
 
-  const abortControllerRef = useRef<AbortController | null>(null);
-  const cacheRef = useRef<Map<string, string[]>>(new Map());
+  // RTK Query lazy query
+  const [trigger, { data, isLoading, error }] = useLazyGetSearchSuggestionsQuery();
 
-  // ===== LIMPIAR CACHÉ =====
-  const clearCache = useCallback(() => {
-    cacheRef.current.clear();
-  }, []);
-
-  // ===== FETCH SUGERENCIAS =====
-  const fetchSuggestions = useCallback(
-    async (searchQuery: string) => {
-      // Cancelar petición anterior
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
-      }
-
-      // Verificar caché
-      if (useCache) {
-        const cached = cacheRef.current.get(searchQuery);
-        if (cached) {
-          setSuggestions(cached);
-          setError(null);
-          return;
-        }
-      }
-
-      abortControllerRef.current = new AbortController();
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const url = `${endpoint}?search=${encodeURIComponent(searchQuery)}&limit=${maxResults}&record=false`;
-        const resp = await api.get<SuggestionsPayload>(url);
-
-        if (resp.success && resp.data?.suggestions) {
-          const results = resp.data.suggestions
-            .map((s) => String(s.term ?? ''))
-            .filter(Boolean)
-            .slice(0, maxResults);
-
-          // Guardar en caché
-          if (useCache) {
-            cacheRef.current.set(searchQuery, results);
-          }
-
-          setSuggestions(results);
-        } else {
-          setSuggestions([]);
-        }
-      } catch (err: any) {
-        if (err.name !== 'AbortError') {
-          console.error('Error fetching suggestions:', err);
-          setError('Error al cargar sugerencias');
-          setSuggestions([]);
-        }
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [endpoint, maxResults, useCache]
-  );
+  // Timer para debounce
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // ===== EFFECT CON DEBOUNCE =====
   useEffect(() => {
+    // Limpiar timer anterior
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Resetear si no está habilitado
     if (!enabled) {
       setSuggestions([]);
-      setError(null);
+      setLocalError(null);
       return;
     }
 
     const trimmed = query.trim();
 
+    // No buscar si no cumple longitud mínima
     if (trimmed.length < minLength) {
       setSuggestions([]);
-      setError(null);
+      setLocalError(null);
       return;
     }
 
-    const timer = setTimeout(() => {
-      fetchSuggestions(trimmed);
+    // Configurar nuevo timer con debounce
+    debounceTimerRef.current = setTimeout(() => {
+      trigger({ query: trimmed, limit: maxResults })
+        .unwrap()
+        .then((results) => {
+          setSuggestions(results.slice(0, maxResults));
+          setLocalError(null);
+        })
+        .catch((err) => {
+          console.error('Error fetching suggestions:', err);
+          setLocalError('Error al cargar sugerencias');
+          setSuggestions([]);
+        });
     }, debounceMs);
 
+    // Cleanup
     return () => {
-      clearTimeout(timer);
-      if (abortControllerRef.current) {
-        abortControllerRef.current.abort();
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
       }
     };
-  }, [query, enabled, minLength, debounceMs, fetchSuggestions]);
+  }, [query, enabled, minLength, debounceMs, maxResults, trigger]);
+
+  // Actualizar sugerencias cuando cambian los datos
+  useEffect(() => {
+    if (data) {
+      setSuggestions(data.slice(0, maxResults));
+    }
+  }, [data, maxResults]);
 
   return {
     suggestions,
     isLoading,
-    error,
-    clearCache,
+    error: localError || (error ? 'Error al cargar sugerencias' : null),
   };
 }

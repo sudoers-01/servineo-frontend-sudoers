@@ -1,16 +1,11 @@
+// src/Components/Adv-search/PriceRangeList.tsx
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { useTranslations } from 'next-intl';
-import { api } from '@/app/lib/api';
+import { useGetPriceRangesQuery } from '@/app/redux/services/jobOffersApi';
 
 type RangeItem = { label: string; min: number | null; max: number | null };
-
-interface PriceRangesResponse {
-  min: number | null;
-  max: number | null;
-  ranges: Array<{ label: string; min?: number | null; max?: number | null }>;
-}
 
 interface PriceRangeListProps {
   onFilterChange?: (filters: { priceRanges: string[]; priceKey?: string }) => void;
@@ -21,15 +16,12 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
   const t = useTranslations('advancedSearch');
   const [selectedRanges, setSelectedRanges] = useState<string[]>([]);
   const [ranges, setRanges] = useState<RangeItem[]>([]);
-  // Start in loading state to avoid rendering any static/previous markup during mount
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
-  // Fetch dynamic ranges from backend on mount
+  // ===== RTK QUERY =====
+  const { data: priceRangesData, isLoading, error: queryError } = useGetPriceRangesQuery();
+
+  // ===== CARGAR CACHÉ DE SESSIONSTORAGE AL MONTAR =====
   useEffect(() => {
-    let mounted = true;
-    setError(null);
-
     // Try to read cached ranges from sessionStorage to avoid flicker on remount
     try {
       const cached = sessionStorage.getItem('adv_price_ranges');
@@ -37,53 +29,38 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
         const parsed = JSON.parse(cached) as RangeItem[];
         if (Array.isArray(parsed) && parsed.length) {
           setRanges(parsed);
-          setLoading(false);
         }
       }
-    } catch {
-      // ignore cache errors
+    } catch (err) {
+      console.error('❌[PriceRangeList] Error loading cache:', err);
     }
+  }, []);
 
-    // Always attempt to refresh in background to keep data current
-    api
-      .get<PriceRangesResponse>('/api/devmaster/offers?action=getPriceRanges')
-      .then((res) => {
-        if (!mounted) return;
-        if (res.success && res.data) {
-          const payload = res.data;
-          const items: RangeItem[] = Array.isArray(payload.ranges)
-            ? payload.ranges.map((r) => ({
-                label: r.label,
-                min: r.min ?? null,
-                max: r.max ?? null,
-              }))
-            : [];
-          setRanges(items);
-          // cache for faster subsequent mounts
-          try {
-            sessionStorage.setItem('adv_price_ranges', JSON.stringify(items));
-          } catch {
-            // ignore storage errors
-          }
-        } else {
-          setError(res.error || t('resultsCounter.noResults'));
-        }
-      })
-      .catch((err: unknown) => {
-        if (!mounted) return;
-        if (err instanceof Error) setError(err.message);
-        else setError('Error desconocido');
-      })
-      .finally(() => {
-        if (!mounted) return;
-        setLoading(false);
-      });
+  // ===== SINCRONIZAR CON RESPUESTA DE RTK QUERY =====
+  useEffect(() => {
+    if (priceRangesData) {
 
-    return () => {
-      mounted = false;
-    };
-  }, [t]);
+      const items: RangeItem[] = Array.isArray(priceRangesData.ranges)
+        ? priceRangesData.ranges.map((r) => ({
+            label: r.label,
+            min: r.min ?? null,
+            max: r.max ?? null,
+          }))
+        : [];
 
+      setRanges(items);
+
+      // Guardar en sessionStorage para futuros montajes
+      try {
+        sessionStorage.setItem('adv_price_ranges', JSON.stringify(items));
+        console.log('💾 [PriceRangeList] Saved to sessionStorage cache');
+      } catch (err) {
+        console.error('❌ [PriceRangeList] Error saving cache:', err);
+      }
+    }
+  }, [priceRangesData]);
+
+  // ===== MANEJAR CAMBIOS DE CHECKBOX =====
   const handleCheckboxChange = (rangeValue: string) => {
     const newSelectedRanges = selectedRanges.includes(rangeValue)
       ? selectedRanges.filter((range) => range !== rangeValue)
@@ -96,7 +73,7 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
     onFilterChange?.({ priceRanges: newSelectedRanges, priceKey });
   };
 
-  // Reset selections when parent signals a clear
+  // ===== RESETEAR SELECCIONES CUANDO EL PADRE SEÑALA UN CLEAR =====
   useEffect(() => {
     if (typeof clearSignal === 'undefined') return;
     setSelectedRanges([]);
@@ -104,22 +81,29 @@ const PriceRangeList: React.FC<PriceRangeListProps> = ({ onFilterChange, clearSi
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clearSignal]);
 
-  if (loading) {
-    return <div className="p-4 text-sm text-gray-500">{t('resultsCounter.loading')}</div>;
-  }
-
-  if (error) {
-    return <div className="p-4 text-sm text-red-500">Error: {error}</div>;
-  }
-
-  if (!ranges.length) {
-    return <div className="p-4 text-sm text-gray-500">{t('resultsCounter.noResults')}</div>;
-  }
-
+  // ===== FORMATEAR ETIQUETAS =====
   function formatRangeLabel(label: string) {
     if (!label) return label;
     // Convert occurrences like "$90" or "$ 90" to "90bs"
     return label.replace(/\$\s*([0-9]+(?:\.[0-9]+)?)/g, '$1bs');
+  }
+
+  // ===== ESTADOS DE CARGA Y ERROR =====
+  // Mostrar loading solo si NO hay datos en caché
+  if (isLoading && ranges.length === 0) {
+    return <div className="p-4 text-sm text-gray-500">{t('resultsCounter.loading')}</div>;
+  }
+
+  if (queryError) {
+    const errorMessage =
+      'data' in queryError && queryError.data
+        ? String((queryError.data as any).message || queryError.data)
+        : 'Error desconocido';
+    return <div className="p-4 text-sm text-red-500">Error: {errorMessage}</div>;
+  }
+
+  if (!ranges.length) {
+    return <div className="p-4 text-sm text-gray-500">{t('resultsCounter.noResults')}</div>;
   }
 
   return (
