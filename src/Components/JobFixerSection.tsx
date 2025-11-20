@@ -17,7 +17,24 @@ export function JobFixerSection({ jobType, fixers, matchCount }: JobFixerSection
   const t = useTranslations("Fixers Por Trabajo")
   const dispatch = useAppDispatch()
   const expandedJobs = useAppSelector(selectExpandedJobs)
-  const isExpanded = expandedJobs.has(jobType)
+  const isExpanded = expandedJobs.includes(jobType)
+
+  const formatJobType = (type: string) => {
+    const customLabels: Record<string, string> = {
+      "svc-plumbing": "Plomería",
+      "svc-electricity": "Electricidad",
+      "svc-carpentry": "Carpintería",
+      "svc-painting": "Pintura",
+      "svc-masonry": "Albañilería",
+      "svc-gardening": "Jardinería",
+      "svc-cleaning": "Limpieza",
+    }
+
+    if (customLabels[type]) return customLabels[type]
+
+    const normalized = type.replace(/^svc-/, "").replace(/-/g, " ")
+    return normalized.charAt(0).toUpperCase() + normalized.slice(1)
+  }
 
   return (
     <div className="border border-gray-200 rounded-lg overflow-hidden bg-white">
@@ -26,7 +43,7 @@ export function JobFixerSection({ jobType, fixers, matchCount }: JobFixerSection
         className="w-full px-6 py-4 flex items-center justify-between bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-150 transition-colors"
       >
         <div className="flex items-center gap-2">
-          <h3 className="text-lg font-semibold text-gray-800">{jobType}</h3>
+          <h3 className="text-lg font-semibold text-gray-800">{formatJobType(jobType)}</h3>
           <span className="text-sm font-medium text-blue-600 bg-blue-50 px-3 py-1 rounded-full">
             ({matchCount})
           </span>

@@ -3,12 +3,12 @@ import type { RootState } from "../store"
 
 interface FixersByJobState {
   searchQuery: string
-  expandedJobs: Set<string>
+  expandedJobs: string[]
 }
 
 const initialState: FixersByJobState = {
   searchQuery: "",
-  expandedJobs: new Set(),
+  expandedJobs: [],
 }
 
 export const fixersByJobSlice = createSlice({
@@ -19,17 +19,17 @@ export const fixersByJobSlice = createSlice({
       state.searchQuery = action.payload
     },
     toggleJobExpanded: (state, action: PayloadAction<string>) => {
-      if (state.expandedJobs.has(action.payload)) {
-        state.expandedJobs.delete(action.payload)
+      if (state.expandedJobs.includes(action.payload)) {
+        state.expandedJobs = state.expandedJobs.filter((job) => job !== action.payload)
       } else {
-        state.expandedJobs.add(action.payload)
+        state.expandedJobs = [...state.expandedJobs, action.payload]
       }
     },
     expandAllJobs: (state, action: PayloadAction<string[]>) => {
-      state.expandedJobs = new Set(action.payload)
+      state.expandedJobs = action.payload
     },
     collapseAllJobs: (state) => {
-      state.expandedJobs.clear()
+      state.expandedJobs = []
     },
   },
 })
