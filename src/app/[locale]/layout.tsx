@@ -45,15 +45,6 @@ export default async function RootLayout({
     <html lang={locale} className={`${roboto.className} `}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <NextIntlClientProvider locale={locale} messages={messages}>
-<<<<<<< HEAD
-        <ReduxProvider>
-          <div className="">
-            
-          </div>
-          {children}
-          <div className='text-black fixed bottom-7 right-7'><TranslationButton/></div>
-        </ReduxProvider>
-=======
           <ReduxProvider>
             <div className="text-black fixed bottom-7 right-7 z-[9999]">
               <TranslationButton />
@@ -63,7 +54,6 @@ export default async function RootLayout({
             </div>
             {children}
           </ReduxProvider>
->>>>>>> Integration
         </NextIntlClientProvider>
       </body>
     </html>
