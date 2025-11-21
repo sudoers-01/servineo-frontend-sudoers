@@ -1,9 +1,22 @@
-import { ParamsMap } from './types';
+import { ParamsMap, FilterState } from './types';
+
 export const SESSION_KEYS = {
   FROM_ADV: 'fromAdv',
   APPLIED_FILTERS: 'appliedFilters',
   ADV_SEARCH_STATE: 'advSearch_state',
 } as const;
+
+// Define el tipo para el estado de AdvSearch
+export interface AdvSearchState {
+  search: string;
+  filters: FilterState;
+  sortBy: string;
+  date?: string | null;
+  rating?: number | null;
+  titleOnly?: boolean;
+  exact?: boolean;
+  // Agrega aquí otras propiedades adicionales si las necesitas
+}
 
 /**
  * Helper para leer sessionStorage de forma segura
@@ -98,15 +111,15 @@ export const clearAppliedFilters = (): void => {
 /**
  * Guardar estado completo de AdvSearch
  */
-export const saveAdvSearchState = (state: any): void => {
+export const saveAdvSearchState = (state: AdvSearchState): void => {
   saveToSession(SESSION_KEYS.ADV_SEARCH_STATE, state);
 };
 
 /**
  * Obtener estado de AdvSearch
  */
-export const getAdvSearchState = (): any | null => {
-  return getSessionValue<any | null>(SESSION_KEYS.ADV_SEARCH_STATE, null);
+export const getAdvSearchState = (): AdvSearchState | null => {
+  return getSessionValue<AdvSearchState | null>(SESSION_KEYS.ADV_SEARCH_STATE, null);
 };
 
 /**

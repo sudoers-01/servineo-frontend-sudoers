@@ -19,6 +19,8 @@ export interface JobOfferData {
   photos?: string[];
   imagenUrl?: string;
   allImages?: string[];
+  completedJobs?: number;
+  location?: string[];
 }
 
 /**

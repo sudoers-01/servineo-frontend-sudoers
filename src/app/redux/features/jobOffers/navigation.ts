@@ -1,17 +1,6 @@
 import { filtersToUrlParams } from './parsers';
-import { markFromAdvSearch, saveAdvSearchState } from './session';
+import { markFromAdvSearch, saveAdvSearchState, type AdvSearchState } from './session';
 import { FilterState } from './types';
-
-export interface AdvSearchState {
-  search: string;
-  filters: FilterState;
-  sortBy: string;
-  date?: string | null;
-  rating?: number | null;
-  titleOnly?: boolean;
-  exact?: boolean;
-  // Agrega otros campos según tu necesidad
-}
 
 /**
  * Navegación desde AdvSearch a ResultsAdvSearch
