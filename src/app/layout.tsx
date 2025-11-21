@@ -5,7 +5,7 @@ import { roboto } from './fonts';
 import 'leaflet/dist/leaflet.css'
 import { ReduxProvider } from './redux/ReduxProvider';
 import { AuthProvider } from './lib/hooks/usoAutentificacion'; 
-import TopMenu from '@/Components/Navigation/TopMenu';
+//import TopMenu from '@/Components/Navigation/TopMenu';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
