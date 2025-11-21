@@ -1,3 +1,4 @@
+// src/app/redux/services/baseApi.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Configuración de las variables de entorno
@@ -7,8 +8,6 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 export const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
   prepareHeaders: (headers) => {
-    // Puedes obtener el token del estado si lo necesitas
-    // const token = (getState() as RootState).auth.token
     const token = localStorage.getItem('token');
 
     // Si tenemos un token, lo añadimos a los headers
@@ -19,7 +18,7 @@ export const baseQuery = fetchBaseQuery({
     headers.set('Content-Type', 'application/json');
     return headers;
   },
-  credentials: 'include',
+  credentials: 'include', 
 });
 
 // API base que otros servicios pueden extender
@@ -27,7 +26,7 @@ export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery,
   endpoints: () => ({}),
-  tagTypes: ['Requester', 'Fixer', 'JobOffer'],
+  tagTypes: ['Requester', 'Fixer', 'JobOffer', 'SearchHistory'],
 });
 
 export interface ApiError {

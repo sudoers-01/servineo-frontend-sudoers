@@ -1,92 +1,117 @@
-"use client"
+'use client';
 
-import { useState, useEffect } from "react"
-import { currentFixer, mockJobOfferService, type JobOffer } from "@/app/lib/mock-data"
-import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
-import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
-import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
-import type { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
-import NotificationModal from "@/Components/Modal-notifications"
-import ConfirmationModal from "@/Components/Modal-confirmation"
-import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
-import { setFixer } from "@/app/redux/slice/fixerSlice"
+import { useState, useEffect } from 'react';
+import { currentFixer, mockJobOfferService, type JobOffer } from '@/app/lib/mock-data';
+import { Plus, Edit2, Trash2, ImageIcon } from 'lucide-react';
+import { JobOfferCard } from '@/Components/Job-offers/JobOfferCard';
+import JobOfferForm from '@/Components/Job-offers/Job-offer-form';
+import type { JobOfferFormData } from '@/app/lib/validations/Job-offer-Schemas';
+import type { JobOfferData } from '@/types/jobOffers';
+import NotificationModal from '@/Components/Modal-notifications';
+import ConfirmationModal from '@/Components/Modal-confirmation';
+import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
+import { setFixer } from '@/app/redux/slice/fixerSlice';
 import {
   setOffers,
   addOffer,
   updateOffer as updateOfferRedux,
   deleteOffer as deleteOfferRedux,
-} from "@/app/redux/slice/jobOffersSlice"
+} from '@/app/redux/slice/jobOffersSlice';
 
 export default function MyOffersPage() {
-  const dispatch = useAppDispatch()
-  const offers = useAppSelector((state) => state.jobOffers.offers)
-  const currentFixerRedux = useAppSelector((state) => state.fixer.currentFixer)
+  const dispatch = useAppDispatch();
+  const offers = useAppSelector((state) => state.jobOffers.offers);
+  const currentFixerRedux = useAppSelector((state) => state.fixer.currentFixer);
 
-  const [isFormOpen, setIsFormOpen] = useState(false)
-  const [editingOffer, setEditingOffer] = useState<JobOffer | null>(null)
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [editingOffer, setEditingOffer] = useState<JobOffer | null>(null);
   const [notification, setNotification] = useState<{
-    isOpen: boolean
-    type: "success" | "error" | "info" | "warning"
-    title: string
-    message: string
-  }>({ isOpen: false, type: "success", title: "", message: "" })
+    isOpen: boolean;
+    type: 'success' | 'error' | 'info' | 'warning';
+    title: string;
+    message: string;
+  }>({ isOpen: false, type: 'success', title: '', message: '' });
   const [confirmDelete, setConfirmDelete] = useState<{
-    isOpen: boolean
-    offerId: string | null
-  }>({ isOpen: false, offerId: null })
+    isOpen: boolean;
+    offerId: string | null;
+  }>({ isOpen: false, offerId: null });
 
   useEffect(() => {
     if (!currentFixerRedux) {
-      dispatch(setFixer(currentFixer))
+      dispatch(setFixer(currentFixer));
     }
-    const myOffers = mockJobOfferService.getMyOffers(currentFixer.id)
-    dispatch(setOffers(myOffers))
-  }, [dispatch, currentFixerRedux])
+    const myOffers = mockJobOfferService.getMyOffers(currentFixer.id);
+    dispatch(setOffers(myOffers));
+  }, [dispatch, currentFixerRedux]);
+
+  // Función para convertir JobOffer a JobOfferData
+  const convertToJobOfferData = (offer: JobOffer): JobOfferData => {
+    return {
+      _id: offer.id,
+      title: offer.title,
+      description: offer.description,
+      city: offer.city,
+      category: offer.services?.[0] || 'otros',
+      tags: offer.tags || offer.services || [],
+      price: offer.price || 0,
+      photos: offer.photos || [],
+      allImages: offer.photos || [],
+      imagenUrl: offer.photos?.[0] || '',
+      fixerId: offer.fixerId,
+      fixerName: offer.fixerName || 'Usuario',
+      fixerPhoto: offer.fixerPhoto || '',
+      contactPhone: offer.whatsapp || '',
+      rating: offer.rating || 0,
+      completedJobs: offer.completedJobs || 0,
+      createdAt: offer.createdAt,
+      location: offer.location ? [offer.location.address] : undefined,
+    };
+  };
 
   const handleEdit = (offer: JobOffer) => {
-    setEditingOffer(offer)
-    setIsFormOpen(true)
-  }
+    setEditingOffer(offer);
+    setIsFormOpen(true);
+  };
 
   const handleDeleteClick = (offerId: string) => {
-    setConfirmDelete({ isOpen: true, offerId })
-  }
+    setConfirmDelete({ isOpen: true, offerId });
+  };
 
   const handleConfirmDelete = () => {
     if (confirmDelete.offerId) {
       try {
-        mockJobOfferService.deleteOffer(confirmDelete.offerId)
-        dispatch(deleteOfferRedux(confirmDelete.offerId))
+        mockJobOfferService.deleteOffer(confirmDelete.offerId);
+        dispatch(deleteOfferRedux(confirmDelete.offerId));
         setNotification({
           isOpen: true,
-          type: "success",
-          title: "Oferta eliminada",
-          message: "La oferta se eliminó correctamente",
-        })
+          type: 'success',
+          title: 'Oferta eliminada',
+          message: 'La oferta se eliminó correctamente',
+        });
       } catch (error) {
-        console.error("Error al eliminar la oferta:", error)
+        console.error('Error al eliminar la oferta:', error);
         setNotification({
           isOpen: true,
-          type: "error",
-          title: "Error",
-          message: "No se pudo eliminar la oferta. Por favor, intenta de nuevo.",
-        })
+          type: 'error',
+          title: 'Error',
+          message: 'No se pudo eliminar la oferta. Por favor, intenta de nuevo.',
+        });
       }
     }
-    setConfirmDelete({ isOpen: false, offerId: null })
-  }
+    setConfirmDelete({ isOpen: false, offerId: null });
+  };
 
   const handleSubmit = (formData: JobOfferFormData) => {
     try {
-      const servicesAsStrings = formData.services.map((service) => service.value)
+      const servicesAsStrings = formData.services.map((service) => service.value);
       const defaultLocations: { [key: string]: { lat: number; lng: number } } = {
         Cochabamba: { lat: -17.3895, lng: -66.1568 },
-        "La Paz": { lat: -16.5, lng: -68.15 },
-        "Santa Cruz": { lat: -17.7834, lng: -63.1821 },
-        "El Alto": { lat: -16.5207, lng: -68.1742 },
-      }
+        'La Paz': { lat: -16.5, lng: -68.15 },
+        'Santa Cruz': { lat: -17.7834, lng: -63.1821 },
+        'El Alto': { lat: -16.5207, lng: -68.1742 },
+      };
 
-      const cityLocation = defaultLocations[formData.city] || defaultLocations["Cochabamba"]
+      const cityLocation = defaultLocations[formData.city] || defaultLocations['Cochabamba'];
 
       const offerData = {
         title: formData.title,
@@ -94,7 +119,7 @@ export default function MyOffersPage() {
         city: formData.city,
         services: servicesAsStrings,
         tags: formData.services.map((s) => s.value),
-        photos: formData.photos || ["/placeholder.svg?height=300&width=400&text=trabajo"],
+        photos: formData.photos || ['/placeholder.svg?height=300&width=400&text=trabajo'],
         price: formData.price || 0,
         fixerId: currentFixer.id,
         fixerName: currentFixer.name,
@@ -104,46 +129,46 @@ export default function MyOffersPage() {
           lng: cityLocation.lng,
           address: `${formData.city}, Bolivia`,
         },
-      }
+      };
 
       if (editingOffer) {
         const updatedOffer = mockJobOfferService.updateOffer(editingOffer.id, {
           ...offerData,
           id: editingOffer.id,
           createdAt: editingOffer.createdAt,
-        })
+        });
         if (updatedOffer) {
-          dispatch(updateOfferRedux(updatedOffer))
+          dispatch(updateOfferRedux(updatedOffer));
           setNotification({
             isOpen: true,
-            type: "success",
-            title: "Oferta actualizada",
-            message: "La oferta se actualizó correctamente",
-          })
+            type: 'success',
+            title: 'Oferta actualizada',
+            message: 'La oferta se actualizó correctamente',
+          });
         }
       } else {
-        const newOffer = mockJobOfferService.addOffer(offerData)
-        dispatch(addOffer(newOffer))
+        const newOffer = mockJobOfferService.addOffer(offerData);
+        dispatch(addOffer(newOffer));
         setNotification({
           isOpen: true,
-          type: "success",
-          title: "Oferta creada",
-          message: "La oferta se creó correctamente",
-        })
+          type: 'success',
+          title: 'Oferta creada',
+          message: 'La oferta se creó correctamente',
+        });
       }
 
-      setIsFormOpen(false)
-      setEditingOffer(null)
+      setIsFormOpen(false);
+      setEditingOffer(null);
     } catch (error) {
-      console.error("Error al procesar el formulario:", error)
+      console.error('Error al procesar el formulario:', error);
       setNotification({
         isOpen: true,
-        type: "error",
-        title: "Error",
-        message: "Hubo un error al procesar el formulario. Por favor, intenta de nuevo.",
-      })
+        type: 'error',
+        title: 'Error',
+        message: 'Hubo un error al procesar el formulario. Por favor, intenta de nuevo.',
+      });
     }
-  }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
@@ -152,8 +177,8 @@ export default function MyOffersPage() {
           <h1 className="text-3xl font-bold text-gray-900">Mis Ofertas</h1>
           <button
             onClick={() => {
-              setEditingOffer(null)
-              setIsFormOpen(true)
+              setEditingOffer(null);
+              setIsFormOpen(true);
             }}
             className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300 font-semibold"
           >
@@ -170,11 +195,11 @@ export default function MyOffersPage() {
             <JobOfferForm
               onSubmit={handleSubmit}
               onCancel={() => {
-                setIsFormOpen(false)
-                setEditingOffer(null)
+                setIsFormOpen(false);
+                setEditingOffer(null);
               }}
               defaultValues={editingOffer ?? undefined}
-              submitButtonText={editingOffer ? "Guardar Cambios" : "Publicar Oferta"}
+              submitButtonText={editingOffer ? 'Guardar Cambios' : 'Publicar Oferta'}
             />
           </div>
         )}
@@ -187,12 +212,13 @@ export default function MyOffersPage() {
             </div>
             <h3 className="text-2xl font-bold mb-3">No tienes ofertas publicadas</h3>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-              Crea tu primera oferta de trabajo para que los clientes puedan encontrarte y contactarte
+              Crea tu primera oferta de trabajo para que los clientes puedan encontrarte y
+              contactarte
             </p>
             <button
               onClick={() => {
-                setEditingOffer(null)
-                setIsFormOpen(true)
+                setEditingOffer(null);
+                setIsFormOpen(true);
               }}
               className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-xl hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 font-bold"
             >
@@ -209,14 +235,14 @@ export default function MyOffersPage() {
                 style={{ animationDelay: `${index * 50}ms` }}
               >
                 <div className="relative">
-                  <JobOfferCard offer={offer} showFixerInfo={true} />
+                  <JobOfferCard offer={convertToJobOfferData(offer)} viewMode="grid" />
 
                   {/* Action Buttons - Positioned absolutely over the card */}
-                  <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
-                        handleEdit(offer)
+                        e.stopPropagation();
+                        handleEdit(offer);
                       }}
                       className="p-2.5 bg-white text-primary rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-primary/20"
                       title="Editar oferta"
@@ -225,8 +251,8 @@ export default function MyOffersPage() {
                     </button>
                     <button
                       onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteClick(offer.id)
+                        e.stopPropagation();
+                        handleDeleteClick(offer.id);
                       }}
                       className="p-2.5 bg-white text-destructive rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-destructive/20"
                       title="Eliminar oferta"
@@ -262,5 +288,5 @@ export default function MyOffersPage() {
         type="danger"
       />
     </div>
-  )
+  );
 }
