@@ -1,7 +1,7 @@
 "use client"
 
 import { Pie, PieChart, Cell, Tooltip } from "recharts"
-import { useGetJobStatisticsQuery, JobLog } from '../../app/redux/services/statisticsApi';
+import { useGetJobStatisticsQuery } from '../../app/redux/services/statisticsApi';
 
 
 const COLORS = {
