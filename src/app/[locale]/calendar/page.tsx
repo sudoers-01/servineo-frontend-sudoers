@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useCallback, useEffect, useRef, useMemo } from "react";
 import { useRouter } from 'next/navigation';
 import DesktopCalendar from "@/componentsLorem/calendar/DesktopCalendar";
 import { UserRoleProvider } from "@/utils/contexts/UserRoleContext";
@@ -9,6 +9,7 @@ import MobileList from "@/componentsLorem/list/MobileList";
 import { ModeSelectionModal, ModeSelectionModalHandles } from '@/componentsLorem/appointments/forms/ModeSelectionModal';
 import CancelDaysAppointments from "@/componentsLorem/appointments/forms/CancelDaysAppointment";
 
+import useDailyConts from "@/utils/useDailyConts";
 import useSixMonthsAppointments from '@/hooks/Appointments/useSixMonthsAppointments';
 import { AppointmentsProvider } from "@/utils/contexts/AppointmentsContext/AppoinmentsContext";
 import { AppointmentsStatusProvider } from "@/utils/contexts/DayliViewRequesterContext";
@@ -60,32 +61,43 @@ export default function CalendarPage() {
         setIsCancelModalOpen(false);
     }
 
+    /*   Esto quedara como vestigio del lorem 
+     *   const handleConfirmCancel = (selectedDays: string[]) => {
+            //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
+        }*/
+
     const {
         isHourBookedFixer,
         isHourBooked,
         isEnabled,
         isCanceled,
-        loading,
+        refetch: refetchSixMonths,
+        refetchHour,
+        loading
     } = useSixMonthsAppointments(fixer_id, today);
+
+    const {
+        getAppointmentsForDay,
+        refetch: refetchConts
+    } = useDailyConts({ date: today, fixer_id });
+
+    const refetchAll = useCallback(() => {
+        refetchSixMonths();
+        refetchConts();
+    }, [refetchSixMonths, refetchConts]);
+
 
     const providerValue = useMemo(() => ({
         isHourBookedFixer,
         isHourBooked,
         isEnabled,
         isCanceled,
+        getAppointmentsForDay,
+        refetchAll,
+        refetchHour,
         loading
-    }), [isHourBookedFixer, isHourBooked, isEnabled, isCanceled, loading]);
+    }), [isHourBookedFixer, isHourBooked, isEnabled, isCanceled, refetchAll, refetchHour, getAppointmentsForDay, loading]);
 
-    if (isLoading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-white">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Cargando calendario...</p>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <UserRoleProvider
@@ -98,6 +110,9 @@ export default function CalendarPage() {
                 isHourBooked={providerValue.isHourBooked}
                 isEnabled={providerValue.isEnabled}
                 isCanceled={providerValue.isCanceled}
+                getAppointmentsForDay={providerValue.getAppointmentsForDay}
+                refetchAll={providerValue.refetchAll}
+                refetchHour={providerValue.refetchHour}
                 loading={providerValue.loading}
             >
                 <AppointmentsStatusProvider
@@ -131,7 +146,7 @@ export default function CalendarPage() {
                                     <h2 className="text-black p-4 text-xl text-center flex-1">Mi Calendario</h2>
                                 )}
                                 {userRole === 'requester' && (
-                                    <h2 className="text-black p-4 text-xl text-center flex-1">Calendario Diego Paredes</h2>
+                                    <h2 className="text-black p-4 text-xl text-center flex-1">Calendario de Juan Carlos Peréz</h2>
                                 )}
                             </div>
 
@@ -152,7 +167,7 @@ export default function CalendarPage() {
                                         </button>
                                     </div>
                                 )}
-                                
+
                             </div>
 
                             <div className="hidden md:flex md:items-center md:ml-auto md:mr-4 md:gap-4">
