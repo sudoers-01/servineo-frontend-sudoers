@@ -286,20 +286,32 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.trabajo && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {jobTypes.map((job) => (
-                      <label
-                        key={job.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedJobs.includes(job.dbValue)}
-                          onChange={() => handleJobChange(job.dbValue)}
-                        />
-                        <span className="truncate">{job.label}</span>
-                      </label>
-                    ))}
+                    {jobTypes.map((job) => {
+                      const isSelected = selectedJobs.includes(job.dbValue);
+                      const isDisabled = selectedJobs.length > 0 && !isSelected;
+
+                      return (
+                        <label
+                          key={job.dbValue}
+                          className={`flex items-center gap-2 text-xs cursor-pointer min-w-0 transition-colors ${
+                            isDisabled
+                              ? 'opacity-50 cursor-not-allowed text-gray-400'
+                              : 'hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            className={`w-4 h-4 flex-shrink-0 ${
+                              isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
+                            }`}
+                            checked={isSelected}
+                            onChange={() => handleJobChange(job.dbValue)}
+                            disabled={isDisabled}
+                          />
+                          <span className="truncate">{job.label}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}

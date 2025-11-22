@@ -12,30 +12,20 @@ import {
   selectSidebarOpen,
   setSidebarOpen,
 } from "../app/redux/slice/filterSlice"
+import { DB_VALUES } from "@/app/redux/contants"
 import { X } from "lucide-react"
 import { useTranslations } from "next-intl"
 
-const FIXER_NAMES = ["A-C", "D-F", "G-I", "J-L", "M-N"]
-const CITIES = ["Beni", "Chuquisaca", "Cochabamba", "La Paz", "Oruro", "Potosí", "Santa Cruz", "Tarija"]
-const JOB_TYPES = [
-  "Albañil",
-  "Carpintero",
-  "Cerrajero",
-  "Decorador",
-  "Electricista",
-  "Fontanero",
-  "Jardinero",
-  "Mecánico",
-  "Pintor",
-]
-
 export function FiltersPanel() {
-  const t= useTranslations("filtersPanel");
+  const t = useTranslations("filtersPanel")
   const dispatch = useAppDispatch()
   const sidebarOpen = useAppSelector(selectSidebarOpen)
   const selectedFixerNames = useAppSelector(selectSelectedFixerNames)
   const selectedCities = useAppSelector(selectSelectedCities)
   const selectedJobTypes = useAppSelector(selectSelectedJobTypes)
+
+  // Determina si hay una selección automática de tipo de trabajo (por búsqueda)
+  const hasAutoSelectedJobType = selectedJobTypes.length > 0
 
   return (
     <>
@@ -92,18 +82,18 @@ export function FiltersPanel() {
                 <h3 className="font-medium text-blue-800">{t("fixerName")}</h3>
               </div>
               <div className="grid grid-cols-2 gap-2">
-                {FIXER_NAMES.map((name) => (
+                {DB_VALUES.ranges.slice(0, 5).map((range) => (
                   <label
-                    key={name}
+                    key={range}
                     className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
                   >
                     <input
                       type="checkbox"
-                      checked={selectedFixerNames.includes(name)}
-                      onChange={() => dispatch(toggleFixerName(name))}
+                      checked={selectedFixerNames.includes(range)}
+                      onChange={() => dispatch(toggleFixerName(range))}
                       className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
                     />
-                    <span className="text-sm text-gray-700">De ({name})</span>
+                    <span className="text-sm text-gray-700">{range}</span>
                   </label>
                 ))}
               </div>
@@ -115,7 +105,7 @@ export function FiltersPanel() {
                 <h3 className="font-medium text-blue-800">{t("city")}</h3>
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                {CITIES.map((city) => (
+                {DB_VALUES.cities.map((city) => (
                   <label
                     key={city}
                     className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
@@ -138,20 +128,38 @@ export function FiltersPanel() {
                 <h3 className="font-medium text-blue-800">{t("jobCategory")}</h3>
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                {JOB_TYPES.map((type) => (
-                  <label
-                    key={type}
-                    className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedJobTypes.includes(type)}
-                      onChange={() => dispatch(toggleJobType(type))}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{type}</span>
-                  </label>
-                ))}
+                {DB_VALUES.jobTypes.map((type) => {
+                  const isSelected = selectedJobTypes.includes(type)
+                  const isDisabled = hasAutoSelectedJobType && !isSelected
+
+                  return (
+                    <label
+                      key={type}
+                      className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                        isDisabled
+                          ? 'cursor-not-allowed opacity-50 bg-gray-200'
+                          : 'cursor-pointer hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => dispatch(toggleJobType(type))}
+                        disabled={isDisabled}
+                        className={`w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 ${
+                          isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
+                        }`}
+                      />
+                      <span
+                        className={`text-sm ${
+                          isDisabled ? 'text-gray-400' : 'text-gray-700'
+                        }`}
+                      >
+                        {type}
+                      </span>
+                    </label>
+                  )
+                })}
               </div>
             </div>
           </div>

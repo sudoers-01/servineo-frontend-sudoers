@@ -52,6 +52,14 @@ export const filterSlice = createSlice({
         ? state.selectedJobTypes.filter((t) => t !== type)
         : [...state.selectedJobTypes, type]
     },
+    autoSelectJobType: (state, action: PayloadAction<string>) => {
+      // Auto-selecciona un tipo de trabajo (usado cuando hay coincidencia en búsqueda)
+      state.selectedJobTypes = [action.payload]
+    },
+    clearJobTypeSelection: (state) => {
+      // Limpia la selección de tipos de trabajo
+      state.selectedJobTypes = []
+    },
     resetFilters: (state) => {
       state.selectedFixerNames = []
       state.selectedCities = []
@@ -71,6 +79,8 @@ export const {
   toggleFixerName,
   toggleCity,
   toggleJobType,
+  autoSelectJobType,
+  clearJobTypeSelection,
   resetFilters,
   setSidebarOpen,
 } = filterSlice.actions
