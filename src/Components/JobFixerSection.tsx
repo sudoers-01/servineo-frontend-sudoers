@@ -14,7 +14,7 @@ interface JobFixerSectionProps {
 }
 
 export function JobFixerSection({ jobType, fixers, matchCount }: JobFixerSectionProps) {
-  const t = useTranslations("Fixers Por Trabajo")
+  //const t = useTranslations("Fixers Por Trabajo")
   const dispatch = useAppDispatch()
   const expandedJobs = useAppSelector(selectExpandedJobs)
   const isExpanded = expandedJobs.includes(jobType)

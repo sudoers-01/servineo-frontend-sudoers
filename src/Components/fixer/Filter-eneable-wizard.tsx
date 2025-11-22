@@ -65,7 +65,7 @@ interface FixerEnableWizardProps {
 }
 
 export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
-  const [registerFixer, { isLoading }] = useCreateUserProfileMutation()
+  const [registerFixer] = useCreateUserProfileMutation()
   const [step, setStep] = useState(0)
   const total = 8
   const [draft, setDraft] = useState<FixerProfileDraft>({

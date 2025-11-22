@@ -3,8 +3,7 @@
 import { useState } from 'react';
 import FixerRegisterForm from '@/Components/fixer/Fixer-register-form';
 import { FixerEnableWizard } from '@/Components/fixer/Filter-eneable-wizard';
-import { Navbar } from '@/Components/Shared/Navbar';
-import { useGetAllJobsQuery } from '@/app/redux/services/jobApi';
+//import { useGetAllJobsQuery } from '@/app/redux/services/jobApi';
 
 const defaultFormValues = {
   name: 'Freddy Amin Zapata',
@@ -23,7 +22,7 @@ type RequesterUser = {
 
 export default function BecomeFixerPage() {
   const [requester, setRequester] = useState<RequesterUser | null>(null);
-  const { data: jobs, error, isLoading } = useGetAllJobsQuery();
+  //const { data: jobs, error, isLoading } = useGetAllJobsQuery();
 
   
 

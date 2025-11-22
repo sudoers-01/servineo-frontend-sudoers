@@ -1,14 +1,14 @@
 'use client';
 import { FixerProfile } from "@/Components/Fixer-profile";
 import { useGetFixerByIdQuery, useGetJobsByFixerQuery } from "@/app/redux/services/fixerApi";
-import { useParams } from "next/navigation";
+//import { useParams } from "next/navigation";
 import { useAppSelector } from "@/app/redux/hooks";
 import { useEffect, useState } from "react";
 import type { Fixer } from "@/types/fixer-component";
 import type { JobOffer, Location } from "@/types/job-offer"; // ← Quitamos IUserProfile, agregamos Location
 
 export default function FixerProfilePage() {
-  const params = useParams();
+  //const params = useParams();
   const fixerId =   "691646c477c99dee64b21689";
   const { data: fixerProfile, isLoading: loadingFixer, error: errorFixer } = useGetFixerByIdQuery(fixerId);
   const { data: jobOffers = [], isLoading: loadingJobs } = useGetJobsByFixerQuery(fixerId);
