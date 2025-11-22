@@ -77,13 +77,19 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       : [...selectedRanges, dbValue];
 
     setSelectedRanges(newRanges);
-    applyFilters(newRanges, selectedCity, selectedJobs, filtersFromStore.isAutoSelectedCategory);
+    applyFilters(newRanges, selectedCity, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
   };
 
   const handleCityChange = (dbValue: string) => {
+    // Si está automarcado por búsqueda, no permite deseleccionar
+    const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city === dbValue;
+    if (isAutoMarked && selectedCity === dbValue) {
+      return;
+    }
+
     const newCity = selectedCity === dbValue ? '' : dbValue;
     setSelectedCity(newCity);
-    applyFilters(selectedRanges, newCity, selectedJobs, filtersFromStore.isAutoSelectedCategory);
+    applyFilters(selectedRanges, newCity, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
   };
 
   const handleJobChange = (dbValue: string) => {
@@ -99,10 +105,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
 
     setSelectedJobs(newJobs);
     // Marca como selección manual del usuario
-    applyFilters(selectedRanges, selectedCity, newJobs, false);
+    applyFilters(selectedRanges, selectedCity, newJobs, false, false);
   };
 
-  const applyFilters = (ranges: string[], city: string, jobs: string[], isAuto: boolean = false) => {
+  const applyFilters = (ranges: string[], city: string, jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
     const filtersToValidate = { range: ranges, city, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
@@ -112,7 +118,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       onFiltersApply({
         ...data,
         city: data.city || '',
-        isAutoSelectedCategory: isAuto,
+        isAutoSelectedCategory: isAutoCat,
+        isAutoSelectedCity: isAutoCity,
       });
     }
   };
@@ -130,6 +137,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
         city: '',
         category: [],
         isAutoSelectedCategory: false,
+        isAutoSelectedCity: false,
       });
     }
   };
@@ -265,20 +273,31 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.ciudad && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {cities.map((city) => (
-                      <label
-                        key={city.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedCity === city.dbValue}
-                          onChange={() => handleCityChange(city.dbValue)}
-                        />
-                        <span className="truncate">{city.label}</span>
-                      </label>
-                    ))}
+                    {cities.map((city) => {
+                      const isSelected = selectedCity === city.dbValue;
+                      const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city === city.dbValue;
+                      const isDisabled = filtersFromStore.isAutoSelectedCity && !isAutoMarked;
+
+                      return (
+                        <label
+                          key={city.dbValue}
+                          className={`flex items-center gap-2 text-xs cursor-pointer min-w-0 transition-colors ${
+                            isDisabled
+                              ? 'opacity-50 cursor-not-allowed text-gray-400'
+                              : 'hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            className={`w-4 h-4 flex-shrink-0 cursor-pointer`}
+                            checked={isSelected}
+                            onChange={() => handleCityChange(city.dbValue)}
+                            disabled={isDisabled}
+                          />
+                          <span className="truncate">{city.label}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}

@@ -24,6 +24,7 @@ export interface FilterState {
   minPrice?: number | null;
   maxPrice?: number | null;
   isAutoSelectedCategory?: boolean;
+  isAutoSelectedCity?: boolean;
 }
 
 export interface PaginationState {

@@ -10,6 +10,7 @@ import {
   selectSelectedCities,
   selectSelectedJobTypes,
   selectIsAutoSelectedJobType,
+  selectIsAutoSelectedCity,
   selectSidebarOpen,
   setSidebarOpen,
 } from "../app/redux/slice/filterSlice"
@@ -25,6 +26,7 @@ export function FiltersPanel() {
   const selectedCities = useAppSelector(selectSelectedCities)
   const selectedJobTypes = useAppSelector(selectSelectedJobTypes)
   const isAutoSelectedJobType = useAppSelector(selectIsAutoSelectedJobType)
+  const isAutoSelectedCity = useAppSelector(selectIsAutoSelectedCity)
 
   return (
     <>
@@ -104,20 +106,41 @@ export function FiltersPanel() {
                 <h3 className="font-medium text-blue-800">{t("city")}</h3>
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
-                {DB_VALUES.cities.map((city) => (
-                  <label
-                    key={city}
-                    className="flex items-center gap-2 p-2 cursor-pointer hover:bg-gray-50 rounded-lg transition-colors"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={selectedCities.includes(city)}
-                      onChange={() => dispatch(toggleCity(city))}
-                      className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                    />
-                    <span className="text-sm text-gray-700">{city}</span>
-                  </label>
-                ))}
+                {DB_VALUES.cities.map((city) => {
+                  const isSelected = selectedCities.includes(city)
+                  const isAutoMarked = isAutoSelectedCity && isSelected
+                  const isDisabled = isAutoSelectedCity && !isSelected
+
+                  return (
+                    <label
+                      key={city}
+                      className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
+                        isDisabled
+                          ? 'cursor-not-allowed opacity-50 bg-gray-200'
+                          : 'cursor-pointer hover:bg-gray-50'
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => {
+                          // Si es automarcado, no permite deseleccionar
+                          if (isAutoMarked) return
+                          dispatch(toggleCity(city))
+                        }}
+                        disabled={isDisabled}
+                        className={`w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer`}
+                      />
+                      <span
+                        className={`text-sm ${
+                          isDisabled ? 'text-gray-400' : 'text-gray-700'
+                        }`}
+                      >
+                        {city}
+                      </span>
+                    </label>
+                  )
+                })}
               </div>
             </div>
 

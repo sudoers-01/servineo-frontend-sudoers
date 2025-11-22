@@ -27,7 +27,7 @@ interface SearchBarProps {
 export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const t = useTranslations('search');
   const dispatch = useAppDispatch();
-  const { findMatchingJobType } = useJobTypeAutoMatch();
+  const { findMatchingJobType, findMatchingCity } = useJobTypeAutoMatch();
 
   const searchFromStore = useAppSelector((state) => state.jobOfert.search);
   const filtersFromStore = useAppSelector((state) => state.jobOfert.filters);
@@ -78,41 +78,49 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     setValue('');
     setError(undefined);
     onSearch('');
-    // Limpia el automarcado del filtro de categoría cuando se borra la búsqueda
-    if (filtersFromStore.isAutoSelectedCategory) {
+    // Limpia el automarcado del filtro cuando se borra la búsqueda
+    if (filtersFromStore.isAutoSelectedCategory || filtersFromStore.isAutoSelectedCity) {
       dispatch(setFilters({
         ...filtersFromStore,
-        category: [],
+        category: filtersFromStore.isAutoSelectedCategory ? [] : filtersFromStore.category,
+        city: filtersFromStore.isAutoSelectedCity ? '' : filtersFromStore.city,
         isAutoSelectedCategory: false,
+        isAutoSelectedCity: false,
       }));
     }
   };
 
   /**
-   * Auto-detecta si la búsqueda coincide con un tipo de trabajo
+   * Auto-detecta si la búsqueda coincide con un tipo de trabajo o ciudad
    * y auto-selecciona los filtros correspondientes
    */
   const applyAutoFilterIfMatch = (searchQuery: string) => {
     const matchedJobType = findMatchingJobType(searchQuery);
+    const matchedCity = findMatchingCity(searchQuery);
     
+    const newFilters = { ...filtersFromStore };
+
     if (matchedJobType) {
-      // Auto-selecciona solo el tipo de trabajo coincidente
-      dispatch(setFilters({
-        ...filtersFromStore,
-        category: [matchedJobType],
-        isAutoSelectedCategory: true,
-      }));
+      newFilters.category = [matchedJobType];
+      newFilters.isAutoSelectedCategory = true;
     } else {
-      // Si no hay coincidencia, limpia la selección automática de categorías
-      // pero solo si fue automarcada
       if (filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.length === 1 && filtersFromStore.range.length === 0 && filtersFromStore.city === '') {
-        dispatch(setFilters({
-          ...filtersFromStore,
-          category: [],
-          isAutoSelectedCategory: false,
-        }));
+        newFilters.category = [];
+        newFilters.isAutoSelectedCategory = false;
       }
     }
+
+    if (matchedCity) {
+      newFilters.city = matchedCity;
+      newFilters.isAutoSelectedCity = true;
+    } else {
+      if (filtersFromStore.isAutoSelectedCity && filtersFromStore.city !== '') {
+        newFilters.city = '';
+        newFilters.isAutoSelectedCity = false;
+      }
+    }
+
+    dispatch(setFilters(newFilters));
   };
 
   const selectItem = (item: string) => {
