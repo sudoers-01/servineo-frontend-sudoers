@@ -21,7 +21,6 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
   const [manualLng, setManualLng] = useState(location?.lng.toString() || "")
   const [outOfBounds, setOutOfBounds] = useState(false)
 
-  // Límites aproximados de Cochabamba
   const COCHABAMBA_BOUNDS = useMemo(() => ({
     north: -17.2,
     south: -17.6,
@@ -30,7 +29,6 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
   }), [])
 
   useEffect(() => {
-    // Load Leaflet CSS
     if (!document.getElementById("leaflet-css")) {
       const link = document.createElement("link")
       link.id = "leaflet-css"
@@ -39,7 +37,6 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
       document.head.appendChild(link)
     }
 
-    // Load Leaflet JS
     if (!window.L) {
       const script = document.createElement("script")
       script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -61,17 +58,13 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
 
   useEffect(() => {
     if (!mapLoaded || !mapRef.current) return
-
-    // Initialize map centered on Cochabamba, Bolivia
     const map = L.map(mapRef.current).setView([-17.3935, -66.157], 13)
 
-    // Add OpenStreetMap tiles
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
       attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       maxZoom: 19,
     }).addTo(map)
 
-    // Set map bounds to Cochabamba region
     const bounds = L.latLngBounds(
       L.latLng(COCHABAMBA_BOUNDS.south, COCHABAMBA_BOUNDS.west),
       L.latLng(COCHABAMBA_BOUNDS.north, COCHABAMBA_BOUNDS.east)
@@ -82,30 +75,22 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
     })
 
     let marker: L.Marker | null = null
-
-    // Add existing marker if location exists and is within Cochabamba
     if (location && isInCochabamba(location.lat, location.lng)) {
       marker = L.marker([location.lat, location.lng]).addTo(map)
       map.setView([location.lat, location.lng], 15)
       setOutOfBounds(false)
     }
 
-    // Handle map clicks
     map.on("click", (e: L.LeafletEvent) => {
       const { lat, lng } = e.latlng
-
-      // Check if location is within Cochabamba
       if (!isInCochabamba(lat, lng)) {
         setOutOfBounds(true)
-        
-        // Remove old marker if any
+
         if (marker) {
           map.removeLayer(marker)
           marker = null
         }
-        
-        // Update location to null or keep previous valid location
-        onLocationChange({ lat: 0, lng: 0 }) // Reset to invalid location
+        onLocationChange({ lat: 0, lng: 0 }) 
         setManualLat("")
         setManualLng("")
         return
@@ -113,15 +98,12 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
 
       setOutOfBounds(false)
 
-      // Remove old marker
       if (marker) {
         map.removeLayer(marker)
       }
 
-      // Add new marker
       marker = L.marker([lat, lng]).addTo(map)
 
-      // Update location
       onLocationChange({ lat, lng })
       setManualLat(lat.toFixed(6))
       setManualLng(lng.toFixed(6))

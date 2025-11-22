@@ -47,7 +47,7 @@ export default async function RootLayout({
         <NextIntlClientProvider locale={locale} messages={messages}>
         <ReduxProvider>
           <div className="">
-            <TopMenu/>
+            
           </div>
           {children}
           <div className='text-black fixed bottom-7 right-7'><TranslationButton/></div>
