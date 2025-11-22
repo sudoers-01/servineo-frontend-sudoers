@@ -77,25 +77,32 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       : [...selectedRanges, dbValue];
 
     setSelectedRanges(newRanges);
-    applyFilters(newRanges, selectedCity, selectedJobs);
+    applyFilters(newRanges, selectedCity, selectedJobs, filtersFromStore.isAutoSelectedCategory);
   };
 
   const handleCityChange = (dbValue: string) => {
     const newCity = selectedCity === dbValue ? '' : dbValue;
     setSelectedCity(newCity);
-    applyFilters(selectedRanges, newCity, selectedJobs);
+    applyFilters(selectedRanges, newCity, selectedJobs, filtersFromStore.isAutoSelectedCategory);
   };
 
   const handleJobChange = (dbValue: string) => {
+    // Si está automarcado por búsqueda, no permite deseleccionar
+    const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(dbValue);
+    if (isAutoMarked && selectedJobs.includes(dbValue)) {
+      return;
+    }
+
     const newJobs = selectedJobs.includes(dbValue)
       ? selectedJobs.filter((j) => j !== dbValue)
       : [...selectedJobs, dbValue];
 
     setSelectedJobs(newJobs);
-    applyFilters(selectedRanges, selectedCity, newJobs);
+    // Marca como selección manual del usuario
+    applyFilters(selectedRanges, selectedCity, newJobs, false);
   };
 
-  const applyFilters = (ranges: string[], city: string, jobs: string[]) => {
+  const applyFilters = (ranges: string[], city: string, jobs: string[], isAuto: boolean = false) => {
     const filtersToValidate = { range: ranges, city, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
@@ -105,6 +112,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       onFiltersApply({
         ...data,
         city: data.city || '',
+        isAutoSelectedCategory: isAuto,
       });
     }
   };
@@ -121,6 +129,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
         range: [],
         city: '',
         category: [],
+        isAutoSelectedCategory: false,
       });
     }
   };
@@ -288,7 +297,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                   <div className="flex flex-col gap-2">
                     {jobTypes.map((job) => {
                       const isSelected = selectedJobs.includes(job.dbValue);
-                      const isDisabled = selectedJobs.length > 0 && !isSelected;
+                      const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
+                      const isDisabled = filtersFromStore.isAutoSelectedCategory && !isAutoMarked;
 
                       return (
                         <label
@@ -301,9 +311,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                         >
                           <input
                             type="checkbox"
-                            className={`w-4 h-4 flex-shrink-0 ${
-                              isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
-                            }`}
+                            className={`w-4 h-4 flex-shrink-0 cursor-pointer`}
                             checked={isSelected}
                             onChange={() => handleJobChange(job.dbValue)}
                             disabled={isDisabled}

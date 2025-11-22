@@ -78,6 +78,14 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     setValue('');
     setError(undefined);
     onSearch('');
+    // Limpia el automarcado del filtro de categoría cuando se borra la búsqueda
+    if (filtersFromStore.isAutoSelectedCategory) {
+      dispatch(setFilters({
+        ...filtersFromStore,
+        category: [],
+        isAutoSelectedCategory: false,
+      }));
+    }
   };
 
   /**
@@ -92,14 +100,16 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
       dispatch(setFilters({
         ...filtersFromStore,
         category: [matchedJobType],
+        isAutoSelectedCategory: true,
       }));
     } else {
       // Si no hay coincidencia, limpia la selección automática de categorías
-      // pero solo si no hay filtros del usuario aplicados
-      if (filtersFromStore.category.length === 1 && filtersFromStore.range.length === 0 && filtersFromStore.city === '') {
+      // pero solo si fue automarcada
+      if (filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.length === 1 && filtersFromStore.range.length === 0 && filtersFromStore.city === '') {
         dispatch(setFilters({
           ...filtersFromStore,
           category: [],
+          isAutoSelectedCategory: false,
         }));
       }
     }

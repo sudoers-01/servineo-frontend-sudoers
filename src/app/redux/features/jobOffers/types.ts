@@ -23,6 +23,7 @@ export interface FilterState {
   tags?: string[];
   minPrice?: number | null;
   maxPrice?: number | null;
+  isAutoSelectedCategory?: boolean;
 }
 
 export interface PaginationState {

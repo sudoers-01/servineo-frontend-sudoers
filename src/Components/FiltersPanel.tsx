@@ -9,6 +9,7 @@ import {
   selectSelectedFixerNames,
   selectSelectedCities,
   selectSelectedJobTypes,
+  selectIsAutoSelectedJobType,
   selectSidebarOpen,
   setSidebarOpen,
 } from "../app/redux/slice/filterSlice"
@@ -23,9 +24,7 @@ export function FiltersPanel() {
   const selectedFixerNames = useAppSelector(selectSelectedFixerNames)
   const selectedCities = useAppSelector(selectSelectedCities)
   const selectedJobTypes = useAppSelector(selectSelectedJobTypes)
-
-  // Determina si hay una selección automática de tipo de trabajo (por búsqueda)
-  const hasAutoSelectedJobType = selectedJobTypes.length > 0
+  const isAutoSelectedJobType = useAppSelector(selectIsAutoSelectedJobType)
 
   return (
     <>
@@ -130,7 +129,8 @@ export function FiltersPanel() {
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {DB_VALUES.jobTypes.map((type) => {
                   const isSelected = selectedJobTypes.includes(type)
-                  const isDisabled = hasAutoSelectedJobType && !isSelected
+                  const isAutoMarked = isAutoSelectedJobType && isSelected
+                  const isDisabled = isAutoSelectedJobType && !isSelected
 
                   return (
                     <label
@@ -138,17 +138,21 @@ export function FiltersPanel() {
                       className={`flex items-center gap-2 p-2 rounded-lg transition-colors ${
                         isDisabled
                           ? 'cursor-not-allowed opacity-50 bg-gray-200'
+                          : isAutoMarked
+                          ? 'cursor-pointer hover:bg-gray-50'
                           : 'cursor-pointer hover:bg-gray-50'
                       }`}
                     >
                       <input
                         type="checkbox"
                         checked={isSelected}
-                        onChange={() => dispatch(toggleJobType(type))}
+                        onChange={() => {
+                          // Si es automarcado, no permite deseleccionar
+                          if (isAutoMarked) return
+                          dispatch(toggleJobType(type))
+                        }}
                         disabled={isDisabled}
-                        className={`w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 ${
-                          isDisabled ? 'cursor-not-allowed' : 'cursor-pointer'
-                        }`}
+                        className={`w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer`}
                       />
                       <span
                         className={`text-sm ${
