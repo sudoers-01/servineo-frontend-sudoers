@@ -7,13 +7,7 @@ import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
 import { DB_VALUES } from '@/app/redux/contants';
-
-interface FilterState {
-  range: string[];
-  city: string[];
-  category: string[];
-  isAutoSelectedCategory?: boolean;
-}
+import type { FilterState } from '@/app/redux/features/jobOffers/types';
 
 interface FilterDrawerProps {
   isOpen: boolean;
@@ -123,13 +117,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
 
     if (!isValid || !data) return;
 
+    const filterState: FilterState = {
+      range: data.range ?? [],
+      city: data.city ?? [],
+      category: data.category ?? [],
+      isAutoSelectedCategory: isAutoCat,
+      isAutoSelectedCity: isAutoCity,
+    };
+
     if (onFiltersApply) {
-      onFiltersApply({
-        ...data,
-        city: data.city || [],
-        isAutoSelectedCategory: isAutoCat,
-        isAutoSelectedCity: isAutoCity,
-      });
+      onFiltersApply(filterState);
     }
   };
 
@@ -147,7 +144,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
         category: [],
         isAutoSelectedCategory: false,
         isAutoSelectedCity: false,
-      });
+      } as FilterState);
     }
   };
 
