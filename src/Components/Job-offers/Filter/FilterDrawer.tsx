@@ -89,12 +89,11 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
 
     const newCity = selectedCity === dbValue ? '' : dbValue;
     setSelectedCity(newCity);
-    applyFilters(selectedRanges, newCity, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
+    applyFilters(selectedRanges, newCity, selectedJobs, filtersFromStore.isAutoSelectedCategory, newCity === '' ? false : filtersFromStore.isAutoSelectedCity);
   };
 
   const handleJobChange = (dbValue: string) => {
-    // Si está automarcado por búsqueda, no permite deseleccionar
-    const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(dbValue);
+     const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(dbValue);
     if (isAutoMarked && selectedJobs.includes(dbValue)) {
       return;
     }
@@ -104,8 +103,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       : [...selectedJobs, dbValue];
 
     setSelectedJobs(newJobs);
-    // Marca como selección manual del usuario
-    applyFilters(selectedRanges, selectedCity, newJobs, false, false);
+    applyFilters(selectedRanges, selectedCity, newJobs, false, filtersFromStore.isAutoSelectedCity);
   };
 
   const applyFilters = (ranges: string[], city: string, jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
