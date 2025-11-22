@@ -306,40 +306,39 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
             </div>
 
             {/* Filtro: Calificación */}
-            <div className="mb-6">
-              <div
-                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
-                onClick={() => toggleSection('rating')}
-              >
-                <span className="truncate">Calificación</span>
-              </div>
-              {openSections.rating && (
-                <div className="bg-white border border-gray-200 p-4 rounded">
-                  <div className="flex items-center gap-2">
-                    {Array.from({ length: 5 }, (_, idx) => {
-                      const starNumber = idx + 1;
-                      const filled = (selectedRating ?? 0) >= starNumber;
-                      return (
-                        <button
-                          key={starNumber}
-                          type="button"
-                          onClick={() => handleRatingClick(starNumber)}
-                          onMouseEnter={() => {}}
-                          onMouseLeave={() => {}}
-                          className="transition-transform hover:scale-110 active:scale-95 touch-manipulation"
-                        >
-                          <Star
-                            size={30}
-                            fill={filled ? '#fbbf24' : '#ffffff'}
-                            stroke="#000000"
-                            strokeWidth={2}
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+<div className="mb-6">
+  <div
+    className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+    onClick={() => toggleSection('rating')}
+  >
+    <span className="truncate">Calificación</span>
+  </div>
+  {openSections.rating && (
+    <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
+      <div className="flex items-center gap-1 justify-start flex-wrap">
+        {Array.from({ length: 5 }, (_, idx) => {
+          const starNumber = idx + 1;
+          const filled = (selectedRating ?? 0) >= starNumber;
+          return (
+            <button
+              key={starNumber}
+              type="button"
+              onClick={() => handleRatingClick(starNumber)}
+              className="transition-transform hover:scale-110 active:scale-95 touch-manipulation flex-shrink-0"
+              aria-label={`${starNumber} estrellas`}
+            >
+              <Star
+                className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
+                fill={filled ? '#fbbf24' : '#ffffff'}
+                stroke="#000000"
+                strokeWidth={2}
+              />
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  )}
             </div>
           </div>
         </div>
