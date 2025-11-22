@@ -6,6 +6,7 @@ interface FilterState {
   selectedFixerNames: string[]
   selectedCities: string[]
   selectedJobTypes: string[]
+  isAutoSelectedJobType: boolean
   sidebarOpen: boolean
 }
 
@@ -15,6 +16,7 @@ const initialState: FilterState = {
   selectedFixerNames: [],
   selectedCities: [],
   selectedJobTypes: [],
+  isAutoSelectedJobType: false,
   sidebarOpen: false,
 }
 
@@ -51,6 +53,19 @@ export const filterSlice = createSlice({
       state.selectedJobTypes = state.selectedJobTypes.includes(type)
         ? state.selectedJobTypes.filter((t) => t !== type)
         : [...state.selectedJobTypes, type]
+      // Si el usuario selecciona manualmente, marcamos como NO automático
+      state.isAutoSelectedJobType = false
+    },
+    autoSelectJobType: (state, action: PayloadAction<string>) => {
+      // Auto-selecciona un tipo de trabajo (usado cuando hay coincidencia en búsqueda)
+      state.selectedJobTypes = [action.payload]
+      // Marcamos como automático
+      state.isAutoSelectedJobType = true
+    },
+    clearJobTypeSelection: (state) => {
+      // Limpia la selección de tipos de trabajo
+      state.selectedJobTypes = []
+      state.isAutoSelectedJobType = false
     },
     resetFilters: (state) => {
       state.selectedFixerNames = []
@@ -71,6 +86,8 @@ export const {
   toggleFixerName,
   toggleCity,
   toggleJobType,
+  autoSelectJobType,
+  clearJobTypeSelection,
   resetFilters,
   setSidebarOpen,
 } = filterSlice.actions
@@ -80,6 +97,7 @@ export const selectRecentSearches = (state: RootState) => state.filters.recentSe
 export const selectSelectedFixerNames = (state: RootState) => state.filters.selectedFixerNames
 export const selectSelectedCities = (state: RootState) => state.filters.selectedCities
 export const selectSelectedJobTypes = (state: RootState) => state.filters.selectedJobTypes
+export const selectIsAutoSelectedJobType = (state: RootState) => state.filters.isAutoSelectedJobType
 export const selectSidebarOpen = (state: RootState) => state.filters.sidebarOpen
 
 export default filterSlice.reducer

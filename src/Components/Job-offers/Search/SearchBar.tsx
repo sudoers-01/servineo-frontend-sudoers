@@ -9,13 +9,15 @@ import { SearchButton } from './SearchButton';
 import { AdvancedSearchButton } from './AdvancedSearchButton';
 import { FilterButton } from '../Filter/FilterButton';
 import { validateSearch } from '@/app/lib/validations/search.validator';
-import { useAppSelector } from '@/app/redux/hooks';
+import { useAppSelector, useAppDispatch } from '@/app/redux/hooks';
 import { useTranslations } from 'next-intl';
 import { useSearchHistory } from '@/app/redux/features/searchHistory/useSearchHistory';
 import { useSearchSuggestions } from '@/app/redux/features/searchHistory/useSearchSuggestions';
 import { useSearchKeyboard } from '@/app/redux/features/searchHistory/useSearchKeyboard';
 import { useSearchTouch } from '@/app/redux/features/searchHistory/useSearchTouch';
 import { SearchDropdown } from '@/Components/Shared/SearchDropdown';
+import { useJobTypeAutoMatch } from '@/lib/useJobTypeAutoMatch';
+import { setFilters } from '@/app/redux/slice/jobOfert';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -24,8 +26,11 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const t = useTranslations('search');
+  const dispatch = useAppDispatch();
+  const { findMatchingJobType } = useJobTypeAutoMatch();
 
   const searchFromStore = useAppSelector((state) => state.jobOfert.search);
+  const filtersFromStore = useAppSelector((state) => state.jobOfert.filters);
 
   const [value, setValue] = React.useState('');
   const [error, setError] = React.useState<string | undefined>();
@@ -73,10 +78,46 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     setValue('');
     setError(undefined);
     onSearch('');
+    // Limpia el automarcado del filtro de categoría cuando se borra la búsqueda
+    if (filtersFromStore.isAutoSelectedCategory) {
+      dispatch(setFilters({
+        ...filtersFromStore,
+        category: [],
+        isAutoSelectedCategory: false,
+      }));
+    }
+  };
+
+  /**
+   * Auto-detecta si la búsqueda coincide con un tipo de trabajo
+   * y auto-selecciona los filtros correspondientes
+   */
+  const applyAutoFilterIfMatch = (searchQuery: string) => {
+    const matchedJobType = findMatchingJobType(searchQuery);
+    
+    if (matchedJobType) {
+      // Auto-selecciona solo el tipo de trabajo coincidente
+      dispatch(setFilters({
+        ...filtersFromStore,
+        category: [matchedJobType],
+        isAutoSelectedCategory: true,
+      }));
+    } else {
+      // Si no hay coincidencia, limpia la selección automática de categorías
+      // pero solo si fue automarcada
+      if (filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.length === 1 && filtersFromStore.range.length === 0 && filtersFromStore.city === '') {
+        dispatch(setFilters({
+          ...filtersFromStore,
+          category: [],
+          isAutoSelectedCategory: false,
+        }));
+      }
+    }
   };
 
   const selectItem = (item: string) => {
     setValue(item);
+    applyAutoFilterIfMatch(item);
     onSearch(item);
     addToHistory(item);
     setIsOpen(false);
@@ -99,6 +140,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
       return;
     }
     const query = data!;
+    applyAutoFilterIfMatch(query);
     onSearch(query);
     addToHistory(query);
     setIsOpen(false);

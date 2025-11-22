@@ -12,6 +12,7 @@ interface FilterState {
   range: string[];
   city: string;
   category: string[];
+  isAutoSelectedCategory?: boolean;
 }
 
 interface FilterDrawerProps {
@@ -77,25 +78,32 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       : [...selectedRanges, dbValue];
 
     setSelectedRanges(newRanges);
-    applyFilters(newRanges, selectedCity, selectedJobs);
+    applyFilters(newRanges, selectedCity, selectedJobs, filtersFromStore.isAutoSelectedCategory);
   };
 
   const handleCityChange = (dbValue: string) => {
     const newCity = selectedCity === dbValue ? '' : dbValue;
     setSelectedCity(newCity);
-    applyFilters(selectedRanges, newCity, selectedJobs);
+    applyFilters(selectedRanges, newCity, selectedJobs, filtersFromStore.isAutoSelectedCategory);
   };
 
   const handleJobChange = (dbValue: string) => {
+    // Si está automarcado por búsqueda, no permite deseleccionar
+    const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(dbValue);
+    if (isAutoMarked && selectedJobs.includes(dbValue)) {
+      return;
+    }
+
     const newJobs = selectedJobs.includes(dbValue)
       ? selectedJobs.filter((j) => j !== dbValue)
       : [...selectedJobs, dbValue];
 
     setSelectedJobs(newJobs);
-    applyFilters(selectedRanges, selectedCity, newJobs);
+    // Marca como selección manual del usuario
+    applyFilters(selectedRanges, selectedCity, newJobs, false);
   };
 
-  const applyFilters = (ranges: string[], city: string, jobs: string[]) => {
+  const applyFilters = (ranges: string[], city: string, jobs: string[], isAuto: boolean = false) => {
     const filtersToValidate = { range: ranges, city, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
@@ -105,6 +113,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       onFiltersApply({
         ...data,
         city: data.city || '',
+        isAutoSelectedCategory: isAuto,
       });
     }
   };
@@ -121,6 +130,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
         range: [],
         city: '',
         category: [],
+        isAutoSelectedCategory: false,
       });
     }
   };
@@ -286,20 +296,31 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.trabajo && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {jobTypes.map((job) => (
-                      <label
-                        key={job.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedJobs.includes(job.dbValue)}
-                          onChange={() => handleJobChange(job.dbValue)}
-                        />
-                        <span className="truncate">{job.label}</span>
-                      </label>
-                    ))}
+                    {jobTypes.map((job) => {
+                      const isSelected = selectedJobs.includes(job.dbValue);
+                      const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
+                      const isDisabled = filtersFromStore.isAutoSelectedCategory && !isAutoMarked;
+
+                      return (
+                        <label
+                          key={job.dbValue}
+                          className={`flex items-center gap-2 text-xs cursor-pointer min-w-0 transition-colors ${
+                            isDisabled
+                              ? 'opacity-50 cursor-not-allowed text-gray-400'
+                              : 'hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            className={`w-4 h-4 flex-shrink-0 cursor-pointer`}
+                            checked={isSelected}
+                            onChange={() => handleJobChange(job.dbValue)}
+                            disabled={isDisabled}
+                          />
+                          <span className="truncate">{job.label}</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}

@@ -11,11 +11,15 @@ import {
   selectRecentSearches,
   setSidebarOpen,
   selectSidebarOpen,
+  autoSelectJobType,
+  clearJobTypeSelection,
 } from "../app/redux/slice/filterSlice"
+import { useJobTypeAutoMatch } from "@/lib/useJobTypeAutoMatch"
 import { Search, Settings2, Trash2, X, Clock, FilterIcon } from "lucide-react"
 
 export function SearchHeader() {
   const t = useTranslations('search')
+  const { findMatchingJobType } = useJobTypeAutoMatch()
   
   const dispatch = useAppDispatch()
   const searchQuery = useAppSelector(selectSearchQuery)
@@ -35,6 +39,18 @@ export function SearchHeader() {
     document.addEventListener("mousedown", handleClickOutside)
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
+
+  const handleSearchChange = (query: string) => {
+    dispatch(setSearchQuery(query))
+
+    const matchedJobType = findMatchingJobType(query)
+    
+    if (matchedJobType) {
+      dispatch(autoSelectJobType(matchedJobType))
+    } else {
+      dispatch(clearJobTypeSelection())
+    }
+  }
 
   const handleSearch = (query: string) => {
     dispatch(setSearchQuery(query))
@@ -71,7 +87,7 @@ export function SearchHeader() {
               type="text"
               placeholder={t('placeholder')}
               value={searchQuery}
-              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+              onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setShowRecent(true)}
               className="w-full pl-12 pr-10 py-3 border-2 border-border rounded-xl bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
             />
@@ -81,6 +97,7 @@ export function SearchHeader() {
                 type="button"
                 onClick={() => {
                   dispatch(setSearchQuery(""))
+                  dispatch(clearJobTypeSelection())
                   setShowRecent(true)
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-primary/10 rounded-full transition-all"
