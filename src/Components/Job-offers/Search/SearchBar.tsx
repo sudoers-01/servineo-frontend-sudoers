@@ -83,7 +83,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
       dispatch(setFilters({
         ...filtersFromStore,
         category: filtersFromStore.isAutoSelectedCategory ? [] : filtersFromStore.category,
-        city: filtersFromStore.isAutoSelectedCity ? '' : filtersFromStore.city,
+        city: filtersFromStore.isAutoSelectedCity ? [] : filtersFromStore.city,
         isAutoSelectedCategory: false,
         isAutoSelectedCity: false,
       }));
@@ -104,18 +104,18 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
       newFilters.category = [matchedJobType];
       newFilters.isAutoSelectedCategory = true;
     } else {
-      if (filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.length === 1 && filtersFromStore.range.length === 0 && filtersFromStore.city === '') {
+      if (filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.length === 1 && filtersFromStore.range.length === 0 && filtersFromStore.city.length === 0) {
         newFilters.category = [];
         newFilters.isAutoSelectedCategory = false;
       }
     }
 
     if (matchedCity) {
-      newFilters.city = matchedCity;
+      newFilters.city = [matchedCity];
       newFilters.isAutoSelectedCity = true;
     } else {
-      if (filtersFromStore.isAutoSelectedCity && filtersFromStore.city !== '') {
-        newFilters.city = '';
+      if (filtersFromStore.isAutoSelectedCity && filtersFromStore.city.length > 0) {
+        newFilters.city = [];
         newFilters.isAutoSelectedCity = false;
       }
     }

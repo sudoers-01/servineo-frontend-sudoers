@@ -10,7 +10,7 @@ import { DB_VALUES } from '@/app/redux/contants';
 
 interface FilterState {
   range: string[];
-  city: string;
+  city: string[];
   category: string[];
   isAutoSelectedCategory?: boolean;
 }
@@ -38,13 +38,13 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const tJob = useTranslations('advancedSearch.jobType');
 
   const [selectedRanges, setSelectedRanges] = useState<string[]>(filtersFromStore.range || []);
-  const [selectedCity, setSelectedCity] = useState<string>(filtersFromStore.city || '');
+  const [selectedCities, setSelectedCities] = useState<string[]>(filtersFromStore.city || []);
   const [selectedJobs, setSelectedJobs] = useState<string[]>(filtersFromStore.category || []);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
 
   useEffect(() => {
     setSelectedRanges(filtersFromStore.range || []);
-    setSelectedCity(filtersFromStore.city || '');
+    setSelectedCities(filtersFromStore.city || []);
     setSelectedJobs(filtersFromStore.category || []);
   }, [filtersFromStore]);
 
@@ -78,19 +78,29 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       : [...selectedRanges, dbValue];
 
     setSelectedRanges(newRanges);
-    applyFilters(newRanges, selectedCity, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
+    applyFilters(newRanges, selectedCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
   };
 
   const handleCityChange = (dbValue: string) => {
     // Si está automarcado por búsqueda, no permite deseleccionar
-    const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city === dbValue;
-    if (isAutoMarked && selectedCity === dbValue) {
+    const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(dbValue);
+    if (isAutoMarked && selectedCities.includes(dbValue)) {
       return;
     }
 
-    const newCity = selectedCity === dbValue ? '' : dbValue;
-    setSelectedCity(newCity);
-    applyFilters(selectedRanges, newCity, selectedJobs, filtersFromStore.isAutoSelectedCategory, newCity === '' ? false : filtersFromStore.isAutoSelectedCity);
+    let newCities: string[];
+    if (filtersFromStore.isAutoSelectedCity) {
+      // Si está automarcado, solo una ciudad permitida
+      newCities = selectedCities.includes(dbValue) ? [] : [dbValue];
+    } else {
+      // Si no está automarcado, permitir múltiples
+      newCities = selectedCities.includes(dbValue)
+        ? selectedCities.filter((c) => c !== dbValue)
+        : [...selectedCities, dbValue];
+    }
+
+    setSelectedCities(newCities);
+    applyFilters(selectedRanges, newCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, false);
   };
 
   const handleJobChange = (dbValue: string) => {
@@ -104,11 +114,11 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       : [...selectedJobs, dbValue];
 
     setSelectedJobs(newJobs);
-    applyFilters(selectedRanges, selectedCity, newJobs, false, filtersFromStore.isAutoSelectedCity);
+    applyFilters(selectedRanges, selectedCities, newJobs, false, filtersFromStore.isAutoSelectedCity);
   };
 
-  const applyFilters = (ranges: string[], city: string, jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
-    const filtersToValidate = { range: ranges, city, category: jobs };
+  const applyFilters = (ranges: string[], cities: string[], jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
+    const filtersToValidate = { range: ranges, city: cities, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
     if (!isValid || !data) return;
@@ -116,7 +126,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     if (onFiltersApply) {
       onFiltersApply({
         ...data,
-        city: data.city || '',
+        city: data.city || [],
         isAutoSelectedCategory: isAutoCat,
         isAutoSelectedCity: isAutoCity,
       });
@@ -125,7 +135,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
 
   const handleReset = () => {
     setSelectedRanges([]);
-    setSelectedCity('');
+    setSelectedCities([]);
     setSelectedJobs([]);
 
     if (onReset) {
@@ -133,7 +143,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     } else if (onFiltersApply) {
       onFiltersApply({
         range: [],
-        city: '',
+        city: [],
         category: [],
         isAutoSelectedCategory: false,
         isAutoSelectedCity: false,
@@ -273,8 +283,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
                     {cities.map((city) => {
-                      const isSelected = selectedCity === city.dbValue;
-                      const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city === city.dbValue;
+                      const isSelected = selectedCities.includes(city.dbValue);
+                      const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(city.dbValue);
                       const isDisabled = filtersFromStore.isAutoSelectedCity && !isAutoMarked;
 
                       return (

@@ -18,7 +18,7 @@ export interface OfferData {
 
 export interface FilterState {
   range: string[];
-  city: string;
+  city: string[];
   category: string[];
   tags?: string[];
   minPrice?: number | null;
@@ -62,7 +62,7 @@ export interface OfferResponse {
 
 export interface OfferFilters {
   range?: string[];
-  city?: string;
+  city?: string[];
   category?: string[];
   tags?: string[];
   minPrice?: number | null;

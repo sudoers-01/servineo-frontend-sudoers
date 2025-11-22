@@ -46,7 +46,8 @@ export function parseUrlToFilters(searchParams: URLSearchParams): {
 } {
   const search = searchParams.get('search') || '';
   const ranges = searchParams.getAll('range');
-  const city = searchParams.get('city') || '';
+  const cityRaw = searchParams.get('city') || '';
+  const city = cityRaw ? cityRaw.split(',').filter(Boolean) : [];
   
   const categoryRaw = searchParams.get('category') || '';
   const category = categoryRaw ? categoryRaw.split(',').filter(Boolean) : [];
@@ -171,7 +172,9 @@ export function filtersToUrlParams(params: {
   if (params.filters?.range?.length) {
     params.filters.range.forEach((r) => urlParams.append('range', r));
   }
-  if (params.filters?.city) urlParams.set('city', params.filters.city);
+  if (params.filters?.city?.length) {
+    urlParams.set('city', params.filters.city.join(','));
+  }
   if (params.filters?.category?.length) {
     urlParams.set('category', params.filters.category.join(','));
   }
