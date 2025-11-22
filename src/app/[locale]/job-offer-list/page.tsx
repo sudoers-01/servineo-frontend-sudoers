@@ -1,7 +1,17 @@
 // src/app/[locale]/job-offer-list/page.tsx
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
+import { JobOffer, JobOfferBackend } from '../../lib/mock-data';
+import { JobOfferCard } from '@/Components/Job-offers/Job-offer-card';
+import { JobOfferModal } from '@/Components/Job-offers/Job-offer-modal';
+import { MapView } from '@/Components/Job-offers/maps/MapView';
+import { SearchHeader } from '@/Components/SearchHeader';
+import { useLogClickMutation } from '../../redux/services/activityApi';
+import { useLogSearchMutation, useUpdateFiltersMutation } from '../../redux/services/searchApi';
+import { useGetAllJobOffersQuery } from '../../redux/services/jobOfferApi';
+import { FiltersPanel } from '@/Components/FiltersPanel';
+import { useAppSelector } from '../../redux/hooks';
 import {
   SearchBar,
   NoResultsMessage,
@@ -42,17 +52,64 @@ const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
 
 export default function JobOffersPage() {
   const t = useTranslations('jobOffers');
-  const dispatch = useAppDispatch();
+  const [selectedOffer, setSelectedOffer] = useState<JobOffer | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6;
 
-  useInitialUrlParams();
+  // Load offers from API
+  const { data: apiOffersRaw = [], isLoading, isError } = useGetAllJobOffersQuery();
+  
+  // Cast to the correct backend type
+  const apiOffers = apiOffersRaw as unknown as JobOfferBackend[];
 
-  const { offers, total, isLoading } = useJobOffers();
-
-  const { sortBy, search, paginaActual, registrosPorPagina, error: reduxError} = useAppSelector(
-    (state) => state.jobOfert,
+  // Normalize API offers to UI shape
+  const offers: JobOffer[] = useMemo(
+    () =>
+      apiOffers.map((o) => ({
+        ...o,
+        id: o._id || o.id || '',
+        createdAt: o?.createdAt ? new Date(o.createdAt) : new Date(0),
+        tags: o?.tags || [],
+        photos: o?.photos || [],
+        location: o?.location || { lat: 0, lng: 0, address: '' },
+      })),
+    [apiOffers]
   );
 
-  useSyncUrlParams();
+  const searchQuery = useAppSelector(selectSearchQuery);
+  const selectedCities = useAppSelector(selectSelectedCities);
+  const selectedJobTypes = useAppSelector(selectSelectedJobTypes);
+  const selectedFixerNames = useAppSelector(selectSelectedFixerNames);
+  const recentSearches = useAppSelector(selectRecentSearches);
+  const persona = { id: '691646c477c99dee64b21689', nombre: 'Usuario POC' };
+  const [logClick] = useLogClickMutation();
+  
+  const handleCardClick = async (offer: JobOffer) => {
+    setSelectedOffer(offer);
+    setIsModalOpen(true);
+
+    const activityData = {
+      userId: persona.id,
+      date: new Date().toISOString(),
+      role: 'requester' as const,
+      type: 'click' as const,
+      metadata: {
+        button: 'job_offer',
+        jobTitle: offer.title || 'Sin título',
+        jobId: offer.id,
+      },
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      await logClick(activityData).unwrap();
+      console.log('Click registrado:', offer.title);
+    } catch (error) {
+      console.error('Error al registrar clic:', error);
+    }
+  };
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const stickyRef = useRef<HTMLDivElement | null>(null);
@@ -112,7 +169,8 @@ export default function JobOffersPage() {
     }
   }, [isLoading, offers]);
 
-  // Sticky header
+  // Mantener actualizado el count de filteredOffers en un ref
+  const filteredOffersCountRef = useRef<number>(0);
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -125,8 +183,14 @@ export default function JobOffersPage() {
       }
     };
 
-    update();
-    window.addEventListener('resize', update);
+  // Refs para rastrear valores anteriores y evitar envíos duplicados
+  const previousSearchQueryRef = useRef<string>('');
+  const previousRecentSearchesRef = useRef<string[]>([]);
+  const previousFixerNamesRef = useRef<string[]>([]);
+  const previousCitiesRef = useRef<string[]>([]);
+  const previousJobTypesRef = useRef<string[]>([]);
+  const isInitialMountRef = useRef<boolean>(true);
+  const lastSearchSentRef = useRef<string>('');
 
     const hdrEl = document.querySelector('header');
     const mo = hdrEl ? new MutationObserver(update) : null;
@@ -163,9 +227,19 @@ export default function JobOffersPage() {
       hasActiveFilters.current = false;
     }
 
-    dispatch(setFilters(appliedFilters));
-    dispatch(resetPagination());
-  };
+          const searchData = {
+            user_type: 'visitor' as const,
+            search_query: currentQuery,
+            search_type: 'search_box' as const,
+            filters: {
+              filter_1: {
+                fixer_name: getFixerNameValue(),
+                city: getCityValue(),
+                job_type: getJobTypeValue(),
+                search_count: searchCount,
+              },
+            },
+          };
 
   const handleSortChange = (option: string) => {
     scrollRestoredRef.current = true;
@@ -240,19 +314,58 @@ export default function JobOffersPage() {
                 className="flex lg:hidden"
               />
 
-              {/* Desktop view toggle */}
-              <ViewModeToggle
-                viewMode={viewMode}
-                onChange={setViewMode}
-                variant="desktop"
-                className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2"
-              />
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
+            </div>
+          </div>
+        </header>
+        <main className="p-6">Cargando ofertas...</main>
+      </div>
+    );
+  }
 
-              <div className="hidden lg:block w-auto">
-                <PaginationSelector
-                  registrosPorPagina={registrosPorPagina}
-                  onChange={handleRegistrosPorPaginaChange}
-                />
+  if (isError) {
+    return (
+      <div className="min-h-screen bg-white">
+        <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+          <div className="container mx-auto px-4 py-4">
+            <div className="flex items-center gap-2">
+              <Briefcase className="w-5 h-5 text-blue-600" />
+              <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
+            </div>
+          </div>
+        </header>
+        <main className="p-6">Error cargando ofertas.</main>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-white">
+      {/* Header Section */}
+      <header className="sticky top-0 z-10 bg-white border-b border-gray-100 shadow-sm">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-4">
+              <Link
+                href="/"
+                className="flex items-center text-blue-600 hover:text-blue-700 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5 mr-1" />
+                <span className="font-medium">{t('backToHome')}</span>
+              </Link>
+              <div className="hidden md:flex items-center gap-2">
+                <Briefcase className="w-5 h-5 text-blue-600" />
+                <h1 className="text-xl font-semibold text-gray-800">{t('pageTitle')}</h1>
+                <span className="text-sm text-gray-500 bg-blue-50 px-2 py-1 rounded-full">
+                  {filteredOffers.length} {t('available')}
+                </span>
               </div>
             </div>
 
@@ -308,18 +421,6 @@ export default function JobOffersPage() {
             <NoResultsMessage search={search} />
           ) : null}
         </div>
-
-        {!isLoading && Array.isArray(offers) && offers.length > 0 && viewMode !== 'map' && (
-          <div className="mt-8 mb-24 flex justify-center">
-            <Paginacion
-              paginaActual={paginaActual}
-              registrosPorPagina={registrosPorPagina}
-              totalRegistros={total}
-              onChange={handlePageChange}
-            />
-          </div>
-        )}
-      </main>
 
       <JobOfferModal
         offer={selectedOffer}

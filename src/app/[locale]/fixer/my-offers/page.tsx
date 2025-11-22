@@ -1,36 +1,47 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { currentFixer, mockJobOfferService, type JobOffer } from '@/app/lib/mock-data';
-import { Plus, Edit2, Trash2, ImageIcon } from 'lucide-react';
-import { JobOfferCard } from '@/Components/Job-offers/JobOfferCard';
-import JobOfferForm from '@/Components/Job-offers/Job-offer-form';
-import type { JobOfferFormData } from '@/app/lib/validations/Job-offer-Schemas';
-import type { JobOfferData } from '@/types/jobOffers';
-import NotificationModal from '@/Components/Modal-notifications';
-import ConfirmationModal from '@/Components/Modal-confirmation';
-import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
-import { setFixer } from '@/app/redux/slice/fixerSlice';
+import { useState, useEffect } from "react"
+import { currentFixer, type JobOfferBackend } from "@/app/lib/mock-data"
+import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
+import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
+import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
+import type { JobOfferFormData } from "@/app/lib/validations/Job-offer-Schemas"
+import NotificationModal from "@/Components/Modal-notifications"
+import ConfirmationModal from "@/Components/Modal-confirmation"
+import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
+import { setFixer } from "@/app/redux/slice/fixerSlice"
 import {
-  setOffers,
-  addOffer,
-  updateOffer as updateOfferRedux,
-  deleteOffer as deleteOfferRedux,
-} from '@/app/redux/slice/jobOffersSlice';
+  useGetJobOffersByFixerQuery,
+  useCreateJobOfferMutation,
+  useUpdateJobOfferMutation,
+  useDeleteJobOfferMutation,
+} from "@/app/redux/services/jobOfferApi"
+
+type JobOfferWithId = Omit<JobOfferBackend, "createdAt"> & {
+  id: string
+  createdAt: Date
+  tags: string[]
+}
 
 export default function MyOffersPage() {
-  const dispatch = useAppDispatch();
-  const offers = useAppSelector((state) => state.jobOffers.offers);
-  const currentFixerRedux = useAppSelector((state) => state.fixer.currentFixer);
+  const dispatch = useAppDispatch()
+  const currentFixerRedux = useAppSelector((state) => state.fixer.currentFixer)
 
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingOffer, setEditingOffer] = useState<JobOffer | null>(null);
+  const { data: offersFromAPI = [], isLoading, refetch } = useGetJobOffersByFixerQuery(currentFixer.id)
+  const [createJobOffer] = useCreateJobOfferMutation()
+  const [updateJobOffer] = useUpdateJobOfferMutation()
+  const [deleteJobOffer] = useDeleteJobOfferMutation()
+
+  const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingOffer, setEditingOffer] = useState<JobOfferWithId | null>(null)
+
   const [notification, setNotification] = useState<{
-    isOpen: boolean;
-    type: 'success' | 'error' | 'info' | 'warning';
-    title: string;
-    message: string;
-  }>({ isOpen: false, type: 'success', title: '', message: '' });
+    isOpen: boolean
+    type: "success" | "error" | "info" | "warning"
+    title: string
+    message: string
+  }>({ isOpen: false, type: "success", title: "", message: "" })
+
   const [confirmDelete, setConfirmDelete] = useState<{
     isOpen: boolean;
     offerId: string | null;
@@ -40,135 +51,160 @@ export default function MyOffersPage() {
     if (!currentFixerRedux) {
       dispatch(setFixer(currentFixer));
     }
-    const myOffers = mockJobOfferService.getMyOffers(currentFixer.id);
-    dispatch(setOffers(myOffers));
-  }, [dispatch, currentFixerRedux]);
+  }, [dispatch, currentFixerRedux])
 
-  // Función para convertir JobOffer a JobOfferData
-  const convertToJobOfferData = (offer: JobOffer): JobOfferData => {
-    return {
-      _id: offer.id,
-      title: offer.title,
-      description: offer.description,
-      city: offer.city,
-      category: offer.services?.[0] || 'otros',
-      tags: offer.tags || offer.services || [],
-      price: offer.price || 0,
-      photos: offer.photos || [],
-      allImages: offer.photos || [],
-      imagenUrl: offer.photos?.[0] || '',
-      fixerId: offer.fixerId,
-      fixerName: offer.fixerName || 'Usuario',
-      fixerPhoto: offer.fixerPhoto || '',
-      contactPhone: offer.whatsapp || '',
-      rating: offer.rating || 0,
-      completedJobs: offer.completedJobs || 0,
-      createdAt: offer.createdAt,
-      location: offer.location ? [offer.location.address] : undefined,
-    };
-  };
-
-  const handleEdit = (offer: JobOffer) => {
-    setEditingOffer(offer);
-    setIsFormOpen(true);
-  };
+  const handleEdit = (offer: JobOfferWithId) => {
+    setEditingOffer(offer)
+    setIsFormOpen(true)
+  }
 
   const handleDeleteClick = (offerId: string) => {
     setConfirmDelete({ isOpen: true, offerId });
   };
 
-  const handleConfirmDelete = () => {
-    if (confirmDelete.offerId) {
-      try {
-        mockJobOfferService.deleteOffer(confirmDelete.offerId);
-        dispatch(deleteOfferRedux(confirmDelete.offerId));
-        setNotification({
-          isOpen: true,
-          type: 'success',
-          title: 'Oferta eliminada',
-          message: 'La oferta se eliminó correctamente',
-        });
-      } catch (error) {
-        console.error('Error al eliminar la oferta:', error);
-        setNotification({
-          isOpen: true,
-          type: 'error',
-          title: 'Error',
-          message: 'No se pudo eliminar la oferta. Por favor, intenta de nuevo.',
-        });
-      }
-    }
-    setConfirmDelete({ isOpen: false, offerId: null });
-  };
+  const handleConfirmDelete = async () => {
+    if (!confirmDelete.offerId) return
 
-  const handleSubmit = (formData: JobOfferFormData) => {
     try {
-      const servicesAsStrings = formData.services.map((service) => service.value);
-      const defaultLocations: { [key: string]: { lat: number; lng: number } } = {
+      await deleteJobOffer(confirmDelete.offerId).unwrap()
+      setNotification({
+        isOpen: true,
+        type: "success",
+        title: "Eliminada",
+        message: "La oferta se eliminó correctamente",
+      })
+      refetch()
+    } catch {
+      setNotification({
+        isOpen: true,
+        type: "error",
+        title: "Error",
+        message: "No se pudo eliminar la oferta",
+      })
+    } finally {
+      setConfirmDelete({ isOpen: false, offerId: null })
+    }
+  }
+
+  const handleSubmit = async (formData: JobOfferFormData) => {
+    try {
+      const servicesAsStrings = formData.services.map(s => s.value)
+
+      const defaultLocations: Record<string, { lat: number; lng: number }> = {
         Cochabamba: { lat: -17.3895, lng: -66.1568 },
         'La Paz': { lat: -16.5, lng: -68.15 },
         'Santa Cruz': { lat: -17.7834, lng: -63.1821 },
         'El Alto': { lat: -16.5207, lng: -68.1742 },
       };
 
-      const cityLocation = defaultLocations[formData.city] || defaultLocations['Cochabamba'];
+      const cityLocation = defaultLocations[formData.city] || defaultLocations.Cochabamba
 
       const offerData = {
         title: formData.title,
         description: formData.description,
         city: formData.city,
         services: servicesAsStrings,
-        tags: formData.services.map((s) => s.value),
-        photos: formData.photos || ['/placeholder.svg?height=300&width=400&text=trabajo'],
+        photos: formData.photos || ["/placeholder.svg?height=300&width=400&text=trabajo"],
         price: formData.price || 0,
         fixerId: currentFixer.id,
         fixerName: currentFixer.name,
-        whatsapp: currentFixer.whatsapp || currentFixer.phone,
+        whatsapp: currentFixer.whatsapp || currentFixer.phone.replace(/\D/g, "").slice(3),
         location: {
           lat: cityLocation.lat,
           lng: cityLocation.lng,
           address: `${formData.city}, Bolivia`,
         },
-      };
-
-      if (editingOffer) {
-        const updatedOffer = mockJobOfferService.updateOffer(editingOffer.id, {
-          ...offerData,
-          id: editingOffer.id,
-          createdAt: editingOffer.createdAt,
-        });
-        if (updatedOffer) {
-          dispatch(updateOfferRedux(updatedOffer));
-          setNotification({
-            isOpen: true,
-            type: 'success',
-            title: 'Oferta actualizada',
-            message: 'La oferta se actualizó correctamente',
-          });
-        }
-      } else {
-        const newOffer = mockJobOfferService.addOffer(offerData);
-        dispatch(addOffer(newOffer));
-        setNotification({
-          isOpen: true,
-          type: 'success',
-          title: 'Oferta creada',
-          message: 'La oferta se creó correctamente',
-        });
+        tags: formData.services.map(s => s.value), // o puedes tener un campo tags separado
       }
 
-      setIsFormOpen(false);
-      setEditingOffer(null);
-    } catch (error) {
-      console.error('Error al procesar el formulario:', error);
+      if (editingOffer) {
+        await updateJobOffer({
+          offerId: editingOffer.id,
+          data: offerData,
+        }).unwrap()
+
+        setNotification({
+          isOpen: true,
+          type: "success",
+          title: "¡Actualizada!",
+          message: "Los cambios se guardaron correctamente",
+        })
+      } else {
+        await createJobOffer(offerData).unwrap()
+        setNotification({
+          isOpen: true,
+          type: "success",
+          title: "¡Publicada!",
+          message: "Tu nueva oferta ya está visible",
+        })
+      }
+
+      setIsFormOpen(false)
+      setEditingOffer(null)
+      refetch()
+    } catch (error: unknown) {
+      const err = error as { data?: { message?: string }; error?: string; status?: number }
+      let message = "Error al procesar la oferta"
+
+      if (err?.data?.message) message = err.data.message
+      else if (err?.error) message = err.error
+      else if (err?.status === 401) message = "Sesión expirada"
+
       setNotification({
         isOpen: true,
-        type: 'error',
-        title: 'Error',
-        message: 'Hubo un error al procesar el formulario. Por favor, intenta de nuevo.',
-      });
+        type: "error",
+        title: "Error",
+        message,
+      })
     }
   };
+
+      // Normalización 100% tipada – CERO any, CERO unknown
+      const offers: JobOfferWithId[] = offersFromAPI.map((raw: unknown) => {
+        const offer = raw as {
+          _id?: string
+          id?: string
+          title?: string
+          description?: string
+          city?: string
+          services?: string[]
+          photos?: string[]
+          price?: number
+          fixerId?: string
+          fixerName?: string
+          whatsapp?: string
+          location?: { lat: number; lng: number; address: string }
+          createdAt?: string | Date
+          tags?: string[]
+          fixerPhoto?: string
+          rating?: number
+          completedJobs?: number
+        }
+
+        return {
+          _id: offer._id,
+          id: offer._id || offer.id || `temp-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          title: offer.title ?? "",
+          description: offer.description ?? "",
+          city: offer.city ?? "Cochabamba",
+          services: offer.services ?? [],
+          photos: offer.photos ?? ["/placeholder.svg?height=300&width=400&text=trabajo"],
+          price: offer.price ?? 0,
+          fixerId: offer.fixerId ?? currentFixer.id,
+          fixerName: offer.fixerName ?? currentFixer.name,
+          whatsapp: offer.whatsapp ?? currentFixer.whatsapp ?? currentFixer.phone,
+          location: offer.location ?? { lat: -17.3895, lng: -66.1568, address: "Cochabamba, Bolivia" },
+          tags: offer.tags ?? [],
+          fixerPhoto: offer.fixerPhoto ?? currentFixer.photo,
+          rating: offer.rating ?? currentFixer.rating,
+          completedJobs: offer.completedJobs ?? currentFixer.completedJobs,
+          createdAt: typeof offer.createdAt === "string" 
+            ? new Date(offer.createdAt) 
+            : offer.createdAt instanceof Date 
+              ? offer.createdAt 
+              : new Date(),
+        } satisfies JobOfferWithId
+      })
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
@@ -189,9 +225,8 @@ export default function MyOffersPage() {
       </div>
 
       <div className="container mx-auto px-4 py-8">
-        {/* Form Modal */}
         {isFormOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
             <JobOfferForm
               onSubmit={handleSubmit}
               onCancel={() => {
@@ -204,26 +239,26 @@ export default function MyOffersPage() {
           </div>
         )}
 
-        {/* Empty State */}
-        {offers.length === 0 ? (
-          <div className="text-center py-16 animate-fade-in">
+        {isLoading ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <p className="text-muted-foreground">Cargando tus ofertas...</p>
+          </div>
+        ) : offers.length === 0 ? (
+          <div className="text-center py-16">
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl flex items-center justify-center">
               <ImageIcon className="w-10 h-10 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold mb-3">No tienes ofertas publicadas</h3>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-              Crea tu primera oferta de trabajo para que los clientes puedan encontrarte y
-              contactarte
+            <h3 className="text-2xl font-bold mb-3">Aún no tienes ofertas</h3>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+              Crea tu primera oferta para que los clientes te encuentren
             </p>
             <button
-              onClick={() => {
-                setEditingOffer(null);
-                setIsFormOpen(true);
-              }}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-primary-foreground rounded-xl hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300 font-bold"
+              onClick={() => setIsFormOpen(true)}
+              className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-xl hover:scale-105 transition font-bold"
             >
               <Plus className="w-5 h-5" />
-              Crear Primera Oferta
+              Crear Oferta
             </button>
           </div>
         ) : (
@@ -234,32 +269,29 @@ export default function MyOffersPage() {
                 className="animate-fade-in relative group"
                 style={{ animationDelay: `${index * 50}ms` }}
               >
-                <div className="relative">
-                  <JobOfferCard offer={convertToJobOfferData(offer)} viewMode="grid" />
+                <JobOfferCard offer={offer} showFixerInfo={true} />
 
-                  {/* Action Buttons - Positioned absolutely over the card */}
-                  <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-30">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEdit(offer);
-                      }}
-                      className="p-2.5 bg-white text-primary rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-primary/20"
-                      title="Editar oferta"
-                    >
-                      <Edit2 className="w-5 h-5" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteClick(offer.id);
-                      }}
-                      className="p-2.5 bg-white text-destructive rounded-lg shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 border border-destructive/20"
-                      title="Eliminar oferta"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
+                <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleEdit(offer)
+                    }}
+                    className="p-2.5 bg-white text-primary rounded-lg shadow-lg hover:scale-110 transition border border-primary/20"
+                    title="Editar"
+                  >
+                    <Edit2 className="w-5 h-5" />
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteClick(offer.id)
+                    }}
+                    className="p-2.5 bg-white text-red-600 rounded-lg shadow-lg hover:scale-110 transition border border-red-600/20"
+                    title="Eliminar"
+                  >
+                    <Trash2 className="w-5 h-5" />
+                  </button>
                 </div>
               </div>
             ))}
@@ -267,23 +299,21 @@ export default function MyOffersPage() {
         )}
       </div>
 
-      {/* Notification Modal */}
       <NotificationModal
         isOpen={notification.isOpen}
-        onClose={() => setNotification({ ...notification, isOpen: false })}
+        onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
         type={notification.type}
         title={notification.title}
         message={notification.message}
       />
 
-      {/* Confirmation Modal */}
       <ConfirmationModal
         isOpen={confirmDelete.isOpen}
         onClose={() => setConfirmDelete({ isOpen: false, offerId: null })}
         onConfirm={handleConfirmDelete}
         title="¿Eliminar oferta?"
-        message="Esta acción no se puede deshacer. ¿Estás seguro de que quieres eliminar esta oferta?"
-        confirmText="Eliminar"
+        message="Esta acción no se puede deshacer."
+        confirmText="Sí, eliminar"
         cancelText="Cancelar"
         type="danger"
       />

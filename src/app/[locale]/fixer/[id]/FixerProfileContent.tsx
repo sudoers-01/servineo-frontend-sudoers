@@ -1,12 +1,12 @@
 'use client';
 
-import { JobOfferCard } from '@/Components/Job-offers/JobOfferCard';
-import type { JobOfferData } from '@/types/jobOffers';
-import { MapPin, Star, Briefcase, MessageSquare, Share2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import type { Fixer, JobOffer } from '@/app/lib/mock-data';
-import Image from 'next/image';
+import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
+import { MapPin, Star, Briefcase, MessageSquare, Share2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
+import type { Fixer } from "@/app/lib/mock-data"
+import Image from "next/image"
+import FixerGraficCard from "@/Components/fixer/Fixer-grafic-card"
 
 interface FixerProfileContentProps {
   fixer: Fixer;
@@ -128,6 +128,15 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
           </div>
         </div>
       )}
+      <div className="mt-1">
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-200/80 p-1">
+          <FixerGraficCard
+            completedJobs={fixer.completedJobs}
+            cancelledJobs={fixer.cancelledJobs ?? 0}
+            monthlyData={fixer.monthlyData}
+          />
+        </div>
+      </div>
     </div>
   );
 
