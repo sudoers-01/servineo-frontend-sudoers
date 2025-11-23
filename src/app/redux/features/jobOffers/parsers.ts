@@ -73,6 +73,12 @@ export function parseUrlToFilters(searchParams: URLSearchParams): {
   const ratingRaw = searchParams.get('rating');
   const rating = ratingRaw != null ? (Number.isNaN(Number(ratingRaw)) ? null : Number(ratingRaw)) : null;
 
+  // ✅ NUEVO: Detectar si la categoría fue automarcada desde búsqueda
+  const isAutoSelectedCategory = search.trim() !== '' && category.length > 0;
+  
+  // ✅ NUEVO: Detectar si la ciudad fue automarcada desde búsqueda
+  const isAutoSelectedCity = search.trim() !== '' && city.length > 0;
+
   return {
     search,
     filters: {
@@ -82,6 +88,8 @@ export function parseUrlToFilters(searchParams: URLSearchParams): {
       tags,
       minPrice,
       maxPrice,
+      isAutoSelectedCategory,  // ✅ Agregado
+      isAutoSelectedCity,      // ✅ Agregado
     },
     sortBy,
     page,
