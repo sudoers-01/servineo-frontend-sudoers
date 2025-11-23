@@ -153,7 +153,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     <>
       <div
         className={`fixed inset-0 bg-black duration-300 z-40 ${
-          isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
+          isOpen ? 'opacity-0' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
       />
@@ -181,7 +181,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
         `}</style>
 
         <div className="p-4 sm:p-6 h-full flex flex-col">
-          <div className="flex justify-between items-center mb-6">
+            <div className="flex justify-between items-center mb-6">
             <h2 className="text-base sm:text-lg font-bold">{t('filters')}</h2>
 
             <div className="flex items-center gap-2">
@@ -190,16 +190,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 className="bg-[#2B6AE0] text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#2B31E0] transition-colors"
               >
                 {t('resetButton.desktop')}
-              </button>
-              <button
-                onClick={onClose}
-                className="sm:hidden text-gray-500 hover:text-gray-700 p-2"
-                aria-label="Cerrar filtros"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round" />
-                </svg>
               </button>
             </div>
           </div>
