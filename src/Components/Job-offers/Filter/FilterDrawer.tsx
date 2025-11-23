@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
@@ -57,10 +57,33 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   }, [isOpen]);
 
   const toggleSection = (section: string) => {
-    setOpenSections((prev) => ({
-      ...prev,
-      [section]: !prev[section],
-    }));
+    setOpenSections((prev) => {
+      const opening = !prev[section];
+      const next = { ...prev, [section]: opening };
+
+      // map section names to demoCounts/loadingCounts keys
+      const keyMap: Record<string, 'ranges' | 'cities' | 'jobTypes'> = {
+        fixer: 'ranges',
+        ciudad: 'cities',
+        trabajo: 'jobTypes',
+      };
+      const key = keyMap[section];
+
+      // When opening a section, simulate async recalculation for its counts
+      if (opening && key) {
+        setLoadingCounts((s) => ({ ...s, [key]: true }));
+        // clear previous timer if any
+        if (timersRef.current[key]) {
+          clearTimeout(timersRef.current[key] as NodeJS.Timeout);
+        }
+        timersRef.current[key] = setTimeout(() => {
+          setDemoCounts(computeDemoCountsSync());
+          setLoadingCounts((s) => ({ ...s, [key]: false }));
+        }, 450);
+      }
+
+      return next;
+    });
   };
 
   const handleRangeChange = (dbValue: string) => {
@@ -117,6 +140,15 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }
   };
 
+  // cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(timersRef.current).forEach((t) => {
+        if (t) clearTimeout(t as NodeJS.Timeout);
+      });
+    };
+  }, []);
+
   const nameRanges = [
     [
       { dbValue: DB_VALUES.ranges[0], label: tName('ranges.ac') },
@@ -136,8 +168,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   // Flatten the name ranges into a single list to render as a vertical list
   const nameOptions = nameRanges.flat();
 
-  // Compute demo counts from local mock data (frontend-only visual counts)
-  const demoCounts = useMemo(() => {
+  // Demo counts computed from mock data — we compute them asynchronously per-section
+  const timersRef = useRef<Record<string, NodeJS.Timeout | number>>({});
+
+  const computeDemoCountsSync = () => {
     const cities: Record<string, number> = {};
     const jobTypes: Record<string, number> = {};
     const ranges: Record<string, number> = {};
@@ -161,10 +195,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     };
 
     for (const o of mockJobOffers) {
-      // cities
       if (o.city && cities[o.city] !== undefined) cities[o.city]++;
 
-      // job types: match by presence in services, tags or title (case-insensitive)
       const haystack = `${(o.services || []).join(' ')} ${(o.tags || []).join(' ')} ${o.title || ''}`.toLowerCase();
       DB_VALUES.jobTypes.forEach((jt) => {
         if (haystack.includes(jt.toLowerCase())) {
@@ -172,7 +204,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
         }
       });
 
-      // ranges: use fixerName first letter
       const first = o.fixerName ? o.fixerName.trim().charAt(0) : '';
       if (first) {
         const idx = letterToRangeIndex(first);
@@ -186,7 +217,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       jobTypes: Record<string, number>;
       ranges: Record<string, number>;
     };
-  }, []);
+  };
+
+  const [demoCounts, setDemoCounts] = useState(() => computeDemoCountsSync());
+  const [loadingCounts, setLoadingCounts] = useState({ ranges: false, cities: false, jobTypes: false });
 
   const cities = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
@@ -262,6 +296,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                     {nameOptions.map((range) => {
                       const count = demoCounts.ranges?.[range.dbValue] ?? 0;
                       const disabled = count === 0;
+                      const loading = loadingCounts.ranges;
                       return (
                         <label
                           key={range.dbValue}
@@ -279,7 +314,11 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             />
                             <span className="truncate">{range.label}</span>
                           </div>
-                          <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          {loading ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          )}
                         </label>
                       );
                     })}
@@ -302,6 +341,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                     {cities.map((city) => {
                       const count = demoCounts.cities?.[city.dbValue] ?? 0;
                       const disabled = count === 0;
+                      const loading = loadingCounts.cities;
                       return (
                         <label
                           key={city.dbValue}
@@ -319,7 +359,11 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             />
                             <span className="truncate">{city.label}</span>
                           </div>
-                          <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          {loading ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          )}
                         </label>
                       );
                     })}
@@ -342,6 +386,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                     {jobTypes.map((job) => {
                       const count = demoCounts.jobTypes?.[job.dbValue] ?? 0;
                       const disabled = count === 0;
+                      const loading = loadingCounts.jobTypes;
                       return (
                         <label
                           key={job.dbValue}
@@ -359,7 +404,11 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             />
                             <span className="truncate">{job.label}</span>
                           </div>
-                          <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          {loading ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          )}
                         </label>
                       );
                     })}
