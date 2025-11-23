@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
+import { mockJobOffers } from '@/app/lib/mock-data';
 import { DB_VALUES } from '@/app/redux/contants';
 
 interface FilterState {
@@ -135,6 +136,58 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   // Flatten the name ranges into a single list to render as a vertical list
   const nameOptions = nameRanges.flat();
 
+  // Compute demo counts from local mock data (frontend-only visual counts)
+  const demoCounts = useMemo(() => {
+    const cities: Record<string, number> = {};
+    const jobTypes: Record<string, number> = {};
+    const ranges: Record<string, number> = {};
+
+    // init keys
+    DB_VALUES.cities.forEach((c) => (cities[c] = 0));
+    DB_VALUES.jobTypes.forEach((j) => (jobTypes[j] = 0));
+    DB_VALUES.ranges.forEach((r) => (ranges[r] = 0));
+
+    const letterToRangeIndex = (letter: string) => {
+      const l = letter.toUpperCase();
+      if ('A' <= l && l <= 'C') return 0;
+      if ('D' <= l && l <= 'F') return 1;
+      if ('G' <= l && l <= 'I') return 2;
+      if ('J' <= l && l <= 'L') return 3;
+      if ('M' <= l && l <= 'Ñ') return 4;
+      if ('O' <= l && l <= 'Q') return 5;
+      if ('R' <= l && l <= 'T') return 6;
+      if ('U' <= l && l <= 'W') return 7;
+      return 8; // X-Z and others
+    };
+
+    for (const o of mockJobOffers) {
+      // cities
+      if (o.city && cities[o.city] !== undefined) cities[o.city]++;
+
+      // job types: match by presence in services, tags or title (case-insensitive)
+      const haystack = `${(o.services || []).join(' ')} ${(o.tags || []).join(' ')} ${o.title || ''}`.toLowerCase();
+      DB_VALUES.jobTypes.forEach((jt) => {
+        if (haystack.includes(jt.toLowerCase())) {
+          jobTypes[jt] = (jobTypes[jt] || 0) + 1;
+        }
+      });
+
+      // ranges: use fixerName first letter
+      const first = o.fixerName ? o.fixerName.trim().charAt(0) : '';
+      if (first) {
+        const idx = letterToRangeIndex(first);
+        const key = DB_VALUES.ranges[idx] || DB_VALUES.ranges[DB_VALUES.ranges.length - 1];
+        ranges[key] = (ranges[key] || 0) + 1;
+      }
+    }
+
+    return { cities, jobTypes, ranges } as {
+      cities: Record<string, number>;
+      jobTypes: Record<string, number>;
+      ranges: Record<string, number>;
+    };
+  }, []);
+
   const cities = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
     label: tCity(
@@ -206,20 +259,30 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.fixer && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {nameOptions.map((range) => (
-                      <label
-                        key={range.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedRanges.includes(range.dbValue)}
-                          onChange={() => handleRangeChange(range.dbValue)}
-                        />
-                        <span className="truncate">{range.label}</span>
-                      </label>
-                    ))}
+                    {nameOptions.map((range) => {
+                      const count = demoCounts.ranges?.[range.dbValue] ?? 0;
+                      const disabled = count === 0;
+                      return (
+                        <label
+                          key={range.dbValue}
+                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
+                            disabled ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 cursor-pointer flex-shrink-0"
+                              checked={selectedRanges.includes(range.dbValue)}
+                              onChange={() => handleRangeChange(range.dbValue)}
+                              disabled={disabled}
+                            />
+                            <span className="truncate">{range.label}</span>
+                          </div>
+                          <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -236,20 +299,30 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.ciudad && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {cities.map((city) => (
-                      <label
-                        key={city.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedCity === city.dbValue}
-                          onChange={() => handleCityChange(city.dbValue)}
-                        />
-                        <span className="truncate">{city.label}</span>
-                      </label>
-                    ))}
+                    {cities.map((city) => {
+                      const count = demoCounts.cities?.[city.dbValue] ?? 0;
+                      const disabled = count === 0;
+                      return (
+                        <label
+                          key={city.dbValue}
+                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
+                            disabled ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 cursor-pointer flex-shrink-0"
+                              checked={selectedCity === city.dbValue}
+                              onChange={() => handleCityChange(city.dbValue)}
+                              disabled={disabled}
+                            />
+                            <span className="truncate">{city.label}</span>
+                          </div>
+                          <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -266,20 +339,30 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.trabajo && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {jobTypes.map((job) => (
-                      <label
-                        key={job.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedJobs.includes(job.dbValue)}
-                          onChange={() => handleJobChange(job.dbValue)}
-                        />
-                        <span className="truncate">{job.label}</span>
-                      </label>
-                    ))}
+                    {jobTypes.map((job) => {
+                      const count = demoCounts.jobTypes?.[job.dbValue] ?? 0;
+                      const disabled = count === 0;
+                      return (
+                        <label
+                          key={job.dbValue}
+                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
+                            disabled ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 cursor-pointer flex-shrink-0"
+                              checked={selectedJobs.includes(job.dbValue)}
+                              onChange={() => handleJobChange(job.dbValue)}
+                              disabled={disabled}
+                            />
+                            <span className="truncate">{job.label}</span>
+                          </div>
+                          <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}
