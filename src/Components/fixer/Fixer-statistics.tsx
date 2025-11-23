@@ -22,9 +22,9 @@ export default function EstadisticasTrabajos() {
 
     // Definir colores usando las claves traducibles
     const COLORS = {
-        completed: "#10B981",
+        completed: "blue",
         inProgress: "#3B82F6",
-        pending: "#F59E0B",
+        pending: "#1AA7ED",
     }
 
     if (isLoading) {
