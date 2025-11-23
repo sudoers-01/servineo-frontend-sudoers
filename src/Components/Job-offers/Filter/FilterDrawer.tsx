@@ -1,12 +1,12 @@
 'use client';
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
-import { mockJobOffers } from '@/app/lib/mock-data';
 import { DB_VALUES } from '@/app/redux/contants';
+import { useGetFilterCountsQuery } from '@/app/redux/services/jobOffersApi';
 
 interface FilterState {
   range: string[];
@@ -39,51 +39,23 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const [selectedCity, setSelectedCity] = useState<string>(filtersFromStore.city || '');
   const [selectedJobs, setSelectedJobs] = useState<string[]>(filtersFromStore.category || []);
 
+  const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
+    range: selectedRanges.length > 0 ? selectedRanges : undefined,
+    city: selectedCity || undefined,
+    category: selectedJobs.length > 0 ? selectedJobs : undefined,
+  });
+
   useEffect(() => {
     setSelectedRanges(filtersFromStore.range || []);
     setSelectedCity(filtersFromStore.city || '');
     setSelectedJobs(filtersFromStore.category || []);
-  }, [filtersFromStore]);
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflowY = 'scroll';
-    } else {
-      document.body.style.overflowY = 'unset';
-    }
-    return () => {
-      document.body.style.overflowY = 'unset';
-    };
-  }, [isOpen]);
+  }, [filtersFromStore.range, filtersFromStore.city, filtersFromStore.category]);
 
   const toggleSection = (section: string) => {
-    setOpenSections((prev) => {
-      const opening = !prev[section];
-      const next = { ...prev, [section]: opening };
-
-      // map section names to demoCounts/loadingCounts keys
-      const keyMap: Record<string, 'ranges' | 'cities' | 'jobTypes'> = {
-        fixer: 'ranges',
-        ciudad: 'cities',
-        trabajo: 'jobTypes',
-      };
-      const key = keyMap[section];
-
-      // When opening a section, simulate async recalculation for its counts
-      if (opening && key) {
-        setLoadingCounts((s) => ({ ...s, [key]: true }));
-        // clear previous timer if any
-        if (timersRef.current[key]) {
-          clearTimeout(timersRef.current[key] as NodeJS.Timeout);
-        }
-        timersRef.current[key] = setTimeout(() => {
-          setDemoCounts(computeDemoCountsSync());
-          setLoadingCounts((s) => ({ ...s, [key]: false }));
-        }, 450);
-      }
-
-      return next;
-    });
+    setOpenSections((prev) => ({
+      ...prev,
+      [section]: !prev[section],
+    }));
   };
 
   const handleRangeChange = (dbValue: string) => {
@@ -140,14 +112,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }
   };
 
-  // cleanup timers on unmount
-  useEffect(() => {
-    return () => {
-      Object.values(timersRef.current).forEach((t) => {
-        if (t) clearTimeout(t as NodeJS.Timeout);
-      });
-    };
-  }, []);
+  const getRangeCount = (dbValue: string): number => {
+    if (!backendCounts?.ranges) return 0;
+    return backendCounts.ranges[dbValue] || 0;
+  };
 
   const nameRanges = [
     [
@@ -165,62 +133,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ],
   ];
 
-  // Flatten the name ranges into a single list to render as a vertical list
   const nameOptions = nameRanges.flat();
-
-  // Demo counts computed from mock data — we compute them asynchronously per-section
-  const timersRef = useRef<Record<string, NodeJS.Timeout | number>>({});
-
-  const computeDemoCountsSync = () => {
-    const cities: Record<string, number> = {};
-    const jobTypes: Record<string, number> = {};
-    const ranges: Record<string, number> = {};
-
-    // init keys
-    DB_VALUES.cities.forEach((c) => (cities[c] = 0));
-    DB_VALUES.jobTypes.forEach((j) => (jobTypes[j] = 0));
-    DB_VALUES.ranges.forEach((r) => (ranges[r] = 0));
-
-    const letterToRangeIndex = (letter: string) => {
-      const l = letter.toUpperCase();
-      if ('A' <= l && l <= 'C') return 0;
-      if ('D' <= l && l <= 'F') return 1;
-      if ('G' <= l && l <= 'I') return 2;
-      if ('J' <= l && l <= 'L') return 3;
-      if ('M' <= l && l <= 'Ñ') return 4;
-      if ('O' <= l && l <= 'Q') return 5;
-      if ('R' <= l && l <= 'T') return 6;
-      if ('U' <= l && l <= 'W') return 7;
-      return 8; // X-Z and others
-    };
-
-    for (const o of mockJobOffers) {
-      if (o.city && cities[o.city] !== undefined) cities[o.city]++;
-
-      const haystack = `${(o.services || []).join(' ')} ${(o.tags || []).join(' ')} ${o.title || ''}`.toLowerCase();
-      DB_VALUES.jobTypes.forEach((jt) => {
-        if (haystack.includes(jt.toLowerCase())) {
-          jobTypes[jt] = (jobTypes[jt] || 0) + 1;
-        }
-      });
-
-      const first = o.fixerName ? o.fixerName.trim().charAt(0) : '';
-      if (first) {
-        const idx = letterToRangeIndex(first);
-        const key = DB_VALUES.ranges[idx] || DB_VALUES.ranges[DB_VALUES.ranges.length - 1];
-        ranges[key] = (ranges[key] || 0) + 1;
-      }
-    }
-
-    return { cities, jobTypes, ranges } as {
-      cities: Record<string, number>;
-      jobTypes: Record<string, number>;
-      ranges: Record<string, number>;
-    };
-  };
-
-  const [demoCounts, setDemoCounts] = useState(() => computeDemoCountsSync());
-  const [loadingCounts, setLoadingCounts] = useState({ ranges: false, cities: false, jobTypes: false });
 
   const cities = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
@@ -268,7 +181,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
         `}</style>
 
         <div className="p-4 sm:p-6 h-full flex flex-col">
-            <div className="flex justify-between items-center mb-6">
+          <div className="flex justify-between items-center mb-6">
             <h2 className="text-base sm:text-lg font-bold">{t('filters')}</h2>
 
             <div className="flex items-center gap-2">
@@ -282,7 +195,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
           </div>
 
           <div className="flex-1 overflow-y-auto custom-scrollbar">
-            {/* Filtro: Nombre de Fixer */}
             <div className="mb-6">
               <div
                 className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
@@ -294,9 +206,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
                     {nameOptions.map((range) => {
-                      const count = demoCounts.ranges?.[range.dbValue] ?? 0;
+                      const count = getRangeCount(range.dbValue);
                       const disabled = count === 0;
-                      const loading = loadingCounts.ranges;
                       return (
                         <label
                           key={range.dbValue}
@@ -314,7 +225,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             />
                             <span className="truncate">{range.label}</span>
                           </div>
-                          {loading ? (
+                          {loadingCounts ? (
                             <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
                           ) : (
                             <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
@@ -327,7 +238,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               )}
             </div>
 
-            {/* Filtro: Ciudad */}
             <div className="mb-6">
               <div
                 className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
@@ -339,9 +249,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
                     {cities.map((city) => {
-                      const count = demoCounts.cities?.[city.dbValue] ?? 0;
+                      const count = backendCounts?.cities?.[city.dbValue] ?? 0;
                       const disabled = count === 0;
-                      const loading = loadingCounts.cities;
                       return (
                         <label
                           key={city.dbValue}
@@ -359,7 +268,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             />
                             <span className="truncate">{city.label}</span>
                           </div>
-                          {loading ? (
+                          {loadingCounts ? (
                             <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
                           ) : (
                             <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
@@ -372,7 +281,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               )}
             </div>
 
-            {/* Filtro: Tipo de Trabajo */}
             <div className="mb-6">
               <div
                 className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
@@ -384,9 +292,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
                     {jobTypes.map((job) => {
-                      const count = demoCounts.jobTypes?.[job.dbValue] ?? 0;
+                      const count = backendCounts?.categories?.[job.dbValue] ?? 0;
                       const disabled = count === 0;
-                      const loading = loadingCounts.jobTypes;
                       return (
                         <label
                           key={job.dbValue}
@@ -404,7 +311,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             />
                             <span className="truncate">{job.label}</span>
                           </div>
-                          {loading ? (
+                          {loadingCounts ? (
                             <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
                           ) : (
                             <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
