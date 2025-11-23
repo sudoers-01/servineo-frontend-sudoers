@@ -132,6 +132,9 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ],
   ];
 
+  // Flatten the name ranges into a single list to render as a vertical list
+  const nameOptions = nameRanges.flat();
+
   const cities = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
     label: tCity(
@@ -156,7 +159,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       />
 
       <div
-        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-[75%] sm:w-63 bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
+        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-full max-w-[265px] md:w-63 md:max-w-none bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -211,25 +214,21 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 <span className="truncate">{t('fixerName')}</span>
               </div>
               {openSections.fixer && (
-                <div className="bg-white border border-gray-200 p-4 rounded">
-                  <div className="flex gap-2">
-                    {nameRanges.map((column, colIndex) => (
-                      <div key={colIndex} className="flex flex-col gap-2 flex-1">
-                        {column.map((range) => (
-                          <label
-                            key={range.dbValue}
-                            className="flex items-center gap-2 text-xs cursor-pointer hover:text-[#2B31E0] transition-colors"
-                          >
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4 cursor-pointer flex-shrink-0"
-                              checked={selectedRanges.includes(range.dbValue)}
-                              onChange={() => handleRangeChange(range.dbValue)}
-                            />
-                            <span className="truncate">{range.label}</span>
-                          </label>
-                        ))}
-                      </div>
+                <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
+                  <div className="flex flex-col gap-2">
+                    {nameOptions.map((range) => (
+                      <label
+                        key={range.dbValue}
+                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 cursor-pointer flex-shrink-0"
+                          checked={selectedRanges.includes(range.dbValue)}
+                          onChange={() => handleRangeChange(range.dbValue)}
+                        />
+                        <span className="truncate">{range.label}</span>
+                      </label>
                     ))}
                   </div>
                 </div>
