@@ -20,6 +20,7 @@ import {
   setSortBy,
   setRegistrosPorPagina,
   resetPagination,
+  setRating,
   setPaginaActual,
   resetFilters,
   enablePersistence,
@@ -151,7 +152,7 @@ export default function JobOffersPage() {
 
     const hasFilters =
       appliedFilters.range.length > 0 ||
-      appliedFilters.city !== '' ||
+      (Array.isArray(appliedFilters.city) ? appliedFilters.city.length > 0 : !!appliedFilters.city) ||
       appliedFilters.category.length > 0;
 
     if (hasFilters && !hasActiveFilters.current) {
@@ -286,6 +287,24 @@ export default function JobOffersPage() {
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           onFiltersApply={handleFiltersApply}
+          onRatingChange={(rating) => {
+            // rating is either integer 1..5 (from star filter) or null
+            scrollRestoredRef.current = true;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            const hasRatingFilter = rating != null;
+            if (hasRatingFilter && !hasActiveFilters.current) {
+              pageBeforeFilter.current = paginaActual;
+              hasActiveFilters.current = true;
+            }
+
+            if (!hasRatingFilter) {
+              hasActiveFilters.current = false;
+            }
+
+            dispatch(setRating(rating));
+            dispatch(resetPagination());
+          }}
           onReset={handleResetFilters}
         />
 

@@ -5,18 +5,20 @@ import { Star } from 'lucide-react';
 import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
-import { useAppSelector } from '@/app/redux/hooks';
+import { useAppSelector, useAppDispatch } from '@/app/redux/hooks';
 import { DB_VALUES } from '@/app/redux/contants';
 import type { FilterState } from '@/app/redux/features/jobOffers/types';
+import { setRating } from '@/app/redux/slice/jobOfert';
 
 interface FilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onFiltersApply?: (filters: FilterState) => void;
+  onRatingChange?: (rating: number | null) => void;
   onReset?: () => void;
 }
 
-export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: FilterDrawerProps) {
+export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, onReset }: FilterDrawerProps) {
   const filtersFromStore = useAppSelector((state) => state.jobOfert.filters);
 
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
@@ -35,12 +37,20 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const [selectedCities, setSelectedCities] = useState<string[]>(filtersFromStore.city || []);
   const [selectedJobs, setSelectedJobs] = useState<string[]>(filtersFromStore.category || []);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  const dispatch = useAppDispatch();
+  const storeRating = useAppSelector((s) => s.jobOfert.rating);
 
   useEffect(() => {
     setSelectedRanges(filtersFromStore.range || []);
     setSelectedCities(filtersFromStore.city || []);
     setSelectedJobs(filtersFromStore.category || []);
+    // sync rating from store
+    setSelectedRating(storeRating ?? null);
   }, [filtersFromStore]);
+
+  useEffect(() => {
+    setSelectedRating(storeRating ?? null);
+  }, [storeRating]);
 
   useEffect(() => {
     if (isOpen) {
@@ -61,9 +71,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   };
 
   const handleRatingClick = (star: number) => {
-    setSelectedRating(star);
-    // Intentionally do not alter applyFilters or external filter state
-    // to avoid changing existing functionality.
+    // Toggle: clicking the same star deselects
+    const newRating = selectedRating === star ? null : star;
+    setSelectedRating(newRating);
+
+    // Update store rating so the main query includes the rating param
+    dispatch(setRating(newRating));
+
+    // Call applyFilters so page.tsx's onFiltersApply runs and handles
+    // hasActiveFilters / pagination like other filters do.
+    applyFilters(selectedRanges, selectedCities, selectedJobs, false, false);
   };
 
   const handleRangeChange = (dbValue: string) => {
@@ -134,6 +151,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     setSelectedRanges([]);
     setSelectedCities([]);
     setSelectedJobs([]);
+    setSelectedRating(null);
+    dispatch(setRating(null));
 
     if (onReset) {
       onReset();
