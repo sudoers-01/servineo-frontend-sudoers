@@ -97,7 +97,7 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
         category: offer.categories[0] || "General",
         tags: offer.categories,
         city: offer.city,
-        createdAt: new Date(offer.createdAt),
+        createdAt: new Date(offer.createdAt || Date.now()),
         fixerId: offer.fixerId,
         fixerName: offer.fixerName,
         fixerPhoto: undefined, // Add if available in IJobOffer
@@ -107,7 +107,7 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
         imagenUrl: offer.images[0],
         rating: 0, // Mock
         status: "active",
-        updatedAt: new Date(offer.createdAt)
+        updatedAt: new Date(offer.createdAt || Date.now())
     });
 
     return (

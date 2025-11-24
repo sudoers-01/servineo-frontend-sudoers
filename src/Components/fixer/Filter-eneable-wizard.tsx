@@ -14,7 +14,7 @@ import { VehicleStep } from "./steps/Vehicle-step"
 import { TermsStep } from "./steps/Terms-step"
 import { CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react"
 import { ProfilePhotoStep } from "./steps/Profile-photo-step"
-import { useCreateUserProfileMutation } from "@/app/redux/services/userApi"
+// import { useCreateUserProfileMutation } from "@/app/redux/services/userApi"
 import { IUser } from "@/types/user"
 import { fixerProfileSchema, type FixerProfileData } from "@/app/lib/validations/fixer-schemas"
 
@@ -30,7 +30,7 @@ interface FixerEnableWizardProps {
 }
 
 export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
-  const [registerFixer] = useCreateUserProfileMutation()
+  //const [registerFixer] = useCreateUserProfileMutation()
   const [step, setStep] = useState(0)
   const total = 7 // 0 to 6
   const [success, setSuccess] = useState(false)

@@ -8,8 +8,9 @@ import { ExperienceSection } from "@/Components/fixer/dashboard/ExperienceSectio
 import { PortfolioSection } from "@/Components/fixer/dashboard/PortfolioSection"
 import { User, Briefcase, Award, Building2, Image as ImageIcon, MapPin, Phone, Mail } from "lucide-react"
 import Image from "next/image"
+import EstadisticasTrabajos from "@/Components/fixer/Fixer-statistics"
 
-type Tab = "offers" | "certs" | "experience" | "portfolio"
+type Tab = "offers" | "certs" | "experience" | "portfolio" | "estadisticas"
 
 export default function FixerDashboardPage() {
     const { user } = useAppSelector((state) => state.user)
@@ -123,6 +124,16 @@ export default function FixerDashboardPage() {
                             <ImageIcon className="h-5 w-5" />
                             Portafolio
                         </button>
+                        <button
+                            onClick={() => setActiveTab("estadisticas")}
+                            className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${activeTab === "estadisticas"
+                                ? "bg-blue-50 text-blue-700 shadow-sm"
+                                : "text-gray-600 hover:bg-gray-50"
+                                }`}
+                        >
+                            <Award className="h-5 w-5" />
+                            Estadísticas
+                        </button>
                     </nav>
                 </div>
 
@@ -133,7 +144,7 @@ export default function FixerDashboardPage() {
                         {activeTab === "certs" && <CertificationsSection />}
                         {activeTab === "experience" && <ExperienceSection />}
                         {activeTab === "portfolio" && <PortfolioSection />}
-                        
+                        {activeTab === "estadisticas" && <EstadisticasTrabajos />}
                     </div>
                 </div>
             </div>

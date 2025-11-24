@@ -33,12 +33,6 @@ interface LocationMapProps {
   lng: number
 }
 
-declare global {
-  interface Window {
-    L?: typeof import("leaflet")
-  }
-}
-
 export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<FormData>({
