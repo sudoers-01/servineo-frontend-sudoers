@@ -161,6 +161,8 @@ export function filtersToUrlParams(params: {
   exact?: boolean;
   date?: string | null;
   rating?: number | null;
+  totalRegistros?: number;
+  totalPages?: number;
 }): URLSearchParams {
   const urlParams = new URLSearchParams();
 
@@ -190,7 +192,8 @@ export function filtersToUrlParams(params: {
   if (params.rating != null) urlParams.set('rating', String(params.rating));
   if (params.page != null) urlParams.set('page', String(params.page));
   if (params.limit != null) urlParams.set('limit', String(params.limit));
-
+  if (params.totalRegistros != null) urlParams.set('total', String(params.totalRegistros));
+  if (params.totalPages != null) urlParams.set('totalPages', String(params.totalPages));
   return urlParams;
 }
 

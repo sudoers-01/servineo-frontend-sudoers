@@ -220,8 +220,6 @@ export function useSyncUrlParams() {
     const queryString = urlParams.toString();
     const target = queryString ? `?${queryString}` : '';
 
-    if (typeof window !== 'undefined' && window.location.search === target) return;
-
     router.replace(target, { scroll: false });
   }, [params, router]);
 }
