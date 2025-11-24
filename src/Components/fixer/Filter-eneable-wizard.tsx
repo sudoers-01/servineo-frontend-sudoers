@@ -7,12 +7,14 @@ import { PillButton } from "./Pill-button"
 import { CIStep } from "./steps/Ci-step"
 import { LocationStep } from "./steps/Location-step"
 import { ServicesStep, type Service } from "./steps/Services-step"
-import { PaymentStep, type PaymentMethod } from "./steps/Payment-step";
+import { PaymentStep, type PaymentMethod } from "./steps/Payment-step"
 import { ExperienceStep, type Experience } from "./steps/Experience-step"
 import { VehicleStep } from "./steps/Vehicle-step"
 import { TermsStep } from "./steps/Terms-step"
 import { CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react"
 import { ProfilePhotoStep } from "./steps/Profile-photo-step"
+import { useCreateUserProfileMutation } from "@/app/redux/services/userApi"
+import { IUserProfile } from "@/types/job-offer"
 
 type RequesterUser = {
   id: string
@@ -20,11 +22,12 @@ type RequesterUser = {
   email: string
   urlPhoto?: string
   role: "requester" | "fixer"
+  phone?: string
 }
 
 type FixerProfileDraft = {
   ci: string
-  location?: { lat: number; lng: number } | null
+  location?: { lat: number; lng: number; address?: string } | null
   services: Service[]
   selectedServiceIds: string[]
   payments: PaymentMethod[]
@@ -34,6 +37,18 @@ type FixerProfileDraft = {
   vehicleType?: string
   termsAccepted: boolean
   photoUrl?: string
+  bio?: string
+  languages?: string[]
+  availability?: {
+    monday: boolean
+    tuesday: boolean
+    wednesday: boolean
+    thursday: boolean
+    friday: boolean
+    saturday: boolean
+    sunday: boolean
+  }
+  hourlyRate?: number
 }
 
 const DEFAULT_SERVICES: Service[] = [
@@ -50,6 +65,7 @@ interface FixerEnableWizardProps {
 }
 
 export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
+  const [registerFixer] = useCreateUserProfileMutation()
   const [step, setStep] = useState(0)
   const total = 8
   const [draft, setDraft] = useState<FixerProfileDraft>({
@@ -64,6 +80,18 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
     vehicleType: "",
     termsAccepted: false,
     photoUrl: "",
+    bio: "",
+    languages: [],
+    availability: {
+      monday: true,
+      tuesday: true,
+      wednesday: true,
+      thursday: true,
+      friday: true,
+      saturday: false,
+      sunday: false
+    },
+    hourlyRate: undefined
   })
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [submitting, setSubmitting] = useState(false)
@@ -143,19 +171,10 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
     }))
   }
 
-  async function handleSubmit() {
-    if (!validateStep()) return
-    setSubmitting(true)
-    await new Promise((r) => setTimeout(r, 900))
-    setSubmitting(false)
-    setSuccess(true)
-  }
-
   function addExperience(experience: Omit<Experience, "id">) {
-    const id = `exp-${Date.now()}`
     setDraft((d) => ({
       ...d,
-      experiences: [...d.experiences, { ...experience, id }],
+      experiences: [...d.experiences, { ...experience, id: `exp-${Date.now()}` }],
     }))
   }
 
@@ -164,6 +183,87 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
       ...d,
       experiences: d.experiences.filter((exp) => exp.id !== id),
     }))
+  }
+
+  async function handleSubmit() {
+    if (!validateStep()) return
+    setSubmitting(true)
+
+    try {
+      const userProfileData: Omit<IUserProfile, '_id'> = {
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone || "",
+          role: "fixer",
+          urlPhoto: user.urlPhoto || draft.photoUrl || ""
+        },
+        profile: {
+          ci: draft.ci,
+          photoUrl: draft.photoUrl || "",
+          location: draft.location
+            ? {
+                lat: draft.location.lat,
+                lng: draft.location.lng,
+                address: draft.location.address || ""
+              }
+            : null,
+          services: draft.services
+            .filter(s => draft.selectedServiceIds.includes(s.id))
+            .map(s => ({
+              id: s.id,
+              name: s.name,
+              custom: s.custom || false
+            })),
+          selectedServiceIds: draft.selectedServiceIds,
+          paymentMethods: draft.payments.map(method => ({
+            type: method,
+            accountInfo: draft.accountInfo || ""
+          })),
+           experiences: draft.experiences.map(exp => ({
+              id: exp.id,
+              title: exp.title,
+              description: exp.description,
+              years: 1, // O el valor que corresponda
+              images: [
+                {
+                  id: exp.id,
+                  url: exp.fileUrl,
+                  name: exp.fileName,
+                  size: 0, // Si tienes el tamaño, agrégalo
+                  type: exp.fileType === "image" ? "image/jpeg" : "video/mp4"
+                }
+              ]
+            })),
+                      vehicle: draft.hasVehicle !== null ? {
+            hasVehicle: draft.hasVehicle,
+            type: draft.vehicleType || "",
+            details: ""
+          } : undefined,
+          terms: {
+            accepted: draft.termsAccepted,
+            acceptedAt: draft.termsAccepted ? new Date() : undefined
+          },
+          additionalInfo: {
+            bio: draft.bio || "",
+            languages: draft.languages || [],
+            availability: draft.availability,
+            hourlyRate: draft.hourlyRate
+          },
+          status: "pending",
+          createdAt: new Date(),
+          updatedAt: new Date()
+        }
+      }
+      console.log("Submitting user profile data:", userProfileData)
+      await registerFixer(userProfileData).unwrap()
+      setSuccess(true)
+    } catch (error) {
+      setErrors({ submit: "Error al registrar el perfil. Por favor intenta de nuevo." })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
@@ -185,6 +285,7 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
               <p>Métodos de pago: {draft.payments.join(", ")}</p>
               <p>Experiencias: {draft.experiences.length}</p>
               <p>Vehículo: {draft.hasVehicle ? `Sí (${draft.vehicleType})` : "No"}</p>
+              <p className="text-xs text-gray-500 mt-4">Estado: En revisión (pending)</p>
             </div>
           </div>
         </Card>
@@ -265,6 +366,10 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
               onAcceptChange={(termsAccepted) => setDraft((d) => ({ ...d, termsAccepted }))}
               error={errors.terms}
             />
+          )}
+
+          {errors.submit && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">{errors.submit}</div>
           )}
 
           <div className="flex items-center justify-between">

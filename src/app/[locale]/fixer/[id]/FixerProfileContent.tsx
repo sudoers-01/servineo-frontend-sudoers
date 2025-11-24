@@ -1,4 +1,4 @@
-"use client"
+'use client';
 
 import { useTranslations } from 'next-intl'
 import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
@@ -7,9 +7,10 @@ import { useRouter } from "next/navigation"
 import { useState } from "react"
 import type { Fixer } from "@/app/lib/mock-data"
 import Image from "next/image"
+import FixerGraficCard from "@/Components/fixer/Fixer-grafic-card"
 
 interface FixerProfileContentProps {
-  fixer: Fixer
+  fixer: Fixer;
 }
 
 export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
@@ -18,28 +19,52 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
   const router = useRouter()
   const [activeTab, setActiveTab] = useState("inicio")
 
-  const handleOfferClick = (offerId: string) => {
-    router.push(`/offers/${offerId}`)
-  }
+  // Función para convertir JobOffer a JobOfferData
+  const convertToJobOfferData = (offer: JobOffer): JobOfferData => {
+    return {
+      _id: offer.id,
+      title: offer.title,
+      description: offer.description,
+      city: offer.city,
+      category: offer.services?.[0] || 'otros',
+      tags: offer.tags || offer.services || [],
+      price: offer.price || 0,
+      photos: offer.photos || [],
+      allImages: offer.photos || [],
+      imagenUrl: offer.photos?.[0] || '',
+      fixerId: offer.fixerId || fixer.id,
+      fixerName: offer.fixerName || fixer.name,
+      fixerPhoto: offer.fixerPhoto || fixer.photo || '',
+      contactPhone: offer.whatsapp || fixer.whatsapp || fixer.phone || '',
+      rating: offer.rating || fixer.rating || 0,
+      completedJobs: offer.completedJobs || fixer.completedJobs || 0,
+      createdAt: offer.createdAt,
+      location: offer.location ? [offer.location.address] : undefined,
+    };
+  };
+
+  const handleOfferClick = (offer: JobOfferData) => {
+    router.push(`/offers/${offer._id}`);
+  };
 
   const handleContact = () => {
     if (fixer.whatsapp) {
-      window.open(`https://wa.me/${fixer.whatsapp}`, "_blank")
+      window.open(`https://wa.me/${fixer.whatsapp}`, '_blank');
     }
-  }
+  };
 
   const renderTabContent = () => {
     switch (activeTab) {
-      case "servicios":
-        return renderServicesTab()
-      case "reseñas":
-        return renderReviewsTab()
-      case "fotos":
-        return renderPhotosTab()
+      case 'servicios':
+        return renderServicesTab();
+      case 'reseñas':
+        return renderReviewsTab();
+      case 'fotos':
+        return renderPhotosTab();
       default:
-        return renderHomeTab()
+        return renderHomeTab();
     }
-  }
+  };
 
   const renderHomeTab = () => (
     <div className="space-y-6">
@@ -49,7 +74,7 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
         <p className="text-gray-600 mb-6">
           {fixer.bio || t('about.noDescription')}
         </p>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
             <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -88,7 +113,7 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-semibold text-gray-900">{t('recentJobs.title')}</h2>
             <button
-              onClick={() => setActiveTab("servicios")}
+              onClick={() => setActiveTab('servicios')}
               className="text-blue-600 text-sm font-medium hover:underline"
             >
               {t('actions.viewAll')}
@@ -96,17 +121,27 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fixer.jobOffers.slice(0, 2).map((offer) => (
-              <JobOfferCard 
-                key={offer.id} 
-                offer={offer} 
-                onClick={() => handleOfferClick(offer.id)} 
+              <JobOfferCard
+                key={offer.id}
+                offer={convertToJobOfferData(offer)}
+                viewMode="grid"
+                onClick={handleOfferClick}
               />
             ))}
           </div>
         </div>
       )}
+      <div className="mt-1">
+        <div className="bg-white rounded-3xl shadow-lg border border-gray-200/80 p-1">
+          <FixerGraficCard
+            completedJobs={fixer.completedJobs}
+            cancelledJobs={fixer.cancelledJobs ?? 0}
+            monthlyData={fixer.monthlyData}
+          />
+        </div>
+      </div>
     </div>
-  )
+  );
 
   const renderServicesTab = () => (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -128,7 +163,7 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
         ))}
       </div>
     </div>
-  )
+  );
 
   const renderReviewsTab = () => (
     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
@@ -292,8 +327,8 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
               onClick={() => setActiveTab(tab.id)}
               className={`px-4 py-3 text-sm font-medium ${
                 activeTab === tab.id
-                  ? "text-blue-600 border-b-2 border-blue-600"
-                  : "text-gray-500 hover:text-gray-700"
+                  ? 'text-blue-600 border-b-2 border-blue-600'
+                  : 'text-gray-500 hover:text-gray-700'
               }`}
             >
               {tab.label}
@@ -305,5 +340,5 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
         <div>{renderTabContent()}</div>
       </div>
     </div>
-  )
+  );
 }

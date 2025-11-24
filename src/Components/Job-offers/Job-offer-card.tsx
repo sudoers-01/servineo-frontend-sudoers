@@ -1,3 +1,4 @@
+// src\Components\Job-offers\Job-offer-card.tsx
 "use client"
 
 import { useRouter } from 'next/navigation'

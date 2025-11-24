@@ -22,13 +22,17 @@ type RequesterUser = {
   role: 'requester' | 'fixer';
 };
 
+
 export default function BecomeFixerPage() {
   const t = useTranslations("becomeFixer");
   const [requester, setRequester] = useState<RequesterUser | null>(null);
+  //const { data: jobs, error, isLoading } = useGetAllJobsQuery();
+
+  
 
   return (
     <div>
-      <Navbar />
+     
       <div className="container mx-auto max-w-4xl p-4">
         <header className="mb-6 text-center">
           <h1 className="text-2xl font-bold">{t("title")}</h1>
