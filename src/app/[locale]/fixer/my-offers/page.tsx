@@ -219,118 +219,116 @@ export default function MyOffersPage() {
       })
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
-      <div className="container mx-auto px-4 py-6">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold text-gray-900">Mis Ofertas</h1>
-          <button
-            onClick={() => {
+  <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50">
+    <div className="container mx-auto px-4 py-6">
+      <div className="flex items-center justify-between">
+        <h1 className="text-3xl font-bold text-gray-900">Mis Ofertas</h1>
+        <button
+          onClick={() => {
+            setEditingOffer(null);
+            setIsFormOpen(true);
+          }}
+          className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300 font-semibold"
+        >
+          <Plus className="w-5 h-5" />
+          {t('newOffer')}
+        </button>
+      </div>
+    </div>
+
+    <div className="container mx-auto px-4 py-8">
+      {isFormOpen && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <JobOfferForm
+            onSubmit={handleSubmit}
+            onCancel={() => {
+              setIsFormOpen(false);
               setEditingOffer(null);
-              setIsFormOpen(true);
             }}
-            className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300 font-semibold"
+            defaultValues={editingOffer ?? undefined}
+            submitButtonText={editingOffer ? t('actions.saveChanges') : t('actions.publishOffer')}
+          />
+        </div>
+      )}
+
+      {isLoading ? (
+        <div className="text-center py-16">
+          <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-muted-foreground">Cargando tus ofertas...</p>
+        </div>
+      ) : offers.length === 0 ? (
+        <div className="text-center py-16">
+          <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl flex items-center justify-center">
+            <ImageIcon className="w-10 h-10 text-primary" />
+          </div>
+          <h3 className="text-2xl font-bold mb-3">{t('noOffers.title')}</h3>
+          <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+            {t('noOffers.description')}
+          </p>
+          <button
+            onClick={() => setIsFormOpen(true)}
+            className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-xl hover:scale-105 transition font-bold"
           >
             <Plus className="w-5 h-5" />
-            {t('newOffer')}
+            {t('noOffers.createFirst')}
           </button>
         </div>
-      </div>
-
-      <div className="container mx-auto px-4 py-8">
-        {isFormOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <JobOfferForm
-              onSubmit={handleSubmit}
-              onCancel={() => {
-                setIsFormOpen(false);
-                setEditingOffer(null);
-              }}
-              defaultValues={editingOffer ?? undefined}
-              submitButtonText={editingOffer ? t('actions.saveChanges') : t('actions.publishOffer')}
-            />
-          </div>
-        )}
-
-        {isLoading ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 mx-auto mb-4 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-            <p className="text-muted-foreground">Cargando tus ofertas...</p>
-          </div>
-        ) : offers.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl flex items-center justify-center">
-              <ImageIcon className="w-10 h-10 text-primary" />
-            </div>
-            <h3 className="text-2xl font-bold mb-3">{t('noOffers.title')}</h3>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
-              {t('noOffers.description')}
-            </p>
-            <button
-              onClick={() => setIsFormOpen(true)}
-              className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-xl hover:scale-105 transition font-bold"
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {offers.map((offer, index) => (
+            <div
+              key={offer.id}
+              className="animate-fade-in relative group"
+              style={{ animationDelay: `${index * 50}ms` }}
             >
-              <Plus className="w-5 h-5" />
-              {t('noOffers.createFirst')}
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {offers.map((offer, index) => (
-              <div
-                key={offer.id}
-                className="animate-fade-in relative group"
-                style={{ animationDelay: `${index * 50}ms` }}
-              >
-                <JobOfferCard offer={offer} showFixerInfo={true} />
+              <JobOfferCard offer={offer} showFixerInfo={true} />
 
-                  
-                  <div className="absolute left-3 bottom-16 flex gap-2">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleEdit(offer)
-                      }}
-                      className="p-2 bg-white/95 text-primary rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
-                      title={t('actions.edit')}
-                    >
-                      <Edit2 className="w-4 h-4" />
-                    </button>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        handleDeleteClick(offer.id)
-                      }}
-                      className="p-2 bg-white/95 text-destructive rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
-                      title={t('actions.delete')}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </div>
+              <div className="absolute left-3 bottom-16 flex gap-2">
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleEdit(offer)
+                  }}
+                  className="p-2 bg-white/95 text-primary rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
+                  title={t('actions.edit')}
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleDeleteClick(offer.id)
+                  }}
+                  className="p-2 bg-white/95 text-destructive rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
+                  title={t('actions.delete')}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      <NotificationModal
-        isOpen={notification.isOpen}
-        onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
-        type={notification.type}
-        title={notification.title}
-        message={notification.message}
-      />
-
-      <ConfirmationModal
-        isOpen={confirmDelete.isOpen}
-        onClose={() => setConfirmDelete({ isOpen: false, offerId: null })}
-        onConfirm={handleConfirmDelete}
-        title={t('confirmDelete.title')}
-        message={t('confirmDelete.message')}
-        confirmText={t('confirmDelete.confirm')}
-        cancelText={t('confirmDelete.cancel')}
-        type="danger"
-      />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
-  )
+
+    <NotificationModal
+      isOpen={notification.isOpen}
+      onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
+      type={notification.type}
+      title={notification.title}
+      message={notification.message}
+    />
+
+    <ConfirmationModal
+      isOpen={confirmDelete.isOpen}
+      onClose={() => setConfirmDelete({ isOpen: false, offerId: null })}
+      onConfirm={handleConfirmDelete}
+      title={t('confirmDelete.title')}
+      message={t('confirmDelete.message')}
+      confirmText={t('confirmDelete.confirm')}
+      cancelText={t('confirmDelete.cancel')}
+      type="danger"
+    />
+  </div>
+)
 }

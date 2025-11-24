@@ -37,11 +37,7 @@ interface LocationMapProps {
   lng: number
 }
 
-declare global {
-  interface Window {
-    L?: typeof import("leaflet")
-  }
-}
+// Remove duplicate Window interface declaration to avoid type conflicts
 
 export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
   const t = useTranslations('fixerProfile.profile')
@@ -67,7 +63,7 @@ export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
 
   const handleContact = () => {
     if (fixer.whatsapp) {
-      window.open(https://wa.me/${fixer.whatsapp.replace(/\D/g, "")}, "_blank")
+      window.open(`https://wa.me/${fixer.whatsapp.replace(/\D/g, "")}`, "_blank")
     }
   }
 

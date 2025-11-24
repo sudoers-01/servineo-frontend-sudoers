@@ -31,7 +31,7 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
         return (
             <div className="p-2 bg-white border border-gray-300 shadow-md rounded-md text-sm">
-                <p className="font-semibold text-gray-800">{${payload[0].name}: ${payload[0].value}}</p>
+                <p className="font-semibold text-gray-800">{`${payload[0].name}: ${payload[0].value}`}</p>
             </div>
         )
     }
@@ -94,12 +94,12 @@ export default function EstadisticasTrabajos() {
                                 dominantBaseline={props.dominantBaseline}
                                 fill="#333" 
                                 className="text-sm font-medium">
-                                {${payload.cantidad}}
+                                {`${payload.cantidad}`}
                             </text>
                         )}>
                         {chartData.map((entry, index) => (
                             <Cell 
-                                key={cell-${index}} 
+                                key={`cell-${index}`} 
                                 fill={COLORS[entry.estado as keyof typeof COLORS]} 
                             />
                         ))}
@@ -110,7 +110,7 @@ export default function EstadisticasTrabajos() {
                 {chartData.map((item, index) => (
                     <div 
                         key={item.estado} 
-                        className={flex justify-between px-4 py-1 ${index < chartData.length - 1 ? 'border-b border-gray-200' : ''}}>
+                        className={`flex justify-between px-4 py-1 ${index < chartData.length - 1 ? 'border-b border-gray-200' : ''}`}>
                         <span className="font-medium flex items-center">
                             <span 
                                 className="inline-block w-3 h-3 rounded-full mr-2" 
