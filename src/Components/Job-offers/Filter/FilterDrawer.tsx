@@ -256,16 +256,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
               >
                 {t('resetButton.desktop')}
               </button>
-              <button
-                onClick={onClose}
-                className="sm:hidden text-gray-500 hover:text-gray-700 p-2"
-                aria-label="Cerrar filtros"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
             </div>
           </div>
 
