@@ -86,9 +86,7 @@ export default function LoginPage() {
           message: mensajeExito,
         });
 
-        setTimeout(() => {
-          router.push("/");
-        }, 1000);
+        setTimeout(() => window.location.href = "/", 2000);
       } else {
         const mensajeError =
           res.message ||

@@ -16,15 +16,32 @@ import Image from "next/image"
 import type { Fixer } from "@/app/lib/mock-data"
 import FixerGraficCard from "@/Components/fixer/Fixer-grafic-card"
 
-export function FixerProfile({
-  fixer,
-  isOwner = false,
-}: {
+interface FixerProfileProps {
   fixer: Fixer
   isOwner?: boolean
-}) {
+}
+
+interface FormData {
+  bio: string
+  phone: string
+  city: string
+  whatsapp: string
+}
+
+interface LocationMapProps {
+  lat: number
+  lng: number
+}
+
+declare global {
+  interface Window {
+    L?: typeof import("leaflet")
+  }
+}
+
+export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
   const [isEditing, setIsEditing] = useState(false)
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     bio: fixer.bio || "",
     phone: fixer.phone || "",
     city: fixer.city || "",
@@ -277,16 +294,16 @@ export function FixerProfile({
           </div>
 
           {/* Mapa de ubicación */}
-          {fixer.location && fixer.location.lat && fixer.location.lng && (
+          {fixer.location?.lat && fixer.location?.lng && (
             <LocationMap lat={fixer.location.lat} lng={fixer.location.lng} />
           )}
 
-          {/* ←←← TARJETA DE ESTADÍSTICAS (siempre visible o solo para owner) ←←← */}
+          {/* Tarjeta de estadísticas */}
           <div className="mt-12">
             <FixerGraficCard
               completedJobs={fixer.completedJobs ?? 0}
               cancelledJobs={fixer.cancelledJobs ?? 0}
-              monthlyData={fixer.monthlyData} // si tienes datos reales, los usa; si no, el componente muestra los de ejemplo
+              monthlyData={fixer.monthlyData}
             />
           </div>
         </div>
@@ -296,9 +313,9 @@ export function FixerProfile({
 }
 
 // ========================================
-// Componente del mapa (sin cambios)
+// Componente del mapa
 // ========================================
-function LocationMap({ lat, lng }: { lat: number; lng: number }) {
+function LocationMap({ lat, lng }: LocationMapProps) {
   const mapRef = useRef<HTMLDivElement | null>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
 
@@ -324,16 +341,15 @@ function LocationMap({ lat, lng }: { lat: number; lng: number }) {
   useEffect(() => {
     if (!mapLoaded || !mapRef.current || !window.L) return
 
-    const map = (window.L as any).map(mapRef.current).setView([lat, lng], 14)
+    const L = window.L
+    const map = L.map(mapRef.current).setView([lat, lng], 14)
 
-    ;(window.L as any)
-      .tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap contributors",
-        maxZoom: 19,
-      })
-      .addTo(map)
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      attribution: "© OpenStreetMap contributors",
+      maxZoom: 19,
+    }).addTo(map)
 
-    ;(window.L as any).marker([lat, lng]).addTo(map)
+    L.marker([lat, lng]).addTo(map)
 
     return () => {
       map.remove()

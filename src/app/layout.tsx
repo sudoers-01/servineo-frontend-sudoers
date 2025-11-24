@@ -4,8 +4,8 @@ import "./globals.css";
 import { roboto } from './fonts';
 import 'leaflet/dist/leaflet.css'
 import { ReduxProvider } from './redux/ReduxProvider';
-import { AuthProvider } from './lib/hooks/usoAutentificacion'; // ← AGREGAR ESTA LÍNEA
-import TopMenu from '@/Components/Navigation/TopMenu';
+import { AuthProvider } from './lib/hooks/usoAutentificacion'; 
+//import TopMenu from '@/Components/Navigation/TopMenu';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -35,7 +35,7 @@ export default function RootLayout({
         <ReduxProvider>
           <AuthProvider> 
             <div className="">
-              <TopMenu/>
+              
             </div>
             {children}
           </AuthProvider> 

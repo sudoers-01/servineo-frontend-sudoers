@@ -5,6 +5,7 @@ import userReducer from "./slice/userSlice"
 import fixerReducer from "./slice/fixerSlice"
 import filterReducer from "./slice/filterSlice"
 import jobOffersReducer from "./slice/jobOffersSlice"
+import jobOfertReducer from "./slice/jobOfert"
 import logger from "redux-logger"
 
 export const store = configureStore({
@@ -14,6 +15,7 @@ export const store = configureStore({
     fixer: fixerReducer,
     filters: filterReducer,
     jobOffers: jobOffersReducer,
+    jobOfert: jobOfertReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware()

@@ -1,3 +1,4 @@
+// src/app/redux/services/baseApi.ts
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
@@ -17,7 +18,7 @@ export const baseQuery = fetchBaseQuery({
     headers.set('Content-Type', 'application/json');
     return headers;
   },
-  credentials: 'include',
+  credentials: 'include', 
 });
 
 export interface ApiError {

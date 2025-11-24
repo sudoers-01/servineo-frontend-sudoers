@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { z } from 'zod';
+import Link from 'next/link';
 
 const BASE_API = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
 
@@ -157,13 +158,13 @@ export default function ClientResend({ email: emailProp }: { email?: string; tok
           {loading ? 'Reenviando…' : !canResend ? `Espera ${secondsToResend}s` : 'Reenviar enlace'}
         </button>
 
-        <a
+        <Link
           href="/login"
           className="text-center rounded-xl p-3.5 font-semibold transition
                      bg-background text-foreground ring-1 ring-border hover:bg-muted"
         >
           Volver a inicio de sesión
-        </a>
+        </Link>
       </div>
 
       <div className="mt-6 text-xs text-muted-foreground space-y-1">
