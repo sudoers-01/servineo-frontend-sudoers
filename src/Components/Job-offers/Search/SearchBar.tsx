@@ -16,6 +16,9 @@ import { useSearchSuggestions } from '@/app/redux/features/searchHistory/useSear
 import { useSearchKeyboard } from '@/app/redux/features/searchHistory/useSearchKeyboard';
 import { useSearchTouch } from '@/app/redux/features/searchHistory/useSearchTouch';
 import { SearchDropdown } from '@/Components/Shared/SearchDropdown';
+import { useAppDispatch } from "@/app/redux/hooks";
+import { setSearch } from "@/app/redux/slice/jobOfert";
+
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -24,6 +27,7 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const t = useTranslations('search');
+  const dispatch = useAppDispatch();//
 
   const searchFromStore = useAppSelector((state) => state.jobOfert.search);
 
@@ -49,6 +53,13 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     minLength: 1,
   });
 
+  // Restaurar desde Redux/localStorage al cargar
+  React.useEffect(() => {
+      if (searchFromStore) {
+        setValue(searchFromStore);
+     }
+  }, []);
+
   // Sincronizar con Redux
   React.useEffect(() => {
     if (searchFromStore !== prevSearchFromStore.current && searchFromStore !== value) {
@@ -61,6 +72,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setValue(newValue);
+    const dispatch = useAppDispatch();//
     setPreviewValue(null);
     const { isValid, error } = validateSearch(newValue);
     setError(isValid ? undefined : error);
