@@ -18,7 +18,7 @@ export const baseQuery = fetchBaseQuery({
     headers.set('Content-Type', 'application/json');
     return headers;
   },
-  credentials: 'include', 
+  credentials: 'include',
 });
 
 export interface ApiError {
@@ -37,6 +37,6 @@ export const isApiError = (error: unknown): error is ApiError => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['User', 'Job', 'Statistics', 'JobOffer', 'Requester' ],
+  tagTypes: ['User', 'Job', 'Statistics', 'JobOffer', 'Requester', 'SearchHistory'],
   endpoints: () => ({}),
 });

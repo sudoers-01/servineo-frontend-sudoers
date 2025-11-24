@@ -105,13 +105,13 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
       {totalImages > 1 && isHovered && (
         <>
           <button
-            onClick={(e) => { e.stopPropagation(); handlePrevImage(); }}
+            onClick={handlePrevImage}
             className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
           >
             <ChevronLeft className="w-4 h-4 text-gray-800" />
           </button>
           <button
-            onClick={(e) => { e.stopPropagation(); handleNextImage(); }}
+            onClick={handleNextImage}
             className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
           >
             <ChevronRight className="w-4 h-4 text-gray-800" />

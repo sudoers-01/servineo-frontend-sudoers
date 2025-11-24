@@ -4,12 +4,13 @@ import { useState } from "react"
 import Image from "next/image"
 import { MapPin, Star, MessageCircle, Share2, Flag } from "lucide-react"
 import { PillButton } from "@/Components/Pill-button"
-import { StatisticsSection } from "@/Components/fixer/profile/StatisticsSection"
+
 import { JobOffersSection } from "@/Components/fixer/dashboard/JobOffersSection"
 import { CertificationsSection } from "@/Components/fixer/dashboard/CertificationsSection"
 import { ExperienceSection } from "@/Components/fixer/dashboard/ExperienceSection"
 import { PortfolioSection } from "@/Components/fixer/dashboard/PortfolioSection"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/Tabs/Tabs"
+import EstadisticasTrabajos from "@/Components/fixer/Fixer-statistics"
 
 // Mock data for the profile header
 const MOCK_FIXER = {
@@ -101,13 +102,11 @@ export default function FixerProfilePage({ params }: { params: { id: string } })
             <TabsTrigger value="experiencia" className="px-6">Experiencia</TabsTrigger>
             <TabsTrigger value="certificaciones" className="px-6">Certificaciones</TabsTrigger>
             <TabsTrigger value="portafolio" className="px-6">Portafolio</TabsTrigger>
+            <TabsTrigger value="estadisticas" className="px-6">Estadísticas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="resumen" className="space-y-8">
-            <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Estadísticas</h2>
-              <StatisticsSection />
-            </section>
+
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Ofertas Destacadas</h2>
@@ -129,6 +128,9 @@ export default function FixerProfilePage({ params }: { params: { id: string } })
 
           <TabsContent value="portafolio">
             <PortfolioSection readOnly />
+          </TabsContent>
+          <TabsContent value="estadisticas">
+            <EstadisticasTrabajos />
           </TabsContent>
         </Tabs>
       </div>

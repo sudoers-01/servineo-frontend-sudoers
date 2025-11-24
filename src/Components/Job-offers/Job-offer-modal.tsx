@@ -3,11 +3,10 @@
 import { X, MessageCircle, MapPin, Sparkles, Calendar, Tag } from 'lucide-react';
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
-import type { JobOfferData } from '@/types/jobOffers';
-
+import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
 
 interface Props {
-  offer: JobOfferData | null;
+  offer: JobOfferData | AdaptedJobOffer | null;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -18,16 +17,38 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
 
   if (!isOpen || !offer) return null;
 
+  // Normalize data
+  const isAdapted = (o: JobOfferData | AdaptedJobOffer): o is AdaptedJobOffer => 'services' in o;
+
+  const title = offer.title;
+  const description = offer.description;
+  const price = offer.price;
+  const city = offer.city;
+  const tags = offer.tags || [];
+  const createdAt = offer.createdAt;
+
+  const category = isAdapted(offer)
+    ? (offer.services?.[0] || 'General')
+    : offer.category;
+
+  const phone = isAdapted(offer)
+    ? offer.phone
+    : offer.contactPhone;
+
   // Prepare images
   const images = (() => {
-    if (offer.allImages && offer.allImages.length > 0) return offer.allImages;
-    if (offer.photos && offer.photos.length > 0) return offer.photos;
-    if (offer.imagenUrl) return [offer.imagenUrl];
-    return [];
+    if (isAdapted(offer)) {
+      return offer.photos || [];
+    } else {
+      if (offer.allImages && offer.allImages.length > 0) return offer.allImages;
+      if (offer.photos && offer.photos.length > 0) return offer.photos;
+      if (offer.imagenUrl) return [offer.imagenUrl];
+      return [];
+    }
   })();
 
   const handleWhatsAppClick = () => {
-    const cleanPhone = offer.contactPhone.replace(/\D/g, '');
+    const cleanPhone = phone.replace(/\D/g, '');
     window.open(`https://wa.me/${cleanPhone}`, '_blank');
   };
 
@@ -42,7 +63,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           {images.length > 0 ? (
             <Image
               src={images[0]}
-              alt={offer.title}
+              alt={title}
               fill
               className="object-cover"
             />
@@ -64,15 +85,15 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <div className="absolute bottom-4 left-6 right-6 text-white">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-1 bg-primary/90 rounded-full text-xs font-semibold backdrop-blur-sm">
-                {tCat(offer.category)}
+                {tCat(category)}
               </span>
               <div className="flex items-center gap-1 text-xs font-medium bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm">
                 <MapPin className="w-3 h-3" />
-                {offer.city}
+                {city}
               </div>
             </div>
             <h2 className="text-2xl font-bold leading-tight shadow-black drop-shadow-md">
-              {offer.title}
+              {title}
             </h2>
           </div>
         </div>
@@ -84,10 +105,10 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <div className="flex items-center justify-between pb-4 border-b border-gray-100">
             <div className="flex items-center gap-2 text-gray-500 text-sm">
               <Calendar className="w-4 h-4" />
-              <span>{new Date(offer.createdAt).toLocaleDateString()}</span>
+              <span>{new Date(createdAt).toLocaleDateString()}</span>
             </div>
             <div className="text-xl font-bold text-primary">
-              {offer.price?.toLocaleString()} Bs
+              {price?.toLocaleString()} Bs
             </div>
           </div>
 
@@ -98,19 +119,19 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
               <h3>Descripción del Trabajo</h3>
             </div>
             <p className="text-gray-600 leading-relaxed text-sm sm:text-base">
-              {offer.description}
+              {description}
             </p>
           </div>
 
           {/* Tags */}
-          {offer.tags && offer.tags.length > 0 && (
+          {tags && tags.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-gray-900 font-semibold">
                 <Tag className="w-4 h-4 text-blue-500" />
                 <h3>Etiquetas</h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                {offer.tags.map((tag, idx) => (
+                {tags.map((tag, idx) => (
                   <span
                     key={idx}
                     className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-lg font-medium"
