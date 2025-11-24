@@ -243,7 +243,7 @@ export default function useAdvSearchLogic() {
     }
 
     const shouldOpenFixer = ranges.length > 0;
-    const shouldOpenCiudad = !!city;
+    const shouldOpenCiudad = !!cityRaw;
     const shouldOpenTrabajo = !!(urlCategory && urlCategory.length);
     const shouldOpenCategorias = !!(urlTags && urlTags.length);
     const shouldOpenPrecio = !!(min || max);
@@ -266,7 +266,7 @@ export default function useAdvSearchLogic() {
     if (titleOnly) params.set('titleOnly', 'true');
     if (exactWords) params.set('exact', 'true');
     selectedRanges.forEach((r) => params.append('range', r));
-    if (selectedCity) params.set('city', selectedCity);
+    if (selectedCity.length) params.set('city', selectedCity.join(','));
     if (selectedJobs.length) params.set('category', selectedJobs.join(','));
     if (selectedTags.length) params.set('tags', selectedTags.join(','));
     const { minPrice, maxPrice } = parsePriceRange(selectedPriceKey);
