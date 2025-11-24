@@ -88,7 +88,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
     const newRating = selectedRating === star ? null : star;
     setSelectedRating(newRating);
     dispatch(setRating(newRating));
-    applyFilters(selectedRanges, selectedCities, selectedJobs, false, false);
+    applyFilters(selectedRanges, selectedCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
   };
 
   const handleRangeChange = (dbValue: string) => {
