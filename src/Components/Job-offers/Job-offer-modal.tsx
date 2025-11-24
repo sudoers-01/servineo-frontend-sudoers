@@ -1,22 +1,28 @@
 'use client';
 
-//import type { JobOffer } from "@/app/lib/mock-data"
-import { X, MessageCircle, MapPin, Sparkles } from 'lucide-react';
+import { X, MessageCircle, MapPin, Sparkles, Calendar } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
+import React from 'react';
+
+// Si ya tienes el tipo JobOffer en tu proyecto, comenta la interfaz local y descomenta la importación:
+// import type { JobOffer } from "@/app/lib/mock-data"
 
 interface JobOffer {
-  _id: string;
-  fixerId: string;
-  name: string;
-  title: string;
-  description: string;
-  tags: string[];
-  phone: string;
-  photos: string[];
-  services: string[];
-  price: number;
-  createdAt: Date;
-  city: string;
+  _id?: string;
+  fixerId?: string;
+  name?: string;
+  fixerName?: string;
+  title?: string;
+  description?: string;
+  tags?: string[];
+  phone?: string;
+  whatsapp?: string;
+  photos?: string[];
+  services?: string[];
+  price?: number;
+  createdAt?: string | Date;
+  city?: string;
 }
 
 interface Props {
@@ -28,6 +34,17 @@ interface Props {
 export function JobOfferModal({ offer, isOpen, onClose }: Props) {
   if (!isOpen || !offer) return null;
 
+  const handleClickCalendar = () => {
+    // Si necesitás setear valores dinámicos, reemplaza los ids hardcodeados por offer._id u otros campos.
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('fixer_id', offer.fixerId ?? offer._id ?? '');
+      sessionStorage.setItem('requester_id', sessionStorage.getItem('requester_id') ?? '');
+      sessionStorage.setItem('roluser', 'requester');
+    }
+  };
+
+  const phoneNumberForLink = (offer.whatsapp || offer.phone || '').replace(/\s/g, '');
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/60" onClick={onClose} />
@@ -36,20 +53,28 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
         <div className="sticky top-0 bg-gradient-to-r from-white via-white to-primary/5 backdrop-blur-lg border-b border-primary p-6 flex items-center justify-between z-10">
           <div className="flex-1">
             <h2 className="text-2xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              {offer.name}
+              {offer.fixerName ?? offer.name ?? 'Profesional'}
             </h2>
             <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
               <MapPin className="w-4 h-4" />
-              <span>{offer.city}</span>
+              <span>{offer.city ?? '—'}</span>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            className="p-2.5 hover:bg-muted rounded-xl transition-all hover:rotate-90 duration-300"
-            aria-label="Cerrar modal"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          <div className="flex items-center gap-4">
+            <div className="text-right">
+              <p className="text-xs text-muted-foreground">Phone</p>
+              <p className="font-semibold">{offer.phone ?? offer.whatsapp ?? '—'}</p>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="p-2.5 hover:bg-muted rounded-xl transition-all hover:rotate-90 duration-300"
+              aria-label="Cerrar modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Content */}
@@ -60,14 +85,14 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
               <h3 className="font-bold text-lg">Descripción</h3>
             </div>
             <p className="text-foreground/80 leading-relaxed bg-muted/30 p-4 rounded-xl">
-              {offer.description}
+              {offer.description ?? 'Este profesional no ha añadido una descripción.'}
             </p>
           </div>
 
           <div>
             <h3 className="font-bold text-lg mb-3">Servicios Ofrecidos</h3>
             <div className="flex flex-wrap gap-2">
-              {(offer.services && offer.services.length > 0 ? offer.services : offer.tags).map((service) => (
+              {(offer.services && offer.services.length > 0 ? offer.services : offer.tags ?? []).map((service) => (
                 <span
                   key={service}
                   className="px-4 py-2 bg-gradient-to-r from-primary/10 to-primary/5 text-primary text-sm rounded-full font-medium border border-primary/20 hover:border-primary/40 hover:scale-105 transition-all"
@@ -75,10 +100,13 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
                   {service}
                 </span>
               ))}
+              {((offer.services?.length ?? 0) === 0 && (offer.tags?.length ?? 0) === 0) && (
+                <span className="px-4 py-2 text-sm text-muted-foreground">Sin servicios listados</span>
+              )}
             </div>
           </div>
 
-          {offer.photos.length > 0 && (
+          {offer.photos && offer.photos.length > 0 && (
             <div>
               <h3 className="font-bold text-lg mb-4">Galería de Trabajos</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -109,8 +137,8 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
                   <MessageCircle className="w-5 h-5 text-primary-foreground" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">phone</p>
-                  <p className="font-semibold">{offer.phone}</p>
+                  <p className="text-xs text-muted-foreground">WhatsApp</p>
+                  <p className="font-semibold">{offer.whatsapp ?? offer.phone ?? '—'}</p>
                 </div>
               </div>
 
@@ -120,21 +148,46 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground">Ciudad</p>
-                  <p className="font-semibold">{offer.city}</p>
+                  <p className="font-semibold">{offer.city ?? '—'}</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <a
-            href={`https://wa.me/${offer.phone.replace(/\s/g, '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-primary to-blue-600 text-primary-foreground py-4 rounded-xl text-center font-bold hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
-          >
-            <MessageCircle className="w-5 h-5" />
-            Contactar por WhatsApp
-          </a>
+          {/* Action Buttons */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <a
+              href={phoneNumberForLink ? `https://wa.me/${phoneNumberForLink}` : '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-primary to-blue-600 text-white py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
+            >
+              <MessageCircle className="w-5 h-5" />
+              {phoneNumberForLink ? 'WhatsApp' : 'WhatsApp (no disponible)'}
+            </a>
+
+            <Link
+              href="/calendar"
+              onClick={handleClickCalendar}
+              className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-primary to-blue-600 text-white py-3.5 rounded-xl font-bold hover:shadow-xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
+            >
+              <Calendar className="w-5 h-5" />
+              Agendar Cita +
+            </Link>
+          </div>
+
+          {/* Bottom contact CTA (opcional - conserva UX de la otra versión) */}
+          <div className="pt-4">
+            <a
+              href={phoneNumberForLink ? `https://wa.me/${phoneNumberForLink}` : '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-primary to-blue-600 text-primary-foreground py-4 rounded-xl text-center font-bold hover:shadow-2xl hover:shadow-primary/30 hover:scale-105 transition-all duration-300"
+            >
+              <MessageCircle className="w-5 h-5" />
+              Contactar por WhatsApp
+            </a>
+          </div>
         </div>
       </div>
     </div>

@@ -1,7 +1,9 @@
 'use client';
 
 import { useState, useEffect } from "react"
-import { currentFixer, type JobOfferBackend } from "@/app/lib/mock-data"
+import { currentFixer,mockJobOfferService, type JobOfferBackend } from "@/app/lib/mock-data"
+import { useTranslations } from 'next-intl'
+
 import { Plus, Edit2, Trash2, ImageIcon } from "lucide-react"
 import { JobOfferCard } from "@/Components/Job-offers/Job-offer-card"
 import JobOfferForm from "@/Components/Job-offers/Job-offer-form"
@@ -24,6 +26,8 @@ type JobOfferWithId = Omit<JobOfferBackend, "createdAt"> & {
 }
 
 export default function MyOffersPage() {
+  const t = useTranslations('myOffers')
+  
   const dispatch = useAppDispatch()
   const currentFixerRedux = useAppSelector((state) => state.fixer.currentFixer)
 
@@ -62,27 +66,26 @@ export default function MyOffersPage() {
     setConfirmDelete({ isOpen: true, offerId });
   };
 
-  const handleConfirmDelete = async () => {
-    if (!confirmDelete.offerId) return
-
-    try {
-      await deleteJobOffer(confirmDelete.offerId).unwrap()
-      setNotification({
-        isOpen: true,
-        type: "success",
-        title: "Eliminada",
-        message: "La oferta se eliminó correctamente",
-      })
-      refetch()
-    } catch {
-      setNotification({
-        isOpen: true,
-        type: "error",
-        title: "Error",
-        message: "No se pudo eliminar la oferta",
-      })
-    } finally {
-      setConfirmDelete({ isOpen: false, offerId: null })
+  const handleConfirmDelete = () => {
+    if (confirmDelete.offerId) {
+      try {
+        mockJobOfferService.deleteOffer(confirmDelete.offerId)
+        dispatch(deleteOfferRedux(confirmDelete.offerId))
+        setNotification({
+          isOpen: true,
+          type: "success",
+          title: t('notifications.offerDeleted.title'),
+          message: t('notifications.offerDeleted.message'),
+        })
+      } catch (error) {
+        console.error("Error al eliminar la oferta:", error)
+        setNotification({
+          isOpen: true,
+          type: "error",
+          title: t('notifications.error.title'),
+          message: t('notifications.error.deleteMessage'),
+        })
+      }
     }
   }
 
@@ -129,13 +132,22 @@ export default function MyOffersPage() {
           title: "¡Actualizada!",
           message: "Los cambios se guardaron correctamente",
         })
+        if (updatedOffer) {
+          dispatch(updateOfferRedux(updatedOffer))
+          setNotification({
+            isOpen: true,
+            type: "success",
+            title: t('notifications.offerUpdated.title'),
+            message: t('notifications.offerUpdated.message'),
+          })
+        }
       } else {
         await createJobOffer(offerData).unwrap()
         setNotification({
           isOpen: true,
           type: "success",
-          title: "¡Publicada!",
-          message: "Tu nueva oferta ya está visible",
+          title: t('notifications.offerCreated.title'),
+          message: t('notifications.offerCreated.message'),
         })
       }
 
@@ -153,8 +165,8 @@ export default function MyOffersPage() {
       setNotification({
         isOpen: true,
         type: "error",
-        title: "Error",
-        message,
+        title: t('notifications.error.title'),
+        message: t('notifications.error.formMessage'),
       })
     }
   };
@@ -219,7 +231,7 @@ export default function MyOffersPage() {
             className="flex items-center gap-2 px-6 py-3 bg-primary text-white rounded-xl hover:shadow-xl hover:shadow-blue-500/30 hover:scale-105 transition-all duration-300 font-semibold"
           >
             <Plus className="w-5 h-5" />
-            Nueva Oferta
+            {t('newOffer')}
           </button>
         </div>
       </div>
@@ -234,7 +246,7 @@ export default function MyOffersPage() {
                 setEditingOffer(null);
               }}
               defaultValues={editingOffer ?? undefined}
-              submitButtonText={editingOffer ? 'Guardar Cambios' : 'Publicar Oferta'}
+              submitButtonText={editingOffer ? t('actions.saveChanges') : t('actions.publishOffer')}
             />
           </div>
         )}
@@ -249,16 +261,16 @@ export default function MyOffersPage() {
             <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-primary/20 to-blue-600/20 rounded-2xl flex items-center justify-center">
               <ImageIcon className="w-10 h-10 text-primary" />
             </div>
-            <h3 className="text-2xl font-bold mb-3">Aún no tienes ofertas</h3>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              Crea tu primera oferta para que los clientes te encuentren
+            <h3 className="text-2xl font-bold mb-3">{t('noOffers.title')}</h3>
+            <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+              {t('noOffers.description')}
             </p>
             <button
               onClick={() => setIsFormOpen(true)}
               className="inline-flex items-center gap-3 px-8 py-4 bg-primary text-white rounded-xl hover:scale-105 transition font-bold"
             >
               <Plus className="w-5 h-5" />
-              Crear Oferta
+              {t('noOffers.createFirst')}
             </button>
           </div>
         ) : (
@@ -271,27 +283,29 @@ export default function MyOffersPage() {
               >
                 <JobOfferCard offer={offer} showFixerInfo={true} />
 
-                <div className="absolute top-12 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleEdit(offer)
-                    }}
-                    className="p-2.5 bg-white text-primary rounded-lg shadow-lg hover:scale-110 transition border border-primary/20"
-                    title="Editar"
-                  >
-                    <Edit2 className="w-5 h-5" />
-                  </button>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      handleDeleteClick(offer.id)
-                    }}
-                    className="p-2.5 bg-white text-red-600 rounded-lg shadow-lg hover:scale-110 transition border border-red-600/20"
-                    title="Eliminar"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  
+                  <div className="absolute left-3 bottom-16 flex gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleEdit(offer)
+                      }}
+                      className="p-2 bg-white/95 text-primary rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
+                      title={t('actions.edit')}
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteClick(offer.id)
+                      }}
+                      className="p-2 bg-white/95 text-destructive rounded-lg transition-all hover:scale-110 shadow-lg hover:shadow-xl"
+                      title={t('actions.delete')}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               </div>
             ))}
@@ -311,12 +325,12 @@ export default function MyOffersPage() {
         isOpen={confirmDelete.isOpen}
         onClose={() => setConfirmDelete({ isOpen: false, offerId: null })}
         onConfirm={handleConfirmDelete}
-        title="¿Eliminar oferta?"
-        message="Esta acción no se puede deshacer."
-        confirmText="Sí, eliminar"
-        cancelText="Cancelar"
+        title={t('confirmDelete.title')}
+        message={t('confirmDelete.message')}
+        confirmText={t('confirmDelete.confirm')}
+        cancelText={t('confirmDelete.cancel')}
         type="danger"
       />
     </div>
-  );
+  )
 }

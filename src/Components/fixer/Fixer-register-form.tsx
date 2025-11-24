@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { initialRegistrationSchema, type InitialRegistrationData } from "@/app/lib/validations/fixer-schemas"
 import { AlertCircle } from "lucide-react"
 import { useState } from "react"
+import { useTranslations } from "next-intl"
 
 interface FixerRegisterFormProps {
   onSubmit: (data: InitialRegistrationData) => void
@@ -16,6 +17,7 @@ export default function FixerRegisterForm({
   submitButtonText = "Registrar",
   defaultValues,
 }: FixerRegisterFormProps) {
+  const t= useTranslations("becomeFixer");
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const {
@@ -45,7 +47,7 @@ export default function FixerRegisterForm({
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
       <div className="space-y-1">
         <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          Nombre Completo <span className="text-red-500">*</span>
+          {t("completeName")} <span className="text-red-500">*</span>
         </label>
         <Controller
           name="name"
@@ -83,7 +85,7 @@ export default function FixerRegisterForm({
 
       <div className="space-y-1">
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          Email <span className="text-red-500">*</span>
+          {t("eMail")} <span className="text-red-500">*</span>
         </label>
         <Controller
           name="email"
@@ -108,7 +110,7 @@ export default function FixerRegisterForm({
 
       <div className="space-y-1">
         <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-          Teléfono <span className="text-red-500">*</span>
+          {t("phone")} <span className="text-red-500">*</span>
         </label>
         <Controller
           name="phone"
@@ -128,7 +130,7 @@ export default function FixerRegisterForm({
                 }}
               />
               <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                {field.value ? field.value.replace(/\D/g, '').length : 0}/10 dígitos
+                {field.value ? field.value.replace(/\D/g, '').length : 0} {t("digits")}
               </span>
             </div>
           )}
