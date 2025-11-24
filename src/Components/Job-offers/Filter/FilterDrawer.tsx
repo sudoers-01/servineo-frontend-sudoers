@@ -224,7 +224,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
       />
 
       <div
-        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-[75%] sm:w-63 bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
+        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-full max-w-[265px] md:w-63 md:max-w-none bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
