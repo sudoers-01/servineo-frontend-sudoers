@@ -218,7 +218,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
     <>
       <div
         className={`fixed inset-0 bg-black duration-300 z-40 ${
-          isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
+          isOpen ? 'opacity-0' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
       />
