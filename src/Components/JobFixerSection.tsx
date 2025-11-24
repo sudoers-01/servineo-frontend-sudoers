@@ -5,7 +5,7 @@ import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
 import { toggleJobExpanded, selectExpandedJobs } from "@/app/redux/slice/fixersByJobSlice"
 import { ChevronDown } from "lucide-react"
 import { FixerCard } from "./FixerCard"
-import { useTranslations } from "next-intl"
+//import { useTranslations } from "next-intl"
 
 interface JobFixerSectionProps {
   jobType: string

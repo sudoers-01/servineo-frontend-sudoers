@@ -1,4 +1,4 @@
-// src/app/[locale]/job-offer-list/page.tsx
+
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
