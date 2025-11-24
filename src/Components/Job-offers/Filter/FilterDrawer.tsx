@@ -42,13 +42,17 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
   const dispatch = useAppDispatch();
   const storeRating = useAppSelector((s) => s.jobOfert.rating);
 
-  // Query para obtener los conteos del backend - SOLO cuando el drawer está abierto
+  // 🔧 FIX: Enviar minRating y maxRating como rango exacto
   const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
     range: selectedRanges.length > 0 ? selectedRanges : undefined,
     city: selectedCities.length > 0 ? selectedCities[0] : undefined,
     category: selectedJobs.length > 0 ? selectedJobs : undefined,
+    minRating: selectedRating ?? undefined,
+    // Para 5 estrellas, no enviar maxRating (buscar >= 5.0)
+    // Para 1-4 estrellas, limitar al rango (ej: 4.0-4.99)
+    maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
   }, {
-    skip: !isOpen, // ⚡ No hacer query si el drawer está cerrado
+    skip: !isOpen,
   });
 
   useEffect(() => {
@@ -175,9 +179,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
 
   const getRatingCount = (starNumber: number): number => {
     if (!backendCounts?.ratings) return 0;
-    // El backend devuelve buckets como "1-2", "2-3", "3-4", "4-5", "5-6"
-    // Cada bucket representa ratings en ese rango (ej: "4-5" = ratings de 4.0 a 4.99)
-    // Para X estrellas, queremos contar ofertas con rating >= X
     const key = `${starNumber}-${starNumber + 1}`;
     return backendCounts.ratings[key] || 0;
   };
