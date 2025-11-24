@@ -274,15 +274,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
                   <div className="flex flex-col gap-2">
                     {nameOptions.map((range) => {
                       const count = getRangeCount(range.dbValue);
-                      const disabled = count === 0;
+                      // Do not disable ranges based on count. Keep them selectable even if count === 0.
+                      const disabled = false;
                       return (
                         <label
                           key={range.dbValue}
                           className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
-                            disabled ? 'opacity-50 pointer-events-none' : 'cursor-pointer hover:text-[#2B31E0]'
+                            'cursor-pointer hover:text-[#2B31E0]'
                           }`}
                         >
-                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                          <div className={`flex items-center gap-2`}>
                             <input
                               type="checkbox"
                               className="w-4 h-4 cursor-pointer flex-shrink-0"
@@ -320,7 +321,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
                       const isSelected = selectedCities.includes(city.dbValue);
                       const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(city.dbValue);
                       const count = backendCounts?.cities?.[city.dbValue] ?? 0;
-                      const disabled = count === 0 || (filtersFromStore.isAutoSelectedCity && !isAutoMarked);
+                      // Only disable if auto-selected logic requires it; do not disable when count === 0
+                      const disabled = filtersFromStore.isAutoSelectedCity && !isAutoMarked;
 
                       return (
                         <label
@@ -331,16 +333,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
                               : 'cursor-pointer hover:text-[#2B31E0]'
                           }`}
                         >
-                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
-                            <input
-                              type="checkbox"
-                              className="w-4 h-4 flex-shrink-0 cursor-pointer"
-                              checked={isSelected}
-                              onChange={() => handleCityChange(city.dbValue)}
-                              disabled={disabled}
-                            />
-                            <span className="truncate">{city.label}</span>
-                          </div>
+                            <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 flex-shrink-0 cursor-pointer"
+                                checked={isSelected}
+                                onChange={() => handleCityChange(city.dbValue)}
+                                disabled={disabled}
+                              />
+                              <span className="truncate">{city.label}</span>
+                            </div>
                           {loadingCounts ? (
                             <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
                           ) : (
@@ -369,7 +371,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
                       const isSelected = selectedJobs.includes(job.dbValue);
                       const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
                       const count = backendCounts?.categories?.[job.dbValue] ?? 0;
-                      const disabled = count === 0 || (filtersFromStore.isAutoSelectedCategory && !isAutoMarked);
+                      // Only disable if auto-selected logic requires it; do not disable when count === 0
+                      const disabled = filtersFromStore.isAutoSelectedCategory && !isAutoMarked;
 
                       return (
                         <label
@@ -418,7 +421,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, 
                       const starNumber = idx + 1;
                       const filled = (selectedRating ?? 0) >= starNumber;
                       const count = getRatingCount(starNumber);
-                      const disabled = count === 0;
+                      // Keep rating buttons enabled even if count === 0
+                      const disabled = false;
                       
                       return (
                         <div key={starNumber} className="flex flex-col items-center gap-1">
