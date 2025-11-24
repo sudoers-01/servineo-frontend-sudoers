@@ -133,6 +133,7 @@ export default function FixerDashboardPage() {
                         {activeTab === "certs" && <CertificationsSection />}
                         {activeTab === "experience" && <ExperienceSection />}
                         {activeTab === "portfolio" && <PortfolioSection />}
+                        
                     </div>
                 </div>
             </div>
