@@ -18,11 +18,13 @@ export interface OfferData {
 
 export interface FilterState {
   range: string[];
-  city: string;
+  city: string[];
   category: string[];
   tags?: string[];
   minPrice?: number | null;
   maxPrice?: number | null;
+  isAutoSelectedCategory?: boolean;
+  isAutoSelectedCity?: boolean;
 }
 
 export interface PaginationState {
@@ -60,7 +62,7 @@ export interface OfferResponse {
 
 export interface OfferFilters {
   range?: string[];
-  city?: string;
+  city?: string[];
   category?: string[];
   tags?: string[];
   minPrice?: number | null;

@@ -63,7 +63,7 @@ export const jobOffersApi = baseApi.injectEndpoints({
         
         if (params.search?.trim()) urlParams.append('search', params.search);
         if (params.filters?.range?.length) params.filters.range.forEach(r => urlParams.append('range', r));
-        if (params.filters?.city) urlParams.append('city', params.filters.city);
+        if (params.filters?.city?.length) urlParams.append('city', params.filters.city.join(','));
         if (params.filters?.category?.length) params.filters.category.forEach(c => urlParams.append('category', c));
         if (params.filters?.tags?.length) urlParams.append('tags', params.filters.tags.join(','));
         if (params.filters?.minPrice != null) urlParams.append('minPrice', String(params.filters.minPrice));

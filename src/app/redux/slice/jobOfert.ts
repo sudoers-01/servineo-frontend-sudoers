@@ -13,7 +13,7 @@ const getDefaultState = (): JobOffersState => ({
   error: null,
   filters: {
     range: [],
-    city: '',
+    city: [],
     category: [],
   },
   sortBy: 'recent',
