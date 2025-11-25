@@ -64,7 +64,7 @@ export default async function RootLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={`${roboto.className}`}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ReduxProvider>
             <div className="text-black fixed bottom-7 right-7 z-[9999]">
