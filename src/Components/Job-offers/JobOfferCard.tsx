@@ -11,7 +11,7 @@ import type { JobOfferData } from '@/types/jobOffers';
 
 interface JobOfferCardProps {
   offer: JobOfferData;
-  viewMode?: 'grid' | 'list';
+  viewMode?: 'grid' | 'list'| string;
   onClick?: (offer: JobOfferData) => void;
   onEdit?: (offer: JobOfferData) => void;
   onDelete?: (id: string) => void;
