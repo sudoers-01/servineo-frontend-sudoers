@@ -23,20 +23,51 @@ export interface JobOffer {
 }
 
 export interface Fixer {
-    id: string
-    name: string
-    email?: string
-    phone: string
-    photo?: string
-    city: string
-    rating?: number
-    completedJobs: number
-    services: string[]
-    bio?: string
-    joinDate: Date
-    jobOffers: JobOffer[]
-    paymentMethods: string[]
-    whatsapp?: string
+  id: string
+  name: string
+  email?: string
+  phone: string
+  photo?: string
+  city: string
+  rating?: number
+  completedJobs: number
+  services: string[]
+  bio?: string
+  joinDate: string
+  location?: {
+    lat: number
+    lng: number
+    address?: string
+  } | null
+  jobOffers: JobOffer[]
+  paymentMethods: string[]
+  whatsapp?: string
+  cancelledJobs?: number                                          
+  monthlyData?: { month: string; completados: number; cancelados: number }[]
+}
+
+export type JobOfferBackend = {
+  _id?: string
+  id?: string
+  title: string
+  description: string
+  city: string
+  services: string[]
+  photos: string[]
+  price: number
+  fixerId: string
+  fixerName: string
+  whatsapp: string
+  location: {
+    lat: number
+    lng: number
+    address: string
+  }
+  createdAt: string
+  tags?: string[]
+  fixerPhoto?: string
+  rating?: number
+  completedJobs?: number
 }
 
 // Mock de ubicación del usuario
@@ -62,21 +93,23 @@ export const availableServices = [
 
 // Mock de FIXER actual (simulando usuario logueado)
 export const currentFixer: Fixer = {
-    id: "fixer-001",
-    name: "Juan Carlos Pérez",
-    email: "juan.perez@example.com",
-    phone: "59170341618",
-    whatsapp: "59170341618",
-    photo: "/img/avatars/fixer-001.jpg",
-    city: "Cochabamba",
-    rating: 4.8,
-    completedJobs: 124,
-    services: ["Plomería", "Electricidad", "Carpintería"],
-    bio: "Soy un técnico con más de 5 años de experiencia en trabajos de electricidad y plomería. Me apasiona mi trabajo y siempre busco la satisfacción del cliente.",
-    joinDate: new Date("2022-01-15"),
-    jobOffers: [],
-    paymentMethods: ["Efectivo", "Transferencia", "QR"],
+  id: "fixer-001",
+  name: "Juan Carlos Pérez",
+  email: "juan.perez@example.com",
+  phone: "59170341618",
+  whatsapp: "59170341618",
+  photo: "/img/avatars/fixer-001.jpg",
+  city: "Cochabamba",
+  rating: 4.8,
+  completedJobs: 124,
+  services: ["Plomería", "Electricidad", "Carpintería"],
+  bio: "Soy un técnico con más de 5 años de experiencia en trabajos de electricidad y plomería. Me apasiona mi trabajo y siempre busco la satisfacción del cliente.",
+  joinDate: "2022-01-15",
+  jobOffers: [],
+  paymentMethods: ["Efectivo", "Transferencia", "QR"],
 }
+
+// Duplicate mock offers and fixers removed — the file keeps a single set of mockFixers and _mockJobOffers further down.
 
 // Mock de ofertas de trabajo
 let _mockJobOffers: JobOffer[] = [

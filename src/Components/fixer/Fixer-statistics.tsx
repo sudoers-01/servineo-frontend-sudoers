@@ -2,9 +2,32 @@
 
 import { useTranslations } from 'next-intl'
 import { Pie, PieChart, Cell, Tooltip } from "recharts"
-import { useGetJobStatisticsQuery, JobLog } from '../../app/redux/services/statisticsApi';
+import { useGetJobStatisticsQuery } from '../../app/redux/services/statisticsApi';
 
-const CustomTooltip = ({ active, payload }: any) => {
+
+const COLORS = {
+    completed: "blue",
+    inProgress: "#3B82F6",
+    pending: "#1AA7ED",
+}
+
+
+
+interface TooltipPayload {
+    name: string;
+    value: number;
+    payload: {
+        estado: string;
+        cantidad: number;
+    };
+}
+
+interface TooltipProps {
+    active?: boolean;
+    payload?: TooltipPayload[];
+}
+
+const CustomTooltip = ({ active, payload }: TooltipProps) => {
     if (active && payload && payload.length) {
         return (
             <div className="p-2 bg-white border border-gray-300 shadow-md rounded-md text-sm">
@@ -19,13 +42,6 @@ export default function EstadisticasTrabajos() {
     const t = useTranslations('statistics.jobs')
     
     const { data: jobLogs, isLoading, isError } = useGetJobStatisticsQuery();
-
-    // Definir colores usando las claves traducibles
-    const COLORS = {
-        completed: "blue",
-        inProgress: "#3B82F6",
-        pending: "#1AA7ED",
-    }
 
     if (isLoading) {
         return <div className="text-center p-8">{t('loading')}</div>;
@@ -44,7 +60,6 @@ export default function EstadisticasTrabajos() {
     
     const stats = dailyStatusLog.metadata;
 
-    // Usar claves en inglés internamente para la lógica
     const chartData = [
         { estado: "completed", estadoLabel: t('status.completed'), cantidad: stats.completed },
         { estado: "inProgress", estadoLabel: t('status.inProgress'), cantidad: stats.inProgress },
@@ -118,6 +133,6 @@ export default function EstadisticasTrabajos() {
                     <span>{totalTrabajos} {t('jobs')}</span>
                 </div>
             </div>
-        </div>
-    )
+        </div>
+    )
 }
