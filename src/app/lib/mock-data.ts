@@ -33,10 +33,41 @@ export interface Fixer {
   completedJobs: number
   services: string[]
   bio?: string
-  joinDate: Date
+  joinDate: string
+  location?: {
+    lat: number
+    lng: number
+    address?: string
+  } | null
   jobOffers: JobOffer[]
   paymentMethods: string[]
   whatsapp?: string
+  cancelledJobs?: number                                          
+  monthlyData?: { month: string; completados: number; cancelados: number }[]
+}
+
+export type JobOfferBackend = {
+  _id?: string
+  id?: string
+  title: string
+  description: string
+  city: string
+  services: string[]
+  photos: string[]
+  price: number
+  fixerId: string
+  fixerName: string
+  whatsapp: string
+  location: {
+    lat: number
+    lng: number
+    address: string
+  }
+  createdAt: string
+  tags?: string[]
+  fixerPhoto?: string
+  rating?: number
+  completedJobs?: number
 }
 
 // Mock de ubicación del usuario
@@ -73,7 +104,7 @@ export const currentFixer: Fixer = {
   completedJobs: 124,
   services: ["Plomería", "Electricidad", "Carpintería"],
   bio: "Soy un técnico con más de 5 años de experiencia en trabajos de electricidad y plomería. Me apasiona mi trabajo y siempre busco la satisfacción del cliente.",
-  joinDate: new Date("2022-01-15"),
+  joinDate: "2022-01-15",
   jobOffers: [],
   paymentMethods: ["Efectivo", "Transferencia", "QR"],
 }
@@ -262,7 +293,7 @@ export const mockFixers = [
     completedJobs: 124,
     services: ["Plomería", "Electricidad", "Carpintería"],
     bio: "Soy un técnico con más de 5 años de experiencia...",
-    joinDate: new Date("2022-01-15"),
+    joinDate: "2022-01-15",
     paymentMethods: ["Efectivo", "Transferencia", "QR"],
     jobOffers: [
       {
