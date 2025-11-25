@@ -17,6 +17,7 @@ interface JobOfferCardProps {
   onDelete?: (id: string) => void;
   className?: string;
   readOnly?: boolean;
+  
 }
 
 export const JobOfferCard: React.FC<JobOfferCardProps> = ({
