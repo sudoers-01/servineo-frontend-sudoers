@@ -101,7 +101,7 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {fixer.jobOffers.slice(0, 2).map((offer: any) => (
-              <JobOfferCard key={offer.id ?? offer._id} offer={convertToJobOfferData(offer)}  onClick={() => handleOfferClick(convertToJobOfferData(offer))} />
+              <JobOfferCard key={offer.id ?? offer._id} offer={convertToJobOfferData(offer)} viewMode="grid" onClick={() => handleOfferClick(convertToJobOfferData(offer))} />
             ))}
           </div>
         </div>
