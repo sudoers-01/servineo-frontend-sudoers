@@ -102,5 +102,3 @@ export default function DiscordButton({ onNotify }: DiscordButtonProps) {
   );
 }
 
-
-

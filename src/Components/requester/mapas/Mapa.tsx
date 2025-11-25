@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useRouter } from "next/navigation";
 import { enviarUbicacion } from "@/app/redux/services/auth/registro";
 
 const customIcon = new L.Icon({
@@ -28,6 +29,7 @@ export default function MapaLeaflet() {
   const [pais, setPais] = useState<string | null>(null);
   const [cargandoDireccion, setCargandoDireccion] = useState(false);
 
+  const router = useRouter();
   const ejecutado = useRef(false);
 
   useEffect(() => {
@@ -103,7 +105,7 @@ try {
       pais || null
     );
 
-    window.location.href = "/";
+    router.push("/");
   } catch (error) {
     console.error(error);
   }

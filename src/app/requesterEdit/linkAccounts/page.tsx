@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Mail } from "lucide-react";
-import { FaGithub, FaDiscord } from "react-icons/fa";
+import { FaGithub } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
 import {
   obtenerMetodosCliente,
@@ -12,7 +12,6 @@ import {
 import VincularCorreo from "./vinculoCuenta/vincularCorreo";
 import VincularGoogle from "./vinculoCuenta/vincularGoogle";
 import VincularGithub from "./vinculoCuenta/vincularGithub";
-import VincularDiscord from "./vinculoCuenta/vincularDiscord";
 
 
 interface Props {
@@ -23,7 +22,6 @@ const ALL_PROVIDERS_META = [
   { provider: "google", name: "Google" },
   { provider: "github", name: "GitHub" },
   { provider: "email", name: "Correo Electrónico" },
-  { provider: "discord", name: "Discord" },
 ] as const;
 
 interface FullAuthProvider extends AuthProvider {
@@ -135,9 +133,6 @@ export default function AccountLoginSettings({ token = "" }: Props) {
             {method.provider === "email" && (
               <Mail size={28} className="text-gray-800" />
             )}
-            {method.provider === "discord" && (
-              <FaDiscord size={30} className="text-[#5865F2]" />
-            )}
 
             <div className="flex flex-col">
               <span className="text-sm font-semibold text-gray-800 flex items-center gap-2">
@@ -204,14 +199,6 @@ export default function AccountLoginSettings({ token = "" }: Props) {
                 );
               }
 
-              if (method.provider === "discord") {
-                return (
-                  <VincularDiscord
-                    key="discord"
-                    onLinked={() => handleLink("discord")}
-                  />
-                );
-              }
               if (method.provider === "email") {
                 // Aquí reemplazamos el botón por el formulario directo
                 return (

@@ -18,12 +18,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
+  const readUserFromStorage = () => {
+    const storedUser = localStorage.getItem("servineo_user");
+    try {
+      if (storedUser && storedUser !== "undefined") {
+        return JSON.parse(storedUser) as User;
+      }
+      return null;
+    } catch {
+      console.error("Usuario malformado en localStorage, reseteando");
+      localStorage.removeItem("servineo_user");
+      return null;
+    }
+  };
+
   useEffect(() => {
     try {
-      const storedUser = localStorage.getItem("servineo_user");
-      if (storedUser) {
-        setUser(JSON.parse(storedUser));
-      }
+      setUser(readUserFromStorage());
     } catch (e) {
       console.error("Error leyendo usuario:", e);
       localStorage.removeItem("servineo_user");
@@ -39,9 +50,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       .then((data) => {
         if (data.valid && data.user) {
           setUser((prev) => {
-            const newUser = { ...prev, ...data.user };
-            localStorage.setItem("servineo_user", JSON.stringify(newUser));
-            return newUser;
+            const currentStored = readUserFromStorage();
+            if (currentStored) {
+              const storedName = currentStored.name || '';
+              const backendName = data.user.name || '';
+          
+              if (storedName !== backendName) {
+                console.log("🔄 localStorage tiene nombre diferente al backend:", {
+                  localStorage: storedName,
+                  backend: backendName,
+                  usando: "localStorage (más reciente)"
+                });
+              }
+
+              const userFromStorage: User = {
+                id: currentStored.id,
+                email: currentStored.email || '',
+                name: currentStored.name,
+                picture: currentStored.picture,
+              };
+              return userFromStorage;
+            } else {
+            
+              localStorage.setItem("servineo_user", JSON.stringify(data.user));
+              return data.user;
+            }
           });
         } else {
           localStorage.removeItem("servineo_token");
@@ -58,10 +91,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (user) {
-      localStorage.setItem("servineo_user", JSON.stringify(user));
-    }
-  }, [user]);
+    const syncUser = () => {
+      setUser(readUserFromStorage());
+    };
+
+    window.addEventListener("servineo_user_updated", syncUser);
+    window.addEventListener("storage", syncUser);
+
+    return () => {
+      window.removeEventListener("servineo_user_updated", syncUser);
+      window.removeEventListener("storage", syncUser);
+    };
+  }, []);
 
   const logout = () => {
     localStorage.removeItem("servineo_token");
@@ -84,3 +125,4 @@ export function useAuth(): AuthContextType {
   }
   return context;
 }
+

@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { useRouter } from "next/navigation";
 import { useAuth } from "../auth/usoAutentificacion";
 import { enviarUbicacion, enviarTokenGoogle } from "@/app/redux/services/auth/registro";
 
@@ -29,6 +30,7 @@ export default function MapaLeaflet() {
   const [pais, setPais] = useState<string | null>(null);
   const [cargandoDireccion, setCargandoDireccion] = useState(false);
 
+  const router = useRouter();
   const ejecutado = useRef(false);
   const { setUser } = useAuth();
 
@@ -130,7 +132,7 @@ try {
         pais || null
       );
 
-      window.location.href = "/";
+      router.push("/");
     } catch (error) {
       console.error(error);
     }

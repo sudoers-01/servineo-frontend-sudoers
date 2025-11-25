@@ -104,7 +104,7 @@ let _mockJobOffers: JobOffer[] = [
     
   },
   {
-    id: "offer-001",
+    id: "offer-002",
     fixerId: "fixer-001",
     fixerName: "Juan Carlos Pérez",
     fixerPhoto: "/img/avatars/fixer-001.jpg",
@@ -127,7 +127,7 @@ let _mockJobOffers: JobOffer[] = [
     
   },
   {
-    id: "offer-001",
+    id: "offer-003",
     fixerId: "fixer-001",
     fixerName: "Juan Carlos Pérez",
     fixerPhoto: "/img/avatars/fixer-001.jpg",
@@ -150,7 +150,7 @@ let _mockJobOffers: JobOffer[] = [
     
   },
   {
-    id: "offer-001",
+    id: "offer-004",
     fixerId: "fixer-001",
     fixerName: "Juan Carlos Pérez",
     fixerPhoto: "/img/avatars/fixer-001.jpg",
@@ -173,7 +173,7 @@ let _mockJobOffers: JobOffer[] = [
     
   },
   {
-    id: "offer-001",
+    id: "offer-005",
     fixerId: "fixer-001",
     fixerName: "Juan Carlos Pérez",
     fixerPhoto: "/img/avatars/fixer-001.jpg",
@@ -196,7 +196,7 @@ let _mockJobOffers: JobOffer[] = [
     
   },
   {
-    id: "offer-001",
+    id: "offer-006",
     fixerId: "fixer-001",
     fixerName: "Juan Carlos Pérez",
     fixerPhoto: "/img/avatars/fixer-001.jpg",
