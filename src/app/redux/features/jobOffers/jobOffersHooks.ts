@@ -186,7 +186,29 @@ export function useInitialUrlParams() {
       dispatch(enablePersistence());
     } else {
       const restored = restoreFromStorage();
-      dispatch(restoreSavedState(restored));
+      
+      // 🔧 MIGRACIÓN: Convertir city de string a string[]
+      const migratedState = {
+        ...restored,
+        filters: {
+          ...restored.filters,
+          city: (() => {
+            const cityValue = restored.filters.city;
+            // Si es string, convertir a array
+            if (typeof cityValue === 'string') {
+              return cityValue ? [cityValue] : [];
+            }
+            // Si ya es array, usar tal cual
+            if (Array.isArray(cityValue)) {
+              return cityValue;
+            }
+            // Fallback
+            return [];
+          })(),
+        }
+      };
+      
+      dispatch(restoreSavedState(migratedState));
     }
   }, [searchParams, dispatch]);
 }
@@ -219,8 +241,6 @@ export function useSyncUrlParams() {
 
     const queryString = urlParams.toString();
     const target = queryString ? `?${queryString}` : '';
-
-    if (typeof window !== 'undefined' && window.location.search === target) return;
 
     router.replace(target, { scroll: false });
   }, [params, router]);

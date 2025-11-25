@@ -74,7 +74,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
   // Limpiar selección cuando cambia clearSignal
   useEffect(() => {
-    if (!hasRestoredFromUrl) return;
+    if (!hasRestoredFromUrl || !clearSignal) return;
 
     setSelectedCategories([]);
     onFilterChange?.({ categories: [] });

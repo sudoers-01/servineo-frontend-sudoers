@@ -34,9 +34,28 @@ interface PriceRangesApiResponse {
   };
 }
 
+// ===== TIPOS PARA FILTER COUNTS =====
+interface FilterCountsResponse {
+  ranges: Record<string, number>;
+  cities: Record<string, number>;
+  categories: Record<string, number>;
+  ratings: Record<string, number>;
+  total: number;
+}
+
+interface FilterCountsParams {
+  range?: string[];
+  city?: string;
+  category?: string[];
+  search?: string;
+  minRating?: number;
+  maxRating?: number;
+}
+
 // Extender el baseApi con endpoints específicos de ofertas
 export const jobOffersApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+
     // 1. Query principal
     getOffers: builder.query<OfferResponse, OfferParams>({
       query: (params) => {
@@ -44,7 +63,7 @@ export const jobOffersApi = baseApi.injectEndpoints({
         
         if (params.search?.trim()) urlParams.append('search', params.search);
         if (params.filters?.range?.length) params.filters.range.forEach(r => urlParams.append('range', r));
-        if (params.filters?.city) urlParams.append('city', params.filters.city);
+        if (params.filters?.city?.length) urlParams.append('city', params.filters.city.join(','));
         if (params.filters?.category?.length) params.filters.category.forEach(c => urlParams.append('category', c));
         if (params.filters?.tags?.length) urlParams.append('tags', params.filters.tags.join(','));
         if (params.filters?.minPrice != null) urlParams.append('minPrice', String(params.filters.minPrice));
@@ -62,7 +81,7 @@ export const jobOffersApi = baseApi.injectEndpoints({
       },
       providesTags: ['JobOffer'],
     }),
-    
+
     // 2. Ofertas recientes (Home)
     getRecentOffers: builder.query<OfferResponse, { category?: string; limit?: number }>({
       query: ({ category, limit = 8 }) => {
@@ -76,7 +95,7 @@ export const jobOffersApi = baseApi.injectEndpoints({
       },
       providesTags: ['JobOffer'],
     }),
-    
+
     // 3. Tags dinámicos
     getTags: builder.query<string[], { search?: string; category?: string[] }>({
       query: ({ search, category }) => {
@@ -93,7 +112,7 @@ export const jobOffersApi = baseApi.injectEndpoints({
         return [];
       },
     }),
-    
+
     // 4. Rangos de precios
     getPriceRanges: builder.query<PriceRangesResponse, void>({
       query: () => {
@@ -101,7 +120,6 @@ export const jobOffersApi = baseApi.injectEndpoints({
       },
       transformResponse: (response: PriceRangesApiResponse) => {
         
-        // Si la respuesta ya tiene el formato correcto
         if (response.ranges) {
           return {
             min: response.min ?? null,
@@ -110,7 +128,6 @@ export const jobOffersApi = baseApi.injectEndpoints({
           };
         }
         
-        // Si viene envuelto en data
         if (response.data?.ranges) {
           return {
             min: response.data.min ?? null,
@@ -119,7 +136,6 @@ export const jobOffersApi = baseApi.injectEndpoints({
           };
         }
         
-        // Fallback: estructura vacía
         return {
           min: null,
           max: null,
@@ -127,6 +143,26 @@ export const jobOffersApi = baseApi.injectEndpoints({
         };
       },
     }),
+
+    // 5. Filter Counts (AGREGADO SIGUIENDO TU MISMO FORMATO)
+    getFilterCounts: builder.query<FilterCountsResponse, FilterCountsParams>({
+      query: (params) => {
+        const urlParams = new URLSearchParams();
+
+        if (params.range?.length) params.range.forEach(r => urlParams.append('range', r));
+        if (params.city) urlParams.set('city', params.city);
+        if (params.category?.length) params.category.forEach(c => urlParams.append('category', c));
+        if (params.search) urlParams.set('search', params.search);
+        if (params.minRating != null) urlParams.set('minRating', String(params.minRating));
+        if (params.maxRating != null) urlParams.set('maxRating', String(params.maxRating));
+
+        return `/devmaster/filter-counts?${urlParams.toString()}`;
+      },
+      transformResponse: (response: { success: boolean; data: FilterCountsResponse }) => {
+        return response.data;
+      },
+    }),
+
   }),
 });
 
@@ -136,4 +172,6 @@ export const {
   useGetRecentOffersQuery,
   useGetTagsQuery,
   useGetPriceRangesQuery,
+  useGetFilterCountsQuery,
+  useLazyGetFilterCountsQuery,
 } = jobOffersApi;
