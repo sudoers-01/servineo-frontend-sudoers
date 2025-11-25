@@ -58,10 +58,10 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
 
   // Restaurar desde Redux/localStorage al cargar
   React.useEffect(() => {
-      if (searchFromStore) {
-        setValue(searchFromStore);
-     }
-  }, []);
+    if (searchFromStore) {
+      setValue(searchFromStore);
+    }
+  }, [searchFromStore]);
 
   // Sincronizar con Redux
   React.useEffect(() => {
@@ -75,7 +75,6 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setValue(newValue);
-    const dispatch = useAppDispatch();//
     setPreviewValue(null);
     const { isValid, error } = validateSearch(newValue);
     setError(isValid ? undefined : error);

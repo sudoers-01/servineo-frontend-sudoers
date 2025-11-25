@@ -12,8 +12,6 @@ interface AdvancedSearchButtonProps {
 }
 
 export function AdvancedSearchButton({
-  src = '/img/advSearch.jpg',
-  alt,
 }: AdvancedSearchButtonProps) {
   const t = useTranslations('search');
   const router = useRouter();
