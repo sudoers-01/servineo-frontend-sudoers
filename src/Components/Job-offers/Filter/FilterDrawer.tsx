@@ -19,7 +19,7 @@ interface FilterDrawerProps {
   onReset?: () => void;
 }
 
-export function FilterDrawer({ isOpen, onClose, onFiltersApply, onRatingChange, onReset }: FilterDrawerProps) {
+export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: FilterDrawerProps) {
   const filtersFromStore = useAppSelector((state) => state.jobOfert.filters);
 
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
