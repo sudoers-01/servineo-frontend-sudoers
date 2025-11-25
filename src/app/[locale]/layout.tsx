@@ -63,9 +63,9 @@ export default async function RootLayout({ children, params }: Props) {
   const messages = await loader();
 
   return (
-    <html lang={locale} className={`${roboto.className}`}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <NextIntlClientProvider locale={locale} messages={messages}>
+  <html lang={locale} className={roboto.className}>
+    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <NextIntlClientProvider locale={locale} messages={messages}>
         <ReduxProvider>
           <div className="">
             <TopMenu/>
@@ -73,8 +73,8 @@ export default async function RootLayout({ children, params }: Props) {
           {children}
           <TranslationButton/>
         </ReduxProvider>
-        </NextIntlClientProvider>
-      </body>
-    </html>
-  );
+      </NextIntlClientProvider>
+    </body>
+  </html>
+);
 }
