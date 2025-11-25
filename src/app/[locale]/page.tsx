@@ -24,9 +24,9 @@ export default function Home() {
 
       <ServicesSection />
       <HowItWorksSection />
-      
+
       <CTASection />
-        <FooterSection />
+      <FooterSection />
     </div>
   );
 }
