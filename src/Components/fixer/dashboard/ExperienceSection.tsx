@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, Building2, Calendar, Briefcase } from "lucide-reac
 import { IExperience } from "@/types/fixer-profile"
 import { Modal } from "@/Components/Modal"
 import { useForm } from "react-hook-form"
+import { useGetExperiencesByFixerQuery } from "@/app/redux/services/experiencesApi"
 
 const MOCK_EXP: IExperience[] = [
     {
@@ -23,15 +24,20 @@ const MOCK_EXP: IExperience[] = [
 
 interface ExperienceSectionProps {
     readOnly?: boolean;
+    fixerId?: string;
 }
 
-export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) {
+export function ExperienceSection({ readOnly = false, fixerId }: ExperienceSectionProps) {
     const [experiences, setExperiences] = useState<IExperience[]>(MOCK_EXP)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingExp, setEditingExp] = useState<IExperience | null>(null)
 
     const { register, handleSubmit, reset, setValue, watch } = useForm<IExperience>()
     const isCurrent = watch("isCurrent")
+
+    const { data: fixerExperiences, isLoading, isError } = useGetExperiencesByFixerQuery(fixerId!, {
+        skip: !fixerId || !readOnly,
+    })
 
     const handleOpenModal = (exp?: IExperience) => {
         if (readOnly) return;
@@ -85,6 +91,20 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
         }
     }
 
+    const displayExperiences = fixerId && readOnly && fixerExperiences ? fixerExperiences : experiences
+
+    if (fixerId && readOnly) {
+        if (isLoading) {
+            return <div className="text-center p-8">Cargando experiencia...</div>
+        }
+        if (isError) {
+            return <div className="text-center p-8 text-red-600">Error al cargar la experiencia.</div>
+        }
+        if (!fixerExperiences || fixerExperiences.length === 0) {
+            return <div className="text-center p-8 text-gray-500">Este fixer aún no tiene experiencia registrada.</div>
+        }
+    }
+
     return (
         <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -104,7 +124,7 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
             </div>
 
             <div className="relative border-l-2 border-gray-200 ml-3 space-y-8 py-2">
-                {experiences.map((exp) => (
+                {displayExperiences.map((exp) => (
                     <div key={exp._id} className="relative pl-8 group">
                         {/* Timeline dot */}
                         <div className="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-600 shadow-sm" />

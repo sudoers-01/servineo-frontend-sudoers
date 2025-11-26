@@ -32,6 +32,12 @@ const nextConfig: NextConfig = {
         pathname: "/**",
 
       },
+      {
+        protocol: "https",
+        hostname: "mi-cdn.com",
+        pathname: "/**",
+
+      },
 
     ],
   },
