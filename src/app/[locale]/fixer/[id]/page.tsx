@@ -11,6 +11,10 @@ import { ExperienceSection } from "@/Components/fixer/dashboard/ExperienceSectio
 import { PortfolioSection } from "@/Components/fixer/dashboard/PortfolioSection"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/Tabs/Tabs"
 import EstadisticasTrabajos from "@/Components/fixer/Fixer-statistics"
+import { JobOfferCard } from "@/Components/Job-offers/JobOfferCard"
+import type { JobOfferData } from "@/types/jobOffers"
+import { useGetJobOffersByFixerQuery, type JobOffer } from "@/app/redux/services/jobOfferApi"
+import { useParams } from "next/navigation"
 
 // Mock data for the profile header
 const MOCK_FIXER = {
@@ -24,9 +28,34 @@ const MOCK_FIXER = {
   verified: true
 }
 
-export default function FixerProfilePage({ params }: { params: { id: string } }) {
+export default function FixerProfilePage() {
+  const params = useParams<{ locale: string; id: string }>()
+  const fixerId = params?.id
   const [activeTab, setActiveTab] = useState("resumen")
-  console.log("Fixer ID:", params.id)
+  const { data: fixerOffers, isLoading, isError } = useGetJobOffersByFixerQuery(fixerId as string)
+
+  const mapJobOfferToCardData = (offer: JobOffer): JobOfferData => ({
+    _id: offer._id || offer.id || "",
+    fixerId: offer.fixerId,
+    fixerName: offer.fixerName,
+    fixerPhoto: offer.fixerPhoto,
+    title: offer.title || "Servicio",
+    description: offer.description,
+    category: offer.services?.[0] || "otros",
+    tags: offer.tags || offer.services || [],
+    price: offer.price,
+    city: offer.city,
+    contactPhone: offer.whatsapp,
+    createdAt: offer.createdAt || new Date(),
+    rating: offer.rating,
+    photos: offer.photos,
+    allImages: offer.photos,
+    imagenUrl: offer.photos && offer.photos.length > 0 ? offer.photos[0] : undefined,
+    completedJobs: offer.completedJobs,
+    location: offer.location ? [offer.location.address] : undefined,
+  })
+
+  const mappedOffers: JobOfferData[] = fixerOffers?.map(mapJobOfferToCardData) || []
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Profile Header */}
@@ -110,16 +139,56 @@ export default function FixerProfilePage({ params }: { params: { id: string } })
 
             <section>
               <h2 className="text-xl font-bold text-gray-900 mb-4">Ofertas Destacadas</h2>
-              <JobOffersSection readOnly />
+              {isLoading && (
+                <p className="text-gray-500 text-sm">Cargando ofertas...</p>
+              )}
+              {isError && (
+                <p className="text-red-500 text-sm">No se pudieron cargar las ofertas de este fixer.</p>
+              )}
+              {!isLoading && !isError && mappedOffers.length === 0 && (
+                <p className="text-gray-500 text-sm">Este fixer aún no tiene ofertas publicadas.</p>
+              )}
+              {!isLoading && !isError && mappedOffers.length > 0 && (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {mappedOffers.map((offer) => (
+                    <JobOfferCard
+                      key={offer._id}
+                      offer={offer}
+                      readOnly
+                      className="h-full"
+                    />
+                  ))}
+                </div>
+              )}
             </section>
           </TabsContent>
 
           <TabsContent value="ofertas">
-            <JobOffersSection readOnly />
+            {isLoading && (
+              <p className="text-gray-500 text-sm">Cargando ofertas...</p>
+            )}
+            {isError && (
+              <p className="text-red-500 text-sm">No se pudieron cargar las ofertas de este fixer.</p>
+            )}
+            {!isLoading && !isError && mappedOffers.length === 0 && (
+              <p className="text-gray-500 text-sm">Este fixer aún no tiene ofertas publicadas.</p>
+            )}
+            {!isLoading && !isError && mappedOffers.length > 0 && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mappedOffers.map((offer) => (
+                  <JobOfferCard
+                    key={offer._id}
+                    offer={offer}
+                    readOnly
+                    className="h-full"
+                  />
+                ))}
+              </div>
+            )}
           </TabsContent>
 
           <TabsContent value="experiencia">
-            <ExperienceSection readOnly />
+            <ExperienceSection readOnly fixerId={fixerId as string} />
           </TabsContent>
 
           <TabsContent value="certificaciones">
