@@ -24,7 +24,8 @@
     "Soldador": "Welder",
     "Techador": "Roofer",
     "Vidriero": "Glazier",
-    "Yesero": "Plasterer"
+    "Yesero": "Plasterer",
+    "Plomería": "Plumber"
   },
   "jobOffers": {
     "pageTitle": "Job Offers",

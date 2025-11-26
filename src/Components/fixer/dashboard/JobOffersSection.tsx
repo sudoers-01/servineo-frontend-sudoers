@@ -1,43 +1,63 @@
 "use client"
+// Force rebuild
 
 import { useState } from "react"
 import { PillButton } from "../Pill-button"
-import { Plus, Briefcase } from "lucide-react"
+import { Plus, Briefcase, Trash2 } from "lucide-react"
 import { IJobOffer } from "@/types/fixer-profile"
 import { Modal } from "@/Components/Modal"
 import { useForm } from "react-hook-form"
 import { JobOfferCard } from "@/Components/Job-offers/JobOfferCard"
 import type { JobOfferData } from "@/types/jobOffers"
-
-// Mock data for now
-const MOCK_OFFERS: IJobOffer[] = [
-    {
-        _id: "1",
-        fixerId: "fixer1",
-        fixerName: "Juan Perez",
-        fixerWhatsapp: "+591 70000000",
-        description: "Servicio de plomería general, reparación de fugas y destape de cañerías.",
-        city: "Cochabamba",
-        price: 150,
-        categories: ["Plomería"],
-        images: ["https://picsum.photos/200"],
-        createdAt: new Date().toISOString()
-    }
-]
+import { useAppSelector } from "@/app/redux/hooks"
+import {
+    useGetJobOffersByFixerQuery,
+    useCreateJobOfferMutation,
+    useUpdateJobOfferMutation,
+    useDeleteJobOfferMutation,
+    CreateJobOfferInput
+} from "@/app/redux/services/jobOfferApi"
 
 interface JobOffersSectionProps {
-    readOnly?: boolean;
+    readOnly?: boolean
 }
 
 export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
-    const [offers, setOffers] = useState<IJobOffer[]>(MOCK_OFFERS)
+    const { user } = useAppSelector((state) => state.user)
+    const userId = user?._id || ""
+
+    // API Hooks
+    const { data: apiOffers, isLoading } = useGetJobOffersByFixerQuery(userId, {
+        skip: !userId
+    })
+    const [createOffer] = useCreateJobOfferMutation()
+    const [updateOffer] = useUpdateJobOfferMutation()
+    const [deleteOffer] = useDeleteJobOfferMutation()
+
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [offerToDelete, setOfferToDelete] = useState<string | null>(null)
     const [editingOffer, setEditingOffer] = useState<IJobOffer | null>(null)
 
     const { register, handleSubmit, reset, setValue } = useForm<IJobOffer>()
 
+    // Map API offers to local IJobOffer format
+    const offers: IJobOffer[] = apiOffers?.map(offer => ({
+        _id: offer._id || offer.id,
+        fixerId: offer.fixerId,
+        fixerName: offer.fixerName,
+        fixerWhatsapp: offer.whatsapp,
+        description: offer.description,
+        city: offer.city,
+        price: offer.price,
+        categories: offer.services || [],
+        images: offer.photos || [],
+        createdAt: offer.createdAt ? new Date(offer.createdAt).toISOString() : new Date().toISOString()
+    })) || []
+
+    // === Modal de creación/edición ===
     const handleOpenModal = (offer?: IJobOffer) => {
-        if (readOnly) return;
+        if (readOnly) return
         if (offer) {
             setEditingOffer(offer)
             setValue("description", offer.description)
@@ -63,35 +83,104 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
         reset()
     }
 
-    const onSubmit = (data: IJobOffer) => {
-        if (editingOffer) {
-            setOffers(prev => prev.map(o => o._id === editingOffer._id ? { ...o, ...data } : o))
-        } else {
-            const newOffer: IJobOffer = {
-                ...data,
-                _id: Date.now().toString(),
-                fixerId: "fixer1",
-                fixerName: "Juan Perez",
-                fixerWhatsapp: "",
-                images: ["https://picsum.photos/200"],
-                createdAt: new Date().toISOString()
+    const onSubmit = async (data: IJobOffer) => {
+        if (!user) return;
+
+        // Validation
+        if (!user.telefono) {
+            alert("Por favor, actualiza tu perfil con un número de teléfono antes de crear una oferta.");
+            return;
+        }
+        if (!data.description) {
+            alert("La descripción es obligatoria.");
+            return;
+        }
+        if (!data.city) {
+            alert("La ciudad es obligatoria.");
+            return;
+        }
+        if (!data.categories || data.categories.length === 0) {
+            alert("Debes seleccionar al menos una categoría.");
+            return;
+        }
+        const price = Number(data.price);
+        if (isNaN(price) || price <= 0) {
+            alert("El precio debe ser un número mayor a 0.");
+            return;
+        }
+
+        try {
+            const offerData: CreateJobOfferInput = {
+                fixerId: user._id || "",
+                fixerName: user.name,
+                whatsapp: user.telefono,
+                description: data.description,
+                city: data.city,
+                price: price,
+                services: data.categories,
+                photos: data.images || [],
+                title: data.categories[0] || "Servicio",
+                location: user.ubicacion ? {
+                    lat: user.ubicacion.lat || 0,
+                    lng: user.ubicacion.lng || 0,
+                    address: user.ubicacion.direccion || ""
+                } : undefined
             }
-            setOffers(prev => [...prev, newOffer])
+
+            console.log("Sending offer data:", offerData);
+
+            if (editingOffer && editingOffer._id) {
+                await updateOffer({
+                    offerId: editingOffer._id,
+                    data: offerData
+                }).unwrap()
+            } else {
+                await createOffer(offerData).unwrap()
+            }
+            handleCloseModal()
+        } catch (error) {
+            console.error("Error saving offer:", error)
+            // @ts-ignore
+            console.error("Error details:", JSON.stringify(error?.data || error, null, 2))
+
+            // @ts-ignore
+            if (error?.data?.error) {
+                // @ts-ignore
+                alert(`Error: ${error.data.error}`);
+            } else {
+                alert("Error al guardar la oferta. Revisa la consola para más detalles.");
+            }
         }
-        handleCloseModal()
     }
 
-    const handleDelete = (id: string) => {
-        if (readOnly) return;
-        if (confirm("¿Estás seguro de eliminar esta oferta?")) {
-            setOffers(prev => prev.filter(o => o._id !== id))
-        }
+    // === Modal de eliminación ===
+    const openDeleteModal = (id: string) => {
+        if (readOnly) return
+        setOfferToDelete(id)
+        setIsDeleteModalOpen(true)
     }
 
-    // Helper to convert IJobOffer to JobOfferData for the card
+    const confirmDelete = async () => {
+        if (offerToDelete) {
+            try {
+                await deleteOffer(offerToDelete).unwrap()
+                setOfferToDelete(null)
+            } catch (error) {
+                console.error("Error deleting offer:", error)
+            }
+        }
+        setIsDeleteModalOpen(false)
+    }
+
+    const closeDeleteModal = () => {
+        setIsDeleteModalOpen(false)
+        setOfferToDelete(null)
+    }
+
+    // Mapeo para la tarjeta
     const mapToCardData = (offer: IJobOffer): JobOfferData => ({
         _id: offer._id || "",
-        title: offer.categories[0] || "Sin título", // Using category as title for now
+        title: offer.categories[0] || "Sin título",
         description: offer.description,
         price: offer.price,
         category: offer.categories[0] || "General",
@@ -100,15 +189,19 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
         createdAt: new Date(offer.createdAt || Date.now()),
         fixerId: offer.fixerId,
         fixerName: offer.fixerName,
-        fixerPhoto: undefined, // Add if available in IJobOffer
+        fixerPhoto: undefined,
         contactPhone: offer.fixerWhatsapp,
         allImages: offer.images,
         photos: offer.images,
         imagenUrl: offer.images[0],
-        rating: 0, // Mock
+        rating: 0,
         status: "active",
         updatedAt: new Date(offer.createdAt || Date.now())
-    });
+    })
+
+    if (isLoading) {
+        return <div className="p-8 text-center">Cargando ofertas...</div>
+    }
 
     return (
         <div className="space-y-6">
@@ -128,19 +221,27 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
                 )}
             </div>
 
+            {/* Lista de ofertas */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {offers.map((offer) => (
-                    <JobOfferCard
-                        key={offer._id}
-                        offer={mapToCardData(offer)}
-                        onEdit={!readOnly ? () => handleOpenModal(offer) : undefined}
-                        onDelete={!readOnly ? handleDelete : undefined}
-                        readOnly={readOnly}
-                        className="h-full"
-                    />
-                ))}
+                {offers.length > 0 ? (
+                    offers.map((offer) => (
+                        <JobOfferCard
+                            key={offer._id}
+                            offer={mapToCardData(offer)}
+                            onEdit={!readOnly ? () => handleOpenModal(offer) : undefined}
+                            onDelete={!readOnly ? () => openDeleteModal(offer._id!) : undefined}
+                            readOnly={readOnly}
+                            className="h-full"
+                        />
+                    ))
+                ) : (
+                    <div className="col-span-full text-center py-8 text-gray-500">
+                        No tienes ofertas publicadas.
+                    </div>
+                )}
             </div>
 
+            {/* Modal de Crear/Editar */}
             <Modal
                 open={isModalOpen}
                 onClose={handleCloseModal}
@@ -191,21 +292,47 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
                     </div>
 
                     <div className="flex justify-end gap-2 pt-4">
+                        <PillButton type="button" onClick={handleCloseModal} className="bg-gray-100 text-gray-700 hover:bg-gray-200">
+                            Cancelar
+                        </PillButton>
+                        <PillButton type="submit" className="bg-primary text-white hover:bg-blue-800">
+                            Guardar
+                        </PillButton>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Modal de Confirmación de Eliminación */}
+            <Modal
+                open={isDeleteModalOpen}
+                onClose={closeDeleteModal}
+                title="Eliminar oferta"
+                size="sm"
+            >
+                <Modal.Body>
+                    <p className="text-gray-700">
+                        ¿Estás seguro de que quieres eliminar esta oferta de forma permanente?
+                        Esta acción <strong>no se puede deshacer</strong>.
+                    </p>
+                </Modal.Body>
+
+                <Modal.Footer>
+                    <div className="flex justify-end gap-3">
                         <PillButton
-                            type="button"
-                            onClick={handleCloseModal}
+                            onClick={closeDeleteModal}
                             className="bg-gray-100 text-gray-700 hover:bg-gray-200"
                         >
                             Cancelar
                         </PillButton>
                         <PillButton
-                            type="submit"
-                            className="bg-primary text-white hover:bg-blue-800"
+                            onClick={confirmDelete}
+                            className="bg-red-600 text-white hover:bg-red-700 flex items-center gap-2"
                         >
-                            Guardar
+                            <Trash2 className="h-4 w-4" />
+                            Eliminar
                         </PillButton>
                     </div>
-                </form>
+                </Modal.Footer>
             </Modal>
         </div>
     )
