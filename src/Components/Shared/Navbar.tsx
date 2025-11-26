@@ -12,7 +12,7 @@ export function Navbar() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const isActive = (path: string) => pathname === path;
+  const isActive = (path: string) => pathname.includes(path)
 
   const handleJobOffersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -44,6 +44,18 @@ export function Navbar() {
             >
               <Briefcase className="w-4 h-4" />
               <span className="font-medium">Ofertas de Trabajo</span>
+            </Link>
+
+            <Link
+              href="/fixers-by-job"
+              className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                isActive("/fixers-by-job")
+                  ? "bg-primary text-white shadow-lg shadow-blue-500/30"
+                  : "text-blue-900 hover:bg-blue-50"
+              }`}
+            >
+              <ClipboardList className="w-4 h-4" />
+              <span className="font-medium">Fixers Por Trabajo</span>
             </Link>
 
             <Link
