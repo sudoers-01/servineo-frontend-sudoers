@@ -2,33 +2,37 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../styles/admin.module.css';
+import { mockAuth } from '../lib/mockAuth';
 
 export default function AdminLogin() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
     const router = useRouter();
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
+        setLoading(true);
         
         try {
-        const response = await fetch('/api/auth/admin/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        const data = await response.json();
+        // Usar el mock en lugar del backend real
+        const data = await mockAuth.adminLogin(email, password);
 
         if (data.success) {
+            // Guardar en localStorage
             localStorage.setItem('adminToken', data.token);
-            router.push('/user-admin/dashboard');
+            localStorage.setItem('adminUser', JSON.stringify(data.admin));
+            
+            // Redirigir al dashboard
+            router.push('/es/user-admin/dashboard');
         } else {
-            alert('Credenciales incorrectas');
+            alert(data.message || 'Credenciales incorrectas');
         }
         } catch (error) {
         console.error('Login error:', error);
         alert('Error del servidor');
+        } finally {
+        setLoading(false);
         }
     };
 
@@ -48,7 +52,7 @@ export default function AdminLogin() {
                 id="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
+                placeholder="admin@servineo.com"
                 required
             />
             </div>
@@ -60,7 +64,7 @@ export default function AdminLogin() {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="admin123"
                 required
             />
             </div>
@@ -69,19 +73,18 @@ export default function AdminLogin() {
             <a href="#">Forgot password</a>
             </div>
 
-            <button type="submit" className={styles.loginButton}>
-            Sign In
+            <button 
+            type="submit" 
+            className={styles.loginButton}
+            disabled={loading}
+            >
+            {loading ? 'Loading...' : 'Sign In'}
             </button>
 
-            <div className={styles.signupLink}>
-            <span>Dont have an account? </span>
-            <a href="#">Sign Up</a>
-            </div>
-
-            <div className={styles.googleLogin}>
-            <button type="button" className={styles.googleButton}>
-                Sign in with Google
-            </button>
+            <div className={styles.demoCredentials}>
+            <p><strong>Demo Credentials:</strong></p>
+            <p>Email: admin@servineo.com</p>
+            <p>Password: admin123</p>
             </div>
         </form>
         </div>
