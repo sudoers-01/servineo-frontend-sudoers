@@ -182,14 +182,10 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
         return
       }
 
-      const paymentMethods = []
-      if (data.metodoPago.hasEfectivo) paymentMethods.push({ type: 'efectivo' })
-      if (data.metodoPago.qr) paymentMethods.push({ type: 'qr' })
-      if (data.metodoPago.tarjetaCredito) paymentMethods.push({ type: 'tarjeta' })
-
       const payload = {
         id: user._id?.toString(), // ← por si acaso es ObjectId
         profile: {
+          telefono: user.telefono,
           ci: data.ci.trim(),
 
           // Solo servicios oficiales (los que empiezan con "svc-")

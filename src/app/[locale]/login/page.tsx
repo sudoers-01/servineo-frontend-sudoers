@@ -14,13 +14,11 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { useAppDispatch } from "@/app/redux/hooks";
 import { setUser } from "@/app/redux/slice/userSlice";
 
-/* ----------------------------- Zod schema ----------------------------- */
 const loginSchema = z.object({
   email: z.string().email("Debe ingresar un correo válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
-/* ---------------------------- Interfaces TS --------------------------- */
 interface LoginFormData {
   email: string;
   password: string;
