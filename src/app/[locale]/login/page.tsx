@@ -78,19 +78,22 @@ export default function LoginPage() {
       if (res.success && res.data) {
         const datos = res.data;
 
-        // Normalize ID: ensure _id is present
         const normalizedUser = {
           ...datos.user,
-          _id: datos.user.id || datos.user._id || datos.user.id,
-          id: datos.user.id || datos.user._id, // opcional, para compatibilidad
+          _id: (datos.user._id || datos.user.id) as string,
+          id: (datos.user.id || datos.user._id) as string,
+          name: (datos.user.name || datos.user.displayName || "Usuario") as string,
+          email: datos.user.email as string,
+          url_photo: (datos.user.picture || datos.user.url_photo || null) as string | undefined,
+          role: ((datos.user as any).role || "requester") as "requester" | "fixer" | "admin",
         };
 
-        localStorage.setItem("servineo_user", JSON.stringify(normalizedUser));
-        dispatch(setUser(normalizedUser as any));
-
         localStorage.setItem("servineo_token", datos.token);
+        localStorage.setItem("servineo_user", JSON.stringify(normalizedUser));
 
-        const mensajeExito = datos.message || `¡Bienvenido, ${datos.user.name}!`;
+        dispatch(setUser(normalizedUser)); // ← ahora sí, sin errores
+
+        const mensajeExito = datos.message || `¡Bienvenido, ${normalizedUser.name}!`;
 
         setNotification({
           isOpen: true,

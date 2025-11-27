@@ -39,18 +39,17 @@ export default function BecomeFixerPage() {
                 onSubmit={(data) => {
                   const { name, email, phone } = data;
 
-                  // Línea mágica que arregla todo
-                  const userId = reduxUser?._id || (reduxUser as any)?.id;
-
-                  if (!userId) {
-                    console.error("User not logged in, cannot register as fixer");
-                    return;
-                  }
+                  // Acepta cualquier formato: _id, id, o incluso del localStorage como respaldo
+                  const userId =
+                    reduxUser?._id ||
+                    (reduxUser as any)?.id ||
+                    JSON.parse(localStorage.getItem("servineo_user") || "{}")?._id ||
+                    JSON.parse(localStorage.getItem("servineo_user") || "{}")?.id;
 
                   const url_photo = reduxUser?.url_photo || 'https://picsum.photos/80';
 
                   const user: IUser = {
-                    _id: userId,           // ← aquí usas la variable normalizada
+                    _id: userId,
                     name: name || reduxUser?.name || '',
                     email: email || reduxUser?.email || '',
                     telefono: phone,
