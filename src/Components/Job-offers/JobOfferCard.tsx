@@ -87,7 +87,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         images.map((img, idx) => (
           <Image
             key={idx}
-            src={img}
+            src={img.startsWith('http') || img.startsWith('/') ? img : `/${img}`}
             alt={offer.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -169,7 +169,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            {tCat(offer.category)}
+            {offer.category ? tCat(offer.category) : t('uncategorized')}
           </span>
           {offer.tags && offer.tags.length > 0 && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">

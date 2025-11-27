@@ -11,6 +11,9 @@ import Link from "next/link";
 import NotificationModal from "@/Components/Modal-notifications";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
+import { useAppDispatch } from "@/app/redux/hooks";
+import { setUser } from "@/app/redux/slice/userSlice";
+
 /* ----------------------------- Zod schema ----------------------------- */
 const loginSchema = z.object({
   email: z.string().email("Debe ingresar un correo válido"),
@@ -50,6 +53,7 @@ export default function LoginPage() {
   const [mostrarPass, setMostrarPass] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const [notification, setNotification] = useState<NotificationState>({
     isOpen: false,
@@ -74,8 +78,17 @@ export default function LoginPage() {
       if (res.success && res.data) {
         const datos = res.data;
 
+        // Normalize ID: ensure _id is present
+        const normalizedUser = {
+          ...datos.user,
+          _id: datos.user.id || datos.user._id || datos.user.id,
+          id: datos.user.id || datos.user._id, // opcional, para compatibilidad
+        };
+
+        localStorage.setItem("servineo_user", JSON.stringify(normalizedUser));
+        dispatch(setUser(normalizedUser as any));
+
         localStorage.setItem("servineo_token", datos.token);
-        localStorage.setItem("servineo_user", JSON.stringify(datos.user));
 
         const mensajeExito = datos.message || `¡Bienvenido, ${datos.user.name}!`;
 
@@ -86,7 +99,7 @@ export default function LoginPage() {
           message: mensajeExito,
         });
 
-        setTimeout(() => window.location.href = "/", 2000);
+        setTimeout(() => router.push("/"), 2000);
       } else {
         const mensajeError =
           res.message ||

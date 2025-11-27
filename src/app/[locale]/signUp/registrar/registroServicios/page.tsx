@@ -121,6 +121,7 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
 
       if (data.success) {
         if (data.token) localStorage.setItem("servineo_token", data.token);
+        if (data.user) localStorage.setItem("servineo_user", JSON.stringify(data.user));
 
         onNotify?.({
           type: "success",
@@ -137,7 +138,7 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
           message: data.message || "No fue posible completar el registro.",
         });
       }
-    }  finally {
+    } finally {
       setCargando(false);
     }
   };
@@ -161,9 +162,8 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
             value={formData.nombre}
             onChange={handleChange}
             placeholder="Ingresa tu nombre"
-            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.nombre ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
-            }`}
+            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${errors.nombre ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              }`}
           />
           {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
         </div>
@@ -177,9 +177,8 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
             value={formData.apellido}
             onChange={handleChange}
             placeholder="Ingresa tu apellido"
-            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.apellido ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
-            }`}
+            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${errors.apellido ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              }`}
           />
           {errors.apellido && <p className="text-red-500 text-xs mt-1">{errors.apellido}</p>}
         </div>
@@ -196,9 +195,8 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
           value={formData.email}
           onChange={handleChange}
           placeholder="nombre@dominio.com"
-          className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-            errors.email ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
-          }`}
+          className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${errors.email ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+            }`}
         />
         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
       </div>
@@ -215,9 +213,8 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
             value={formData.password}
             onChange={handleChange}
             placeholder="Ingresa tu contraseña"
-            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.password ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
-            }`}
+            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${errors.password ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              }`}
           />
           <button
             type="button"
@@ -258,9 +255,8 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
             value={formData.confirmarPassword}
             onChange={handleChange}
             placeholder="Confirma tu contraseña"
-            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.confirmarPassword ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
-            }`}
+            className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${errors.confirmarPassword ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              }`}
           />
           <button
             type="button"

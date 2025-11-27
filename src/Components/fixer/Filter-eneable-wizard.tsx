@@ -14,7 +14,7 @@ import { VehicleStep } from "./steps/Vehicle-step"
 import { TermsStep } from "./steps/Terms-step"
 import { CheckCircle2, ArrowLeft, ArrowRight } from "lucide-react"
 import { ProfilePhotoStep } from "./steps/Profile-photo-step"
-// import { useCreateUserProfileMutation } from "@/app/redux/services/userApi"
+import { useConvertToFixerMutation } from "@/app/redux/services/become"
 import { IUser } from "@/types/user"
 import { fixerProfileSchema, type FixerProfileData } from "@/app/lib/validations/fixer-schemas"
 
@@ -30,7 +30,7 @@ interface FixerEnableWizardProps {
 }
 
 export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
-  //const [registerFixer] = useCreateUserProfileMutation()
+  const [convertToFixer] = useConvertToFixerMutation()
   const [step, setStep] = useState(0)
   const total = 7 // 0 to 6
   const [success, setSuccess] = useState(false)
@@ -177,39 +177,65 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
 
   const onSubmit: SubmitHandler<FixerProfileData> = async (data) => {
     try {
-      // Construct the payload matching IUser structure
-      // We are updating the existing user, so we send the fields to update
-      const payload = {
-        ...user, // Keep existing user data
-        role: "fixer" as const,
-        ci: data.ci,
-        url_photo: data.url_photo,
-        workLocation: {
-          lat: data.workLocation.lat,
-          lng: data.workLocation.lng,
-          direccion: data.workLocation.direccion || "",
-          departamento: data.workLocation.departamento || "Cochabamba", // Default or derived
-          pais: "Bolivia"
-        },
-        servicios: availableServices
-          .filter((s) => data.servicios.includes(s.id))
-          .map((s) => s.name), // The backend expects string array of names? Or IDs? 
-        // User schema says: servicios: [{ type: String }]
-        // Assuming names for now based on schema type String.
-        metodoPago: data.metodoPago,
-        vehiculo: data.vehiculo,
-        acceptTerms: data.acceptTerms,
-        experience: data.experience,
-        // accountInfo is not in IUser, so we don't send it directly unless we add it to a field
-        // Maybe it goes into experience or a new field? 
-        // For now, ignoring accountInfo in payload as it's not in IUser schema provided.
+      if (!user._id) {
+        console.error("User ID is missing")
+        return
       }
 
+      const paymentMethods = []
+      if (data.metodoPago.hasEfectivo) paymentMethods.push({ type: 'efectivo' })
+      if (data.metodoPago.qr) paymentMethods.push({ type: 'qr' })
+      if (data.metodoPago.tarjetaCredito) paymentMethods.push({ type: 'tarjeta' })
+
+      const payload = {
+        id: user._id?.toString(), // ← por si acaso es ObjectId
+        profile: {
+          ci: data.ci.trim(),
+
+          // Solo servicios oficiales (los que empiezan con "svc-")
+          services: data.servicios
+            .filter((id): id is string => id.startsWith("svc-"))
+            .map((id) => {
+              const service = DEFAULT_SERVICES.find((s) => s.id === id);
+              return { name: service?.name ?? "Servicio desconocido" };
+            }),
+
+          vehicle: data.vehiculo.hasVehiculo
+            ? {
+              hasVehiculo: true,
+              tipoVehiculo: data.vehiculo.tipoVehiculo || undefined,
+            }
+            : { hasVehiculo: false },
+
+          paymentMethods: (() => {
+            const methods: { type: string }[] = [];
+            if (data.metodoPago.hasEfectivo) methods.push({ type: "efectivo" });
+            if (data.metodoPago.qr) methods.push({ type: "qr" });
+            if (data.metodoPago.tarjetaCredito) methods.push({ type: "tarjeta" });
+            return methods;
+          })(),
+
+          location: {
+            lat: Number(data.workLocation.lat),
+            lng: Number(data.workLocation.lng),
+            direccion: data.workLocation.direccion?.trim() || "",
+            // NO enviamos departamento ni pais → rompe el backend
+          },
+
+          terms: {
+            accepted: data.acceptTerms,
+          },
+        },
+      };
+
       console.log("Submitting user profile data:", payload)
-      //await registerFixer(payload).unwrap()
+      await convertToFixer(payload).unwrap()
       setSuccess(true)
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error registering fixer:", error)
+      if (error && typeof error === 'object' && 'data' in error) {
+        console.error("API Error Data:", error.data)
+      }
     }
   }
 
