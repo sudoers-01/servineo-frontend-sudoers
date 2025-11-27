@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from '../styles/admin.module.css';
-import { mockAuth } from '../lib/mockAuth';
+import { adminAPI } from '../lib/api';
 
 export default function AdminDashboard() {
     const [metrics, setMetrics] = useState<any>(null);
@@ -11,33 +11,33 @@ export default function AdminDashboard() {
 
     useEffect(() => {
         const checkAuthAndLoadData = async () => {
-        const token = localStorage.getItem('adminToken');
-        const adminData = localStorage.getItem('adminUser');
+            const token = localStorage.getItem('adminToken');
+            const adminData = localStorage.getItem('adminUser');
         
-        // Si no hay token, redirigir al login
-        if (!token || !adminData) {
-            router.push('/es/user-admin');
-            return;
-        }
-
-        try {
-            // Verificar token con mock
-            const authCheck = await mockAuth.verifyAdminToken(token);
-            if (!authCheck.valid) {
-            localStorage.removeItem('adminToken');
-            localStorage.removeItem('adminUser');
-            router.push('/es/user-admin');
-            return;
+            // Si no hay token, redirigir al login
+            if (!token || !adminData) {
+                router.push('/es/user-admin');
+                return;
             }
 
-            // Cargar métricas con mock
-            const metricsData = await mockAuth.getAdminMetrics();
-            setMetrics(metricsData.metrics);
-        } catch (error) {
-            console.error('Error loading metrics:', error);
-        } finally {
-            setLoading(false);
-        }
+            try {
+                // Verificar token con backend
+                const authCheck = await adminAPI.verifyToken(token);
+                if (!authCheck.valid) {
+                    localStorage.removeItem('adminToken');
+                    localStorage.removeItem('adminUser');
+                    router.push('/es/user-admin');
+                    return;
+                }
+
+                // Cargar métricas con backend
+                const metricsData = await adminAPI.getMetrics(token);
+                setMetrics(metricsData.metrics);
+            } catch (error) {
+                console.error('Error loading metrics:', error);
+            } finally {
+                setLoading(false);
+            }
         };
 
         checkAuthAndLoadData();
