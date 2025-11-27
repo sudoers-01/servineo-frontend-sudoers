@@ -17,7 +17,7 @@ export default function FixerRegisterForm({
   defaultValues,
 }: FixerRegisterFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  
+
   const {
     control,
     handleSubmit,
@@ -93,8 +93,7 @@ export default function FixerRegisterForm({
               {...field}
               id="email"
               type="email"
-              readOnly
-              className="w-full rounded-full border border-transparent bg-gray-200/70 px-4 py-2 text-sm outline-none cursor-not-allowed opacity-80"
+              className="w-full rounded-full border border-transparent bg-gray-200 px-4 py-2 text-sm outline-none placeholder:text-gray-500 focus:border-blue-500 focus:bg-gray-100 focus:ring-2 focus:ring-blue-400 transition-all"
               placeholder="correo@ejemplo.com"
             />
           )}

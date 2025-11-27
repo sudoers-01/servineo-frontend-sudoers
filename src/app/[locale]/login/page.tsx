@@ -11,13 +11,14 @@ import Link from "next/link";
 import NotificationModal from "@/Components/Modal-notifications";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 
-/* ----------------------------- Zod schema ----------------------------- */
+import { useAppDispatch } from "@/app/redux/hooks";
+import { setUser } from "@/app/redux/slice/userSlice";
+
 const loginSchema = z.object({
   email: z.string().email("Debe ingresar un correo válido"),
   password: z.string().min(6, "La contraseña debe tener al menos 6 caracteres"),
 });
 
-/* ---------------------------- Interfaces TS --------------------------- */
 interface LoginFormData {
   email: string;
   password: string;
@@ -50,6 +51,7 @@ export default function LoginPage() {
   const [mostrarPass, setMostrarPass] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
+  const dispatch = useAppDispatch();
 
   const [notification, setNotification] = useState<NotificationState>({
     isOpen: false,
@@ -74,10 +76,22 @@ export default function LoginPage() {
       if (res.success && res.data) {
         const datos = res.data;
 
-        localStorage.setItem("servineo_token", datos.token);
-        localStorage.setItem("servineo_user", JSON.stringify(datos.user));
+        const normalizedUser = {
+          ...datos.user,
+          _id: (datos.user._id || datos.user.id) as string,
+          id: (datos.user.id || datos.user._id) as string,
+          name: (datos.user.name || datos.user.displayName || "Usuario") as string,
+          email: datos.user.email as string,
+          url_photo: (datos.user.picture || datos.user.url_photo || null) as string | undefined,
+          role: ((datos.user as any).role || "requester") as "requester" | "fixer" | "admin",
+        };
 
-        const mensajeExito = datos.message || `¡Bienvenido, ${datos.user.name}!`;
+        localStorage.setItem("servineo_token", datos.token);
+        localStorage.setItem("servineo_user", JSON.stringify(normalizedUser));
+
+        dispatch(setUser(normalizedUser)); // ← ahora sí, sin errores
+
+        const mensajeExito = datos.message || `¡Bienvenido, ${normalizedUser.name}!`;
 
         setNotification({
           isOpen: true,
@@ -86,9 +100,7 @@ export default function LoginPage() {
           message: mensajeExito,
         });
 
-        setTimeout(() => {
-          router.push("/");
-        }, 1000);
+        setTimeout(() => router.push("/"), 2000);
       } else {
         const mensajeError =
           res.message ||

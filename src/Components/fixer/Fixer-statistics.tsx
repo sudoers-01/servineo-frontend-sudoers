@@ -1,7 +1,7 @@
 "use client"
 
 import { Pie, PieChart, Cell, Tooltip } from "recharts"
-import { useGetJobStatisticsQuery, JobLog } from '../../app/redux/services/statisticsApi';
+import { useGetJobStatisticsQuery } from '../../app/redux/services/statisticsApi';
 
 
 const COLORS = {
@@ -55,7 +55,7 @@ export default function EstadisticasTrabajos() {
     if (!dailyStatusLog) {
         return <div className="text-center p-8 text-gray-500">No se encontraron logs de estado de trabajos.</div>;
     }
-    
+
     const stats = dailyStatusLog.metadata;
 
     const chartData = [
@@ -90,7 +90,7 @@ export default function EstadisticasTrabajos() {
                                 y={props.y}
                                 textAnchor={props.textAnchor}
                                 dominantBaseline={props.dominantBaseline}
-                                fill="#333" 
+                                fill="#333"
                                 className="text-sm font-medium">
                                 {`${payload.cantidad}`}
                             </text>
@@ -103,26 +103,26 @@ export default function EstadisticasTrabajos() {
             </div>
             <div className="mt-4 w-full text-sm text-gray-700">
                 {chartData.map((item, index) => (
-                    <div 
-                        key={item.estado} 
+                    <div
+                        key={item.estado}
                         className={`flex justify-between px-4 py-1 ${index < chartData.length - 1 ? 'border-b border-gray-200' : ''}`}>
                         <span className="font-medium flex items-center">
-                            <span 
-                                className="inline-block w-3 h-3 rounded-full mr-2" 
+                            <span
+                                className="inline-block w-3 h-3 rounded-full mr-2"
                                 style={{ backgroundColor: COLORS[item.estado as keyof typeof COLORS] }}
                             ></span>
                             {item.estado}
                         </span>
-                        
+
                         <span>
-                            {item.cantidad} trabajos 
+                            {item.cantidad} trabajos
                             <span className="ml-2 font-normal text-gray-500">
                                 ({((item.cantidad / totalTrabajos) * 100).toFixed(0)}%)
                             </span>
                         </span>
                     </div>
                 ))}
-                
+
                 <div className="flex justify-between px-4 py-1 mt-2 border-t-2 border-gray-300 font-bold">
                     <span>Total</span>
                     <span>{totalTrabajos} trabajos</span>

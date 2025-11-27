@@ -1,6 +1,6 @@
 import type React from "react"
 interface CardProps {
-  title: string,
+  title?: string,
   className?: string,
   children: React.ReactNode
 }
