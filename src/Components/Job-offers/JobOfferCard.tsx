@@ -4,7 +4,15 @@
 import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { MapPin, Star, MessageCircle, ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-react';
+import {
+  MapPin,
+  Star,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Trash2,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useImageCarousel } from '@/app/redux/features/jobOffers/useImageCarousel';
 import type { JobOfferData } from '@/types/jobOffers';
@@ -80,7 +88,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   // Render Image Carousel
   const renderImageCarousel = () => (
     <div
-      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${viewMode === 'grid' ? 'h-48 w-full' : 'w-64 h-48 flex-shrink-0'}`}
+      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${viewMode === 'grid' ? 'h-48 w-full' : 'w-64 self-stretch flex-shrink-0'}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -93,8 +101,13 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
             src={img}
             alt={offer.title}
             fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+            sizes={
+              viewMode === 'grid'
+                ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
+                : '16rem'
+            }
             className={`object-cover transition-all duration-500 ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
+            style={{ position: 'absolute' }}
             priority={idx === 0}
           />
         ))
@@ -109,14 +122,16 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         <>
           <button
             onClick={handlePrevImage}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
+            onTouchEnd={handlePrevImage}
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
             aria-label="Imagen anterior"
           >
             <ChevronLeft className="w-4 h-4 text-gray-800" />
           </button>
           <button
             onClick={handleNextImage}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
+            onTouchEnd={handleNextImage}
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
             aria-label="Siguiente imagen"
           >
             <ChevronRight className="w-4 h-4 text-gray-800" />
@@ -156,37 +171,64 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
   // Render Content
   const renderContent = () => (
-    <div className={`flex flex-col ${viewMode === 'grid' ? 'p-4' : 'flex-1 p-4 relative'}`}>
+    <div
+      className={`flex flex-col ${viewMode === 'grid' ? 'p-4' : 'flex-1 pt-4 pb-1 pl-4 pr-4 '}`}
+    >
+      {/* Price - Solo en List View */}
       {viewMode === 'list' && (
         <div className="absolute right-4 top-4 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20">
           <span className="text-primary">{offer.price?.toLocaleString()} Bs</span>
         </div>
       )}
 
+      {/* Título y Descripción */}
       <div className={viewMode === 'list' ? 'mb-2 pr-32' : ''}>
-        <h3 className={`text-base font-semibold text-gray-900 group-hover:text-primary transition-colors ${viewMode === 'grid' ? 'truncate' : ''}`}>
+        <h3
+          className={`text-base font-semibold text-gray-900 group-hover:text-primary transition-colors ${viewMode === 'grid' ? 'truncate' : 'text-left'}`}
+        >
           <SearchHighlight text={offer.title} searchQuery={searchQuery} />
         </h3>
-        <p className="mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed">
+        <p
+          className={`mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed ${viewMode === 'list' ? 'text-left' : ''}`}
+        >
           <SearchHighlight text={offer.description} searchQuery={searchQuery} />
         </p>
       </div>
 
-      <div className="mt-2 flex items-center justify-between">
+      {/* Tags y Fecha */}
+      <div className={viewMode === 'list' ? 'mb-2' : 'mt-2'}>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
             {offer.category ? tCat(offer.category) : ''}
           </span>
           {offer.tags && offer.tags.length > 0 && (
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-              {offer.tags[0]}
-            </span>
+            <>
+              {viewMode === 'list' ? (
+                offer.tags.slice(0, 2).map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
+                  >
+                    {tag}
+                  </span>
+                ))
+              ) : (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+                  {offer.tags[0]}
+                </span>
+              )}
+            </>
           )}
+          <span
+            className={`text-xs text-gray-400 font-medium ${viewMode === 'list' ? 'ml-auto' : ''}`}
+          >
+            {new Date(offer.createdAt).toLocaleDateString()}
+          </span>
         </div>
-        <span className="text-xs text-gray-400 font-medium">
-          {new Date(offer.createdAt).toLocaleDateString()}
-        </span>
       </div>
+
+      {/* Footer en List View */}
+      {viewMode === 'list' && renderFooter()}
     </div>
   );
 
@@ -197,7 +239,10 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         <div className="border-t border-gray-100 p-3 flex items-center justify-end gap-2 bg-gray-50/50">
           {onEdit && (
             <button
-              onClick={(e) => { e.stopPropagation(); onEdit(offer); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(offer);
+              }}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
               title="Editar"
             >
@@ -206,7 +251,10 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
           )}
           {onDelete && (
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete(offer._id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(offer._id);
+              }}
               className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
               title="Eliminar"
             >
@@ -220,7 +268,9 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     if (readOnly) return null;
 
     return (
-      <div className="border-t border-gray-100 p-3 flex items-center justify-between gap-3">
+      <div
+        className={`${viewMode === 'grid' ? 'border-t border-gray-100 p-3' : 'border-t border-gray-100 pl-3 py-2'} flex items-center justify-between gap-3 ${viewMode === 'list' ? 'hover:bg-gray-50 transition-colors' : ''}`}
+      >
         <div
           className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={handleFixerClick}
@@ -242,7 +292,9 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
           </div>
 
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-gray-900 truncate">
+            <p
+              className={`text-sm font-medium text-gray-900 truncate ${viewMode === 'list' ? 'text-left' : ''}`}
+            >
               {offer.fixerName || t('defaultUserName')}
             </p>
             {offer.rating && (
@@ -269,24 +321,19 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   };
 
   return (
-    <div
-      ref={elementRef}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 ${
-        viewMode === 'list' ? 'flex flex-row' : ''
-      } ${className}`}
-    >
-      <div onClick={handleCardClick} className="cursor-pointer contents">
-        {renderImageCarousel()}
-        {renderContent()}
-      </div>
-      {viewMode === 'grid' && renderFooter()}
-      {viewMode === 'list' && (
-        <div className="flex flex-col justify-end p-4 border-l border-gray-100">
-          {renderFooter()}
-        </div>
-      )}
+  <div
+    ref={elementRef}
+    onMouseEnter={handleMouseEnter}
+    onMouseLeave={handleMouseLeave}
+    className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 ${
+      viewMode === 'list' ? 'flex flex-row items-stretch min-h-0' : ''
+    } ${className}`}
+  >
+    <div onClick={handleCardClick} className="cursor-pointer contents">
+      {renderImageCarousel()}
+      {renderContent()}
     </div>
-  );
+    {viewMode === 'grid' && renderFooter()}
+  </div>
+);
 };
