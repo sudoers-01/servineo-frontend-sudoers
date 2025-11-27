@@ -27,11 +27,11 @@ export const userApi = baseApi.injectEndpoints({
       query: (role) => `/user-profiles/role/${role}`,
       providesTags: ["User"],
     }),
-    convertToFixer: builder.mutation<IUserProfile, { id: string; profile: IUserProfile["profile"] }>({
-      query: ({ id, profile }) => ({
+    convertToFixer: builder.mutation<IUserProfile, { id: string; profile: IUserProfile["profile"]; user?: IUserProfile["user"] }>({
+      query: ({ id, profile, user }) => ({
         url: `/user-profiles/${id}/convert-fixer`,
         method: "PATCH",
-        body: { profile },
+        body: { profile, user },
       }),
       invalidatesTags: ["User"],
     }),
