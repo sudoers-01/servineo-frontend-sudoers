@@ -35,21 +35,26 @@ export default function BecomeFixerPage() {
               <h2 className="mb-3 text-center text-lg font-semibold">Datos iniciales</h2>
               <FixerRegisterForm
                 defaultValues={defaultValues}
+                // En become-fixer/page.tsx → dentro del onSubmit
                 onSubmit={(data) => {
                   const { name, email, phone } = data;
-                  // Use redux ID if available, else mock or generate
-                  const _id = reduxUser?._id || 'req-guest';
-                  const url_photo = 'https://picsum.photos/80'; // Placeholder or from redux if available
 
-                  // Construct a partial IUser object for the wizard
+                  // Acepta cualquier formato: _id, id, o incluso del localStorage como respaldo
+                  const userId =
+                    reduxUser?._id ||
+                    (reduxUser as any)?.id ||
+                    JSON.parse(localStorage.getItem("servineo_user") || "{}")?._id ||
+                    JSON.parse(localStorage.getItem("servineo_user") || "{}")?.id;
+
+                  const url_photo = reduxUser?.url_photo || 'https://picsum.photos/80';
+
                   const user: IUser = {
-                    _id,
-                    name,
-                    email,
+                    _id: userId,
+                    name: name || reduxUser?.name || '',
+                    email: email || reduxUser?.email || '',
                     telefono: phone,
                     url_photo,
                     role: 'requester',
-                    // Initialize other fields as undefined or empty if needed by the type
                   };
 
                   setRequester(user);
