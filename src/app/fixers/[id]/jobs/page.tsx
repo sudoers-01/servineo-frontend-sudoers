@@ -3,6 +3,7 @@ import { Roboto } from 'next/font/google';
 import { getJobsByFixerId } from '@/services/jobs';
 import type { Job } from '@/types/job';
 import JobsList from '@/app/components/fixers/JobsList';
+import JobsActions from './components/JobsActions'; // <-- IMPORTANTE
 
 const roboto = Roboto({ subsets: ['latin'], weight: ['400', '500', '700'] });
 
@@ -11,6 +12,7 @@ type PageProps = { params: Promise<{ id: string }> };
 export default async function Page({ params }: PageProps) {
   const { id } = await params;
   let jobs: Job[] = [];
+
   try {
     jobs = await getJobsByFixerId(id);
     if (process.env.NODE_ENV !== 'production') {
@@ -28,6 +30,10 @@ export default async function Page({ params }: PageProps) {
         >
           Appointments
         </h1>
+
+        {/* 🔵 BOTÓN + MODAL AQUI */}
+        <JobsActions />
+
         <JobsList jobs={jobs} />
       </div>
     </div>
