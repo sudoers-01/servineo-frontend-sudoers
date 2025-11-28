@@ -13,7 +13,12 @@ import EstadisticasTrabajos from "@/Components/fixer/Fixer-statistics"
 type Tab = "offers" | "certs" | "experience" | "portfolio" | "estadisticas"
 
 export default function FixerDashboardPage() {
-    const { user } = useAppSelector((state) => state.user)
+    const { user: reduxUser } = useAppSelector((state) => state.user)
+    const user =
+        reduxUser ||
+        (typeof window !== "undefined"
+            ? JSON.parse(localStorage.getItem("servineo_user") || "null")
+            : null)
     const [activeTab, setActiveTab] = useState<Tab>("offers")
 
     if (!user) {
@@ -142,7 +147,9 @@ export default function FixerDashboardPage() {
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 min-h-[500px]">
                         {activeTab === "offers" && <JobOffersSection />}
                         {activeTab === "certs" && <CertificationsSection />}
-                        {activeTab === "experience" && <ExperienceSection />}
+                        {activeTab === "experience" && (
+                            <ExperienceSection fixerId={user._id || (user as any).id} />
+                        )}
                         {activeTab === "portfolio" && <PortfolioSection />}
                         {activeTab === "estadisticas" && <EstadisticasTrabajos />}
                     </div>
