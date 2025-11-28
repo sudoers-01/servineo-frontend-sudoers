@@ -349,14 +349,14 @@ export default function TopMenu() {
               <button onClick={() => router.push('/fixer/profile')} className={styles.menuItem}>
                 Perfil
               </button>
+
+              {/* --- BOTÓN CENTRO DE PAGOS (SOLO VISIBLE PARA FIXERS) --- */}
+              <button onClick={goToPaymentCenter} className={`${styles.menuItem} flex items-center justify-between`}>
+                <span>Centro de Pagos</span>
+                <Wallet size={16} className="text-gray-500" />
+              </button>
             </>
           )}
-
-          {/* --- BOTÓN CENTRO DE PAGOS (VISIBLE PARA TODOS) --- */}
-          <button onClick={goToPaymentCenter} className={`${styles.menuItem} flex items-center justify-between`}>
-            <span>Centro de Pagos</span>
-            <Wallet size={16} className="text-gray-500" />
-          </button>
           
           <button onClick={logout} className={`${styles.menuItem} ${styles.logoutBtn}`}>
             Cerrar sesión
