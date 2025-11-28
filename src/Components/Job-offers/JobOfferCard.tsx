@@ -45,10 +45,32 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
   // Preparar imágenes
   const images = React.useMemo(() => {
-    if (offer.allImages && offer.allImages.length > 0) return offer.allImages;
-    if (offer.photos && offer.photos.length > 0) return offer.photos;
-    if (offer.imagenUrl) return [offer.imagenUrl];
-    return [];
+    const imageArray = [];
+    
+    if (offer.allImages && offer.allImages.length > 0) {
+      imageArray.push(...offer.allImages);
+    } else if (offer.photos && offer.photos.length > 0) {
+      imageArray.push(...offer.photos);
+    } else if (offer.imagenUrl) {
+      imageArray.push(offer.imagenUrl);
+    }
+    
+    // Filtrar y validar imágenes
+    return imageArray.filter((img) => {
+      if (!img || typeof img !== 'string') return false;
+      
+      const trimmed = img.trim();
+      if (trimmed.length === 0) return false;
+      
+      // Validar que sea una URL válida
+      try {
+        new URL(trimmed);
+        return true;
+      } catch {
+        // Si no es URL válida pero es una ruta relativa, permitir
+        return trimmed.startsWith('/') || trimmed.startsWith('./');
+      }
+    });
   }, [offer]);
 
   const {
@@ -95,22 +117,30 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
       onClick={handleCardClick}
     >
       {images.length > 0 ? (
-        images.map((img, idx) => (
-          <Image
-            key={idx}
-            src={img}
-            alt={offer.title}
-            fill
-            sizes={
-              viewMode === 'grid'
-                ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
-                : '16rem'
-            }
-            className={`object-cover transition-all duration-500 ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
-            style={{ position: 'absolute' }}
-            priority={idx === 0}
-          />
-        ))
+        images.map((img, idx) => {
+          // Double-check en tiempo de render
+          if (!img || typeof img !== 'string') return null;
+          
+          return (
+            <Image
+              key={idx}
+              src={img}
+              alt={offer.title}
+              fill
+              sizes={
+                viewMode === 'grid'
+                  ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
+                  : '16rem'
+              }
+              className={`object-cover transition-all duration-500 ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
+              style={{ position: 'absolute' }}
+              priority={idx === 0}
+              onError={(e) => {
+                console.warn(`Failed to load image: ${img}`, e);
+              }}
+            />
+          );
+        })
       ) : (
         <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
           <span className="text-sm">No image</span>
