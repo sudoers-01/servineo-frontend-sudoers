@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useState } from "react";
+import { useState } from 'react';
 
 interface Props {
   open: boolean;
@@ -21,25 +21,25 @@ export default function ConfirmDisableModal({ open, onConfirm, onCancel }: Props
 
   return (
     <div
-      className="fixed inset-0 flex items-center justify-center z-50"
-      style={{ backgroundColor: "rgba(0, 0, 0, 0.35)" }}
+      className='fixed inset-0 flex items-center justify-center z-50'
+      style={{ backgroundColor: 'rgba(0, 0, 0, 0.35)' }}
     >
-      <div className="bg-white rounded-xl p-7 w-[350px] shadow-xl">
-        <h2 className="text-center text-gray-800 text-lg font-semibold mb-4">
+      <div className='bg-white rounded-xl p-7 w-[350px] shadow-xl'>
+        <h2 className='text-center text-gray-800 text-lg font-semibold mb-4'>
           Seguro que quieres desactivar el trabajo
         </h2>
 
-        <div className="flex justify-between mt-6">
+        <div className='flex justify-between mt-6'>
           <button
-            className="bg-blue-600 text-white rounded-lg px-5 py-2 text-sm hover:bg-blue-700"
+            className='bg-blue-600 text-white rounded-lg px-5 py-2 text-sm hover:bg-blue-700'
             onClick={handleConfirm}
             disabled={loading}
           >
-            {loading ? "Desactivando..." : "Aceptar"}
+            {loading ? 'Desactivando...' : 'Aceptar'}
           </button>
 
           <button
-            className="bg-gray-300 text-black rounded-lg px-5 py-2 text-sm hover:bg-gray-400"
+            className='bg-gray-300 text-black rounded-lg px-5 py-2 text-sm hover:bg-gray-400'
             onClick={onCancel}
           >
             Cancelar
