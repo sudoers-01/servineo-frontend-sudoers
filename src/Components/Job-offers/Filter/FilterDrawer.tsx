@@ -42,14 +42,12 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const dispatch = useAppDispatch();
   const storeRating = useAppSelector((s) => s.jobOfert.rating);
 
-  // 🔧 FIX: Enviar minRating y maxRating como rango exacto
+  // 🔧 FIX: Enviar todas las ciudades separadas por coma
   const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
     range: selectedRanges.length > 0 ? selectedRanges : undefined,
-    city: selectedCities.length > 0 ? selectedCities[0] : undefined,
+    city: selectedCities.length > 0 ? selectedCities.join(',') : undefined, // ✅ CORREGIDO
     category: selectedJobs.length > 0 ? selectedJobs : undefined,
     minRating: selectedRating ?? undefined,
-    // Para 5 estrellas, no enviar maxRating (buscar >= 5.0)
-    // Para 1-4 estrellas, limitar al rango (ej: 4.0-4.99)
     maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
   }, {
     skip: !isOpen,
@@ -274,7 +272,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                   <div className="flex flex-col gap-2">
                     {nameOptions.map((range) => {
                       const count = getRangeCount(range.dbValue);
-                      // Do not disable ranges based on count. Keep them selectable even if count === 0.
                       const disabled = false;
                       return (
                         <label
@@ -321,7 +318,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                       const isSelected = selectedCities.includes(city.dbValue);
                       const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(city.dbValue);
                       const count = backendCounts?.cities?.[city.dbValue] ?? 0;
-                      // Only disable if auto-selected logic requires it; do not disable when count === 0
                       const disabled = filtersFromStore.isAutoSelectedCity && !isAutoMarked;
 
                       return (
@@ -371,7 +367,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                       const isSelected = selectedJobs.includes(job.dbValue);
                       const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
                       const count = backendCounts?.categories?.[job.dbValue] ?? 0;
-                      // Only disable if auto-selected logic requires it; do not disable when count === 0
                       const disabled = filtersFromStore.isAutoSelectedCategory && !isAutoMarked;
 
                       return (
@@ -421,7 +416,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                       const starNumber = idx + 1;
                       const filled = (selectedRating ?? 0) >= starNumber;
                       const count = getRatingCount(starNumber);
-                      // Keep rating buttons enabled even if count === 0
                       const disabled = false;
                       
                       return (
