@@ -38,6 +38,6 @@ export const isApiError = (error: unknown): error is ApiError => {
 export const baseApi = createApi({
   reducerPath: 'api',
   baseQuery,
-  tagTypes: ['User', 'Job', 'Statistics', 'JobOffer', 'Requester', 'SearchHistory'],
+  tagTypes: ['User', 'Job', 'Statistics', 'JobOffer', 'Requester', 'SearchHistory', 'Experience'],
   endpoints: () => ({}),
 });
