@@ -20,28 +20,50 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
   const [activeTab, setActiveTab] = useState<string>('inicio');
 
   // Helper: convertir JobOffer (origen) a la forma que espera JobOfferCard
-  const convertToJobOfferData = (offer: any) => {
-  return {
-    id: offer.id ?? offer._id,
-    fixerId: offer.fixerId ?? fixer.id,
-    fixerName: offer.fixerName ?? fixer.name,
-    fixerPhoto: offer.fixerPhoto ?? fixer.photo ?? '',
-    title: offer.title ?? '',
-    description: offer.description ?? '',
-    price: offer.price ?? 0,
-    city: offer.city ?? fixer.city ?? '',
-    photos: offer.photos ?? [],
-    services: offer.services ?? [],
-    tags: offer.tags ?? offer.services ?? [],
-    whatsapp: offer.whatsapp ?? fixer.whatsapp ?? fixer.phone ?? '',
-    createdAt: offer.createdAt ?? new Date(),
-    location: offer.location ? {
-      ...offer.location,
-      address: offer.location.address ?? ''
-    } : undefined,  
-    status: offer.status ?? 'pending',
+  const convertToJobOfferData = (offer: any = {}) => {
+    // Safe defaults and normalization for heterogeneous backend shapes
+    const title = offer.title ?? offer.jobType ?? (offer.services && offer.services[0]) ?? 'Sin título';
+
+    const normalizeSrc = (src?: any) => {
+      if (!src) return null;
+      if (typeof src !== 'string') src = String(src);
+      const s = src.trim();
+      if (!s) return null;
+      if (/^https?:\/\//i.test(s) || /^data:/i.test(s)) return s;
+      if (s.startsWith('/')) return s;
+      return '/' + s;
+    };
+
+    const rawPhotos: (string | null)[] = [];
+    if (offer.photos && Array.isArray(offer.photos) && offer.photos.length > 0) rawPhotos.push(...offer.photos);
+    else if (offer.allImages && Array.isArray(offer.allImages) && offer.allImages.length > 0) rawPhotos.push(...offer.allImages);
+    else if (offer.imagenUrl) rawPhotos.push(offer.imagenUrl);
+
+    const photos = rawPhotos.map(normalizeSrc).filter((v): v is string => !!v);
+
+    const city = offer.city ?? fixer.city ?? offer.department ?? '';
+
+    const category = offer.category ?? offer.jobType ?? (offer.services && offer.services[0]) ?? 'General';
+
+    return {
+      id: offer.id ?? offer._id ?? '',
+      fixerId: offer.fixerId ?? fixer.id ?? '',
+      fixerName: offer.fixerName ?? fixer.name ?? '',
+      fixerPhoto: normalizeSrc(offer.fixerPhoto ?? fixer.photo) ?? '',
+      title,
+      description: offer.description ?? '',
+      price: offer.price ?? 0,
+      city,
+      photos,
+      services: offer.services ?? offer.tags ?? [],
+      tags: offer.tags ?? offer.services ?? [],
+      whatsapp: offer.whatsapp ?? fixer.whatsapp ?? fixer.phone ?? '',
+      createdAt: offer.createdAt ? new Date(offer.createdAt) : new Date(),
+      location: offer.location ? { ...offer.location, address: offer.location.address ?? '' } : undefined,
+      status: offer.status ?? 'pending',
+      category,
+    };
   };
-};
 
   const handleOfferClick = (offer: any) => {
     const id = offer._id ?? offer.id;
@@ -100,9 +122,20 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
             </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {fixer.jobOffers.slice(0, 2).map((offer: any) => (
-              <JobOfferCard key={offer.id ?? offer._id} offer={convertToJobOfferData(offer)} viewMode="grid" onClick={() => handleOfferClick(convertToJobOfferData(offer))} />
-            ))}
+            {(() => {
+              console.log('FixerProfileContent: fixer.jobOffers', fixer.jobOffers);
+              return (fixer.jobOffers ?? []).slice(0, 2).map((offer: any, i: number) => {
+                console.log('FixerProfileContent: offer', i, offer);
+                return (
+                  <JobOfferCard
+                    key={offer?.id ?? offer?._id ?? `fixer-offer-${i}`}
+                    offer={convertToJobOfferData(offer)}
+                    viewMode="grid"
+                    onClick={() => handleOfferClick(convertToJobOfferData(offer))}
+                  />
+                );
+              });
+            })()}
           </div>
         </div>
       )}
@@ -188,13 +221,17 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
 
       {fixer.jobOffers?.some((offer: any) => offer.photos?.length > 0) ? (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {fixer.jobOffers.flatMap((offer: any) =>
-            (offer.photos ?? []).map((photo: string, i: number) => (
-              <div key={`${offer.id}-${i}`} className="aspect-square rounded-lg overflow-hidden group cursor-pointer">
-                <Image src={photo || '/placeholder.svg'} alt={`${t?.('gallery.workLabel') ?? 'Trabajo'} ${i + 1}`} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-              </div>
-            ))
-          )}
+          {(() => {
+            console.log('FixerProfileContent: gallery fixer.jobOffers', fixer.jobOffers);
+            return (fixer.jobOffers ?? []).flatMap((offer: any, i: number) => {
+              console.log('FixerProfileContent: gallery offer', i, offer);
+              return (offer?.photos ?? []).map((photo: string, j: number) => (
+                <div key={`${offer?.id ?? offer?._id ?? i}-${j}`} className="aspect-square rounded-lg overflow-hidden group cursor-pointer">
+                  <Image src={photo || '/placeholder.svg'} alt={`${t?.('gallery.workLabel') ?? 'Trabajo'} ${j + 1}`} width={200} height={200} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                </div>
+              ));
+            });
+          })()}
         </div>
       ) : (
         <div className="text-center py-12">
