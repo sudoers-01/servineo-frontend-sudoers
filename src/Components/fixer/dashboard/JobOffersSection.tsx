@@ -129,16 +129,22 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {offers.map((offer) => (
-                    <JobOfferCard
-                        key={offer._id}
-                        offer={mapToCardData(offer)}
-                        onEdit={!readOnly ? () => handleOpenModal(offer) : undefined}
-                        onDelete={!readOnly ? handleDelete : undefined}
-                        readOnly={readOnly}
-                        className="h-full"
-                    />
-                ))}
+                {(() => {
+                    console.log('JobOffersSection: offers', offers);
+                    return (offers ?? []).map((offer, i) => {
+                        console.log('JobOffersSection: offer', i, offer);
+                        return (
+                            <JobOfferCard
+                                key={offer._id ?? `offer-${i}`}
+                                offer={mapToCardData(offer)}
+                                onEdit={!readOnly ? () => handleOpenModal(offer) : undefined}
+                                onDelete={!readOnly ? handleDelete : undefined}
+                                readOnly={readOnly}
+                                className="h-full"
+                            />
+                        );
+                    });
+                })()}
             </div>
 
             <Modal

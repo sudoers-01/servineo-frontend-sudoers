@@ -84,9 +84,13 @@ export const JobOffersView: React.FC<JobOffersViewProps> = ({
           </h1>
         )}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-          {offers.map((offer) => (
-            <JobOfferCard key={offer._id} offer={offer} viewMode="grid" onClick={onOfferClick} />
-          ))}
+          {(() => {
+            console.log('JobOffersView: offers', offers);
+            return (offers ?? []).map((offer, i) => {
+              console.log('JobOffersView: offer', i, offer);
+              return <JobOfferCard key={offer._id ?? `offer-${i}`} offer={offer} viewMode="grid" onClick={onOfferClick} />;
+            });
+          })()}
         </div>
       </div>
     );
@@ -101,9 +105,13 @@ export const JobOffersView: React.FC<JobOffersViewProps> = ({
         </h1>
       )}
       <div className="flex flex-col gap-4">
-        {offers.map((offer) => (
-          <JobOfferCard key={offer._id} offer={offer} viewMode="list" onClick={onOfferClick} />
-        ))}
+        {(() => {
+          console.log('JobOffersView: offers (list)', offers);
+          return (offers ?? []).map((offer, i) => {
+            console.log('JobOffersView: offer (list)', i, offer);
+            return <JobOfferCard key={offer._id ?? `offer-list-${i}`} offer={offer} viewMode="list" onClick={onOfferClick} />;
+          });
+        })()}
       </div>
     </div>
   );

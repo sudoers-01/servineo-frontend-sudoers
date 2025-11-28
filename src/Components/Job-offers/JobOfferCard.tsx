@@ -33,12 +33,24 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   const t = useTranslations('cardJob');
   const tCat = useTranslations('Categories');
 
-  // Preparar imágenes
+  // Normalize image sources: ensure strings, leading slash for relative filenames, keep absolute URLs/data URIs
+  const normalizeSrc = (src?: any) => {
+    if (!src) return null;
+    if (typeof src !== 'string') src = String(src);
+    const s = src.trim();
+    if (!s) return null;
+    if (/^https?:\/\//i.test(s) || /^data:/i.test(s)) return s;
+    if (s.startsWith('/')) return s;
+    return '/' + s;
+  };
+
   const images = React.useMemo(() => {
-    if (offer.allImages && offer.allImages.length > 0) return offer.allImages;
-    if (offer.photos && offer.photos.length > 0) return offer.photos;
-    if (offer.imagenUrl) return [offer.imagenUrl];
-    return [];
+    const raw: (string | null)[] = [];
+    if (offer.allImages && Array.isArray(offer.allImages) && offer.allImages.length > 0) raw.push(...offer.allImages);
+    else if (offer.photos && Array.isArray(offer.photos) && offer.photos.length > 0) raw.push(...offer.photos);
+    else if (offer.imagenUrl) raw.push(offer.imagenUrl as string);
+
+    return raw.map(normalizeSrc).filter((v): v is string => !!v);
   }, [offer]);
 
   const {
@@ -57,8 +69,8 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const cleanPhone = offer.contactPhone.replace(/\D/g, '');
-    window.open(`https://wa.me/${cleanPhone}`, '_blank');
+    const cleanPhone = (offer.contactPhone ?? (offer as any).whatsapp ?? '').toString().replace(/\D/g, '');
+    if (cleanPhone) window.open(`https://wa.me/${cleanPhone}`, '_blank');
   };
 
   const handleFixerClick = (e: React.MouseEvent) => {
@@ -74,6 +86,9 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
   const isDashboardMode = !!onEdit || !!onDelete;
   const totalImages = images.length;
+  console.log("AAAAAAAAAQAAAAAAAAA")
+  console.log(offer);
+  console.log(offer.category);
 
   // Render Image Carousel
   const renderImageCarousel = () => (
@@ -88,8 +103,8 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         images.map((img, idx) => (
           <Image
             key={idx}
-            src={img}
-            alt={offer.title}
+            src={img ?? '/placeholder.svg'}
+            alt={offer.title ?? 'Oferta'}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
             className={`object-cover transition-all duration-500 ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
@@ -170,7 +185,8 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            {tCat(offer.category)}
+            {offer.category ? tCat(offer.category) : offer.category ?? ''}
+            
           </span>
           {offer.tags && offer.tags.length > 0 && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
@@ -220,20 +236,27 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
           className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={handleFixerClick}
         >
-          <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100">
-            {offer.fixerPhoto ? (
-              <Image
-                src={offer.fixerPhoto}
-                alt={offer.fixerName}
-                width={36}
-                height={36}
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
-                {offer.fixerName?.[0]?.toUpperCase() || 'U'}
-              </div>
-            )}
+          <div className="w-9 h-9 rounded-full overflow-hidden shrink-0 ring-2 ring-gray-100">
+            {(() => {
+              const fixerPhotoSrc = normalizeSrc(offer.fixerPhoto as any);
+              if (fixerPhotoSrc) {
+                return (
+                  <Image
+                    src={fixerPhotoSrc}
+                    alt={offer.fixerName}
+                    width={36}
+                    height={36}
+                    className="w-full h-full object-cover"
+                  />
+                );
+              }
+
+              return (
+                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
+                  {offer.fixerName?.[0]?.toUpperCase() || 'U'}
+                </div>
+              );
+            })()}
           </div>
 
           <div className="min-w-0 flex-1">
@@ -253,7 +276,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
         <button
           onClick={handleWhatsAppClick}
-          className="flex-shrink-0 bg-primary hover:bg-primary/90 rounded-full transition-all shadow-sm flex items-center gap-2 px-3 py-2"
+          className="shrink-0 bg-primary hover:bg-primary/90 rounded-full transition-all shadow-sm flex items-center gap-2 px-3 py-2"
           aria-label={t('contactWhatsApp')}
         >
           <MessageCircle className="w-4 h-4 text-white" />
