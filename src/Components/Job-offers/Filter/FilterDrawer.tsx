@@ -61,20 +61,45 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     setSelectedJobs(filtersFromStore.category || []);
     setSelectedRating(storeRating ?? null);
   }, [filtersFromStore, storeRating]);
-  // Si el drawer se abre y hay un `search` en el store que coincide con una categoría
-  // autoseleccionar esa categoría para que el checkbox aparezca marcado.
+  // Auto-select category when drawer opens if search matches a job type (fuzzy, accent-insensitive)
+  const normalizeText = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .trim();
+
   useEffect(() => {
     if (!isOpen) return;
     const s = storeSearch?.trim();
     if (!s) return;
     if (selectedJobs && selectedJobs.length > 0) return;
-    const match = DB_VALUES.jobTypes.find((j) => j.toLowerCase() === s.toLowerCase());
-    if (match) {
-      setSelectedJobs([match]);
-      // marcar como aplicado automáticamente
-      applyFilters(selectedRanges, selectedCities, [match], true, filtersFromStore.isAutoSelectedCity);
+
+    const ns = normalizeText(s);
+
+    // Try exact match first
+    let found = DB_VALUES.jobTypes.find((j) => normalizeText(j) === ns);
+
+    // Try partial match against backend keys (if available)
+    if (!found && backendCounts?.categories) {
+      found = Object.keys(backendCounts.categories).find((k) => {
+        const nk = normalizeText(k);
+        return nk === ns || nk.includes(ns) || ns.includes(nk);
+      }) as any;
     }
-  }, [isOpen, storeSearch]);
+
+    // Try partial match against static list
+    if (!found) {
+      found = DB_VALUES.jobTypes.find((j) => normalizeText(j).includes(ns) || ns.includes(normalizeText(j)));
+    }
+
+    if (found) {
+      const matchVal = typeof found === 'string' ? found : String(found);
+      setSelectedJobs([matchVal]);
+      applyFilters(selectedRanges, selectedCities, [matchVal], true, filtersFromStore.isAutoSelectedCity);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, storeSearch, backendCounts]);
 
   useEffect(() => {
     setSelectedRating(storeRating ?? null);
@@ -226,13 +251,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   // Fallback a DB_VALUES.jobTypes si no hay datos del backend.
   const jobTypes = React.useMemo(() => {
     if (backendCounts && backendCounts.categories) {
-      // backendCounts.categories: Record<string, number>
-      return Object.keys(backendCounts.categories).map((dbValue) => ({ dbValue, label: dbValue }));
+      return Object.keys(backendCounts.categories).map((dbValue) => ({ dbValue, label: dbValue, count: backendCounts.categories[dbValue] || 0 }));
     }
-
-    // Fallback: usar valores estáticos (muestran las etiquetas traducidas si existen)
-    return DB_VALUES.jobTypes.map((dbValue, index) => ({ dbValue, label: dbValue }));
+    // Fallback: usar valores estáticos
+    return DB_VALUES.jobTypes.map((dbValue) => ({ dbValue, label: dbValue, count: 0 }));
   }, [backendCounts]);
+
+  // Ordenar por count descendente
+  const jobTypesSorted = React.useMemo(() => {
+    return [...jobTypes].sort((a, b) => (b.count || 0) - (a.count || 0));
+  }, [jobTypes]);
 
   return (
     <>
@@ -384,7 +412,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.trabajo && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {jobTypes.map((job) => {
+                    {jobTypesSorted.map((job) => {
                       const isSelected = selectedJobs.includes(job.dbValue);
                       const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
                       const count = backendCounts?.categories?.[job.dbValue] ?? 0;
