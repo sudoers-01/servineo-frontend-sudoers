@@ -46,7 +46,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   // 🔧 FIX: Enviar todas las ciudades separadas por coma
   const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
     range: selectedRanges.length > 0 ? selectedRanges : undefined,
-    city: selectedCities.length > 0 ? selectedCities.join(',') : undefined, // ✅ CORREGIDO
+    city: selectedCities.length > 0 ? selectedCities.join(',') : undefined,
     category: selectedJobs.length > 0 ? selectedJobs : undefined,
     search: storeSearch?.trim() ? storeSearch : undefined,
     minRating: selectedRating ?? undefined,
@@ -61,6 +61,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     setSelectedJobs(filtersFromStore.category || []);
     setSelectedRating(storeRating ?? null);
   }, [filtersFromStore, storeRating]);
+
   // Auto-select category when drawer opens if search matches a job type (fuzzy, accent-insensitive)
   const normalizeText = (s: string) =>
     s
@@ -159,16 +160,21 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   };
 
   const handleJobChange = (dbValue: string) => {
-    const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(dbValue);
-    if (isAutoMarked && selectedJobs.includes(dbValue)) {
-      return;
+    // Si hay auto-selección, permitir cambio libre entre categorías
+    let newJobs: string[];
+    
+    if (filtersFromStore.isAutoSelectedCategory) {
+      // Si clickea en otra categoría, cambiar a esa (comportamiento de radio button)
+      newJobs = selectedJobs.includes(dbValue) ? [] : [dbValue];
+    } else {
+      // Comportamiento normal de checkbox múltiple
+      newJobs = selectedJobs.includes(dbValue)
+        ? selectedJobs.filter((j) => j !== dbValue)
+        : [...selectedJobs, dbValue];
     }
 
-    const newJobs = selectedJobs.includes(dbValue)
-      ? selectedJobs.filter((j) => j !== dbValue)
-      : [...selectedJobs, dbValue];
-
     setSelectedJobs(newJobs);
+    // Quitar el flag de auto-selección ya que el usuario hizo un cambio manual
     applyFilters(selectedRanges, selectedCities, newJobs, false, filtersFromStore.isAutoSelectedCity);
   };
 
@@ -247,20 +253,33 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ),
   }));
 
-  // Mostrar dinámicamente los tipos de trabajo según lo que devuelve el backend (backendCounts.categories).
-  // Fallback a DB_VALUES.jobTypes si no hay datos del backend.
-  const jobTypes = React.useMemo(() => {
-    if (backendCounts && backendCounts.categories) {
-      return Object.keys(backendCounts.categories).map((dbValue) => ({ dbValue, label: dbValue, count: backendCounts.categories[dbValue] || 0 }));
-    }
-    // Fallback: usar valores estáticos
-    return DB_VALUES.jobTypes.map((dbValue) => ({ dbValue, label: dbValue, count: 0 }));
-  }, [backendCounts]);
+  // ✅ SIEMPRE mostrar todas las categorías estáticas con sus traducciones
+  // Obtener los contadores del backend, pero mantener la lista completa
+  const jobTypes = DB_VALUES.jobTypes.map((dbValue, index) => ({
+    dbValue,
+    label: tJob(
+      `options.${['mason', 'carpenter', 'locksmith', 'decorator', 'electrician', 'plumber', 'fumigator', 'installer', 'gardener', 'cleaner', 'mechanic', 'assembler', 'painter', 'polisher', 'welder', 'roofer', 'glazier', 'plasterer'][index]}`,
+    ),
+  }));
 
-  // Ordenar por count descendente
+  // ✅ Ordenar por contador descendente (cuando hay búsqueda activa)
   const jobTypesSorted = React.useMemo(() => {
-    return [...jobTypes].sort((a, b) => (b.count || 0) - (a.count || 0));
-  }, [jobTypes]);
+    if (!backendCounts?.categories) {
+      return jobTypes; // Sin datos del backend, mantener orden original
+    }
+    
+    // Si hay una búsqueda activa (storeSearch), ordenar por count
+    if (storeSearch?.trim()) {
+      return [...jobTypes].sort((a, b) => {
+        const countA = backendCounts.categories[a.dbValue] || 0;
+        const countB = backendCounts.categories[b.dbValue] || 0;
+        return countB - countA;
+      });
+    }
+    
+    // Sin búsqueda, mantener orden original
+    return jobTypes;
+  }, [backendCounts, jobTypes, storeSearch]);
 
   return (
     <>
@@ -414,20 +433,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                   <div className="flex flex-col gap-2">
                     {jobTypesSorted.map((job) => {
                       const isSelected = selectedJobs.includes(job.dbValue);
-                      const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
                       const count = backendCounts?.categories?.[job.dbValue] ?? 0;
-                      const disabled = filtersFromStore.isAutoSelectedCategory && !isAutoMarked;
+                      // Nunca deshabilitar, siempre permitir selección
+                      const disabled = false;
 
                       return (
                         <label
                           key={job.dbValue}
-                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
-                            disabled
-                              ? 'opacity-50 cursor-not-allowed text-gray-400 pointer-events-none'
-                              : 'cursor-pointer hover:text-[#2B31E0]'
-                          }`}
+                          className="flex items-center justify-between gap-2 text-xs min-w-0 transition-colors cursor-pointer hover:text-[#2B31E0]"
                         >
-                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                          <div className="flex items-center gap-2">
                             <input
                               type="checkbox"
                               className="w-4 h-4 flex-shrink-0 cursor-pointer"
