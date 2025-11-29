@@ -35,21 +35,20 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
-
 ## Para obtener los datos del usuario tanto fixer como requester
+
 utilizar el hook useSelector
 
-const { user, loading } = useSelector((state: RootState) => state.user); 
+const { user, loading } = useSelector((state: RootState) => state.user);
 user es un usuario requester o fixer
 
-
 export interface IUser {
-    _id?: string;
-    id?: string;
-    name: string;
-    email: string;
-    url_photo?: string;
-    role: "requester" | "fixer" | "admin";
+\_id?: string;
+id?: string;
+name: string;
+email: string;
+url_photo?: string;
+role: "requester" | "fixer" | "admin";
 
     authProviders?: Array<{
         provider: string;
@@ -98,4 +97,5 @@ export interface IUser {
     description?: string;
     createdAt?: string;
     updatedAt?: string;
+
 }
