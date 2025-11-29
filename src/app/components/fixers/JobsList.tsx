@@ -25,7 +25,7 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
         onClose={() => setIsRegisterModalOpen(false)}
         id={idJob}
       />
-      
+
       {jobs.map((job) => (
         <RequestedJob
           key={job._id}
