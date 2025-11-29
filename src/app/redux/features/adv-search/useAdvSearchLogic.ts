@@ -239,7 +239,11 @@ export default function useAdvSearchLogic() {
     const rating = sp.get('rating');
     if (rating != null) {
       const r = Number(rating);
-      if (!Number.isNaN(r)) setSelectedRating(r);
+      if (!Number.isNaN(r)) {
+        // Limitar el rating entre 1 y 5
+        const clampedRating = Math.min(5, Math.max(1, r));
+        setSelectedRating(clampedRating);
+      }
     }
 
     const shouldOpenFixer = ranges.length > 0;
@@ -283,7 +287,11 @@ export default function useAdvSearchLogic() {
     }
     if (minPrice != null) params.set('minPrice', String(minPrice));
     if (maxPrice != null) params.set('maxPrice', String(maxPrice));
-    if (selectedRating != null) params.set('rating', String(selectedRating));
+    // Limitar el rating entre 1 y 5 al hacer búsqueda
+    if (selectedRating != null) {
+      const clampedRating = Math.min(5, Math.max(1, selectedRating));
+      params.set('rating', String(clampedRating));
+    }
     params.set('page', '1');
     params.set('limit', '10');
     
