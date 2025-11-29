@@ -118,11 +118,10 @@ export default function RecentOffersSection() {
                 <button
                   onClick={() => scroll('left')}
                   disabled={!canScrollLeft}
-                  className={`flex-shrink-0 p-2 rounded-lg transition-all ${
-                    canScrollLeft
+                  className={`flex-shrink-0 p-2 rounded-lg transition-all ${canScrollLeft
                       ? 'bg-white border-2 border-gray-200 hover:border-primary text-gray-700 hover:text-primary shadow-sm'
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }`}
+                    }`}
                   aria-label="Scroll left"
                 >
                   <ChevronLeft className="w-5 h-5" />
@@ -137,11 +136,10 @@ export default function RecentOffersSection() {
                     <button
                       key={cat}
                       onClick={() => handleCategorySelect(cat)}
-                      className={`flex-shrink-0 px-4 py-2 rounded-xl font-medium transition-all ${
-                        selectedCategory === cat
+                      className={`flex-shrink-0 px-4 py-2 rounded-xl font-medium transition-all ${selectedCategory === cat
                           ? 'bg-gradient-to-r from-primary to-blue-600 text-white shadow-md'
                           : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-primary hover:text-primary'
-                      }`}
+                        }`}
                     >
                       {tCat(cat)}
                     </button>
@@ -151,11 +149,10 @@ export default function RecentOffersSection() {
                 <button
                   onClick={() => scroll('right')}
                   disabled={!canScrollRight}
-                  className={`flex-shrink-0 p-2 rounded-lg transition-all ${
-                    canScrollRight
+                  className={`flex-shrink-0 p-2 rounded-lg transition-all ${canScrollRight
                       ? 'bg-white border-2 border-gray-200 hover:border-primary text-gray-700 hover:text-primary shadow-sm'
                       : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  }`}
+                    }`}
                   aria-label="Scroll right"
                 >
                   <ChevronRight className="w-5 h-5" />
@@ -168,11 +165,10 @@ export default function RecentOffersSection() {
                 <button
                   key={cat}
                   onClick={() => handleCategorySelect(cat)}
-                  className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                    selectedCategory === cat
+                  className={`px-4 py-2 rounded-xl font-medium transition-all ${selectedCategory === cat
                       ? 'bg-gradient-to-r from-primary to-blue-600 text-white shadow-md'
                       : 'bg-white border-2 border-gray-200 text-gray-700 hover:border-primary hover:text-primary'
-                  }`}
+                    }`}
                 >
                   {tCat(cat)}
                 </button>
@@ -198,14 +194,20 @@ export default function RecentOffersSection() {
         {/* Offers Grid */}
         {!isLoading && !error && trabajos.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trabajos.map((trabajo) => (
-              <JobOfferCard
-                key={trabajo._id}
-                offer={trabajo}
-                viewMode="grid"
-                onClick={handleCardClick}
-              />
-            ))}
+            {(() => {
+                  console.log('RecentOffersSection: trabajos', trabajos);
+                  return (trabajos ?? []).map((trabajo, i) => {
+                    console.log('RecentOffersSection: trabajo', i, trabajo);
+                    return (
+                      <JobOfferCard
+                        key={trabajo._id ?? `trabajo-${i}`}
+                        offer={trabajo}
+                        viewMode="grid"
+                        onClick={handleCardClick}
+                      />
+                    );
+                  });
+                })()}
           </div>
         )}
 

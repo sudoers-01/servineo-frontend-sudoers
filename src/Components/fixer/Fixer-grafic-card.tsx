@@ -13,6 +13,9 @@ interface FixerGraficCardProps {
 }
 
 export default function FixerGraficCard({ completedJobs, cancelledJobs }: FixerGraficCardProps) {
+
+  console.log("Completed Jobs:", completedJobs);
+  console.log("Cancelled Jobs:", cancelledJobs);
   const monthlyData = [
     { month: "Ene", completados: 8, cancelados: 1 },
     { month: "Feb", completados: 30, cancelados: 2 },
