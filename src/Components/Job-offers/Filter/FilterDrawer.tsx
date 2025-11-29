@@ -41,12 +41,14 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   
   const dispatch = useAppDispatch();
   const storeRating = useAppSelector((s) => s.jobOfert.rating);
+  const storeSearch = useAppSelector((s) => s.jobOfert.search);
 
   // 🔧 FIX: Enviar todas las ciudades separadas por coma
   const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
     range: selectedRanges.length > 0 ? selectedRanges : undefined,
     city: selectedCities.length > 0 ? selectedCities.join(',') : undefined, // ✅ CORREGIDO
     category: selectedJobs.length > 0 ? selectedJobs : undefined,
+    search: storeSearch?.trim() ? storeSearch : undefined,
     minRating: selectedRating ?? undefined,
     maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
   }, {
