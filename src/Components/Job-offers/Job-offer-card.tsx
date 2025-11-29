@@ -1,3 +1,4 @@
+// src\Components\Job-offers\Job-offer-card.tsx
 "use client"
 
 import { useRouter } from 'next/navigation'
@@ -10,12 +11,14 @@ interface JobOfferCardProps {
   offer: JobOffer
   showFixerInfo?: boolean
   onClick?: () => void
+  viewMode?: 'grid' | 'list' | string
 }
 
 export function JobOfferCard({ 
   offer, 
   showFixerInfo = true,
-  onClick
+  onClick,
+  viewMode = 'grid'
 }: JobOfferCardProps) {
   const router = useRouter()
 
