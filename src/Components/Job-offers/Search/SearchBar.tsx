@@ -74,6 +74,12 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
+    if (newValue.length >= 100) {// asegura que no pase de 100
+      const trimmed = newValue.slice(0, 100);
+      setPreviewValue(null);
+      setValue(trimmed);
+    setError('Límite máximo de 100 caracteres.');
+    return;  }
     setValue(newValue);
     setPreviewValue(null);
     const { isValid, error } = validateSearch(newValue);
@@ -233,6 +239,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
             className={inputClasses}
             value={previewValue ?? value}
             onChange={handleChange}
+            maxLength={100}
             ref={(el) => {
               inputRef.current = el as HTMLInputElement | null;
             }}
@@ -276,7 +283,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
           {onFilter && <FilterButton onClick={onFilter} />}
         </div>
       </div>
-      <div className="h-2 mt-1">{hasError && <p className="text-red-500 text-sm">{error}</p>}</div>
+      <div className="min-h-5 mt-1">{hasError && <p className="text-red-500 text-sm leading-4">{error}</p>}</div>
     </div>
   );
 };

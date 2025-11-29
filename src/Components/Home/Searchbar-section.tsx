@@ -9,6 +9,8 @@ import { useSearchSuggestions } from '@/app/redux/features/searchHistory/useSear
 import { useSearchKeyboard } from '@/app/redux/features/searchHistory/useSearchKeyboard';
 import { useSearchTouch } from '@/app/redux/features/searchHistory/useSearchTouch';
 import { SearchDropdown } from '@/Components/Shared/SearchDropdown';
+import { validateSearch } from '@/app/lib/validations/search.validator';
+
 
 interface SearchBarProps {
   value: string;
@@ -35,6 +37,8 @@ export function SearchBar({
   const [highlighted, setHighlighted] = useState<number>(-1);
   const [longPressedItem, setLongPressedItem] = useState<string | null>(null);
   const [previewValue, setPreviewValue] = useState<string | null>(null);
+  const [error, setError] = useState<string | undefined>();
+
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -119,7 +123,7 @@ export function SearchBar({
   const handleSearch = useCallback(() => {
     const searchValue = previewValue ?? value;
     const trimmed = searchValue.trim();
-
+    if (error) return;
     if (trimmed) {
       addToHistory(trimmed);
       setIsOpen(false);
@@ -155,9 +159,18 @@ export function SearchBar({
   // Manejar cambios en el input
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      onChange(e.target.value);
+      let newValue = e.target.value;
+      if (newValue.length > 100) {
+      newValue = newValue.slice(0, 100);
+      setError('Límite máximo de 100 caracteres.');
+      onChange(newValue);
+      return;
+    }
+      onChange(newValue);
       setPreviewValue(null);
       setHighlighted(-1);
+      const { isValid, error } = validateSearch(newValue);
+     setError(isValid ? undefined : error);
     },
     [onChange],
   );
@@ -179,7 +192,7 @@ export function SearchBar({
   return (
     <div className={`flex-1 relative group ${className}`} ref={containerRef}>
       {/* Icono de búsqueda */}
-      <div className="absolute left-4 top-1/2 -translate-y-1/2 z-10">
+      <div className="absolute left-4 top-1/3 -translate-y-1/2 z-10">
         <Search
           className={`w-5 h-5 transition-all duration-300 ${
             isFocused
@@ -235,7 +248,8 @@ export function SearchBar({
           shadow-lg
           disabled:opacity-50 disabled:cursor-not-allowed
           ${
-            isFocused
+            error? 'border-red-500 shadow-[0_0_0_1px_red]'
+            : isFocused
               ? 'border-primary shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.02] bg-white'
               : 'border-primary hover:border-blue-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'
           }
@@ -279,6 +293,10 @@ export function SearchBar({
         maxVisibleSuggestions={5}
         className="border-2 border-primary/20 rounded-2xl shadow-2xl backdrop-blur-md"
       />
+        {/* Mensaje de error */}
+    <div className="min-h-5 mt-1">
+    {error && <p className="text-red-500 text-sm leading-4">{error}</p>}
+    </div>
     </div>
   );
 }
