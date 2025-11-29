@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react"
 import type { JobOffer } from "@/app/lib/mock-data"
 import { userLocation } from "@/app/lib/mock-data"
 import { JobQuickInfo } from "./JobQuickInfo"
-import { ZoomIn, ZoomOut, Locate, MapPin, Minus, Plus } from "lucide-react"
+import { MapPin, Minus, Plus } from "lucide-react"
 import type { Map, Marker, Circle } from 'leaflet';
 
 interface MapViewProps {
@@ -82,7 +82,7 @@ export function MapView({ offers, onOfferClick }: MapViewProps) {
       try {
         map.removeLayer(marker)
       } catch (error) {
-        // Silenciar errores al remover marcadores que ya no existen
+        console.error("Error removing marker:", error)
       }
     })
     markersRef.current = []
@@ -320,11 +320,11 @@ export function MapView({ offers, onOfferClick }: MapViewProps) {
     }
   }
 
-  const handleRecenter = () => {
-    if (mapInstanceRef.current) {
-      mapInstanceRef.current.setView([userLocation.lat, userLocation.lng], 14)
-    }
-  }
+  // const handleRecenter = () => {
+  //   if (mapInstanceRef.current) {
+  //     mapInstanceRef.current.setView([userLocation.lat, userLocation.lng], 14)
+  //   }
+  // }
 
   // Si no estamos en el cliente, mostrar un placeholder
   if (!isClient) {

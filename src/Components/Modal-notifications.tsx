@@ -1,6 +1,6 @@
 "use client"
 
-import { X, CheckCircle, AlertCircle, Info, Trash2, type LucideIcon, AlertTriangle } from "lucide-react"
+import { X, CheckCircle, AlertCircle, Info, type LucideIcon, AlertTriangle } from "lucide-react"
 import { useEffect, type ReactNode } from "react"
 
 interface NotificationModalProps {

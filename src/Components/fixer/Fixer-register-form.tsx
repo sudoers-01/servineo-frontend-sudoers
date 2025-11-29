@@ -2,7 +2,7 @@
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { initialRegistrationSchema, type InitialRegistrationData } from "@/app/lib/validations/fixer-schemas"
-import { AlertCircle } from "lucide-react"
+//import { AlertCircle } from "lucide-react"
 import { useState, useEffect } from "react"
 
 interface FixerRegisterFormProps {

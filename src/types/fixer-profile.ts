@@ -4,13 +4,14 @@ export interface IJobOffer {
     fixerName: string;
     fixerWhatsapp: string;
     description: string;
-    titulo?: string;// aqui se aumentara titulo en un aproxima actualizacion por el momento  puedes ponerlo Titulo del trabajo
+    titulo?: string;
     city: string;
     price: number;
     categories: string[];
     images: string[];
     createdAt?: string;
     updatedAt?: string;
+    photos? : string [];
 
 }
 

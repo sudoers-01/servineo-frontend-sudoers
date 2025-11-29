@@ -22,6 +22,7 @@ export default function TopMenu() {
   const dispatch = useDispatch();
   // Acceder correctamente al estado
   const { user, loading } = useSelector((state: RootState) => state.user);
+  console.log("User in TopMenu:", user);
 
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -88,7 +89,7 @@ export default function TopMenu() {
       return (
         <Link
           href="/become-fixer"
-          className="flex items-center gap-2  text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-green-700 transition-colors"
+          className="flex items-center gap-2  px-4 py-2 rounded-md text-sm font-medium text-primary transition-colors"
         >
           <Wrench className="h-4 w-4" />
           Convertir a Fixer
@@ -100,7 +101,7 @@ export default function TopMenu() {
       return (
         <Link
           href="/fixer/dashboard"
-          className="flex items-center gap-2  text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+          className="flex items-center gap-2  text-white px-4 py-2 rounded-md text-sm font-medium bg-primary transition-colors"
         >
           <UserCircle className="h-4 w-4" />
           Perfil de Fixer

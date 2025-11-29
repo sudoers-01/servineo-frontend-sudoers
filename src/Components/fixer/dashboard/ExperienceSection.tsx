@@ -13,7 +13,7 @@ import {
 import { Modal } from "@/Components/Modal"
 import { useForm } from "react-hook-form"
 import { PillButton } from "../Pill-button"
-import { SerializedError } from "@reduxjs/toolkit"
+//import { SerializedError } from "@reduxjs/toolkit"
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query"
 
 // Type guard para errores de API

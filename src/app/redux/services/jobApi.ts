@@ -4,21 +4,29 @@ import type { IJob } from "@/types/job-offer"
 export const jobApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getAllJobs: builder.query<IJob[], void>({
-      query: () => "/jobs",
+      query: () => "/jobs", // Asegúrate que esta ruta coincida con tu backend (ej: /job-offers)
       providesTags: ["Job"],
     }),
     getJobsByFixer: builder.query<IJob[], string>({
       query: (fixerId) => `/jobs/fixer/${fixerId}`,
       providesTags: ["Job"],
     }),
-    createJob: builder.mutation<IJob, Omit<IJob, "_id">>({
-      query: (body) => ({
-        url: "/jobs",
+    
+    // --- AQUÍ ESTÁ EL CAMBIO ---
+    // 1. Cambiamos el tipo de entrada de Omit<IJob...> a FormData
+    createJob: builder.mutation<IJob, FormData>({
+      query: (formData) => ({
+        url: "/jobs", // Asegúrate que coincida con tu backend router.post('/', ...)
         method: "POST",
-        body,
+        body: formData, 
+        // NOTA: No necesitas poner headers manuales. 
+        // RTK Query y el navegador detectarán que es FormData 
+        // y pondrán el 'multipart/form-data' automáticamente.
       }),
       invalidatesTags: ["Job"],
     }),
+    // ---------------------------
+
     updateJob: builder.mutation<IJob, { jobId: string; data: Partial<IJob> & { fixerId: string } }>({
       query: ({ jobId, data }) => ({
         url: `/jobs/${jobId}`,
