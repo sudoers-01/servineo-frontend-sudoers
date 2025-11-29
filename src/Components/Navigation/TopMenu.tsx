@@ -4,14 +4,47 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
+import { useGetUserByIdQuery } from "@/app/redux/services/userApi";
+import { useDispatch } from "react-redux";
+import { setUser } from "@/app/redux/slice/userSlice";
+import { useSelector } from "react-redux";
+import { IUser } from "@/types/user";
 
 export default function TopMenu() {
+
+  const dispatch = useDispatch();
+
+  const user = useSelector((state: { user: IUser }) => state.user);
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  // CORRECCIÓN TS
+  useEffect(() => {
+    const token = localStorage.getItem("servineo_user");
+
+    if (token) {
+      const user = JSON.parse(token);
+      const userId = user._id;
+      setUserId(userId);
+    }
+  }, []);
+
+
+  const { data: userData, isLoading, error } = useGetUserByIdQuery(userId!, {
+    skip: !userId,
+  });
+
+  useEffect(() => {
+    if (userData) {
+      dispatch(setUser(userData))
+    }
+  }, [userData, dispatch]);
+
+
+  console.log("user este es mi usuario que esta en el estado de redux", user);
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -54,11 +87,10 @@ export default function TopMenu() {
   return (
     <>
       <header
-        className={`fixed w-full z-50 transition-all duration-300 ${
-          scrolled
-            ? "bg-white/10 backdrop-blur-sm bg-white shadow-md"
-            : "bg-white/10 backdrop-blur-sm"
-        } border-t-[1.5px] border-b-[1.5px] border-primary`}
+        className={`fixed w-full z-50 transition-all duration-300 ${scrolled
+          ? "bg-white/10 backdrop-blur-sm bg-white shadow-md"
+          : "bg-white/10 backdrop-blur-sm"
+          } border-t-[1.5px] border-b-[1.5px] border-primary`}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16">
@@ -82,52 +114,52 @@ export default function TopMenu() {
 
             {/* DERECHA */}
             <div className="hidden md:flex items-center space-x-4">              {!isLogged ? (
-                <>
-                  <Link
-                    href="../login"
-                    className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Iniciar Sesión
-                  </Link>
-                  <Link
-                    href="/signUp"
-                    className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Regístrate
-                  </Link>
-                </>
-              ) : (
-                <div className="relative" ref={dropdownRef}>
-                  <button
-                    onClick={() => setAccountOpen(!accountOpen)}
-                    className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                  >
-                    Mi cuenta
-                  </button>
+              <>
+                <Link
+                  href="../login"
+                  className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Iniciar Sesión
+                </Link>
+                <Link
+                  href="/signUp"
+                  className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  Regístrate
+                </Link>
+              </>
+            ) : (
+              <div className="relative" ref={dropdownRef}>
+                <button
+                  onClick={() => setAccountOpen(!accountOpen)}
+                  className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                >
+                  Mi cuenta
+                </button>
 
-                  {accountOpen && (
-                    <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50">
-                      <Link
-                        href="/requesterEdit"
-                        className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
-                      >
-                        Editar perfil
-                      </Link>
-                      
-                      <button
-                        onClick={() => {
-                          localStorage.removeItem("servineo_token");
-                          localStorage.removeItem("servineo_user");
-                          window.location.reload();
-                        }}
-                        className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
-                      >
-                        Cerrar sesión
-                      </button>
-                    </div>
-                  )}
-                </div>
-              )}
+                {accountOpen && (
+                  <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50">
+                    <Link
+                      href="/requesterEdit"
+                      className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
+                    >
+                      Editar perfil
+                    </Link>
+
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem("servineo_token");
+                        localStorage.removeItem("servineo_user");
+                        window.location.reload();
+                      }}
+                      className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
 
             </div>
 
@@ -144,9 +176,8 @@ export default function TopMenu() {
 
         {/* MOBILE MENU */}
         <div
-          className={`md:hidden ${
-            isOpen ? "block" : "hidden"
-          } bg-white/95 backdrop-blur-sm border-t border-gray-200`}
+          className={`md:hidden ${isOpen ? "block" : "hidden"
+            } bg-white/95 backdrop-blur-sm border-t border-gray-200`}
         >
           <div className="px-2 pt-2 pb-3 space-y-1">
             {navItems.map((item) => (

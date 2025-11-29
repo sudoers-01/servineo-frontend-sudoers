@@ -11,7 +11,7 @@ export interface IJobOffer {
     images: string[];
     createdAt?: string;
     updatedAt?: string;
-    
+
 }
 
 export interface ICertification {
@@ -44,7 +44,7 @@ export interface IPortfolioItem {
     _id?: string;
     fixerId: string;
     type: "image" | "video";
-    url: string;
+    url?: string;
     youtubeUrl?: string | null;
     createdAt?: string;
     updatedAt?: string;

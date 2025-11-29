@@ -50,7 +50,7 @@ export interface IUser {
         departamento?: string;
         pais?: string;
     };
-
+    description?: string;
     createdAt?: string;
     updatedAt?: string;
 }

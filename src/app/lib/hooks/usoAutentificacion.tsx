@@ -63,8 +63,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (user) {
       // Ensure _id exists
-      const userWithId = { ...user, _id: (user as any).id || (user as any)._id };
+      const userWithId = { ...user, _id: user.id };
       localStorage.setItem("servineo_user", JSON.stringify(userWithId));
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       dispatch(setReduxUser(userWithId as any)); // Sync with Redux
     }
   }, [user, dispatch]);

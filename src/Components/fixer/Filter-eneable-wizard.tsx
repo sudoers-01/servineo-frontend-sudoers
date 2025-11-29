@@ -17,6 +17,8 @@ import { ProfilePhotoStep } from "./steps/Profile-photo-step"
 import { useConvertToFixerMutation } from "@/app/redux/services/become"
 import { IUser } from "@/types/user"
 import { fixerProfileSchema, type FixerProfileData } from "@/app/lib/validations/fixer-schemas"
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query"
+import { SerializedError } from "@reduxjs/toolkit"
 
 const DEFAULT_SERVICES: Service[] = [
   { id: "svc-plumbing", name: "Plomería" },
@@ -27,6 +29,28 @@ const DEFAULT_SERVICES: Service[] = [
 
 interface FixerEnableWizardProps {
   user: IUser
+}
+
+// Type guards para manejar errores
+function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+  return typeof error === 'object' && error != null && 'status' in error
+}
+
+function isErrorWithData(error: unknown): error is { data: { message?: string; error?: string } } {
+  return (
+    typeof error === 'object' &&
+    error != null &&
+    'data' in error &&
+    typeof (error as { data: unknown }).data === 'object'
+  )
+}
+
+function isSerializedError(error: unknown): error is SerializedError {
+  return (
+    typeof error === 'object' &&
+    error != null &&
+    ('name' in error || 'message' in error || 'code' in error)
+  )
 }
 
 export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
@@ -227,10 +251,18 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
       console.log("Submitting user profile data:", payload)
       await convertToFixer(payload).unwrap()
       setSuccess(true)
-    } catch (error: any) {
+    } catch (error) {
       console.error("Error registering fixer:", error)
-      if (error && typeof error === 'object' && 'data' in error) {
+
+      // Manejo tipado de errores
+      if (isErrorWithData(error)) {
         console.error("API Error Data:", error.data)
+      } else if (isFetchBaseQueryError(error)) {
+        console.error("Fetch Error:", error)
+      } else if (isSerializedError(error)) {
+        console.error("Serialized Error:", error.message)
+      } else {
+        console.error("Unknown error type")
       }
     }
   }

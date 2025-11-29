@@ -31,6 +31,7 @@ interface BackendUser {
   id?: string;
   email?: string;
   [key: string]: unknown;
+  role?: string;
 }
 
 interface LoginResponse {
@@ -83,7 +84,7 @@ export default function LoginPage() {
           name: (datos.user.name || datos.user.displayName || "Usuario") as string,
           email: datos.user.email as string,
           url_photo: (datos.user.picture || datos.user.url_photo || null) as string | undefined,
-          role: ((datos.user as any).role || "requester") as "requester" | "fixer" | "admin",
+          role: (datos.user.role || "requester") as "requester" | "fixer" | "admin",
         };
 
         localStorage.setItem("servineo_token", datos.token);

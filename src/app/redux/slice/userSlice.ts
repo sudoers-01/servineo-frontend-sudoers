@@ -28,6 +28,7 @@ export const userSlice = createSlice({
       state.user = null;
       state.isAuthenticated = false;
     },
+
   },
 });
 

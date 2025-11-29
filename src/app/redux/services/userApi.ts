@@ -1,8 +1,12 @@
+// refactorizar  las rutas
+
 import { baseApi } from "./baseApi"
 import type { IUserProfile } from "@/types/job-offer"
+import type { IUser } from "@/types/user"
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+
     createUserProfile: builder.mutation<IUserProfile, IUserProfile>({
       query: (body) => ({
         url: "/user-profiles",
@@ -11,22 +15,25 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+
     getUserProfiles: builder.query<IUserProfile[], void>({
       query: () => "/user-profiles",
       providesTags: ["User"],
     }),
-    updateBio: builder.mutation<IUserProfile, { id: string; bio: string }>({
-      query: ({ id, bio }) => ({
-        url: `/user-profiles/${id}/bio`,
-        method: "PATCH",
-        body: { bio },
+    updateDescription: builder.mutation<IUser, { id: string; description: string }>({
+      query: ({ id, description }) => ({
+        url: `/user/${id}/description`,
+        method: "POST",
+        body: { description },
       }),
       invalidatesTags: ["User"],
     }),
+
     getUsersByRole: builder.query<IUserProfile[], string>({
       query: (role) => `/user-profiles/role/${role}`,
       providesTags: ["User"],
     }),
+
     convertToFixer: builder.mutation<IUserProfile, { id: string; profile: IUserProfile["profile"] }>({
       query: ({ id, profile }) => ({
         url: `/user-profiles/${id}/convert-fixer`,
@@ -35,14 +42,24 @@ export const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+
+    getUserById: builder.query<IUser, string>({
+      query: (id) => `/user/${id}`,
+      providesTags: ["User"],
+    }),
+
   }),
+
   overrideExisting: false,
 })
 
 export const {
   useCreateUserProfileMutation,
   useGetUserProfilesQuery,
-  useUpdateBioMutation,
+  useUpdateDescriptionMutation,
   useGetUsersByRoleQuery,
   useConvertToFixerMutation,
+  useLazyGetUserByIdQuery,
+  useGetUserByIdQuery,
+
 } = userApi

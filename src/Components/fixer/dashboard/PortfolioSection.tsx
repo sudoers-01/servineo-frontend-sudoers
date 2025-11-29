@@ -2,11 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { PillButton } from "../Pill-button"
-import { Plus, Trash2, Image as ImageIcon, Video, X, CheckCircle, XCircle } from "lucide-react"
-import { IPortfolioItem } from "@/types/fixer-profile"
+import { Plus, Trash2, Image as ImageIcon, Video, X, CheckCircle, XCircle, Loader2 } from "lucide-react"
 import { Modal } from "@/Components/Modal"
+import NotificationModal from "@/Components/Modal-notifications"
 import { useForm } from "react-hook-form"
 import Image from "next/image"
+
+import { useGetPortfolioByFixerQuery, useCreatePortfolioItemMutation, useDeletePortfolioItemMutation } from "@/app/redux/services/portafolioApi"
+// Importamos el type guard
+import { isApiError } from "@/app/redux/services/baseApi"
 
 type PortfolioFormValues = {
   type: "image" | "video"
@@ -19,24 +23,14 @@ interface PortfolioSectionProps {
   fixerId?: string
 }
 
-const API_URL = "http://localhost:8000/api"
-
-// 🔹 Soporta: https://www.youtube.com/watch?v=ID, https://youtu.be/ID, /embed/ID, etc.
+// Helper para YouTube
 function getYouTubeId(rawUrl?: string): string | undefined {
   if (!rawUrl) return undefined
   try {
     const url = new URL(rawUrl)
-
-    // youtu.be/ID
-    if (url.hostname.includes("youtu.be")) {
-      return url.pathname.replace("/", "")
-    }
-
-    // youtube.com/watch?v=ID
+    if (url.hostname.includes("youtu.be")) return url.pathname.replace("/", "")
     const vParam = url.searchParams.get("v")
     if (vParam) return vParam
-
-    // youtube.com/embed/ID o rutas similares
     const parts = url.pathname.split("/")
     return parts[parts.length - 1] || undefined
   } catch {
@@ -45,21 +39,45 @@ function getYouTubeId(rawUrl?: string): string | undefined {
 }
 
 export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSectionProps) {
-  const [items, setItems] = useState<IPortfolioItem[]>([])
+  // ID efectivo
+  const effectiveFixerId = fixerId || "69285d2860ea986813517593"
+
+  // --- Estados UI ---
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [modalType, setModalType] = useState<"image" | "video">("image")
-  const [loading, setLoading] = useState(false)
+  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null)
+
+  // Validación de imagen
   const [previewUrl, setPreviewUrl] = useState<string>("")
   const [isValidUrl, setIsValidUrl] = useState<boolean | null>(null)
   const [isValidating, setIsValidating] = useState(false)
-  const [fullscreenImage, setFullscreenImage] = useState<string | null>(null)
 
+  // Notificaciones
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+  const [notification, setNotification] = useState({
+    isOpen: false,
+    type: "success",
+    title: "",
+    message: "",
+  })
+
+  // --- RTK Query Hooks ---
+  const {
+    data: items = [],
+    isLoading,
+    isError
+  } = useGetPortfolioByFixerQuery(effectiveFixerId, {
+    skip: !effectiveFixerId
+  })
+
+  const [createItem, { isLoading: isCreating }] = useCreatePortfolioItemMutation()
+  const [deleteItem, { isLoading: isDeleting }] = useDeletePortfolioItemMutation()
+
+  // --- React Hook Form ---
   const { register, handleSubmit, reset, watch } = useForm<PortfolioFormValues>()
-
-  const effectiveFixerId = fixerId || "64a1b2c3d4e5f67890123456"
   const watchedUrl = watch("url")
 
-  // Validar URL de imagen en tiempo real - Acepta cualquier tipo de URL
+  // Efecto de validación de imagen
   useEffect(() => {
     if (!watchedUrl || modalType !== "image") {
       setPreviewUrl("")
@@ -70,143 +88,132 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     const timeoutId = setTimeout(() => {
       setIsValidating(true)
       const img = document.createElement("img")
-      
       img.onload = () => {
         setIsValidUrl(true)
         setPreviewUrl(watchedUrl)
         setIsValidating(false)
       }
-      
       img.onerror = () => {
         setIsValidUrl(false)
         setPreviewUrl("")
         setIsValidating(false)
       }
-      
       img.src = watchedUrl
-    }, 500) // Debounce de 500ms
+    }, 500)
 
     return () => clearTimeout(timeoutId)
   }, [watchedUrl, modalType])
 
-  // Cargar portafolio
-  useEffect(() => {
-    const fetchPortfolio = async () => {
-      try {
-        setLoading(true)
-        const res = await fetch(`${API_URL}/portfolio/fixer/${effectiveFixerId}`)
-        if (!res.ok) {
-          console.error("Error al obtener portafolio:", res.status)
-          return
-        }
-        const data = await res.json()
-        setItems(data)
-      } catch (error) {
-        console.error("Error obteniendo portafolio:", error)
-      } finally {
-        setLoading(false)
-      }
-    }
+  // Helper de error seguro
+  const getErrorMessage = (error: unknown) => {
+    if (isApiError(error)) return error.data.message || "Error desconocido"
+    return "Ocurrió un error inesperado"
+  }
 
-    if (effectiveFixerId) fetchPortfolio()
-  }, [effectiveFixerId])
+  const showNotification = (type: "success" | "error" | "warning", title: string, message: string) => {
+    setNotification({ isOpen: true, type, title, message })
+  }
 
+  // --- Handlers ---
   const handleOpenModal = (type: "image" | "video") => {
     if (readOnly) return
     setModalType(type)
     setPreviewUrl("")
     setIsValidUrl(null)
-    reset({
-      type,
-      url: "",
-      youtubeUrl: "",
-    })
+    reset({ type, url: "", youtubeUrl: "" })
     setIsModalOpen(true)
   }
 
   const handleCloseModal = () => {
     setIsModalOpen(false)
+    reset()
     setPreviewUrl("")
     setIsValidUrl(null)
-    reset()
   }
 
   const onSubmit = async (data: PortfolioFormValues) => {
     try {
-      let url = data.url
+      let finalUrl = data.url
 
-      // Validar que haya URL y que haya cargado correctamente
       if (data.type === "image") {
-        if (!url) {
-          alert("Por favor ingresa una URL")
+        if (!finalUrl) {
+          showNotification("error", "Campo requerido", "Por favor ingresa una URL")
           return
         }
         if (isValidUrl !== true) {
-          alert("La imagen no pudo cargarse. Verifica la URL.")
+          showNotification("error", "URL Inválida", "La imagen no pudo cargarse.")
           return
         }
       }
 
-      if (data.type === "video" && data.youtubeUrl && !url) {
+      if (data.type === "video" && data.youtubeUrl) {
         const videoId = getYouTubeId(data.youtubeUrl)
         if (videoId) {
-          url = `https://img.youtube.com/vi/${videoId}/0.jpg`
+          if (!finalUrl) {
+            finalUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`
+          }
+        } else {
+          showNotification("error", "URL Inválida", "No se pudo identificar el video")
+          return
         }
       }
 
-      const body = {
+      const payload = {
         type: data.type,
-        url,
+        url: finalUrl,
         youtubeUrl: data.youtubeUrl,
         fixerId: effectiveFixerId,
       }
 
-      const res = await fetch(`${API_URL}/portfolio`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(body),
-      })
+      await createItem(payload).unwrap()
 
-      if (!res.ok) {
-        console.error("Error creando item:", res.status)
-        alert("Error al guardar la imagen. Intenta de nuevo.")
-        return
-      }
-
-      const newItem = await res.json()
-      setItems(prev => [...prev, newItem])
+      showNotification("success", "¡Éxito!", "Elemento agregado al portafolio")
       handleCloseModal()
+
     } catch (error) {
-      console.error("Error creando item de portafolio:", error)
-      alert("Error al guardar. Verifica la URL e intenta de nuevo.")
+      showNotification("error", "Error al guardar", getErrorMessage(error))
     }
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDeleteRequest = (id: string) => {
     if (readOnly) return
-    const ok = confirm("¿Estás seguro de eliminar este elemento?")
-    if (!ok) return
+    setDeleteId(id)
+    showNotification("warning", "¿Estás seguro?", "Esta acción eliminará el elemento permanentemente.")
+  }
 
+  const confirmDelete = async () => {
+    if (!deleteId) return
     try {
-      const res = await fetch(`${API_URL}/portfolio/${id}`, {
-        method: "DELETE",
-      })
-
-      if (!res.ok) {
-        console.error("Error eliminando item:", res.status)
-        return
-      }
-
-      setItems(prev => prev.filter(i => i._id !== id))
+      await deleteItem(deleteId).unwrap()
+      showNotification("success", "Eliminado", "Elemento eliminado correctamente")
+      setDeleteId(null)
     } catch (error) {
-      console.error("Error eliminando item del portafolio:", error)
+      showNotification("error", "Error", getErrorMessage(error))
+      setDeleteId(null)
     }
   }
+
+  const cancelDelete = () => {
+    setDeleteId(null)
+  }
+
+  if (isLoading) return <div className="text-center p-8 text-gray-500">Cargando portafolio...</div>
+  if (isError) return <div className="text-center p-8 text-red-500">Error al cargar el portafolio.</div>
 
   return (
     <div className="space-y-6">
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={() => setNotification(prev => ({ ...prev, isOpen: false }))}
+        type={notification.type as "success" | "error" | "warning"}
+        title={notification.title}
+        message={notification.message}
+        autoClose={notification.type !== "warning"}
+        autoCloseDelay={5000}
+        onConfirm={deleteId ? confirmDelete : undefined}
+        onCancel={deleteId ? cancelDelete : undefined}
+      />
+
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
           <ImageIcon className="h-5 w-5 text-blue-600" />
@@ -234,16 +241,18 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         )}
       </div>
 
-      {loading ? (
-        <p className="text-gray-500 text-sm">Cargando portafolio...</p>
+      {items.length === 0 ? (
+        <div className="text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
+          <p className="text-gray-500">No hay elementos en el portafolio aún.</p>
+        </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {items.map((item) => {
             const isVideo = item.type === "video"
             const videoId = getYouTubeId(item.youtubeUrl || undefined)
             const hasUrl = item.url && item.url.trim() !== ""
-            const isDataUrl = hasUrl && item.url.startsWith('data:')
-            const isHttpUrl = hasUrl && (item.url.startsWith('http://') || item.url.startsWith('https://'))
+            const isDataUrl = hasUrl && item.url!.startsWith('data:')
+            const isHttpUrl = hasUrl && (item.url!.startsWith('http://') || item.url!.startsWith('https://'))
 
             return (
               <div
@@ -252,9 +261,8 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                 onClick={() => !isVideo && hasUrl && setFullscreenImage(item.url || null)}
               >
                 {isVideo && videoId ? (
-                  // 🔥 Video embebido de YouTube
                   <iframe
-                    className="absolute inset-0 w-full h-full rounded-2xl"
+                    className="absolute inset-0 w-full h-full rounded-2xl pointer-events-none"
                     src={`https://www.youtube.com/embed/${videoId}`}
                     title="YouTube video"
                     frameBorder="0"
@@ -262,36 +270,34 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                     allowFullScreen
                   />
                 ) : hasUrl ? (
-                  // 🖼 Imagen - usar img nativo para data URLs, next/image para URLs HTTP
                   <div className="absolute inset-0">
                     {isDataUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={item.url}
+                        src={item.url!}
                         alt="Portfolio item"
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     ) : isHttpUrl ? (
                       <Image
-                        src={item.url}
+                        src={item.url!}
                         alt="Portfolio item"
                         fill
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
-                        unoptimized={!isHttpUrl}
+                        unoptimized={true}
                       />
                     ) : (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
-                        src={item.url}
+                        src={item.url!}
                         alt="Portfolio item"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className="w-full h-full object-cover"
                       />
                     )}
                   </div>
                 ) : (
-                  // ⚠️ Sin imagen
-                  <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200">
+                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                     <div className="text-center p-4">
                       <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                       <p className="text-xs text-gray-500 font-medium">Sin imagen</p>
@@ -300,11 +306,13 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                 )}
 
                 {!readOnly && (
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 pointer-events-none"
-                  >
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 pointer-events-none">
                     <button
-                      onClick={() => handleDelete(item._id!)}
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        handleDeleteRequest(item._id!)
+                      }}
+                      disabled={isDeleting}
                       className="self-end p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-colors shadow-sm hover:scale-110 pointer-events-auto"
                       title="Eliminar"
                     >
@@ -318,7 +326,6 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         </div>
       )}
 
-      {/* MODAL */}
       <Modal
         open={isModalOpen}
         onClose={handleCloseModal}
@@ -342,7 +349,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                   />
                   {isValidating && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+                      <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
                     </div>
                   )}
                   {!isValidating && isValidUrl === true && (
@@ -357,34 +364,18 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                     ❌ No se pudo cargar la imagen. Verifica la URL.
                   </p>
                 )}
-                {isValidUrl === true && (
-                  <p className="text-xs text-green-600 mt-1 font-medium">
-                    ✅ Imagen válida y lista para agregar
-                  </p>
-                )}
               </div>
 
-              {/* Vista previa */}
               {previewUrl && isValidUrl && (
                 <div className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
                   <p className="text-xs text-green-700 mb-2 font-semibold">✅ Vista Previa:</p>
                   <div className="relative w-full h-48 rounded-lg overflow-hidden bg-white shadow-md">
-                    {previewUrl.startsWith('data:') ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={previewUrl}
-                        alt="Preview"
-                        className="w-full h-full object-contain"
-                      />
-                    ) : (
-                      <Image
-                        src={previewUrl}
-                        alt="Preview"
-                        fill
-                        className="object-contain"
-                        unoptimized={!previewUrl.startsWith('http')}
-                      />
-                    )}
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={previewUrl}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                    />
                   </div>
                 </div>
               )}
@@ -409,7 +400,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                 <input
                   {...register("url")}
                   className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="Se intentará extraer automáticamente"
+                  placeholder="Se intentará extraer automáticamente si está vacío"
                 />
               </div>
             </>
@@ -426,19 +417,24 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
 
             <PillButton
               type="submit"
-              className="bg-primary text-white hover:bg-blue-800"
-              disabled={modalType === "image" && isValidUrl !== true}
+              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              disabled={(modalType === "image" && isValidUrl !== true) || isCreating}
             >
-              Guardar
+              {isCreating ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> Guardando...
+                </>
+              ) : (
+                "Guardar"
+              )}
             </PillButton>
           </div>
         </form>
       </Modal>
 
-      {/* Modal de imagen en pantalla completa */}
       {fullscreenImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fade-in"
           onClick={() => setFullscreenImage(null)}
         >
           <button
@@ -448,22 +444,12 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             <X className="h-6 w-6" />
           </button>
           <div className="relative w-full h-full max-w-6xl max-h-[90vh]" onClick={(e) => e.stopPropagation()}>
-            {fullscreenImage.startsWith('data:') ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={fullscreenImage}
-                alt="Imagen en pantalla completa"
-                className="w-full h-full object-contain"
-              />
-            ) : (
-              <Image
-                src={fullscreenImage}
-                alt="Imagen en pantalla completa"
-                fill
-                className="object-contain"
-                unoptimized={!fullscreenImage.startsWith('http')}
-              />
-            )}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={fullscreenImage}
+              alt="Imagen completa"
+              className="w-full h-full object-contain"
+            />
           </div>
         </div>
       )}

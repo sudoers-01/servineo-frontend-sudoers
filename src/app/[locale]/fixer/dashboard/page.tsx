@@ -1,29 +1,59 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useAppSelector } from "@/app/redux/hooks"
-import { JobOffersSection } from "@/Components/fixer/dashboard/JobOffersSection"
-import { CertificationsSection } from "@/Components/fixer/dashboard/CertificationsSection"
-import { ExperienceSection } from "@/Components/fixer/dashboard/ExperienceSection"
-import { PortfolioSection } from "@/Components/fixer/dashboard/PortfolioSection"
-import { User, Briefcase, Award, Building2, Image as ImageIcon, MapPin, Phone, Mail } from "lucide-react"
-import Image from "next/image"
-import EstadisticasTrabajos from "@/Components/fixer/Fixer-statistics"
+import { useState } from "react";
+import { useAppSelector } from "@/app/redux/hooks";
+import { JobOffersSection } from "@/Components/fixer/dashboard/JobOffersSection";
+import { CertificationsSection } from "@/Components/fixer/dashboard/CertificationsSection";
+import { ExperienceSection } from "@/Components/fixer/dashboard/ExperienceSection";
+import { PortfolioSection } from "@/Components/fixer/dashboard/PortfolioSection";
+import { User, Briefcase, Award, Building2, Image as ImageIcon, MapPin, Phone, Mail, Edit2, Check } from "lucide-react";
+import Image from "next/image";
+import EstadisticasTrabajos from "@/Components/fixer/Fixer-statistics";
+import { useUpdateDescriptionMutation } from "@/app/redux/services/userApi";
+import { useEffect } from "react";
 
-type Tab = "offers" | "certs" | "experience" | "portfolio" | "estadisticas"
+type Tab = "offers" | "certs" | "experience" | "portfolio" | "estadisticas";
 
 export default function FixerDashboardPage() {
-    const { user: reduxUser } = useAppSelector((state) => state.user)
-    const user =
-        reduxUser ||
-        (typeof window !== "undefined"
-            ? JSON.parse(localStorage.getItem("servineo_user") || "null")
-            : null)
-    const [activeTab, setActiveTab] = useState<Tab>("offers")
+    const { user: reduxUser } = useAppSelector((state) => state.user);
+    const user = reduxUser;
+
+    const [activeTab, setActiveTab] = useState<Tab>("offers");
+
+    // Estado para edición de descripción
+    const [editingDescription, setEditingDescription] = useState(false);
+
+
+    const [descriptionValue, setDescriptionValue] = useState("");
+
+    useEffect(() => {
+        if (user) {
+            setDescriptionValue(user?.description || "");
+            // Si es la primera vez, forzamos que esté en edición
+            if (!user?.description) {
+                setEditingDescription(true);
+            }
+        }
+    }, [user]);
+
+
+    const [updateDescription] = useUpdateDescriptionMutation();
 
     if (!user) {
-        return <div className="p-8 text-center">Cargando perfil...</div>
+        return <div className="p-8 text-center">Cargando perfil...</div>;
     }
+
+    const handleSaveDescription = async () => {
+        try {
+            if (!user._id) return;
+
+            await updateDescription({ id: user._id, description: descriptionValue })
+
+            setEditingDescription(false);
+        } catch (err) {
+            console.error("Error actualizando descripción:", err);
+        }
+    };
 
     return (
         <div className="container mx-auto max-w-6xl p-4 space-y-6">
@@ -47,21 +77,45 @@ export default function FixerDashboardPage() {
                                     <User className="h-full w-full p-4 text-gray-400" />
                                 )}
                             </div>
-                            <div className="absolute bottom-0 right-0 h-6 w-6 bg-green-500 border-2 border-white rounded-full" title="Disponible"></div>
+                            <div
+                                className="absolute bottom-0 right-0 h-6 w-6 bg-green-500 border-2 border-white rounded-full"
+                                title="Disponible"
+                            ></div>
                         </div>
                         <div className="flex gap-2">
-                            <button className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors">
-                                Editar Perfil
-                            </button>
-                            <button className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full text-sm font-medium transition-colors">
-                                Ver Público
-                            </button>
+                            {!editingDescription ? (
+                                <button
+                                    onClick={() => setEditingDescription(true)}
+                                    className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors flex items-center gap-1"
+                                >
+                                    <Edit2 className="h-4 w-4" />
+                                    Editar Perfil
+                                </button>
+                            ) : (
+                                <button
+                                    onClick={handleSaveDescription}
+                                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm font-medium transition-colors flex items-center gap-1"
+                                >
+                                    <Check className="h-4 w-4" />
+                                    Guardar
+                                </button>
+                            )}
                         </div>
                     </div>
 
                     <div>
                         <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
-                        <p className="text-gray-500 font-medium">Fixer Profesional</p>
+
+                        {!editingDescription ? (
+                            <p className="text-gray-500 font-medium">{descriptionValue}</p>
+                        ) : (
+                            <input
+                                type="text"
+                                value={descriptionValue}
+                                onChange={(e) => setDescriptionValue(e.target.value)}
+                                className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 w-full max-w-xs"
+                            />
+                        )}
 
                         <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
                             {user.email && (
@@ -147,14 +201,12 @@ export default function FixerDashboardPage() {
                     <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 min-h-[500px]">
                         {activeTab === "offers" && <JobOffersSection />}
                         {activeTab === "certs" && <CertificationsSection />}
-                        {activeTab === "experience" && (
-                            <ExperienceSection fixerId={user._id || (user as any).id} />
-                        )}
-                        {activeTab === "portfolio" && <PortfolioSection />}
+                        {activeTab === "experience" && <ExperienceSection fixerId={user._id || user.id} />}
+                        {activeTab === "portfolio" && <PortfolioSection fixerId={user._id || user.id} />}
                         {activeTab === "estadisticas" && <EstadisticasTrabajos />}
                     </div>
                 </div>
             </div>
         </div>
-    )
+    );
 }

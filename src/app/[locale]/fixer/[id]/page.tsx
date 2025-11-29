@@ -1,11 +1,11 @@
 "use client"
-
+// aqui falta refacotorizar porque tenemos que traernos con el id todo la data del fixer que esta en la card
 import { useState } from "react"
 import Image from "next/image"
 import { MapPin, Star, MessageCircle, Share2, Flag } from "lucide-react"
 import { PillButton } from "@/Components/Pill-button"
 
-import { JobOffersSection } from "@/Components/fixer/dashboard/JobOffersSection"
+
 import { CertificationsSection } from "@/Components/fixer/dashboard/CertificationsSection"
 import { ExperienceSection } from "@/Components/fixer/dashboard/ExperienceSection"
 import { PortfolioSection } from "@/Components/fixer/dashboard/PortfolioSection"

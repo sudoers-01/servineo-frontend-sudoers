@@ -17,6 +17,21 @@ import {
     useDeleteJobOfferMutation,
     CreateJobOfferInput
 } from "@/app/redux/services/jobOfferApi"
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query"
+
+// Type guards para errores
+function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
+    return typeof error === 'object' && error != null && 'status' in error
+}
+
+function isErrorWithData(error: unknown): error is { data: { error?: string; message?: string } } {
+    return (
+        typeof error === 'object' &&
+        error != null &&
+        'data' in error &&
+        typeof (error as { data: unknown }).data === 'object'
+    )
+}
 
 interface JobOffersSectionProps {
     readOnly?: boolean
@@ -140,16 +155,21 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
             handleCloseModal()
         } catch (error) {
             console.error("Error saving offer:", error)
-            // @ts-ignore
-            console.error("Error details:", JSON.stringify(error?.data || error, null, 2))
 
-            // @ts-ignore
-            if (error?.data?.error) {
-                // @ts-ignore
-                alert(`Error: ${error.data.error}`);
-            } else {
-                alert("Error al guardar la oferta. Revisa la consola para más detalles.");
+            let errorMessage = "Error al guardar la oferta. Revisa la consola para más detalles."
+
+            if (isErrorWithData(error)) {
+                console.error("Error details:", JSON.stringify(error.data, null, 2))
+                if (error.data.error) {
+                    errorMessage = `Error: ${error.data.error}`
+                } else if (error.data.message) {
+                    errorMessage = `Error: ${error.data.message}`
+                }
+            } else if (isFetchBaseQueryError(error)) {
+                errorMessage = 'error' in error ? String(error.error) : 'Error de conexión'
             }
+
+            alert(errorMessage)
         }
     }
 
