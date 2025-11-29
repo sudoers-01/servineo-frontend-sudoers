@@ -61,6 +61,20 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     setSelectedJobs(filtersFromStore.category || []);
     setSelectedRating(storeRating ?? null);
   }, [filtersFromStore, storeRating]);
+  // Si el drawer se abre y hay un `search` en el store que coincide con una categoría
+  // autoseleccionar esa categoría para que el checkbox aparezca marcado.
+  useEffect(() => {
+    if (!isOpen) return;
+    const s = storeSearch?.trim();
+    if (!s) return;
+    if (selectedJobs && selectedJobs.length > 0) return;
+    const match = DB_VALUES.jobTypes.find((j) => j.toLowerCase() === s.toLowerCase());
+    if (match) {
+      setSelectedJobs([match]);
+      // marcar como aplicado automáticamente
+      applyFilters(selectedRanges, selectedCities, [match], true, filtersFromStore.isAutoSelectedCity);
+    }
+  }, [isOpen, storeSearch]);
 
   useEffect(() => {
     setSelectedRating(storeRating ?? null);
