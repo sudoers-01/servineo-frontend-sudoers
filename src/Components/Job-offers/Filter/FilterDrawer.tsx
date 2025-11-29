@@ -222,12 +222,17 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ),
   }));
 
-  const jobTypes = DB_VALUES.jobTypes.map((dbValue, index) => ({
-    dbValue,
-    label: tJob(
-      `options.${['mason', 'carpenter', 'locksmith', 'decorator', 'electrician', 'plumber', 'fumigator', 'installer', 'gardener', 'cleaner', 'mechanic', 'assembler', 'painter', 'polisher', 'welder', 'roofer', 'glazier', 'plasterer'][index]}`,
-    ),
-  }));
+  // Mostrar dinámicamente los tipos de trabajo según lo que devuelve el backend (backendCounts.categories).
+  // Fallback a DB_VALUES.jobTypes si no hay datos del backend.
+  const jobTypes = React.useMemo(() => {
+    if (backendCounts && backendCounts.categories) {
+      // backendCounts.categories: Record<string, number>
+      return Object.keys(backendCounts.categories).map((dbValue) => ({ dbValue, label: dbValue }));
+    }
+
+    // Fallback: usar valores estáticos (muestran las etiquetas traducidas si existen)
+    return DB_VALUES.jobTypes.map((dbValue, index) => ({ dbValue, label: dbValue }));
+  }, [backendCounts]);
 
   return (
     <>
