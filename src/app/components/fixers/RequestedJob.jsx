@@ -9,6 +9,7 @@ export default function RequestedJob({
   state = '',
   onAppointmentDetails,
   onRegisterJob,
+  onViewPromos,
   className = '',
 }) {
   const [open, setOpen] = useState(false);
@@ -42,6 +43,11 @@ export default function RequestedJob({
 
   const handleRegister = () => {
     onRegisterJob?.();
+    setOpen(false);
+  };
+
+  const handleViewPromos = () => {
+    onViewPromos?.();
     setOpen(false);
   };
 
@@ -107,6 +113,14 @@ export default function RequestedJob({
                 className='w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
               >
                 Register job
+              </button>
+              <div className='h-px bg-gray-100' />
+              <button
+                role='menuitem'
+                onClick={handleViewPromos}
+                className='w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
+              >
+                View promos
               </button>
             </div>
           )}

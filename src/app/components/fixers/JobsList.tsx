@@ -10,6 +10,7 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
   const router = useRouter();
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
   const [idJob, setIdJob] = useState<string>('');
+
   if (!jobs || jobs.length === 0) {
     return (
       <div className='rounded-xl border border-dashed border-gray-300 p-8 text-center text-gray-500'>
@@ -24,7 +25,7 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
         onClose={() => setIsRegisterModalOpen(false)}
         id={idJob}
       />
-      ;
+      
       {jobs.map((job) => (
         <RequestedJob
           key={job._id}
@@ -36,6 +37,9 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
           onRegisterJob={() => {
             setIsRegisterModalOpen(true);
             setIdJob(job._id);
+          }}
+          onViewPromos={() => {
+            router.push(`/promotions/${job._id}`);
           }}
         />
       ))}
