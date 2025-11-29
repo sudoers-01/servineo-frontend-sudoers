@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { useGetTagsQuery } from '@/app/redux/services/jobOffersApi';
 
@@ -21,6 +21,12 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [hasRestoredFromUrl, setHasRestoredFromUrl] = useState(false);
+
+  // Ref to store the latest onFilterChange callback
+  const onFilterChangeRef = useRef(onFilterChange);
+  useEffect(() => {
+    onFilterChangeRef.current = onFilterChange;
+  }, [onFilterChange]);
 
   const {
     data: tagsData,
@@ -65,11 +71,10 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
     if (urlTags.length > 0) {
       setSelectedCategories(urlTags);
-      onFilterChange?.({ categories: urlTags });
+      onFilterChangeRef.current?.({ categories: urlTags });
     }
 
     setHasRestoredFromUrl(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Solo se ejecuta al montar el componente
 
   // Limpiar selección cuando cambia clearSignal
@@ -77,8 +82,8 @@ const DropdownList: React.FC<DropdownListProps> = ({
     if (!hasRestoredFromUrl || !clearSignal) return;
 
     setSelectedCategories([]);
-    onFilterChange?.({ categories: [] });
-  }, [clearSignal, hasRestoredFromUrl, onFilterChange]);
+    onFilterChangeRef.current?.({ categories: [] });
+  }, [clearSignal, hasRestoredFromUrl]);
 
   const handleCheckboxChange = useCallback(
     (categoryValue: string) => {
@@ -89,13 +94,13 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
         // Llamar a onFilterChange después de actualizar el estado
         setTimeout(() => {
-          onFilterChange?.({ categories: newSelectedCategories });
+          onFilterChangeRef.current?.({ categories: newSelectedCategories });
         }, 0);
 
         return newSelectedCategories;
       });
     },
-    [onFilterChange],
+    [],
   );
 
   if (isLoading) {
