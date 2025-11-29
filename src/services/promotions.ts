@@ -21,3 +21,19 @@ export async function getPromotionsByOfferId(offerId: string): Promise<Promotion
     return [];
   }
 }
+
+export async function deletePromotion(id: string): Promise<boolean> {
+  try {
+    const response = await fetch(apiUrl(`api/promotions/${id}`), {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    return response.ok;
+  } catch (error) {
+    console.error('Error deleting promotion:', error);
+    return false;
+  }
+}
