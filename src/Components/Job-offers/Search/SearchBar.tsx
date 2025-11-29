@@ -18,6 +18,8 @@ import { useSearchTouch } from '@/app/redux/features/searchHistory/useSearchTouc
 import { SearchDropdown } from '@/Components/Shared/SearchDropdown';
 import { useJobTypeAutoMatch } from '@/lib/useJobTypeAutoMatch';
 import { setFilters } from '@/app/redux/slice/jobOfert';
+import { useEffect } from 'react';
+
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -41,6 +43,13 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
 
   const containerRef = React.useRef<HTMLDivElement | null>(null);
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+   useEffect(() => {
+    if (value !== '') {
+      const { isValid, error } = validateSearch(value);
+      setError(isValid ? undefined : error);
+    }
+  }, [value]);
 
   const prevSearchFromStore = React.useRef(searchFromStore);
 
