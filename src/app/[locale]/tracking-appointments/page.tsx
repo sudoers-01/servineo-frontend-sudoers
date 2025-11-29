@@ -3,10 +3,14 @@
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 
-import { useGetMapLocationsQuery, useGetTrackingMetricsQuery } from '@/app/redux/services/trackingAppointmentsApi';
+// ✅ Imports de Redux (API)
+import { useGetMapLocationsQuery, useGetTrackingMetricsQuery, useGetFixerStatsQuery } from '@/app/redux/services/trackingAppointmentsApi';
 
+// ✅ Imports de Componentes UI
+import FixerStatsTable from '@/Components/Statistics-panel/fixer-stats-table';
 import MetricsCards from '@/Components/Statistics-panel/metrics-cards';
 
+// ✅ Carga dinámica del Mapa (sin SSR)
 const AdminMap = dynamic(
   () => import('@/Components/Statistics-panel/admin-map'),
   { 
@@ -16,19 +20,28 @@ const AdminMap = dynamic(
 );
 
 const StatisticsPage: React.FC = () => {
+  // --- Estados Locales (Filtros) ---
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
+  // --- Hooks de Redux (Datos del Backend) ---
+  
+  // 1. Métricas Generales
   const { 
     data: metrics = { total: 0, active: 0, cancelled: 0 }, 
     isLoading: loadingMetrics 
   } = useGetTrackingMetricsQuery({ startDate, endDate });
 
+  // 2. Datos del Mapa
   const { 
     data: rawMapData = [], 
     isLoading: loadingMap 
   } = useGetMapLocationsQuery();
 
+  // 3. Tabla de Fixers
+  const { data: fixerStats = [] } = useGetFixerStatsQuery();
+
+  // --- Lógica de Filtrado Local para el Mapa ---
   const filteredAppointments = React.useMemo(() => {
     if (!rawMapData) return [];
 
@@ -43,13 +56,15 @@ const StatisticsPage: React.FC = () => {
         lng: Number(app.lon),
         service: ''
       }))
+      // Filtro de seguridad: Coordenadas válidas
       .filter((app: any) => !isNaN(app.lat) && !isNaN(app.lng))
+      // Filtro de fechas
       .filter((app: any) => {
         if (!startDate || !endDate) return true;
         const appointmentDate = new Date(app.date);
         const start = new Date(startDate);
         const end = new Date(endDate);
-        end.setHours(23, 59, 59);
+        end.setHours(23, 59, 59); // Incluir todo el día final
         return appointmentDate >= start && appointmentDate <= end;
       });
   }, [rawMapData, startDate, endDate]);
@@ -58,7 +73,7 @@ const StatisticsPage: React.FC = () => {
     <div className="w-full min-h-screen bg-gray-50 pb-10">
       <div className="max-w-7xl mx-auto px-6 py-8 flex flex-col gap-8">
       
-        {/* HEADER */}
+        {/* 1. ENCABEZADO Y FILTROS */}
         <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4">
           <div>
             <h1 className="text-2xl font-bold text-gray-800">Tracking de Citas</h1>
@@ -77,10 +92,10 @@ const StatisticsPage: React.FC = () => {
           </div>
         </div>
 
-       
+        {/* 2. FILA SUPERIOR: MAPA (75%) + MÉTRICAS (25%) */}
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:h-[550px]">
           
-          
+          {/* MAPA */}
           <div className="lg:col-span-3 bg-white rounded-xl shadow border border-gray-200 overflow-hidden relative z-0 h-[400px] lg:h-full">
             {loadingMap ? (
                <div className="h-full w-full flex items-center justify-center text-gray-500">Cargando datos...</div>
@@ -93,12 +108,20 @@ const StatisticsPage: React.FC = () => {
             )}
           </div>
 
-          
+          {/* COLUMNA DERECHA: MÉTRICAS */}
           <div className="lg:col-span-1 h-full flex flex-col gap-6">
-            <div className="flex-shrink: 0">
+            <div className="flex-shrink-0">
               <MetricsCards metrics={metrics} />
             </div>
+            
           </div>
+        
+        </div> 
+
+
+        
+        <div className="w-full">
+           <FixerStatsTable stats={fixerStats} />
         </div>
 
       </div>
