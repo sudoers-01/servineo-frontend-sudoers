@@ -406,58 +406,58 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               )}
             </div>
 
-            {/* Filtro: Calificación */}
-            <div className="mb-6">
-              <div
-                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
-                onClick={() => toggleSection('rating')}
+           
+{/* Filtro: Calificación */}
+<div className="mb-6">
+  <div
+    className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+    onClick={() => toggleSection('rating')}
+  >
+    <span className="truncate">Calificación</span>
+  </div>
+  {openSections.rating && (
+    <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
+      <div className="flex items-center gap-1 justify-center">
+        {Array.from({ length: 5 }, (_, idx) => {
+          const starNumber = idx + 1;
+          const filled = (selectedRating ?? 0) >= starNumber;
+          const count = getRatingCount(starNumber);
+          const disabled = false;
+          
+          return (
+            <div key={starNumber} className="flex flex-col items-center gap-1 min-w-[32px]">
+              <button
+                type="button"
+                onClick={() => !disabled && handleRatingClick(starNumber)}
+                className={`transition-transform touch-manipulation flex-shrink-0 ${
+                  disabled 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:scale-110 active:scale-95'
+                }`}
+                aria-label={`${starNumber} estrellas`}
+                disabled={disabled}
               >
-                <span className="truncate">Calificación</span>
-              </div>
-              {openSections.rating && (
-                <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
-                  <div className="flex items-center gap-1 justify-start flex-wrap">
-                    {Array.from({ length: 5 }, (_, idx) => {
-                      const starNumber = idx + 1;
-                      const filled = (selectedRating ?? 0) >= starNumber;
-                      const count = getRatingCount(starNumber);
-                      // Keep rating buttons enabled even if count === 0
-                      const disabled = false;
-                      
-                      return (
-                        <div key={starNumber} className="flex flex-col items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => !disabled && handleRatingClick(starNumber)}
-                            className={`transition-transform touch-manipulation flex-shrink-0 ${
-                              disabled 
-                                ? 'opacity-50 cursor-not-allowed' 
-                                : 'hover:scale-110 active:scale-95'
-                            }`}
-                            aria-label={`${starNumber} estrellas`}
-                            disabled={disabled}
-                          >
-                            <Star
-                              className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
-                              fill={filled ? '#fbbf24' : '#ffffff'}
-                              stroke="#000000"
-                              strokeWidth={2}
-                            />
-                          </button>
-                          {loadingCounts ? (
-                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
-                          ) : (
-                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>
-                              ({count})
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <Star
+                  className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
+                  fill={filled ? '#fbbf24' : '#ffffff'}
+                  stroke="#000000"
+                  strokeWidth={2}
+                />
+              </button>
+              {loadingCounts ? (
+                <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+              ) : (
+                <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs whitespace-nowrap`}>
+                  ({count})
+                </span>
               )}
             </div>
+          );
+        })}
+      </div>
+    </div>
+  )}
+</div>
           </div>
         </div>
       </div>
