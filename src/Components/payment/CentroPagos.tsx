@@ -191,7 +191,7 @@ const CentroDePagos = () => {
             
             {/* --- CORRECCIÓN: Botones usan 'fixerIdFromUrl' --- */}
             <button
-              onClick={() => router.push(`/payment/pages/FixerWallet?fixerId=${fixerIdFromUrl}`)}
+              onClick={() => router.push(`/payment/FixerWallet?fixerId=${fixerIdFromUrl}`)}
               disabled={!fixerIdFromUrl} // Usa el ID de la URL
               className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
             >
