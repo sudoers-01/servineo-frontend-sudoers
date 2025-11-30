@@ -110,7 +110,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   // Render Image Carousel
   const renderImageCarousel = () => (
     <div
-      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${viewMode === 'grid' ? 'h-48 w-full' : 'w-64 h-48 flex-shrink-0'}`}
+      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${viewMode === 'grid' ? 'h-48 w-full' : 'w-64 h-full flex-shrink-0'}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
