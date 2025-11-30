@@ -43,11 +43,12 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const storeRating = useAppSelector((s) => s.jobOfert.rating);
   const storeSearch = useAppSelector((s) => s.jobOfert.search);
 
-  // 🔧 FIX: Enviar todas las ciudades separadas por coma
+  // 🔧 Petición de contadores: NO enviar la categoría para obtener totales por categoría
   const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
     range: selectedRanges.length > 0 ? selectedRanges : undefined,
     city: selectedCities.length > 0 ? selectedCities.join(',') : undefined,
-    category: selectedJobs.length > 0 ? selectedJobs : undefined,
+    // Intencional: no enviar `category` aquí para que el backend devuelva totales por categoría
+    category: undefined,
     search: storeSearch?.trim() ? storeSearch : undefined,
     minRating: selectedRating ?? undefined,
     maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
@@ -96,8 +97,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
 
     if (found) {
       const matchVal = typeof found === 'string' ? found : String(found);
+      // Sólo seleccionar en UI; NO aplicar automáticamente para evitar recargas al abrir filtros
       setSelectedJobs([matchVal]);
-      applyFilters(selectedRanges, selectedCities, [matchVal], true, filtersFromStore.isAutoSelectedCity);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, storeSearch, backendCounts]);
@@ -192,7 +193,21 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       isAutoSelectedCity: isAutoCity,
     };
 
-    if (onFiltersApply) {
+    // Evitar disparar el handler si no hay cambios reales respecto al store
+    const arraysEqual = (a: string[] = [], b: string[] = []) => {
+      if (a.length !== b.length) return false;
+      const sa = [...a].sort();
+      const sb = [...b].sort();
+      for (let i = 0; i < sa.length; i++) if (sa[i] !== sb[i]) return false;
+      return true;
+    };
+
+    const sameAsStore =
+      arraysEqual(filterState.range, filtersFromStore.range) &&
+      arraysEqual(filterState.city, filtersFromStore.city) &&
+      arraysEqual(filterState.category, filtersFromStore.category);
+
+    if (!sameAsStore && onFiltersApply) {
       onFiltersApply(filterState);
     }
   };
@@ -262,6 +277,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ),
   }));
 
+  // (no baseline logic here)
+
   // ✅ Ordenar por contador descendente (cuando hay búsqueda activa)
   const jobTypesSorted = React.useMemo(() => {
     if (!backendCounts?.categories) {
@@ -280,6 +297,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     // Sin búsqueda, mantener orden original
     return jobTypes;
   }, [backendCounts, jobTypes, storeSearch]);
+
+  // No filtering of jobTypes; always use jobTypesSorted
 
   return (
     <>
