@@ -40,7 +40,7 @@ export function AdvancedSearchButton({
       "
     >
       <div className="flex-shrink-0">
-        <ZoomIn className="w-8 h-8" />
+        <ZoomIn className="w-8 h-8" strokeWidth={2.8} />
       </div>
     </Button>
   );
