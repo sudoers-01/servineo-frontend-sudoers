@@ -222,5 +222,5 @@ export default function FixerDashboardPage() {
         </div>
       </div>
     </div>
-  );
+  );  
 }
