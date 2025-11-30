@@ -285,7 +285,7 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
                 </div>
                 <div className="flex items-center">
                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 mr-1" />
-                  <span>{fixer.rating?.toFixed(1) ?? (t?.('reviews.new') ?? 'Nuevo')}</span>
+                  <span>{fixer.rating?.toFixed(1) ?? (t?.('reviews.new') ?? 'N')}</span>
                   <span className="mx-1">•</span>
                   <span>{fixer.completedJobs ?? 0} {t?.('about.completedJobs') ?? 'trabajos'}</span>
                 </div>

@@ -7,6 +7,7 @@ import { IPortfolioItem } from "@/types/fixer-profile"
 import { Modal } from "@/Components/Modal"
 import { useForm } from "react-hook-form"
 import Image from "next/image"
+import { useTranslations } from "next-intl"
 
 const MOCK_PORTFOLIO: IPortfolioItem[] = [
     {
@@ -31,6 +32,7 @@ interface PortfolioSectionProps {
 }
 
 export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
+    const t = useTranslations('PortfolioSection');
     const [items, setItems] = useState<IPortfolioItem[]>(MOCK_PORTFOLIO)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [modalType, setModalType] = useState<"image" | "video">("image")
@@ -84,7 +86,7 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <ImageIcon className="h-5 w-5 text-blue-600" />
-                    {readOnly ? "Portafolio" : "Mi Portafolio"}
+                    {readOnly ? t('titles.portfolio') : t('titles.myPortfolio')}
                 </h2>
 
                 {!readOnly && (
@@ -94,7 +96,7 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
                             className="bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 flex items-center gap-2"
                         >
                             <Video className="h-4 w-4" />
-                            Video
+                            {t('buttons.video')}
                         </PillButton>
 
                         <PillButton
@@ -102,7 +104,7 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
                             className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
                         >
                             <Plus className="h-4 w-4" />
-                            Imagen
+                            {t('buttons.image')}
                         </PillButton>
                     </div>
                 )}
@@ -118,8 +120,8 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
                         {/* Imagen con componente Next/Image */}
                         <div className="absolute inset-0 relative">
                             <Image
-                                src={item.url || "https://placehold.co/300x300?text=No+Image"}
-                                alt="Portfolio item"
+                                src={item.url || t('image.placeholder')}
+                                alt={t('image.alt')}
                                 fill
                                 sizes="100vw"
                                 className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -139,7 +141,7 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
                                 <button
                                     onClick={() => handleDelete(item._id!)}
                                     className="self-end p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-colors shadow-sm hover:scale-110"
-                                    title="Eliminar"
+                                    title={t('tooltips.delete')}
                                 >
                                     <Trash2 className="h-4 w-4" />
                                 </button>
@@ -153,7 +155,7 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
             <Modal
                 open={isModalOpen}
                 onClose={handleCloseModal}
-                title={modalType === "image" ? "Agregar Imagen" : "Agregar Video"}
+                title={modalType === "image" ? t('modal.addImage') : t('modal.addVideo')}
                 size="md"
             >
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -161,30 +163,30 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
 
                     {modalType === "image" ? (
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">URL de la Imagen</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.imageUrl.label')}</label>
                             <input
-                                {...register("url", { required: "La URL es requerida" })}
+                                {...register("url", { required: t('form.imageUrl.required') })}
                                 className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                placeholder="https://..."
+                                placeholder={t('form.imageUrl.placeholder')}
                             />
                         </div>
                     ) : (
                         <>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">URL de YouTube</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.youtubeUrl.label')}</label>
                                 <input
-                                    {...register("youtubeUrl", { required: "La URL es requerida" })}
+                                    {...register("youtubeUrl", { required: t('form.youtubeUrl.required') })}
                                     className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    placeholder={t('form.youtubeUrl.placeholder')}
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">URL de Miniatura (Opcional)</label>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.thumbnailUrl.label')}</label>
                                 <input
                                     {...register("url")}
                                     className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                                    placeholder="Se intentará extraer automáticamente"
+                                    placeholder={t('form.thumbnailUrl.placeholder')}
                                 />
                             </div>
                         </>
@@ -196,14 +198,14 @@ export function PortfolioSection({ readOnly = false }: PortfolioSectionProps) {
                             onClick={handleCloseModal}
                             className="bg-gray-100 text-gray-700 hover:bg-gray-200"
                         >
-                            Cancelar
+                            {t('buttons.cancel')}
                         </PillButton>
 
                         <PillButton
                             type="submit"
                             className="bg-primary text-white hover:bg-blue-800"
                         >
-                            Guardar
+                            {t('buttons.save')}
                         </PillButton>
                     </div>
                 </form>

@@ -5,23 +5,25 @@ import { Mail, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { vincularCorreoContrasena, Client } from "@/app/redux/services/services/api";
 import { z } from "zod";
+import { useTranslations } from "next-intl";
 
-const schema = z
+const schema = (t: (key: string) => string) => 
+  z
   .object({
     email: z
       .string()
-      .email("Debe ser un correo electrónico válido."),
+      .email(t("errors.invalidEmail")),
     password: z
       .string()
-      .min(8, "La contraseña debe tener al menos 8 caracteres.")
-      .regex(/[A-Z]/, "Debe contener al menos una letra mayúscula.")
-      .regex(/[a-z]/, "Debe contener al menos una letra minúscula.")
-      .regex(/[0-9]/, "Debe contener al menos un número.")
-      .regex(/[^A-Za-z0-9]/, "Debe contener al menos un símbolo."),
+      .min(8, t("errors.passwordMinLength"))
+      .regex(/[A-Z]/, t("errors.passwordUppercase"))
+      .regex(/[a-z]/, t("errors.passwordLowercase"))
+      .regex(/[0-9]/, t("errors.passwordNumber"))
+      .regex(/[^A-Za-z0-9]/, t("errors.passwordSymbol")),
     repeatPassword: z.string(),
   })
   .refine((data) => data.password === data.repeatPassword, {
-    message: "Las contraseñas no coinciden.",
+    message: t("errors.passwordsDoNotMatch"),
     path: ["repeatPassword"],
   });
 
@@ -31,6 +33,7 @@ interface VincularCorreoProps {
 }
 
 export default function VincularCorreo({ token, onLinked }: VincularCorreoProps) {
+  const t = useTranslations('VincularCorreo');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -41,10 +44,12 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
   const [success, setSuccess] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const schemaValidation = schema(t);
+
   // Validar dinámicamente al escribir
   const validarCampo = (campo: string, valor: string) => {
     const data = { email, password, repeatPassword, [campo]: valor };
-    const result = schema.safeParse(data);
+    const result = schemaValidation.safeParse(data);
 
     if (!result.success) {
       const issues = result.error.issues.filter((i) => i.path[0] === campo);
@@ -63,7 +68,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
   };
 
   const handleVincular = async () => {
-    const result = schema.safeParse({ email, password, repeatPassword });
+    const result = schemaValidation.safeParse({ email, password, repeatPassword });
 
     if (!result.success) {
       const formattedErrors: Record<string, string> = {};
@@ -71,7 +76,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
         formattedErrors[issue.path[0] as string] = issue.message;
       });
       setErrors(formattedErrors);
-      toast.error("Por favor, corrige los errores del formulario.");
+      toast.error(t('toasts.formErrors'));
       return;
     }
 
@@ -101,10 +106,10 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           <Mail size={28} className="text-gray-800" />
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-gray-800">
-              Correo y contraseña
+              {t('title')}
             </span>
             <span className="text-xs text-gray-500">
-              Vincula tu cuenta con credenciales
+              {t('subtitle')}
             </span>
           </div>
         </div>
@@ -113,7 +118,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           onClick={() => setMostrarFormulario((prev) => !prev)}
           className="flex items-center justify-center gap-2 bg-blue-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-700 transition disabled:opacity-60"
         >
-          {mostrarFormulario ? "Cancelar" : "Vincular"}
+          {mostrarFormulario ? t('buttons.cancel') : t('buttons.link')}
         </button>
       </div>
 
@@ -123,7 +128,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           <div className="mb-3">
             <input
               type="email"
-              placeholder="Correo electrónico"
+              placeholder={t('form.email.placeholder')}
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
@@ -142,7 +147,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           <div className="relative mb-3">
             <input
               type={mostrarPassword ? "text" : "password"}
-              placeholder="Contraseña"
+              placeholder={t('form.password.placeholder')}
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
@@ -168,7 +173,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           <div className="relative mb-3">
             <input
               type={mostrarRepeatPassword ? "text" : "password"}
-              placeholder="Repetir contraseña"
+              placeholder={t('form.repeatPassword.placeholder')}
               value={repeatPassword}
               onChange={(e) => {
                 setRepeatPassword(e.target.value);
@@ -200,12 +205,12 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
             disabled={loading}
             className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-700 transition disabled:opacity-60"
           >
-            {loading ? "Vinculando..." : "Confirmar Vinculación"}
+            {loading ? t('buttons.linking') : t('buttons.confirm')}
           </button>
 
           {success && (
             <p className="mt-3 text-sm text-green-600 font-medium">
-              Vinculación exitosa.
+              {t('success.message')}
             </p>
           )}
         </div>

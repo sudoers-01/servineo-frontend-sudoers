@@ -38,6 +38,7 @@ import { useTranslations } from 'next-intl';
 import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
 import { adaptOfferToModalFormat } from '@/types/jobOffers';
 
+
 const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
 
 export default function JobOffersPage() {
@@ -267,7 +268,7 @@ export default function JobOffersPage() {
 
       <main className="px-4 sm:px-6 md:px-12 lg:px-24">
         {reduxError && (
-          <div className="text-red-500 text-center mb-4 p-3 bg-red-100 rounded">{reduxError}</div>
+          <div className="text-red-500 text-center mb-4 p-3 bg-red-100 rounded">{t('error')}</div>
         )}
 
         {isLoading && (

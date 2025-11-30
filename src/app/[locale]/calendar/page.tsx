@@ -8,6 +8,7 @@ import MobileCalendar from "@/componentsLorem/calendar/mobile/MobileCalendar";
 import MobileList from "@/componentsLorem/list/MobileList";
 import { ModeSelectionModal, ModeSelectionModalHandles } from '@/componentsLorem/appointments/forms/ModeSelectionModal';
 import CancelDaysAppointments from "@/componentsLorem/appointments/forms/CancelDaysAppointment";
+import { useTranslations } from "next-intl";
 
 import useDailyConts from "@/utils/useDailyConts";
 import useSixMonthsAppointments from '@/hooks/Appointments/useSixMonthsAppointments';
@@ -15,6 +16,7 @@ import { AppointmentsProvider } from "@/utils/contexts/AppointmentsContext/Appoi
 import { AppointmentsStatusProvider } from "@/utils/contexts/DayliViewRequesterContext";
 
 export default function CalendarPage() {
+    const t = useTranslations('CalendarPage');
     const router = useRouter();
     const modeModalRef = useRef<ModeSelectionModalHandles>(null);
 
@@ -143,10 +145,10 @@ export default function CalendarPage() {
                                 </button>
 
                                 {userRole === 'fixer' && (
-                                    <h2 className="text-black p-4 text-xl text-center flex-1">Mi Calendario</h2>
+                                    <h2 className="text-black p-4 text-xl text-center flex-1">{t('titles.myCalendar')}</h2>
                                 )}
                                 {userRole === 'requester' && (
-                                    <h2 className="text-black p-4 text-xl text-center flex-1">Calendario de Juan Carlos Peréz</h2>
+                                    <h2 className="text-black p-4 text-xl text-center flex-1">{t('titles.fixerCalendar', { fixerName: 'Juan Carlos Peréz' })}</h2>
                                 )}
                             </div>
 
@@ -157,13 +159,13 @@ export default function CalendarPage() {
                                             className="flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm"
                                             onClick={handleOpenAvailabilityModal}
                                         >
-                                            Modificar Disponibilidad
+                                            {t('buttons.modifyAvailability')}
                                         </button>
                                         <button
                                             className="flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors text-sm"
                                             onClick={openCancelModal}
                                         >
-                                            Cancelar Citas
+                                            {t('buttons.cancelAppointments')}   
                                         </button>
                                     </div>
                                 )}
@@ -178,13 +180,13 @@ export default function CalendarPage() {
                                             className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors whitespace-nowrap"
                                             onClick={handleOpenAvailabilityModal}
                                         >
-                                            Modificar Disponibilidad
+                                         {t('buttons.modifyAvailability')}   
                                         </button>
                                         <button
                                             className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors whitespace-nowrap"
                                             onClick={openCancelModal}
                                         >
-                                            Cancelar Citas
+                                            {t('buttons.cancelAppointments')}
                                         </button>
                                     </div>
                                 )}

@@ -25,9 +25,9 @@ export default function BecomeFixerPage() {
       <Navbar />
       <div className="container mx-auto max-w-4xl p-4">
         <header className="mb-6 text-center">
-          <h1 className="text-2xl font-bold">{t ? t('title') : 'Conviértete en un Fixer'}</h1>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
           <p className="text-sm text-gray-500">
-            {t ? t('description') : 'Completa tu registro y habilita tu cuenta como FIXER'}
+            {t('description')}
           </p>
         </header>
 
@@ -35,7 +35,7 @@ export default function BecomeFixerPage() {
           {!requester ? (
             <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">
               <h2 className="mb-3 text-center text-lg font-semibold">
-                {t ? t('InputData') : 'Datos iniciales'}
+                {t('InputData')}
               </h2>
 
               <FixerRegisterForm
@@ -59,7 +59,7 @@ export default function BecomeFixerPage() {
 
                   setRequester(user);
                 }}
-                submitButtonText={t ? t('button1') : 'Continuar'}
+                submitButtonText={t('button1')}
               />
             </div>
           ) : (

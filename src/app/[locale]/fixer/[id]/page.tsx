@@ -4,6 +4,7 @@ import { useState } from "react"
 import Image from "next/image"
 import { MapPin, Star, MessageCircle, Share2, Flag } from "lucide-react"
 import { PillButton } from "@/Components/Pill-button"
+import { useTranslations } from "next-intl"
 
 import { JobOffersSection } from "@/Components/fixer/dashboard/JobOffersSection"
 import { CertificationsSection } from "@/Components/fixer/dashboard/CertificationsSection"
@@ -11,22 +12,27 @@ import { ExperienceSection } from "@/Components/fixer/dashboard/ExperienceSectio
 import { PortfolioSection } from "@/Components/fixer/dashboard/PortfolioSection"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/Tabs/Tabs"
 import EstadisticasTrabajos from "@/Components/fixer/Fixer-statistics"
+import { useAppSelector } from "@/app/redux/hooks"
+import { IUser } from "@/types/user"
+
+export default function FixerProfilePage({ params }: { params: { id: string } }) {
+  const t = useTranslations('Mock_Fixer');
+  const [activeTab, setActiveTab] = useState("resumen")
 
 // Mock data for the profile header
 const MOCK_FIXER = {
   name: "Juan Perez",
-  role: "Plomero Profesional",
+  role: t('role'),
   rating: 4.8,
-  reviews: 124,
+  reviews: t('reviews'),
   location: "Cochabamba, Bolivia",
   photo: "https://picsum.photos/80",
-  bio: "Especialista en plomería residencial y comercial con más de 10 años de experiencia. Garantizo trabajos limpios y duraderos.",
+  bio: t('about'),
   verified: true
 }
 
-export default function FixerProfilePage({ params }: { params: { id: string } }) {
-  const [activeTab, setActiveTab] = useState("resumen")
   console.log("Fixer ID:", params.id)
+
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
       {/* Profile Header */}
@@ -62,7 +68,7 @@ export default function FixerProfilePage({ params }: { params: { id: string } })
                     <div className="flex items-center gap-1">
                       <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
                       <span className="font-semibold text-gray-900">{MOCK_FIXER.rating}</span>
-                      <span>({MOCK_FIXER.reviews} reseñas)</span>
+                      <span>({MOCK_FIXER.reviews})</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <MapPin className="w-4 h-4" />
@@ -97,19 +103,19 @@ export default function FixerProfilePage({ params }: { params: { id: string } })
       <div className="container mx-auto px-4 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           <TabsList className="bg-white p-1 rounded-xl border shadow-sm inline-flex">
-            <TabsTrigger value="resumen" className="px-6">Resumen</TabsTrigger>
-            <TabsTrigger value="ofertas" className="px-6">Ofertas</TabsTrigger>
-            <TabsTrigger value="experiencia" className="px-6">Experiencia</TabsTrigger>
-            <TabsTrigger value="certificaciones" className="px-6">Certificaciones</TabsTrigger>
-            <TabsTrigger value="portafolio" className="px-6">Portafolio</TabsTrigger>
-            <TabsTrigger value="estadisticas" className="px-6">Estadísticas</TabsTrigger>
+            <TabsTrigger value="resumen" className="px-6">{t('tabs.summary')}</TabsTrigger>
+            <TabsTrigger value="ofertas" className="px-6">{t('tabs.offers')}</TabsTrigger>
+            <TabsTrigger value="experiencia" className="px-6">{t('tabs.experience')}</TabsTrigger>
+            <TabsTrigger value="certificaciones" className="px-6">{t('tabs.certifications')}</TabsTrigger>
+            <TabsTrigger value="portafolio" className="px-6">{t('tabs.portfolio')}</TabsTrigger>
+            <TabsTrigger value="estadisticas" className="px-6">{t('tabs.statistics')}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="resumen" className="space-y-8">
 
 
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Ofertas Destacadas</h2>
+              <h2 className="text-xl font-bold text-gray-900 mb-4">{t('featuredOffers')}</h2>
               <JobOffersSection readOnly />
             </section>
           </TabsContent>
@@ -136,4 +142,4 @@ export default function FixerProfilePage({ params }: { params: { id: string } })
       </div>
     </div>
   )
-}
+ }

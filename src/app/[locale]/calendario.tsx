@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 // Array de nombres para selección aleatoria
 const availableNames = [
@@ -10,6 +11,7 @@ const availableNames = [
 ];
 
 export default function Home() {
+  const t = useTranslations('Calendar');
   const [randomName, setRandomName] = useState("John Doe");
 
   useEffect(() => {
@@ -32,7 +34,7 @@ export default function Home() {
             </div>
             <div>
               <div className="text-2xl lg:text-3xl font-bold text-gray-800">{randomName}</div>
-              <div className="text-gray-500 text-sm lg:text-base">(Fixer)</div>
+              <div className="text-gray-500 text-sm lg:text-base">({t('fixer')})</div>
             </div>
           </div>
           
@@ -42,7 +44,7 @@ export default function Home() {
               href="/calendar"
               className="block lg:inline-block w-full lg:w-auto text-center bg-gray-800 hover:bg-gray-900 text-white px-6 py-3 rounded-lg font-medium transition-colors"
             >
-              Ver Calendario
+              {t('viewCalendar')}
             </Link>
           </div>
         </div>
@@ -54,21 +56,21 @@ export default function Home() {
           
           {/* Sección 2.1 Net Admission */}
           <div className="mb-6 lg:mb-8">
-            <h2 className="text-xl lg:text-2xl font-bold text-gray-800 mb-6">Informacion de Perfil</h2>
+            <h2 className="text-xl lg:text-2xl font-bold text-gray-800 mb-6">{t('profileInfo')}</h2>
             
             {/* Experiencia Previa */}
             <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6 mb-4">
-              <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-3">Experiencia Previa</h3>
+              <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-3">{t('previousExperience')}</h3>
               <div className="text-gray-600">
-                <p>Información sobre experiencias y trabajos anteriores...</p>
+                <p>{t('experienceDescription')}</p>
               </div>
             </div>
 
             {/* Reseñas */}
             <div className="bg-white rounded-lg border border-gray-200 p-4 lg:p-6">
-              <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-3">Reseñas</h3>
+              <h3 className="text-lg lg:text-xl font-bold text-gray-800 mb-3">{t('reviews')}</h3>
               <div className="text-gray-600">
-                <p>Reseñas y comentarios de clientes...</p>
+                <p>{t('reviewsDescription')}</p>
               </div>
             </div>
           </div>

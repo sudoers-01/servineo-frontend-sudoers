@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, Building2, Calendar, Briefcase } from "lucide-reac
 import { IExperience } from "@/types/fixer-profile"
 import { Modal } from "@/Components/Modal"
 import { useForm } from "react-hook-form"
+import { useTranslations } from "next-intl"
 
 const MOCK_EXP: IExperience[] = [
     {
@@ -26,6 +27,7 @@ interface ExperienceSectionProps {
 }
 
 export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) {
+     const t = useTranslations('ExperienceSection');
     const [experiences, setExperiences] = useState<IExperience[]>(MOCK_EXP)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [editingExp, setEditingExp] = useState<IExperience | null>(null)
@@ -90,7 +92,7 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
             <div className="flex items-center justify-between">
                 <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
                     <Building2 className="h-5 w-5 text-blue-600" />
-                    {readOnly ? "Experiencia Laboral" : "Mi Experiencia Laboral"}
+                    {readOnly ? t('titles.experience') : t('titles.myExperience')}
                 </h2>
                 {!readOnly && (
                     <PillButton
@@ -98,7 +100,7 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
                         className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
                     >
                         <Plus className="h-4 w-4" />
-                        Agregar Experiencia
+                        {t('buttons.addExperience')}
                     </PillButton>
                 )}
             </div>
@@ -136,14 +138,14 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
                                         <button
                                             onClick={() => handleOpenModal(exp)}
                                             className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                                            title="Editar"
+                                            title={t('tooltips.edit')}
                                         >
                                             <Edit2 className="h-4 w-4" />
                                         </button>
                                         <button
                                             onClick={() => handleDelete(exp._id!)}
                                             className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                                            title="Eliminar"
+                                            title={t('tooltips.delete')}
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </button>
@@ -158,38 +160,38 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
             <Modal
                 open={isModalOpen}
                 onClose={handleCloseModal}
-                title={editingExp ? "Editar Experiencia" : "Nueva Experiencia"}
+                title={editingExp ? t('modal.editTitle') : t('modal.newTitle')}
                 size="lg"
             >
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Cargo / Título</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1"> {t('form.jobTitle.label')}</label>
                         <input
-                            {...register("jobTitle", { required: "El cargo es requerido" })}
+                           {...register("jobTitle", { required: t('form.jobTitle.required') })}
                             className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="Ej: Plomero Senior"
+                            placeholder={t('form.jobTitle.placeholder')}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Empresa / Organización</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.organization.label')}</label>
                         <input
-                            {...register("organization", { required: "La empresa es requerida" })}
+                            {...register("organization", { required: t('form.organization.required') })}
                             className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                            placeholder="Ej: Servicios Generales S.A."
+                            placeholder={t('form.organization.placeholder')}
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Empleo</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.jobType.label')}</label>
                         <select
                             {...register("jobType", { required: true })}
                             className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
                         >
-                            <option value="Tiempo completo">Tiempo completo</option>
-                            <option value="Medio tiempo">Medio tiempo</option>
-                            <option value="Contrato">Contrato</option>
-                            <option value="Freelance">Freelance</option>
+                            <option value="Tiempo completo">{t('form.jobType.options.fullTime')}</option>
+                            <option value="Medio tiempo">{t('form.jobType.options.partTime')}</option>
+                            <option value="Contrato">{t('form.jobType.options.contract')}</option>
+                            <option value="Freelance">{t('form.jobType.options.freelance')}</option>
                         </select>
                     </div>
 
@@ -200,12 +202,12 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
                             {...register("isCurrent")}
                             className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                         />
-                        <label htmlFor="isCurrent" className="text-sm font-medium text-gray-700">Actualmente trabajo aquí</label>
+                        <label htmlFor="isCurrent" className="text-sm font-medium text-gray-700">{t('form.isCurrent.label')}</label>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Inicio</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.startDate.label')}</label>
                             <input
                                 type="date"
                                 {...register("startDate", { required: true })}
@@ -213,7 +215,7 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">{t('form.endDate.label')}</label>
                             <input
                                 type="date"
                                 {...register("endDate", { required: !isCurrent })}
@@ -229,13 +231,13 @@ export function ExperienceSection({ readOnly = false }: ExperienceSectionProps) 
                             onClick={handleCloseModal}
                             className="bg-gray-100 text-gray-700 hover:bg-gray-200"
                         >
-                            Cancelar
+                            {t('buttons.cancel')}
                         </PillButton>
                         <PillButton
                             type="submit"
                             className="bg-primary text-white hover:bg-blue-800"
                         >
-                            Guardar
+                            {t('buttons.save')}
                         </PillButton>
                     </div>
                 </form>
