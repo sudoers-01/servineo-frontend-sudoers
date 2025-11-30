@@ -268,7 +268,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ),
   }));
 
-  // ✅ SIEMPRE mostrar todas las categorías estáticas con sus traducciones
+  // SIEMPRE mostrar todas las categorías estáticas con sus traducciones
   // Obtener los contadores del backend, pero mantener la lista completa
   const jobTypes = DB_VALUES.jobTypes.map((dbValue, index) => ({
     dbValue,
@@ -276,30 +276,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       `options.${['mason', 'carpenter', 'locksmith', 'decorator', 'electrician', 'plumber', 'fumigator', 'installer', 'gardener', 'cleaner', 'mechanic', 'assembler', 'painter', 'polisher', 'welder', 'roofer', 'glazier', 'plasterer'][index]}`,
     ),
   }));
-
-  // (no baseline logic here)
-
-  // ✅ Ordenar por contador descendente (cuando hay búsqueda activa)
+  // Mantener orden alfabético por etiqueta (no reordenar por conteos)
   const jobTypesSorted = React.useMemo(() => {
-    if (!backendCounts?.categories) {
-      return jobTypes; // Sin datos del backend, mantener orden original
-    }
-    
-    // Si hay una búsqueda activa (storeSearch), ordenar por count
-    if (storeSearch?.trim()) {
-      return [...jobTypes].sort((a, b) => {
-        const countA = backendCounts.categories[a.dbValue] || 0;
-        const countB = backendCounts.categories[b.dbValue] || 0;
-        return countB - countA;
-      });
-    }
-    
-    // Sin búsqueda, mantener orden original
-    return jobTypes;
-  }, [backendCounts, jobTypes, storeSearch]);
-
-  // No filtering of jobTypes; always use jobTypesSorted
-
+    return [...jobTypes].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+  }, [jobTypes]);
   return (
     <>
       <div
