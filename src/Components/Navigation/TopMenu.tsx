@@ -340,6 +340,13 @@ export default function TopMenu() {
               <button onClick={() => router.push('/become-fixer')} className={styles.menuItem}>
                 Convertirse en Fixer
               </button>
+              
+              <button onClick={() => router.push('/payment/paymentDemoAdaptado')} className={styles.menuItem}>
+                Trabajos Requester
+              </button>
+              <button onClick={() => router.push('/payment/Pagos-Fisico')} className={styles.menuItem}>
+                Confirmar Pagos
+              </button>
             </>
           )}
 
@@ -348,6 +355,9 @@ export default function TopMenu() {
             <>
               <button onClick={() => router.push('/fixer/profile')} className={styles.menuItem}>
                 Perfil
+              </button>
+              <button onClick={() => router.push('/payment/Pagos-Fisico')} className={styles.menuItem}>
+                Confirmar Pagos
               </button>
             </>
           )}

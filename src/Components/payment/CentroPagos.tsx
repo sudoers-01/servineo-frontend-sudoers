@@ -18,6 +18,8 @@ interface FixerData {
   isTestData?: boolean;
 }
 
+import RecentEarningsModal from './RecentEarningsModal';
+
 const CentroDePagos = () => {
   const router = useRouter();
   const searchParams = useSearchParams(); 
@@ -28,6 +30,7 @@ const CentroDePagos = () => {
   const [fixerData, setFixerData] = useState<FixerData | null>(null); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showEarningsModal, setShowEarningsModal] = useState(false);
   
   useEffect(() => {
     if (fixerIdFromUrl) {
@@ -127,6 +130,14 @@ const CentroDePagos = () => {
       </div>
 
       <div className="max-w-3xl mx-auto px-4"> 
+        <div className="flex justify-end pt-4">
+          <button
+            onClick={() => setShowEarningsModal(true)}
+            className="font-['Roboto'] inline-flex items-center justify-center px-5 py-2 rounded-lg bg-[#2c6ef7] text-white font-semibold shadow-sm transition-colors hover:bg-[#1f5ad6] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2c6ef7]"
+          >
+            Mis Ganancias
+          </button>
+        </div>
         
         {/* Usamos el ID real de la URL para el Watcher */}
         {/*<WalletFlagWatcher fixerId={fixerIdFromUrl || MOCK_FIXER_ID} pollMs={4000} />*/}
@@ -241,6 +252,19 @@ const CentroDePagos = () => {
         )}
 
       </div> 
+
+      {showEarningsModal && (
+        <RecentEarningsModal
+          onClose={() => setShowEarningsModal(false)}
+          total={310}
+          data={[
+            { label: '19 nov', value: 65 },
+            { label: '20 nov', value: 38 },
+            { label: '21 nov', value: 90 },
+            { label: '22 nov', value: 110 },
+          ]}
+        />
+      )}
     </div>
   );
 };
