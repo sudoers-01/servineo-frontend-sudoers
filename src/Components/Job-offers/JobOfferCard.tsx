@@ -46,7 +46,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   // Preparar imágenes
   const images = React.useMemo(() => {
     const imageArray = [];
-    
+
     if (offer.allImages && offer.allImages.length > 0) {
       imageArray.push(...offer.allImages);
     } else if (offer.photos && offer.photos.length > 0) {
@@ -54,14 +54,14 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     } else if (offer.imagenUrl) {
       imageArray.push(offer.imagenUrl);
     }
-    
+
     // Filtrar y validar imágenes
     return imageArray.filter((img) => {
       if (!img || typeof img !== 'string') return false;
-      
+
       const trimmed = img.trim();
       if (trimmed.length === 0) return false;
-      
+
       // Validar que sea una URL válida
       try {
         new URL(trimmed);
@@ -110,7 +110,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   // Render Image Carousel
   const renderImageCarousel = () => (
     <div
-      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${viewMode === 'grid' ? 'h-48 w-full' : 'w-64 self-stretch flex-shrink-0'}`}
+      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${viewMode === 'grid' ? 'h-48 w-full' : 'w-64 h-48 flex-shrink-0'}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -120,7 +120,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         images.map((img, idx) => {
           // Double-check en tiempo de render
           if (!img || typeof img !== 'string') return null;
-          
+
           return (
             <Image
               key={idx}
@@ -152,17 +152,13 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         <>
           <button
             onClick={handlePrevImage}
-            onTouchEnd={handlePrevImage}
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
-            aria-label="Imagen anterior"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
           >
             <ChevronLeft className="w-4 h-4 text-gray-800" />
           </button>
           <button
             onClick={handleNextImage}
-            onTouchEnd={handleNextImage}
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
-            aria-label="Siguiente imagen"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
           >
             <ChevronRight className="w-4 h-4 text-gray-800" />
           </button>
@@ -184,13 +180,12 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         </div>
       )}
 
-      {/* City Badge */}
+      {/* Badges */}
       <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-medium shadow-sm border border-primary">
         <MapPin className="w-3.5 h-3.5 text-primary" />
         <span className="text-gray-700">{offer.city}</span>
       </div>
 
-      {/* Price Badge */}
       {viewMode === 'grid' && (
         <div className="absolute right-3 top-3 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20">
           <span className="text-primary">{offer.price?.toLocaleString()} Bs</span>
@@ -201,68 +196,41 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
   // Render Content
   const renderContent = () => (
-    <div
-      className={`flex flex-col ${viewMode === 'grid' ? 'p-4' : 'flex-1 pt-4 pb-1 pl-4 pr-4 '}`}
-    >
-      {/* Price - Solo en List View */}
+    <div className={`flex flex-col ${viewMode === 'grid' ? 'p-4' : 'flex-1 p-4 relative'}`}>
       {viewMode === 'list' && (
         <div className="absolute right-4 top-4 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20">
           <span className="text-primary">{offer.price?.toLocaleString()} Bs</span>
         </div>
       )}
 
-      {/* Título y Descripción */}
       <div className={viewMode === 'list' ? 'mb-2 pr-32' : ''}>
-        <h3
-          className={`text-base font-semibold text-gray-900 group-hover:text-primary transition-colors ${viewMode === 'grid' ? 'truncate' : 'text-left'}`}
-        >
+        <h3 className="text-base font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
           <SearchHighlight text={offer.title} searchQuery={searchQuery} />
         </h3>
-        <p
-          className={`mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed ${viewMode === 'list' ? 'text-left' : ''}`}
-        >
+        <p className="mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed">
           <SearchHighlight text={offer.description} searchQuery={searchQuery} />
         </p>
       </div>
 
-      {/* Tags y Fecha */}
-      <div className={viewMode === 'list' ? 'mb-2' : 'mt-2'}>
+      <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            {offer.category ? tCat(offer.category) : t('uncategorized')}
+            {offer.category ? tCat(offer.category) : ''}
           </span>
           {offer.tags && offer.tags.length > 0 && (
-            <>
-              {viewMode === 'list' ? (
-                offer.tags.slice(0, 2).map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600"
-                  >
-                    {tag}
-                  </span>
-                ))
-              ) : (
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                  {offer.tags[0]}
-                </span>
-              )}
-            </>
+            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+              {offer.tags[0]}
+            </span>
           )}
-          <span
-            className={`text-xs text-gray-400 font-medium ${viewMode === 'list' ? 'ml-auto' : ''}`}
-          >
-            {new Date(offer.createdAt).toLocaleDateString()}
-          </span>
         </div>
+        <span className="text-xs text-gray-400 font-medium ml-auto">
+          {new Date(offer.createdAt).toLocaleDateString()}
+        </span>
       </div>
-
-      {/* Footer en List View */}
-      {viewMode === 'list' && renderFooter()}
     </div>
   );
 
-  // Render Footer (Fixer Info or Actions)
+  // Render Footer
   const renderFooter = () => {
     if (isDashboardMode && !readOnly) {
       return (
@@ -298,9 +266,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     if (readOnly) return null;
 
     return (
-      <div
-        className={`${viewMode === 'grid' ? 'border-t border-gray-100 p-3' : 'border-t border-gray-100 pl-3 py-2'} flex items-center justify-between gap-3 ${viewMode === 'list' ? 'hover:bg-gray-50 transition-colors' : ''}`}
-      >
+      <div className="border-t border-gray-100 p-3 flex items-center justify-between gap-3">
         <div
           className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
           onClick={handleFixerClick}
@@ -322,9 +288,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
           </div>
 
           <div className="min-w-0 flex-1">
-            <p
-              className={`text-sm font-medium text-gray-900 truncate ${viewMode === 'list' ? 'text-left' : ''}`}
-            >
+            <p className="text-sm font-medium text-gray-900 truncate">
               {offer.fixerName || t('defaultUserName')}
             </p>
             {offer.rating && (
@@ -340,7 +304,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
         <button
           onClick={handleWhatsAppClick}
-          className="flex-shrink-0 bg-[#1AA7ED] hover:bg-[#1AA7ED]/90 rounded-full transition-all shadow-sm hover:shadow-md hover:scale-110 flex items-center gap-2 px-3 py-2"
+          className="flex-shrink-0 bg-primary hover:bg-primary/90 rounded-full transition-all shadow-sm flex items-center gap-2 px-3 py-2"
           aria-label={t('contactWhatsApp')}
         >
           <MessageCircle className="w-4 h-4 text-white" />
@@ -350,6 +314,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     );
   };
 
+  // Return
   return (
     <div
       ref={elementRef}
@@ -359,15 +324,27 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         viewMode === 'list' ? 'flex flex-row' : ''
       } ${className}`}
     >
-      <div onClick={handleCardClick} className="cursor-pointer contents">
-        {renderImageCarousel()}
-        {renderContent()}
-      </div>
-      {viewMode === 'grid' && renderFooter()}
-      {viewMode === 'list' && (
-        <div className="flex flex-col justify-end p-4 border-l border-gray-100">
+      {viewMode === 'grid' ? (
+        <>
+          <div onClick={handleCardClick} className="cursor-pointer contents">
+            {renderImageCarousel()}
+            {renderContent()}
+          </div>
           {renderFooter()}
-        </div>
+        </>
+      ) : (
+        <>
+          <div onClick={handleCardClick} className="cursor-pointer">
+            {renderImageCarousel()}
+          </div>
+          {/* Contenedor vertical para contenido + footer */}
+          <div className="flex flex-col flex-1">
+            <div onClick={handleCardClick} className="cursor-pointer flex-1">
+              {renderContent()}
+            </div>
+            {renderFooter()}
+          </div>
+        </>
       )}
     </div>
   );
