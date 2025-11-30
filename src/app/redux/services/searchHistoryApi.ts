@@ -177,9 +177,7 @@ export const searchHistoryApi = baseApi.injectEndpoints({
         updateSessionIdFromResponse(response);
 
         if (response.success && response.suggestions) {
-          return response.suggestions
-            .map((s) => String(s.term ?? ''))
-            .filter(Boolean);
+          return response.suggestions.map((s) => String(s.term ?? '')).filter(Boolean);
         }
         
         return [];

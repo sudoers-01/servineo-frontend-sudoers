@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { useState, useRef, useEffect } from "react"
-import { useTranslations } from 'next-intl'
-import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
+import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
 import {
   setSearchQuery,
   addRecentSearch,
@@ -34,13 +34,13 @@ export function SearchHeader() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowRecent(false)
+        setShowRecent(false);
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const handleSearchChange = (query: string) => {
     dispatch(setSearchQuery(query))
@@ -61,20 +61,20 @@ export function SearchHeader() {
   }
 
   const handleSearch = (query: string) => {
-    dispatch(setSearchQuery(query))
+    dispatch(setSearchQuery(query));
     if (query.trim()) {
-      dispatch(addRecentSearch(query))
+      dispatch(addRecentSearch(query));
     }
-    setShowRecent(false)
-  }
+    setShowRecent(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      dispatch(addRecentSearch(searchQuery))
+      dispatch(addRecentSearch(searchQuery));
     }
-    setShowRecent(false)
-  }
+    setShowRecent(false);
+  };
 
   return (
     <div className="space-y-3 w-full">
@@ -99,7 +99,7 @@ export function SearchHeader() {
               onFocus={() => setShowRecent(true)}
               className="w-full pl-12 pr-10 py-3 border-2 border-border rounded-xl bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
             />
-            
+
             {searchQuery && (
               <button
                 type="button"
@@ -127,8 +127,8 @@ export function SearchHeader() {
                   <button
                     type="button"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      dispatch(clearRecentSearches())
+                      e.stopPropagation();
+                      dispatch(clearRecentSearches());
                     }}
                     className="text-xs text-destructive hover:text-destructive/80 flex items-center gap-1 transition-colors"
                   >
@@ -170,5 +170,5 @@ export function SearchHeader() {
         </button>
       </form>
     </div>
-  )
+  );
 }

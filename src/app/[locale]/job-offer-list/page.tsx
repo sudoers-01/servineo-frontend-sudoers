@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -49,9 +48,13 @@ export default function JobOffersPage() {
 
   const { offers, total, isLoading } = useJobOffers();
 
-  const { sortBy, search, paginaActual, registrosPorPagina, error: reduxError } = useAppSelector(
-    (state) => state.jobOfert,
-  );
+  const {
+    sortBy,
+    search,
+    paginaActual,
+    registrosPorPagina,
+    error: reduxError,
+  } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
 
@@ -217,8 +220,9 @@ export default function JobOffersPage() {
 
       <div
         ref={stickyRef}
-        className={`w-full mx-auto px-3 sm:px-4 md:px-6 lg:max-w-5xl sticky top-0 bg-white py-3 shadow-md ${isDrawerOpen ? 'z-10' : 'z-50'
-          }`}
+        className={`w-full mx-auto px-3 sm:px-4 md:px-6 lg:max-w-5xl sticky top-0 bg-white py-3 shadow-md ${
+          isDrawerOpen ? 'z-10' : 'z-50'
+        }`}
       >
         <div className="flex gap-2">
           <FilterButton onClick={toggleDrawer} />

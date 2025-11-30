@@ -229,7 +229,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
       <div className={viewMode === 'list' ? 'mb-2' : 'mt-2'}>
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            {offer.category ? tCat(offer.category) : ''}
+            {offer.category ? tCat(offer.category) : t('uncategorized')}
           </span>
           {offer.tags && offer.tags.length > 0 && (
             <>
@@ -351,19 +351,24 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   };
 
   return (
-  <div
-    ref={elementRef}
-    onMouseEnter={handleMouseEnter}
-    onMouseLeave={handleMouseLeave}
-    className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary/50 hover:-translate-y-1 ${
-      viewMode === 'list' ? 'flex flex-row items-stretch min-h-0' : ''
-    } ${className}`}
-  >
-    <div onClick={handleCardClick} className="cursor-pointer contents">
-      {renderImageCarousel()}
-      {renderContent()}
+    <div
+      ref={elementRef}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
+      className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary hover:-translate-y-1 ${
+        viewMode === 'list' ? 'flex flex-row' : ''
+      } ${className}`}
+    >
+      <div onClick={handleCardClick} className="cursor-pointer contents">
+        {renderImageCarousel()}
+        {renderContent()}
+      </div>
+      {viewMode === 'grid' && renderFooter()}
+      {viewMode === 'list' && (
+        <div className="flex flex-col justify-end p-4 border-l border-gray-100">
+          {renderFooter()}
+        </div>
+      )}
     </div>
-    {viewMode === 'grid' && renderFooter()}
-  </div>
-);
+  );
 };

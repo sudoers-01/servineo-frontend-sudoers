@@ -96,7 +96,7 @@ const jobOffersSlice = createSlice({
     setRegistrosPorPagina: (state, action: PayloadAction<number>) => {
       state.registrosPorPagina = action.payload;
       state.paginaActual = 1;
-      
+
       if (state.shouldPersist) {
         saveToStorage(STORAGE_KEYS.PAGE_SIZE, action.payload);
         saveToStorage(STORAGE_KEYS.PAGE, 1);
@@ -117,7 +117,7 @@ const jobOffersSlice = createSlice({
 
     setPaginaActual: (state, action: PayloadAction<number>) => {
       state.paginaActual = action.payload;
-      
+
       if (state.shouldPersist) {
         saveToStorage(STORAGE_KEYS.PAGE, action.payload);
       }
@@ -134,16 +134,26 @@ const jobOffersSlice = createSlice({
       }
     },
 
-    updatePagination: (state, action: PayloadAction<{
-      total: number;
-      page: number;
-      limit: number;
-      totalPages: number;
-      listKey?: string;
-      isInitialSearch?: boolean;
-    }>) => {
-      const { total, page, limit, totalPages, listKey = 'offers', isInitialSearch } = action.payload;
-      
+    updatePagination: (
+      state,
+      action: PayloadAction<{
+        total: number;
+        page: number;
+        limit: number;
+        totalPages: number;
+        listKey?: string;
+        isInitialSearch?: boolean;
+      }>,
+    ) => {
+      const {
+        total,
+        page,
+        limit,
+        totalPages,
+        listKey = 'offers',
+        isInitialSearch,
+      } = action.payload;
+
       if (!state.paginaciones[listKey]) {
         state.paginaciones[listKey] = {
           paginaActual: 1,
@@ -162,7 +172,7 @@ const jobOffersSlice = createSlice({
       if (page === 1 && isInitialSearch) {
         state.preservedTotalRegistros = total;
       }
-      
+
       const totalToUse = state.preservedTotalRegistros > 0 ? state.preservedTotalRegistros : total;
 
       state.paginaActual = page;
@@ -218,7 +228,7 @@ const jobOffersSlice = createSlice({
 
     resetPagination: (state) => {
       state.paginaActual = 1;
-      
+
       if (state.shouldPersist) {
         saveToStorage(STORAGE_KEYS.PAGE, 1);
       }
