@@ -65,45 +65,17 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     setSelectedRating(storeRating ?? null);
   }, [filtersFromStore, storeRating]);
 
-  // Auto-select category when drawer opens if search matches a job type (fuzzy, accent-insensitive)
-  const normalizeText = (s: string) =>
-    s
-      .toLowerCase()
-      .normalize('NFD')
-      .replace(/\p{Diacritic}/gu, '')
-      .trim();
-
+  // Cuando se abre el drawer, mantener abiertas las secciones que ya tienen filtros aplicados
   useEffect(() => {
     if (!isOpen) return;
-    const s = storeSearch?.trim();
-    if (!s) return;
-    if (selectedJobs && selectedJobs.length > 0) return;
 
-    const ns = normalizeText(s);
-
-    // Try exact match first
-    let found = DB_VALUES.jobTypes.find((j) => normalizeText(j) === ns);
-
-    // Try partial match against backend keys (if available)
-    if (!found && backendCounts?.categories) {
-      found = Object.keys(backendCounts.categories).find((k) => {
-        const nk = normalizeText(k);
-        return nk === ns || nk.includes(ns) || ns.includes(nk);
-      }) as any;
-    }
-
-    // Try partial match against static list
-    if (!found) {
-      found = DB_VALUES.jobTypes.find((j) => normalizeText(j).includes(ns) || ns.includes(normalizeText(j)));
-    }
-
-    if (found) {
-      const matchVal = typeof found === 'string' ? found : String(found);
-      // Sólo seleccionar en UI; NO aplicar automáticamente para evitar recargas al abrir filtros
-      setSelectedJobs([matchVal]);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen, storeSearch, backendCounts]);
+    setOpenSections((prev) => ({
+      fixer: prev.fixer || (filtersFromStore.range && filtersFromStore.range.length > 0),
+      ciudad: prev.ciudad || (filtersFromStore.city && filtersFromStore.city.length > 0),
+      trabajo: prev.trabajo || (filtersFromStore.category && filtersFromStore.category.length > 0),
+      rating: prev.rating || (storeRating != null),
+    }));
+  }, [isOpen, filtersFromStore, storeRating]);
 
   useEffect(() => {
     setSelectedRating(storeRating ?? null);
@@ -298,7 +270,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       />
 
       <div
-        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-full max-w-[265px] md:w-63 md:max-w-none bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
+        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-full max-w-[265px] md:w-64 md:max-w-none bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -472,57 +444,58 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               )}
             </div>
 
-            {/* Filtro: Calificación */}
-            <div className="mb-6">
-              <div
-                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
-                onClick={() => toggleSection('rating')}
+           
+{/* Filtro: Calificación */}
+<div className="mb-6">
+  <div
+    className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+    onClick={() => toggleSection('rating')}
+  >
+    <span className="truncate">Calificación</span>
+  </div>
+  {openSections.rating && (
+    <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
+      <div className="flex items-center gap-1 justify-center">
+        {Array.from({ length: 5 }, (_, idx) => {
+          const starNumber = idx + 1;
+          const filled = (selectedRating ?? 0) >= starNumber;
+          const count = getRatingCount(starNumber);
+          const disabled = false;
+          
+          return (
+            <div key={starNumber} className="flex flex-col items-center gap-1 min-w-[32px]">
+              <button
+                type="button"
+                onClick={() => !disabled && handleRatingClick(starNumber)}
+                className={`transition-transform touch-manipulation flex-shrink-0 ${
+                  disabled 
+                    ? 'opacity-50 cursor-not-allowed' 
+                    : 'hover:scale-110 active:scale-95'
+                }`}
+                aria-label={`${starNumber} estrellas`}
+                disabled={disabled}
               >
-                <span className="truncate">Calificación</span>
-              </div>
-              {openSections.rating && (
-                <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
-                  <div className="flex items-center gap-1 justify-start flex-wrap">
-                    {Array.from({ length: 5 }, (_, idx) => {
-                      const starNumber = idx + 1;
-                      const filled = (selectedRating ?? 0) >= starNumber;
-                      const count = getRatingCount(starNumber);
-                      const disabled = false;
-                      
-                      return (
-                        <div key={starNumber} className="flex flex-col items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => !disabled && handleRatingClick(starNumber)}
-                            className={`transition-transform touch-manipulation flex-shrink-0 ${
-                              disabled 
-                                ? 'opacity-50 cursor-not-allowed' 
-                                : 'hover:scale-110 active:scale-95'
-                            }`}
-                            aria-label={`${starNumber} estrellas`}
-                            disabled={disabled}
-                          >
-                            <Star
-                              className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
-                              fill={filled ? '#fbbf24' : '#ffffff'}
-                              stroke="#000000"
-                              strokeWidth={2}
-                            />
-                          </button>
-                          {loadingCounts ? (
-                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
-                          ) : (
-                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>
-                              ({count})
-                            </span>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
+                <Star
+                  className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
+                  fill={filled ? '#fbbf24' : '#ffffff'}
+                  stroke="#000000"
+                  strokeWidth={2}
+                />
+              </button>
+              {loadingCounts ? (
+                <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+              ) : (
+                <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs whitespace-nowrap`}>
+                  ({count})
+                </span>
               )}
             </div>
+          );
+        })}
+      </div>
+    </div>
+  )}
+</div>
           </div>
         </div>
       </div>
