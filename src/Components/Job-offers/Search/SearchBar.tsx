@@ -91,6 +91,8 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     return;  }
     setValue(newValue);
     setPreviewValue(null);
+    // Abrir el dropdown al escribir para que las sugerencias vuelvan a mostrarse
+    setIsOpen(true);
     const { isValid, error } = validateSearch(newValue);
     setError(isValid ? undefined : error);
     setHighlighted(-1);

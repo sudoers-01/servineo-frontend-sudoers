@@ -41,15 +41,18 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   
   const dispatch = useAppDispatch();
   const storeRating = useAppSelector((s) => s.jobOfert.rating);
+  const storeSearch = useAppSelector((s) => s.jobOfert.search);
 
-  // 🔧 FIX: Enviar minRating y maxRating como rango exacto
+  // 🔧 Petición de contadores: NO enviar la categoría para obtener totales por categoría
   const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
     range: selectedRanges.length > 0 ? selectedRanges : undefined,
-    city: selectedCities.length > 0 ? selectedCities[0] : undefined,
+    city: selectedCities.length > 0 ? selectedCities.join(',') : undefined,
+    // Enviar las categorías seleccionadas como ARRAY para que el builder
+    // de query agregue correctamente múltiples params `category=`.
+    // (Antes se enviaba una cadena con comas y provocaba errores al iterar.)
     category: selectedJobs.length > 0 ? selectedJobs : undefined,
+    search: storeSearch?.trim() ? storeSearch : undefined,
     minRating: selectedRating ?? undefined,
-    // Para 5 estrellas, no enviar maxRating (buscar >= 5.0)
-    // Para 1-4 estrellas, limitar al rango (ej: 4.0-4.99)
     maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
   }, {
     skip: !isOpen,
@@ -113,6 +116,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   };
 
   const handleCityChange = (dbValue: string) => {
+    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] handleCityChange click:', dbValue, { selectedCities, filtersFromStore });
     const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(dbValue);
     if (isAutoMarked && selectedCities.includes(dbValue)) {
       return;
@@ -132,20 +136,27 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   };
 
   const handleJobChange = (dbValue: string) => {
-    const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(dbValue);
-    if (isAutoMarked && selectedJobs.includes(dbValue)) {
-      return;
+    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] handleJobChange click:', dbValue, { selectedJobs, filtersFromStore });
+    // Si hay auto-selección, permitir cambio libre entre categorías
+    let newJobs: string[];
+    
+    if (filtersFromStore.isAutoSelectedCategory) {
+      // Si clickea en otra categoría, cambiar a esa (comportamiento de radio button)
+      newJobs = selectedJobs.includes(dbValue) ? [] : [dbValue];
+    } else {
+      // Comportamiento normal de checkbox múltiple
+      newJobs = selectedJobs.includes(dbValue)
+        ? selectedJobs.filter((j) => j !== dbValue)
+        : [...selectedJobs, dbValue];
     }
 
-    const newJobs = selectedJobs.includes(dbValue)
-      ? selectedJobs.filter((j) => j !== dbValue)
-      : [...selectedJobs, dbValue];
-
     setSelectedJobs(newJobs);
+    // Quitar el flag de auto-selección ya que el usuario hizo un cambio manual
     applyFilters(selectedRanges, selectedCities, newJobs, false, filtersFromStore.isAutoSelectedCity);
   };
 
   const applyFilters = (ranges: string[], cities: string[], jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
+    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters called with:', { ranges, cities, jobs, isAutoCat, isAutoCity, filtersFromStore });
     const filtersToValidate = { range: ranges, city: cities, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
@@ -159,8 +170,25 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       isAutoSelectedCity: isAutoCity,
     };
 
-    if (onFiltersApply) {
+    // Evitar disparar el handler si no hay cambios reales respecto al store
+    const arraysEqual = (a: string[] = [], b: string[] = []) => {
+      if (a.length !== b.length) return false;
+      const sa = [...a].sort();
+      const sb = [...b].sort();
+      for (let i = 0; i < sa.length; i++) if (sa[i] !== sb[i]) return false;
+      return true;
+    };
+
+    const sameAsStore =
+      arraysEqual(filterState.range, filtersFromStore.range) &&
+      arraysEqual(filterState.city, filtersFromStore.city) &&
+      arraysEqual(filterState.category, filtersFromStore.category);
+
+    if (!sameAsStore && onFiltersApply) {
+      if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters -> dispatching onFiltersApply', filterState);
       onFiltersApply(filterState);
+    } else {
+      if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters -> no-op (sameAsStore)', { sameAsStore, filterState, store: filtersFromStore });
     }
   };
 
@@ -220,13 +248,18 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     ),
   }));
 
+  // SIEMPRE mostrar todas las categorías estáticas con sus traducciones
+  // Obtener los contadores del backend, pero mantener la lista completa
   const jobTypes = DB_VALUES.jobTypes.map((dbValue, index) => ({
     dbValue,
     label: tJob(
       `options.${['mason', 'carpenter', 'locksmith', 'decorator', 'electrician', 'plumber', 'fumigator', 'installer', 'gardener', 'cleaner', 'mechanic', 'assembler', 'painter', 'polisher', 'welder', 'roofer', 'glazier', 'plasterer'][index]}`,
     ),
   }));
-
+  // Mantener orden alfabético por etiqueta (no reordenar por conteos)
+  const jobTypesSorted = React.useMemo(() => {
+    return [...jobTypes].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+  }, [jobTypes]);
   return (
     <>
       <div
@@ -286,7 +319,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                   <div className="flex flex-col gap-2">
                     {nameOptions.map((range) => {
                       const count = getRangeCount(range.dbValue);
-                      // Do not disable ranges based on count. Keep them selectable even if count === 0.
                       const disabled = false;
                       return (
                         <label
@@ -333,7 +365,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                       const isSelected = selectedCities.includes(city.dbValue);
                       const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(city.dbValue);
                       const count = backendCounts?.cities?.[city.dbValue] ?? 0;
-                      // Only disable if auto-selected logic requires it; do not disable when count === 0
                       const disabled = filtersFromStore.isAutoSelectedCity && !isAutoMarked;
 
                       return (
@@ -379,23 +410,18 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.trabajo && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {jobTypes.map((job) => {
+                    {jobTypesSorted.map((job) => {
                       const isSelected = selectedJobs.includes(job.dbValue);
-                      const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
                       const count = backendCounts?.categories?.[job.dbValue] ?? 0;
-                      // Only disable if auto-selected logic requires it; do not disable when count === 0
-                      const disabled = filtersFromStore.isAutoSelectedCategory && !isAutoMarked;
+                      // Nunca deshabilitar, siempre permitir selección
+                      const disabled = false;
 
                       return (
                         <label
                           key={job.dbValue}
-                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
-                            disabled
-                              ? 'opacity-50 cursor-not-allowed text-gray-400 pointer-events-none'
-                              : 'cursor-pointer hover:text-[#2B31E0]'
-                          }`}
+                          className="flex items-center justify-between gap-2 text-xs min-w-0 transition-colors cursor-pointer hover:text-[#2B31E0]"
                         >
-                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                          <div className="flex items-center gap-2">
                             <input
                               type="checkbox"
                               className="w-4 h-4 flex-shrink-0 cursor-pointer"

@@ -49,7 +49,7 @@ export default function JobOffersPage() {
 
   const { offers, total, isLoading } = useJobOffers();
 
-  const { sortBy, search, paginaActual, registrosPorPagina, error: reduxError } = useAppSelector(
+  const { sortBy, search, paginaActual, registrosPorPagina,totalPages, error: reduxError } = useAppSelector(
     (state) => state.jobOfert,
   );
 
@@ -63,6 +63,29 @@ export default function JobOffersPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  useEffect(() => {// corregir pagina actual si esta fuera del limite
+    if (!isLoading && totalPages > 0) {
+
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = Number(params.get('page') || 1);
+
+      let correctedPage = pageParam;
+
+      if (pageParam < 1 || isNaN(pageParam)) {//validaciones
+        correctedPage = 1;
+       } else if (pageParam > totalPages) {
+        correctedPage = totalPages;
+      }
+
+      if (correctedPage !== pageParam) {
+        params.set('page', correctedPage.toString());
+        window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+        dispatch(setPaginaActual(correctedPage));
+      }
+    }
+  }, [isLoading, totalPages, dispatch]);
+
 
   // Limpiar búsqueda si se navega directamente sin parámetros
   useEffect(() => {
