@@ -1,4 +1,4 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000' as string;
+//const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000' as string;
 
 export interface LogoutResponse {
   success: boolean;
@@ -13,7 +13,7 @@ export async function cerrarTodasSesiones(): Promise<LogoutResponse> {
   }
 
   try {
-    const response = await fetch(`${API_URL}/api/controlC/cerrar-sesiones/logout-all`, {
+    const response = await fetch(`/api/controlC/cerrar-sesiones/logout-all`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,

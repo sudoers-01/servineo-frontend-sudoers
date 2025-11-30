@@ -64,7 +64,7 @@ export default function AddCardModalFixer({
       let cardId: string | null = null;
 
       if (saveCard) {
-        const cardRes = await fetch('/api/cardscreate', {
+        const cardRes = await fetch('http://localhost:8000/api/cardscreate', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -80,7 +80,7 @@ export default function AddCardModalFixer({
       }
 
       // Actualizar recarga en wallet
-      const walletRes = await fetch('/api/wallet/update', {
+      const walletRes = await fetch('http://localhost:8000/api/wallet/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -103,7 +103,7 @@ export default function AddCardModalFixer({
       setTimeout(() => {
         setSuccessMessage('');
         onClose();
-        router.push(/payment/pages/FixerWallet?fixerId=${userId}); // <-- backticks para interpolación
+        router.push(`/payment/FixerWallet?fixerId=${userId}`); // <-- backticks para interpolación
       }, 2000);
     } catch (err: unknown) {
       console.error(err);

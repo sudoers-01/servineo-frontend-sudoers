@@ -53,7 +53,7 @@ export default function PaymentsPage() {
         const payload = { bookingId, providerId, amount, currency };
         console.log("→ POST /api/payments/intent payload =", payload);
 
-        const res = await fetch('/api/payments/intent', {
+        const res = await fetch('http://localhost:8000/api/payments/intent', {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bookingId, providerId, amount, currency }),
@@ -91,10 +91,10 @@ export default function PaymentsPage() {
 
   const toDriveThumb = (url: string) => {
     const m = url.match(/id=([^&]+)/);
-    return m ? https://drive.google.com/thumbnail?id=${m[1]}&sz=w512 : url;
+    return m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w512` : url;
   };
 
-  const fallbackQR = https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent("Servineo QR")};
+  const fallbackQR = `https://api.qrserver.com/v1/create-qr-code/?size=256x256&data=${encodeURIComponent("Servineo QR")}`;
 
   useEffect(() => {
     if (method?.qrImageUrl) {

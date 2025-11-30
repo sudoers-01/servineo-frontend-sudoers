@@ -2,7 +2,7 @@
 //pasar
 import React from 'react';
 import { useEffect, useState } from 'react';
-import BackButton from '../components/BackButton';
+import BackButton from '../../components/BackButton';
 import { Copy } from 'lucide-react';
 
 interface TransferBankProps {
@@ -42,7 +42,7 @@ export default function TransferBank({ fixerId, servineoId, amount }: TransferBa
       }
 
       try {
-       const res = await fetch('/api/transferencia-bancaria/intent'   , {
+       const res = await fetch('http://localhost:8000/api/transferencia-bancaria/intent'   , {
         //const res = await fetch('/api/transferencia-bancaria/intent'   , {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

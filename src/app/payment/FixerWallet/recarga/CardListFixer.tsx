@@ -31,7 +31,7 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
 
     const fetchCards = async () => {
         try {
-            const res = await fetch(/api/cards?userId=${fixerId});
+            const res = await fetch(`http://localhost:8000/api/cards?userId=${fixerId}`);
             if (!res.ok) throw new Error('Error fetching cards');
             const data = await res.json();
             setCards(data);
@@ -52,9 +52,9 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
         setConfirmModal(null);
 
         try {
-            console.log(💳 Recargando ${amount} BOB a la wallet del fixer ${fixerId});
+            console.log(`💳 Recargando ${amount} BOB a la wallet del fixer ${fixerId}`);
 
-            const res = await fetch(/api/wallet/update, {
+            const res = await fetch(`http://localhost:8000/api/wallet/update`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount, userId: fixerId }), // ✅ usar userId
@@ -64,7 +64,7 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Error al recargar wallet');
 
-            showSuccessModal(💰 Recarga exitosa: +${amount} BOB (nuevo balance: ${data.wallet.balance} BOB));
+            showSuccessModal(`💰 Recarga exitosa: +${amount} BOB (nuevo balance: ${data.wallet.balance} BOB)`);
             onRechargeSuccess?.();
         } catch (err) {
             console.error(err);
@@ -144,7 +144,7 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
                                         : 'bg-[#2B6AE0] hover:bg-[#2BDDE0]'
                                     }`}
                             >
-                                {processingCardId === card._id ? 'Procesando...' : Recargar ${amount} BOB}
+                                {processingCardId === card._id ? 'Procesando...' : `Recargar ${amount} BOB`}
                             </motion.button>
                         </motion.div>
                     ))}
@@ -174,7 +174,7 @@ export default function CardListFixer({ fixerId, amount, onRechargeSuccess }: Ca
                             animate={{ scale: 1 }}
                             className="bg-[#2B6AE0] p-8 rounded-2xl shadow-2xl text-center max-w-sm w-full"
                         >
-                            <h2 className="text-xl font-bold mb-4">⚠ Confirmar Recarga</h2>
+                            <h2 className="text-xl font-bold mb-4">⚠️ Confirmar Recarga</h2>
                             <p className="text-black mb-6">
                                 ¿Deseas recargar{' '}
                                 <span className="font-bold text-[#2BDDE0]">{amount} BOB</span>{' '}

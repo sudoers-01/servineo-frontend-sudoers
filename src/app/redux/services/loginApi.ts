@@ -1,4 +1,4 @@
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
+const BASE_URL = "http://localhost:8000/api/controlC";
 
 export interface ApiResponse<T> {
   success: boolean;
@@ -24,7 +24,7 @@ class ApiClient {
     const id = setTimeout(() => controller.abort(), this.timeout);
 
     try {
-      const response = await fetch(`${this.baseUrl}${url}`, {
+      const response = await fetch(`${BASE_URL}${url}`, {
         ...options,
         signal: controller.signal,
         headers: {

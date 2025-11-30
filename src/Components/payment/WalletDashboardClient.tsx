@@ -52,11 +52,11 @@ export default function FixerWalletDashboard() {
     setLoading(true);
     setError(null);
     
-    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+    //const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
     try {
       // Llama al endpoint que ya funciona
-      const res = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
+      const res = await fetch(`http://localhost:8000/api/fixer/payment-center/${fixerId}`);
       
       if (!res.ok) {
         const errData = await res.json();
@@ -147,7 +147,7 @@ export default function FixerWalletDashboard() {
             
             {/* CORRECCIÓN: Ruta a 'recarga' (en español) */}
             <Link
-              href={`/payment/recarga?fixerId=${receivedFixerId}`}
+              href={`/payment/FixerWallet/recarga?fixerId=${receivedFixerId}`}
               className="w-full block text-center bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
             >
               Recargar Saldo

@@ -52,7 +52,7 @@ const CentroDePagos = () => {
       console.log(`🔍 Intentando conectar a: ${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
       
       // --- CORRECCIÓN: Usar la URL absoluta en fetch ---
-      const response = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`, {
+      const response = await fetch(`http://localhost:8000/api/fixer/payment-center/${fixerId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

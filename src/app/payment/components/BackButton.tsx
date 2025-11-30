@@ -14,7 +14,7 @@ export default function BackButton({
   return (
     <button
       onClick={handleClick}
-      className={inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-[#2B6AE0] text-white hover:bg-gray-800 text-sm shadow-lg ${className}}
+      className={`inline-flex items-center gap-2 px-4 py-3 rounded-xl bg-[#2B6AE0] text-white hover:bg-gray-800 text-sm shadow-lg ${className}`}
       aria-label="Volver"
     >
       <span aria-hidden>←</span> Volver
