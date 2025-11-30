@@ -1,4 +1,4 @@
-//const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'; 
+const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'; 
 const ULTIMO_CAMBIO_BASE = '/api/controlC/ultimo-cambio';
 
 export interface LastPasswordChangeResponse {
@@ -22,7 +22,7 @@ export async function obtenerUltimoCambio(): Promise<LastPasswordChangeResponse>
     console.log('🔍 Consultando último cambio...');
     console.log('🔑 Token disponible:', !!token);
     
-    const fullUrl = `${ULTIMO_CAMBIO_BASE}/fecha-ultimo-cambio`;
+    const fullUrl = `${BASE_URL}${ULTIMO_CAMBIO_BASE}/fecha-ultimo-cambio`;
     console.log('🌐 URL completa:', fullUrl);
     
     const response = await fetch(fullUrl, {
