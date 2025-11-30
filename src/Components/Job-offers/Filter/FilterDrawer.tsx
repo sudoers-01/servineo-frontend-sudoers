@@ -62,6 +62,18 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     setSelectedRating(storeRating ?? null);
   }, [filtersFromStore, storeRating]);
 
+  // Cuando se abre el drawer, mantener abiertas las secciones que ya tienen filtros aplicados
+  useEffect(() => {
+    if (!isOpen) return;
+
+    setOpenSections((prev) => ({
+      fixer: prev.fixer || (filtersFromStore.range && filtersFromStore.range.length > 0),
+      ciudad: prev.ciudad || (filtersFromStore.city && filtersFromStore.city.length > 0),
+      trabajo: prev.trabajo || (filtersFromStore.category && filtersFromStore.category.length > 0),
+      rating: prev.rating || (storeRating != null),
+    }));
+  }, [isOpen, filtersFromStore, storeRating]);
+
   useEffect(() => {
     setSelectedRating(storeRating ?? null);
   }, [storeRating]);
@@ -225,7 +237,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       />
 
       <div
-        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-full max-w-[265px] md:w-63 md:max-w-none bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
+        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-full max-w-[265px] md:w-64 md:max-w-none bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
