@@ -6,7 +6,7 @@ import { CreditCard, QrCode, Building2, ArrowLeft } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements } from '@stripe/react-stripe-js';
 import TransferBank from './TransferBank';
-import CardListFixer from '../../FixerWallet/recarga/CardListFixer';
+import CardListFixer from './CardListFixer';
 
 // Stripe público
 const stripePromise = loadStripe(
