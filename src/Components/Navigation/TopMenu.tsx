@@ -209,7 +209,7 @@ export default function TopMenu() {
     const userId = userData?._id || userData?.id;
     if (userId) {
       // Navegamos al centro de pagos pasando el ID en la query string
-      router.push(`/payment/Pagos-Fisico`);
+      router.push(`/payment/centro-de-pagos?fixerId=${userId}`);
       setProfileMenuOpen(false);
     } else {
       console.error("No se encontró el ID del usuario para ir al centro de pagos");
@@ -341,7 +341,7 @@ export default function TopMenu() {
                 Convertirse en Fixer
               </button>
               
-              <button onClick={() => router.push('/payment/paymentDemoAdaptado')} className={styles.menuItem}>
+              <button onClick={() => router.push('/payment/trabajos')} className={styles.menuItem}>
                 Trabajos Requester
               </button>
             </>
