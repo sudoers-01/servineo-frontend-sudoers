@@ -47,8 +47,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
     range: selectedRanges.length > 0 ? selectedRanges : undefined,
     city: selectedCities.length > 0 ? selectedCities.join(',') : undefined,
-    // Intencional: no enviar `category` aquí para que el backend devuelva totales por categoría
-    category: undefined,
+    // Enviar las categorías seleccionadas como ARRAY para que el builder
+    // de query agregue correctamente múltiples params `category=`.
+    // (Antes se enviaba una cadena con comas y provocaba errores al iterar.)
+    category: selectedJobs.length > 0 ? selectedJobs : undefined,
     search: storeSearch?.trim() ? storeSearch : undefined,
     minRating: selectedRating ?? undefined,
     maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
@@ -142,6 +144,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   };
 
   const handleCityChange = (dbValue: string) => {
+    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] handleCityChange click:', dbValue, { selectedCities, filtersFromStore });
     const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(dbValue);
     if (isAutoMarked && selectedCities.includes(dbValue)) {
       return;
@@ -161,6 +164,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   };
 
   const handleJobChange = (dbValue: string) => {
+    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] handleJobChange click:', dbValue, { selectedJobs, filtersFromStore });
     // Si hay auto-selección, permitir cambio libre entre categorías
     let newJobs: string[];
     
@@ -180,6 +184,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   };
 
   const applyFilters = (ranges: string[], cities: string[], jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
+    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters called with:', { ranges, cities, jobs, isAutoCat, isAutoCity, filtersFromStore });
     const filtersToValidate = { range: ranges, city: cities, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
@@ -208,7 +213,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       arraysEqual(filterState.category, filtersFromStore.category);
 
     if (!sameAsStore && onFiltersApply) {
+      if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters -> dispatching onFiltersApply', filterState);
       onFiltersApply(filterState);
+    } else {
+      if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters -> no-op (sameAsStore)', { sameAsStore, filterState, store: filtersFromStore });
     }
   };
 
