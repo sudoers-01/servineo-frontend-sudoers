@@ -356,7 +356,7 @@ _mockJobOffers = _mockJobOffers.map((offer) => {
 
 // Funciones mock para manejar ofertas
 export const mockJobOfferService = {
-  getOffers: () => _mockJobOffers,
+    getOffers: () => _mockJobOffers,
 
   addOffer: (offer: Omit<JobOffer, 'id' | 'createdAt'>) => {
     const newOffer: JobOffer = {
