@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
+import { useLogClickMutation } from '../../redux/services/activityApi';
 import {
   SearchBar,
   NoResultsMessage,
@@ -59,6 +60,29 @@ export default function JobOffersPage() {
 
   useSyncUrlParams();
 
+  // Get user ID from localStorage
+  const [userId, setUserId] = useState<string>('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('servineo_user');
+      if (storedUser) {
+        try {
+          const userObj = JSON.parse(storedUser);
+          console.log('User object from localStorage:', userObj);
+          // Intenta obtener el ID de diferentes propiedades posibles
+          const id = userObj.id || userObj._id || userObj.userId || '';
+          setUserId(id);
+          console.log('Extracted user ID:', id);
+        } catch (error) {
+          console.error('Error parsing user from localStorage:', error);
+        }
+      } else {
+        console.warn('No servineo_user found in localStorage');
+      }
+    }
+  }, []);
+
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const scrollRestoredRef = useRef(false);
@@ -67,6 +91,57 @@ export default function JobOffersPage() {
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [logClick] = useLogClickMutation();
+
+  // Adapter function to convert JobOfferData from backend to AdaptedJobOffer
+  const adaptJobOffer = (offer: JobOfferData): AdaptedJobOffer => {
+    return {
+      _id: offer._id,
+      fixerId: offer.fixerId,
+      name: offer.fixerName,
+      title: offer.title,
+      description: offer.description,
+      tags: offer.tags || [],
+      phone: offer.contactPhone,
+      photos: offer.photos || [],
+      services: offer.category ? [offer.category] : [],
+      price: offer.price,
+      createdAt: offer.createdAt instanceof Date ? offer.createdAt : new Date(offer.createdAt),
+      city: offer.city,
+    };
+  };
+
+  const handleCardClick = async (offer: JobOfferData) => {
+    const adaptedOffer = adaptJobOffer(offer);
+    setSelectedOffer(adaptedOffer);
+    setIsModalOpen(true);
+
+    // Only log the click if userId is available
+    if (!userId) {
+      console.warn('User ID no disponible, no se registró el click');
+      return;
+    }
+
+    const activityData = {
+      userId: userId,
+      date: new Date().toISOString(),
+      role: 'requester',
+      type: 'click',
+      metadata: {
+        button: 'job_offer',
+        jobTitle: adaptedOffer.title || 'Sin título',
+        jobId: adaptedOffer._id,
+      },
+      timestamp: new Date().toISOString(),
+    };
+
+    try {
+      await logClick(activityData).unwrap();
+      console.log('Click registrado:', adaptedOffer.title);
+    } catch (error) {
+      console.error('Error al registrar clic:', error);
+    }
+  };
 
   // Limpiar búsqueda si se navega directamente sin parámetros
   useEffect(() => {
@@ -205,11 +280,11 @@ export default function JobOffersPage() {
   };
 
   // Handler para abrir modal al hacer click en el área de la oferta
-  const handleCardClick = (offer: JobOfferData) => {
+ /* const handleCardClick = (offer: JobOfferData) => {
     const adaptedOffer = adaptOfferToModalFormat(offer);
     setSelectedOffer(adaptedOffer);
     setIsModalOpen(true);
-  };
+  };*/
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
 

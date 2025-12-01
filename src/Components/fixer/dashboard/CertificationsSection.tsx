@@ -140,7 +140,7 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
                   </div>
 
                   {cert.credentialUrl && (
-                    
+                    <a
                       href={cert.credentialUrl}
                       target="_blank"
                       rel="noopener noreferrer"
