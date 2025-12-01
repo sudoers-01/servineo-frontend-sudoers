@@ -1,8 +1,8 @@
-"use client"
+'use client';
 
-import { useState, useRef, useEffect } from "react"
-import { useTranslations } from 'next-intl'
-import { useAppDispatch, useAppSelector } from "@/app/redux/hooks"
+import { useState, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { useAppDispatch, useAppSelector } from '@/app/redux/hooks';
 import {
   setSearchQuery,
   addRecentSearch,
@@ -11,11 +11,17 @@ import {
   selectRecentSearches,
   setSidebarOpen,
   selectSidebarOpen,
+  autoSelectJobType,
+  clearJobTypeSelection,
+  autoSelectCity,
+  clearCitySelection,
 } from "../app/redux/slice/filterSlice"
+import { useJobTypeAutoMatch } from "@/lib/useJobTypeAutoMatch"
 import { Search, Settings2, Trash2, X, Clock, FilterIcon } from "lucide-react"
 
 export function SearchHeader() {
   const t = useTranslations('search')
+  const { findMatchingJobType, findMatchingCity } = useJobTypeAutoMatch()
   
   const dispatch = useAppDispatch()
   const searchQuery = useAppSelector(selectSearchQuery)
@@ -28,29 +34,47 @@ export function SearchHeader() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
-        setShowRecent(false)
+        setShowRecent(false);
       }
     }
 
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => document.removeEventListener("mousedown", handleClickOutside)
-  }, [])
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSearchChange = (query: string) => {
+    dispatch(setSearchQuery(query))
+
+    const matchedJobType = findMatchingJobType(query)
+    if (matchedJobType) {
+      dispatch(autoSelectJobType(matchedJobType))
+    } else {
+      dispatch(clearJobTypeSelection())
+    }
+
+    const matchedCity = findMatchingCity(query)
+    if (matchedCity) {
+      dispatch(autoSelectCity(matchedCity))
+    } else {
+      dispatch(clearCitySelection())
+    }
+  }
 
   const handleSearch = (query: string) => {
-    dispatch(setSearchQuery(query))
+    dispatch(setSearchQuery(query));
     if (query.trim()) {
-      dispatch(addRecentSearch(query))
+      dispatch(addRecentSearch(query));
     }
-    setShowRecent(false)
-  }
+    setShowRecent(false);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
-      dispatch(addRecentSearch(searchQuery))
+      dispatch(addRecentSearch(searchQuery));
     }
-    setShowRecent(false)
-  }
+    setShowRecent(false);
+  };
 
   return (
     <div className="space-y-3 w-full">
@@ -71,16 +95,18 @@ export function SearchHeader() {
               type="text"
               placeholder={t('placeholder')}
               value={searchQuery}
-              onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+              onChange={(e) => handleSearchChange(e.target.value)}
               onFocus={() => setShowRecent(true)}
               className="w-full pl-12 pr-10 py-3 border-2 border-border rounded-xl bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
             />
-            
+
             {searchQuery && (
               <button
                 type="button"
                 onClick={() => {
                   dispatch(setSearchQuery(""))
+                  dispatch(clearJobTypeSelection())
+                  dispatch(clearCitySelection())
                   setShowRecent(true)
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-primary/10 rounded-full transition-all"
@@ -101,8 +127,8 @@ export function SearchHeader() {
                   <button
                     type="button"
                     onClick={(e) => {
-                      e.stopPropagation()
-                      dispatch(clearRecentSearches())
+                      e.stopPropagation();
+                      dispatch(clearRecentSearches());
                     }}
                     className="text-xs text-destructive hover:text-destructive/80 flex items-center gap-1 transition-colors"
                   >
@@ -144,5 +170,5 @@ export function SearchHeader() {
         </button>
       </form>
     </div>
-  )
+  );
 }

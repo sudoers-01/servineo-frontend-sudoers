@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { Mail } from "lucide-react";
-import { FaGithub, FaDiscord } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
+import React, { useEffect, useState } from 'react';
+import { Mail } from 'lucide-react';
+import { FaGithub, FaDiscord } from 'react-icons/fa';
+import { FcGoogle } from 'react-icons/fc';
 import {
   obtenerMetodosCliente,
   desvincularMetodo,
@@ -20,10 +20,10 @@ interface Props {
 }
 
 const ALL_PROVIDERS_META = [
-  { provider: "google", name: "Google" },
-  { provider: "github", name: "GitHub" },
-  { provider: "email", name: "Correo Electrónico" },
-  { provider: "discord", name: "Discord" },
+  { provider: 'google', name: 'Google' },
+  { provider: 'github', name: 'GitHub' },
+  { provider: 'email', name: 'Correo Electrónico' },
+  { provider: 'discord', name: 'Discord' },
 ] as const;
 
 interface FullAuthProvider extends AuthProvider {
@@ -35,11 +35,9 @@ export default function AccountLoginSettings({ token = "" }: Props) {
   const t = useTranslations('AccountLoginSettings'); 
   const [methods, setMethods] = useState<FullAuthProvider[]>([]);
 
-  const buildFullMethodsList = (
-    linkedMethodsFromAPI: AuthProvider[]
-  ): FullAuthProvider[] => {
+  const buildFullMethodsList = (linkedMethodsFromAPI: AuthProvider[]): FullAuthProvider[] => {
     const linkedMethodsMap = new Map<string, AuthProvider>(
-      linkedMethodsFromAPI.map((m) => [m.provider, m])
+      linkedMethodsFromAPI.map((m) => [m.provider, m]),
     );
 
     return ALL_PROVIDERS_META.map((p) => {
@@ -61,7 +59,7 @@ export default function AccountLoginSettings({ token = "" }: Props) {
         const fullList = buildFullMethodsList(linkedMethodsFromAPI);
         setMethods(fullList);
       } catch (err) {
-        console.error("Error al cargar métodos:", err);
+        console.error('Error al cargar métodos:', err);
       }
     }
     fetchMethods();
@@ -162,12 +160,7 @@ export default function AccountLoginSettings({ token = "" }: Props) {
             {t('buttons.unlink')}
           </button>
         </div>
-      );
-    })}
-  </div>
-</section>
-
-
+      </section>
 
       {/* Métodos disponibles */}
       <section>
@@ -182,45 +175,34 @@ export default function AccountLoginSettings({ token = "" }: Props) {
         ) : (
           <div className="space-y-3">
             {availableMethods.map((method) => {
-              if (method.provider === "google") {
+              if (method.provider === 'google') {
                 return (
                   <VincularGoogle
                     key="google"
                     tokenUsuario={token}
-                    onLinked={() => handleLink("google")}
+                    onLinked={() => handleLink('google')}
                   />
                 );
               }
 
-              if (method.provider === "github") {
-                return (
-                  <VincularGithub
-                    key="github"
-                    onLinked={() => handleLink("github")}
-                  />
-                );
+              if (method.provider === 'github') {
+                return <VincularGithub key="github" onLinked={() => handleLink('github')} />;
               }
 
-              if (method.provider === "discord") {
-                return (
-                  <VincularDiscord
-                    key="discord"
-                    onLinked={() => handleLink("discord")}
-                  />
-                );
+              if (method.provider === 'discord') {
+                return <VincularDiscord key="discord" onLinked={() => handleLink('discord')} />;
               }
-              if (method.provider === "email") {
+              if (method.provider === 'email') {
                 // Aquí reemplazamos el botón por el formulario directo
                 return (
                   <VincularCorreo
                     key="email"
                     token={token}
                     onLinked={(client) => {
-                      if (!client) return; 
+                      if (!client) return;
                       const fullList = buildFullMethodsList(client.authProviders);
                       setMethods(fullList);
                     }}
-
                   />
                 );
               }

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { Mail, Eye, EyeOff } from "lucide-react";
@@ -35,9 +35,9 @@ interface VincularCorreoProps {
 export default function VincularCorreo({ token, onLinked }: VincularCorreoProps) {
   const t = useTranslations('VincularCorreo');
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [repeatPassword, setRepeatPassword] = useState('');
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarRepeatPassword, setMostrarRepeatPassword] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -88,9 +88,9 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
       toast.success(response.message);
       onLinked?.(response.client);
       setMostrarFormulario(false);
-      setEmail("");
-      setPassword("");
-      setRepeatPassword("");
+      setEmail('');
+      setPassword('');
+      setRepeatPassword('');
       setErrors({});
     } else {
       toast.error(response.message);
@@ -132,15 +132,13 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
               value={email}
               onChange={(e) => {
                 setEmail(e.target.value);
-                validarCampo("email", e.target.value);
+                validarCampo('email', e.target.value);
               }}
               className={`border rounded-lg px-3 py-2 w-full text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none ${
-                errors.email ? "border-red-500" : ""
+                errors.email ? 'border-red-500' : ''
               }`}
             />
-            {errors.email && (
-              <p className="text-red-600 text-xs mt-1">{errors.email}</p>
-            )}
+            {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email}</p>}
           </div>
 
           {/* Contraseña */}
@@ -151,10 +149,10 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
               value={password}
               onChange={(e) => {
                 setPassword(e.target.value);
-                validarCampo("password", e.target.value);
+                validarCampo('password', e.target.value);
               }}
               className={`border rounded-lg px-3 py-2 w-full text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none pr-10 ${
-                errors.password ? "border-red-500" : ""
+                errors.password ? 'border-red-500' : ''
               }`}
             />
             <button
@@ -164,9 +162,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
             >
               {mostrarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
-            {errors.password && (
-              <p className="text-red-600 text-xs mt-1">{errors.password}</p>
-            )}
+            {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password}</p>}
           </div>
 
           {/* Repetir contraseña */}
@@ -177,25 +173,21 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
               value={repeatPassword}
               onChange={(e) => {
                 setRepeatPassword(e.target.value);
-                validarCampo("repeatPassword", e.target.value);
+                validarCampo('repeatPassword', e.target.value);
               }}
               className={`border rounded-lg px-3 py-2 w-full text-gray-900 focus:ring-2 focus:ring-blue-500 outline-none pr-10 ${
-                errors.repeatPassword ? "border-red-500" : ""
+                errors.repeatPassword ? 'border-red-500' : ''
               }`}
             />
             <button
               type="button"
-              onClick={() =>
-                setMostrarRepeatPassword(!mostrarRepeatPassword)
-              }
+              onClick={() => setMostrarRepeatPassword(!mostrarRepeatPassword)}
               className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
             >
               {mostrarRepeatPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
             {errors.repeatPassword && (
-              <p className="text-red-600 text-xs mt-1">
-                {errors.repeatPassword}
-              </p>
+              <p className="text-red-600 text-xs mt-1">{errors.repeatPassword}</p>
             )}
           </div>
 

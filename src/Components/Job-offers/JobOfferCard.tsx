@@ -4,20 +4,29 @@
 import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { MapPin, Star, MessageCircle, ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-react';
+import {
+  MapPin,
+  Star,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Trash2,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useImageCarousel } from '@/app/redux/features/jobOffers/useImageCarousel';
 import type { JobOfferData } from '@/types/jobOffers';
+import { SearchHighlight } from '../SearchHighlight';
 
 interface JobOfferCardProps {
   offer: JobOfferData;
-  viewMode?: 'grid' | 'list'| string;
+  viewMode?: 'grid' | 'list' | string;
   onClick?: (offer: JobOfferData) => void;
   onEdit?: (offer: JobOfferData) => void;
   onDelete?: (id: string) => void;
   className?: string;
+  searchQuery?: string;
   readOnly?: boolean;
-  
 }
 
 export const JobOfferCard: React.FC<JobOfferCardProps> = ({
@@ -27,6 +36,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   onEdit,
   onDelete,
   className = '',
+  searchQuery = '',
   readOnly = false,
 }) => {
   const router = useRouter();
@@ -45,12 +55,25 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
   };
 
   const images = React.useMemo(() => {
-    const raw: (string | null)[] = [];
-    if (offer.allImages && Array.isArray(offer.allImages) && offer.allImages.length > 0) raw.push(...offer.allImages);
-    else if (offer.photos && Array.isArray(offer.photos) && offer.photos.length > 0) raw.push(...offer.photos);
-    else if (offer.imagenUrl) raw.push(offer.imagenUrl as string);
+    const imageArray: any[] = [];
 
-    return raw.map(normalizeSrc).filter((v): v is string => !!v);
+    // Recopilar imágenes de diferentes fuentes
+    if (offer.allImages && Array.isArray(offer.allImages) && offer.allImages.length > 0) {
+      imageArray.push(...offer.allImages);
+    } else if (offer.photos && Array.isArray(offer.photos) && offer.photos.length > 0) {
+      imageArray.push(...offer.photos);
+    } else if (offer.imagenUrl) {
+      imageArray.push(offer.imagenUrl);
+    }
+
+    // Normalizar y filtrar imágenes válidas
+    return imageArray
+      .map(normalizeSrc)
+      .filter((img): img is string => {
+        if (!img || typeof img !== 'string') return false;
+        const trimmed = img.trim();
+        return trimmed.length > 0;
+      });
   }, [offer]);
 
   const {
@@ -69,7 +92,13 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    const cleanPhone = (offer.contactPhone ?? (offer as any).whatsapp ?? '').toString().replace(/\D/g, '');
+    const cleanPhone = (
+      offer.contactPhone ??
+      (offer as any).whatsapp ??
+      ''
+    )
+      .toString()
+      .replace(/\D/g, '');
     if (cleanPhone) window.open(`https://wa.me/${cleanPhone}`, '_blank');
   };
 
@@ -86,31 +115,45 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
   const isDashboardMode = !!onEdit || !!onDelete;
   const totalImages = images.length;
-  console.log("AAAAAAAAAQAAAAAAAAA")
-  console.log(offer);
-  console.log(offer.category);
 
   // Render Image Carousel
   const renderImageCarousel = () => (
     <div
-      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${viewMode === 'grid' ? 'h-48 w-full' : 'w-64 h-48 flex-shrink-0'}`}
+      className={`relative overflow-hidden transition-transform ${isTouching ? 'scale-[0.98]' : 'scale-100'} ${
+        viewMode === 'grid' ? 'h-48 w-full' : 'w-64 h-full flex-shrink-0'
+      }`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
       onClick={handleCardClick}
     >
       {images.length > 0 ? (
-        images.map((img, idx) => (
-          <Image
-            key={idx}
-            src={img ?? '/placeholder.svg'}
-            alt={offer.title ?? 'Oferta'}
-            fill
-            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
-            className={`object-cover transition-all duration-500 ${idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'}`}
-            priority={idx === 0}
-          />
-        ))
+        images.map((img, idx) => {
+          // Validación adicional en render
+          if (!img || typeof img !== 'string') return null;
+
+          return (
+            <Image
+              key={idx}
+              src={img}
+              alt={offer.title ?? 'Oferta'}
+              fill
+              sizes={
+                viewMode === 'grid'
+                  ? '(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw'
+                  : '16rem'
+              }
+              className={`object-cover transition-all duration-500 ${
+                idx === currentIndex ? 'opacity-100 scale-100' : 'opacity-0 scale-110'
+              }`}
+              style={{ position: 'absolute' }}
+              priority={idx === 0}
+              onError={(e) => {
+                console.warn(`Failed to load image: ${img}`);
+              }}
+            />
+          );
+        })
       ) : (
         <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
           <span className="text-sm">No image</span>
@@ -144,7 +187,9 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
           {Array.from({ length: totalImages }).map((_, idx) => (
             <div
               key={idx}
-              className={`h-1 rounded-full transition-all duration-300 ${idx === currentIndex ? 'w-6 bg-white shadow-lg' : 'w-1.5 bg-white/60'}`}
+              className={`h-1 rounded-full transition-all duration-300 ${
+                idx === currentIndex ? 'w-6 bg-white shadow-lg' : 'w-1.5 bg-white/60'
+              }`}
             />
           ))}
         </div>
@@ -175,10 +220,10 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
 
       <div className={viewMode === 'list' ? 'mb-2 pr-32' : ''}>
         <h3 className="text-base font-semibold text-gray-900 truncate group-hover:text-primary transition-colors">
-          {offer.title}
+          <SearchHighlight text={offer.title} searchQuery={searchQuery} />
         </h3>
         <p className="mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed">
-          {offer.description}
+          <SearchHighlight text={offer.description} searchQuery={searchQuery} />
         </p>
       </div>
 
@@ -186,7 +231,6 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
             {offer.category ? tCat(offer.category) : offer.category ?? ''}
-            
           </span>
           {offer.tags && offer.tags.length > 0 && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
@@ -201,14 +245,17 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     </div>
   );
 
-  // Render Footer (Fixer Info or Actions)
+  // Render Footer
   const renderFooter = () => {
     if (isDashboardMode && !readOnly) {
       return (
         <div className="border-t border-gray-100 p-3 flex items-center justify-end gap-2 bg-gray-50/50">
           {onEdit && (
             <button
-              onClick={(e) => { e.stopPropagation(); onEdit(offer); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(offer);
+              }}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
               title="Editar"
             >
@@ -217,7 +264,10 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
           )}
           {onDelete && (
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete(offer._id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(offer._id);
+              }}
               className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
               title="Eliminar"
             >
@@ -286,23 +336,37 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
     );
   };
 
+  // Return
   return (
     <div
       ref={elementRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary hover:-translate-y-1 ${viewMode === 'list' ? 'flex flex-row' : ''
-        } ${className}`}
+      className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary hover:-translate-y-1 ${
+        viewMode === 'list' ? 'flex flex-row' : ''
+      } ${className}`}
     >
-      <div onClick={handleCardClick} className="cursor-pointer contents">
-        {renderImageCarousel()}
-        {renderContent()}
-      </div>
-      {viewMode === 'grid' && renderFooter()}
-      {viewMode === 'list' && (
-        <div className="flex flex-col justify-end p-4 border-l border-gray-100">
+      {viewMode === 'grid' ? (
+        <>
+          <div onClick={handleCardClick} className="cursor-pointer contents">
+            {renderImageCarousel()}
+            {renderContent()}
+          </div>
           {renderFooter()}
-        </div>
+        </>
+      ) : (
+        <>
+          <div onClick={handleCardClick} className="cursor-pointer">
+            {renderImageCarousel()}
+          </div>
+          {/* Contenedor vertical para contenido + footer */}
+          <div className="flex flex-col flex-1">
+            <div onClick={handleCardClick} className="cursor-pointer flex-1">
+              {renderContent()}
+            </div>
+            {renderFooter()}
+          </div>
+        </>
       )}
     </div>
   );

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
@@ -16,7 +16,7 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
   const [loading, setLoading] = useState(false);
 
   const handleVincularGitHub = () => {
-    const token = localStorage.getItem("servineo_token");
+    const token = localStorage.getItem('servineo_token');
     if (!token) {
       toast.error(t("errors.noSession"));
       return;
@@ -34,7 +34,7 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
       (msg) => {
         toast.error(msg);
         setLoading(false);
-      }
+      },
     );
   };
 

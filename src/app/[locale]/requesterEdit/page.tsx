@@ -33,13 +33,13 @@ export default function ConfiguracionPage() {
   const { user } = useAuth();
   const router = useRouter();
   //const [menuOpen, setMenuOpen] = useState(false);
-  
+
   const [seccionActiva, setSeccionActiva] = useState('inicio');
 
   // 🆕 Estados para HU5 (Editar Perfil)
   //const [profileData, setProfileData] = useState<RequesterDataState>(INITIAL_DATA)
-  const [profileLoading, setProfileLoading] = useState(false)
-  const [profileError, setProfileError] = useState<string | null>(null)
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [profileError, setProfileError] = useState<string | null>(null);
 
 
   type SafeUser = { name?: string; email?: string; url_photo?: string };
@@ -55,10 +55,10 @@ export default function ConfiguracionPage() {
 
 
   const loadProfileData = useCallback(async () => {
-    if (!user) return
+    if (!user) return;
 
-    setProfileLoading(true)
-    setProfileError(null)
+    setProfileLoading(true);
+    setProfileError(null);
 
     try {
 
@@ -67,28 +67,28 @@ export default function ConfiguracionPage() {
       setProfileError(message)
       //setProfileData(INITIAL_DATA)
     } finally {
-      setProfileLoading(false)
+      setProfileLoading(false);
     }
   }, [user, t])
 
   //Cargar datos cuando se activa la sección de perfil
   useEffect(() => {
     if (seccionActiva === 'perfil') {
-      loadProfileData()
+      loadProfileData();
     }
-  }, [seccionActiva, loadProfileData])
+  }, [seccionActiva, loadProfileData]);
 
   //Callbacks para HU8 (Cambiar Contraseña)
   const handlePasswordCancel = () => {
-    setSeccionActiva('inicio') // Volver al inicio
-  }
+    setSeccionActiva('inicio'); // Volver al inicio
+  };
 
   const handlePasswordSaved = () => {
     //setPasswordChanging(false)
     setTimeout(() => {
-      setSeccionActiva('inicio') // Volver al inicio después de cambiar
-    }, 1500)
-  }
+      setSeccionActiva('inicio'); // Volver al inicio después de cambiar
+    }, 1500);
+  };
 
   // Función para renderizar el contenido según la sección
   const renderContenido = () => {
@@ -99,7 +99,7 @@ export default function ConfiguracionPage() {
             <div className="flex items-center justify-center h-64">
               <p className="text-blue-600 text-lg animate-pulse">{t('loading.profile')}</p>
             </div>
-          )
+          );
         }
 
         if (profileError) {
@@ -115,7 +115,7 @@ export default function ConfiguracionPage() {
                 {t('buttons.retry')}
               </button>
             </div>
-          )
+          );
         }
 
         return (
@@ -136,10 +136,7 @@ export default function ConfiguracionPage() {
               {t('sections.changePassword')}
             </h2>
             <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
-              <ChangePasswordForm 
-                onCancel={handlePasswordCancel}
-                onSaved={handlePasswordSaved}
-              />
+              <ChangePasswordForm onCancel={handlePasswordCancel} onSaved={handlePasswordSaved} />
             </div>
           </div>
         );
@@ -189,7 +186,7 @@ export default function ConfiguracionPage() {
         );
 
       case 'cuentas':
-        return <AccountLoginSettings token={localStorage.getItem("servineo_token") ?? ""} />;
+        return <AccountLoginSettings token={localStorage.getItem('servineo_token') ?? ''} />;
 
       default: // 'inicio'
         return (
@@ -228,14 +225,17 @@ export default function ConfiguracionPage() {
   return (
     <div className="font-sans flex flex-col min-h-screen bg-gray-50 text-gray-800">
       {/* Header - igual */}
-      
+
       <div className="flex flex-1">
         {/* Sidebar actualizado */}
         <aside className="w-64 bg-white p-6 flex flex-col justify-between relative shadow-md">
           <div>
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-                <button onClick={() => router.back()} className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600">
+                <button
+                  onClick={() => router.back()}
+                  className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-50 hover:bg-blue-100 text-blue-600"
+                >
                   <ArrowLeft className="w-4 h-4" />
                 </button>
                 {t('title')}

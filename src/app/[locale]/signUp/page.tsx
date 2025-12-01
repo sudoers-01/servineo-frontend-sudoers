@@ -12,21 +12,20 @@ export default function SignUp() {
   const t = useTranslations('SignUpRegister');
   const [notification, setNotification] = useState({
     isOpen: false,
-    type: "info" as "success" | "error" | "info" | "warning",
-    title: "",
-    message: "",
+    type: 'info' as 'success' | 'error' | 'info' | 'warning',
+    title: '',
+    message: '',
   });
 
   const handleNotify = (notif: {
-    type: "success" | "error" | "info" | "warning";
+    type: 'success' | 'error' | 'info' | 'warning';
     title: string;
     message: string;
   }) => {
     setNotification({ isOpen: true, ...notif });
   };
 
-  const handleCloseNotification = () =>
-    setNotification((prev) => ({ ...prev, isOpen: false }));
+  const handleCloseNotification = () => setNotification((prev) => ({ ...prev, isOpen: false }));
 
   return (
     <>

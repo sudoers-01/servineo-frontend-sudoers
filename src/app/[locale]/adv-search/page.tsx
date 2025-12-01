@@ -267,7 +267,7 @@ function AdvancedSearchPage() {
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
-                          checked={selectedCity === city.dbValue}
+                          checked={selectedCity.includes(city.dbValue)}
                           onChange={() => handleCityChange(city.dbValue)}
                         />
                         <span className="truncate">{city.label}</span>
@@ -427,7 +427,7 @@ function AdvancedSearchPage() {
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedRanges([]);
-                  setSelectedCity('');
+                  setSelectedCity([]);
                   setSelectedJobs([]);
                   setSelectedCategories([]);
                   setSelectedPriceRanges([]);

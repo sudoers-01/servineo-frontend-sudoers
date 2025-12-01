@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Fixer } from '@/app/lib/mock-data';
 import FixerGraficCard from '@/Components/fixer/Fixer-grafic-card';
-import type { JobOffer as JobOfferType } from '@/types/job-offer';
+
 
 // Si el tipo Fixer viene de otro lado, ajusta la importación anterior.
 // interface FixerProfileContentProps { fixer: Fixer; }

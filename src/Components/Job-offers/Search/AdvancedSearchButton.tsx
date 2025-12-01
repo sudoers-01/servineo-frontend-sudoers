@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
+import { ZoomIn } from 'lucide-react';
 import { Button } from '@/Components/ui/button';
 import { useTranslations } from 'next-intl';
 
@@ -12,8 +12,6 @@ interface AdvancedSearchButtonProps {
 }
 
 export function AdvancedSearchButton({
-  src = '/img/advSearch.jpg',
-  alt,
 }: AdvancedSearchButtonProps) {
   const t = useTranslations('search');
   const router = useRouter();
@@ -42,13 +40,7 @@ export function AdvancedSearchButton({
       "
     >
       <div className="flex-shrink-0">
-        <Image
-          src={src}
-          alt={alt ?? t('advancedSearch')}
-          width={32}
-          height={32}
-          className="rounded-full object-cover"
-        />
+        <ZoomIn className="w-8 h-8" strokeWidth={2.8} />
       </div>
     </Button>
   );

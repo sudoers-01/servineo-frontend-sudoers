@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { FaDiscord } from "react-icons/fa";
@@ -15,7 +15,7 @@ export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
   const [loading, setLoading] = useState(false);
 
   const handleVincularDiscord = () => {
-    const token = localStorage.getItem("servineo_token");
+    const token = localStorage.getItem('servineo_token');
     if (!token) {
       return;
     }

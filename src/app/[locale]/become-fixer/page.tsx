@@ -1,23 +1,33 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import FixerRegisterForm from '@/Components/fixer/Fixer-register-form';
 import { FixerEnableWizard } from '@/Components/fixer/Filter-eneable-wizard';
 import { Navbar } from '@/Components/Shared/Navbar';
 import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
+import { RootState } from '@/app/redux/store';
 import { IUser } from '@/types/user';
+import { useRouter } from 'next/navigation';
 
 export default function BecomeFixerPage() {
-  const t = useTranslations?.('becomeFixer');
+  const t = useTranslations('becomeFixer');
+  const router = useRouter();
   const { user: reduxUser } = useAppSelector((state) => state.user);
   const [requester, setRequester] = useState<IUser | null>(null);
 
-  // Valores por defecto (si hay user en redux, los usamos; si no, usamos valores por defecto)
+  // Redirigir si el usuario ya es fixer
+  useEffect(() => {
+    if (reduxUser?.role === 'fixer') {
+      router.push('/fixer/dashboard');
+    }
+  }, [reduxUser, router]);
+
+  // Valores por defecto del formulario
   const defaultValues = {
-    name: reduxUser?.name || 'Freddy Amin Zapata',
-    email: reduxUser?.email || 'zapata@example.com',
-    phone: reduxUser?.telefono || '+591 68546043',
+    name: reduxUser?.name || '',
+    email: reduxUser?.email || '',
+    phone: reduxUser?.telefono || '',
   };
 
   return (
@@ -41,23 +51,17 @@ export default function BecomeFixerPage() {
               <FixerRegisterForm
                 defaultValues={defaultValues}
                 onSubmit={(data) => {
-                  const { name, email, phone } = data;
-                  // Use redux ID if available, else fallback id
-                  const _id = reduxUser?._id  ?? 'req-guest';
-                  const url_photo = reduxUser?.url_photo ?? 'https://picsum.photos/80';
-
-                  // Construimos el objeto IUser mínimo (ajusta campos si tu IUser requiere otros)
-                  const user: IUser = {
-                    _id,
-                    name,
-                    email,
-                    telefono: phone,
-                    url_photo,
+                  // Construir el objeto IUser con los datos del formulario y redux
+                  const finalUser: IUser = {
+                    _id: reduxUser?._id || 'req-guest',
+                    name: data.name,
+                    email: data.email,
+                    telefono: data.phone,
+                    url_photo: reduxUser?.url_photo || 'https://picsum.photos/80',
                     role: 'requester',
-                    // si el IUser tiene campos obligatorios adicionales, completa con valores por defecto o extrae desde reduxUser
                   } as IUser;
 
-                  setRequester(user);
+                  setRequester(finalUser);
                 }}
                 submitButtonText={t('button1')}
               />
