@@ -130,7 +130,6 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
                   <JobOfferCard
                     key={offer?.id ?? offer?._id ?? `fixer-offer-${i}`}
                     offer={convertToJobOfferData(offer)}
-                    viewMode="grid"
                     onClick={() => handleOfferClick(convertToJobOfferData(offer))}
                   />
                 );
