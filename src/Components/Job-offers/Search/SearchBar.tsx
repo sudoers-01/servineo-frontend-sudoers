@@ -9,13 +9,15 @@ import { SearchButton } from './SearchButton';
 import { AdvancedSearchButton } from './AdvancedSearchButton';
 import { FilterButton } from '../Filter/FilterButton';
 import { validateSearch } from '@/app/lib/validations/search.validator';
-import { useAppSelector } from '@/app/redux/hooks';
+import { useAppSelector, useAppDispatch } from '@/app/redux/hooks';
 import { useTranslations } from 'next-intl';
 import { useSearchHistory } from '@/app/redux/features/searchHistory/useSearchHistory';
 import { useSearchSuggestions } from '@/app/redux/features/searchHistory/useSearchSuggestions';
 import { useSearchKeyboard } from '@/app/redux/features/searchHistory/useSearchKeyboard';
 import { useSearchTouch } from '@/app/redux/features/searchHistory/useSearchTouch';
 import { SearchDropdown } from '@/Components/Shared/SearchDropdown';
+import { useJobTypeAutoMatch } from '@/lib/useJobTypeAutoMatch';
+import { setFilters } from '@/app/redux/slice/jobOfert';
 
 interface SearchBarProps {
   onSearch: (query: string) => void;
@@ -24,8 +26,11 @@ interface SearchBarProps {
 
 export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const t = useTranslations('search');
+  const dispatch = useAppDispatch();
+  const { findMatchingJobType, findMatchingCity } = useJobTypeAutoMatch();
 
   const searchFromStore = useAppSelector((state) => state.jobOfert.search);
+  const filtersFromStore = useAppSelector((state) => state.jobOfert.filters);
 
   const [value, setValue] = React.useState('');
   const [error, setError] = React.useState<string | undefined>();
@@ -51,6 +56,13 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     maxResults: 6,
   });
 
+  // Restaurar desde Redux/localStorage al cargar
+  React.useEffect(() => {
+    if (searchFromStore) {
+      setValue(searchFromStore);
+    }
+  }, [searchFromStore]);
+
   // Sincronizar con Redux
   React.useEffect(() => {
     if (searchFromStore !== prevSearchFromStore.current && searchFromStore !== value) {
@@ -73,10 +85,54 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
     setValue('');
     setError(undefined);
     onSearch('');
+    // Limpia el automarcado del filtro cuando se borra la búsqueda
+    if (filtersFromStore.isAutoSelectedCategory || filtersFromStore.isAutoSelectedCity) {
+      dispatch(setFilters({
+        ...filtersFromStore,
+        category: filtersFromStore.isAutoSelectedCategory ? [] : filtersFromStore.category,
+        city: filtersFromStore.isAutoSelectedCity ? [] : filtersFromStore.city,
+        isAutoSelectedCategory: false,
+        isAutoSelectedCity: false,
+      }));
+    }
+  };
+
+  /**
+   * Auto-detecta si la búsqueda coincide con un tipo de trabajo o ciudad
+   * y auto-selecciona los filtros correspondientes
+   */
+  const applyAutoFilterIfMatch = (searchQuery: string) => {
+    const matchedJobType = findMatchingJobType(searchQuery);
+    const matchedCity = findMatchingCity(searchQuery);
+    
+    const newFilters = { ...filtersFromStore };
+
+    if (matchedJobType) {
+      newFilters.category = [matchedJobType];
+      newFilters.isAutoSelectedCategory = true;
+    } else {
+      if (filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.length === 1 && filtersFromStore.range.length === 0 && filtersFromStore.city.length === 0) {
+        newFilters.category = [];
+        newFilters.isAutoSelectedCategory = false;
+      }
+    }
+
+    if (matchedCity) {
+      newFilters.city = [matchedCity];
+      newFilters.isAutoSelectedCity = true;
+    } else {
+      if (filtersFromStore.isAutoSelectedCity && filtersFromStore.city.length > 0) {
+        newFilters.city = [];
+        newFilters.isAutoSelectedCity = false;
+      }
+    }
+
+    dispatch(setFilters(newFilters));
   };
 
   const selectItem = (item: string) => {
     setValue(item);
+    applyAutoFilterIfMatch(item);
     onSearch(item);
     addToHistory(item);
     setIsOpen(false);
@@ -99,6 +155,7 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
       return;
     }
     const query = data!;
+    applyAutoFilterIfMatch(query);
     onSearch(query);
     addToHistory(query);
     setIsOpen(false);

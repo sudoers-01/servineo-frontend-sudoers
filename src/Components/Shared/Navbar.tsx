@@ -56,9 +56,9 @@ export function Navbar() {
             <Link
               href={`/${locale}/become-fixer`}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
-                isActive("/fixers-by-job")
-                  ? "bg-primary text-white shadow-lg shadow-blue-500/30"
-                  : "text-blue-900 hover:bg-blue-50"
+                isActive('/fixers-by-job')
+                  ? 'bg-primary text-white shadow-lg shadow-blue-500/30'
+                  : 'text-blue-900 hover:bg-blue-50'
               }`}
             >
               <ClipboardList className="w-4 h-4" />

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -20,6 +19,7 @@ import {
   setSortBy,
   setRegistrosPorPagina,
   resetPagination,
+  setRating,
   setPaginaActual,
   resetFilters,
   enablePersistence,
@@ -48,9 +48,13 @@ export default function JobOffersPage() {
 
   const { offers, total, isLoading } = useJobOffers();
 
-  const { sortBy, search, paginaActual, registrosPorPagina, error: reduxError } = useAppSelector(
-    (state) => state.jobOfert,
-  );
+  const {
+    sortBy,
+    search,
+    paginaActual,
+    registrosPorPagina,
+    error: reduxError,
+  } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
 
@@ -151,7 +155,7 @@ export default function JobOffersPage() {
 
     const hasFilters =
       appliedFilters.range.length > 0 ||
-      appliedFilters.city !== '' ||
+      (Array.isArray(appliedFilters.city) ? appliedFilters.city.length > 0 : !!appliedFilters.city) ||
       appliedFilters.category.length > 0;
 
     if (hasFilters && !hasActiveFilters.current) {
@@ -216,8 +220,9 @@ export default function JobOffersPage() {
 
       <div
         ref={stickyRef}
-        className={`w-full mx-auto px-3 sm:px-4 md:px-6 lg:max-w-5xl sticky top-0 bg-white py-3 shadow-md ${isDrawerOpen ? 'z-10' : 'z-50'
-          }`}
+        className={`w-full mx-auto px-3 sm:px-4 md:px-6 lg:max-w-5xl sticky top-0 bg-white py-3 shadow-md ${
+          isDrawerOpen ? 'z-10' : 'z-50'
+        }`}
       >
         <div className="flex gap-2">
           <FilterButton onClick={toggleDrawer} />
@@ -285,6 +290,24 @@ export default function JobOffersPage() {
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           onFiltersApply={handleFiltersApply}
+          onRatingChange={(rating) => {
+            // rating is either integer 1..5 (from star filter) or null
+            scrollRestoredRef.current = true;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+
+            const hasRatingFilter = rating != null;
+            if (hasRatingFilter && !hasActiveFilters.current) {
+              pageBeforeFilter.current = paginaActual;
+              hasActiveFilters.current = true;
+            }
+
+            if (!hasRatingFilter) {
+              hasActiveFilters.current = false;
+            }
+
+            dispatch(setRating(rating));
+            dispatch(resetPagination());
+          }}
           onReset={handleResetFilters}
         />
 
@@ -302,7 +325,7 @@ export default function JobOffersPage() {
 
         <div className="w-full max-w-5xl mx-auto">
           {!isLoading && Array.isArray(offers) && offers.length > 0 ? (
-            <JobOffersView offers={offers} viewMode={viewMode} onOfferClick={handleCardClick} />
+            <JobOffersView offers={offers} viewMode={viewMode} onOfferClick={handleCardClick} search={search} />
           ) : !isLoading ? (
             <NoResultsMessage search={search} />
           ) : null}

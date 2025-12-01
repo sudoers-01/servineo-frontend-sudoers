@@ -1,22 +1,21 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { Star } from 'lucide-react';
 import { roboto } from '@/app/fonts';
 import { validateFilters } from '@/app/lib/validations/filter.validator';
 import { useTranslations } from 'next-intl';
-import { useAppSelector } from '@/app/redux/hooks';
+import { useAppSelector, useAppDispatch } from '@/app/redux/hooks';
 import { DB_VALUES } from '@/app/redux/contants';
-
-interface FilterState {
-  range: string[];
-  city: string;
-  category: string[];
-}
+import type { FilterState } from '@/app/redux/features/jobOffers/types';
+import { setRating } from '@/app/redux/slice/jobOfert';
+import { useGetFilterCountsQuery } from '@/app/redux/services/jobOffersApi';
 
 interface FilterDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   onFiltersApply?: (filters: FilterState) => void;
+  onRatingChange?: (rating: number | null) => void;
   onReset?: () => void;
 }
 
@@ -27,6 +26,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     fixer: false,
     ciudad: false,
     trabajo: false,
+    rating: false,
   });
 
   const t = useTranslations('filtersPanel');
@@ -35,14 +35,36 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const tJob = useTranslations('advancedSearch.jobType');
 
   const [selectedRanges, setSelectedRanges] = useState<string[]>(filtersFromStore.range || []);
-  const [selectedCity, setSelectedCity] = useState<string>(filtersFromStore.city || '');
+  const [selectedCities, setSelectedCities] = useState<string[]>(filtersFromStore.city || []);
   const [selectedJobs, setSelectedJobs] = useState<string[]>(filtersFromStore.category || []);
+  const [selectedRating, setSelectedRating] = useState<number | null>(null);
+  
+  const dispatch = useAppDispatch();
+  const storeRating = useAppSelector((s) => s.jobOfert.rating);
+
+  // 🔧 FIX: Enviar minRating y maxRating como rango exacto
+  const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
+    range: selectedRanges.length > 0 ? selectedRanges : undefined,
+    city: selectedCities.length > 0 ? selectedCities[0] : undefined,
+    category: selectedJobs.length > 0 ? selectedJobs : undefined,
+    minRating: selectedRating ?? undefined,
+    // Para 5 estrellas, no enviar maxRating (buscar >= 5.0)
+    // Para 1-4 estrellas, limitar al rango (ej: 4.0-4.99)
+    maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
+  }, {
+    skip: !isOpen,
+  });
 
   useEffect(() => {
     setSelectedRanges(filtersFromStore.range || []);
-    setSelectedCity(filtersFromStore.city || '');
+    setSelectedCities(filtersFromStore.city || []);
     setSelectedJobs(filtersFromStore.category || []);
-  }, [filtersFromStore]);
+    setSelectedRating(storeRating ?? null);
+  }, [filtersFromStore, storeRating]);
+
+  useEffect(() => {
+    setSelectedRating(storeRating ?? null);
+  }, [storeRating]);
 
   useEffect(() => {
     if (isOpen) {
@@ -62,58 +84,103 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }));
   };
 
+  const handleRatingClick = (star: number) => {
+    const newRating = selectedRating === star ? null : star;
+    setSelectedRating(newRating);
+    dispatch(setRating(newRating));
+    applyFilters(selectedRanges, selectedCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
+  };
+
   const handleRangeChange = (dbValue: string) => {
     const newRanges = selectedRanges.includes(dbValue)
       ? selectedRanges.filter((r) => r !== dbValue)
       : [...selectedRanges, dbValue];
 
     setSelectedRanges(newRanges);
-    applyFilters(newRanges, selectedCity, selectedJobs);
+    applyFilters(newRanges, selectedCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
   };
 
   const handleCityChange = (dbValue: string) => {
-    const newCity = selectedCity === dbValue ? '' : dbValue;
-    setSelectedCity(newCity);
-    applyFilters(selectedRanges, newCity, selectedJobs);
+    const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(dbValue);
+    if (isAutoMarked && selectedCities.includes(dbValue)) {
+      return;
+    }
+
+    let newCities: string[];
+    if (filtersFromStore.isAutoSelectedCity) {
+      newCities = selectedCities.includes(dbValue) ? [] : [dbValue];
+    } else {
+      newCities = selectedCities.includes(dbValue)
+        ? selectedCities.filter((c) => c !== dbValue)
+        : [...selectedCities, dbValue];
+    }
+
+    setSelectedCities(newCities);
+    applyFilters(selectedRanges, newCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, false);
   };
 
   const handleJobChange = (dbValue: string) => {
+    const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(dbValue);
+    if (isAutoMarked && selectedJobs.includes(dbValue)) {
+      return;
+    }
+
     const newJobs = selectedJobs.includes(dbValue)
       ? selectedJobs.filter((j) => j !== dbValue)
       : [...selectedJobs, dbValue];
 
     setSelectedJobs(newJobs);
-    applyFilters(selectedRanges, selectedCity, newJobs);
+    applyFilters(selectedRanges, selectedCities, newJobs, false, filtersFromStore.isAutoSelectedCity);
   };
 
-  const applyFilters = (ranges: string[], city: string, jobs: string[]) => {
-    const filtersToValidate = { range: ranges, city, category: jobs };
+  const applyFilters = (ranges: string[], cities: string[], jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
+    const filtersToValidate = { range: ranges, city: cities, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
     if (!isValid || !data) return;
 
+    const filterState: FilterState = {
+      range: data.range ?? [],
+      city: data.city ?? [],
+      category: data.category ?? [],
+      isAutoSelectedCategory: isAutoCat,
+      isAutoSelectedCity: isAutoCity,
+    };
+
     if (onFiltersApply) {
-      onFiltersApply({
-        ...data,
-        city: data.city || '',
-      });
+      onFiltersApply(filterState);
     }
   };
 
   const handleReset = () => {
     setSelectedRanges([]);
-    setSelectedCity('');
+    setSelectedCities([]);
     setSelectedJobs([]);
+    setSelectedRating(null);
+    dispatch(setRating(null));
 
     if (onReset) {
       onReset();
     } else if (onFiltersApply) {
       onFiltersApply({
         range: [],
-        city: '',
+        city: [],
         category: [],
-      });
+        isAutoSelectedCategory: false,
+        isAutoSelectedCity: false,
+      } as FilterState);
     }
+  };
+
+  const getRangeCount = (dbValue: string): number => {
+    if (!backendCounts?.ranges) return 0;
+    return backendCounts.ranges[dbValue] || 0;
+  };
+
+  const getRatingCount = (starNumber: number): number => {
+    if (!backendCounts?.ratings) return 0;
+    const key = `${starNumber}-${starNumber + 1}`;
+    return backendCounts.ratings[key] || 0;
   };
 
   const nameRanges = [
@@ -131,6 +198,8 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       { dbValue: DB_VALUES.ranges[8], label: tName('ranges.xz') },
     ],
   ];
+
+  const nameOptions = nameRanges.flat();
 
   const cities = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
@@ -150,13 +219,13 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     <>
       <div
         className={`fixed inset-0 bg-black duration-300 z-40 ${
-          isOpen ? 'opacity-50' : 'opacity-0 pointer-events-none'
+          isOpen ? 'opacity-0' : 'opacity-0 pointer-events-none'
         }`}
         onClick={onClose}
       />
 
       <div
-        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-[75%] sm:w-63 bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
+        className={`${roboto.variable} font-sans fixed top-0 left-0 h-full w-full max-w-[265px] md:w-63 md:max-w-none bg-white shadow-xl z-80 transform transition-transform duration-300 ease-in-out overflow-hidden ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -188,16 +257,6 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               >
                 {t('resetButton.desktop')}
               </button>
-              <button
-                onClick={onClose}
-                className="sm:hidden text-gray-500 hover:text-gray-700 p-2"
-                aria-label="Cerrar filtros"
-              >
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                  <line x1="18" y1="6" x2="6" y2="18" strokeWidth="2" strokeLinecap="round" />
-                  <line x1="6" y1="6" x2="18" y2="18" strokeWidth="2" strokeLinecap="round" />
-                </svg>
-              </button>
             </div>
           </div>
 
@@ -211,26 +270,37 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                 <span className="truncate">{t('fixerName')}</span>
               </div>
               {openSections.fixer && (
-                <div className="bg-white border border-gray-200 p-4 rounded">
-                  <div className="flex gap-2">
-                    {nameRanges.map((column, colIndex) => (
-                      <div key={colIndex} className="flex flex-col gap-2 flex-1">
-                        {column.map((range) => (
-                          <label
-                            key={range.dbValue}
-                            className="flex items-center gap-2 text-xs cursor-pointer hover:text-[#2B31E0] transition-colors"
-                          >
+                <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
+                  <div className="flex flex-col gap-2">
+                    {nameOptions.map((range) => {
+                      const count = getRangeCount(range.dbValue);
+                      // Do not disable ranges based on count. Keep them selectable even if count === 0.
+                      const disabled = false;
+                      return (
+                        <label
+                          key={range.dbValue}
+                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
+                            'cursor-pointer hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <div className={`flex items-center gap-2`}>
                             <input
                               type="checkbox"
                               className="w-4 h-4 cursor-pointer flex-shrink-0"
                               checked={selectedRanges.includes(range.dbValue)}
                               onChange={() => handleRangeChange(range.dbValue)}
+                              disabled={disabled}
                             />
                             <span className="truncate">{range.label}</span>
-                          </label>
-                        ))}
-                      </div>
-                    ))}
+                          </div>
+                          {loadingCounts ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          )}
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -247,20 +317,40 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.ciudad && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {cities.map((city) => (
-                      <label
-                        key={city.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedCity === city.dbValue}
-                          onChange={() => handleCityChange(city.dbValue)}
-                        />
-                        <span className="truncate">{city.label}</span>
-                      </label>
-                    ))}
+                    {cities.map((city) => {
+                      const isSelected = selectedCities.includes(city.dbValue);
+                      const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(city.dbValue);
+                      const count = backendCounts?.cities?.[city.dbValue] ?? 0;
+                      // Only disable if auto-selected logic requires it; do not disable when count === 0
+                      const disabled = filtersFromStore.isAutoSelectedCity && !isAutoMarked;
+
+                      return (
+                        <label
+                          key={city.dbValue}
+                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
+                            disabled
+                              ? 'opacity-50 cursor-not-allowed text-gray-400 pointer-events-none'
+                              : 'cursor-pointer hover:text-[#2B31E0]'
+                          }`}
+                        >
+                            <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                              <input
+                                type="checkbox"
+                                className="w-4 h-4 flex-shrink-0 cursor-pointer"
+                                checked={isSelected}
+                                onChange={() => handleCityChange(city.dbValue)}
+                                disabled={disabled}
+                              />
+                              <span className="truncate">{city.label}</span>
+                            </div>
+                          {loadingCounts ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          )}
+                        </label>
+                      );
+                    })}
                   </div>
                 </div>
               )}
@@ -277,20 +367,93 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               {openSections.trabajo && (
                 <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
                   <div className="flex flex-col gap-2">
-                    {jobTypes.map((job) => (
-                      <label
-                        key={job.dbValue}
-                        className="flex items-center gap-2 text-xs cursor-pointer min-w-0 hover:text-[#2B31E0] transition-colors"
-                      >
-                        <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0"
-                          checked={selectedJobs.includes(job.dbValue)}
-                          onChange={() => handleJobChange(job.dbValue)}
-                        />
-                        <span className="truncate">{job.label}</span>
-                      </label>
-                    ))}
+                    {jobTypes.map((job) => {
+                      const isSelected = selectedJobs.includes(job.dbValue);
+                      const isAutoMarked = filtersFromStore.isAutoSelectedCategory && filtersFromStore.category.includes(job.dbValue);
+                      const count = backendCounts?.categories?.[job.dbValue] ?? 0;
+                      // Only disable if auto-selected logic requires it; do not disable when count === 0
+                      const disabled = filtersFromStore.isAutoSelectedCategory && !isAutoMarked;
+
+                      return (
+                        <label
+                          key={job.dbValue}
+                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
+                            disabled
+                              ? 'opacity-50 cursor-not-allowed text-gray-400 pointer-events-none'
+                              : 'cursor-pointer hover:text-[#2B31E0]'
+                          }`}
+                        >
+                          <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 flex-shrink-0 cursor-pointer"
+                              checked={isSelected}
+                              onChange={() => handleJobChange(job.dbValue)}
+                              disabled={disabled}
+                            />
+                            <span className="truncate">{job.label}</span>
+                          </div>
+                          {loadingCounts ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                          )}
+                        </label>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Filtro: Calificación */}
+            <div className="mb-6">
+              <div
+                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+                onClick={() => toggleSection('rating')}
+              >
+                <span className="truncate">Calificación</span>
+              </div>
+              {openSections.rating && (
+                <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
+                  <div className="flex items-center gap-1 justify-start flex-wrap">
+                    {Array.from({ length: 5 }, (_, idx) => {
+                      const starNumber = idx + 1;
+                      const filled = (selectedRating ?? 0) >= starNumber;
+                      const count = getRatingCount(starNumber);
+                      // Keep rating buttons enabled even if count === 0
+                      const disabled = false;
+                      
+                      return (
+                        <div key={starNumber} className="flex flex-col items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={() => !disabled && handleRatingClick(starNumber)}
+                            className={`transition-transform touch-manipulation flex-shrink-0 ${
+                              disabled 
+                                ? 'opacity-50 cursor-not-allowed' 
+                                : 'hover:scale-110 active:scale-95'
+                            }`}
+                            aria-label={`${starNumber} estrellas`}
+                            disabled={disabled}
+                          >
+                            <Star
+                              className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
+                              fill={filled ? '#fbbf24' : '#ffffff'}
+                              stroke="#000000"
+                              strokeWidth={2}
+                            />
+                          </button>
+                          {loadingCounts ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>
+                              ({count})
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
