@@ -1,9 +1,8 @@
-"use client"
+'use client';
 
 import { useTranslations } from 'next-intl'
 import { Pie, PieChart, Cell, Tooltip } from "recharts"
 import { useGetJobStatisticsQuery } from '../../app/redux/services/statisticsApi';
-
 
 const COLORS = {
     completed: "blue",
@@ -14,17 +13,17 @@ const COLORS = {
 
 
 interface TooltipPayload {
-    name: string;
-    value: number;
-    payload: {
-        estado: string;
-        cantidad: number;
-    };
+  name: string;
+  value: number;
+  payload: {
+    estado: string;
+    cantidad: number;
+  };
 }
 
 interface TooltipProps {
-    active?: boolean;
-    payload?: TooltipPayload[];
+  active?: boolean;
+  payload?: TooltipPayload[];
 }
 
 const CustomTooltip = ({ active, payload }: TooltipProps) => {
@@ -68,6 +67,10 @@ export default function EstadisticasTrabajos() {
 
     const totalTrabajos = stats.total;
 
+  if (isLoading) {
+    return <div className="text-center p-8">Cargando estadísticas...</div>;
+  }
+  if (isError || !jobLogs) {
     return (
         <div className="flex flex-col font-['Roboto'] rounded-2xl p-4 bg-white">
             <div className="flex justify-center pb-2">
@@ -135,4 +138,5 @@ export default function EstadisticasTrabajos() {
             </div>
         </div>
     )
+}
 }

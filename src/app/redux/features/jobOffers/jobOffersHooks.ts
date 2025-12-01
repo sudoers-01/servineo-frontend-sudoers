@@ -19,18 +19,15 @@ import {
   enablePersistence,
   setError,
 } from '@/app/redux/slice/jobOfert';
-import {
-  selectSearchParams,
-  selectJobOffersState,
-} from './selectors';
+import { selectSearchParams, selectJobOffersState } from './selectors';
 import { parseUrlToFilters, filtersToUrlParams, parseAppliedParams } from './parsers';
 import { restoreFromStorage } from './storage';
-import { 
-  isFromAdvSearch, 
-  clearAdvSearchMark, 
-  saveAppliedFilters, 
+import {
+  isFromAdvSearch,
+  clearAdvSearchMark,
+  saveAppliedFilters,
   getAppliedFilters,
-  clearAppliedFilters 
+  clearAppliedFilters,
 } from './session';
 import { ParamsMap } from './types';
 import { JOBOFERT_ALLOWED_LIMITS } from '@/app/lib/validations/pagination.validator';
@@ -44,20 +41,20 @@ export function useJobOffers() {
   const [skipQuery, setSkipQuery] = useState(false);
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shouldClearErrorRef = useRef(true);
-  
+
   // ✅ Validar página < 1
   useEffect(() => {
     if (params.page < 1) {
       dispatch(setError(`La página ${params.page} no es válida. Debe ser mayor o igual a 1.`));
       setSkipQuery(true);
       shouldClearErrorRef.current = false;
-      
+
       errorTimeoutRef.current = setTimeout(() => {
         dispatch(setPaginaActual(1));
         setSkipQuery(false);
         shouldClearErrorRef.current = true;
       }, 2500);
-      
+
       return () => {
         if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
       };
@@ -67,18 +64,18 @@ export function useJobOffers() {
   // ✅ Validar límite inválido
   useEffect(() => {
     if (!JOBOFERT_ALLOWED_LIMITS.includes(params.limit)) {
-      dispatch(setError(
-        `Límite no permitido. Valores permitidos: ${JOBOFERT_ALLOWED_LIMITS.join(', ')}`
-      ));
+      dispatch(
+        setError(`Límite no permitido. Valores permitidos: ${JOBOFERT_ALLOWED_LIMITS.join(', ')}`),
+      );
       setSkipQuery(true);
       shouldClearErrorRef.current = false;
-      
+
       errorTimeoutRef.current = setTimeout(() => {
         dispatch(setRegistrosPorPagina(10));
         setSkipQuery(false);
         shouldClearErrorRef.current = true;
       }, 2500);
-      
+
       return () => {
         if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
       };
@@ -99,48 +96,49 @@ export function useJobOffers() {
     },
     {
       skip: skipQuery,
-    }
+    },
   );
 
   // ✅ NUEVO - Capturar error 400 del backend
-useEffect(() => {
-  if (error && 'status' in error) {
-    const fetchError = error as FetchBaseQueryError;
+  useEffect(() => {
+    if (error && 'status' in error) {
+      const fetchError = error as FetchBaseQueryError;
 
-    if (fetchError.status === 400 && fetchError.data && typeof fetchError.data === 'object') {
-      const message = (fetchError.data as { message?: string }).message;
+      if (fetchError.status === 400 && fetchError.data && typeof fetchError.data === 'object') {
+        const message = (fetchError.data as { message?: string }).message;
 
-      if (message) {
-        console.log('❌ API ERROR 400:', message);
-        dispatch(setError(message));
-        shouldClearErrorRef.current = false;
+        if (message) {
+          console.log('❌ API ERROR 400:', message);
+          dispatch(setError(message));
+          shouldClearErrorRef.current = false;
 
-        errorTimeoutRef.current = setTimeout(() => {
-          dispatch(setPaginaActual(1));
-          shouldClearErrorRef.current = true;
-        }, 2500);
+          errorTimeoutRef.current = setTimeout(() => {
+            dispatch(setPaginaActual(1));
+            shouldClearErrorRef.current = true;
+          }, 2500);
 
-        return () => {
-          if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
-        };
+          return () => {
+            if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
+          };
+        }
       }
     }
-  }
-}, [error, dispatch]);
-
+  }, [error, dispatch]);
 
   // ✅ Actualizar paginación
   useEffect(() => {
     if (data) {
       const totalPages = Math.ceil(data.total / params.limit) || 1;
 
-      dispatch(updatePagination({
-        total: data.total,
-        page: params.page,
-        limit: params.limit,
-        totalPages,
-        isInitialSearch: params.page === 1,
-      }));
+      dispatch(
+        updatePagination({
+          total: data.total,
+          page: params.page,
+          limit: params.limit,
+          totalPages,
+          isInitialSearch: params.page === 1,
+        }),
+      );
 
       if (shouldClearErrorRef.current) {
         dispatch(setError(null));
@@ -173,7 +171,7 @@ export function useInitialUrlParams() {
 
     if ([...searchParams.keys()].length > 0) {
       const parsed = parseUrlToFilters(searchParams);
-      
+
       dispatch(setSearch(parsed.search));
       dispatch(setFilters(parsed.filters));
       dispatch(setSortBy(parsed.sortBy));
@@ -186,7 +184,29 @@ export function useInitialUrlParams() {
       dispatch(enablePersistence());
     } else {
       const restored = restoreFromStorage();
-      dispatch(restoreSavedState(restored));
+      
+      // 🔧 MIGRACIÓN: Convertir city de string a string[]
+      const migratedState = {
+        ...restored,
+        filters: {
+          ...restored.filters,
+          city: (() => {
+            const cityValue = restored.filters.city;
+            // Si es string, convertir a array
+            if (typeof cityValue === 'string') {
+              return cityValue ? [cityValue] : [];
+            }
+            // Si ya es array, usar tal cual
+            if (Array.isArray(cityValue)) {
+              return cityValue;
+            }
+            // Fallback
+            return [];
+          })(),
+        }
+      };
+      
+      dispatch(restoreSavedState(migratedState));
     }
   }, [searchParams, dispatch]);
 }
@@ -201,7 +221,7 @@ export function useSyncUrlParams() {
 
   useEffect(() => {
     const currentParams = JSON.stringify(params);
-    
+
     if (currentParams === prevParamsRef.current) return;
     prevParamsRef.current = currentParams;
 
@@ -219,8 +239,6 @@ export function useSyncUrlParams() {
 
     const queryString = urlParams.toString();
     const target = queryString ? `?${queryString}` : '';
-
-    if (typeof window !== 'undefined' && window.location.search === target) return;
 
     router.replace(target, { scroll: false });
   }, [params, router]);
@@ -264,7 +282,7 @@ export function useAppliedFilters() {
       if (isFromAdvSearch()) {
         const sp = new URLSearchParams(window.location.search);
         const params = parseAppliedParams(sp);
-        
+
         setAppliedParams(params);
         setShowAppliedFilters(true);
         saveAppliedFilters(params);
@@ -286,16 +304,16 @@ export function useAppliedFilters() {
     setAppliedParams(null);
     dispatch(resetFilters());
     clearAppliedFilters();
-    
+
     if (typeof window !== 'undefined') {
       window.location.href = '/job-offer-list';
     }
   };
 
-  return { 
-    showAppliedFilters, 
-    appliedParams, 
-    handleClearApplied 
+  return {
+    showAppliedFilters,
+    appliedParams,
+    handleClearApplied,
   };
 }
 
