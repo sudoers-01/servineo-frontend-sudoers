@@ -1,31 +1,30 @@
-"use client";
+'use client';
 
-import React, { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
-import { listForums, createForum } from "@/Components/ask_for_help/forum.service";
-import type { ForumThread, ForumCategoria } from "@/Components/ask_for_help/forum.types";
-import { FORUMSearch } from "@/Components/ask_for_help/FORUMSearch";
+import React, { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { listForums, createForum } from '@/Components/ask_for_help/forum.service';
+import type { ForumThread, ForumCategoria } from '@/Components/ask_for_help/forum.types';
+import { FORUMSearch } from '@/Components/ask_for_help/FORUMSearch';
 import {
   FORUMCategoryFilter,
   ForumCategoryFilterValue,
-} from "@/Components/ask_for_help/FORUMCategoryFilter";
-import { FORUMCreateForm } from "@/Components/ask_for_help/FORUMCreateForm";
-import { FORUMThreadList } from "@/Components/ask_for_help/FORUMThreadList";
+} from '@/Components/ask_for_help/FORUMCategoryFilter';
+import { FORUMCreateForm } from '@/Components/ask_for_help/FORUMCreateForm';
+import { FORUMThreadList } from '@/Components/ask_for_help/FORUMThreadList';
 
 export default function ForoDeUsuariosPage() {
   const router = useRouter();
 
-  const [query, setQuery] = useState("");
-  const [categoriaFiltro, setCategoriaFiltro] =
-    useState<ForumCategoryFilterValue>("todas");
+  const [query, setQuery] = useState('');
+  const [categoriaFiltro, setCategoriaFiltro] = useState<ForumCategoryFilterValue>('todas');
   const [threads, setThreads] = useState<ForumThread[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [titulo, setTitulo] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [categoria, setCategoria] = useState<ForumCategoria | "">("");
+  const [titulo, setTitulo] = useState('');
+  const [descripcion, setDescripcion] = useState('');
+  const [categoria, setCategoria] = useState<ForumCategoria | ''>('');
   const [creating, setCreating] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
@@ -36,7 +35,7 @@ export default function ForoDeUsuariosPage() {
       const data = await listForums();
       setThreads(data);
     } catch (err: unknown) {
-      let errorMessage = "Error al cargar el foro";
+      let errorMessage = 'Error al cargar el foro';
       if (err instanceof Error) errorMessage = err.message;
       setError(errorMessage);
     } finally {
@@ -52,12 +51,9 @@ export default function ForoDeUsuariosPage() {
     const q = query.trim().toLowerCase();
     return threads.filter((t) => {
       const coincideTexto =
-        !q ||
-        t.titulo.toLowerCase().includes(q) ||
-        t.descripcion.toLowerCase().includes(q);
+        !q || t.titulo.toLowerCase().includes(q) || t.descripcion.toLowerCase().includes(q);
 
-      const coincideCategoria =
-        categoriaFiltro === "todas" || t.categoria === categoriaFiltro;
+      const coincideCategoria = categoriaFiltro === 'todas' || t.categoria === categoriaFiltro;
 
       return coincideTexto && coincideCategoria;
     });
@@ -66,11 +62,11 @@ export default function ForoDeUsuariosPage() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     if (!titulo.trim() || !descripcion.trim()) {
-      setCreateError("Completa el título y la descripción.");
+      setCreateError('Completa el título y la descripción.');
       return;
     }
     if (!categoria) {
-      setCreateError("Selecciona una categoría para tu publicación.");
+      setCreateError('Selecciona una categoría para tu publicación.');
       return;
     }
 
@@ -79,12 +75,12 @@ export default function ForoDeUsuariosPage() {
       setCreateError(null);
       await createForum({ titulo, descripcion, categoria });
       setShowCreateForm(false);
-      setTitulo("");
-      setDescripcion("");
-      setCategoria("");
+      setTitulo('');
+      setDescripcion('');
+      setCategoria('');
       await loadForums();
     } catch (err: unknown) {
-      let errorMessage = "Error al crear la publicación";
+      let errorMessage = 'Error al crear la publicación';
       if (err instanceof Error) errorMessage = err.message;
       setCreateError(errorMessage);
     } finally {
@@ -104,9 +100,7 @@ export default function ForoDeUsuariosPage() {
             ←
           </button>
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-3 text-center">
-            Foro de Usuarios
-          </h1>
+          <h1 className="text-4xl font-bold text-gray-900 mb-3 text-center">Foro de Usuarios</h1>
           <p className="text-gray-600 text-lg text-center">
             Comparte tus dudas y ayuda a otros usuarios.
           </p>
@@ -123,7 +117,7 @@ export default function ForoDeUsuariosPage() {
                 onClick={() => setShowCreateForm((v) => !v)}
                 className="px-4 py-2 border border-blue-600 rounded-md text-sm bg-blue-600 text-white hover:bg-blue-700 transition"
               >
-                {showCreateForm ? "Cerrar formulario" : "Crear publicación"}
+                {showCreateForm ? 'Cerrar formulario' : 'Crear publicación'}
               </button>
             </div>
           </section>
@@ -155,9 +149,7 @@ export default function ForoDeUsuariosPage() {
             threads={filteredThreads}
             loading={loading}
             error={error}
-            onOpenThread={(id) =>
-              router.push(`/ask-for-help/foro-usuario/${id}`)
-            }
+            onOpenThread={(id) => router.push(`/ask-for-help/foro-usuario/${id}`)}
           />
         </div>
       </div>

@@ -48,9 +48,7 @@ export const FAQList: React.FC<FAQListProps> = ({ faqs }) => {
             key={faq._id}
             faq={faq}
             isOpen={openFAQId === faq._id}
-            onToggle={() =>
-              setOpenFAQId((prev) => (prev === faq._id ? null : faq._id))
-            }
+            onToggle={() => setOpenFAQId((prev) => (prev === faq._id ? null : faq._id))}
           />
         ))}
       </div>

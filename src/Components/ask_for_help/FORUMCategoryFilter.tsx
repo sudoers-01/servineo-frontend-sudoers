@@ -1,10 +1,10 @@
 // frontend/src/Components/ask_for_help/FORUMCategoryFilter.tsx
-"use client";
+'use client';
 
-import React from "react";
-import type { ForumCategoria } from "./forum.types";
+import React from 'react';
+import type { ForumCategoria } from './forum.types';
 
-export type ForumCategoryFilterValue = ForumCategoria | "todas";
+export type ForumCategoryFilterValue = ForumCategoria | 'todas';
 
 interface FORUMCategoryFilterProps {
   selectedCategory: ForumCategoryFilterValue;
@@ -12,11 +12,11 @@ interface FORUMCategoryFilterProps {
 }
 
 const categories: { value: ForumCategoryFilterValue; label: string }[] = [
-  { value: "todas", label: "Todas" },
-  { value: "problemas", label: "Problemas" },
-  { value: "servicios", label: "Servicios" },
-  { value: "consejos", label: "Consejos" },
-  { value: "general", label: "General" },
+  { value: 'todas', label: 'Todas' },
+  { value: 'problemas', label: 'Problemas' },
+  { value: 'servicios', label: 'Servicios' },
+  { value: 'consejos', label: 'Consejos' },
+  { value: 'general', label: 'General' },
 ];
 
 export const FORUMCategoryFilter: React.FC<FORUMCategoryFilterProps> = ({
@@ -28,8 +28,8 @@ export const FORUMCategoryFilter: React.FC<FORUMCategoryFilterProps> = ({
       {categories.map((category) => {
         const isActive = selectedCategory === category.value;
         const buttonClasses = isActive
-          ? "border-primary text-primary font-bold"
-          : "border-transparent text-neutral-text hover:text-primary hover:border-primary font-semibold";
+          ? 'border-primary text-primary font-bold'
+          : 'border-transparent text-neutral-text hover:text-primary hover:border-primary font-semibold';
 
         return (
           <button

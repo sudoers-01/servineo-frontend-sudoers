@@ -1,8 +1,8 @@
 // frontend/src/Components/ask_for_help/FORUMSearch.tsx
-"use client";
+'use client';
 
-import React from "react";
-import { Search } from "lucide-react";
+import React from 'react';
+import { Search } from 'lucide-react';
 
 interface FORUMSearchProps {
   query: string;

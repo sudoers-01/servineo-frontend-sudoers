@@ -1,4 +1,3 @@
-
 export interface JobOfferData {
   _id: string;
   fixerId: string;

@@ -1,7 +1,7 @@
 // frontend/src/components/ask_for_help/FAQItem.tsx
 'use client';
 
-import React, {} from 'react';
+import React from 'react';
 import { FAQ } from './faq.types';
 
 interface FAQItemProps {

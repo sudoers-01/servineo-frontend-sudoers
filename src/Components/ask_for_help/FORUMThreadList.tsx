@@ -1,8 +1,8 @@
 // frontend/src/Components/ask_for_help/FORUMThreadList.tsx
-"use client";
+'use client';
 
-import React from "react";
-import type { ForumThread } from "./forum.types";
+import React from 'react';
+import type { ForumThread } from './forum.types';
 
 interface FORUMThreadListProps {
   threads: ForumThread[];
@@ -18,11 +18,7 @@ export const FORUMThreadList: React.FC<FORUMThreadListProps> = ({
   onOpenThread,
 }) => {
   if (loading) {
-    return (
-      <p className="text-center text-gray-600">
-        Cargando publicaciones...
-      </p>
-    );
+    return <p className="text-center text-gray-600">Cargando publicaciones...</p>;
   }
 
   if (error) {
@@ -51,26 +47,21 @@ export const FORUMThreadList: React.FC<FORUMThreadListProps> = ({
         >
           <div className="flex justify-between items-start">
             <div>
-              <h2 className="font-semibold text-gray-900">
-                {thread.titulo}
-              </h2>
+              <h2 className="font-semibold text-gray-900">{thread.titulo}</h2>
 
               {/* chip de categoría */}
               <div className="mt-1 mb-1">
                 <span className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-blue-700">
-                  {thread.categoria === "problemas" && "Problemas"}
-                  {thread.categoria === "servicios" && "Servicios"}
-                  {thread.categoria === "consejos" && "Consejos"}
-                  {thread.categoria === "general" && "General"}
+                  {thread.categoria === 'problemas' && 'Problemas'}
+                  {thread.categoria === 'servicios' && 'Servicios'}
+                  {thread.categoria === 'consejos' && 'Consejos'}
+                  {thread.categoria === 'general' && 'General'}
                 </span>
               </div>
 
-              <p className="text-sm text-gray-600 mt-1 line-clamp-2">
-                {thread.descripcion}
-              </p>
+              <p className="text-sm text-gray-600 mt-1 line-clamp-2">{thread.descripcion}</p>
               <p className="mt-2 text-xs text-gray-400">
-                Por {thread.authorName} •{" "}
-                {new Date(thread.createdAt).toLocaleDateString()}
+                Por {thread.authorName} • {new Date(thread.createdAt).toLocaleDateString()}
               </p>
             </div>
             <span className="text-sm text-gray-500 whitespace-nowrap">

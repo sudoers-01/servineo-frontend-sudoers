@@ -214,10 +214,8 @@ export default function FixerDashboardPage() {
         <div className="lg:col-span-3">
           <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 min-h-[500px]">
             {activeTab === 'offers' && <JobOffersSection />}
-            
-                {activeTab === 'certs' && (
-                <CertificationsSection fixerId={user._id || user.id} />
-                )}
+
+            {activeTab === 'certs' && <CertificationsSection fixerId={user._id || user.id} />}
             {activeTab === 'experience' && <ExperienceSection fixerId={user._id || user.id} />}
             {activeTab === 'portfolio' && <PortfolioSection fixerId={user._id || user.id} />}
             {activeTab === 'estadisticas' && <EstadisticasTrabajos />}
@@ -225,5 +223,5 @@ export default function FixerDashboardPage() {
         </div>
       </div>
     </div>
-  );  
+  );
 }

@@ -1,13 +1,8 @@
-"use client";
+'use client';
 
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo,
-} from "react";
-import { useRouter } from "next/navigation";
-import { Search, HelpCircle, Users } from "lucide-react";
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import { Search, HelpCircle, Users } from 'lucide-react';
 
 interface Suggestion {
   id: number;
@@ -18,16 +13,16 @@ interface Suggestion {
 const CentroDeAyuda: React.FC = () => {
   const router = useRouter();
 
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
-  const [message, setMessage] = useState("");
+  const [message, setMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
 
   /** Muestra un mensaje temporal */
   const showMessage = useCallback((msg: string) => {
     setMessage(msg);
-    const timeoutId = setTimeout(() => setMessage(""), 5000);
+    const timeoutId = setTimeout(() => setMessage(''), 5000);
     return () => clearTimeout(timeoutId);
   }, []);
 
@@ -37,46 +32,46 @@ const CentroDeAyuda: React.FC = () => {
       let finalUrl: string;
 
       switch (target) {
-        case "Preguntas Frecuentes sobre Servineo":
-        case "Preguntas Frecuentes (FAQ)":
-          finalUrl = "/ask-for-help/preguntas-frecuentes";
+        case 'Preguntas Frecuentes sobre Servineo':
+        case 'Preguntas Frecuentes (FAQ)':
+          finalUrl = '/ask-for-help/preguntas-frecuentes';
           break;
-        case "Foro de Usuarios":
-          finalUrl = "/ask-for-help/foro-usuario";
+        case 'Foro de Usuarios':
+          finalUrl = '/ask-for-help/foro-usuario';
           break;
-        case "Home":
-          finalUrl = "/";
+        case 'Home':
+          finalUrl = '/';
           break;
-        case "Perfil":
-          finalUrl = "/perfil";
+        case 'Perfil':
+          finalUrl = '/perfil';
           break;
         default:
-          finalUrl = url || `/${target.toLowerCase().replace(/\s/g, "-")}`;
+          finalUrl = url || `/${target.toLowerCase().replace(/\s/g, '-')}`;
       }
 
-      if (typeof window !== "undefined") {
+      if (typeof window !== 'undefined') {
         router.push(finalUrl);
       } else {
         console.log(`[REDIRECCIÓN SIMULADA] → ${finalUrl}`);
         showMessage(`Simulando navegación a: ${finalUrl}`);
       }
     },
-    [router, showMessage]
+    [router, showMessage],
   );
 
   /** Ejecuta búsqueda */
   const handleSearchSubmit = useCallback(
     (
       event?: React.MouseEvent<HTMLElement> | React.KeyboardEvent<HTMLInputElement>,
-      customQuery?: string
+      customQuery?: string,
     ) => {
-      if (event && "preventDefault" in event) event.preventDefault();
+      if (event && 'preventDefault' in event) event.preventDefault();
 
       const query = customQuery || searchTerm.trim();
 
       if (!query) {
         setIsSearching(false);
-        showMessage("Por favor, ingresa un término de búsqueda.");
+        showMessage('Por favor, ingresa un término de búsqueda.');
         return;
       }
 
@@ -89,14 +84,21 @@ const CentroDeAyuda: React.FC = () => {
       setTimeout(() => {
         setIsLoading(false);
 
-        if (query.toLowerCase().includes("pago")) {
+        if (query.toLowerCase().includes('pago')) {
           setSuggestions([
-            { id: 1, title: "Problemas con mi pago", url: "/ayuda/pago-problemas" },
-            { id: 2, title: "Métodos de pago aceptados", url: "/ayuda/metodos-pago" },
+            { id: 1, title: 'Problemas con mi pago', url: '/ayuda/pago-problemas' },
+            { id: 2, title: 'Métodos de pago aceptados', url: '/ayuda/metodos-pago' },
           ]);
-        } else if (query.toLowerCase().includes("faq") || query.toLowerCase().includes("pregunta")) {
+        } else if (
+          query.toLowerCase().includes('faq') ||
+          query.toLowerCase().includes('pregunta')
+        ) {
           setSuggestions([
-            { id: 99, title: "Preguntas Frecuentes (FAQ)", url: "/ask-for-help/preguntas-frecuentes" },
+            {
+              id: 99,
+              title: 'Preguntas Frecuentes (FAQ)',
+              url: '/ask-for-help/preguntas-frecuentes',
+            },
           ]);
         } else {
           setSuggestions([]);
@@ -104,7 +106,7 @@ const CentroDeAyuda: React.FC = () => {
         }
       }, 600);
     },
-    [searchTerm, showMessage]
+    [searchTerm, showMessage],
   );
 
   /** Click sobre sugerencia */
@@ -114,7 +116,7 @@ const CentroDeAyuda: React.FC = () => {
       setSuggestions([]);
       handleSearchSubmit(undefined, suggestion.title);
     },
-    [handleSearchSubmit]
+    [handleSearchSubmit],
   );
 
   /** Autocompletado */
@@ -129,16 +131,14 @@ const CentroDeAyuda: React.FC = () => {
     }
 
     const simSuggestions: Suggestion[] = [
-      { id: 10, title: "Problemas con mi pago", url: "/ayuda/pago-problemas" },
-      { id: 11, title: "Restablecer contraseña", url: "/ayuda/restablecer" },
-      { id: 12, title: "Información de facturación", url: "/ayuda/facturacion" },
-      { id: 13, title: "Contacto de soporte", url: "/ask-for-help/preguntas-frecuentes" },
-      { id: 14, title: "Preguntas Frecuentes (FAQ)", url: "/ask-for-help/preguntas-frecuentes" },
+      { id: 10, title: 'Problemas con mi pago', url: '/ayuda/pago-problemas' },
+      { id: 11, title: 'Restablecer contraseña', url: '/ayuda/restablecer' },
+      { id: 12, title: 'Información de facturación', url: '/ayuda/facturacion' },
+      { id: 13, title: 'Contacto de soporte', url: '/ask-for-help/preguntas-frecuentes' },
+      { id: 14, title: 'Preguntas Frecuentes (FAQ)', url: '/ask-for-help/preguntas-frecuentes' },
     ];
 
-    const filtered = simSuggestions.filter((s) =>
-      s.title.toLowerCase().includes(query)
-    );
+    const filtered = simSuggestions.filter((s) => s.title.toLowerCase().includes(query));
 
     const handler = setTimeout(() => setSuggestions(filtered), 150);
     return () => clearTimeout(handler);
@@ -151,9 +151,7 @@ const CentroDeAyuda: React.FC = () => {
     return (
       !isSearching &&
       (normalizedQuery.length === 0 ||
-        ["pre", "frec", "faq", "duda", "pregunt"].some((k) =>
-          normalizedQuery.includes(k)
-        ))
+        ['pre', 'frec', 'faq', 'duda', 'pregunt'].some((k) => normalizedQuery.includes(k)))
     );
   }, [normalizedQuery, isSearching]);
 
@@ -161,9 +159,7 @@ const CentroDeAyuda: React.FC = () => {
     return (
       !isSearching &&
       (normalizedQuery.length === 0 ||
-        ["popu", "publica", "guia", "articulo", "arti"].some((k) =>
-          normalizedQuery.includes(k)
-        ))
+        ['popu', 'publica', 'guia', 'articulo', 'arti'].some((k) => normalizedQuery.includes(k)))
     );
   }, [normalizedQuery, isSearching]);
 
@@ -171,31 +167,25 @@ const CentroDeAyuda: React.FC = () => {
     return (
       !isSearching &&
       (normalizedQuery.length === 0 ||
-        ["foro", "comunidad", "usuario", "usuarios", "duda", "ayuda"].some((k) =>
-          normalizedQuery.includes(k)
+        ['foro', 'comunidad', 'usuario', 'usuarios', 'duda', 'ayuda'].some((k) =>
+          normalizedQuery.includes(k),
         ))
     );
   }, [normalizedQuery, isSearching]);
 
-  const isResultsVisible = useMemo(
-    () => isSearching && !isLoading,
-    [isSearching, isLoading]
-  );
+  const isResultsVisible = useMemo(() => isSearching && !isLoading, [isSearching, isLoading]);
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 font-sans antialiased">
       <div className="container mx-auto px-4 max-w-5xl">
         {/* HEADER ESTILO FORO USUARIO */}
         <div className="bg-white rounded-xl shadow-lg p-8 mb-8 relative">
-
           <div className="flex flex-col items-center text-center">
-            <h1 className="text-4xl font-bold text-gray-900 mb-3">
-              Centro de Ayuda
-            </h1>
+            <h1 className="text-4xl font-bold text-gray-900 mb-3">Centro de Ayuda</h1>
 
             <p className="text-gray-600 text-lg max-w-2xl">
-              Encuentra respuestas rápidas, guías y participa en la comunidad
-              para resolver tus dudas sobre Servineo.
+              Encuentra respuestas rápidas, guías y participa en la comunidad para resolver tus
+              dudas sobre Servineo.
             </p>
           </div>
         </div>
@@ -242,7 +232,7 @@ const CentroDeAyuda: React.FC = () => {
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") handleSearchSubmit(e);
+                  if (e.key === 'Enter') handleSearchSubmit(e);
                 }}
                 className="w-full pl-12 pr-10 py-3 border-2 border-border rounded-xl bg-card focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm hover:shadow-md"
               />
@@ -259,9 +249,7 @@ const CentroDeAyuda: React.FC = () => {
                       className="px-4 py-3 cursor-pointer text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition duration-150"
                     >
                       <p className="font-semibold truncate">{s.title}</p>
-                      <p className="text-xs text-gray-400 truncate">
-                        {s.url}
-                      </p>
+                      <p className="text-xs text-gray-400 truncate">{s.url}</p>
                     </li>
                   ))}
                 </ul>
@@ -291,12 +279,8 @@ const CentroDeAyuda: React.FC = () => {
                         onClick={() => handleRedirect(r.title, r.url)}
                         className="p-4 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition"
                       >
-                        <p className="font-semibold text-blue-600">
-                          {r.title}
-                        </p>
-                        <p className="text-sm text-gray-500 truncate">
-                          {r.url}
-                        </p>
+                        <p className="font-semibold text-blue-600">{r.title}</p>
+                        <p className="text-sm text-gray-500 truncate">{r.url}</p>
                       </div>
                     ))}
                   </div>
@@ -314,9 +298,7 @@ const CentroDeAyuda: React.FC = () => {
               <div className="space-y-4">
                 {isFAQVisible && (
                   <button
-                    onClick={() =>
-                      handleRedirect("Preguntas Frecuentes sobre Servineo")
-                    }
+                    onClick={() => handleRedirect('Preguntas Frecuentes sobre Servineo')}
                     className="w-full flex items-center p-4 bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] duration-200 text-left hover:bg-blue-50"
                   >
                     <div className="p-3 mr-4 rounded-full bg-blue-100 text-blue-600">
@@ -335,16 +317,14 @@ const CentroDeAyuda: React.FC = () => {
 
                 {isForumVisible && (
                   <button
-                    onClick={() => handleRedirect("Foro de Usuarios")}
+                    onClick={() => handleRedirect('Foro de Usuarios')}
                     className="w-full flex items-center p-4 bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] duration-200 text-left hover:bg-blue-50"
                   >
                     <div className="p-3 mr-4 rounded-full bg-blue-100 text-blue-600">
                       <Users className="h-6 w-6" />
                     </div>
                     <div>
-                      <h2 className="text-lg font-semibold text-gray-800">
-                        Foro de Usuarios
-                      </h2>
+                      <h2 className="text-lg font-semibold text-gray-800">Foro de Usuarios</h2>
                       <p className="text-sm text-gray-500">
                         comparte tus dudas y ayuda a otros usuarios
                       </p>

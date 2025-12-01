@@ -3,16 +3,16 @@
 import { useState, useEffect } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { X, Upload} from 'lucide-react';
+import { X, Upload } from 'lucide-react';
 import Image from 'next/image';
 
 // Imports de tus tipos y esquemas reales
-import { 
-  jobOfferSchema, 
+import {
+  jobOfferSchema,
   jobCategories,
   boliviaCities,
   type JobOfferFormData,
-  type IJobOffer 
+  type IJobOffer,
 } from '@/app/lib/validations/Job-offer-Schemas';
 
 interface JobOfferFormProps {
@@ -29,7 +29,6 @@ export default function JobOfferForm({
   defaultValues,
   isSubmitting = false,
 }: JobOfferFormProps) {
-  
   // === ESTADOS PARA IMÁGENES Y TAGS ===
   const [selectedNewImages, setSelectedNewImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
@@ -37,7 +36,7 @@ export default function JobOfferForm({
   const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
 
   // === CONFIGURACIÓN DEL FORMULARIO ===
- // ...
+  // ...
   const {
     register,
     handleSubmit,
@@ -85,11 +84,11 @@ export default function JobOfferForm({
     if (!currentTags.includes(value) && currentTags.length < 5) {
       setValue('tags', [...currentTags, value], { shouldValidate: true });
     }
-    e.target.value = "";
+    e.target.value = '';
   };
 
   const removeTag = (tagToRemove: string) => {
-    const newTags = currentTags.filter(t => t !== tagToRemove);
+    const newTags = currentTags.filter((t) => t !== tagToRemove);
     setValue('tags', newTags, { shouldValidate: true });
   };
 
@@ -104,7 +103,7 @@ export default function JobOfferForm({
     }
 
     const newFiles: File[] = [];
-    files.forEach(file => {
+    files.forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
         alert(`La imagen ${file.name} es muy pesada (máx 5MB)`);
       } else {
@@ -112,22 +111,22 @@ export default function JobOfferForm({
       }
     });
 
-    const newPreviews = newFiles.map(file => URL.createObjectURL(file));
-    setSelectedNewImages(prev => [...prev, ...newFiles]);
-    setPreviewUrls(prev => [...prev, ...newPreviews]);
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
+    setSelectedNewImages((prev) => [...prev, ...newFiles]);
+    setPreviewUrls((prev) => [...prev, ...newPreviews]);
   };
 
   const removeNewImage = (index: number) => {
-    setSelectedNewImages(prev => prev.filter((_, i) => i !== index));
+    setSelectedNewImages((prev) => prev.filter((_, i) => i !== index));
     URL.revokeObjectURL(previewUrls[index]); // Limpiar memoria
-    setPreviewUrls(prev => prev.filter((_, i) => i !== index));
+    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
   const removeExistingImage = (index: number) => {
-    // Aquí solo la quitamos visualmente. 
+    // Aquí solo la quitamos visualmente.
     // Nota: Si tu backend requiere una lista de "fotos a borrar", necesitarías lógica extra aquí.
     // Por ahora asumimos que al enviar, el backend reemplaza o gestiona las fotos.
-    setExistingPhotos(prev => prev.filter((_, i) => i !== index));
+    setExistingPhotos((prev) => prev.filter((_, i) => i !== index));
   };
 
   // === MANEJO DEL SUBMIT ===
@@ -155,7 +154,6 @@ export default function JobOfferForm({
       {/* Cuerpo Scrollable */}
       <div className="flex-1 overflow-y-auto px-6 py-6">
         <form id="job-offer-form" onSubmit={handleSubmit(onFormSubmit)} className="space-y-5">
-          
           {/* Título */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">Título</label>
@@ -176,21 +174,28 @@ export default function JobOfferForm({
             >
               <option value="">Seleccionar...</option>
               {jobCategories.map((cat) => (
-                <option key={cat.value} value={cat.value}>{cat.label}</option>
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
               ))}
             </select>
-            {errors.category && <p className="text-sm text-red-500 mt-1">{errors.category.message}</p>}
+            {errors.category && (
+              <p className="text-sm text-red-500 mt-1">{errors.category.message}</p>
+            )}
           </div>
 
           {/* Tags (Etiquetas) */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-               Etiquetas <span className="text-xs text-gray-400 font-normal">(Máx. 5)</span>
+              Etiquetas <span className="text-xs text-gray-400 font-normal">(Máx. 5)</span>
             </label>
-            
+
             <div className="flex flex-wrap gap-2 mb-3 min-h-[32px] p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300">
               {currentTags.map((tag) => (
-                <span key={tag} className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200">
+                <span
+                  key={tag}
+                  className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200"
+                >
                   {tag}
                   <button
                     type="button"
@@ -202,7 +207,9 @@ export default function JobOfferForm({
                 </span>
               ))}
               {currentTags.length === 0 && (
-                <span className="text-xs text-gray-400 italic self-center px-1">Sin etiquetas seleccionadas</span>
+                <span className="text-xs text-gray-400 italic self-center px-1">
+                  Sin etiquetas seleccionadas
+                </span>
               )}
             </div>
 
@@ -216,7 +223,11 @@ export default function JobOfferForm({
                 {currentTags.length >= 5 ? 'Límite alcanzado' : '+ Agregar etiqueta...'}
               </option>
               {jobCategories.map((cat) => (
-                <option key={cat.value} value={cat.value} disabled={currentTags.includes(cat.value)}>
+                <option
+                  key={cat.value}
+                  value={cat.value}
+                  disabled={currentTags.includes(cat.value)}
+                >
                   {cat.label}
                 </option>
               ))}
@@ -233,7 +244,9 @@ export default function JobOfferForm({
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
               placeholder="Describe detalladamente el servicio..."
             />
-            {errors.description && <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>}
+            {errors.description && (
+              <p className="text-sm text-red-500 mt-1">{errors.description.message}</p>
+            )}
           </div>
 
           {/* Precio y Ciudad */}
@@ -248,7 +261,7 @@ export default function JobOfferForm({
               />
               {errors.price && <p className="text-sm text-red-500 mt-1">{errors.price.message}</p>}
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
               <select
@@ -256,7 +269,9 @@ export default function JobOfferForm({
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white"
               >
                 {boliviaCities.map((city) => (
-                  <option key={city.value} value={city.value}>{city.label}</option>
+                  <option key={city.value} value={city.value}>
+                    {city.label}
+                  </option>
                 ))}
               </select>
               {errors.city && <p className="text-sm text-red-500 mt-1">{errors.city.message}</p>}
@@ -265,23 +280,32 @@ export default function JobOfferForm({
 
           {/* Teléfono */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Celular de Contacto</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Celular de Contacto
+            </label>
             <input
               {...register('contactPhone')}
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               placeholder="Ej: 70000000"
             />
-            {errors.contactPhone && <p className="text-sm text-red-500 mt-1">{errors.contactPhone.message}</p>}
+            {errors.contactPhone && (
+              <p className="text-sm text-red-500 mt-1">{errors.contactPhone.message}</p>
+            )}
           </div>
 
           {/* Imágenes */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-3">Imágenes del Trabajo</label>
-            
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Imágenes del Trabajo
+            </label>
+
             <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
               {/* Fotos Existentes (Backend) */}
               {existingPhotos.map((url, idx) => (
-                <div key={`existing-${idx}`} className="relative aspect-square group rounded-lg overflow-hidden border border-gray-200">
+                <div
+                  key={`existing-${idx}`}
+                  className="relative aspect-square group rounded-lg overflow-hidden border border-gray-200"
+                >
                   <Image src={url} alt="existing" fill className="object-cover" sizes="100px" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
@@ -292,13 +316,18 @@ export default function JobOfferForm({
                       <X size={14} />
                     </button>
                   </div>
-                  <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] px-1 text-center py-0.5">Guardada</span>
+                  <span className="absolute bottom-0 left-0 right-0 bg-black/50 text-white text-[10px] px-1 text-center py-0.5">
+                    Guardada
+                  </span>
                 </div>
               ))}
 
               {/* Fotos Nuevas (Preview) */}
               {previewUrls.map((url, idx) => (
-                <div key={`new-${idx}`} className="relative aspect-square group rounded-lg overflow-hidden border border-blue-200">
+                <div
+                  key={`new-${idx}`}
+                  className="relative aspect-square group rounded-lg overflow-hidden border border-blue-200"
+                >
                   <Image src={url} alt="preview" fill className="object-cover" sizes="100px" />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                     <button
@@ -309,30 +338,33 @@ export default function JobOfferForm({
                       <X size={14} />
                     </button>
                   </div>
-                  <span className="absolute bottom-0 left-0 right-0 bg-green-500/80 text-white text-[10px] px-1 text-center py-0.5">Nueva</span>
+                  <span className="absolute bottom-0 left-0 right-0 bg-green-500/80 text-white text-[10px] px-1 text-center py-0.5">
+                    Nueva
+                  </span>
                 </div>
               ))}
 
               {/* Botón de Subida */}
-              {(existingPhotos.length + previewUrls.length) < 5 && (
+              {existingPhotos.length + previewUrls.length < 5 && (
                 <label className="flex flex-col items-center justify-center aspect-square border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 hover:border-primary/50 transition-all group">
                   <div className="p-2 rounded-full bg-gray-100 group-hover:bg-primary/10 transition-colors mb-1">
                     <Upload className="w-5 h-5 text-gray-400 group-hover:text-primary" />
                   </div>
-                  <span className="text-xs text-gray-500 font-medium group-hover:text-primary">Subir</span>
-                  <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*" 
-                    multiple 
-                    onChange={handleImageChange} 
+                  <span className="text-xs text-gray-500 font-medium group-hover:text-primary">
+                    Subir
+                  </span>
+                  <input
+                    type="file"
+                    className="hidden"
+                    accept="image/*"
+                    multiple
+                    onChange={handleImageChange}
                   />
                 </label>
               )}
             </div>
             <p className="text-xs text-gray-400 mt-2">Máximo 5 imágenes en total (5MB cada una).</p>
           </div>
-
         </form>
       </div>
 
@@ -354,11 +386,13 @@ export default function JobOfferForm({
         >
           {isSubmitting ? (
             <>
-              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"/>
+              <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               Guardando...
             </>
+          ) : defaultValues ? (
+            'Actualizar Oferta'
           ) : (
-             defaultValues ? 'Actualizar Oferta' : 'Publicar Oferta'
+            'Publicar Oferta'
           )}
         </button>
       </div>

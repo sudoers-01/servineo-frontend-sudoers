@@ -1,5 +1,3 @@
-
-
 export interface IUserProfile {
   user: {
     id: string;
@@ -74,4 +72,3 @@ export interface Location {
   lng: number;
   address?: string;
 }
-

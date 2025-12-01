@@ -22,7 +22,7 @@ export default function TopMenu() {
   const dispatch = useDispatch();
   // Acceder correctamente al estado
   const { user, loading } = useSelector((state: RootState) => state.user);
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
@@ -34,8 +34,7 @@ export default function TopMenu() {
   const navItems = [
     { name: 'Inicio', href: '/' },
     { name: 'Ofertas de trabajo', href: '/job-offer-list' },
-    { name:'Ayuda', href : '/ask-for-help/centro_de_ayuda' },
-  
+    { name: 'Ayuda', href: '/ask-for-help/centro_de_ayuda' },
   ];
 
   // Obtener userId desde localStorage

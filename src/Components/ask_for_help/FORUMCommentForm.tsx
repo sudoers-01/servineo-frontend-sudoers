@@ -1,7 +1,7 @@
 // src/Components/ask_for_help/FORUMCommentForm.tsx
-"use client";
+'use client';
 
-import React from "react";
+import React from 'react';
 
 interface FORUMCommentFormProps {
   value: string;
@@ -33,7 +33,7 @@ export const FORUMCommentForm: React.FC<FORUMCommentFormProps> = ({
         disabled={posting || !value.trim()}
         className="px-4 py-2 rounded-md bg-blue-600 text-white text-sm hover:bg-blue-700 disabled:opacity-60"
       >
-        {posting ? "Enviando..." : "Enviar"}
+        {posting ? 'Enviando...' : 'Enviar'}
       </button>
     </form>
   );

@@ -15,7 +15,6 @@ interface DeleteResponse {
 
 export const certificationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    
     // CREATE: POST /api/certifications
     createCertification: builder.mutation<ICertification, Partial<ICertification>>({
       query: (body) => ({
@@ -50,7 +49,7 @@ export const certificationApi = baseApi.injectEndpoints({
 
     // UPDATE: PUT /api/certifications/:id
     updateCertification: builder.mutation<
-      ICertification, 
+      ICertification,
       { id: string; data: Partial<ICertification> }
     >({
       query: ({ id, data }) => ({
@@ -60,8 +59,8 @@ export const certificationApi = baseApi.injectEndpoints({
       }),
       transformResponse: (response: ApiResponse<ICertification>) => response.data,
       invalidatesTags: (result, error, { id }) => [
-        { type: 'Certification', id }, 
-        { type: 'Certification', id: 'LIST' }
+        { type: 'Certification', id },
+        { type: 'Certification', id: 'LIST' },
       ],
     }),
 
@@ -76,10 +75,9 @@ export const certificationApi = baseApi.injectEndpoints({
       transformResponse: (response: DeleteResponse) => ({ message: response.message }),
       invalidatesTags: (result, error, id) => [
         { type: 'Certification', id },
-        { type: 'Certification', id: 'LIST' }
+        { type: 'Certification', id: 'LIST' },
       ],
     }),
-
   }),
   overrideExisting: false,
 });

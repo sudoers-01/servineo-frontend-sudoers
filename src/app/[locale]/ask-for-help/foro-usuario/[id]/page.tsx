@@ -1,15 +1,12 @@
-"use client";
+'use client';
 
-import { useParams, useRouter } from "next/navigation";
-import React, { useEffect, useState, useCallback } from "react";
-import {
-  getForumWithComments,
-  addCommentToForum,
-} from "@/Components/ask_for_help/forum.service";
-import type { ForumWithComments } from "@/Components/ask_for_help/forum.types";
-import { FORUMThreadDetail } from "@/Components/ask_for_help/FORUMThreadDetail";
-import { FORUMCommentsList } from "@/Components/ask_for_help/FORUMCommetsList";
-import { FORUMCommentForm } from "@/Components/ask_for_help/FORUMCommentForm";
+import { useParams, useRouter } from 'next/navigation';
+import React, { useEffect, useState, useCallback } from 'react';
+import { getForumWithComments, addCommentToForum } from '@/Components/ask_for_help/forum.service';
+import type { ForumWithComments } from '@/Components/ask_for_help/forum.types';
+import { FORUMThreadDetail } from '@/Components/ask_for_help/FORUMThreadDetail';
+import { FORUMCommentsList } from '@/Components/ask_for_help/FORUMCommetsList';
+import { FORUMCommentForm } from '@/Components/ask_for_help/FORUMCommentForm';
 
 export default function ForoDetallePage() {
   const router = useRouter();
@@ -20,7 +17,7 @@ export default function ForoDetallePage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [newComment, setNewComment] = useState("");
+  const [newComment, setNewComment] = useState('');
   const [posting, setPosting] = useState(false);
   const [postError, setPostError] = useState<string | null>(null);
 
@@ -31,7 +28,7 @@ export default function ForoDetallePage() {
       const res = await getForumWithComments(forumId);
       setData(res);
     } catch (err: unknown) {
-      let errorMessage = "Error al cargar la publicación";
+      let errorMessage = 'Error al cargar la publicación';
       if (err instanceof Error) {
         errorMessage = err.message;
       }
@@ -53,10 +50,10 @@ export default function ForoDetallePage() {
       setPosting(true);
       setPostError(null);
       await addCommentToForum(forumId, newComment);
-      setNewComment("");
+      setNewComment('');
       await load();
     } catch (err: unknown) {
-      let errorMessage = "Error al enviar el comentario";
+      let errorMessage = 'Error al enviar el comentario';
       if (err instanceof Error) {
         errorMessage = err.message;
       }
@@ -74,10 +71,7 @@ export default function ForoDetallePage() {
     return (
       <div className="p-8 text-center">
         <p className="text-red-600 mb-4">{error}</p>
-        <button
-          onClick={() => router.back()}
-          className="px-4 py-2 border rounded-md"
-        >
+        <button onClick={() => router.back()} className="px-4 py-2 border rounded-md">
           Volver
         </button>
       </div>
@@ -96,9 +90,7 @@ export default function ForoDetallePage() {
 
         {/* Comentarios + formulario */}
         <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="font-semibold mb-4">
-            Comentarios ({comments.length})
-          </h2>
+          <h2 className="font-semibold mb-4">Comentarios ({comments.length})</h2>
 
           <FORUMCommentsList comments={comments} />
 
