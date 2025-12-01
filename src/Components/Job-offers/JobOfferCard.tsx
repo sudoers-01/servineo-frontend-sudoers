@@ -4,7 +4,15 @@
 import React from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { MapPin, Star, MessageCircle, ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-react';
+import {
+  MapPin,
+  Star,
+  MessageCircle,
+  ChevronLeft,
+  ChevronRight,
+  Edit2,
+  Trash2,
+} from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useImageCarousel } from '@/app/redux/features/jobOffers/useImageCarousel';
 import type { JobOfferData } from '@/types/jobOffers';
@@ -87,7 +95,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         images.map((img, idx) => (
           <Image
             key={idx}
-            src={img}
+            src={img.startsWith('http') || img.startsWith('/') ? img : `/${img}`}
             alt={offer.title}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -169,7 +177,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
       <div className="mt-2 flex items-center justify-between">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-            {tCat(offer.category)}
+            {offer.category ? tCat(offer.category) : t('uncategorized')}
           </span>
           {offer.tags && offer.tags.length > 0 && (
             <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
@@ -191,7 +199,10 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         <div className="border-t border-gray-100 p-3 flex items-center justify-end gap-2 bg-gray-50/50">
           {onEdit && (
             <button
-              onClick={(e) => { e.stopPropagation(); onEdit(offer); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(offer);
+              }}
               className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
               title="Editar"
             >
@@ -200,7 +211,10 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
           )}
           {onDelete && (
             <button
-              onClick={(e) => { e.stopPropagation(); onDelete(offer._id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(offer._id);
+              }}
               className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
               title="Eliminar"
             >
@@ -267,8 +281,9 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
       ref={elementRef}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary hover:-translate-y-1 ${viewMode === 'list' ? 'flex flex-row' : ''
-        } ${className}`}
+      className={`group relative w-full overflow-hidden rounded-2xl border border-gray-200 bg-white transition-all duration-300 hover:shadow-xl hover:border-primary hover:-translate-y-1 ${
+        viewMode === 'list' ? 'flex flex-row' : ''
+      } ${className}`}
     >
       <div onClick={handleCardClick} className="cursor-pointer contents">
         {renderImageCarousel()}

@@ -9,6 +9,7 @@ import { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { TranslationButton } from '@/Components/Shared/TranslationButton';
+import BotonesFlotantes from '@/Components/ask_for_help/contenedor';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -22,16 +23,13 @@ const geistMono = Geist_Mono({
 
 // Mapa de mensajes
 const messagesMap = {
-  en: () => import('../../../messages/en.json').then(mod => mod.default),
-  es: () => import('../../../messages/es.json').then(mod => mod.default),
+  en: () => import('../../../messages/en.json').then((mod) => mod.default),
+  es: () => import('../../../messages/es.json').then((mod) => mod.default),
 };
 
 // Genera los locales estáticamente
 export function generateStaticParams() {
-  return [
-    { locale: 'en' },
-    { locale: 'es' }
-  ];
+  return [{ locale: 'en' }, { locale: 'es' }];
 }
 
 export const metadata: Metadata = {
@@ -64,11 +62,15 @@ export default async function RootLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={`${roboto.className}`}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={true}
+      >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ReduxProvider>
             <div className="text-black fixed bottom-7 right-7 z-[9999]">
               <TranslationButton />
+              <BotonesFlotantes />
             </div>
             <div className="">
               <TopMenu />
