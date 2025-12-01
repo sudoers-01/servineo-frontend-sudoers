@@ -1,14 +1,19 @@
 // src\app\redux\slice\jobOfert.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { FilterState, JobOffersState } from '../features/jobOffers/types';
-import { saveToStorage, clearJobOffersStorage, STORAGE_KEYS } from '../features/jobOffers/storage';
+import {
+  saveToStorage,
+  clearJobOffersStorage,
+  saveCountsToStorage,
+  STORAGE_KEYS,
+} from '../features/jobOffers/storage';
 
 const getDefaultState = (): JobOffersState => ({
   loading: false,
   error: null,
   filters: {
     range: [],
-    city: '',
+    city: [],
     category: [],
   },
   sortBy: 'recent',
@@ -177,6 +182,11 @@ const jobOffersSlice = createSlice({
 
       if (state.shouldPersist) {
         saveToStorage(STORAGE_KEYS.PAGE, page);
+        saveCountsToStorage({
+          totalRegistros: totalToUse,
+          totalPages: totalPages,
+          preservedTotalRegistros: state.preservedTotalRegistros,
+        });
       }
     },
 
@@ -193,6 +203,8 @@ const jobOffersSlice = createSlice({
       state.paginaActual = 1;
       state.preservedTotalRegistros = 0;
       state.shouldPersist = false; // Desactivar persistencia temporalmente
+      state.totalRegistros = 0;
+      state.totalPages = 0;
 
       // Limpiar localStorage explícitamente
       clearJobOffersStorage();
@@ -245,6 +257,9 @@ const jobOffersSlice = createSlice({
         exact: boolean;
         date: string | null;
         rating: number | null;
+        totalRegistros?: number;
+        totalPages?: number;
+        preservedTotalRegistros?: number;
       }>,
     ) => {
       const restored = action.payload;
@@ -257,15 +272,29 @@ const jobOffersSlice = createSlice({
       state.exact = restored.exact;
       state.date = restored.date;
       state.rating = restored.rating;
+
+      if (restored.totalRegistros !== undefined) {
+        state.totalRegistros = restored.totalRegistros;
+      }
+      if (restored.totalPages !== undefined) {
+        state.totalPages = restored.totalPages;
+      }
+      if (restored.preservedTotalRegistros !== undefined) {
+        state.preservedTotalRegistros = restored.preservedTotalRegistros;
+      }
+
       state.shouldPersist = true;
 
       if (!state.paginaciones['offers']) {
         state.paginaciones['offers'] = {
           paginaActual: restored.paginaActual,
           registrosPorPagina: restored.registrosPorPagina,
-          totalRegistros: 0,
-          totalPages: 0,
+          totalRegistros: restored.totalRegistros || 0,
+          totalPages: restored.totalPages || 0,
         };
+      } else {
+        state.paginaciones['offers'].totalRegistros = restored.totalRegistros || 0;
+        state.paginaciones['offers'].totalPages = restored.totalPages || 0;
       }
     },
 

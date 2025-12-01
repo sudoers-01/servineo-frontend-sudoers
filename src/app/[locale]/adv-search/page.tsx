@@ -63,7 +63,7 @@ function AdvancedSearchPage() {
     selectedTags,
     selectedPriceKey,
     loading,
-    totalRegistros,
+    resultsCount,
     storeLoading,
     clearSignal,
     skipSyncRef,
@@ -160,7 +160,7 @@ function AdvancedSearchPage() {
         <div className="max-w-7xl mx-auto">
           <div className="w-full sm:w-[700px] mx-auto">
             <div className="mb-3">
-              <ResultsCounter total={totalRegistros ?? 0} loading={storeLoading ?? loading} />
+              <ResultsCounter total={resultsCount ?? 0} loading={storeLoading ?? loading} />
             </div>
 
             <div className="mb-4">
@@ -269,7 +269,7 @@ function AdvancedSearchPage() {
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
-                          checked={selectedCity === city.dbValue}
+                          checked={selectedCity.includes(city.dbValue)}
                           onChange={() => handleCityChange(city.dbValue)}
                         />
                         <span className="truncate">{city.label}</span>
@@ -429,7 +429,7 @@ function AdvancedSearchPage() {
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedRanges([]);
-                  setSelectedCity('');
+                  setSelectedCity([]);
                   setSelectedJobs([]);
                   setSelectedCategories([]);
                   setSelectedPriceRanges([]);

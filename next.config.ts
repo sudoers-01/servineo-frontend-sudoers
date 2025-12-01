@@ -11,8 +11,14 @@ const nextConfig: NextConfig = {
         hostname: '**',
       },
       {
-        protocol: 'http',
-        hostname: '**',
+        protocol: 'https',
+        hostname: 'mi-cdn.com',
+        pathname: '/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+        pathname: '/**',
       },
     ],
   },
