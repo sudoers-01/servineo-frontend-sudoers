@@ -62,7 +62,7 @@ export function Navbar() {
               }`}
             >
               <ClipboardList className="w-4 h-4" />
-              <span className="font-medium">Fixers Por Trabajo</span>
+              <span className="font-medium">{t('a')}</span>
             </Link>
 
             <Link
