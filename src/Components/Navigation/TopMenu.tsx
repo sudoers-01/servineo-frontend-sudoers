@@ -47,10 +47,9 @@ export default function TopMenu() {
   }, []);
 
   // Consultar user por ID
-const { data: userData } = useGetUserByIdQuery("692c7e87f854e6af3593ee7c", {
-  skip: false,
-});
-
+  const { data: userData } = useGetUserByIdQuery(userId!, {
+    skip: !userId,
+  });
 
   // Guardar user en redux
   useEffect(() => {
