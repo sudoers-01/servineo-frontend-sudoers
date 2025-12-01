@@ -8,11 +8,12 @@ import {
   obtenerMetodosCliente,
   desvincularMetodo,
   AuthProvider,
-} from '@/app/redux/services/services/api';
-import VincularCorreo from './vinculoCuenta/vincularCorreo';
-import VincularGoogle from './vinculoCuenta/vincularGoogle';
-import VincularGithub from './vinculoCuenta/vincularGithub';
-import VincularDiscord from './vinculoCuenta/vincularDiscord';
+} from "@/app/redux/services/services/api";
+import VincularCorreo from "./vinculoCuenta/vincularCorreo";
+import VincularGoogle from "./vinculoCuenta/vincularGoogle";
+import VincularGithub from "./vinculoCuenta/vincularGithub";
+import VincularDiscord from "./vinculoCuenta/vincularDiscord";
+import { useTranslations } from "next-intl";
 
 interface Props {
   token?: string;
@@ -30,7 +31,8 @@ interface FullAuthProvider extends AuthProvider {
   name: string;
 }
 
-export default function AccountLoginSettings({ token = '' }: Props) {
+export default function AccountLoginSettings({ token = "" }: Props) {
+  const t = useTranslations('AccountLoginSettings'); 
   const [methods, setMethods] = useState<FullAuthProvider[]>([]);
 
   const buildFullMethodsList = (linkedMethodsFromAPI: AuthProvider[]): FullAuthProvider[] => {
@@ -74,19 +76,17 @@ export default function AccountLoginSettings({ token = '' }: Props) {
     } catch (err) {
       console.error(err);
       alert(
-        `Error al vincular el método ${provider}: ${
-          err instanceof Error ? err.message : 'Desconocido'
-        }`,
+        t('errors.linkError', { provider, error: err instanceof Error ? err.message : t('errors.unknown') })
       );
     }
   };
 
   const handleUnlink = async (provider: string) => {
     if (linkedMethods.length <= 1) {
-      alert('Debes tener al menos un método activo.');
+      alert(t('errors.minimumMethods'));
       return;
     }
-    if (window.confirm(`¿Desvincular ${provider}?`)) {
+    if (window.confirm(t('confirmUnlink', { provider }))) {
       try {
         const updatedLinkedMethods = await desvincularMetodo(provider);
         const fullList = buildFullMethodsList(updatedLinkedMethods);
@@ -94,9 +94,7 @@ export default function AccountLoginSettings({ token = '' }: Props) {
       } catch (err) {
         console.error(err);
         alert(
-          `Error al desvincular método ${provider}: ${
-            err instanceof Error ? err.message : 'Desconocido'
-          }`,
+          t('errors.unlinkError', { provider, error: err instanceof Error ? err.message : t('errors.unknown') })
         );
       }
     }
@@ -105,71 +103,74 @@ export default function AccountLoginSettings({ token = '' }: Props) {
   return (
     <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-2xl shadow-md p-8 mx-auto">
       <h1 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-        Configuración de Cuentas Vinculadas
+        {t('title')}
       </h1>
 
       {/* Métodos vinculados */}
       <section className="mb-10">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">
-          Cuentas Vinculadas ({linkedMethods.length})
-        </h2>
+  <h2 className="text-lg font-semibold text-gray-800 mb-3">
+     {t('linkedAccounts.title', { count: linkedMethods.length })}
+  </h2>
 
-        <div className="space-y-3">
-          {linkedMethods.map((method) => {
-            return (
-              <div
-                key={method.provider}
-                className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition"
-              >
-                <div className="flex items-center gap-3">
-                  {/* Íconos con mismo estilo que los componentes de vinculación */}
-                  {method.provider === 'google' && <FcGoogle size={30} />}
-                  {method.provider === 'github' && <FaGithub size={30} className="text-gray-800" />}
-                  {method.provider === 'email' && <Mail size={28} className="text-gray-800" />}
-                  {method.provider === 'discord' && (
-                    <FaDiscord size={30} className="text-[#5865F2]" />
-                  )}
+  <div className="space-y-3">
+    {linkedMethods.map((method) => {
+      return (
+        <div
+          key={method.provider}
+          className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition"
+        >
+          <div className="flex items-center gap-3">
+            {/* Íconos con mismo estilo que los componentes de vinculación */}
+            {method.provider === "google" && (
+              <FcGoogle size={30} />
+            )}
+            {method.provider === "github" && (
+              <FaGithub size={30} className="text-gray-800" />
+            )}
+            {method.provider === "email" && (
+              <Mail size={28} className="text-gray-800" />
+            )}
+            {method.provider === "discord" && (
+              <FaDiscord size={30} className="text-[#5865F2]" />
+            )}
 
-                  <div className="flex flex-col">
-                    <span className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                      {method.name}
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                        Activo
-                      </span>
-                    </span>
-                    {method.email && (
-                      <span className="text-xs text-gray-500 mt-0.5">{method.email}</span>
-                    )}
-                  </div>
-                </div>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold text-gray-800 flex items-center gap-2">
+                {method.name}
+                <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                  {t('status.active')}
+                </span>
+              </span>
+              {method.email && (
+                <span className="text-xs text-gray-500 mt-0.5">{method.email}</span>
+              )}
+            </div>
+          </div>
 
-                {/* Botón de Desvincular con estilo coherente */}
-                <button
-                  onClick={() => handleUnlink(method.provider)}
-                  disabled={linkedMethods.length <= 1}
-                  className={`flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition disabled:opacity-60 ${
-                    linkedMethods.length <= 1
-                      ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                      : 'bg-red-50 text-red-600 hover:bg-red-100'
-                  }`}
-                >
-                  Desvincular
-                </button>
-              </div>
-            );
-          })}
+          {/* Botón de Desvincular con estilo coherente */}
+          <button
+            onClick={() => handleUnlink(method.provider)}
+            disabled={linkedMethods.length <= 1}
+            className={`flex items-center justify-center gap-2 text-sm font-medium px-4 py-2 rounded-xl transition disabled:opacity-60 ${
+              linkedMethods.length <= 1
+                ? "bg-gray-100 text-gray-400 cursor-not-allowed"
+                : "bg-red-50 text-red-600 hover:bg-red-100"
+            }`}
+          >
+            {t('buttons.unlink')}
+          </button>
         </div>
       </section>
 
       {/* Métodos disponibles */}
       <section>
         <h2 className="text-lg font-semibold text-gray-800 mb-3">
-          Métodos Disponibles ({availableMethods.length})
+          {t('availableMethods.title', { count: availableMethods.length })}
         </h2>
 
         {availableMethods.length === 0 ? (
           <p className="text-gray-400 text-center py-4">
-            Todos los métodos están actualmente vinculados.
+            {t('availableMethods.allLinked')}
           </p>
         ) : (
           <div className="space-y-3">

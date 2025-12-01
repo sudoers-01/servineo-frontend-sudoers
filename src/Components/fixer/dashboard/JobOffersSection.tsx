@@ -8,6 +8,7 @@ import { Modal } from '@/Components/Modal';
 import { useForm } from 'react-hook-form';
 import { JobOfferCard } from '@/Components/Job-offers/JobOfferCard';
 import type { JobOfferData } from '@/types/jobOffers';
+import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
 import {
   useGetJobOffersByFixerQuery,
@@ -37,6 +38,7 @@ interface JobOffersSectionProps {
 }
 
 export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
+  const t = useTranslations('JobOffersSection');
   const { user } = useAppSelector((state) => state.user);
   const userId = user?._id || '';
 
@@ -72,7 +74,6 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
         : new Date().toISOString(),
     })) || [];
 
-  // === Modal de creación/edición ===
   const handleOpenModal = (offer?: IJobOffer) => {
     if (readOnly) return;
     if (offer) {
@@ -177,7 +178,6 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
     }
   };
 
-  // === Modal de eliminación ===
   const openDeleteModal = (id: string) => {
     if (readOnly) return;
     setOfferToDelete(id);
@@ -201,13 +201,13 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
     setOfferToDelete(null);
   };
 
-  // Mapeo para la tarjeta
+  // Helper to convert IJobOffer to JobOfferData for the card
   const mapToCardData = (offer: IJobOffer): JobOfferData => ({
     _id: offer._id || '',
-    title: offer.categories[0] || 'Sin título',
+    title: offer.categories[0] || t('card.defaultTitle'),
     description: offer.description,
     price: offer.price,
-    category: offer.categories[0] || 'General',
+    category: offer.categories[0] || t('card.defaultCategory'),
     tags: offer.categories,
     city: offer.city,
     createdAt: new Date(offer.createdAt || Date.now()),
@@ -232,7 +232,7 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
           <Briefcase className="h-5 w-5 text-blue-600" />
-          {readOnly ? 'Ofertas de Trabajo' : 'Mis Ofertas de Trabajo'}
+          {readOnly ? t('titles.jobOffers') : t('titles.myJobOffers')}
         </h2>
         {!readOnly && (
           <PillButton
@@ -240,7 +240,7 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
             className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Nueva Oferta
+            {t('buttons.newOffer')}
           </PillButton>
         )}
       </div>
@@ -269,37 +269,43 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
       <Modal
         open={isModalOpen}
         onClose={handleCloseModal}
-        title={editingOffer ? 'Editar Oferta' : 'Nueva Oferta'}
+        title={editingOffer ? t('modal.editTitle') : t('modal.newTitle')}
         size="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.category.label')}
+            </label>
             <select
-              {...register('categories.0', { required: 'Selecciona una categoría' })}
+              {...register('categories.0', { required: t('form.category.required') })}
               className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
             >
-              <option value="">Seleccionar...</option>
-              <option value="Plomería">Plomería</option>
-              <option value="Electricidad">Electricidad</option>
-              <option value="Carpintería">Carpintería</option>
-              <option value="Pintura">Pintura</option>
+              <option value="">{t('form.category.select')}</option>
+              <option value="Plomería">{t('form.category.plumbing')}</option>
+              <option value="Electricidad">{t('form.category.electricity')}</option>
+              <option value="Carpintería">{t('form.category.carpentry')}</option>
+              <option value="Pintura">{t('form.category.painting')}</option>
             </select>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              {t('form.description.label')}
+            </label>
             <textarea
-              {...register('description', { required: 'La descripción es requerida' })}
+              {...register('description', { required: t('form.description.required') })}
               rows={3}
               className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Describe tu servicio..."
+              placeholder={t('form.description.placeholder')}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Precio (Bs.)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('form.price.label')}
+              </label>
               <input
                 type="number"
                 {...register('price', { required: true, min: 0 })}
@@ -307,7 +313,9 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ciudad</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('form.city.label')}
+              </label>
               <input
                 {...register('city', { required: true })}
                 className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
@@ -321,10 +329,10 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
               onClick={handleCloseModal}
               className="bg-gray-100 text-gray-700 hover:bg-gray-200"
             >
-              Cancelar
+              {t('buttons.cancel')}
             </PillButton>
             <PillButton type="submit" className="bg-primary text-white hover:bg-blue-800">
-              Guardar
+              {t('buttons.save')}
             </PillButton>
           </div>
         </form>
@@ -332,15 +340,12 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
 
       {/* Modal de Confirmación de Eliminación */}
       <Modal open={isDeleteModalOpen} onClose={closeDeleteModal} title="Eliminar oferta" size="sm">
-        <Modal.Body>
+        <div className="p-6">
           <p className="text-gray-700">
             ¿Estás seguro de que quieres eliminar esta oferta de forma permanente? Esta acción{' '}
             <strong>no se puede deshacer</strong>.
           </p>
-        </Modal.Body>
-
-        <Modal.Footer>
-          <div className="flex justify-end gap-3">
+          <div className="flex justify-end gap-3 mt-6">
             <PillButton
               onClick={closeDeleteModal}
               className="bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -355,7 +360,7 @@ export function JobOffersSection({ readOnly = false }: JobOffersSectionProps) {
               Eliminar
             </PillButton>
           </div>
-        </Modal.Footer>
+        </div>
       </Modal>
     </div>
   );

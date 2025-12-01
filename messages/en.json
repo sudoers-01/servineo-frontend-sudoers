@@ -36,10 +36,12 @@
     "available": "available",
     "backToHome": "Home",
     "loading": "Loading offers...",
+    "error": "An error occurred while loading offers",
     "viewModes": {
       "list": "List",
       "map": "Map",
       "grid": "Grid"
+
     },
     "emptyState": {
       "title": "No offers found",
@@ -488,5 +490,531 @@
     "jobOffers": "Job Offers",
     "becomeFixer": "Become a Fixer",
     "myOffers": "My Offers"
+  },
+  "Mock_Fixer":{
+    "role": "Professional Plumber",
+    "about": "Residential and commercial plumbing specialist with over 10 years of experience. I guarantee clean and long-lasting work.",
+    "reviews": "124 reviews",
+    "featuredOffers": "Featured Offers",
+    "tabs": {
+      "summary": "Summary",
+      "offers": "Offers",
+      "experience": "Experience",
+      "certifications": "Certifications",
+      "portfolio": "Portfolio",
+      "statistics": "Statistics"
+    }
+  }, 
+  "Login": {
+    "title": "Log in",
+    "mode": "Requester mode",
+    "separator": "or",
+    "form": {
+      "email": {
+        "label": "Email",
+        "placeholder": "Enter your email"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password"
+      },
+    "links": {
+      "forgotPassword": "Forgot your password?",
+      "noAccount": "Don't have an account?",
+      "register": "Sign up"
+      },
+    "buttons": {
+      "login": "Log in",
+      "loading": "Logging in..."
+      },
+    "aria": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password"
+     },
+    "errors": {
+      "invalidEmail": "Please enter a valid email",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "invalidCredentials": "Invalid credentials or server error",
+      "loginError": "Login error",
+      "connectionError": "Could not connect to the server",
+      "connectionTitle": "Connection error",
+      "googleError": "Google error"
+     } ,
+    "success": {
+      "title": "Login successful",
+      "welcome": "Welcome, {name}!"
+    }
+  }
+ },
+  "SignUp": {
+    "title": "Create account",
+    "subtitle": "Join our community",
+    "form": {
+      "name": {
+        "label": "Full name",
+        "placeholder": "Enter your full name"
+      },
+      "email": {
+        "label": "Email", 
+        "placeholder": "Enter your email"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Enter your password"
+      },
+      "confirmPassword": {
+        "label": "Confirm password",
+        "placeholder": "Confirm your password"
+      },
+      "terms": {
+        "text": "I agree to the",
+        "link": "terms and conditions"
+      }
+    },
+    "buttons": {
+      "register": "Create account",
+      "loading": "Creating account..."
+    },
+    "links": {
+      "haveAccount": "Already have an account?",
+      "login": "Log in"
+    },
+    "errors": {
+      "nameMinLength": "Name must be at least 2 characters",
+      "invalidEmail": "Please enter a valid email",
+      "passwordMinLength": "Password must be at least 6 characters",
+      "passwordsMatch": "Passwords do not match",
+      "termsRequired": "You must accept the terms and conditions",
+      "registrationError": "Registration error",
+      "connectionError": "Could not connect to the server"
+    },
+    "success": {
+      "title": "Registration successful",
+      "message": "Your account has been created successfully"
+    }
+  },
+  
+  "Calendar": {
+    "fixer": "Fixer",
+    "viewCalendar": "View Calendar",
+    "profileInfo": "Profile Information",
+    "previousExperience": "Previous Experience",
+    "experienceDescription": "Information about previous experiences and jobs...",
+    "reviews": "Reviews",
+    "reviewsDescription": "Customer reviews and comments..."
+  },
+  "AdvSearch": {
+    "pageTitle": "Search Results",
+    "noResults": "No results found",
+    "loading": "Loading...",
+    "loadingFallback": "Loading search results..."
+  },
+  "VincularCorreo": {
+    "title": "Email and password",
+    "subtitle": "Link your account with credentials",
+    "form": {
+      "email": {
+        "placeholder": "Email address"
+      },
+      "password": {
+        "placeholder": "Password"
+      },
+      "repeatPassword": {
+        "placeholder": "Repeat password"
+      }
+    },
+    "buttons": {
+      "link": "Link",
+      "cancel": "Cancel",
+      "confirm": "Confirm Link",
+      "linking": "Linking..."
+    },
+    "errors": {
+      "invalidEmail": "Must be a valid email address.",
+      "passwordMinLength": "Password must be at least 8 characters.",
+      "passwordUppercase": "Must contain at least one uppercase letter.",
+      "passwordLowercase": "Must contain at least one lowercase letter.",
+      "passwordNumber": "Must contain at least one number.",
+      "passwordSymbol": "Must contain at least one symbol.",
+      "passwordsMatch": "Passwords do not match."
+    },
+    "toasts": {
+      "formErrors": "Please correct the form errors."
+    },
+    "success": {
+      "message": "Link successful."
+    }
+  },
+  "VincularDiscord": {
+    "title": "Discord",
+    "subtitle": "Link your Discord account",
+    "buttons": {
+      "link": "Link",
+      "linking": "Linking..."
+    }
+  },
+  "VincularGithub": {
+    "title": "GitHub",
+    "subtitle": "Link your GitHub account",
+    "buttons": {
+      "link": "Link",
+      "linking": "Linking..."
+    },
+    "errors": {
+      "noSession": "No active session to link account"
+    },
+    "success": {
+      "message": "GitHub account linked successfully"
+    }
+  },
+  "VincularGoogle": {
+    "title": "Google",
+    "subtitle": "Link your Google account",
+    "buttons": {
+      "link": "Link",
+      "linking": "Linking..."
+    },
+    "errors": {
+      "emptyToken": "Empty Google token",
+      "noSession": "No active session to link account",
+      "loginError": "Error logging in with Google"
+    }
+  },
+  "AccountLoginSettings": {
+    "title": "Linked Accounts Settings",
+    "linkedAccounts": {
+      "title": "Linked Accounts ({count})"
+    },
+    "availableMethods": {
+      "title": "Available Methods ({count})",
+      "allLinked": "All methods are currently linked."
+    },
+    "status": {
+      "active": "Active"
+    },
+    "buttons": {
+      "unlink": "Unlink"
+    },
+    "confirmUnlink": "Unlink {provider}?",
+    "errors": {
+      "loadMethods": "Error loading methods",
+      "minimumMethods": "You must have at least one active method.",
+      "linkError": "Error linking {provider} method: {error}",
+      "unlinkError": "Error unlinking {provider} method: {error}",
+      "unknown": "Unknown"
+    }
+  },
+  "ConfiguracionPage": {
+    "title": "Settings",
+    "loading": {
+      "profile": "Loading profile data..."
+    },
+    "errors": {
+      "loadTitle": "Load Error",
+      "loadMessage": "Could not load profile: {error}",
+      "loadProfile": "Error loading profile data."
+    },
+    "buttons": {
+      "retry": "Retry Load"
+    },
+    "sections": {
+      "editProfile": "Edit Profile",
+      "changePassword": "Change Password",
+      "security": "Security"
+    },
+    "security": {
+      "description": "Options and recommendations to help you protect your account",
+      "changePassword": "Change password",
+      "linkedDevices": "Linked devices"
+    },
+    "welcome": {
+      "profilePhoto": "Profile photo",
+      "title": "Welcome, {name}",
+      "defaultName": "User",
+      "description": "Manage your information, privacy and security to improve your experience in Servineo.",
+      "loginRequired": "Log in to see your settings."
+    },
+    "navigation": {
+      "editProfile": "Edit Profile",
+      "security": "Security",
+      "linkedAccounts": "Linked accounts"
+    }
+  },
+  "RegistroGoogle": {
+    "errors": {
+      "noToken": {
+        "title": "Token not received",
+        "message": "Google token was not received."
+      },
+      "authError": {
+        "title": "Error",
+        "defaultMessage": "Error authenticating with Google."
+      },
+      "connection": {
+        "title": "Connection Error",
+        "defaultMessage": "Could not connect to the server. Please try again."
+      }
+    },
+    "welcome": {
+      "title": "Welcome",
+      "message": "First time on Servineo. Complete your profile to continue."
+    },
+    "success": {
+      "loginTitle": "Login successful",
+      "loginMessage": "Welcome back, {name}",
+      "defaultName": "user"
+    }
+  },
+  "CalendarPage": {
+    "closeButton": "Close",
+    "titles": {
+      "myCalendar": "My Calendar",
+      "fixerCalendar": "{fixerName}'s Calendar"
+    },
+    "buttons": {
+      "modifyAvailability": "Modify Availability",
+      "cancelAppointments": "Cancel Appointments"
+      }
+  },
+  "CloseSessionPage": {
+    "backButton": "Back",
+    "title": "Session Management",
+    "description": "Manage your connected devices and log out of sessions on other devices to keep your account secure.",
+    "loading": "Loading devices...",
+    "important": "Important",
+    "warnings": {
+      "deviceLimit": "You have reached the limit of 3 connected devices.",
+      "closeSessionsWarning": "When closing sessions, all devices except the current one will be disconnected. You will need to log in again on other devices."
+    },
+    "stats": {
+      "activeSessions": "Active sessions",
+      "otherDevices": "Other devices",
+      "currentDevice": "Current device"
+    },
+    "buttons": {
+      "closeOtherSessions": "Log out of sessions on other devices",
+      "closingSessions": "Logging out..."
+    },
+    "noOtherSessions": "There are no other active sessions. Only this device is connected.",
+    "activeSessions": {
+      "title": "Active Sessions ({count})",
+      "noDevices": "No connected devices.",
+      "thisDevice": "This device"
+    },
+    "confirmation": {
+      "title": "Log out of sessions?",
+      "message": "This action will log out all active sessions on other devices ({count} {sessions}).",
+      "sessionSingular": "session",
+      "sessionPlural": "sessions",
+      "cancel": "Cancel",
+      "closing": "Logging out...",
+      "confirm": "Yes, log out sessions"
+    }
+  },
+  "SignUpRegister": {
+    "title": "Sign Up",
+    "mode": "Requester mode",
+    "separator": "or continue with",
+    "terms": {
+      "text": "By signing up you accept the",
+      "link": "terms of use"
+    },
+    "login": {
+      "text": "Already have an account?",
+      "link": "Log in"
+    }
+  }, 
+  "CertificationsSection": {
+    "titles": {
+      "certifications": "Certifications",
+      "myCertifications": "My Certifications"
+    },
+    "buttons": {
+      "addCertification": "Add Certification",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "card": {
+      "issued": "Issued",
+      "expires": "Expires",
+      "viewCredential": "View credential"
+    },
+    "tooltips": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "modal": {
+      "editTitle": "Edit Certification",
+      "newTitle": "New Certification"
+    },
+    "form": {
+      "name": {
+        "label": "Certification Name",
+        "placeholder": "Ex: Electrical Technician",
+        "required": "Name is required"
+      },
+      "institution": {
+        "label": "Issuing Institution",
+        "placeholder": "Ex: INFOCAL",
+        "required": "Institution is required"
+      },
+      "issueDate": {
+        "label": "Issue Date"
+      },
+      "expiryDate": {
+        "label": "Expiry Date"
+      },
+      "credentialId": {
+        "label": "Credential ID",
+        "placeholder": "Optional"
+      },
+      "credentialUrl": {
+        "label": "Credential URL",
+        "placeholder": "https://..."
+      }
+    },
+    "deleteConfirmation": "Are you sure you want to delete this certification?"
+  }, 
+  "ExperienceSection": {
+    "titles": {
+      "experience": "Work Experience",
+      "myExperience": "My Work Experience"
+    },
+    "buttons": {
+      "addExperience": "Add Experience",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "card": {
+      "present": "Present"
+    },
+    "tooltips": {
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "modal": {
+      "editTitle": "Edit Experience",
+      "newTitle": "New Experience"
+    },
+    "form": {
+      "jobTitle": {
+        "label": "Job Title",
+        "placeholder": "Ex: Senior Plumber",
+        "required": "Job title is required"
+      },
+      "organization": {
+        "label": "Company / Organization",
+        "placeholder": "Ex: General Services Inc.",
+        "required": "Company is required"
+      },
+      "jobType": {
+        "label": "Employment Type",
+        "options": {
+          "fullTime": "Full Time",
+          "partTime": "Part Time",
+          "contract": "Contract",
+          "freelance": "Freelance"
+        }
+      },
+      "isCurrent": {
+        "label": "I currently work here"
+      },
+      "startDate": {
+        "label": "Start Date"
+      },
+      "endDate": {
+        "label": "End Date"
+      }
+    },
+    "deleteConfirmation": "Are you sure you want to delete this experience?"
+  }, 
+  "JobOffersSection": {
+    "titles": {
+      "jobOffers": "Job Offers",
+      "myJobOffers": "My Job Offers"
+    },
+    "buttons": {
+      "newOffer": "New Offer",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "card": {
+      "defaultTitle": "No title",
+      "defaultCategory": "General"
+    },
+    "modal": {
+      "editTitle": "Edit Offer",
+      "newTitle": "New Offer"
+    },
+    "form": {
+      "defaultCity": "Cochabamba",
+      "category": {
+        "label": "Category",
+        "select": "Select...",
+        "required": "Select a category",
+        "options": {
+          "plumbing": "Plumbing",
+          "electricity": "Electricity",
+          "carpentry": "Carpentry",
+          "painting": "Painting"
+        }
+      },
+      "description": {
+        "label": "Description",
+        "placeholder": "Describe your service...",
+        "required": "Description is required"
+      },
+      "price": {
+        "label": "Price (Bs.)"
+      },
+      "city": {
+        "label": "City"
+      }
+    },
+    "deleteConfirmation": "Are you sure you want to delete this offer?"
+  },
+  "PortfolioSection": {
+    "titles": {
+      "portfolio": "Portfolio",
+      "myPortfolio": "My Portfolio"
+    },
+    "buttons": {
+      "video": "Video",
+      "image": "Image",
+      "cancel": "Cancel",
+      "save": "Save"
+    },
+    "image": {
+      "alt": "Portfolio item",
+      "placeholder": "https://placehold.co/300x300?text=No+Image"
+    },
+    "tooltips": {
+      "delete": "Delete"
+    },
+    "modal": {
+      "addImage": "Add Image",
+      "addVideo": "Add Video"
+    },
+    "form": {
+      "imageUrl": {
+        "label": "Image URL",
+        "placeholder": "https://...",
+        "required": "URL is required"
+      },
+      "youtubeUrl": {
+        "label": "YouTube URL",
+        "placeholder": "https://www.youtube.com/watch?v=...",
+        "required": "URL is required"
+      },
+      "thumbnailUrl": {
+        "label": "Thumbnail URL (Optional)",
+        "placeholder": "Will try to extract automatically"
+      }
+    },
+    "deleteConfirmation": "Are you sure you want to delete this item?"
   }
 }
+
+
+
+

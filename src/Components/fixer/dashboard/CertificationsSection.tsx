@@ -6,6 +6,7 @@ import { Plus, Edit2, Trash2, Award, ExternalLink, Calendar, Building2 } from 'l
 import { ICertification } from '@/types/fixer-profile';
 import { Modal } from '@/Components/Modal';
 import { useForm } from 'react-hook-form';
+import { useTranslations } from 'next-intl';
 
 const MOCK_CERTS: ICertification[] = [
   {
@@ -26,6 +27,7 @@ interface CertificationsSectionProps {
 }
 
 export function CertificationsSection({ readOnly = false }: CertificationsSectionProps) {
+  const t = useTranslations('CertificationsSection');
   const [certs, setCerts] = useState<ICertification[]>(MOCK_CERTS);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState<ICertification | null>(null);
@@ -89,7 +91,7 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
           <Award className="h-5 w-5 text-blue-600" />
-          {readOnly ? 'Certificaciones' : 'Mis Certificaciones'}
+          {readOnly ? t('titles.certifications') : t('titles.myCertifications')}
         </h2>
         {!readOnly && (
           <PillButton
@@ -97,7 +99,7 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
             className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
           >
             <Plus className="h-4 w-4" />
-            Agregar Certificación
+            {t('buttons.addCertification')}
           </PillButton>
         )}
       </div>
@@ -114,7 +116,9 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
                   <Award className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-gray-900 text-lg leading-tight">{cert.name}</h3>
+                  <h3 className="font-semibold text-gray-900 text-lg leading-tight">
+                    {cert.name}
+                  </h3>
                   <div className="flex items-center gap-2 text-gray-600 mt-1">
                     <Building2 className="h-4 w-4" />
                     <span>{cert.institution}</span>
@@ -123,22 +127,26 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
                   <div className="flex flex-wrap gap-x-6 gap-y-2 mt-3 text-sm text-gray-500">
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      <span>Emitido: {new Date(cert.issueDate).toLocaleDateString()}</span>
+                      <span>
+                        {t('card.issued')}: {new Date(cert.issueDate).toLocaleDateString()}
+                      </span>
                     </div>
                     <div className="flex items-center gap-1.5">
                       <Calendar className="h-4 w-4" />
-                      <span>Vence: {new Date(cert.expiryDate).toLocaleDateString()}</span>
+                      <span>
+                        {t('card.expires')}: {new Date(cert.expiryDate).toLocaleDateString()}
+                      </span>
                     </div>
                   </div>
 
                   {cert.credentialUrl && (
-                    <a
+                    
                       href={cert.credentialUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline text-sm mt-3 font-medium"
                     >
-                      Ver credencial <ExternalLink className="h-3 w-3" />
+                      {t('card.viewCredential')} <ExternalLink className="h-3 w-3" />
                     </a>
                   )}
                 </div>
@@ -149,14 +157,14 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
                   <button
                     onClick={() => handleOpenModal(cert)}
                     className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                    title="Editar"
+                    title={t('tooltips.edit')}
                   >
                     <Edit2 className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(cert._id!)}
                     className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                    title="Eliminar"
+                    title={t('tooltips.delete')}
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
@@ -170,36 +178,36 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
       <Modal
         open={isModalOpen}
         onClose={handleCloseModal}
-        title={editingCert ? 'Editar Certificación' : 'Nueva Certificación'}
+        title={editingCert ? t('modal.editTitle') : t('modal.newTitle')}
         size="lg"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Nombre de la Certificación
+              {t('form.name.label')}
             </label>
             <input
               {...register('name', { required: 'El nombre es requerido' })}
               className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Ej: Técnico Electricista"
+              placeholder={t('form.name.placeholder')}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Institución Emisora
+              {t('form.institution.label')}
             </label>
             <input
-              {...register('institution', { required: 'La institución es requerida' })}
+              {...register('institution', { required: t('form.institution.required') })}
               className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-              placeholder="Ej: INFOCAL"
+              placeholder={t('form.institution.placeholder')}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha de Emisión
+                {t('form.issueDate.label')}
               </label>
               <input
                 type="date"
@@ -209,7 +217,7 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Fecha de Vencimiento
+                {t('form.expiryDate.label')}
               </label>
               <input
                 type="date"
@@ -221,19 +229,23 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">ID Credencial</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('form.credentialId.label')}
+              </label>
               <input
                 {...register('credentialId')}
                 className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                placeholder="Opcional"
+                placeholder={t('form.credentialId.placeholder')}
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">URL Credencial</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('form.credentialUrl.label')}
+              </label>
               <input
                 {...register('credentialUrl')}
                 className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                placeholder="https://..."
+                placeholder={t('form.credentialUrl.placeholder')}
               />
             </div>
           </div>
@@ -244,10 +256,10 @@ export function CertificationsSection({ readOnly = false }: CertificationsSectio
               onClick={handleCloseModal}
               className="bg-gray-100 text-gray-700 hover:bg-gray-200"
             >
-              Cancelar
+              {t('buttons.cancel')}
             </PillButton>
             <PillButton type="submit" className="bg-primary text-white hover:bg-blue-800">
-              Guardar
+              {t('buttons.save')}
             </PillButton>
           </div>
         </form>
