@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import HistoryPageClient from '../../../Components/payment/HistoryClient'; // 1. Importa tu componente
+import HistoryPageClient from '../../../../Components/payment/HistoryClient'; // 1. Importa tu componente
 import { Loader2 } from 'lucide-react';
 
 // Componente simple de carga (puedes personalizarlo)

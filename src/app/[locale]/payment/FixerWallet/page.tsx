@@ -1,7 +1,7 @@
 //src/app/payment/FixerWallet/page.tsx
 import { Suspense } from 'react';
 import { Loader2 } from 'lucide-react';
-import WalletDashboardClient from '../../../Components/payment/WalletDashboardClient'; // Importa el archivo que renombraste
+import WalletDashboardClient from '../../../../Components/payment/WalletDashboardClient'; // Importa el archivo que renombraste
 
 // Un componente simple de carga que se mostrará mientras se leen los datos del cliente
 function LoadingFallback() {

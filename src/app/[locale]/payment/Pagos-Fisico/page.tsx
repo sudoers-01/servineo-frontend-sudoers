@@ -4,9 +4,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Briefcase, DollarSign, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
-import { Trabajo } from '../../../utils/types';
-import { getFixerId, fetchAllFixerJobs } from '../../../utils/paymentapi';
-import PaymentMethodCashFixer from '../../../Components/payment/PaymentMethodCashFixer';
+import { Trabajo } from '../../../../utils/types';
+import { getFixerId, fetchAllFixerJobs } from '../../../../utils/paymentapi';
+import PaymentMethodCashFixer from '../../../../Components/payment/PaymentMethodCashFixer';
 
 export default function TrabajosYPagos() {
   const [trabajos, setTrabajos] = useState<Trabajo[]>([]);

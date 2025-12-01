@@ -267,7 +267,7 @@ const CentroDePagos = () => {
             <div className="h-4" /> 
 
             <button 
-              onClick={() => router.push(`/cuenta-bancaria?fixerId=${fixerIdFromUrl}`)} 
+              onClick={() => router.push(`/payment/cuenta-bancaria?fixerId=${fixerIdFromUrl}`)} 
               disabled={!fixerIdFromUrl}
               className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
             >
@@ -284,7 +284,7 @@ const CentroDePagos = () => {
             <div className="h-4" />
 
             <button 
-              onClick={() => router.push('/facturas')} 
+              onClick={() => router.push('/payment/facturas')} 
               className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group"
             >
               <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
