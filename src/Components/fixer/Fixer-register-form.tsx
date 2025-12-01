@@ -2,7 +2,7 @@
 import { useForm, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { initialRegistrationSchema, type InitialRegistrationData } from "@/app/lib/validations/fixer-schemas"
-import { useState,useEffect } from "react"
+import { useState, useEffect } from "react"
 import { useTranslations } from "next-intl"
 
 interface FixerRegisterFormProps {
@@ -13,10 +13,10 @@ interface FixerRegisterFormProps {
 
 export default function FixerRegisterForm({
   onSubmit,
-  submitButtonText = 'Registrar',
+  submitButtonText,
   defaultValues = {},
 }: FixerRegisterFormProps) {
-  const t= useTranslations("becomeFixer");
+  const t = useTranslations("becomeFixer");
   const [isSubmitting, setIsSubmitting] = useState(false)
   
   const {
@@ -30,12 +30,11 @@ export default function FixerRegisterForm({
       name: '',
       email: '',
       phone: '',
-      ...defaultValues, // Se cargan aquí si existen
+      ...defaultValues,
     },
     mode: 'onChange',
   });
 
-  // 👉 Reset cuando cambien los defaultValues
   useEffect(() => {
     reset({
       name: defaultValues.name || '',
@@ -55,7 +54,7 @@ export default function FixerRegisterForm({
       {/* NAME */}
       <div className="space-y-1">
         <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          {t("completeName")} <span className="text-red-500">*</span>
+          {t("fields.name.label")} <span className="text-red-500">*</span>
         </label>
         <Controller
           name="name"
@@ -66,7 +65,7 @@ export default function FixerRegisterForm({
                 {...field}
                 maxLength={30}
                 className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm"
-                placeholder="Ingrese su nombre completo"
+                placeholder={t("fields.name.placeholder")}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 30);
                   field.onChange(value);
@@ -84,7 +83,7 @@ export default function FixerRegisterForm({
       {/* EMAIL */}
       <div className="space-y-1">
         <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          {t("eMail")} <span className="text-red-500">*</span>
+          {t("fields.email.label")} <span className="text-red-500">*</span>
         </label>
         <Controller
           name="email"
@@ -94,7 +93,7 @@ export default function FixerRegisterForm({
               {...field}
               type="email"
               className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm"
-              placeholder="correo@ejemplo.com"
+              placeholder={t("fields.email.placeholder")}
             />
           )}
         />
@@ -104,7 +103,7 @@ export default function FixerRegisterForm({
       {/* PHONE */}
       <div className="space-y-1">
         <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-          {t("phone")} <span className="text-red-500">*</span>
+          {t("fields.phone.label")} <span className="text-red-500">*</span>
         </label>
         <Controller
           name="phone"
@@ -115,7 +114,7 @@ export default function FixerRegisterForm({
                 {...field}
                 type="tel"
                 className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm pr-20"
-                placeholder="+591 70123456"
+                placeholder={t("fields.phone.placeholder")}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^\d\s+-]/g, '');
                   field.onChange(value);
@@ -136,7 +135,7 @@ export default function FixerRegisterForm({
         disabled={isSubmitting}
         className="w-full rounded-full bg-primary text-white py-2.5 text-sm font-semibold"
       >
-        {isSubmitting ? 'Registrando...' : submitButtonText}
+        {isSubmitting ? t("buttons.submitting") : (submitButtonText || t("buttons.submit"))}
       </button>
     </form>
   );
