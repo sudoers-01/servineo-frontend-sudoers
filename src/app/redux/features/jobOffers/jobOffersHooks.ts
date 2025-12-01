@@ -31,6 +31,7 @@ import {
 } from './session';
 import { ParamsMap } from './types';
 import { JOBOFERT_ALLOWED_LIMITS } from '@/app/lib/validations/pagination.validator';
+import { sanitizePage, sanitizeLimit } from '@/app/lib/validations/pagination.validator';//
 
 /**
  * Hook principal que combina RTK Query con el slice de Redux
@@ -43,24 +44,18 @@ export function useJobOffers() {
   const shouldClearErrorRef = useRef(true);
 
   // ✅ Validar página < 1
-  useEffect(() => {
-    if (params.page < 1) {
-      dispatch(setError(`La página ${params.page} no es válida. Debe ser mayor o igual a 1.`));
-      setSkipQuery(true);
-      shouldClearErrorRef.current = false;
+   useEffect(() => {
+    if (!data) return;
 
-      errorTimeoutRef.current = setTimeout(() => {
-        dispatch(setPaginaActual(1));
-        setSkipQuery(false);
-        shouldClearErrorRef.current = true;
-      }, 2500);
+    const totalPages = Math.ceil(data.total / params.limit) || 1;
+    const correctedPage = sanitizePage(params.page, totalPages);
 
-      return () => {
-        if (errorTimeoutRef.current) clearTimeout(errorTimeoutRef.current);
-      };
+    if (correctedPage !== params.page) {
+      dispatch(setPaginaActual(correctedPage));
     }
   }, [params.page, dispatch]);
 
+ 
   // ✅ Validar límite inválido
   useEffect(() => {
     if (!JOBOFERT_ALLOWED_LIMITS.includes(params.limit)) {

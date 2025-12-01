@@ -24,6 +24,7 @@ import {
   resetFilters,
   enablePersistence,
 } from '@/app/redux/slice/jobOfert';
+import { STORAGE_KEYS } from '@/app/redux/features/jobOffers/storage';
 import type { FilterState } from '@/app/redux/features/jobOffers/types';
 import { getSortValue } from '../../lib/constants/sortOptions';
 import {
@@ -52,6 +53,7 @@ export default function JobOffersPage() {
     sortBy,
     search,
     paginaActual,
+    totalPages,
     registrosPorPagina,
     error: reduxError,
   } = useAppSelector((state) => state.jobOfert);
@@ -67,14 +69,49 @@ export default function JobOffersPage() {
   const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  useEffect(() => {// corregir pagina actual si esta fuera del limite
+    if (!isLoading && totalPages > 0) {
+
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = Number(params.get('page') || 1);
+
+      let correctedPage = pageParam;
+
+      if (pageParam < 1 || isNaN(pageParam)) {
+        correctedPage = 1;
+       } else if (pageParam > totalPages) {
+        correctedPage = totalPages;
+      }
+
+      if (correctedPage !== pageParam) {
+        params.set('page', correctedPage.toString());
+        window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+        dispatch(setPaginaActual(correctedPage));
+      }
+    }
+  }, [isLoading, totalPages, dispatch]);
+
+
   // Limpiar búsqueda si se navega directamente sin parámetros
+  // Pero no limpiar si existe un valor guardado en localStorage (persistencia)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
 
       if (params.toString() === '' && search !== '') {
-        console.log('Navegación directa detectada, limpiando búsqueda guardada');
-        dispatch(setSearch(''));
+        let hasSavedSearch = false;
+        try {
+          hasSavedSearch = !!window.localStorage.getItem(STORAGE_KEYS.SEARCH);
+        } catch (e) {
+          hasSavedSearch = false;
+        }
+
+        if (!hasSavedSearch) {
+          console.log('Navegación directa detectada sin estado guardado, limpiando búsqueda guardada');
+          dispatch(setSearch(''));
+        } else {
+          console.log('Estado guardado encontrado en localStorage — preservando búsqueda');
+        }
       }
     }
   }, [dispatch, search]);
@@ -279,11 +316,6 @@ export default function JobOffersPage() {
           <div className="text-blue-500 text-center mb-4 p-3 bg-blue-100 rounded">
             {t('loading', { default: 'Cargando ofertas...' })}
           </div>
-        )}
-
-        {/* Overlay cuando el drawer está abierto */}
-        {isDrawerOpen && (
-          <div className="fixed bg-black z-40" onClick={() => setIsDrawerOpen(false)} />
         )}
 
         <FilterDrawer

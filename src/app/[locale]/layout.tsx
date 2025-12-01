@@ -60,7 +60,7 @@ export default async function RootLayout({ children, params }: Props) {
   const messages = await loader();
 
   return (
-    <html lang={locale} className={`${roboto.className}`}>
+    <html lang={locale} className={`${roboto.className}`} suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
         suppressHydrationWarning={true}

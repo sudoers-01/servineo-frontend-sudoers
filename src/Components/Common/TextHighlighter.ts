@@ -1,22 +1,12 @@
 /**
- * Normaliza el texto de búsqueda para crear un patrón de búsqueda flexible
+ * Normaliza una palabra individual para crear un patrón flexible
  * que coincida con variantes de tildes y diéresis
  */
-export function createSearchPattern(searchText: string): RegExp | null {
-  if (!searchText || !searchText.trim()) {
-    return null;
-  }
-
-  // Limpieza inicial
-  let normalized = searchText.trim().toLowerCase();
-  normalized = normalized.replace(/\s+/g, ' ');
-
-  // Escapar caracteres especiales de RegExp para que búsquedas con símbolos no rompan el patrón
+function normalizeWord(word: string): string {
+  let normalized = word.toLowerCase();
+  
+  // Escapar caracteres especiales de RegExp
   normalized = normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-  // Tratar separadores (espacios, guiones, guiones bajos) como opcionales
-  // Esto permite que búsquedas como "pin to" o "pin_tor" encuentren "pintor"
-  normalized = normalized.replace(/[\s_\-\\.,]+/g, '[\\s_\\-\\.,]*');
 
   // Quitar tildes del texto de búsqueda
   normalized = normalized.replace(/[ÁáÀàÂâÄäÃãÅåĀāĂăǍǎȦȧ]/g, 'a');
@@ -26,13 +16,48 @@ export function createSearchPattern(searchText: string): RegExp | null {
   normalized = normalized.replace(/[ÚúÙùÛûÜüŨũŮůŪūŬŭǓǔU̇u̇]/g, 'u');
 
   // Crear patrón flexible que coincida con tildes
-  let pattern = normalized.replace(/a/g, '[aáäà]');
-  pattern = pattern.replace(/e/g, '[eéëè]');
-  pattern = pattern.replace(/i/g, '[iíïì]');
-  pattern = pattern.replace(/o/g, '[oóöò]');
-  pattern = pattern.replace(/u/g, '[uúüù]');
+  let pattern = normalized.replace(/a/g, '[aáäàâ]');
+  pattern = pattern.replace(/e/g, '[eéëèê]');
+  pattern = pattern.replace(/i/g, '[iíïìî]');
+  pattern = pattern.replace(/o/g, '[oóöòô]');
+  pattern = pattern.replace(/u/g, '[uúüùû]');
   
-  return new RegExp(pattern, 'gi');
+  return pattern;
+}
+
+/**
+ * Extrae palabras individuales del texto de búsqueda
+ * separando por espacios, guiones, guiones bajos, puntos y comas
+ */
+function extractSearchWords(searchText: string): string[] {
+  if (!searchText || !searchText.trim()) {
+    return [];
+  }
+
+  // Dividir por separadores: espacios, guiones, guiones bajos, puntos, comas
+  const words = searchText
+    .trim()
+    .split(/[\s\-_.,]+/)
+    .filter(word => word.length > 0);
+
+  return words;
+}
+
+/**
+ * Crea un patrón de búsqueda que coincida con cualquiera de las palabras
+ */
+export function createSearchPattern(searchText: string): RegExp | null {
+  const words = extractSearchWords(searchText);
+  
+  if (words.length === 0) {
+    return null;
+  }
+
+  // Crear patrón para cada palabra y unirlos con OR (|)
+  const patterns = words.map(word => normalizeWord(word));
+  const combinedPattern = patterns.join('|');
+  
+  return new RegExp(`(${combinedPattern})`, 'gi');
 }
 
 /**
@@ -55,6 +80,9 @@ export function highlightTextParts(
   const parts: Array<{ text: string; highlight: boolean }> = [];
   let lastIndex = 0;
   let match: RegExpExecArray | null;
+
+  // Reset del regex para asegurar que empiece desde el inicio
+  pattern.lastIndex = 0;
 
   while ((match = pattern.exec(text)) !== null) {
     // Agregar texto antes de la coincidencia
