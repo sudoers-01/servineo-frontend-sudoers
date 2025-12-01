@@ -2,7 +2,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Force /api to use Next.js proxy
-const API_URL = 'http://localhost:3000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
 
 // Log para debugging (solo en desarrollo)
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
