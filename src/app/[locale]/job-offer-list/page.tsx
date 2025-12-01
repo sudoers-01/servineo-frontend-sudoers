@@ -1,4 +1,3 @@
-// src/app/[locale]/job-offer-list/page.tsx
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
@@ -48,9 +47,13 @@ export default function JobOffersPage() {
 
   const { offers, total, isLoading } = useJobOffers();
 
-  const { sortBy, search, paginaActual, registrosPorPagina, error: reduxError} = useAppSelector(
-    (state) => state.jobOfert,
-  );
+  const {
+    sortBy,
+    search,
+    paginaActual,
+    registrosPorPagina,
+    error: reduxError,
+  } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
 
