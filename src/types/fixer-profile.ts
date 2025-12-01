@@ -1,6 +1,6 @@
 export interface IJobOffer {
   _id: string;
-  fixerId: string; 
+  fixerId: string;
   fixerName: string;
   title: string;
   description: string;
@@ -8,14 +8,13 @@ export interface IJobOffer {
   tags?: string[];
   price: number;
   city: string;
-  contactPhone: string; 
+  contactPhone: string;
   photos: string[];
   rating?: number;
   createdAt?: string;
   updatedAt?: string;
   __v?: number;
 }
-
 
 export interface ICertification {
   _id?: string;

@@ -10,19 +10,15 @@ export const jobOfferSchema = z.object({
   description: z
     .string()
     .min(20, { message: 'La descripción debe ser detallada (mínimo 20 letras)' }),
-  category: z
-    .string()
-    .min(1, { message: 'Selecciona una categoría válida' }),
+  category: z.string().min(1, { message: 'Selecciona una categoría válida' }),
   price: z.coerce
     .number({ error: 'El precio debe ser un número' })
     .positive({ message: 'El precio debe ser mayor a 0' }),
-  city: z
-    .string()
-    .min(1, { message: 'Selecciona una ciudad' }),
+  city: z.string().min(1, { message: 'Selecciona una ciudad' }),
   contactPhone: z
     .string()
     .regex(/^[0-9+ ]{8,15}$/, { message: 'Ingresa un número de teléfono válido' }),
-    tags: z
+  tags: z
     .array(z.string())
     .min(1, { message: 'Debes agregar al menos una etiqueta' })
     .max(5, { message: 'Máximo 5 etiquetas' }),
@@ -31,8 +27,7 @@ export const jobOfferSchema = z.object({
 // Tipo inferido para usar en useForm
 export type JobOfferFormData = z.infer<typeof jobOfferSchema>;
 
-
-// esto no deveria esta aqui lo vamos a cambiar 
+// esto no deveria esta aqui lo vamos a cambiar
 // === 2. INTERFAZ DE RESPUESTA DE LA API (Backend Mongoose) ===
 // Esta interfaz coincide con el JSON que mostraste anteriormente
 export interface IJobOffer {
@@ -53,27 +48,24 @@ export interface IJobOffer {
   __v?: number;
 }
 
-
 // para no crear varios archivos aqui creare para las offertas su category
 
 export const jobCategories = [
-   { value: 'Albañil', label: 'Albañil' },
-   { value: 'Electricista', label: 'Electricista' },
-   { value: 'Fontanero', label: 'Fontanero' },
-   { value: 'Carpintero', label: 'Carpintero' },
-   { value: 'Pintor', label: 'Pintor' },
-   { value: 'Jardinero', label: 'Jardinería' },
-   { value: 'Vidriero', label: 'Vidriero' },
-   { value: 'Yesero', label: 'Yesero' },
-   { value: 'Decorador', label: 'Decorador' },
-   { value: 'Techador', label: 'Techador' },
-   { value: 'Pulidor', label: 'Pulidor' },
-   { value: 'Cerrajero', label: 'Cerrajero' },
-   { value: 'soldador', label: 'Soldador' },
-   //si van a umentar mas sacar del modelo offfer.model.ts
-]
-
-
+  { value: 'Albañil', label: 'Albañil' },
+  { value: 'Electricista', label: 'Electricista' },
+  { value: 'Fontanero', label: 'Fontanero' },
+  { value: 'Carpintero', label: 'Carpintero' },
+  { value: 'Pintor', label: 'Pintor' },
+  { value: 'Jardinero', label: 'Jardinería' },
+  { value: 'Vidriero', label: 'Vidriero' },
+  { value: 'Yesero', label: 'Yesero' },
+  { value: 'Decorador', label: 'Decorador' },
+  { value: 'Techador', label: 'Techador' },
+  { value: 'Pulidor', label: 'Pulidor' },
+  { value: 'Cerrajero', label: 'Cerrajero' },
+  { value: 'soldador', label: 'Soldador' },
+  //si van a umentar mas sacar del modelo offfer.model.ts
+];
 
 export const boliviaCities = [
   { value: 'Beni', label: 'Beni' },

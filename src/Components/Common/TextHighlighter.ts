@@ -4,7 +4,7 @@
  */
 function normalizeWord(word: string): string {
   let normalized = word.toLowerCase();
-  
+
   // Escapar caracteres especiales de RegExp
   normalized = normalized.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
@@ -21,7 +21,7 @@ function normalizeWord(word: string): string {
   pattern = pattern.replace(/i/g, '[iíïìî]');
   pattern = pattern.replace(/o/g, '[oóöòô]');
   pattern = pattern.replace(/u/g, '[uúüùû]');
-  
+
   return pattern;
 }
 
@@ -38,7 +38,7 @@ function extractSearchWords(searchText: string): string[] {
   const words = searchText
     .trim()
     .split(/[\s\-_.,]+/)
-    .filter(word => word.length > 0);
+    .filter((word) => word.length > 0);
 
   return words;
 }
@@ -48,15 +48,15 @@ function extractSearchWords(searchText: string): string[] {
  */
 export function createSearchPattern(searchText: string): RegExp | null {
   const words = extractSearchWords(searchText);
-  
+
   if (words.length === 0) {
     return null;
   }
 
   // Crear patrón para cada palabra y unirlos con OR (|)
-  const patterns = words.map(word => normalizeWord(word));
+  const patterns = words.map((word) => normalizeWord(word));
   const combinedPattern = patterns.join('|');
-  
+
   return new RegExp(`(${combinedPattern})`, 'gi');
 }
 
@@ -66,7 +66,7 @@ export function createSearchPattern(searchText: string): RegExp | null {
  */
 export function highlightTextParts(
   text: string,
-  searchText: string
+  searchText: string,
 ): Array<{ text: string; highlight: boolean }> {
   if (!text || !searchText) {
     return [{ text, highlight: false }];
@@ -89,14 +89,14 @@ export function highlightTextParts(
     if (match.index > lastIndex) {
       parts.push({
         text: text.slice(lastIndex, match.index),
-        highlight: false
+        highlight: false,
       });
     }
 
     // Agregar la coincidencia resaltada
     parts.push({
       text: match[0],
-      highlight: true
+      highlight: true,
     });
 
     lastIndex = match.index + match[0].length;
@@ -106,7 +106,7 @@ export function highlightTextParts(
   if (lastIndex < text.length) {
     parts.push({
       text: text.slice(lastIndex),
-      highlight: false
+      highlight: false,
     });
   }
 

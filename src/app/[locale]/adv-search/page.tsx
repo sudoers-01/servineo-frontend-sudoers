@@ -97,8 +97,6 @@ function AdvancedSearchPage() {
     fetchGlobalTotal,
   } = useAdvSearchLogic();
 
-  
-
   const router = useRouter();
 
   // Close advanced search and go back to jobOfert when user presses Escape

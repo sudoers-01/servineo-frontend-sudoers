@@ -22,7 +22,7 @@ export default function TopMenu() {
   const dispatch = useDispatch();
   // Acceder correctamente al estado
   const { user, loading } = useSelector((state: RootState) => state.user);
-  
+
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLogged, setIsLogged] = useState(false);

@@ -1,4 +1,3 @@
-
 import { baseApi } from './baseApi';
 import type { ICertification } from '@/types/fixer-profile';
 
@@ -22,7 +21,10 @@ export const experienceApi = baseApi.injectEndpoints({
     }),
 
     // Actualizar certificación
-    updateCertification: builder.mutation<ICertification, { id: string; data: Partial<ICertification> }>({
+    updateCertification: builder.mutation<
+      ICertification,
+      { id: string; data: Partial<ICertification> }
+    >({
       query: ({ id, data }) => ({
         url: `/certifications/${id}`,
         method: 'PUT',
@@ -44,9 +46,9 @@ export const experienceApi = baseApi.injectEndpoints({
 });
 
 export const {
-   useGetCertificationsByFixerQuery,
-   useCreateCertificationMutation,
-   useUpdateCertificationMutation,
-   useDeleteCertificationMutation,
-   useLazyGetCertificationsByFixerQuery,
+  useGetCertificationsByFixerQuery,
+  useCreateCertificationMutation,
+  useUpdateCertificationMutation,
+  useDeleteCertificationMutation,
+  useLazyGetCertificationsByFixerQuery,
 } = experienceApi;

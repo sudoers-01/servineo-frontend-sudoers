@@ -31,12 +31,11 @@ import {
 } from './session';
 import { ParamsMap } from './types';
 import { JOBOFERT_ALLOWED_LIMITS } from '@/app/lib/validations/pagination.validator';
-import { sanitizePage } from '@/app/lib/validations/pagination.validator';//
+import { sanitizePage } from '@/app/lib/validations/pagination.validator'; //
 
 /**
  * Hook principal que combina RTK Query con el slice de Redux
  */
-
 
 export function useJobOffers() {
   const dispatch = useAppDispatch();
@@ -179,7 +178,7 @@ export function useInitialUrlParams() {
       dispatch(enablePersistence());
     } else {
       const restored = restoreFromStorage();
-      
+
       // 🔧 MIGRACIÓN: Convertir city de string a string[]
       const migratedState = {
         ...restored,
@@ -198,9 +197,9 @@ export function useInitialUrlParams() {
             // Fallback
             return [];
           })(),
-        }
+        },
       };
-      
+
       dispatch(restoreSavedState(migratedState));
     }
   }, [searchParams, dispatch]);

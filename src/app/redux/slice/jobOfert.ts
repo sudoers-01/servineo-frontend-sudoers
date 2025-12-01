@@ -1,11 +1,11 @@
 // src\app\redux\slice\jobOfert.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { FilterState, JobOffersState } from '../features/jobOffers/types';
-import { 
-  saveToStorage, 
+import {
+  saveToStorage,
   clearJobOffersStorage,
   saveCountsToStorage,
-  STORAGE_KEYS 
+  STORAGE_KEYS,
 } from '../features/jobOffers/storage';
 
 const getDefaultState = (): JobOffersState => ({
@@ -245,20 +245,23 @@ const jobOffersSlice = createSlice({
       }
     },
 
-    restoreSavedState: (state, action: PayloadAction<{
-      search: string;
-      filters: FilterState;
-      sortBy: string;
-      paginaActual: number;
-      registrosPorPagina: number;
-      titleOnly: boolean;
-      exact: boolean;
-      date: string | null;
-      rating: number | null;
-      totalRegistros?: number;
-      totalPages?: number;
-      preservedTotalRegistros?: number;
-    }>) => {
+    restoreSavedState: (
+      state,
+      action: PayloadAction<{
+        search: string;
+        filters: FilterState;
+        sortBy: string;
+        paginaActual: number;
+        registrosPorPagina: number;
+        titleOnly: boolean;
+        exact: boolean;
+        date: string | null;
+        rating: number | null;
+        totalRegistros?: number;
+        totalPages?: number;
+        preservedTotalRegistros?: number;
+      }>,
+    ) => {
       const restored = action.payload;
       state.search = restored.search;
       state.filters = restored.filters;
@@ -279,7 +282,7 @@ const jobOffersSlice = createSlice({
       if (restored.preservedTotalRegistros !== undefined) {
         state.preservedTotalRegistros = restored.preservedTotalRegistros;
       }
-      
+
       state.shouldPersist = true;
 
       if (!state.paginaciones['offers']) {

@@ -11,8 +11,7 @@ interface AdvancedSearchButtonProps {
   alt?: string;
 }
 
-export function AdvancedSearchButton({
-}: AdvancedSearchButtonProps) {
+export function AdvancedSearchButton({}: AdvancedSearchButtonProps) {
   const t = useTranslations('search');
   const router = useRouter();
 

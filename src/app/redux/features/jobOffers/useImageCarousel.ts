@@ -6,10 +6,10 @@ export const useImageCarousel = (id: string, totalImages: number) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const elementRef = useRef<HTMLDivElement | null>(null);
-  
+
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const isActiveRef = useRef(false);
-  
+
   // Estados para touch/swipe
   const touchStartX = useRef<number>(0);
   const touchEndX = useRef<number>(0);
@@ -25,11 +25,11 @@ export const useImageCarousel = (id: string, totalImages: number) => {
 
   const startCarousel = useCallback(() => {
     if (totalImages <= 1) return;
-    
+
     if (isActiveRef.current) return;
-    
+
     clearCurrentInterval();
-    
+
     isActiveRef.current = true;
     intervalRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % totalImages);
@@ -53,7 +53,7 @@ export const useImageCarousel = (id: string, totalImages: number) => {
       clearCurrentInterval();
       setCurrentIndex((prev) => (prev - 1 + totalImages) % totalImages);
     },
-    [totalImages, clearCurrentInterval]
+    [totalImages, clearCurrentInterval],
   );
 
   const handleNextImage = useCallback(
@@ -62,7 +62,7 @@ export const useImageCarousel = (id: string, totalImages: number) => {
       clearCurrentInterval();
       setCurrentIndex((prev) => (prev + 1) % totalImages);
     },
-    [totalImages, clearCurrentInterval]
+    [totalImages, clearCurrentInterval],
   );
 
   // Touch handlers para swipe
@@ -72,7 +72,7 @@ export const useImageCarousel = (id: string, totalImages: number) => {
       setIsTouching(true);
       clearCurrentInterval();
     },
-    [clearCurrentInterval]
+    [clearCurrentInterval],
   );
 
   const handleTouchMove = useCallback((e: React.TouchEvent) => {
@@ -115,7 +115,7 @@ export const useImageCarousel = (id: string, totalImages: number) => {
       {
         threshold: [0, 0.5, 1],
         rootMargin: '-10% 0px -10% 0px',
-      }
+      },
     );
 
     observer.observe(elementRef.current);

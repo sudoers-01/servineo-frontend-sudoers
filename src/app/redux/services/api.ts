@@ -42,19 +42,17 @@ class ApiClient {
       // Intentamos parsear la respuesta
       const data = await response.json();
 
-      return { 
-        success: response.ok, 
-        data, 
+      return {
+        success: response.ok,
+        data,
         message: data.message,
         // Si la respuesta no es OK, intentamos capturar el mensaje de error del backend
-        error: !response.ok ? (data.message || 'Error en la petición') : undefined
+        error: !response.ok ? data.message || 'Error en la petición' : undefined,
       };
-
     } catch (error) {
       // 1. El 'catch' recibe el error (TS infiere unknown)
       // 2. 'getErrorMessage' lo transforma a string limpio inmediatamente
       return { success: false, error: getErrorMessage(error) };
-      
     } finally {
       clearTimeout(id);
     }
@@ -64,7 +62,6 @@ class ApiClient {
     return this.request<T>(url, { method: 'GET' });
   }
 
-  
   post<T>(url: string, body: unknown) {
     return this.request<T>(url, {
       method: 'POST',

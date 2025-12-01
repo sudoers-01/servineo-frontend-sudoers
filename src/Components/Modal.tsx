@@ -78,9 +78,9 @@ const Modal: React.FC<ModalProps> & {
   // Focus trap simple al abrir
   useEffect(() => {
     if (open) {
-        requestAnimationFrame(() => {
-            panelRef.current?.focus();
-        });
+      requestAnimationFrame(() => {
+        panelRef.current?.focus();
+      });
     }
   }, [open]);
 
@@ -131,7 +131,7 @@ const Modal: React.FC<ModalProps> & {
         {(title || showCloseButton) && (
           <div className="flex items-center justify-between gap-4 border-b border-gray-100 px-6 py-4 shrink-0 bg-white rounded-t-2xl">
             {title && <div className="text-lg font-bold text-gray-900 leading-6">{title}</div>}
-            
+
             {showCloseButton && (
               <button
                 type="button"
@@ -151,9 +151,9 @@ const Modal: React.FC<ModalProps> & {
 
         {/* Renderizado condicional del Footer automático */}
         {footer && (
-            <div className="border-t border-gray-100 px-6 py-4 bg-gray-50/50 rounded-b-2xl shrink-0 flex justify-end gap-3">
-                {footer}
-            </div>
+          <div className="border-t border-gray-100 px-6 py-4 bg-gray-50/50 rounded-b-2xl shrink-0 flex justify-end gap-3">
+            {footer}
+          </div>
         )}
       </div>
     </div>
@@ -167,11 +167,11 @@ const Modal: React.FC<ModalProps> & {
 
 Modal.Header = function ModalHeader({ className = '', children, ...props }) {
   return (
-    <div 
-        className={`px-6 py-4 border-b border-gray-100 text-lg font-bold text-gray-900 shrink-0 flex items-center justify-between bg-white rounded-t-2xl ${className}`} 
-        {...props}
+    <div
+      className={`px-6 py-4 border-b border-gray-100 text-lg font-bold text-gray-900 shrink-0 flex items-center justify-between bg-white rounded-t-2xl ${className}`}
+      {...props}
     >
-        {children}
+      {children}
     </div>
   );
 };
@@ -180,22 +180,19 @@ Modal.Body = function ModalBody({ className = '', children, ...props }) {
   // overflow-y-auto permite scroll si el contenido es muy alto
   // flex-1 hace que ocupe el espacio restante entre header y footer
   return (
-    <div 
-        className={`px-6 py-6 overflow-y-auto flex-1 overscroll-contain ${className}`} 
-        {...props}
-    >
-        {children}
+    <div className={`px-6 py-6 overflow-y-auto flex-1 overscroll-contain ${className}`} {...props}>
+      {children}
     </div>
   );
 };
 
 Modal.Footer = function ModalFooter({ className = '', children, ...props }) {
   return (
-    <div 
-        className={`px-6 py-4 border-t border-gray-100 bg-gray-50/80 rounded-b-2xl shrink-0 flex items-center justify-end gap-3 ${className}`} 
-        {...props}
+    <div
+      className={`px-6 py-4 border-t border-gray-100 bg-gray-50/80 rounded-b-2xl shrink-0 flex items-center justify-end gap-3 ${className}`}
+      {...props}
     >
-        {children}
+      {children}
     </div>
   );
 };

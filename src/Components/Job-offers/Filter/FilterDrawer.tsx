@@ -38,25 +38,28 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   const [selectedCities, setSelectedCities] = useState<string[]>(filtersFromStore.city || []);
   const [selectedJobs, setSelectedJobs] = useState<string[]>(filtersFromStore.category || []);
   const [selectedRating, setSelectedRating] = useState<number | null>(null);
-  
+
   const dispatch = useAppDispatch();
   const storeRating = useAppSelector((s) => s.jobOfert.rating);
   const storeSearch = useAppSelector((s) => s.jobOfert.search);
 
   // 🔧 Petición de contadores: NO enviar la categoría para obtener totales por categoría
-  const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery({
-    range: selectedRanges.length > 0 ? selectedRanges : undefined,
-    city: selectedCities.length > 0 ? selectedCities.join(',') : undefined,
-    // Enviar las categorías seleccionadas como ARRAY para que el builder
-    // de query agregue correctamente múltiples params `category=`.
-    // (Antes se enviaba una cadena con comas y provocaba errores al iterar.)
-    category: selectedJobs.length > 0 ? selectedJobs : undefined,
-    search: storeSearch?.trim() ? storeSearch : undefined,
-    minRating: selectedRating ?? undefined,
-    maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
-  }, {
-    skip: !isOpen,
-  });
+  const { data: backendCounts, isLoading: loadingCounts } = useGetFilterCountsQuery(
+    {
+      range: selectedRanges.length > 0 ? selectedRanges : undefined,
+      city: selectedCities.length > 0 ? selectedCities.join(',') : undefined,
+      // Enviar las categorías seleccionadas como ARRAY para que el builder
+      // de query agregue correctamente múltiples params `category=`.
+      // (Antes se enviaba una cadena con comas y provocaba errores al iterar.)
+      category: selectedJobs.length > 0 ? selectedJobs : undefined,
+      search: storeSearch?.trim() ? storeSearch : undefined,
+      minRating: selectedRating ?? undefined,
+      maxRating: selectedRating !== null && selectedRating < 5 ? selectedRating + 0.99 : undefined,
+    },
+    {
+      skip: !isOpen,
+    },
+  );
 
   useEffect(() => {
     setSelectedRanges(filtersFromStore.range || []);
@@ -73,7 +76,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       fixer: prev.fixer || (filtersFromStore.range && filtersFromStore.range.length > 0),
       ciudad: prev.ciudad || (filtersFromStore.city && filtersFromStore.city.length > 0),
       trabajo: prev.trabajo || (filtersFromStore.category && filtersFromStore.category.length > 0),
-      rating: prev.rating || (storeRating != null),
+      rating: prev.rating || storeRating != null,
     }));
   }, [isOpen, filtersFromStore, storeRating]);
 
@@ -103,7 +106,13 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     const newRating = selectedRating === star ? null : star;
     setSelectedRating(newRating);
     dispatch(setRating(newRating));
-    applyFilters(selectedRanges, selectedCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
+    applyFilters(
+      selectedRanges,
+      selectedCities,
+      selectedJobs,
+      filtersFromStore.isAutoSelectedCategory,
+      filtersFromStore.isAutoSelectedCity,
+    );
   };
 
   const handleRangeChange = (dbValue: string) => {
@@ -112,12 +121,23 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       : [...selectedRanges, dbValue];
 
     setSelectedRanges(newRanges);
-    applyFilters(newRanges, selectedCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, filtersFromStore.isAutoSelectedCity);
+    applyFilters(
+      newRanges,
+      selectedCities,
+      selectedJobs,
+      filtersFromStore.isAutoSelectedCategory,
+      filtersFromStore.isAutoSelectedCity,
+    );
   };
 
   const handleCityChange = (dbValue: string) => {
-    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] handleCityChange click:', dbValue, { selectedCities, filtersFromStore });
-    const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(dbValue);
+    if (process.env.NODE_ENV === 'development')
+      console.debug('[FilterDrawer] handleCityChange click:', dbValue, {
+        selectedCities,
+        filtersFromStore,
+      });
+    const isAutoMarked =
+      filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(dbValue);
     if (isAutoMarked && selectedCities.includes(dbValue)) {
       return;
     }
@@ -132,14 +152,24 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
     }
 
     setSelectedCities(newCities);
-    applyFilters(selectedRanges, newCities, selectedJobs, filtersFromStore.isAutoSelectedCategory, false);
+    applyFilters(
+      selectedRanges,
+      newCities,
+      selectedJobs,
+      filtersFromStore.isAutoSelectedCategory,
+      false,
+    );
   };
 
   const handleJobChange = (dbValue: string) => {
-    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] handleJobChange click:', dbValue, { selectedJobs, filtersFromStore });
+    if (process.env.NODE_ENV === 'development')
+      console.debug('[FilterDrawer] handleJobChange click:', dbValue, {
+        selectedJobs,
+        filtersFromStore,
+      });
     // Si hay auto-selección, permitir cambio libre entre categorías
     let newJobs: string[];
-    
+
     if (filtersFromStore.isAutoSelectedCategory) {
       // Si clickea en otra categoría, cambiar a esa (comportamiento de radio button)
       newJobs = selectedJobs.includes(dbValue) ? [] : [dbValue];
@@ -152,11 +182,31 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
 
     setSelectedJobs(newJobs);
     // Quitar el flag de auto-selección ya que el usuario hizo un cambio manual
-    applyFilters(selectedRanges, selectedCities, newJobs, false, filtersFromStore.isAutoSelectedCity);
+    applyFilters(
+      selectedRanges,
+      selectedCities,
+      newJobs,
+      false,
+      filtersFromStore.isAutoSelectedCity,
+    );
   };
 
-  const applyFilters = (ranges: string[], cities: string[], jobs: string[], isAutoCat: boolean = false, isAutoCity: boolean = false) => {
-    if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters called with:', { ranges, cities, jobs, isAutoCat, isAutoCity, filtersFromStore });
+  const applyFilters = (
+    ranges: string[],
+    cities: string[],
+    jobs: string[],
+    isAutoCat: boolean = false,
+    isAutoCity: boolean = false,
+  ) => {
+    if (process.env.NODE_ENV === 'development')
+      console.debug('[FilterDrawer] applyFilters called with:', {
+        ranges,
+        cities,
+        jobs,
+        isAutoCat,
+        isAutoCity,
+        filtersFromStore,
+      });
     const filtersToValidate = { range: ranges, city: cities, category: jobs };
     const { isValid, data } = validateFilters(filtersToValidate);
 
@@ -185,10 +235,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
       arraysEqual(filterState.category, filtersFromStore.category);
 
     if (!sameAsStore && onFiltersApply) {
-      if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters -> dispatching onFiltersApply', filterState);
+      if (process.env.NODE_ENV === 'development')
+        console.debug('[FilterDrawer] applyFilters -> dispatching onFiltersApply', filterState);
       onFiltersApply(filterState);
     } else {
-      if (process.env.NODE_ENV === 'development') console.debug('[FilterDrawer] applyFilters -> no-op (sameAsStore)', { sameAsStore, filterState, store: filtersFromStore });
+      if (process.env.NODE_ENV === 'development')
+        console.debug('[FilterDrawer] applyFilters -> no-op (sameAsStore)', {
+          sameAsStore,
+          filterState,
+          store: filtersFromStore,
+        });
     }
   };
 
@@ -258,7 +314,9 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
   }));
   // Mantener orden alfabético por etiqueta (no reordenar por conteos)
   const jobTypesSorted = React.useMemo(() => {
-    return [...jobTypes].sort((a, b) => a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }));
+    return [...jobTypes].sort((a, b) =>
+      a.label.localeCompare(b.label, 'es', { sensitivity: 'base' }),
+    );
   }, [jobTypes]);
   return (
     <>
@@ -323,9 +381,7 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                       return (
                         <label
                           key={range.dbValue}
-                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${
-                            'cursor-pointer hover:text-[#2B31E0]'
-                          }`}
+                          className={`flex items-center justify-between gap-2 text-xs min-w-0 transition-colors ${'cursor-pointer hover:text-[#2B31E0]'}`}
                         >
                           <div className={`flex items-center gap-2`}>
                             <input
@@ -340,7 +396,11 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                           {loadingCounts ? (
                             <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
                           ) : (
-                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                            <span
+                              className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}
+                            >
+                              ({count})
+                            </span>
                           )}
                         </label>
                       );
@@ -363,7 +423,9 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                   <div className="flex flex-col gap-2">
                     {cities.map((city) => {
                       const isSelected = selectedCities.includes(city.dbValue);
-                      const isAutoMarked = filtersFromStore.isAutoSelectedCity && filtersFromStore.city.includes(city.dbValue);
+                      const isAutoMarked =
+                        filtersFromStore.isAutoSelectedCity &&
+                        filtersFromStore.city.includes(city.dbValue);
                       const count = backendCounts?.cities?.[city.dbValue] ?? 0;
                       const disabled = filtersFromStore.isAutoSelectedCity && !isAutoMarked;
 
@@ -376,20 +438,26 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                               : 'cursor-pointer hover:text-[#2B31E0]'
                           }`}
                         >
-                            <div className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}>
-                              <input
-                                type="checkbox"
-                                className="w-4 h-4 flex-shrink-0 cursor-pointer"
-                                checked={isSelected}
-                                onChange={() => handleCityChange(city.dbValue)}
-                                disabled={disabled}
-                              />
-                              <span className="truncate">{city.label}</span>
-                            </div>
+                          <div
+                            className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}
+                          >
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 flex-shrink-0 cursor-pointer"
+                              checked={isSelected}
+                              onChange={() => handleCityChange(city.dbValue)}
+                              disabled={disabled}
+                            />
+                            <span className="truncate">{city.label}</span>
+                          </div>
                           {loadingCounts ? (
                             <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
                           ) : (
-                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                            <span
+                              className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}
+                            >
+                              ({count})
+                            </span>
                           )}
                         </label>
                       );
@@ -434,7 +502,11 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                           {loadingCounts ? (
                             <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
                           ) : (
-                            <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}>({count})</span>
+                            <span
+                              className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}
+                            >
+                              ({count})
+                            </span>
                           )}
                         </label>
                       );
@@ -444,58 +516,62 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
               )}
             </div>
 
-           
-{/* Filtro: Calificación */}
-<div className="mb-6">
-  <div
-    className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
-    onClick={() => toggleSection('rating')}
-  >
-    <span className="truncate">Calificación</span>
-  </div>
-  {openSections.rating && (
-    <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
-      <div className="flex items-center gap-1 justify-center">
-        {Array.from({ length: 5 }, (_, idx) => {
-          const starNumber = idx + 1;
-          const filled = (selectedRating ?? 0) >= starNumber;
-          const count = getRatingCount(starNumber);
-          const disabled = false;
-          
-          return (
-            <div key={starNumber} className="flex flex-col items-center gap-1 min-w-[32px]">
-              <button
-                type="button"
-                onClick={() => !disabled && handleRatingClick(starNumber)}
-                className={`transition-transform touch-manipulation flex-shrink-0 ${
-                  disabled 
-                    ? 'opacity-50 cursor-not-allowed' 
-                    : 'hover:scale-110 active:scale-95'
-                }`}
-                aria-label={`${starNumber} estrellas`}
-                disabled={disabled}
+            {/* Filtro: Calificación */}
+            <div className="mb-6">
+              <div
+                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+                onClick={() => toggleSection('rating')}
               >
-                <Star
-                  className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
-                  fill={filled ? '#fbbf24' : '#ffffff'}
-                  stroke="#000000"
-                  strokeWidth={2}
-                />
-              </button>
-              {loadingCounts ? (
-                <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
-              ) : (
-                <span className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs whitespace-nowrap`}>
-                  ({count})
-                </span>
+                <span className="truncate">Calificación</span>
+              </div>
+              {openSections.rating && (
+                <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
+                  <div className="flex items-center gap-1 justify-center">
+                    {Array.from({ length: 5 }, (_, idx) => {
+                      const starNumber = idx + 1;
+                      const filled = (selectedRating ?? 0) >= starNumber;
+                      const count = getRatingCount(starNumber);
+                      const disabled = false;
+
+                      return (
+                        <div
+                          key={starNumber}
+                          className="flex flex-col items-center gap-1 min-w-[32px]"
+                        >
+                          <button
+                            type="button"
+                            onClick={() => !disabled && handleRatingClick(starNumber)}
+                            className={`transition-transform touch-manipulation flex-shrink-0 ${
+                              disabled
+                                ? 'opacity-50 cursor-not-allowed'
+                                : 'hover:scale-110 active:scale-95'
+                            }`}
+                            aria-label={`${starNumber} estrellas`}
+                            disabled={disabled}
+                          >
+                            <Star
+                              className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
+                              fill={filled ? '#fbbf24' : '#ffffff'}
+                              stroke="#000000"
+                              strokeWidth={2}
+                            />
+                          </button>
+                          {loadingCounts ? (
+                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                          ) : (
+                            <span
+                              className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs whitespace-nowrap`}
+                            >
+                              ({count})
+                            </span>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
             </div>
-          );
-        })}
-      </div>
-    </div>
-  )}
-</div>
           </div>
         </div>
       </div>

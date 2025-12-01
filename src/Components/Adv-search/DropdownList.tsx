@@ -85,23 +85,20 @@ const DropdownList: React.FC<DropdownListProps> = ({
     onFilterChangeRef.current?.({ categories: [] });
   }, [clearSignal, hasRestoredFromUrl]);
 
-  const handleCheckboxChange = useCallback(
-    (categoryValue: string) => {
-      setSelectedCategories((prev) => {
-        const newSelectedCategories = prev.includes(categoryValue)
-          ? prev.filter((cat) => cat !== categoryValue)
-          : [...prev, categoryValue];
+  const handleCheckboxChange = useCallback((categoryValue: string) => {
+    setSelectedCategories((prev) => {
+      const newSelectedCategories = prev.includes(categoryValue)
+        ? prev.filter((cat) => cat !== categoryValue)
+        : [...prev, categoryValue];
 
-        // Llamar a onFilterChange después de actualizar el estado
-        setTimeout(() => {
-          onFilterChangeRef.current?.({ categories: newSelectedCategories });
-        }, 0);
+      // Llamar a onFilterChange después de actualizar el estado
+      setTimeout(() => {
+        onFilterChangeRef.current?.({ categories: newSelectedCategories });
+      }, 0);
 
-        return newSelectedCategories;
-      });
-    },
-    [],
-  );
+      return newSelectedCategories;
+    });
+  }, []);
 
   if (isLoading) {
     return (

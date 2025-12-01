@@ -183,7 +183,10 @@ export default function useAdvSearchLogic() {
 
     const cityRaw = sp.get('city');
     if (cityRaw != null) {
-      const cities = cityRaw.split(',').map((s) => s.trim()).filter(Boolean);
+      const cities = cityRaw
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean);
       if (cities.length) setSelectedCity(cities);
     }
 

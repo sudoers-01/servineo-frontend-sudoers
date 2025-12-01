@@ -32,8 +32,8 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
   const hasInitialized = useRef(false);
   const lastBackendData = useRef<string[] | undefined>(undefined);
 
-  const { 
-    data: backendHistory, 
+  const {
+    data: backendHistory,
     isLoading: isLoadingHistory,
     error: historyError,
     refetch: refetchHistory,
@@ -107,7 +107,6 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
       setHistory(backendHistory);
       persistToLocalStorage(backendHistory);
     }
-
   }, [useBackend, backendHistory, persistToLocalStorage]);
 
   // ===== ADD =====
@@ -154,7 +153,7 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
             throw new Error('Backend deletion failed');
           }
 
-          const shouldContain = previousHistory.filter(h => h !== item);
+          const shouldContain = previousHistory.filter((h) => h !== item);
           const backendReturned = result.updatedHistory;
 
           if (backendReturned.length === 0 && shouldContain.length > 0) {

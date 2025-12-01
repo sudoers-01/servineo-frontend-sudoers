@@ -11,7 +11,6 @@ import { useSearchTouch } from '@/app/redux/features/searchHistory/useSearchTouc
 import { SearchDropdown } from '@/Components/Shared/SearchDropdown';
 import { validateSearch } from '@/app/lib/validations/search.validator';
 
-
 interface SearchBarProps {
   value: string;
   onChange: (value: string) => void;
@@ -38,7 +37,6 @@ export function SearchBar({
   const [longPressedItem, setLongPressedItem] = useState<string | null>(null);
   const [previewValue, setPreviewValue] = useState<string | null>(null);
   const [error, setError] = useState<string | undefined>();
-
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -161,16 +159,16 @@ export function SearchBar({
     (e: React.ChangeEvent<HTMLInputElement>) => {
       let newValue = e.target.value;
       if (newValue.length > 100) {
-      newValue = newValue.slice(0, 100);
-      setError('Límite máximo de 100 caracteres.');
-      onChange(newValue);
-      return;
-    }
+        newValue = newValue.slice(0, 100);
+        setError('Límite máximo de 100 caracteres.');
+        onChange(newValue);
+        return;
+      }
       onChange(newValue);
       setPreviewValue(null);
       setHighlighted(-1);
       const { isValid, error } = validateSearch(newValue);
-     setError(isValid ? undefined : error);
+      setError(isValid ? undefined : error);
     },
     [onChange],
   );
@@ -248,10 +246,11 @@ export function SearchBar({
           shadow-lg
           disabled:opacity-50 disabled:cursor-not-allowed
           ${
-            error? 'border-red-500 shadow-[0_0_0_1px_red]'
-            : isFocused
-              ? 'border-primary shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.02] bg-white'
-              : 'border-primary hover:border-blue-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'
+            error
+              ? 'border-red-500 shadow-[0_0_0_1px_red]'
+              : isFocused
+                ? 'border-primary shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.02] bg-white'
+                : 'border-primary hover:border-blue-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'
           }
           ${disabled ? 'bg-gray-100' : ''}
         `}
@@ -293,10 +292,10 @@ export function SearchBar({
         maxVisibleSuggestions={5}
         className="border-2 border-primary/20 rounded-2xl shadow-2xl backdrop-blur-md"
       />
-        {/* Mensaje de error */}
-    <div className="min-h-5 mt-1">
-    {error && <p className="text-red-500 text-sm leading-4">{error}</p>}
-    </div>
+      {/* Mensaje de error */}
+      <div className="min-h-5 mt-1">
+        {error && <p className="text-red-500 text-sm leading-4">{error}</p>}
+      </div>
     </div>
   );
 }
