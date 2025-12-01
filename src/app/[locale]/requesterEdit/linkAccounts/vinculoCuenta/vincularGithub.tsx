@@ -1,22 +1,24 @@
-"use client";
+'use client';
 
 import { useState } from "react";
 import { FaGithub } from "react-icons/fa";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { vincularGitHub, Client } from "@/app/redux/services/services/api";
+import { useTranslations } from "next-intl";
 
 interface VincularGithubProps {
   onLinked?: (client?: Client) => void;
 }
 
 export default function VincularGithub({ onLinked }: VincularGithubProps) {
+  const t = useTranslations('VincularGithub');
   const [loading, setLoading] = useState(false);
 
   const handleVincularGitHub = () => {
-    const token = localStorage.getItem("servineo_token");
+    const token = localStorage.getItem('servineo_token');
     if (!token) {
-      toast.error("No hay sesión activa para vincular cuenta");
+      toast.error(t("errors.noSession"));
       return;
     }
 
@@ -25,14 +27,14 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
     vincularGitHub(
       token,
       (client) => {
-        toast.success("Cuenta de GitHub vinculada con éxito");
+        toast.success(t("success.message"));
         setLoading(false);
         onLinked?.(client);
       },
       (msg) => {
         toast.error(msg);
         setLoading(false);
-      }
+      },
     );
   };
 
@@ -41,9 +43,9 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
       <div className="flex items-center gap-3">
         <FaGithub size={30} className="text-gray-800" />
         <div className="flex flex-col">
-          <span className="text-sm font-semibold text-gray-800">GitHub</span>
+          <span className="text-sm font-semibold text-gray-800">{t("title")}</span>
           <span className="text-xs text-gray-500">
-            Vincula tu cuenta de GitHub
+            {t("subtitle")}
           </span>
         </div>
       </div>
@@ -55,10 +57,10 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
         >
           {loading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" /> Vinculando...
+              <Loader2 className="w-4 h-4 animate-spin" /> {t("buttons.linking")}
             </>
           ) : (
-            "Vincular"
+            t("buttons.link")
           )}
         </button>
       </div>

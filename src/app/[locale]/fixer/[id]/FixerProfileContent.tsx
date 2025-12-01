@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import type { Fixer } from '@/app/lib/mock-data';
 import FixerGraficCard from '@/Components/fixer/Fixer-grafic-card';
-import type { JobOffer as JobOfferType } from '@/types/job-offer';
+
 
 // Si el tipo Fixer viene de otro lado, ajusta la importación anterior.
 // interface FixerProfileContentProps { fixer: Fixer; }
@@ -130,7 +130,6 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
                   <JobOfferCard
                     key={offer?.id ?? offer?._id ?? `fixer-offer-${i}`}
                     offer={convertToJobOfferData(offer)}
-                    viewMode="grid"
                     onClick={() => handleOfferClick(convertToJobOfferData(offer))}
                   />
                 );
@@ -285,7 +284,7 @@ export function FixerProfileContent({ fixer }: FixerProfileContentProps) {
                 </div>
                 <div className="flex items-center">
                   <Star className="w-4 h-4 text-yellow-400 fill-yellow-400 mr-1" />
-                  <span>{fixer.rating?.toFixed(1) ?? (t?.('reviews.new') ?? 'Nuevo')}</span>
+                  <span>{fixer.rating?.toFixed(1) ?? (t?.('reviews.new') ?? 'N')}</span>
                   <span className="mx-1">•</span>
                   <span>{fixer.completedJobs ?? 0} {t?.('about.completedJobs') ?? 'trabajos'}</span>
                 </div>

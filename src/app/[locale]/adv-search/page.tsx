@@ -39,7 +39,7 @@ function AdvancedSearchPage() {
 
   const CITIES = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
-    label: t(`city.options.${['beni', 'chuquisaca', 'cochabamba', 'laPaz', 'oruro', 'pando', 'potosi', 'santaCruz', 'tarija'][index]}`),
+    label: t(`city.options.${['Beni', 'Chuquisaca', 'Cochabamba', 'LaPaz', 'Oruro', 'Pando', 'Potosi', 'Santa Cruz', 'Tarija'][index]}`),
   }));
 
   const JOBS = DB_VALUES.jobTypes.map((dbValue, index) => ({
@@ -267,7 +267,7 @@ function AdvancedSearchPage() {
                         <input
                           type="checkbox"
                           className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
-                          checked={selectedCity === city.dbValue}
+                          checked={selectedCity.includes(city.dbValue)}
                           onChange={() => handleCityChange(city.dbValue)}
                         />
                         <span className="truncate">{city.label}</span>
@@ -309,11 +309,11 @@ function AdvancedSearchPage() {
                     {JOBS.map((job) => (
                       <label
                         key={job.dbValue}
-                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors"
+                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2a69df] transition-colors"
                       >
                         <input
                           type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
+                          className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2a69df] rounded border-gray-300 focus:ring-[#2B6AE0]"
                           checked={selectedJobs.includes(job.dbValue)}
                           onChange={() => handleJobChange(job.dbValue)}
                         />
@@ -401,7 +401,7 @@ function AdvancedSearchPage() {
 
             {/* Filtro de Fecha y Calificación */}
             <div className="mb-6 flex flex-col md:flex-row gap-6 items-start">
-              <div className="flex-shrink-0 order-2 md:order-1 w-full md:w-auto">
+              <div className="shrink-0 order-2 md:order-1 w-full md:w-auto">
                 <DateFilterSelector
                   selectedFilter={selectedDateFilter}
                   selectedDate={selectedSpecificDate}
@@ -412,7 +412,7 @@ function AdvancedSearchPage() {
                   onCalendarToggle={setIsCalendarOpen}
                 />
               </div>
-              <div className="flex-shrink-0 order-1 md:order-2 w-full md:w-auto">
+              <div className="shrink-0 order-1 md:order-2 w-full md:w-auto">
                 <CalificacionEstrella value={selectedRating} onChange={setSelectedRating} />
               </div>
             </div>
@@ -427,7 +427,7 @@ function AdvancedSearchPage() {
                 onClick={() => {
                   setSearchQuery('');
                   setSelectedRanges([]);
-                  setSelectedCity('');
+                  setSelectedCity([]);
                   setSelectedJobs([]);
                   setSelectedCategories([]);
                   setSelectedPriceRanges([]);

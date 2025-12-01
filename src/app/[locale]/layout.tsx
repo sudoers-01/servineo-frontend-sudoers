@@ -22,16 +22,13 @@ const geistMono = Geist_Mono({
 
 // Mapa de mensajes
 const messagesMap = {
-  en: () => import('../../../messages/en.json').then(mod => mod.default),
-  es: () => import('../../../messages/es.json').then(mod => mod.default),
+  en: () => import('../../../messages/en.json').then((mod) => mod.default),
+  es: () => import('../../../messages/es.json').then((mod) => mod.default),
 };
 
 // Genera los locales estáticamente
 export function generateStaticParams() {
-  return [
-    { locale: 'en' },
-    { locale: 'es' }
-  ];
+  return [{ locale: 'en' }, { locale: 'es' }];
 }
 
 export const metadata: Metadata = {

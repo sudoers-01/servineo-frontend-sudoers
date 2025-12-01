@@ -8,6 +8,9 @@ export const STORAGE_KEYS = {
   EXACT: 'jobOffers_exact',
   DATE: 'jobOffers_date',
   RATING: 'jobOffers_rating',
+  TOTAL_REGISTROS: 'jobOffers_totalRegistros',
+  TOTAL_PAGES: 'jobOffers_totalPages',
+  PRESERVED_TOTAL: 'jobOffers_preservedTotal',
 } as const;
 
 /**
@@ -43,7 +46,7 @@ export const saveToStorage = <T>(key: string, value: T): void => {
 export const clearJobOffersStorage = (): void => {
   if (typeof window !== 'undefined') {
     try {
-      Object.values(STORAGE_KEYS).forEach(key => {
+      Object.values(STORAGE_KEYS).forEach((key) => {
         localStorage.removeItem(key);
       });
     } catch (error) {
@@ -66,5 +69,18 @@ export const restoreFromStorage = () => {
     exact: getStoredValue(STORAGE_KEYS.EXACT, false),
     date: getStoredValue(STORAGE_KEYS.DATE, null),
     rating: getStoredValue(STORAGE_KEYS.RATING, null),
+    totalRegistros: getStoredValue(STORAGE_KEYS.TOTAL_REGISTROS, 0),
+    totalPages: getStoredValue(STORAGE_KEYS.TOTAL_PAGES, 0),
+    preservedTotalRegistros: getStoredValue(STORAGE_KEYS.PRESERVED_TOTAL, 0),
   };
+};
+
+export const saveCountsToStorage = (counts: {
+  totalRegistros: number;
+  totalPages: number;
+  preservedTotalRegistros: number;
+}): void => {
+  saveToStorage(STORAGE_KEYS.TOTAL_REGISTROS, counts.totalRegistros);
+  saveToStorage(STORAGE_KEYS.TOTAL_PAGES, counts.totalPages);
+  saveToStorage(STORAGE_KEYS.PRESERVED_TOTAL, counts.preservedTotalRegistros);
 };
