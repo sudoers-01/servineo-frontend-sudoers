@@ -27,12 +27,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-<<<<<<< HEAD
     "src/app/ctrlC/home-tsx"
-=======
-    "src/app/ctrl/home-tsx",
-    "src/components/calendar/mobile/MobileDayliView.tsx"
->>>>>>> dev
   ],
   "exclude": ["node_modules"]
 }
