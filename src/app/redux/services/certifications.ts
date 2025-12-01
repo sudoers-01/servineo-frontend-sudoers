@@ -1,26 +1,53 @@
 import { baseApi } from './baseApi';
 import type { ICertification } from '@/types/fixer-profile';
 
-// falta configurar las rutas
-export const experienceApi = baseApi.injectEndpoints({
+// Interfaces de respuesta del Backend
+interface ApiResponse<T> {
+  success: boolean;
+  message?: string;
+  data: T;
+}
+
+interface DeleteResponse {
+  success: boolean;
+  message: string;
+}
+
+export const certificationApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Crear certificación
+    // CREATE: POST /api/certifications
     createCertification: builder.mutation<ICertification, Partial<ICertification>>({
       query: (body) => ({
-        url: '/experiences',
+        url: '/certifications',
         method: 'POST',
         body,
       }),
-      invalidatesTags: ['Certification'],
+      transformResponse: (response: ApiResponse<ICertification>) => response.data,
+      // Invalidamos la lista para que se refresque al crear una nueva
+      invalidatesTags: [{ type: 'Certification', id: 'LIST' }],
     }),
 
-    // Obtener certificaciones por fixer
+    // GET BY FIXER: GET /api/certifications/fixer/:fixerId
     getCertificationsByFixer: builder.query<ICertification[], string>({
       query: (fixerId) => `/certifications/fixer/${fixerId}`,
-      providesTags: ['Certification'],
+      transformResponse: (response: ApiResponse<ICertification[]>) => response.data,
+      providesTags: (result) =>
+        result
+          ? [
+              ...result.map(({ _id }) => ({ type: 'Certification' as const, id: _id })),
+              { type: 'Certification', id: 'LIST' },
+            ]
+          : [{ type: 'Certification', id: 'LIST' }],
     }),
 
-    // Actualizar certificación
+    // GET BY ID: GET /api/certifications/:id
+    getCertificationById: builder.query<ICertification, string>({
+      query: (id) => `/certifications/${id}`,
+      transformResponse: (response: ApiResponse<ICertification>) => response.data,
+      providesTags: (result, error, id) => [{ type: 'Certification', id }],
+    }),
+
+    // UPDATE: PUT /api/certifications/:id
     updateCertification: builder.mutation<
       ICertification,
       { id: string; data: Partial<ICertification> }
@@ -30,25 +57,37 @@ export const experienceApi = baseApi.injectEndpoints({
         method: 'PUT',
         body: data,
       }),
-      invalidatesTags: ['Certification'],
+      transformResponse: (response: ApiResponse<ICertification>) => response.data,
+      invalidatesTags: (result, error, { id }) => [
+        { type: 'Certification', id },
+        { type: 'Certification', id: 'LIST' },
+      ],
     }),
 
-    // Eliminar certificación
+    // ✅ DELETE CORREGIDO:
+    // Ya no pide userId en el body, solo el id en la URL.
     deleteCertification: builder.mutation<{ message: string }, string>({
       query: (id) => ({
         url: `/certifications/${id}`,
         method: 'DELETE',
+        // No se envía body
       }),
-      invalidatesTags: ['Certification'],
+      transformResponse: (response: DeleteResponse) => ({ message: response.message }),
+      invalidatesTags: (result, error, id) => [
+        { type: 'Certification', id },
+        { type: 'Certification', id: 'LIST' },
+      ],
     }),
   }),
   overrideExisting: false,
 });
 
 export const {
-  useGetCertificationsByFixerQuery,
   useCreateCertificationMutation,
+  useGetCertificationsByFixerQuery,
+  useGetCertificationByIdQuery,
   useUpdateCertificationMutation,
   useDeleteCertificationMutation,
   useLazyGetCertificationsByFixerQuery,
-} = experienceApi;
+  useLazyGetCertificationByIdQuery,
+} = certificationApi;

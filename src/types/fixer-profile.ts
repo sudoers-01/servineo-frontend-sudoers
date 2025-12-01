@@ -22,9 +22,9 @@ export interface ICertification {
   name: string;
   institution: string;
   issueDate: string;
-  expiryDate: string;
-  credentialId: string;
-  credentialUrl: string;
+  expiryDate?: string;
+  credentialId?: string;
+  credentialUrl?: string;
   createdAt?: string;
   updatedAt?: string;
 }

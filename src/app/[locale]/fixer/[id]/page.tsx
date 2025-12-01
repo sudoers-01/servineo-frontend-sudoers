@@ -188,7 +188,7 @@ export default function FixerProfilePage() {
           </TabsContent>
 
           <TabsContent value="experiencia">
-            <ExperienceSection readOnly fixerId={fixerId as string} />
+            <ExperienceSection readOnly />
           </TabsContent>
 
           <TabsContent value="certificaciones">
