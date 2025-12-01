@@ -76,10 +76,6 @@ export default function AdminLogin() {
                 >
                 {loading ? 'Signing In...' : 'Sign In as Admin'}
                 </button>
-
-                <div className={styles.backendStatus}>
-                <p>🔗 Conectado al backend real</p>
-                </div>
             </form>
         </div>
     );
