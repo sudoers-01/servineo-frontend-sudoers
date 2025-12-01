@@ -1,4 +1,4 @@
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
+const BASE_URL = `https://servineo-backend.vercel.app/api/controlC`;
 
 export interface User {
   id: string;

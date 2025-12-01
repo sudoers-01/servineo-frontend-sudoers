@@ -10,12 +10,12 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 }
 
 export const baseQuery = fetchBaseQuery({
-  baseUrl: API_URL,
+  baseUrl: "https://servineo-backend.vercel.app/api",
   prepareHeaders: (headers) => {
-    const token = localStorage.getItem('servineo_token');
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
+    // const token = localStorage.getItem('servineo_token');
+    // if (token) {
+    //   headers.set('authorization', `Bearer ${token}`);
+    // }
     //  headers.set('Content-Type', 'application/json');
     return headers;
   },
