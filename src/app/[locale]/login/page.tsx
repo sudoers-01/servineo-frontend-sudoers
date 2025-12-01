@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -14,13 +14,7 @@ import { useTranslations } from 'next-intl';
 import { useAppDispatch } from '@/app/redux/hooks';
 import { setUser } from '@/app/redux/slice/userSlice';
 
-/* ----------------------------- Zod schema ----------------------------- */
-const loginSchema = (t: (key: string) => string) =>
-  z.object({
-    email: z.string().email(t('errors.invalidEmail')),
-    password: z.string().min(6, t('errors.passwordMinLength')),
-  });
-
+/* ----------------------------- Interfaces ----------------------------- */
 interface LoginFormData {
   email: string;
   password: string;
@@ -59,6 +53,16 @@ export default function LoginPage() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
+  // ✅ Schema de Zod usando useMemo para que no se recree en cada render
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('errors.invalidEmail')),
+        password: z.string().min(6, t('errors.passwordMinLength')),
+      }),
+    [t]
+  );
+
   const [notification, setNotification] = useState<NotificationState>({
     isOpen: false,
     type: 'info',
@@ -71,7 +75,7 @@ export default function LoginPage() {
     handleSubmit,
     formState: { errors },
   } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema(t)),
+    resolver: zodResolver(loginSchema),
   });
 
   const manejarLogin = async (data: LoginFormData): Promise<void> => {
