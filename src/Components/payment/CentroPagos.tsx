@@ -1,9 +1,12 @@
+// servineo-frontend/src/Components/payment/CentroPagos.tsx
 'use client';
 import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation'; 
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 //import WalletFlagWatcher from "./WalletFlagWatcher";
+import { showToast } from "nextjs-toast-notify";
+
 
 // --- Constantes Mock (Se mantienen como pediste) ---
 const MOCK_FIXER_ID = "690c1a08f32ebc5be9c5707c";
@@ -16,6 +19,31 @@ interface FixerData {
   trabajosCompletados: number;
   fixerId?: string; // Es opcional
   isTestData?: boolean;
+
+  lowBalanceAlert?: {
+    type: 'none' | 'low' | 'critical';
+  };
+
+  // lo que manda el backend para el toast
+  lowBalanceInfo?: {
+    balance: number;
+    currency: string;
+    lowBalanceThreshold: number;
+    lastLowBalanceNotification?: string | Date;
+
+    flags?: {
+      needsLowAlert?: boolean;
+      needsCriticalAlert?: boolean;
+      cooldownUntil?: string | Date | null;
+      updatedAt?: string | Date | null;
+    };
+
+    toast?: {
+      shouldShow: boolean;
+      level: 'low' | 'critical' | 'none';
+      message: string;
+    };
+  };
 }
 
 import RecentEarningsModal from './RecentEarningsModal';
@@ -40,6 +68,54 @@ const CentroDePagos = () => {
       setLoading(false);
     }
   }, [fixerIdFromUrl]);
+
+    useEffect(() => {
+    const toastInfo = fixerData?.lowBalanceInfo?.toast;
+    console.log("🎯 Toast info en front:", toastInfo);
+
+    if (!toastInfo) return;
+
+    const { level, message, shouldShow } = toastInfo;
+
+    const baseOptions = {
+      duration: 8000,
+      position: "top-center" as const, // centrado arriba
+      transition: "bounceIn" as const,
+      sound: false,
+      progress: true,
+    };
+
+    // 1) Estados críticos / bajos: respetan shouldShow del backend
+    if (shouldShow && level === "critical") {
+      showToast.error(
+        message ||
+          "Tu saldo está en negativo o en un estado crítico. Te recomendamos recargar tu billetera.",
+        baseOptions
+      );
+      return;
+    }
+
+    if (shouldShow && level === "low") {
+      showToast.warning(
+        message || "Tu saldo está bajo. Te recomendamos recargar tu billetera.",
+        baseOptions
+      );
+      return;
+    }
+
+    // 2) Estado saludable: mostrar SIEMPRE que se cargue el Centro de Pagos
+    if (level === "none") {
+      showToast.success(
+        message || "Tu billetera está saludable. Puedes seguir recibiendo pagos sin problema.",
+        baseOptions
+      );
+    }
+  }, [
+    fixerData?.lowBalanceInfo?.toast?.shouldShow ?? null,
+    fixerData?.lowBalanceInfo?.toast?.level ?? null,
+  ]);
+
+
 
   const fetchFixerData = async (fixerId: string) => {
     setLoading(true);

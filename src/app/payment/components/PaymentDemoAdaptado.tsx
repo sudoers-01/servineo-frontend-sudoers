@@ -37,7 +37,7 @@ export default function PaymentMethods({
 
   const goToQR = () => {
     router.push(
-      `/payment/qr?trabajoId=${jobId}&bookingId=TRABAJO-${jobId}&providerId=DEMO-PROVIDER&amount=${amount}&currency=BOB`
+      `/payment/pago-qr?trabajoId=${jobId}&bookingId=TRABAJO-${jobId}&providerId=DEMO-PROVIDER&amount=${amount}&currency=BOB`
     );
   };
 
