@@ -301,45 +301,57 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
                 Ganancias (Bs)
               </div>
               <div className="ml-12">
-                <div className="relative h-80">
-                  {yTicks.map((tick) => {
-                    const bottomPct = (tick / maxTick) * 100;
-                    return (
-                      <div
-                        key={tick}
-                        className="absolute left-0 right-0 flex items-center"
-                        style={{ bottom: `${bottomPct}%` }}
-                      >
-                        <span className="text-sm font-medium text-gray-600 w-12 -ml-14 text-right">{tick}</span>
-                        <div className="flex-1 border-t border-gray-300" />
-                      </div>
-                    );
-                  })}
-
-                  <div className="absolute inset-0 flex items-end justify-around gap-4 pb-8">
-                    {limitedData.map((item, index) => {
-                      const heightPct = (item.value / maxTick) * 100;
-                      console.log(`📊 ${item.label}: ${item.value}Bs / ${maxTick} = ${heightPct.toFixed(1)}%`);
-                      
+                <div className="relative" style={{ height: '352px' }}>
+                  {/* Contenedor del gráfico */}
+                  <div className="absolute left-0 right-0" style={{ top: 0, bottom: '32px', transform: 'translateY(-15px)' }}>
+                    {/* Líneas del eje Y */}
+                    {yTicks.map((tick) => {
+                      const bottomPct = (tick / maxTick) * 100;
                       return (
-                        <div key={index} className="flex flex-col items-center justify-end group relative" style={{ width: '80px', height: '100%' }}>
-                          <div className="absolute bottom-full mb-3 hidden group-hover:block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap z-10 shadow-lg">
-                            <p className="font-bold text-base">Bs. {item.value.toFixed(2)}</p>
-                            <p className="text-xs opacity-80">{item.label}</p>
-                          </div>
-                          
-                          <div
-                            className="w-full bg-gradient-to-t from-[#2c6ef7] to-[#4d8aff] rounded-t-lg transition-all hover:from-[#1f5ad6] hover:to-[#3d7aef] shadow-md hover:shadow-lg cursor-pointer"
-                            style={{ 
-                              height: `${heightPct}%`, 
-                              minHeight: heightPct > 0 ? '8px' : '0' 
-                            }}
-                          />
-                          
-                          <span className="mt-3 text-sm font-bold text-gray-800">{item.label}</span>
+                        <div
+                          key={tick}
+                          className="absolute left-0 right-0 flex items-center"
+                          style={{ bottom: `${bottomPct}%` }}
+                        >
+                          <span className="text-sm font-medium text-gray-600 w-12 -ml-14 text-right">{tick}</span>
+                          <div className="flex-1 border-t border-gray-300" />
                         </div>
                       );
                     })}
+
+                    {/* Barras */}
+                    <div className="absolute inset-0 flex items-end justify-around gap-4" style={{ transform: 'translateY(-10px)' }}>
+                      {limitedData.map((item, index) => {
+                        const heightPx = (item.value / maxTick) * 100;
+                        console.log(`📊 ${item.label}: ${item.value}Bs / ${maxTick} = ${heightPx.toFixed(1)}%`);
+                        
+                        return (
+                          <div key={index} className="flex items-end group relative" style={{ width: '80px', height: '100%' }}>
+                            <div className="absolute bottom-full mb-3 hidden group-hover:block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap z-10 shadow-lg">
+                              <p className="font-bold text-base">Bs. {item.value.toFixed(2)}</p>
+                              <p className="text-xs opacity-80">{item.label}</p>
+                            </div>
+                            
+                            <div
+                              className="w-full bg-gradient-to-t from-[#2c6ef7] to-[#4d8aff] rounded-t-lg transition-all hover:from-[#1f5ad6] hover:to-[#3d7aef] shadow-md hover:shadow-lg cursor-pointer"
+                              style={{ 
+                                height: `${heightPx}%`,
+                                minHeight: heightPx > 0 ? '3px' : '0'
+                              }}
+                            />
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  
+                  {/* Etiquetas de fechas */}
+                  <div className="absolute left-0 right-0 flex justify-around gap-4" style={{ bottom: '-8px', height: '32px', paddingTop: '8px' }}>
+                    {limitedData.map((item, index) => (
+                      <div key={`label-${index}`} style={{ width: '80px' }} className="flex justify-center">
+                        <span className="text-sm font-bold text-gray-800">{item.label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               </div>
