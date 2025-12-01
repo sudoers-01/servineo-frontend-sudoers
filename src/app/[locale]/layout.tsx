@@ -9,6 +9,7 @@ import { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { TranslationButton } from '@/Components/Shared/TranslationButton';
+import BotonesFlotantes from '@/Components/ask_for_help/contenedor';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -69,6 +70,7 @@ export default async function RootLayout({ children, params }: Props) {
           <ReduxProvider>
             <div className="text-black fixed bottom-7 right-7 z-[9999]">
               <TranslationButton />
+              <BotonesFlotantes />
             </div>
             <div className="">
               <TopMenu />
