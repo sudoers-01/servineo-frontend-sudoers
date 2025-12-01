@@ -4,11 +4,9 @@ import { useRouter } from 'next/navigation';
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation'; 
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
-//import WalletFlagWatcher from "./WalletFlagWatcher";
-import { showToast } from "nextjs-toast-notify";
+import RecentEarningsModal from './RecentEarningsModal';
 
-
-// --- Constantes Mock (Se mantienen como pediste) ---
+// --- Constantes Mock ---
 const MOCK_FIXER_ID = "690c1a08f32ebc5be9c5707c";
 const MOCK_WALLET_ID = "6917ca234f50d0d44bff1173";
 
@@ -17,14 +15,13 @@ interface FixerData {
   saldoActual: number;
   totalGanado: number;
   trabajosCompletados: number;
-  fixerId?: string; // Es opcional
+  fixerId?: string;
   isTestData?: boolean;
 
   lowBalanceAlert?: {
     type: 'none' | 'low' | 'critical';
   };
 
-  // lo que manda el backend para el toast
   lowBalanceInfo?: {
     balance: number;
     currency: string;
@@ -46,13 +43,10 @@ interface FixerData {
   };
 }
 
-import RecentEarningsModal from './RecentEarningsModal';
-
 const CentroDePagos = () => {
   const router = useRouter();
   const searchParams = useSearchParams(); 
 
-  // Obtenemos el fixerId de la URL para usarlo en los botones
   const fixerIdFromUrl = searchParams.get('fixerId');
 
   const [fixerData, setFixerData] = useState<FixerData | null>(null); 
@@ -69,27 +63,29 @@ const CentroDePagos = () => {
     }
   }, [fixerIdFromUrl]);
 
-    useEffect(() => {
+  // Toast notifications (comentado hasta instalar nextjs-toast-notify)
+  useEffect(() => {
     const toastInfo = fixerData?.lowBalanceInfo?.toast;
     console.log("🎯 Toast info en front:", toastInfo);
 
     if (!toastInfo) return;
 
+    // TODO: Descomentar cuando se instale nextjs-toast-notify
+    // npm install nextjs-toast-notify
+    /*
     const { level, message, shouldShow } = toastInfo;
 
     const baseOptions = {
       duration: 8000,
-      position: "top-center" as const, // centrado arriba
+      position: "top-center" as const,
       transition: "bounceIn" as const,
       sound: false,
       progress: true,
     };
 
-    // 1) Estados críticos / bajos: respetan shouldShow del backend
     if (shouldShow && level === "critical") {
       showToast.error(
-        message ||
-          "Tu saldo está en negativo o en un estado crítico. Te recomendamos recargar tu billetera.",
+        message || "Tu saldo está en negativo o en un estado crítico. Te recomendamos recargar tu billetera.",
         baseOptions
       );
       return;
@@ -103,32 +99,28 @@ const CentroDePagos = () => {
       return;
     }
 
-    // 2) Estado saludable: mostrar SIEMPRE que se cargue el Centro de Pagos
     if (level === "none") {
       showToast.success(
         message || "Tu billetera está saludable. Puedes seguir recibiendo pagos sin problema.",
         baseOptions
       );
     }
+    */
   }, [
     fixerData?.lowBalanceInfo?.toast?.shouldShow ?? null,
     fixerData?.lowBalanceInfo?.toast?.level ?? null,
   ]);
 
-
-
   const fetchFixerData = async (fixerId: string) => {
     setLoading(true);
     setError(null);
     
-    // --- CORRECCIÓN: Usar la variable de entorno PÚBLICA ---
     const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
     
     try {
       console.log(`🔍 Intentando conectar a: ${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
       
-      // --- CORRECCIÓN: Usar la URL absoluta en fetch ---
-      const response = await fetch(`http://localhost:8000/api/fixer/payment-center/${fixerId}`, {
+      const response = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -150,7 +142,7 @@ const CentroDePagos = () => {
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
-    } catch (err: any) { // Usamos 'any' para poder acceder a err.message
+    } catch (err: any) {
       console.error('❌ Error fetching fixer data:', err);
       setError(err.message || 'Error desconocido');
       
@@ -167,7 +159,6 @@ const CentroDePagos = () => {
     }
   };
 
-  // --- Componente de Carga ---
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -179,7 +170,6 @@ const CentroDePagos = () => {
     );
   }
   
-  // --- Manejo de Error ---
   if (error || !fixerData) {
      return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
@@ -198,7 +188,6 @@ const CentroDePagos = () => {
     );
   }
 
-  // --- Componente Principal ---
   return (
     <div className="min-h-screen bg-gray-100">
       <div className="bg-blue-600 text-white px-6 py-4 shadow-md">
@@ -214,9 +203,6 @@ const CentroDePagos = () => {
             Mis Ganancias
           </button>
         </div>
-        
-        {/* Usamos el ID real de la URL para el Watcher */}
-        {/*<WalletFlagWatcher fixerId={fixerIdFromUrl || MOCK_FIXER_ID} pollMs={4000} />*/}
 
         {fixerData?.isTestData && (
           <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-3 rounded-r-lg">
@@ -228,7 +214,6 @@ const CentroDePagos = () => {
             </div>
           </div>
         )}
-        {/* --- CORRECCIÓN: Llave '}' sobrante eliminada de aquí --- */}
 
         <div className="pt-6 pb-4">
           <div className="bg-blue-600 rounded-2xl p-4 sm:p-6 shadow-xl text-white">
@@ -264,11 +249,9 @@ const CentroDePagos = () => {
           <h3 className="text-base font-semibold text-gray-600 mb-3">Acciones Rápidas</h3>
 
           <div>
-            
-            {/* --- CORRECCIÓN: Botones usan 'fixerIdFromUrl' --- */}
             <button
               onClick={() => router.push(`/payment/FixerWallet?fixerId=${fixerIdFromUrl}`)}
-              disabled={!fixerIdFromUrl} // Usa el ID de la URL
+              disabled={!fixerIdFromUrl}
               className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
             >
               <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors">
@@ -285,7 +268,7 @@ const CentroDePagos = () => {
 
             <button 
               onClick={() => router.push(`/cuenta-bancaria?fixerId=${fixerIdFromUrl}`)} 
-              disabled={!fixerIdFromUrl} // Usa el ID de la URL
+              disabled={!fixerIdFromUrl}
               className="w-full bg-white rounded-2xl p-4 shadow-sm hover:shadow-md transition-shadow flex items-center gap-4 group disabled:opacity-50"
             >
               <div className="bg-cyan-100 p-3 rounded-xl group-hover:bg-cyan-200 transition-colors">
@@ -319,7 +302,7 @@ const CentroDePagos = () => {
         {error && !fixerData?.isTestData && (
           <div className="pb-6">
             <button
-              onClick={() => fetchFixerData(fixerIdFromUrl || '')} // Reintentar con el ID de la URL
+              onClick={() => fetchFixerData(fixerIdFromUrl || '')}
               className="w-full bg-blue-600 text-white font-semibold py-3 rounded-xl hover:bg-blue-700 transition-colors"
             >
               Reintentar carga
@@ -329,16 +312,10 @@ const CentroDePagos = () => {
 
       </div> 
 
-      {showEarningsModal && (
+      {showEarningsModal && fixerIdFromUrl && (
         <RecentEarningsModal
           onClose={() => setShowEarningsModal(false)}
-          total={310}
-          data={[
-            { label: '19 nov', value: 65 },
-            { label: '20 nov', value: 38 },
-            { label: '21 nov', value: 90 },
-            { label: '22 nov', value: 110 },
-          ]}
+          fixerId={fixerIdFromUrl}
         />
       )}
     </div>
