@@ -38,5 +38,40 @@ export const adminAPI = {
                 ]
             }
         };
+    },
+
+    // Metodo para graficos reales
+    getSessionStartChart: async (token: string, date: string, endDate ?: string) => {
+        const params = new URLSearchParams({ date });
+        if (endDate) params.append('enddate', endDate);
+
+        const response = await fetch(`${API_BASE}/api/admin/chart/session/start?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Chart fetch failed: ${response.status}`);
+        }
+        return response.json();
+    },
+
+    getSessionEndChart: async (token: string, date: string, endDate ?: string) => {
+        const params = new URLSearchParams({ date });
+        if (endDate) params.append('enddate', endDate);
+
+        const response = await fetch(`${API_BASE}/api/admin/chart/session/end?${params}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Chart fetch failed: ${response.status}`);
+        }
+        return response.json();
     }
 };
