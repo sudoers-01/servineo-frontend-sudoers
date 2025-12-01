@@ -28,9 +28,19 @@ export const jobOfferSchema = z.object({
     .max(5, { message: 'Máximo 5 etiquetas' }),
 });
 
+
+export const certificationSchema = z.object({
+  name: z.string().min(3, { message: 'El nombre debe tener al menos 3 caracteres' }),
+  institution: z.string().min(2, { message: 'La institución es requerida' }),
+  issueDate: z.string().refine((val) => !isNaN(Date.parse(val)), { message: 'Fecha inválida' }),
+  expiryDate: z.string().optional(), // Puede no tener vencimiento
+  credentialId: z.string().optional(),
+  credentialUrl: z.string().url({ message: 'Debe ser una URL válida (https://...)' }).optional().or(z.literal('')),
+});
+
 // Tipo inferido para usar en useForm
 export type JobOfferFormData = z.infer<typeof jobOfferSchema>;
-
+export type CertificationFormData = z.infer<typeof certificationSchema>;
 
 // esto no deveria esta aqui lo vamos a cambiar 
 // === 2. INTERFAZ DE RESPUESTA DE LA API (Backend Mongoose) ===
