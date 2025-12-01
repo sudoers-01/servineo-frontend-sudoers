@@ -25,6 +25,7 @@ import {
   resetFilters,
   enablePersistence,
 } from '@/app/redux/slice/jobOfert';
+import { STORAGE_KEYS } from '@/app/redux/features/jobOffers/storage';
 import type { FilterState } from '@/app/redux/features/jobOffers/types';
 import { getSortValue } from '../../lib/constants/sortOptions';
 import {
@@ -88,13 +89,25 @@ export default function JobOffersPage() {
 
 
   // Limpiar búsqueda si se navega directamente sin parámetros
+  // Pero no limpiar si existe un valor guardado en localStorage (persistencia)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
 
       if (params.toString() === '' && search !== '') {
-        console.log('Navegación directa detectada, limpiando búsqueda guardada');
-        dispatch(setSearch(''));
+        let hasSavedSearch = false;
+        try {
+          hasSavedSearch = !!window.localStorage.getItem(STORAGE_KEYS.SEARCH);
+        } catch (e) {
+          hasSavedSearch = false;
+        }
+
+        if (!hasSavedSearch) {
+          console.log('Navegación directa detectada sin estado guardado, limpiando búsqueda guardada');
+          dispatch(setSearch(''));
+        } else {
+          console.log('Estado guardado encontrado en localStorage — preservando búsqueda');
+        }
       }
     }
   }, [dispatch, search]);

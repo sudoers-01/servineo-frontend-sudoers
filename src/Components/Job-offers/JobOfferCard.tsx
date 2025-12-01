@@ -216,7 +216,7 @@ export const JobOfferCard: React.FC<JobOfferCardProps> = ({
         <h3
           className={`text-base font-semibold text-gray-900 group-hover:text-primary transition-colors ${viewMode === 'grid' ? 'truncate' : 'text-left'}`}
         >
-          <SearchHighlight text={offer.title} searchQuery={searchQuery} />
+          <span>{offer.title}</span>
         </h3>
         <p
           className={`mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed ${viewMode === 'list' ? 'text-left' : ''}`}
