@@ -32,7 +32,6 @@ export default function RegistroGoogle({ onSuccessClose, onNotify }: RegistroGoo
 
     try {
       const data: GoogleAuthResponse = await enviarTokenGoogle(token);
-      console.log('Respuesta del backend:', data);
 
       if (data.status === 'error') {
         onNotify?.({

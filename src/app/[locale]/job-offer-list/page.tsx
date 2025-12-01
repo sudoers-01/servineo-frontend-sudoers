@@ -106,12 +106,7 @@ export default function JobOffersPage() {
           hasSavedSearch = false;
         }
 
-        if (!hasSavedSearch) {
-          console.log('Navegación directa detectada sin estado guardado, limpiando búsqueda guardada');
-          dispatch(setSearch(''));
-        } else {
-          console.log('Estado guardado encontrado en localStorage — preservando búsqueda');
-        }
+        if (!hasSavedSearch) dispatch(setSearch(''));
       }
     }
   }, [dispatch, search]);

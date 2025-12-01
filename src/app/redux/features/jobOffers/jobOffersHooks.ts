@@ -94,7 +94,7 @@ export function useJobOffers() {
     },
   );
 
-  // ✅ NUEVO - Capturar error 400 del backend
+  // Capturar error 400 del backend
   useEffect(() => {
     if (error && 'status' in error) {
       const fetchError = error as FetchBaseQueryError;
@@ -103,7 +103,6 @@ export function useJobOffers() {
         const message = (fetchError.data as { message?: string }).message;
 
         if (message) {
-          console.log('❌ API ERROR 400:', message);
           dispatch(setError(message));
           shouldClearErrorRef.current = false;
 
@@ -310,25 +309,4 @@ export function useAppliedFilters() {
     appliedParams,
     handleClearApplied,
   };
-}
-
-/**
- * Hook para debug/logging en desarrollo
- */
-export function useJobOffersDebug() {
-  const state = useAppSelector(selectJobOffersState);
-  const params = useAppSelector(selectSearchParams);
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.group('🔍 JobOffers State');
-      console.log('Current Page:', state.paginaActual);
-      console.log('Total Pages:', state.totalPages);
-      console.log('Total Records:', state.totalRegistros);
-      console.log('Preserved Total:', state.preservedTotalRegistros);
-      console.log('Params:', params);
-      console.log('Error:', state.error);
-      console.groupEnd();
-    }
-  }, [state, params]);
 }
