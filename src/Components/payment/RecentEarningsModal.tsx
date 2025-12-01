@@ -6,7 +6,7 @@ import EarningsFilterModal from './EarningsFilterModal';
 
 type Props = {
   onClose: () => void;
-  fixerId?: string; // Ahora es opcional
+  fixerId?: string;
 };
 
 export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: Props) {
@@ -17,21 +17,17 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
   const [currentData, setCurrentData] = useState<{ label: string; value: number }[]>([]);
   const [currentTotal, setCurrentTotal] = useState(0);
 
-  // Obtener fixerId solo en el cliente
   useEffect(() => {
     console.log("🔍 Intentando obtener fixerId...");
     
-    // Primero intentar usar el fixerId de las props
     if (propFixerId) {
       console.log("✅ fixerId obtenido de props:", propFixerId);
       setFixerId(propFixerId);
       return;
     }
     
-    // Si no viene por props, buscar en diferentes lugares
     if (typeof window !== 'undefined') {
       try {
-        // Intentar Redux store primero
         const reduxState = (window as any).__REDUX_DEVTOOLS_EXTENSION__?.store?.getState?.();
         if (reduxState?.fixer?.id || reduxState?.fixer?._id) {
           const id = reduxState.fixer.id || reduxState.fixer._id;
@@ -47,7 +43,6 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
           return;
         }
         
-        // Intentar localStorage como fallback
         const possibleKeys = ['user', 'fixer', 'auth', 'userData'];
         for (const key of possibleKeys) {
           const stored = localStorage.getItem(key);
@@ -61,14 +56,12 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
                 return;
               }
             } catch (e) {
-              // Continuar con la siguiente key
+              // Continuar
             }
           }
         }
         
         console.error("❌ No se encontró fixerId en ningún lugar");
-        console.log("Redux state disponible:", reduxState);
-        console.log("localStorage keys:", Object.keys(localStorage));
         setError("No se pudo obtener tu ID de usuario");
         setLoading(false);
       } catch (error) {
@@ -79,7 +72,6 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
     }
   }, [propFixerId]);
   
-  // Fechas por defecto: últimos 7 días
   const getDefaultDates = () => {
     const to = new Date();
     const from = new Date();
@@ -93,7 +85,6 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
 
   const [dateRange, setDateRange] = useState(getDefaultDates());
 
-  // Formatear fecha para etiquetas
   const formatDateLabel = (dateStr: string): string => {
     const date = new Date(dateStr + 'T00:00:00');
     const day = date.getDate();
@@ -101,7 +92,6 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
     return `${day} ${month}`;
   };
 
-  // Función para cargar datos desde el backend
   const fetchEarnings = async (from: string, to: string) => {
     setLoading(true);
     setError(null);
@@ -111,64 +101,50 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
     try {
       const url = `${BACKEND_URL}/api/lab/earnings/${fixerId}?fromDate=${from}&toDate=${to}`;
       console.log("📊 Cargando ganancias desde:", url);
-      console.log("📅 Rango de fechas:", { from, to });
       
       const res = await fetch(url);
-      
-      console.log("📡 Respuesta recibida - Status:", res.status);
       
       if (!res.ok) {
         let errorMessage = "Error al cargar ganancias";
         try {
           const errData = await res.json();
           errorMessage = errData.error || errData.message || errorMessage;
-          console.error("❌ Error del servidor:", errData);
         } catch (parseError) {
-          console.error("❌ Error al parsear respuesta de error:", parseError);
+          // Ignorar
         }
         throw new Error(errorMessage);
       }
 
       const result = await res.json();
-      console.log("📦 Datos completos recibidos:", result);
+      console.log("📦 Datos recibidos:", result);
       
       if (result.success && result.data) {
-        // Transformar datos al formato esperado
         const transformedData = result.data.earningsByDay.map((item: any) => ({
           label: formatDateLabel(item.date),
           value: item.total
         }));
         
-        console.log("✅ Datos transformados:", {
-          total: result.data.totalEarnings,
-          dias: transformedData.length,
-          data: transformedData
-        });
+        console.log("✅ Datos transformados:", transformedData);
         
         setCurrentData(transformedData);
         setCurrentTotal(result.data.totalEarnings);
       } else {
-        console.error("❌ Estructura de datos incorrecta:", result);
         throw new Error("Estructura de datos incorrecta del servidor");
       }
     } catch (err: any) {
-      console.error("❌ Error completo:", err);
+      console.error("❌ Error:", err);
       setError(err.message || "Error inesperado al cargar datos");
     } finally {
       setLoading(false);
-      console.log("🏁 fetchEarnings finalizado");
     }
   };
 
-  // Cargar datos cuando fixerId esté disponible
   useEffect(() => {
     if (fixerId) {
-      console.log("🔄 Cargando datos para fixerId:", fixerId);
       fetchEarnings(dateRange.from, dateRange.to);
     }
-  }, [fixerId]); // Solo se ejecuta cuando fixerId cambia
+  }, [fixerId]);
 
-  // Si no hay fixerId, mostrar error inmediatamente
   if (!fixerId) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -191,33 +167,51 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
     );
   }
 
-  // Función para aplicar filtros
   const handleApplyFilter = async (from: string, to: string) => {
     setDateRange({ from, to });
     await fetchEarnings(from, to);
     setShowFilterModal(false);
   };
 
-  // Calcular valores dinámicos para el gráfico
-  const limitedData = currentData.slice(0, 7); // Máximo 7 días
+  const limitedData = currentData.slice(0, 7);
   const maxVal = Math.max(...limitedData.map((d) => d.value), 1);
   
-  // Calcular el paso del eje Y dinámicamente
-  const calculateYStep = (max: number): number => {
-    if (max <= 100) return 25;
-    if (max <= 250) return 50;
-    if (max <= 500) return 100;
-    if (max <= 1000) return 200;
-    return 500;
+  const calculateYAxis = (max: number) => {
+    let step: number;
+    
+    if (max <= 10) {
+      step = 2;
+    } else if (max <= 25) {
+      step = 5;
+    } else if (max <= 50) {
+      step = 10;
+    } else if (max <= 100) {
+      step = 20;
+    } else if (max <= 250) {
+      step = 50;
+    } else if (max <= 500) {
+      step = 100;
+    } else if (max <= 1000) {
+      step = 200;
+    } else {
+      step = 500;
+    }
+    
+    const maxTick = Math.ceil(max / step) * step;
+    
+    const ticks = [];
+    for (let i = 0; i <= maxTick; i += step) {
+      ticks.push(i);
+    }
+    
+    console.log("📐 Eje Y:", { max, step, maxTick, ticks });
+    
+    return { step, maxTick, ticks };
   };
   
-  const yStep = calculateYStep(maxVal);
-  const maxTick = Math.max(yStep, Math.ceil(maxVal / yStep) * yStep, 100);
-  const yTicks = Array.from({ length: Math.floor(maxTick / yStep) + 1 }, (_, i) => i * yStep);
-  
+  const { maxTick, ticks: yTicks } = calculateYAxis(maxVal);
   const isEmpty = !limitedData.length || limitedData.every((d) => d.value === 0);
 
-  // Estado de carga
   if (loading) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -231,7 +225,6 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
     );
   }
 
-  // Estado de error
   if (error) {
     return (
       <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
@@ -272,7 +265,6 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
                 Ganancias: {currentTotal}
               </div>
               
-              {/* Botón Filtros */}
               <button
                 onClick={() => setShowFilterModal(true)}
                 className="flex items-center gap-2 px-5 py-2 bg-[#2c6ef7] hover:bg-[#1f5ad6] text-white font-semibold rounded-md shadow-sm transition-colors"
@@ -304,47 +296,47 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
               </div>
             </div>
           ) : (
-            <div className="relative bg-white border border-gray-200 rounded-lg p-4">
-              <div className="absolute left-2 top-1/2 -translate-y-1/2 -rotate-90 origin-left text-sm text-gray-700">
+            <div className="relative bg-white border border-gray-200 rounded-lg p-6">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 -rotate-90 origin-left text-sm font-semibold text-gray-700">
                 Ganancias (Bs)
               </div>
-              <div className="ml-10">
-                <div className="relative h-64">
-                  {/* Líneas y etiquetas del eje Y */}
+              <div className="ml-12">
+                <div className="relative h-80">
                   {yTicks.map((tick) => {
-                    const top = 100 - (tick / maxTick) * 100;
+                    const bottomPct = (tick / maxTick) * 100;
                     return (
                       <div
                         key={tick}
                         className="absolute left-0 right-0 flex items-center"
-                        style={{ top: `${top}%`, transform: 'translateY(50%)' }}
+                        style={{ bottom: `${bottomPct}%` }}
                       >
-                        <span className="text-xs text-gray-500 w-10 -ml-10 text-right">{tick}</span>
-                        <div className="flex-1 border-t border-gray-200" />
+                        <span className="text-sm font-medium text-gray-600 w-12 -ml-14 text-right">{tick}</span>
+                        <div className="flex-1 border-t border-gray-300" />
                       </div>
                     );
                   })}
 
-                  <div className="absolute inset-0 flex items-end justify-between gap-3">
+                  <div className="absolute inset-0 flex items-end justify-around gap-4 pb-8">
                     {limitedData.map((item, index) => {
-                      const heightPct = Math.min(100, (item.value / maxTick) * 100);
+                      const heightPct = (item.value / maxTick) * 100;
+                      console.log(`📊 ${item.label}: ${item.value}Bs / ${maxTick} = ${heightPct.toFixed(1)}%`);
+                      
                       return (
-                        <div key={`${item.label}-${index}`} className="flex flex-col items-center justify-end flex-1 group relative">
-                          {/* Tooltip al hacer hover */}
-                          <div className="absolute bottom-full mb-2 hidden group-hover:block bg-gray-800 text-white px-3 py-2 rounded-lg text-sm whitespace-nowrap z-10">
-                            <p className="font-bold">Bs. {item.value.toFixed(2)}</p>
-                            <p className="text-xs opacity-75">{item.label}</p>
+                        <div key={index} className="flex flex-col items-center justify-end group relative" style={{ width: '80px', height: '100%' }}>
+                          <div className="absolute bottom-full mb-3 hidden group-hover:block bg-gray-900 text-white px-4 py-2 rounded-lg text-sm font-semibold whitespace-nowrap z-10 shadow-lg">
+                            <p className="font-bold text-base">Bs. {item.value.toFixed(2)}</p>
+                            <p className="text-xs opacity-80">{item.label}</p>
                           </div>
                           
-                          {/* Barra */}
                           <div
-                            className="w-14 sm:w-16 bg-[#2c6ef7] rounded-t-md transition-all hover:bg-[#1f5ad6]"
+                            className="w-full bg-gradient-to-t from-[#2c6ef7] to-[#4d8aff] rounded-t-lg transition-all hover:from-[#1f5ad6] hover:to-[#3d7aef] shadow-md hover:shadow-lg cursor-pointer"
                             style={{ 
                               height: `${heightPct}%`, 
-                              minHeight: heightPct > 0 ? '2rem' : '0' 
+                              minHeight: heightPct > 0 ? '8px' : '0' 
                             }}
                           />
-                          <span className="mt-2 text-sm font-semibold text-gray-700">{item.label}</span>
+                          
+                          <span className="mt-3 text-sm font-bold text-gray-800">{item.label}</span>
                         </div>
                       );
                     })}
@@ -365,7 +357,6 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
         </div>
       </div>
 
-      {/* Modal de Filtro */}
       {showFilterModal && (
         <EarningsFilterModal
           currentFrom={dateRange.from}
