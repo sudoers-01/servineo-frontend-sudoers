@@ -70,69 +70,114 @@ export default function AdminDashboard() {
                 </div>
             </header>
 
+            {/* 📊 MÉTRICAS PRINCIPALES */}
             <div className={styles.metricsGrid}>
                 <div className={styles.metricCard}>
-                    <h3>Total Sessions</h3>
+                    <h3>👥 Total Usuarios</h3>
                     <div className={styles.metricValue}>
-                        {metrics?.totalSessions?.toLocaleString()}
+                        {metrics?.totalUsers?.toLocaleString() || '0'}
                     </div>
-                    <div className={styles.metricTrend}>+1348</div>
+                    <div className={styles.metricBreakdown}>
+                        <span>Requesters: {metrics?.usersByRole?.requester || 0}</span>
+                        <span>Fixers: {metrics?.usersByRole?.fixer || 0}</span>
+                    </div>
                 </div>
 
                 <div className={styles.metricCard}>
-                    <h3>Searches</h3>
+                    <h3>🛠️ Trabajos Activos</h3>
                     <div className={styles.metricValue}>
-                        {metrics?.searches?.toLocaleString()}
+                        {metrics?.activeJobs?.toLocaleString() || '0'}
                     </div>
-                    <div className={styles.metricTrend}>+563</div>
+                    <div className={styles.metricTrend}>
+                        Total: {metrics?.totalJobs || 0}
+                    </div>
                 </div>
 
                 <div className={styles.metricCard}>
-                    <h3>Top Search plomeria</h3>
+                    <h3>💰 Ingresos</h3>
                     <div className={styles.metricValue}>
-                        {metrics?.topSearch}
+                        ${metrics?.revenue?.toLocaleString() || '0'} BOB
+                    </div>
+                    <div className={styles.metricTrend}>
+                        Pagos: {metrics?.activePayments || 0}
                     </div>
                 </div>
             </div>
 
+            {/* 📈 ESTADÍSTICAS DE SESIÓN */}
             <div className={styles.dashboardContent}>
                 <div className={styles.section}>
-                    <h3>Session Statistics</h3>
+                    <h3>📊 Sesiones por Rol (Últimos 30 días)</h3>
                     <div className={styles.sessionStats}>
                         <div className={styles.sessionType}>
                             <span className={styles.sessionLabel}>REQUESTER</span>
                             <div className={styles.sessionCount}>
-                                {metrics?.sessionStats?.requester?.toLocaleString()}
+                                {metrics?.sessionStats?.requester?.toLocaleString() || '0'}
                             </div>
                         </div>
                         <div className={styles.sessionType}>
                             <span className={styles.sessionLabel}>FIXER</span>
                             <div className={styles.sessionCount}>
-                                {metrics?.sessionStats?.fixer?.toLocaleString()}
+                                {metrics?.sessionStats?.fixer?.toLocaleString() || '0'}
                             </div>
                         </div>
                         <div className={styles.sessionType}>
                             <span className={styles.sessionLabel}>VISITOR</span>
                             <div className={styles.sessionCount}>
-                                {metrics?.sessionStats?.visitor?.toLocaleString()}
+                                {metrics?.sessionStats?.visitor?.toLocaleString() || '0'}
+                            </div>
+                        </div>
+                        <div className={styles.sessionType}>
+                            <span className={styles.sessionLabel}>ADMIN</span>
+                            <div className={styles.sessionCount}>
+                                {metrics?.sessionStats?.admin?.toLocaleString() || '0'}
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div className={styles.section}>
-                    <h3>Popular Searches</h3>
+                    <h3>🔍 Búsquedas Populares</h3>
                     <div className={styles.popularSearches}>
-                        {metrics?.popularSearches?.map((search: any, index: number) => (
-                        <div key={index} className={styles.searchItem}>
-                            <strong>{search.term}</strong>
-                            <span>{search.count} searches</span>
-                        </div>
-                        ))}
+                        {metrics?.popularSearches?.length > 0 ? (
+                            metrics.popularSearches.map((search: any, index: number) => (
+                                <div key={index} className={styles.searchItem}>
+                                    <strong>{search.term}</strong>
+                                    <span>{search.count} búsquedas</span>
+                                </div>
+                            ))
+                        ) : (
+                            <div className={styles.noData}>
+                                <p>No hay datos de búsquedas recientes</p>
+                                <small>Los usuarios aún no han realizado búsquedas</small>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
 
+            {/* 📊 ESTADO DE TRABAJOS */}
+            {metrics?.jobsByStatus && (
+                <div className={styles.jobsSection}>
+                    <h3>📋 Estado de Trabajos</h3>
+                    <div className={styles.jobsGrid}>
+                        <div className={styles.jobStatusCard}>
+                            <h4>🟡 Pendientes</h4>
+                            <div className={styles.jobCount}>{metrics.jobsByStatus.pending || 0}</div>
+                        </div>
+                        <div className={styles.jobStatusCard}>
+                            <h4>🟠 En Progreso</h4>
+                            <div className={styles.jobCount}>{metrics.jobsByStatus.in_progress || 0}</div>
+                        </div>
+                        <div className={styles.jobStatusCard}>
+                            <h4>✅ Completados</h4>
+                            <div className={styles.jobCount}>{metrics.jobsByStatus.completed || 0}</div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* GRÁFICOS EXISTENTES */}
             <ChartsSection />
         </div>
     );

@@ -4,33 +4,109 @@ import { useRouter } from 'next/navigation';
 import styles from '../styles/admin.module.css';
 import { adminAPI } from '../lib/api';
 
+declare global {
+    interface Window {
+        google?: any;
+    }
+}
+
 export default function AdminLogin() {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
+    const [googleLoading, setGoogleLoading] = useState(false);
     const router = useRouter();
 
+    // Función para login con Google
+    const handleGoogleLogin = async () => {
+        setGoogleLoading(true);
+        
+        try {
+            // Cargar Google API
+            await loadGoogleScript();
+            
+            // Inicializar Google Auth
+            const google = window.google;
+            const client = google?.accounts?.oauth2?.initTokenClient;
+            
+            if (!client) {
+                throw new Error('Google API no disponible');
+            }
+
+            // Solicitar token
+            client({
+                client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+                scope: 'email profile',
+                callback: async (response: any) => {
+                    if (response.error) {
+                        console.error('Google auth error:', response);
+                        alert('Error con Google Login');
+                        setGoogleLoading(false);
+                        return;
+                    }
+
+                    try {
+                        // Enviar token al backend
+                        const data = await adminAPI.loginWithGoogle(response.credential);
+                        
+                        if (data.success) {
+                            localStorage.setItem('adminToken', data.token);
+                            localStorage.setItem('adminUser', JSON.stringify(data.user));
+                            router.push('/es/user-admin/dashboard');
+                        } else {
+                            alert(data.message || 'Error con Google Login');
+                        }
+                    } catch (error) {
+                        console.error('Google login error:', error);
+                        alert('Error con Google Login');
+                    } finally {
+                        setGoogleLoading(false);
+                    }
+                }
+            }).requestAccessToken();
+        } catch (error) {
+            console.error('Google login error:', error);
+            alert('Error con Google Login');
+            setGoogleLoading(false);
+        }
+    };
+
+    // Función para cargar script de Google
+    const loadGoogleScript = () => {
+        return new Promise((resolve, reject) => {
+            if (window.google) {
+                resolve(true);
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = 'https://accounts.google.com/gsi/client';
+            script.async = true;
+            script.defer = true;
+            script.onload = () => resolve(true);
+            script.onerror = () => reject(new Error('Failed to load Google script'));
+            document.head.appendChild(script);
+        });
+    };
+
+    // Login normal 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         
         try {
-        // Conectando al backend
-        const data = await adminAPI.login({ email, password });
+            const data = await adminAPI.login({ email, password });
 
-        if (data.success) {
-            // Guardar en localStorage
-            localStorage.setItem('adminToken', data.token);
-            localStorage.setItem('adminUser', JSON.stringify(data.admin));
-            
-            // Redirigir al dashboard
-            router.push('/es/user-admin/dashboard');
-        } else {
-            alert(data.message || 'Credenciales incorrectas');
-        }
+            if (data.success) {
+                localStorage.setItem('adminToken', data.token);
+                localStorage.setItem('adminUser', JSON.stringify(data.user));
+                router.push('/es/user-admin/dashboard');
+            } else {
+                alert(data.message || 'Credenciales incorrectas');
+            }
         } catch (error) {
             console.error('Login error:', error);
-            alert('Error del servidor - VERIFICA QUE EL BACKEND ESTE CORRIENDO');
+            alert('Error del servidor');
         } finally {
             setLoading(false);
         }
@@ -70,11 +146,25 @@ export default function AdminLogin() {
                 </div>
 
                 <button 
-                type="submit" 
-                className={styles.loginButton}
-                disabled={loading}
+                    type="submit" 
+                    className={styles.loginButton}
+                    disabled={loading}
                 >
-                {loading ? 'Signing In...' : 'Sign In as Admin'}
+                    {loading ? 'Signing In...' : 'Sign In as Admin'}
+                </button>
+
+                <div className={styles.divider}>
+                    <span>o</span>
+                </div>
+
+                {/*NUEVO: Botón de Google */}
+                <button 
+                    type="button"
+                    onClick={handleGoogleLogin}
+                    className={styles.googleButton}
+                    disabled={googleLoading}
+                >
+                    {googleLoading ? 'Connecting...' : 'Sign in with Google'}
                 </button>
             </form>
         </div>
