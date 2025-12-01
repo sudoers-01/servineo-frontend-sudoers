@@ -1,446 +1,432 @@
 'use client';
-import { useState, useEffect, useRef, KeyboardEvent } from 'react';
+
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { usePathname, useRouter } from 'next/navigation';
-import { Home, Tag, Wrench, Briefcase, User, HelpCircle, Wallet } from 'lucide-react';
-import styles from '@/styles/userProfile.module.css';
+import { useRouter, usePathname } from 'next/navigation';
+import { Menu, X, Wallet, LogOut, User as UserIcon, Shield, ChevronDown, Briefcase, Home, HelpCircle } from 'lucide-react';
 import { UserData } from '@/types/User';
 
-// Extendemos temporalmente la interfaz por si tu UserData no tiene _id tipado
+// Extendemos la interfaz por si acaso
 interface ExtendedUserData extends UserData {
   _id?: string;
   id?: string;
 }
 
 export default function TopMenu() {
+  // --- ESTADOS DE UI (Estilo Repo General) ---
+  const [isOpen, setIsOpen] = useState(false); // Mobile menu
   const [scrolled, setScrolled] = useState(false);
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false); // Dropdown desktop
+
+  // --- ESTADOS DE LÓGICA (Tu Repo - LocalStorage) ---
   const [isLogged, setIsLogged] = useState(false);
   const [userData, setUserData] = useState<ExtendedUserData | null>(null);
   const [authReady, setAuthReady] = useState(false);
+
   const dropdownRef = useRef<HTMLDivElement | null>(null);
-  const profileButtonRef = useRef<HTMLButtonElement | null>(null);
   const router = useRouter();
   const pathname = usePathname();
 
+  // Detectar si estamos en flujo de auth para ocultar botones si quieres (opcional)
+  const isInAuthFlow = pathname?.startsWith('/signUp') || pathname === '/login';
+
+  // Foto de perfil con fallback
   const userPhoto =
     userData?.photo?.trim() ||
     userData?.picture?.trim() ||
     userData?.url_photo?.trim() ||
     '/no-photo.png';
-    
-  const isInRegistrationFlow = pathname?.startsWith('/signUp');
-  const isInLoginFlow = pathname === '/login';
-  const isInAuthFlow = isInRegistrationFlow || isInLoginFlow;
 
-  /* -------- SCROLL -------- */
+  // ----------------------------------------------------------------------
+  // 1. EFECTOS Y LÓGICA (Tuya, para que no se rompa la app)
+  // ----------------------------------------------------------------------
+
+  // Detectar Scroll
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Cargar Usuario y Token
   useEffect(() => {
-    const tok = localStorage.getItem('servineo_token');
-    const usr = localStorage.getItem('servineo_user');
-    setIsLogged(!!tok);
-    setUserData(usr ? JSON.parse(usr) : null);
-    setProfileMenuOpen(false);
-  }, [pathname]);
-
-  /* -------- CARGAR USUARIO -------- */
-  useEffect(() => {
-    const token = localStorage.getItem('servineo_token');
-    const user = localStorage.getItem('servineo_user');
-
-    setIsLogged(!!token);
-    try {
-      if (user && user !== 'undefined') {
-        setUserData(JSON.parse(user));
-      } else {
+    const checkAuth = () => {
+      const token = localStorage.getItem('servineo_token');
+      const user = localStorage.getItem('servineo_user');
+      setIsLogged(!!token);
+      
+      try {
+        if (user && user !== 'undefined') {
+          setUserData(JSON.parse(user));
+        } else {
+          setUserData(null);
+        }
+      } catch {
         setUserData(null);
       }
-    } catch {
-      console.error('Usuario inválido en localStorage');
-      localStorage.removeItem('servineo_user');
-      setUserData(null);
-    }
-
-    const syncUserState = () => {
-      const tok = localStorage.getItem('servineo_token');
-      const usr = localStorage.getItem('servineo_user');
-      setIsLogged(!!tok);
-      setUserData(usr ? JSON.parse(usr) : null);
     };
 
-    window.addEventListener('storage', syncUserState);
+    checkAuth();
     setAuthReady(true);
-    return () => window.removeEventListener('storage', syncUserState);
-  }, []);
 
-  useEffect(() => {
-    const syncUser = () => {
-      const usr = localStorage.getItem('servineo_user');
-      setUserData(usr ? JSON.parse(usr) : null);
-      setProfileMenuOpen(false);
+    // Sincronizar entre pestañas
+    window.addEventListener('storage', checkAuth);
+    window.addEventListener('servineo_user_updated', checkAuth);
+
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('servineo_user_updated', checkAuth);
     };
-    window.addEventListener('servineo_user_updated', syncUser);
-    return () => window.removeEventListener('servineo_user_updated', syncUser);
+  }, [pathname]);
+
+  // Click Outside para cerrar dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  /* -------- AUTO LOGOUT POR INACTIVIDAD -------- */
+  // Auto Logout (Tu lógica original)
   useEffect(() => {
     let timer: NodeJS.Timeout;
     const resetTimer = () => {
       clearTimeout(timer);
-      timer = setTimeout(
-        () => {
-          const rawUser = localStorage.getItem('servineo_user');
-          let email = '';
-          try {
-            email = rawUser ? (JSON.parse(rawUser)?.email ?? '') : '';
-          } catch {}
-          localStorage.removeItem('servineo_token');
-          localStorage.removeItem('servineo_user');
-          sessionStorage.setItem('session_expired', '1');
-          if (email) sessionStorage.setItem('prefill_email', email);
-          window.dispatchEvent(new Event('servineo_user_updated'));
-          const target = `/login?expired=1${email ? `&email=${encodeURIComponent(email)}` : ''}`;
-          router.push(target);
-        },
-        15 * 60 * 1000,
-      );
+      timer = setTimeout(() => {
+        if (isLogged) logout(true);
+      }, 15 * 60 * 1000); // 15 min
     };
 
     const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'];
     events.forEach((e) => window.addEventListener(e, resetTimer));
-
-    resetTimer();
-    return () => events.forEach((e) => window.removeEventListener(e, resetTimer));
-  }, []);
-
-  /* -------- CLOSE DROPDOWN OUTSIDE -------- */
-  useEffect(() => {
-    const handleOutside = (e: MouseEvent) => {
-      if (
-        profileMenuOpen &&
-        dropdownRef.current &&
-        !dropdownRef.current.contains(e.target as Node) &&
-        !profileButtonRef.current?.contains(e.target as Node)
-      ) {
-        setProfileMenuOpen(false);
-      }
+    if (isLogged) resetTimer();
+    
+    return () => {
+        clearTimeout(timer);
+        events.forEach((e) => window.removeEventListener(e, resetTimer));
     };
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
-  }, [profileMenuOpen]);
+  }, [isLogged]);
 
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
+  // ----------------------------------------------------------------------
+  // 2. FUNCIONES DE ACCIÓN
+  // ----------------------------------------------------------------------
 
-  const logout = () => {
+  const logout = (expired = false) => {
+    let email = '';
     try {
-      const raw = localStorage.getItem('servineo_user');
-      const email = raw ? (JSON.parse(raw)?.email ?? '') : '';
-      if (email) sessionStorage.setItem('prefill_email', email);
+        const raw = localStorage.getItem('servineo_user');
+        email = raw ? (JSON.parse(raw)?.email ?? '') : '';
     } catch {}
+
     localStorage.removeItem('servineo_token');
     localStorage.removeItem('servineo_user');
     setIsLogged(false);
     setUserData(null);
-    router.push('/');
-  };
+    setAccountOpen(false);
+    setIsOpen(false);
 
-  /* -------- NAV ITEMS -------- */
-  const navItemsDesktop = [
-    { name: "Ofertas de trabajo", href: "/job-offer-list" },
-    ...(userData?.role === "fixer"
-      ? [
-          { name: "Mis ofertas", href: "/fixer/my-offers" },
-        ]
-      : []),
-    { name: "Ayuda", href: "/ayuda" },
-  ];
-
-  const navItemsMobile = [
-    { icon: <Tag size={20} />, href: '/job-offer-list', label: 'Ofertas' },
-    ...(userData?.role === "fixer"
-      ? [
-          { icon: <Briefcase size={20} />, href: "/fixer/my-offers", label: "Mis trabajos" },
-        ]
-      : []),
-    { icon: <HelpCircle size={20} />, href: '/ayuda', label: 'Ayuda' },
-  ];
-
-  /* -------- TECLAS EN MENU DESKTOP -------- */
-  const handleDesktopNavKeyDown = (e: KeyboardEvent<HTMLElement>) => {
-    const logoItems = Array.from(document.querySelectorAll<HTMLElement>('#desktop-logo-button'));
-    const navItems = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        'nav[aria-label="Menú principal"] a, nav[aria-label="Menú principal"] [href]',
-      ),
-    );
-    const buttonItems = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        '#tour-auth-buttons-desktop a, #tour-auth-buttons-desktop button',
-      ),
-    );
-
-    const allItems: HTMLElement[] = [...logoItems, ...navItems, ...buttonItems];
-    if (allItems.length === 0) return;
-
-    const index = allItems.indexOf(document.activeElement as HTMLElement);
-
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      const next = index === -1 ? 0 : (index + 1) % allItems.length;
-      allItems[next].focus();
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      const prev =
-        index === -1 ? allItems.length - 1 : (index - 1 + allItems.length) % allItems.length;
-      allItems[prev].focus();
+    if (expired) {
+        sessionStorage.setItem('session_expired', '1');
+        if (email) sessionStorage.setItem('prefill_email', email);
+        window.dispatchEvent(new Event('servineo_user_updated'));
+        router.push(`/login?expired=1`);
+    } else {
+        window.location.href = '/'; 
     }
   };
 
-  /* -------- IR A CENTRO DE PAGOS -------- */
   const goToPaymentCenter = () => {
-    // Usamos _id (Mongo) o id, dependiendo de cómo venga tu objeto
     const userId = userData?._id || userData?.id;
     if (userId) {
-      // Navegamos al centro de pagos pasando el ID en la query string
       router.push(`/payment/centro-de-pagos?fixerId=${userId}`);
-      setProfileMenuOpen(false);
+      setAccountOpen(false);
+      setIsOpen(false);
     } else {
-      console.error("No se encontró el ID del usuario para ir al centro de pagos");
+      console.error("No se encontró el ID del usuario");
     }
   };
+
+  // ----------------------------------------------------------------------
+  // 3. ITEMS DE NAVEGACIÓN
+  // ----------------------------------------------------------------------
+
+  const navItems = [
+    { name: "Inicio", href: "/", icon: <Home size={18}/> },
+    { name: "Ofertas de trabajo", href: "/job-offer-list", icon: <Briefcase size={18}/> },
+    { name: "Ayuda", href: "/ayuda", icon: <HelpCircle size={18}/> },
+  ];
 
   if (!authReady) return null;
 
   return (
     <>
-      {/* HEADER DESKTOP */}
       <header
-        className={`hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-white shadow-md' : 'bg-white'
-        } border-b border-gray-100`}
-        role="banner"
+        className={`fixed w-full z-50 transition-all duration-300 ${
+          scrolled
+            ? "bg-white/95 backdrop-blur-md shadow-md"
+            : "bg-white/90 backdrop-blur-sm"
+        } border-b border-gray-200`}
       >
-        <div
-          className="w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20"
-          onKeyDown={handleDesktopNavKeyDown}
-        >
-          <button
-            id="desktop-logo-button"
-            onClick={() => (pathname === '/' ? scrollToTop() : router.push('/'))}
-            className="flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]"
-            aria-label="Ir al inicio"
-          >
-            <div className="relative overflow-hidden rounded-full shadow-md">
-              <Image
-                src="/icon.png"
-                alt="Logo de Servineo"
-                width={40}
-                height={40}
-                className="transition-transform duration-300 group-hover:scale-110"
-              />
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            
+            {/* LOGO */}
+            <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer" onClick={() => router.push('/')}>
+               <div className="relative w-8 h-8 overflow-hidden rounded-full shadow-sm">
+                  <Image src="/icon.png" alt="Servineo" fill className="object-cover" />
+               </div>
+              <span className="text-blue-600 font-bold text-xl tracking-tight">
+                SERVINEO
+              </span>
             </div>
-            <span
-              className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]"
-              style={{ fontFamily: 'var(--font-sans)' }}
-            >
-              Servineo
-            </span>
-          </button>
 
-          <nav className="flex gap-6" role="navigation" aria-label="Menú principal">
-            {navItemsDesktop.map((item) => (
+            {/* NAV DESKTOP (CENTRAL) */}
+            <nav className="hidden md:flex items-center space-x-1 lg:space-x-4">
+              {navItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    pathname === item.href 
+                        ? 'text-blue-600 bg-blue-50' 
+                        : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                  }`}
+                >
+                  {item.name}
+                </Link>
+              ))}
+              
+              {/* Items adicionales solo para FIXER en Desktop */}
+              {userData?.role === 'fixer' && (
+                 <Link
+                    href="/fixer/my-offers"
+                    className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                        pathname === '/fixer/my-offers' ? 'text-blue-600 bg-blue-50' : 'text-gray-600 hover:text-blue-600 hover:bg-gray-50'
+                    }`}
+                 >
+                    Mis Ofertas
+                 </Link>
+              )}
+            </nav>
+
+            {/* DERECHA (AUTH / PERFIL) */}
+            <div className="hidden md:flex items-center space-x-4">
+              {isInAuthFlow ? (
+                 <div className="w-4" /> 
+              ) : !isLogged ? (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-gray-700 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Iniciar Sesión
+                  </Link>
+                  <Link
+                    href="/signUp"
+                    className="bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-all shadow-sm hover:shadow-md"
+                  >
+                    Regístrate
+                  </Link>
+                </>
+              ) : (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setAccountOpen(!accountOpen)}
+                    className="flex items-center gap-2 text-gray-700 hover:text-blue-600 px-2 py-1 rounded-full border border-transparent hover:border-gray-200 transition-all focus:outline-none"
+                  >
+                    <img
+                        src={userPhoto}
+                        alt="Perfil"
+                        className="w-9 h-9 rounded-full object-cover border border-gray-200 shadow-sm"
+                    />
+                    <span className="text-sm font-medium max-w-[100px] truncate hidden lg:block">
+                        {userData?.name?.split(' ')[0]}
+                    </span>
+                    <ChevronDown size={16} />
+                  </button>
+
+                  {/* DROPDOWN MENU DESKTOP */}
+                  {accountOpen && (
+                    <div className="absolute right-0 mt-2 w-60 bg-white shadow-xl border border-gray-100 rounded-xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200 overflow-hidden">
+                      
+                      <div className="px-4 py-3 border-b border-gray-100 mb-1 bg-gray-50/50">
+                        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+                            {userData?.role === 'fixer' ? 'Cuenta Fixer' : 'Cuenta Cliente'}
+                        </p>
+                        <p className="text-sm font-medium text-gray-800 truncate" title={userData?.email}>
+                            {userData?.email}
+                        </p>
+                      </div>
+
+                      {/* Opciones Cliente */}
+                      {userData?.role !== 'fixer' && (
+                        <>
+                            <Link href="/mi-perfil" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+                                <UserIcon size={16} className="mr-2" /> Editar Perfil
+                            </Link>
+                            <Link href="/become-fixer" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+                                <Shield size={16} className="mr-2" /> Convertirse en Fixer
+                            </Link>
+                            <Link href="/payment/trabajos" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+                                <Briefcase size={16} className="mr-2" /> Mis Trabajos
+                            </Link>
+                        </>
+                      )}
+
+                      {/* Opciones Fixer */}
+                      {userData?.role === 'fixer' && (
+                        <>
+                            <Link href="/fixer/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+                                <UserIcon size={16} className="mr-2" /> Perfil Profesional
+                            </Link>
+                            {/* BOTÓN CENTRO DE PAGOS */}
+                            <button 
+                                onClick={goToPaymentCenter}
+                                className="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-blue-50"
+                            >
+                                <Wallet size={16} className="mr-2 text-blue-600" /> 
+                                <span className="font-medium text-blue-600">Centro de Pagos</span>
+                            </button>
+                            <Link href="/payment/Pagos-Fisico" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600">
+                                <Shield size={16} className="mr-2" /> Confirmar Pagos
+                            </Link>
+                        </>
+                      )}
+
+                      <div className="border-t border-gray-100 mt-2 pt-2">
+                        <button
+                            onClick={() => logout(false)}
+                            className="w-full text-left flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-50 font-medium transition-colors"
+                        >
+                            <LogOut size={16} className="mr-2" /> Cerrar sesión
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* BOTÓN HAMBURGUESA MOBILE */}
+            <div className="md:hidden flex items-center">
+              <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-600 hover:text-blue-600 hover:bg-gray-100 transition-colors focus:outline-none"
+              >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ------------------------------------------- */}
+        {/* MOBILE MENU (Desplegable) */}
+        {/* ------------------------------------------- */}
+        <div className={`md:hidden transition-all duration-300 ease-in-out ${isOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0 overflow-hidden"} bg-white border-t border-gray-200 shadow-lg`}>
+          <div className="px-4 pt-4 pb-6 space-y-2">
+            
+            {/* Nav Items Generales */}
+            {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
-                  ${
-                    pathname === item.href
-                      ? 'text-[var(--color-primary)] after:w-full'
-                      : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'
-                  }`}
+                className="flex items-center px-3 py-3 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                onClick={() => setIsOpen(false)}
               >
+                <span className="mr-3 text-gray-400">{item.icon}</span>
                 {item.name}
               </Link>
             ))}
-          </nav>
 
-          <div className="flex items-center gap-4" id="tour-auth-buttons-desktop">
-            {isInAuthFlow ? (
-              <div className="w-0" />
-            ) : !isLogged ? (
-              <>
-                <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium transition-opacity duration-300 hover:opacity-90"
-                >
-                  Iniciar Sesión
-                </Link>
-                <Link
-                  href="/signUp"
-                  className="px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium transition-opacity duration-300 hover:opacity-80"
-                >
-                  Registrarse
-                </Link>
-              </>
-            ) : (
-              <button
-                ref={profileButtonRef}
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                className="flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition hover:shadow-md"
-              >
-                <img
-                  src={userPhoto}
-                  alt="Foto"
-                  className="w-10 h-10 rounded-full object-cover border"
-                />
-                <span className="font-medium text-gray-700 hover:text-primary">
-                  {userData?.name}
-                </span>
-              </button>
+            {/* Item específico Fixer Mobile */}
+            {isLogged && userData?.role === 'fixer' && (
+                 <Link
+                    href="/fixer/my-offers"
+                    className="flex items-center px-3 py-3 rounded-lg text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-blue-600"
+                    onClick={() => setIsOpen(false)}
+                 >
+                    <span className="mr-3 text-gray-400"><Briefcase size={18}/></span>
+                    Mis Ofertas
+                 </Link>
             )}
+
+            <div className="border-t border-gray-100 my-4 pt-4">
+              {isInAuthFlow ? null : !isLogged ? (
+                <div className="space-y-3">
+                  <Link
+                    href="/login"
+                    className="block w-full text-center px-4 py-3 rounded-lg text-base font-medium text-gray-700 border border-gray-300 hover:bg-gray-50"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Iniciar Sesión
+                  </Link>
+                  <Link
+                    href="/signUp"
+                    className="block w-full text-center px-4 py-3 rounded-lg text-base font-medium text-white bg-blue-600 hover:bg-blue-700 shadow-md"
+                    onClick={() => setIsOpen(false)}
+                  >
+                    Regístrate
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                   <div className="flex items-center gap-3 px-3 pb-4 mb-2 border-b border-gray-100">
+                        <img src={userPhoto} alt="User" className="w-10 h-10 rounded-full object-cover" />
+                        <div>
+                            <p className="font-semibold text-gray-800">{userData?.name}</p>
+                            <p className="text-xs text-gray-500">{userData?.role === 'fixer' ? 'Fixer' : 'Cliente'}</p>
+                        </div>
+                   </div>
+
+                   {/* Opciones Móviles Específicas */}
+                   {userData?.role !== 'fixer' ? (
+                        <>
+                            <Link href="/mi-perfil" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-md">
+                                <UserIcon size={18} className="mr-3"/> Editar Perfil
+                            </Link>
+                            <Link href="/become-fixer" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-md">
+                                <Shield size={18} className="mr-3"/> Ser Fixer
+                            </Link>
+                            <Link href="/payment/trabajos" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-md">
+                                <Wallet size={18} className="mr-3"/> Mis Trabajos
+                            </Link>
+                        </>
+                   ) : (
+                        <>
+                            <Link href="/fixer/profile" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-md">
+                                <UserIcon size={18} className="mr-3"/> Mi Perfil
+                            </Link>
+                            <button 
+                                onClick={goToPaymentCenter}
+                                className="w-full text-left flex items-center px-3 py-3 text-blue-600 bg-blue-50 font-medium rounded-md"
+                            >
+                                <Wallet size={18} className="mr-3"/> Centro de Pagos
+                            </button>
+                            <Link href="/payment/Pagos-Fisico" onClick={() => setIsOpen(false)} className="flex items-center px-3 py-3 text-gray-600 hover:bg-gray-50 rounded-md">
+                                <Shield size={18} className="mr-3"/> Confirmar Pagos
+                            </Link>
+                        </>
+                   )}
+
+                  <button
+                    onClick={() => logout(false)}
+                    className="w-full text-left flex items-center px-3 py-3 text-red-600 font-medium hover:bg-red-50 rounded-md mt-4"
+                  >
+                    <LogOut size={18} className="mr-3"/> Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>
 
-      {/* MENU DE PERFIL */}
-      {isLogged && !isInAuthFlow && (
-        <div
-          ref={dropdownRef}
-          className={`${styles.profileMenu} ${profileMenuOpen ? styles.show : ''}`}
-        >
-          <div className={styles.menuHeader}>
-            <strong>Mi cuenta</strong>
-            <span className={styles.closeBtn} onClick={() => setProfileMenuOpen(false)}>
-              ✕
-            </span>
-          </div>
-
-          <img className={styles.profilePreview} src={userPhoto} alt="Foto" />
-
-          <div className={styles.menuLabel}>{userData?.name}</div>
-          <div className={styles.menuLabel}>{userData?.email}</div>
-          <div className={styles.menuLabel}>{userData?.phone}</div>
-
-          <hr style={{ margin: '8px 0', opacity: 0.3 }} />
-
-          {/* MENÚ PARA CLIENTES (No Fixers) */}
-          {userData?.role !== "fixer" && (
-            <>
-              <button onClick={() => router.push('/mi-perfil')} className={styles.menuItem}>
-                Editar perfil
-              </button>
-
-              <button onClick={() => router.push('/become-fixer')} className={styles.menuItem}>
-                Convertirse en Fixer
-              </button>
-              
-              <button onClick={() => router.push('/payment/trabajos')} className={styles.menuItem}>
-                Trabajos Requester
-              </button>
-            </>
-          )}
-
-          {/* MENÚ PARA FIXERS */}
-          {userData?.role === "fixer" && (
-            <>
-              <button onClick={() => router.push('/fixer/profile')} className={styles.menuItem}>
-                Perfil
-              </button>
-
-              {/* BOTÓN CENTRO DE PAGOS (SOLO VISIBLE PARA FIXERS) */}
-              <button onClick={goToPaymentCenter} className={`${styles.menuItem} flex items-center justify-between`}>
-                <span>Centro de Pagos</span>
-                <Wallet size={16} className="text-gray-500" />
-              </button>
-              <button onClick={() => router.push('/payment/Pagos-Fisico')} className={styles.menuItem}>
-                Confirmar Pagos
-              </button>
-            </>
-          )}
-          
-          <button onClick={logout} className={`${styles.menuItem} ${styles.logoutBtn}`}>
-            Cerrar sesión
-          </button>
-        </div>
-      )}
-
-      {/* HEADER + NAV MOBILE */}
-      <div className="lg:hidden">
-        {/* Barra superior mobile */}
-        <div className="flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm z-50 fixed top-0 left-0 right-0">
-          <button
-            onClick={() => (pathname === '/' ? scrollToTop() : router.push('/'))}
-            className="flex items-center gap-2 min-w-0"
-          >
-            <div className="relative overflow-hidden rounded-full shadow-md shrink-0">
-              <Image src="/icon.png" alt="Servineo" width={32} height={32} />
-            </div>
-            <span className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]">
-              Servineo
-            </span>
-          </button>
-
-          {isInAuthFlow ? (
-            <div className="w-0" />
-          ) : !isLogged ? (
-            <div className="flex items-center gap-2 flex-nowrap" id="tour-auth-buttons-mobile">
-              <Link
-                href="/login"
-                className="px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
-              >
-                Iniciar sesión
-              </Link>
-              <Link
-                href="/signUp"
-                className="px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
-              >
-                Registrarse
-              </Link>
-            </div>
-          ) : (
-            <button
-              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-              ref={profileButtonRef}
-              className="flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
-            >
-              <img
-                src={userPhoto}
-                alt="Foto"
-                className="w-8 h-8 rounded-full object-cover border"
-              />
-              <span className="text-gray-700 font-medium">{userData?.name}</span>
-            </button>
-          )}
-        </div>
-        {/* Barra inferior mobile */}
-        <nav className="fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50">
-          {navItemsMobile.map((item) => (
-            <button
-              key={item.label}
-              onClick={() => router.push(item.href)}
-              className={`flex flex-col items-center text-[11px] px-1 py-1 ${
-                pathname === item.href
-                  ? 'text-[var(--color-primary)]'
-                  : 'text-gray-900 hover:text-[var(--color-primary)]'
-              }`}
-            >
-              {item.icon}
-              <span className="mt-1">{item.label}</span>
-            </button>
-          ))}
-        </nav>
-        <div className="h-16" />
-        <div className="h-16" />
-      </div>
-
-      <div className="hidden lg:block h-20" />
+      {/* Espaciador para no tapar contenido */}
+      <div className="h-16" />
     </>
   );
 }

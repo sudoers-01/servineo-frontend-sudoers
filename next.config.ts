@@ -1,27 +1,42 @@
 import type { NextConfig } from 'next';
+import createNextIntlPlugin from 'next-intl/plugin';
+
+const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
-  async rewrites() {
-    const backendUrl = process.env.BACKEND_URL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-    
-    console.log(`⚡ Conectando rewrite a: ${backendUrl}`);
+  images: {
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'mi-cdn.com',
+        pathname: '/**',
+      },
+     {
+        protocol: "https",
+        hostname: "picsum.photos",
+        pathname: "/**",
 
+      },
+    ],
+  },
+  eslint: {
+    // Warning: This allows production builds to successfully complete even if
+    // your project has ESLint errors.
+    ignoreDuringBuilds: true,
+  },
+  /* config options here */
+  async rewrites() {
     return [
       {
-        source: '/api/:path*', // El asterisco * es importante para que coincida con subrutas
-        destination: `${backendUrl}/api/:path*`, 
+        source: '/api/:path*',
+        destination: 'http://127.0.0.1:8000/api/:path*',
       },
     ];
   },
-
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
-  typescript: {
-    // Advertencia: Esto omitirá los errores de TypeScript durante el 'build'.
-    ignoreBuildErrors: true,
-  },
 };
 
-export default nextConfig;
+export default withNextIntl(nextConfig);
