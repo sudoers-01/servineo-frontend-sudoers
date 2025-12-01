@@ -131,7 +131,7 @@ export function SearchBar({
       setPreviewValue(null);
       performSearch(trimmed);
     }
-  }, [value, previewValue, addToHistory, performSearch]);
+  }, [value, previewValue, addToHistory, performSearch, error]);
 
   // Hook de navegación por teclado
   const { handleKeyDown } = useSearchKeyboard({

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import {
   SearchBar,
   NoResultsMessage,
@@ -69,9 +69,9 @@ export default function JobOffersPage() {
   const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  useEffect(() => {// corregir pagina actual si esta fuera del limite
+  useEffect(() => {
+    // corregir pagina actual si esta fuera del limite
     if (!isLoading && totalPages > 0) {
-
       const params = new URLSearchParams(window.location.search);
       const pageParam = Number(params.get('page') || 1);
 
@@ -79,7 +79,7 @@ export default function JobOffersPage() {
 
       if (pageParam < 1 || isNaN(pageParam)) {
         correctedPage = 1;
-       } else if (pageParam > totalPages) {
+      } else if (pageParam > totalPages) {
         correctedPage = totalPages;
       }
 
@@ -90,7 +90,6 @@ export default function JobOffersPage() {
       }
     }
   }, [isLoading, totalPages, dispatch]);
-
 
   // Limpiar búsqueda si se navega directamente sin parámetros
   // Pero no limpiar si existe un valor guardado en localStorage (persistencia)
@@ -104,6 +103,7 @@ export default function JobOffersPage() {
           hasSavedSearch = !!window.localStorage.getItem(STORAGE_KEYS.SEARCH);
         } catch (e) {
           hasSavedSearch = false;
+          console.error('Error accessing localStorage:', e);
         }
 
         if (!hasSavedSearch) dispatch(setSearch(''));
@@ -174,50 +174,73 @@ export default function JobOffersPage() {
     };
   }, []);
 
-  // Handlers
-  const handleRegistrosPorPaginaChange = (valor: number) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(setRegistrosPorPagina(valor));
-  };
+  const handleCardClick = useCallback((offer: JobOfferData) => {
+    const adaptedOffer = adaptOfferToModalFormat(offer);
+    setSelectedOffer(adaptedOffer);
+    setIsModalOpen(true);
+  }, []);
 
-  const handleFiltersApply = (appliedFilters: FilterState) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
 
-    const hasFilters =
-      appliedFilters.range.length > 0 ||
-      (Array.isArray(appliedFilters.city) ? appliedFilters.city.length > 0 : !!appliedFilters.city) ||
-      appliedFilters.category.length > 0;
+  const handleRegistrosPorPaginaChange = useCallback(
+    (valor: number) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      dispatch(setRegistrosPorPagina(valor));
+    },
+    [dispatch],
+  );
 
-    if (hasFilters && !hasActiveFilters.current) {
-      pageBeforeFilter.current = paginaActual;
-      hasActiveFilters.current = true;
-    }
+  const handleFiltersApply = useCallback(
+    (appliedFilters: FilterState) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (!hasFilters) {
-      hasActiveFilters.current = false;
-    }
+      const hasFilters =
+        appliedFilters.range.length > 0 ||
+        (Array.isArray(appliedFilters.city)
+          ? appliedFilters.city.length > 0
+          : !!appliedFilters.city) ||
+        appliedFilters.category.length > 0;
 
-    dispatch(setFilters(appliedFilters));
-    dispatch(resetPagination());
-  };
+      if (hasFilters && !hasActiveFilters.current) {
+        pageBeforeFilter.current = paginaActual;
+        hasActiveFilters.current = true;
+      }
 
-  const handleSortChange = (option: string) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    const backendSort = getSortValue(option);
-    dispatch(setSortBy(backendSort));
-  };
+      if (!hasFilters) {
+        hasActiveFilters.current = false;
+      }
 
-  const handleSearchSubmit = (query: string) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(setSearch(query));
-    dispatch(resetPagination());
-  };
+      dispatch(setFilters(appliedFilters));
+      dispatch(resetPagination());
+    },
+    [dispatch, paginaActual],
+  );
 
-  const handleResetFilters = () => {
+  const handleSortChange = useCallback(
+    (option: string) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const backendSort = getSortValue(option);
+      dispatch(setSortBy(backendSort));
+    },
+    [dispatch],
+  );
+
+  const handleSearchSubmit = useCallback(
+    (query: string) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      dispatch(setSearch(query));
+      dispatch(resetPagination());
+    },
+    [dispatch],
+  );
+
+  const handleResetFilters = useCallback(() => {
     const pageToRestore = hasActiveFilters.current ? pageBeforeFilter.current : 1;
     hasActiveFilters.current = false;
 
@@ -227,22 +250,47 @@ export default function JobOffersPage() {
       dispatch(enablePersistence());
       dispatch(setPaginaActual(pageToRestore));
     }, 0);
-  };
+  }, [dispatch]);
 
-  const handlePageChange = (newPage: number) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(setPaginaActual(newPage));
-  };
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      dispatch(setPaginaActual(newPage));
+    },
+    [dispatch],
+  );
 
-  // Handler para abrir modal al hacer click en el área de la oferta
-  const handleCardClick = (offer: JobOfferData) => {
-    const adaptedOffer = adaptOfferToModalFormat(offer);
-    setSelectedOffer(adaptedOffer);
-    setIsModalOpen(true);
-  };
+  const handleRatingChange = useCallback(
+    (rating: number | null) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
-  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
+      const hasRatingFilter = rating != null;
+      if (hasRatingFilter && !hasActiveFilters.current) {
+        pageBeforeFilter.current = paginaActual;
+        hasActiveFilters.current = true;
+      }
+
+      if (!hasRatingFilter) {
+        hasActiveFilters.current = false;
+      }
+
+      dispatch(setRating(rating));
+      dispatch(resetPagination());
+    },
+    [dispatch, paginaActual],
+  );
+
+  const toggleDrawer = useCallback(() => setIsDrawerOpen((prev) => !prev), []);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
+
+  const processedOffers = useMemo(() => {
+    return offers;
+  }, [offers]);
 
   return (
     <>
@@ -271,7 +319,7 @@ export default function JobOffersPage() {
               {/* Mobile view toggle */}
               <ViewModeToggle
                 viewMode={viewMode}
-                onChange={setViewMode}
+                onChange={handleViewModeChange}
                 variant="mobile"
                 className="flex lg:hidden"
               />
@@ -279,7 +327,7 @@ export default function JobOffersPage() {
               {/* Desktop view toggle */}
               <ViewModeToggle
                 viewMode={viewMode}
-                onChange={setViewMode}
+                onChange={handleViewModeChange}
                 variant="desktop"
                 className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2"
               />
@@ -317,24 +365,7 @@ export default function JobOffersPage() {
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           onFiltersApply={handleFiltersApply}
-          onRatingChange={(rating) => {
-            // rating is either integer 1..5 (from star filter) or null
-            scrollRestoredRef.current = true;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            const hasRatingFilter = rating != null;
-            if (hasRatingFilter && !hasActiveFilters.current) {
-              pageBeforeFilter.current = paginaActual;
-              hasActiveFilters.current = true;
-            }
-
-            if (!hasRatingFilter) {
-              hasActiveFilters.current = false;
-            }
-
-            dispatch(setRating(rating));
-            dispatch(resetPagination());
-          }}
+          onRatingChange={handleRatingChange}
           onReset={handleResetFilters}
         />
 
@@ -352,7 +383,12 @@ export default function JobOffersPage() {
 
         <div className="w-full max-w-5xl mx-auto">
           {!isLoading && Array.isArray(offers) && offers.length > 0 ? (
-            <JobOffersView offers={offers} viewMode={viewMode} onOfferClick={handleCardClick} search={search} />
+            <JobOffersView
+              offers={processedOffers}
+              viewMode={viewMode}
+              onOfferClick={handleCardClick}
+              search={search}
+            />
           ) : !isLoading ? (
             <NoResultsMessage search={search} />
           ) : null}
@@ -370,11 +406,7 @@ export default function JobOffersPage() {
         )}
       </main>
 
-      <JobOfferModal
-        offer={selectedOffer}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <JobOfferModal offer={selectedOffer} isOpen={isModalOpen} onClose={handleCloseModal} />
     </>
   );
 }

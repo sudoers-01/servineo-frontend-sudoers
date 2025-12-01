@@ -108,7 +108,6 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
       persistToLocalStorage(backendHistory);
     }
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useBackend, backendHistory, persistToLocalStorage]);
 
   // ===== ADD =====
@@ -178,7 +177,7 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
         persistToLocalStorage(previousHistory);
       }
     },
-    [history, useBackend, deleteHistoryItem, persistToLocalStorage],
+    [useBackend, deleteHistoryItem, persistToLocalStorage],
   );
 
   // ===== CLEAR (CORREGIDO) =====

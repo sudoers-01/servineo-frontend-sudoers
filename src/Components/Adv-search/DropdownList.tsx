@@ -75,7 +75,7 @@ const DropdownList: React.FC<DropdownListProps> = ({
     }
 
     setHasRestoredFromUrl(true);
-  }, []); // Solo se ejecuta al montar el componente
+  }, [hasRestoredFromUrl]); // Solo se ejecuta al montar el componente
 
   // Limpiar selección cuando cambia clearSignal
   useEffect(() => {

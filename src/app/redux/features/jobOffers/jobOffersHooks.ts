@@ -31,11 +31,13 @@ import {
 } from './session';
 import { ParamsMap } from './types';
 import { JOBOFERT_ALLOWED_LIMITS } from '@/app/lib/validations/pagination.validator';
-import { sanitizePage, sanitizeLimit } from '@/app/lib/validations/pagination.validator';//
+import { sanitizePage } from '@/app/lib/validations/pagination.validator';//
 
 /**
  * Hook principal que combina RTK Query con el slice de Redux
  */
+
+
 export function useJobOffers() {
   const dispatch = useAppDispatch();
   const params = useAppSelector(selectSearchParams);
@@ -43,20 +45,7 @@ export function useJobOffers() {
   const errorTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const shouldClearErrorRef = useRef(true);
 
-  // ✅ Validar página < 1
-   useEffect(() => {
-    if (!data) return;
-
-    const totalPages = Math.ceil(data.total / params.limit) || 1;
-    const correctedPage = sanitizePage(params.page, totalPages);
-
-    if (correctedPage !== params.page) {
-      dispatch(setPaginaActual(correctedPage));
-    }
-  }, [params.page, dispatch]);
-
- 
-  // ✅ Validar límite inválido
+  // ✅ Validar límite inválido (ANTES de la query)
   useEffect(() => {
     if (!JOBOFERT_ALLOWED_LIMITS.includes(params.limit)) {
       dispatch(
@@ -93,6 +82,18 @@ export function useJobOffers() {
       skip: skipQuery,
     },
   );
+
+  // Validar página < 1 (DESPUÉS de declarar data)
+  useEffect(() => {
+    if (!data) return;
+
+    const totalPages = Math.ceil(data.total / params.limit) || 1;
+    const correctedPage = sanitizePage(params.page, totalPages);
+
+    if (correctedPage !== params.page) {
+      dispatch(setPaginaActual(correctedPage));
+    }
+  }, [params.page, params.limit, data, dispatch]);
 
   // Capturar error 400 del backend
   useEffect(() => {

@@ -63,7 +63,6 @@ function AdvancedSearchPage() {
     selectedTags,
     selectedPriceKey,
     loading,
-    totalRegistros,
     resultsCount,
     storeLoading,
     clearSignal,

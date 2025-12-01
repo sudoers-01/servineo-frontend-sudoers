@@ -62,7 +62,7 @@ export function useSearchSuggestions(
           setLocalError(null);
         })
         .catch((err) => {
-          // console.error('Error fetching suggestions:', err);
+          console.error('Error fetching suggestions:', err);
           setLocalError('Error al cargar sugerencias');
           setSuggestions([]);
         });

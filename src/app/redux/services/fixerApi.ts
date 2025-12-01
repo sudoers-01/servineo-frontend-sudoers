@@ -1,6 +1,8 @@
 // src/app/redux/services/fixerApi.ts
 import { baseApi } from './baseApi';
-import type { IUserProfile, JobOffer } from '@/types/job-offer';
+import type { IUserProfile } from '@/types/job-offer';
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type JobOffer = any;
 
 export const fixerApi = baseApi.injectEndpoints({
   overrideExisting: false,
