@@ -26,7 +26,7 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
     setLoading(true);
 
     try {
-      const res: ApiResponse<GoogleLoginResponse> = await api.post('/auth/google', {
+      const res: ApiResponse<GoogleLoginResponse> = await api.post('/login/google', {
         credential: credentialResponse.credential,
         token: credentialResponse.credential,
         modo: 'login',
