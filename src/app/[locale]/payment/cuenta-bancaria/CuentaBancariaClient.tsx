@@ -11,7 +11,7 @@ import ReCAPTCHA from "react-google-recaptcha";
 // *************************************************************
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 // CLAVE PÚBLICA DEL SITIO RECAPTCHA V2
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY_V2 || '';
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
 
 
 // ------------------------------------------------------------------
