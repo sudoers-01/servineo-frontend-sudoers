@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Modal from '@/app/profile/[id]/modal-window';
+import Modal from '@/app/[locale]/profile/[id]/modal-window';
 import { CreatePromotion } from '@/types/promotion';
 
 interface CreatePromoModalProps {

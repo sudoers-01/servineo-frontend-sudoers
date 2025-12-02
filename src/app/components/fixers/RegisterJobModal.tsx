@@ -1,4 +1,4 @@
-import Modal from './../../profile/[id]/modal-window';
+import Modal from '../../[locale]/profile/[id]/modal-window';
 import { useRegisterJob } from '../hooks/useRegisterJob';
 import { useState, useEffect } from 'react';
 

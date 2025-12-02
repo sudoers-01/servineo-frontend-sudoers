@@ -1,7 +1,7 @@
-const raw = process.env.NEXT_PUBLIC_BACKEND_BASE_URL;
+const raw = process.env.NEXT_PUBLIC_API_URL;
 
 if (!raw) {
-  throw new Error('NEXT_PUBLIC_BACKEND_BASE_URL no definida');
+  throw new Error('NEXT_PUBLIC_API_URL no definida');
 }
 
 export const API_BASE_URL = raw.replace(/\/+$/, '');

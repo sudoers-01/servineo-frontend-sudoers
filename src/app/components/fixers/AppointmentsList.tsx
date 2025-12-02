@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Appointment } from '@/services/appointments';
 import AppointmentCard from './AppointmentCard';
-import JobRequestModal from '../../job-request/ModalFormMap/JobRequestModal';
+import JobRequestModal from '../../[locale]/job-request/ModalFormMap/JobRequestModal';
 
 export default function AppointmentsList({ appointments }: { appointments: Appointment[] }) {
   const [isJobModalOpen, setIsJobModalOpen] = useState<boolean>(false);
