@@ -101,6 +101,7 @@ const CreatePromoModal = ({ isOpen, onClose, onSave, id, fixerId }: CreatePromoM
               id='promo-title'
               type='text'
               value={title}
+              autoComplete='off'
               onChange={handleTitleChange}
               className={`border text-black border-gray-300 rounded-xl p-3 focus:outline-none focus:ring-2 ${
                 errors.title ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500'
@@ -124,6 +125,7 @@ const CreatePromoModal = ({ isOpen, onClose, onSave, id, fixerId }: CreatePromoM
             <textarea
               id='promo-description'
               value={description}
+              autoComplete='off'
               onChange={handleDescriptionChange}
               className={`border text-black border-gray-300 rounded-xl p-3 h-32 resize-none focus:outline-none focus:ring-2 ${
                 errors.description ? 'border-red-500 focus:ring-red-500' : 'focus:ring-blue-500'
