@@ -183,29 +183,6 @@ export default function EarningsFilterModal({ currentFrom, currentTo, onApply, o
           <h3 className="text-lg font-semibold text-gray-800 mb-4">
             Seleccione el rango de fechas (máximo 7 días)
           </h3>
-          
-          {/* Botones de presets */}
-          <div className="grid grid-cols-3 gap-2 mb-6">
-            <button
-              onClick={() => setPresetRange(7)}
-              className="px-3 py-2 bg-gray-100 hover:bg-blue-100 rounded-lg text-sm font-semibold transition-colors"
-            >
-              Últimos 7 días
-            </button>
-            <button
-              onClick={() => setPresetRange(5)}
-              className="px-3 py-2 bg-gray-100 hover:bg-blue-100 rounded-lg text-sm font-semibold transition-colors"
-            >
-              Últimos 5 días
-            </button>
-            <button
-              onClick={() => setPresetRange(3)}
-              className="px-3 py-2 bg-gray-100 hover:bg-blue-100 rounded-lg text-sm font-semibold transition-colors"
-            >
-              Últimos 3 días
-            </button>
-          </div>
-
           <div className="space-y-5">
             {/* Campo Desde */}
             <div>
