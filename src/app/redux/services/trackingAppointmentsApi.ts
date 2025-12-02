@@ -1,6 +1,5 @@
 import { baseApi } from './baseApi';
 
-// 1. Interfaces (Tipos de datos)
 export interface MapLocation {
   _id: string;
   lat: string;
@@ -32,23 +31,20 @@ interface FilterArgs {
   endDate?: string;
 }
 
-// 2. Definición de la API (Un solo bloque injectEndpoints)
 export const trackingAppointmentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    
-    // Endpoint A: Mapa
-    getMapLocations: builder.query<MapLocation[], void>({
+  
+      getMapLocations: builder.query<MapLocation[], void>({
       query: () => ({
-        url: '/admin/map-locations',
+        url: '/api/admin/map-locations', 
         method: 'GET',
       }),
       providesTags: ['Statistics'],
     }),
 
-    // Endpoint B: Métricas Globales
     getTrackingMetrics: builder.query<TrackingMetrics, FilterArgs>({
       query: ({ startDate, endDate }) => {
-        let url = '/admin/metrics';
+        let url = '/api/admin/metrics'; 
         const params = new URLSearchParams();
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
@@ -62,10 +58,9 @@ export const trackingAppointmentsApi = baseApi.injectEndpoints({
       providesTags: ['Statistics'],
     }),
 
-    // Endpoint C: Tabla de Rendimiento por Fixer (El nuevo)
     getFixerStats: builder.query<FixerStat[], void>({
       query: () => ({
-        url: '/admin/fixer-stats',
+        url: '/api/admin/fixer-stats', 
         method: 'GET',
       }),
       providesTags: ['Statistics'],
@@ -74,7 +69,6 @@ export const trackingAppointmentsApi = baseApi.injectEndpoints({
   }),
 });
 
-// 3. Exportamos TODOS los Hooks juntos
 export const { 
   useGetMapLocationsQuery, 
   useGetTrackingMetricsQuery,
