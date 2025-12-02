@@ -5,9 +5,11 @@ import RegistroGoogle from './registrar/registroServicios/registroGoogle';
 import RegistroForm from './registrar/registroServicios/page';
 import GithubButton from '@/Components/requester/botonRegistro/buttonGithub';
 import DiscordButton from '@/Components/requester/botonRegistro/buttonDiscord';
+import ReCaptchaForm from '@/Components/requester/botonRegistro/recaptcha';
 import NotificationModal from '@/Components/Modal-notifications';
 
 export default function SignUp() {
+  const [captchaValid, setCaptchaValid] = useState(false);
   const [notification, setNotification] = useState({
     isOpen: false,
     type: 'info' as 'success' | 'error' | 'info' | 'warning',
@@ -44,7 +46,7 @@ export default function SignUp() {
           </h1>
           <p className="text-center text-gray-600 mb-8 text-sm">Modo requester</p>
 
-          <RegistroForm onNotify={handleNotify} />
+          <RegistroForm onNotify={handleNotify} captchaValid={captchaValid} />
 
           <div className="flex items-center my-6">
             <div className="flex-1 h-px bg-gray-300" />
@@ -53,9 +55,13 @@ export default function SignUp() {
           </div>
 
           <div className="flex flex-col items-center space-y-3 mt-3">
-            <RegistroGoogle onNotify={handleNotify} />
-            <GithubButton onNotify={handleNotify} />
-            <DiscordButton onNotify={handleNotify} />
+            <RegistroGoogle onNotify={handleNotify} captchaValid={captchaValid} />
+            <GithubButton onNotify={handleNotify} captchaValid={captchaValid} />
+
+            <DiscordButton onNotify={handleNotify} captchaValid={captchaValid} />
+          </div>
+          <div className="mt-5">
+            <ReCaptchaForm onVerified={(success) => setCaptchaValid(success)} />
           </div>
 
           <div className="flex items-start mt-5 text-sm text-gray-600">
@@ -67,7 +73,7 @@ export default function SignUp() {
               Al registrarte aceptas los{' '}
               <Link
                 href="signUp/registrar/Terminosycondiciones"
-                className="underline text-blue-500 hover:text-blue-400 transition"
+                className="text-blue-500 hover:text-blue-400 font-semibold hover:underline transition"
               >
                 términos de uso
               </Link>
@@ -75,7 +81,7 @@ export default function SignUp() {
             </p>
           </div>
 
-          <p className="mt-6 text-center text-gray-700 text-sm">
+          <p className="mt-2 text-center text-gray-700 text-sm">
             ¿Ya tienes cuenta?{' '}
             <Link
               href="login"

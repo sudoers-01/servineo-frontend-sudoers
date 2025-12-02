@@ -20,6 +20,12 @@ export interface UbicacionResponse {
   message?: string;
 }
 
+export interface TelefonoResponse {
+  success: boolean;
+  message?: string;
+  error?: string;
+}
+
 export async function enviarTokenGoogle(token: string): Promise<GoogleAuthResponse> {
   try {
     const res = await fetch(`${BASE_URL}/google/auth`, {
@@ -73,6 +79,33 @@ export async function enviarUbicacion(
     return await res.json();
   } catch (error) {
     console.error('Error al enviar la ubicación al backend:', error);
+    throw error;
+  }
+}
+
+//telefono
+export async function enviarTelefono(telefono: string): Promise<TelefonoResponse> {
+  const token = localStorage.getItem('servineo_token');
+  try {
+    const res = await fetch(`${BASE_URL}/telefono`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ telefono }),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      // Lanzar error con el mensaje del servidor
+      throw new Error(`Error ${res.status}: ${data.error || res.statusText}`);
+    }
+
+    return data;
+  } catch (error) {
+    console.error('Error al enviar el teléfono al backend:', error);
     throw error;
   }
 }

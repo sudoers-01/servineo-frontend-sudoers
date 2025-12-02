@@ -102,7 +102,7 @@ export default function MapaLeaflet() {
         pais || null,
       );
 
-      window.location.href = '/';
+      window.location.href = '/signUp/registrar/registrarTelefono';
     } catch (error) {
       console.error(error);
     }
@@ -193,7 +193,7 @@ export default function MapaLeaflet() {
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#2B6AE0')}
           onClick={manejarEnvio}
         >
-          {cargandoDireccion ? 'Obteniendo dirección...' : 'Finalizar registro'}
+          {cargandoDireccion ? 'Obteniendo dirección...' : 'Continuar'}
         </button>
       </div>
     </div>
