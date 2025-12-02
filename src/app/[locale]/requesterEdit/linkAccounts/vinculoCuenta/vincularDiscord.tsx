@@ -43,7 +43,7 @@ export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
       <button
         onClick={handleVincularDiscord}
         disabled={loading}
-        className="flex items-center justify-center gap-2 bg-[#5865F2] text-white text-sm px-4 py-2 rounded-xl hover:opacity-90 transition disabled:opacity-60"
+        className="flex items-center justify-center gap-2 bg-blue-600 text-white text-sm px-4 py-2 rounded-xl hover:bg-blue-700 transition disabled:opacity-60"
       >
         {loading ? (
           <>
