@@ -61,9 +61,6 @@ export default function JobOffersPage() {
 
   useSyncUrlParams();
 
-  // ============================================================================
-  // USER DATA FROM LOCALSTORAGE
-  // ============================================================================
   const [userId, setUserId] = useState<string>('');
   const [userRole, setUserRole] = useState<string>('visitor');
 
@@ -92,27 +89,18 @@ export default function JobOffersPage() {
     }
   }, []);
 
-  // ============================================================================
-  // SEARCH AND FILTER TRACKING
-  // ============================================================================
   const [logSearch] = useLogSearchMutation();
   const [updateFilters] = useUpdateFiltersMutation();
 
-  // Refs para rastrear valores anteriores y evitar envíos duplicados
   const previousSearchQueryRef = useRef<string>('');
   const previousFiltersRef = useRef<FilterState>(filters);
   const isInitialMountRef = useRef<boolean>(true);
 
-  // Contador de filtros
   const filterCounterRef = useRef<number>(1);
 
-  // Función para obtener el número real de resultados mostrados
   const getSearchCount = (): number => {
-    // Si está cargando, retornar 0 o el valor actual
     if (isLoading) return 0;
 
-    // Usar el total de ofertas que coinciden con los criterios actuales
-    // Este `total` viene de `useJobOffers()` y ya está filtrado por búsqueda y filtros
     return total || 0;
   };
 
@@ -136,7 +124,6 @@ export default function JobOffersPage() {
     return fixerNameFilter.toString();
   };
 
-  // Función helper para obtener el valor del filtro city
   const getCityValue = (): string => {
     if (!filters.city || (Array.isArray(filters.city) && filters.city.length === 0)) {
       return 'not_applied';
@@ -147,7 +134,6 @@ export default function JobOffersPage() {
     return filters.city;
   };
 
-  // Función helper para obtener el valor del filtro job_type
   const getJobTypeValue = (): string => {
     if (!filters.category || filters.category.length === 0) {
       return 'not_applied';
@@ -155,21 +141,15 @@ export default function JobOffersPage() {
     return filters.category.join(', ');
   };
 
-  // ============================================================================
-  // HANDLE SEARCH SUBMIT - NUEVA BÚSQUEDA INDEPENDIENTE
-  // ============================================================================
   const handleSearchSubmit = async (query: string) => {
     scrollRestoredRef.current = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     dispatch(setSearch(query));
     dispatch(resetPagination());
 
-    // Resetear contador de filtros para nueva búsqueda
     filterCounterRef.current = 1;
 
-    // Pequeño delay para asegurar que los resultados se actualicen
     const timeoutId = setTimeout(async () => {
-      // Solo enviar si el query es diferente al anterior o es una búsqueda nueva
       if (query.trim().length > 0) {
         const searchCount = getSearchCount();
 
@@ -199,29 +179,23 @@ export default function JobOffersPage() {
           console.error('Error al registrar nueva búsqueda:', error);
         }
       }
-    }, 500); // Aumentado a 500ms para dar tiempo a que se actualicen los resultados
+    }, 500);
 
     return () => clearTimeout(timeoutId);
   };
 
-  // ============================================================================
-  // DETECTAR CAMBIOS EN FILTROS - SOLO PARA LA ÚLTIMA BÚSQUEDA
-  // ============================================================================
   useEffect(() => {
-    // Skip en el montaje inicial
     if (isInitialMountRef.current) {
       isInitialMountRef.current = false;
       previousFiltersRef.current = { ...filters };
       return;
     }
 
-    // Solo procesar cambios de filtros si hay una búsqueda activa
     if (!previousSearchQueryRef.current) {
       previousFiltersRef.current = { ...filters };
       return;
     }
 
-    // Comparar si los filtros han cambiado realmente
     const currentFilters = filters as any;
     const previousFilters = previousFiltersRef.current as any;
 
@@ -242,14 +216,10 @@ export default function JobOffersPage() {
       compareFilterValues(previousFilters, currentFilters, key),
     );
 
-    // Solo enviar si hay un cambio real en los filtros Y tenemos una búsqueda activa
     if (filtersChanged && previousSearchQueryRef.current) {
-      // Actualizar ref primero para evitar envíos duplicados
       previousFiltersRef.current = { ...filters };
 
-      // Usar un delay más largo para asegurar que los resultados se actualicen
       const timeoutId = setTimeout(async () => {
-        // Incrementar contador para el nuevo filtro
         filterCounterRef.current++;
 
         const searchCount = getSearchCount();
@@ -274,15 +244,12 @@ export default function JobOffersPage() {
         } catch (error) {
           console.error('Error al registrar filtro:', error);
         }
-      }, 500); // Aumentado a 500ms para dar tiempo a que se actualicen los resultados
+      }, 500);
 
       return () => clearTimeout(timeoutId);
     }
   }, [filters, updateFilters, isLoading, total]);
 
-  // ============================================================================
-  // RESET FILTERS HANDLER
-  // ============================================================================
   const handleResetFilters = () => {
     const pageToRestore = hasActiveFilters.current ? pageBeforeFilter.current : 1;
     hasActiveFilters.current = false;
@@ -295,9 +262,6 @@ export default function JobOffersPage() {
     }, 0);
   };
 
-  // ============================================================================
-  // EXISTING COMPONENT CODE
-  // ============================================================================
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const scrollRestoredRef = useRef(false);
@@ -308,7 +272,6 @@ export default function JobOffersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [logClick] = useLogClickMutation();
 
-  // Adapter function to convert JobOfferData from backend to AdaptedJobOffer
   const adaptJobOffer = (offer: JobOfferData): AdaptedJobOffer => {
     return {
       _id: offer._id,
@@ -357,7 +320,6 @@ export default function JobOffersPage() {
     }
   };
 
-  // Limpiar búsqueda si se navega directamente sin parámetros
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -370,14 +332,11 @@ export default function JobOffersPage() {
     }
   }, [dispatch, search]);
 
-  // Guardar posición del scroll
   useEffect(() => {
     const saveScrollPosition = () => {
       try {
         sessionStorage.setItem(SCROLL_POSITION_KEY, window.scrollY.toString());
-      } catch {
-        // ignorar errores
-      }
+      } catch {}
     };
 
     window.addEventListener('beforeunload', saveScrollPosition);
@@ -386,7 +345,6 @@ export default function JobOffersPage() {
     };
   }, []);
 
-  // Restaurar posición del scroll
   useEffect(() => {
     if (!isLoading && Array.isArray(offers) && offers.length > 0 && !scrollRestoredRef.current) {
       try {
@@ -401,13 +359,10 @@ export default function JobOffersPage() {
             }, 100);
           }
         }
-      } catch {
-        // ignorar errores
-      }
+      } catch {}
     }
   }, [isLoading, offers]);
 
-  // Sticky header
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -479,7 +434,6 @@ export default function JobOffersPage() {
 
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
 
-  // Resto del código JSX permanece igual...
   return (
     <>
       <h1 className="mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-0 text-center text-xl sm:text-2xl md:text-3xl font-bold pt-3 px-3">
