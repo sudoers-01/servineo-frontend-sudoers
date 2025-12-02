@@ -1,4 +1,4 @@
-const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
+const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/signUp`;
 
 export interface User {
   id: string;
@@ -66,7 +66,7 @@ export async function enviarUbicacion(
 ): Promise<UbicacionResponse> {
   const token = localStorage.getItem('servineo_token');
   try {
-    const res = await fetch(`${BASE_URL}/ubicacion`, {
+    const res = await fetch(`${BASE_URL}/registrar/ubicacion`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -87,7 +87,7 @@ export async function enviarUbicacion(
 export async function enviarTelefono(telefono: string): Promise<TelefonoResponse> {
   const token = localStorage.getItem('servineo_token');
   try {
-    const res = await fetch(`${BASE_URL}/telefono`, {
+    const res = await fetch(`${BASE_URL}/registrar/telefono`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

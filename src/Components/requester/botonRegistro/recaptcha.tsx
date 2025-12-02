@@ -10,17 +10,36 @@ interface ReCaptchaFormProps {
 const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified }) => {
   const captchaRef = useRef<ReCAPTCHA>(null);
 
+  const verifyBackend = async (token: string) => {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signUp/verify-recaptcha`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token }),
+      });
+
+      const data = await res.json();
+
+      onVerified?.(data.success);
+    } catch (err) {
+      console.error("Error comunicando con backend:", err);
+      onVerified?.(false);
+    }
+  };
+
   return (
     <div>
       <ReCAPTCHA
         ref={captchaRef}
         sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
-        onChange={(value) => {
-          onVerified?.(!!value); // Habilita botones si hay valor
+        onChange={(token) => {
+          if (token) {
+            verifyBackend(token); 
+          }
         }}
         onExpired={() => {
-          onVerified?.(false); // Deshabilita todo al expirar
-          captchaRef.current?.reset(); // Limpia el captcha visual
+          onVerified?.(false);
+          captchaRef.current?.reset();
         }}
       />
     </div>
