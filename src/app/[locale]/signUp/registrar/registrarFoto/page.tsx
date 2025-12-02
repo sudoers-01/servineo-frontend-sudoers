@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { Trash2 } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { getUserIdFromToken } from "../Registrardecoder/getID";
-import NotificationModal from "@/Components/Modal-notifications"; 
+import { useState } from 'react';
+import { Trash2 } from 'lucide-react';
+import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { getUserIdFromToken } from '../Registrardecoder/getID';
+import NotificationModal from '@/Components/Modal-notifications';
 
 export default function FotoPerfil() {
   const router = useRouter();
@@ -15,19 +15,18 @@ export default function FotoPerfil() {
 
   const [notification, setNotification] = useState({
     isOpen: false,
-    type: "info" as "success" | "error" | "info" | "warning",
-    title: "",
-    message: "",
+    type: 'info' as 'success' | 'error' | 'info' | 'warning',
+    title: '',
+    message: '',
   });
 
   const handleNotify = (notif: {
-    type: "success" | "error" | "info" | "warning";
+    type: 'success' | 'error' | 'info' | 'warning';
     title: string;
     message: string;
   }) => setNotification({ isOpen: true, ...notif });
 
-  const handleCloseNotification = () =>
-    setNotification((prev) => ({ ...prev, isOpen: false }));
+  const handleCloseNotification = () => setNotification((prev) => ({ ...prev, isOpen: false }));
 
   const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
 
@@ -47,18 +46,18 @@ export default function FotoPerfil() {
   const continuar = async () => {
     if (!archivo) {
       return handleNotify({
-        type: "error",
-        title: "Foto no seleccionada",
-        message: "Primero selecciona una foto",
+        type: 'error',
+        title: 'Foto no seleccionada',
+        message: 'Primero selecciona una foto',
       });
     }
 
     const usuarioId = getUserIdFromToken();
     if (!usuarioId) {
       return handleNotify({
-        type: "error",
-        title: "Usuario no encontrado",
-        message: "No se encontró el ID del usuario",
+        type: 'error',
+        title: 'Usuario no encontrado',
+        message: 'No se encontró el ID del usuario',
       });
     }
 
@@ -66,11 +65,11 @@ export default function FotoPerfil() {
       setCargando(true);
 
       const formData = new FormData();
-      formData.append("foto", archivo);
-      formData.append("usuarioId", usuarioId);
+      formData.append('foto', archivo);
+      formData.append('usuarioId', usuarioId);
 
       const response = await fetch(`${BASE_URL}/foto-perfil/usuarios/foto`, {
-        method: "PUT",
+        method: 'PUT',
         body: formData,
       });
 
@@ -78,24 +77,24 @@ export default function FotoPerfil() {
 
       if (response.ok && data.success) {
         handleNotify({
-          type: "success",
-          title: "¡Éxito!",
-          message: "Foto actualizada correctamente",
+          type: 'success',
+          title: '¡Éxito!',
+          message: 'Foto actualizada correctamente',
         });
-        setTimeout(() => router.push("/signUp/registrar/registrarUbicacion"), 1000);
+        setTimeout(() => router.push('/signUp/registrar/registrarUbicacion'), 1000);
       } else {
         handleNotify({
-          type: "error",
-          title: "Error",
-          message: data.message || "Error al subir la foto",
+          type: 'error',
+          title: 'Error',
+          message: data.message || 'Error al subir la foto',
         });
       }
     } catch (error) {
-      console.error("Error al subir la foto:", error);
+      console.error('Error al subir la foto:', error);
       handleNotify({
-        type: "error",
-        title: "Error de conexión",
-        message: "No se pudo conectar con el servidor",
+        type: 'error',
+        title: 'Error de conexión',
+        message: 'No se pudo conectar con el servidor',
       });
     } finally {
       setCargando(false);
@@ -119,9 +118,7 @@ export default function FotoPerfil() {
           <h1 className="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-primary/80 to-primary/60 bg-clip-text text-transparent">
             Foto de perfil
           </h1>
-          <p className="text-center text-gray-600 mb-8 text-sm">
-            Sube una foto para tu perfil
-          </p>
+          <p className="text-center text-gray-600 mb-8 text-sm">Sube una foto para tu perfil</p>
 
           {/* Imagen */}
           <div className="flex flex-col items-center gap-4">
@@ -140,9 +137,11 @@ export default function FotoPerfil() {
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 
+                  <path
+                    d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 
                     1.79-4 4 1.79 4 4 4zm0 2c-2.67 
-                    0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                  />
                 </svg>
               )}
             </div>
@@ -160,7 +159,7 @@ export default function FotoPerfil() {
                 htmlFor="input-foto"
                 className="px-4 py-2 bg-primary text-primary-foreground rounded-full cursor-pointer hover:opacity-90 transition"
               >
-                {fotoPreview ? "Cambiar foto" : "Subir foto"}
+                {fotoPreview ? 'Cambiar foto' : 'Subir foto'}
               </label>
 
               {fotoPreview && (
@@ -181,11 +180,11 @@ export default function FotoPerfil() {
               disabled={!archivo || cargando}
               className={`px-5 py-2 rounded-full transition ${
                 archivo
-                  ? "bg-primary text-primary-foreground hover:opacity-90"
-                  : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  ? 'bg-primary text-primary-foreground hover:opacity-90'
+                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {cargando ? "Subiendo..." : "Continuar"}
+              {cargando ? 'Subiendo...' : 'Continuar'}
             </button>
           </div>
         </div>

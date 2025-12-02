@@ -28,9 +28,8 @@ export default function AuthenticatorCodigoModal({
   showModal,
   cerrarModal,
   volverATOTP,
-  email
+  email,
 }: AuthenticatorCodigoModalProps) {
-
   const [codigo, setCodigo] = useState('');
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -54,13 +53,13 @@ export default function AuthenticatorCodigoModal({
     try {
       const res: ApiResponse<RecoveryCodeResponse> = await api.post(
         '/codigos2fa/verify-recovery-code',
-        { email, codigo }
+        { email, codigo },
       );
 
       const inner = res.data;
 
       if (!inner?.success) {
-        setErrorMsg(inner?.message || "Código incorrecto");
+        setErrorMsg(inner?.message || 'Código incorrecto');
         return;
       }
 
@@ -68,7 +67,7 @@ export default function AuthenticatorCodigoModal({
       const user = inner?.data?.user;
 
       if (!token || !user) {
-        setErrorMsg("Respuesta inválida del servidor");
+        setErrorMsg('Respuesta inválida del servidor');
         return;
       }
 
@@ -77,13 +76,12 @@ export default function AuthenticatorCodigoModal({
       localStorage.setItem('servineo_user', JSON.stringify(user));
 
       // ✔️ Mostrar el mensaje de bienvenida igual que en TOTP
-      sessionStorage.setItem("toastMessage", `¡Bienvenido, ${user.name}!`);
+      sessionStorage.setItem('toastMessage', `¡Bienvenido, ${user.name}!`);
 
       // Cerrar modal y redirigir
       cerrarModal();
-      window.location.href = "/";
+      window.location.href = '/';
       return;
-
     } catch (err) {
       console.error('Error al verificar código de recuperación:', err);
       const errorMessage = err instanceof Error ? err.message : 'Error en el servidor';
@@ -96,14 +94,11 @@ export default function AuthenticatorCodigoModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="bg-white w-[520px] rounded-lg shadow-lg p-8">
-
         <h2 className="text-3xl font-bold text-center text-servineo-500 mb-1">
           <span className="text-servineo-400">Servineo</span>
         </h2>
 
-        <p className="text-2xl font-bold text-center text-servineo-500 mb-6">
-          Authenticator App
-        </p>
+        <p className="text-2xl font-bold text-center text-servineo-500 mb-6">Authenticator App</p>
 
         <p className="block text-sm font-semibold text-gray-600 mb-2">
           Ingresar con código de recuperación
@@ -117,7 +112,8 @@ export default function AuthenticatorCodigoModal({
           }}
         >
           <p className="text-sm text-gray-600 mb-4 text-center">
-            Ingresa uno de los códigos de recuperacion que se le otorgo al configurar la app de Authenticator.
+            Ingresa uno de los códigos de recuperacion que se le otorgo al configurar la app de
+            Authenticator.
           </p>
 
           <input
@@ -130,9 +126,7 @@ export default function AuthenticatorCodigoModal({
           />
 
           {errorMsg && (
-            <p className="text-red-600 text-sm mt-2 text-center font-medium">
-              {errorMsg}
-            </p>
+            <p className="text-red-600 text-sm mt-2 text-center font-medium">{errorMsg}</p>
           )}
 
           <div className="flex gap-4 mt-6">

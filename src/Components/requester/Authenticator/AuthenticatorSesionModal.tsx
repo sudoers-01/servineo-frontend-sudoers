@@ -5,9 +5,9 @@ import { api } from '../../../app/redux/services/api';
 interface AuthenticatorSesionProps {
   showModal: boolean;
   setShowModal: () => void; // cierra este modal
-  emailTOTP: string;         // correo interno TOTP
+  emailTOTP: string; // correo interno TOTP
   setEmailTOTP: (email: string) => void;
-  abrirTOTP: () => void;     // abre modal TOTP
+  abrirTOTP: () => void; // abre modal TOTP
 }
 
 interface TwoFactorResponse {
@@ -25,7 +25,7 @@ export default function AuthenticatorSesion({
   setShowModal,
   emailTOTP,
   setEmailTOTP,
-  abrirTOTP
+  abrirTOTP,
 }: AuthenticatorSesionProps) {
   const [email, setEmail] = useState(emailTOTP || '');
   const [errorMessage, setErrorMessage] = useState('');
@@ -60,7 +60,7 @@ export default function AuthenticatorSesion({
         // Guardamos correo para TOTP
         setEmailTOTP(email);
         setShowModal(); // cierra modal de sesión
-        abrirTOTP();    // abre modal TOTP
+        abrirTOTP(); // abre modal TOTP
       }
     } catch (err) {
       setErrorMessage('Error de conexión con el servidor');
@@ -75,9 +75,7 @@ export default function AuthenticatorSesion({
         <h2 className="text-3xl font-bold text-center text-servineo-500 mb-1">
           <span className="text-servineo-400">Servineo</span>
         </h2>
-        <p className="text-2xl font-bold text-center text-servineo-500 mb-6">
-          Authenticator App
-        </p>
+        <p className="text-2xl font-bold text-center text-servineo-500 mb-6">Authenticator App</p>
         <p className="block text-sm font-semibold text-gray-600 mb-2">
           Debe de tener configurado su app Authenticator
         </p>

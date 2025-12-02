@@ -18,20 +18,14 @@ export default function OpcionesLoginModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 border border-gray-200">
-        
         {/* Header */}
         <div className="text-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">
-            Opciones de acceso
-          </h2>
-          <p className="text-sm text-gray-600">
-            Elige cómo deseas recuperar tu acceso
-          </p>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Opciones de acceso</h2>
+          <p className="text-sm text-gray-600">Elige cómo deseas recuperar tu acceso</p>
         </div>
 
         {/* Opciones */}
         <div className="space-y-4">
-          
           {/* OPCIÓN 1: Olvidaste tu contraseña */}
           <button
             onClick={onSelectForgotPassword}
@@ -44,9 +38,7 @@ export default function OpcionesLoginModal({
               <h3 className="font-semibold text-gray-800 group-hover:text-primary transition">
                 ¿Olvidaste tu contraseña?
               </h3>
-              <p className="text-sm text-gray-600">
-                Recupera tu contraseña por correo electrónico
-              </p>
+              <p className="text-sm text-gray-600">Recupera tu contraseña por correo electrónico</p>
             </div>
           </button>
 
@@ -62,12 +54,9 @@ export default function OpcionesLoginModal({
               <h3 className="font-semibold text-gray-800 group-hover:text-primary transition">
                 Ingresar sin contraseña
               </h3>
-              <p className="text-sm text-gray-600">
-                Usa Google Authenticator
-              </p>
+              <p className="text-sm text-gray-600">Usa Google Authenticator</p>
             </div>
           </button>
-
         </div>
 
         {/* Botón cancelar */}
@@ -77,7 +66,6 @@ export default function OpcionesLoginModal({
         >
           Cancelar
         </button>
-
       </div>
     </div>
   );

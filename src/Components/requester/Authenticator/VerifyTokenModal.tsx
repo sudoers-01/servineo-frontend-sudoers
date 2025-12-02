@@ -30,7 +30,7 @@ export default function VerifyTokenModal({ open, onClose, onVerify, loading }: P
   // NUEVO: intentos restantes y mensaje de bloqueo
   const [attemptsLeft, setAttemptsLeft] = useState<number | null>(null);
   const [lockedInfo, setLockedInfo] = useState<string | null>(null);
-  
+
   useEffect(() => {
     if (open) {
       setCode('');
@@ -84,7 +84,7 @@ export default function VerifyTokenModal({ open, onClose, onVerify, loading }: P
         if (status === 423) {
           // bloqueado por demasiados intentos
           const minutes = data?.minutesLeft || data?.minutosRestantes || 5;
-          
+
           setLockedInfo(`Podrás volver a intentar en aproximadamente ${minutes} minuto(s).`);
           msg = `Cuenta bloqueada por demasiados intentos fallidos. Intenta de nuevo en ${minutes} minutos.`;
         } else if (status === 429) {
@@ -111,9 +111,7 @@ export default function VerifyTokenModal({ open, onClose, onVerify, loading }: P
           shake ? 'animate-shake border-red-400' : ''
         }`}
       >
-        <h3 className="text-lg font-semibold mb-2">
-          Ingresa el código de autenticador
-        </h3>
+        <h3 className="text-lg font-semibold mb-2">Ingresa el código de autenticador</h3>
         <p className="text-sm text-gray-600 mb-4">
           Introduce los 6 dígitos que muestra tu app de autenticación.
         </p>
@@ -130,9 +128,7 @@ export default function VerifyTokenModal({ open, onClose, onVerify, loading }: P
         />
 
         {errorMsg && (
-          <div className="text-red-600 text-sm mb-1 text-center font-medium">
-            {errorMsg}
-          </div>
+          <div className="text-red-600 text-sm mb-1 text-center font-medium">{errorMsg}</div>
         )}
 
         {/* NUEVO: intentos restantes */}
@@ -143,11 +139,7 @@ export default function VerifyTokenModal({ open, onClose, onVerify, loading }: P
         )}
 
         {/* NUEVO: info de bloqueo */}
-        {lockedInfo && (
-          <div className="text-xs text-center text-red-500 mb-2">
-            {lockedInfo}
-          </div>
-        )}
+        {lockedInfo && <div className="text-xs text-center text-red-500 mb-2">{lockedInfo}</div>}
 
         <div className="flex justify-end gap-3 mt-2">
           <button
@@ -176,12 +168,23 @@ export default function VerifyTokenModal({ open, onClose, onVerify, loading }: P
 
       <style jsx>{`
         @keyframes shake {
-          0%, 100% { transform: translateX(0); }
-          25% { transform: translateX(-5px); }
-          50% { transform: translateX(5px); }
-          75% { transform: translateX(-4px); }
+          0%,
+          100% {
+            transform: translateX(0);
+          }
+          25% {
+            transform: translateX(-5px);
+          }
+          50% {
+            transform: translateX(5px);
+          }
+          75% {
+            transform: translateX(-4px);
+          }
         }
-        .animate-shake { animation: shake 0.4s ease-in-out; }
+        .animate-shake {
+          animation: shake 0.4s ease-in-out;
+        }
       `}</style>
     </div>
   );

@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React from "react";
-import { FaDiscord } from "react-icons/fa";
+import React from 'react';
+import { FaDiscord } from 'react-icons/fa';
 
 interface Props {
   onMensajeChange: (mensaje: string) => void;
@@ -12,12 +12,12 @@ const LoginDiscord: React.FC<Props> = ({ onMensajeChange }) => {
     try {
       const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
       if (!clientId) {
-        onMensajeChange("Falta configurar NEXT_PUBLIC_DISCORD_CLIENT_ID.");
+        onMensajeChange('Falta configurar NEXT_PUBLIC_DISCORD_CLIENT_ID.');
         return;
       }
 
       const redirectUri = `${window.location.origin}/login?provider=discord`;
-      const scope = "identify email";
+      const scope = 'identify email';
 
       const discordUrl =
         `https://discord.com/api/oauth2/authorize` +
@@ -29,7 +29,7 @@ const LoginDiscord: React.FC<Props> = ({ onMensajeChange }) => {
       window.location.href = discordUrl;
     } catch (error) {
       console.error(error);
-      onMensajeChange("No se pudo iniciar el login con Discord.");
+      onMensajeChange('No se pudo iniciar el login con Discord.');
     }
   };
 

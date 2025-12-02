@@ -34,9 +34,7 @@ export default function SeguridadPage() {
 
         {/* Card 2: Dispositivos vinculados */}
         <button
-          onClick={() =>
-            router.push('/controlC/Configuracion/Seguridad/Inicios')
-          }
+          onClick={() => router.push('/controlC/Configuracion/Seguridad/Inicios')}
           className="flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out bg-white text-gray-800 cursor-pointer min-w-[220px]"
         >
           <div className="p-2 rounded-md bg-blue-50">

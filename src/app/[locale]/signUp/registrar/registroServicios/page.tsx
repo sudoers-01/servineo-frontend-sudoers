@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2 } from "lucide-react";
-import { z } from "zod";
-import { enviarRegistroManual } from "@/app/redux/services/auth/registro";
-import { generarContrasena } from "../Registrardecoder/generadorContrasena";
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { z } from 'zod';
+import { enviarRegistroManual } from '@/app/redux/services/auth/registro';
+import { generarContrasena } from '../Registrardecoder/generadorContrasena';
 
 interface RegistroFormProps {
   onNotify?: (notification: {
-    type: "success" | "error" | "info" | "warning";
+    type: 'success' | 'error' | 'info' | 'warning';
     title: string;
     message: string;
   }) => void;
-  captchaValid: boolean;   // <-- NUEVO
+  captchaValid: boolean; // <-- NUEVO
 }
 
 const nameRegex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
@@ -22,21 +22,21 @@ const registroSchema = z
   .object({
     nombre: z
       .string()
-      .min(3, "El nombre debe tener al menos 3 caracteres")
-      .max(50, "El nombre no puede tener más de 50 caracteres")
-      .regex(nameRegex, "Solo se permiten letras y espacios"),
+      .min(3, 'El nombre debe tener al menos 3 caracteres')
+      .max(50, 'El nombre no puede tener más de 50 caracteres')
+      .regex(nameRegex, 'Solo se permiten letras y espacios'),
     apellido: z
       .string()
-      .min(3, "El apellido debe tener al menos 3 caracteres")
-      .max(50, "El apellido no puede tener más de 50 caracteres")
-      .regex(nameRegex, "Solo se permiten letras y espacios"),
-    email: z.string().email("Correo electrónico inválido"),
-    password: z.string().min(8, "Debe tener al menos 8 caracteres"),
+      .min(3, 'El apellido debe tener al menos 3 caracteres')
+      .max(50, 'El apellido no puede tener más de 50 caracteres')
+      .regex(nameRegex, 'Solo se permiten letras y espacios'),
+    email: z.string().email('Correo electrónico inválido'),
+    password: z.string().min(8, 'Debe tener al menos 8 caracteres'),
     confirmarPassword: z.string(),
   })
   .refine((data) => data.password === data.confirmarPassword, {
-    message: "Las contraseñas no coinciden",
-    path: ["confirmarPassword"],
+    message: 'Las contraseñas no coinciden',
+    path: ['confirmarPassword'],
   });
 
 type RegistroSchema = z.infer<typeof registroSchema>;
@@ -44,11 +44,11 @@ type RegistroSchema = z.infer<typeof registroSchema>;
 export default function RegistroForm({ onNotify, captchaValid }: RegistroFormProps) {
   const router = useRouter();
   const [formData, setFormData] = useState<RegistroSchema>({
-    nombre: "",
-    apellido: "",
-    email: "",
-    password: "",
-    confirmarPassword: "",
+    nombre: '',
+    apellido: '',
+    email: '',
+    password: '',
+    confirmarPassword: '',
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof RegistroSchema, string>>>({});
@@ -83,9 +83,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
     navigator.clipboard.writeText(nueva);
 
     onNotify?.({
-      type: "info",
-      title: "Contraseña generada",
-      message: "La contraseña segura ha sido generada y copiada al portapapeles.",
+      type: 'info',
+      title: 'Contraseña generada',
+      message: 'La contraseña segura ha sido generada y copiada al portapapeles.',
     });
   };
 
@@ -94,12 +94,11 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    
     if (!captchaValid) {
       onNotify?.({
-        type: "warning",
-        title: "Completa la verificación",
-        message: "Debes completar el captcha antes de continuar.",
+        type: 'warning',
+        title: 'Completa la verificación',
+        message: 'Debes completar el captcha antes de continuar.',
       });
       return;
     }
@@ -117,9 +116,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
       setErrors(fieldErrors);
 
       onNotify?.({
-        type: "warning",
-        title: "Datos incompletos o incorrectos",
-        message: "Revisa los campos marcados para continuar.",
+        type: 'warning',
+        title: 'Datos incompletos o incorrectos',
+        message: 'Revisa los campos marcados para continuar.',
       });
 
       return;
@@ -132,21 +131,24 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
       const data = await enviarRegistroManual(nombreCompleto, formData.email, formData.password);
 
       if (data.success) {
-        if (data.token) localStorage.setItem("servineo_token", data.token);
+        if (data.token) localStorage.setItem('servineo_token', data.token);
 
         onNotify?.({
-          type: "success",
-          title: "Registro exitoso",
+          type: 'success',
+          title: 'Registro exitoso',
           message: `Bienvenido, ${nombreCompleto}. Tu cuenta ha sido creada correctamente.`,
         });
 
-        sessionStorage.setItem("toastMessage", `¡Cuenta creada exitosamente! Bienvenido, ${nombreCompleto}.`);
-        router.push("/signUp/registrar/registrarFoto");
+        sessionStorage.setItem(
+          'toastMessage',
+          `¡Cuenta creada exitosamente! Bienvenido, ${nombreCompleto}.`,
+        );
+        router.push('/signUp/registrar/registrarFoto');
       } else {
         onNotify?.({
-          type: "error",
-          title: "Error en el registro",
-          message: data.message || "No fue posible completar el registro.",
+          type: 'error',
+          title: 'Error en el registro',
+          message: data.message || 'No fue posible completar el registro.',
         });
       }
     } finally {
@@ -158,7 +160,6 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-
       {/* Nombre y Apellido */}
       <div className="flex gap-3">
         <div className="flex-1">
@@ -169,7 +170,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             onChange={handleChange}
             placeholder="Ingresa tu nombre"
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.nombre ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              errors.nombre
+                ? 'border-red-500 focus:ring-red-400'
+                : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
           {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
@@ -183,7 +186,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             onChange={handleChange}
             placeholder="Ingresa tu apellido"
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.apellido ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              errors.apellido
+                ? 'border-red-500 focus:ring-red-400'
+                : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
           {errors.apellido && <p className="text-red-500 text-xs mt-1">{errors.apellido}</p>}
@@ -192,7 +197,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
       {/* Correo */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">Correo electrónico*</label>
+        <label className="block text-sm font-semibold text-gray-600 mb-2">
+          Correo electrónico*
+        </label>
         <input
           name="email"
           type="email"
@@ -200,7 +207,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           onChange={handleChange}
           placeholder="nombre@dominio.com"
           className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-            errors.email ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+            errors.email
+              ? 'border-red-500 focus:ring-red-400'
+              : 'border-gray-300 focus:ring-servineo-400'
           }`}
         />
         {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
@@ -212,12 +221,14 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
         <div className="relative">
           <input
             name="password"
-            type={mostrarPassword ? "text" : "password"}
+            type={mostrarPassword ? 'text' : 'password'}
             value={formData.password}
             onChange={handleChange}
             placeholder="Ingresa tu contraseña"
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.password ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              errors.password
+                ? 'border-red-500 focus:ring-red-400'
+                : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
           <button
@@ -249,16 +260,20 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
       {/* Confirmar contraseña */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">Confirmar contraseña*</label>
+        <label className="block text-sm font-semibold text-gray-600 mb-2">
+          Confirmar contraseña*
+        </label>
         <div className="relative">
           <input
             name="confirmarPassword"
-            type={mostrarConfirmarPassword ? "text" : "password"}
+            type={mostrarConfirmarPassword ? 'text' : 'password'}
             value={formData.confirmarPassword}
             onChange={handleChange}
             placeholder="Confirma tu contraseña"
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
-              errors.confirmarPassword ? "border-red-500 focus:ring-red-400" : "border-gray-300 focus:ring-servineo-400"
+              errors.confirmarPassword
+                ? 'border-red-500 focus:ring-red-400'
+                : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
           <button
@@ -269,27 +284,28 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             {mostrarConfirmarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
-        {errors.confirmarPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmarPassword}</p>}
+        {errors.confirmarPassword && (
+          <p className="text-red-500 text-xs mt-1">{errors.confirmarPassword}</p>
+        )}
       </div>
 
       {/* Submit */}
       <button
-       type="submit"
-      disabled={cargando}   
-       className={`w-full flex items-center justify-center gap-2
-      ${!captchaValid ? "bg-primary/60 cursor-not-allowed" : "bg-primary/90 hover:bg-primary"}
-       ${cargando ? "opacity-60 cursor-not-allowed" : ""}
+        type="submit"
+        disabled={cargando}
+        className={`w-full flex items-center justify-center gap-2
+      ${!captchaValid ? 'bg-primary/60 cursor-not-allowed' : 'bg-primary/90 hover:bg-primary'}
+       ${cargando ? 'opacity-60 cursor-not-allowed' : ''}
        text-white font-semibold rounded-xl p-2.5 mt-2 transition-all duration-300
        shadow-md hover:shadow-lg`}
       >
-
         {cargando ? (
           <>
             <Loader2 className="animate-spin w-5 h-5" />
             Registrando...
           </>
         ) : (
-          "Únete"
+          'Únete'
         )}
       </button>
     </form>

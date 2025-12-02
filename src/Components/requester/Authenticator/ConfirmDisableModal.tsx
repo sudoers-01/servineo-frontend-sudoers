@@ -5,7 +5,7 @@ interface Props {
   open: boolean;
   onCancel: () => void;
   onConfirm: () => Promise<void> | void;
-  onFinish?: () => void;  // nuevo: callback al cerrar tras éxito
+  onFinish?: () => void; // nuevo: callback al cerrar tras éxito
   loading?: boolean;
 }
 
@@ -55,9 +55,8 @@ export default function ConfirmDisableModal({
               <div className="flex-1">
                 <h3 className="text-lg font-semibold">Desactivar autenticador</h3>
                 <p className="text-sm text-gray-600 mt-1">
-                  ¿Estás seguro de que quieres desactivar la autenticación en dos
-                  pasos? Esto eliminará tu clave secreta y los códigos de recuperación
-                  asociados.
+                  ¿Estás seguro de que quieres desactivar la autenticación en dos pasos? Esto
+                  eliminará tu clave secreta y los códigos de recuperación asociados.
                 </p>
 
                 <div className="mt-5 flex justify-end gap-3">
@@ -104,8 +103,7 @@ export default function ConfirmDisableModal({
               Autenticador desactivado correctamente
             </h3>
             <p className="text-sm text-gray-600 mb-6">
-              Ya puedes volver a configurar la autenticación cuando quieras desde esta
-              misma página.
+              Ya puedes volver a configurar la autenticación cuando quieras desde esta misma página.
             </p>
             <button
               onClick={() => {

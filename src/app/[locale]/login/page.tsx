@@ -73,7 +73,9 @@ export default function LoginPage() {
   });
 
   // Estado para los nuevos modales de autenticación/métodos
-  const [modalActivo, setModalActivo] = useState<'none' | 'opciones' | 'sesion' | 'totp' | 'codigo'>('none');
+  const [modalActivo, setModalActivo] = useState<
+    'none' | 'opciones' | 'sesion' | 'totp' | 'codigo'
+  >('none');
   const [emailTOTP, setEmailTOTP] = useState('');
 
   const {
@@ -103,7 +105,9 @@ export default function LoginPage() {
         };
         // Detectar si el backend requiere MFA/2FA y abrir los modales correspondientes
         const needs2FA = Boolean(
-          datos.requires2FA || datos.mfaRequired || (datos.mfaMethods && datos.mfaMethods.length > 0)
+          datos.requires2FA ||
+            datos.mfaRequired ||
+            (datos.mfaMethods && datos.mfaMethods.length > 0),
         );
 
         if (needs2FA) {
@@ -114,7 +118,11 @@ export default function LoginPage() {
 
           if (methods.includes('passwordless') || methods.includes('session')) {
             setModalActivo('sesion');
-          } else if (methods.includes('totp') || methods.includes('otp') || methods.includes('totp_sms')) {
+          } else if (
+            methods.includes('totp') ||
+            methods.includes('otp') ||
+            methods.includes('totp_sms')
+          ) {
             setModalActivo('totp');
           } else {
             setModalActivo('opciones');
@@ -197,72 +205,71 @@ export default function LoginPage() {
         const data = event.data || {};
         const { type, token, user, message } = data;
 
-        if (type === "GITHUB_AUTH_SUCCESS") {
+        if (type === 'GITHUB_AUTH_SUCCESS') {
           if (token && user) {
-            localStorage.setItem("servineo_token", token);
-            localStorage.setItem("servineo_user", JSON.stringify(user));
+            localStorage.setItem('servineo_token', token);
+            localStorage.setItem('servineo_user', JSON.stringify(user));
 
-            const nombre = (user as { name?: string }).name || "Usuario";
+            const nombre = (user as { name?: string }).name || 'Usuario';
 
             setNotification({
               isOpen: true,
-              type: "success",
-              title: "Inicio de sesión exitoso",
+              type: 'success',
+              title: 'Inicio de sesión exitoso',
               message: `¡Bienvenido, ${nombre}!`,
             });
 
             setTimeout(() => {
-              window.location.href = "/";
+              window.location.href = '/';
             }, 1500);
           } else {
             setNotification({
               isOpen: true,
-              type: "error",
-              title: "Error al iniciar sesión",
-              message:
-                "Respuesta inválida desde GitHub. Inténtalo nuevamente.",
+              type: 'error',
+              title: 'Error al iniciar sesión',
+              message: 'Respuesta inválida desde GitHub. Inténtalo nuevamente.',
             });
           }
         }
 
-        if (type === "GITHUB_AUTH_ERROR") {
+        if (type === 'GITHUB_AUTH_ERROR') {
           setNotification({
             isOpen: true,
-            type: "error",
-            title: "Error al iniciar sesión",
-            message: message || "No se pudo iniciar sesión con GitHub.",
+            type: 'error',
+            title: 'Error al iniciar sesión',
+            message: message || 'No se pudo iniciar sesión con GitHub.',
           });
         }
       } catch (err) {
-        console.error("Error procesando mensaje de GitHub:", err);
+        console.error('Error procesando mensaje de GitHub:', err);
       }
     };
 
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-    // 🔹 Manejo de login con Discord (redirect a /login?provider=discord&code=...)
+  // 🔹 Manejo de login con Discord (redirect a /login?provider=discord&code=...)
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    if (typeof window === 'undefined') return;
 
     const search = window.location.search;
     const params = new URLSearchParams(search);
-    const provider = params.get("provider");
-    const code = params.get("code");
-    const error = params.get("error");
+    const provider = params.get('provider');
+    const code = params.get('code');
+    const error = params.get('error');
 
     // Solo nos interesa cuando viene de Discord
-    if (provider !== "discord") return;
+    if (provider !== 'discord') return;
 
     if (error) {
       setNotification({
         isOpen: true,
-        type: "error",
-        title: "Error de autenticación",
+        type: 'error',
+        title: 'Error de autenticación',
         message: error,
       });
-      window.history.replaceState({}, "", "/login");
+      window.history.replaceState({}, '', '/login');
       return;
     }
 
@@ -272,60 +279,52 @@ export default function LoginPage() {
       try {
         setLoading(true);
 
-        const res: ApiResponse<LoginResponse> = await api.post(
-          "/auth/discord",
-          { code }
-        );
+        const res: ApiResponse<LoginResponse> = await api.post('/auth/discord', { code });
 
         if (res.success && res.data) {
           const datos = res.data;
 
-          localStorage.setItem("servineo_token", datos.token);
-          localStorage.setItem("servineo_user", JSON.stringify(datos.user));
+          localStorage.setItem('servineo_token', datos.token);
+          localStorage.setItem('servineo_user', JSON.stringify(datos.user));
 
-          const mensajeExito =
-            datos.message || `¡Bienvenido, ${datos.user.name}!`;
+          const mensajeExito = datos.message || `¡Bienvenido, ${datos.user.name}!`;
 
           setNotification({
             isOpen: true,
-            type: "success",
-            title: "Inicio de sesión exitoso",
+            type: 'success',
+            title: 'Inicio de sesión exitoso',
             message: mensajeExito,
           });
 
           // limpiar parámetros de la URL
-          window.history.replaceState({}, "", "/login");
+          window.history.replaceState({}, '', '/login');
 
           setTimeout(() => {
-            window.location.href = "/";
+            window.location.href = '/';
           }, 1500);
         } else {
           const mensajeError =
-          res.message ||
-          (res.data as unknown as { message?: string })?.message ||
-          (res as unknown as { error?: string })?.error ||
-          "No se pudo iniciar sesión con Discord.";
-
+            res.message ||
+            (res.data as unknown as { message?: string })?.message ||
+            (res as unknown as { error?: string })?.error ||
+            'No se pudo iniciar sesión con Discord.';
 
           setNotification({
             isOpen: true,
-            type: "error",
-            title: "Error al iniciar sesión",
+            type: 'error',
+            title: 'Error al iniciar sesión',
             message: mensajeError,
           });
 
-          window.history.replaceState({}, "", "/login");
+          window.history.replaceState({}, '', '/login');
         }
       } catch (err: unknown) {
-        console.error("[LOGIN] Error en loginDiscord:", err);
-        const message =
-          err instanceof Error
-            ? err.message
-            : "No se pudo conectar con el servidor.";
+        console.error('[LOGIN] Error en loginDiscord:', err);
+        const message = err instanceof Error ? err.message : 'No se pudo conectar con el servidor.';
         setNotification({
           isOpen: true,
-          type: "error",
-          title: "Error de conexión",
+          type: 'error',
+          title: 'Error de conexión',
           message,
         });
       } finally {
@@ -400,7 +399,7 @@ export default function LoginPage() {
               )}
             </div>
 
-           {/* 🆕 UN SOLO BOTÓN que abre el modal de opciones */}
+            {/* 🆕 UN SOLO BOTÓN que abre el modal de opciones */}
             <p className="text-center text-sm text-gray-500">
               <button
                 type="button"
@@ -433,7 +432,7 @@ export default function LoginPage() {
           {/* Botón Google */}
           <div className="flex flex-col items-center gap-3 mt-4">
             <LoginGoogle onMensajeChange={handleMensajeChange} />
-          
+
             {/* Botón GitHub */}
             <LoginGithub onMensajeChange={handleMensajeChange} />
 

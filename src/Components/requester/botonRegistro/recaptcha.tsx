@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useRef } from "react";
-import ReCAPTCHA from "react-google-recaptcha";
+import { useRef } from 'react';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 interface ReCaptchaFormProps {
   onVerified?: (success: boolean) => void;

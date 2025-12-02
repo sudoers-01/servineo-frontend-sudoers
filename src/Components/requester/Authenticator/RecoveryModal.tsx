@@ -4,8 +4,8 @@ import React from 'react';
 interface Props {
   open: boolean;
   codes: string[] | null;
-  onClose: () => void;        // si el usuario cancela
-  onConfirm: () => void;      // cuando el usuario confirma que guardó los códigos
+  onClose: () => void; // si el usuario cancela
+  onConfirm: () => void; // cuando el usuario confirma que guardó los códigos
 }
 
 export default function RecoveryModal({ open, codes, onConfirm }: Props) {
@@ -29,7 +29,8 @@ export default function RecoveryModal({ open, codes, onConfirm }: Props) {
       <div className="bg-white rounded-lg w-[560px] p-6 shadow-lg border">
         <h3 className="text-lg font-semibold mb-2">Códigos de recuperación</h3>
         <p className="text-sm text-gray-600 mb-4">
-          Guarda estos códigos en un lugar seguro. Se mostrarán <strong>una sola vez</strong>. Cada código sirve para recuperar tu cuenta si pierdes el acceso al autenticador.
+          Guarda estos códigos en un lugar seguro. Se mostrarán <strong>una sola vez</strong>. Cada
+          código sirve para recuperar tu cuenta si pierdes el acceso al autenticador.
         </p>
 
         <div className="grid grid-cols-2 gap-3 mb-4">

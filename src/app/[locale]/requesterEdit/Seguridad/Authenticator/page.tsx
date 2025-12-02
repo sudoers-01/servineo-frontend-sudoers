@@ -67,7 +67,8 @@ export default function AuthenticatorPage() {
       setQrDataUrl(data.qrDataUrl ?? null);
     } catch (err) {
       console.error('Error al regenerar QR', err);
-      const errorMessage = err instanceof Error ? err.message : 'No se pudo regenerar el código. Intenta de nuevo.';
+      const errorMessage =
+        err instanceof Error ? err.message : 'No se pudo regenerar el código. Intenta de nuevo.';
       alert(errorMessage);
     } finally {
       setRegenLoading(false);
@@ -133,15 +134,26 @@ export default function AuthenticatorPage() {
             aria-label="Volver"
             className="p-2 rounded-full hover:bg-gray-100"
           >
-            <svg className="w-6 h-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+            <svg
+              className="w-6 h-6 text-gray-700"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeWidth={2}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M15 19l-7-7 7-7"
+              />
             </svg>
           </button>
 
           <div>
             <h1 className="text-xl font-semibold">Aplicación authenticator</h1>
             <p className="text-sm text-gray-600">
-              En vez de esperar a que lleguen mensajes de texto, puedes obtener códigos de verificación desde una aplicación de autenticación.
+              En vez de esperar a que lleguen mensajes de texto, puedes obtener códigos de
+              verificación desde una aplicación de autenticación.
             </p>
           </div>
         </div>
@@ -161,8 +173,8 @@ export default function AuthenticatorPage() {
                   className="text-blue-600 underline hover:text-blue-800"
                 >
                   Google Play Store
-                </a>
-                {' '}o desde{' '}
+                </a>{' '}
+                o desde{' '}
                 <a
                   href="https://apps.apple.com/es/app/google-authenticator/id388497605"
                   target="_blank"
@@ -183,11 +195,20 @@ export default function AuthenticatorPage() {
                   {/* Icono QR */}
                   <div className="w-14 h-14 flex items-center justify-center rounded-2xl bg-white border border-gray-200 shadow-sm">
                     <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-100 via-gray-200 to-gray-300 flex items-center justify-center border border-gray-300">
-                      <svg className="w-6 h-6 text-gray-700" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <svg
+                        className="w-6 h-6 text-gray-700"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                      >
                         <rect x="3" y="3" width="7" height="7" strokeWidth="1.5" />
                         <rect x="14" y="3" width="7" height="7" strokeWidth="1.5" />
                         <rect x="3" y="14" width="7" height="7" strokeWidth="1.5" />
-                        <path strokeWidth="1.5" strokeLinecap="round" d="M14 14h3v3M17 17h4M17 14h4M14 17h3" />
+                        <path
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          d="M14 14h3v3M17 17h4M17 14h4M14 17h3"
+                        />
                       </svg>
                     </div>
                   </div>
@@ -195,7 +216,9 @@ export default function AuthenticatorPage() {
                   {/* Texto */}
                   <div className="flex-1 text-left space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-gray-900">Autenticación en dos pasos</span>
+                      <span className="font-semibold text-gray-900">
+                        Autenticación en dos pasos
+                      </span>
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium bg-emerald-100 text-emerald-700 border border-emerald-200">
                         Activa
                       </span>
@@ -216,7 +239,12 @@ export default function AuthenticatorPage() {
                   className="inline-flex items-center justify-center w-10 h-10 rounded-full border border-red-200 bg-white text-red-600 shadow-sm transition-all duration-200 hover:bg-red-50 hover:border-red-300 hover:shadow-md hover:-translate-y-0.5 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-200 cursor-pointer"
                 >
                   <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M10 11v6M14 11v6M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+                    <path
+                      strokeWidth="1.7"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M4 6h16M10 11v6M14 11v6M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"
+                    />
                   </svg>
                 </button>
               </div>
@@ -229,7 +257,12 @@ export default function AuthenticatorPage() {
                 >
                   <span className="w-5 h-5 inline-flex items-center justify-center text-indigo-600">
                     <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l2 2" />
+                      <path
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M12 8v4l2 2"
+                      />
                       <circle cx="12" cy="12" r="10" strokeWidth="1.5" />
                     </svg>
                   </span>
@@ -248,7 +281,9 @@ export default function AuthenticatorPage() {
                   </p>
                   <ul className="list-disc ml-6">
                     {recoveryCodes.map((c) => (
-                      <li key={c} className="font-mono">{c}</li>
+                      <li key={c} className="font-mono">
+                        {c}
+                      </li>
                     ))}
                   </ul>
                 </div>

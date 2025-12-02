@@ -26,7 +26,6 @@ export interface TelefonoResponse {
   error?: string;
 }
 
-
 export async function enviarTokenGoogle(token: string): Promise<GoogleAuthResponse> {
   try {
     const res = await fetch(`${BASE_URL}/google/auth`, {
@@ -84,14 +83,14 @@ export async function enviarUbicacion(
   }
 }
 
-//telefono 
+//telefono
 export async function enviarTelefono(telefono: string): Promise<TelefonoResponse> {
-  const token = localStorage.getItem("servineo_token");
+  const token = localStorage.getItem('servineo_token');
   try {
     const res = await fetch(`${BASE_URL}/telefono`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
       body: JSON.stringify({ telefono }),
@@ -106,11 +105,10 @@ export async function enviarTelefono(telefono: string): Promise<TelefonoResponse
 
     return data;
   } catch (error) {
-    console.error("Error al enviar el teléfono al backend:", error);
+    console.error('Error al enviar el teléfono al backend:', error);
     throw error;
   }
 }
-
 
 export interface RegistroResponse {
   success: boolean;

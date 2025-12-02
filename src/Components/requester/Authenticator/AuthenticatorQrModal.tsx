@@ -25,23 +25,20 @@ export default function AuthenticatorQrModal({
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-lg w-[480px] p-6 shadow-lg border">
-        <h3 className="text-lg font-semibold mb-3">
-          Configurar aplicación de autenticación
-        </h3>
+        <h3 className="text-lg font-semibold mb-3">Configurar aplicación de autenticación</h3>
 
         <div className="text-sm text-gray-600 mb-4">
           <ul className="list-disc ml-5">
             <li>
-              En la aplicación Google Authenticator, toca el icono{' '}
-              <strong>+</strong>.
-              </li>
-              <li>
-                Elige <strong>Escanear un código QR</strong>.
-              </li>
-            </ul>
+              En la aplicación Google Authenticator, toca el icono <strong>+</strong>.
+            </li>
+            <li>
+              Elige <strong>Escanear un código QR</strong>.
+            </li>
+          </ul>
         </div>
 
-         {/* Contenedor principal del QR + botón de refrescar */}
+        {/* Contenedor principal del QR + botón de refrescar */}
         <div className="flex flex-col items-center justify-center py-4 gap-3">
           <div className="relative">
             {qrDataUrl ? (
@@ -80,9 +77,7 @@ export default function AuthenticatorQrModal({
               className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-gray-200 bg-white text-xs text-gray-700 shadow-sm hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
             >
               <svg
-                className={`w-4 h-4 ${
-                  regenerating ? 'animate-spin' : ''
-                }`}
+                className={`w-4 h-4 ${regenerating ? 'animate-spin' : ''}`}
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"

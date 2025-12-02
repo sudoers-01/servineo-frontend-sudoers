@@ -1,11 +1,11 @@
-"use client";
+'use client';
 
-import { useState, useEffect, useCallback } from "react";
-import { ArrowLeft, Laptop, Smartphone, Monitor } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { UAParser } from "ua-parser-js";
-import { toast } from "sonner";
-import { useAuth } from "../../../../Components/requester/auth/usoAutentificacion";
+import { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, Laptop, Smartphone, Monitor } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { UAParser } from 'ua-parser-js';
+import { toast } from 'sonner';
+import { useAuth } from '../../../../Components/requester/auth/usoAutentificacion';
 
 interface Dispositivo {
   _id: string;
@@ -25,15 +25,15 @@ export default function DispositivosVinculados() {
   const [modalVisible, setModalVisible] = useState<string | null>(null);
   const [modalCerrarTodas, setModalCerrarTodas] = useState(false);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   const detectarDispositivo = () => {
     const parser = new UAParser();
     const result = parser.getResult();
-    const os = result.os.name || "Desconocido";
-    let type = "desktop";
-    if (result.device.type === "mobile") type = "mobile";
-    if (result.device.type === "tablet") type = "tablet";
+    const os = result.os.name || 'Desconocido';
+    let type = 'desktop';
+    if (result.device.type === 'mobile') type = 'mobile';
+    if (result.device.type === 'tablet') type = 'tablet';
     return { os, type };
   };
 
@@ -42,90 +42,90 @@ export default function DispositivosVinculados() {
     try {
       setCargandoDispositivos(true);
       const res = await fetch(`${API_URL}/devices/${user.id}`);
-      if (!res.ok) throw new Error("Error en la respuesta del backend");
+      if (!res.ok) throw new Error('Error en la respuesta del backend');
       const data = await res.json();
       setDispositivos(data);
     } catch (err) {
       console.error(err);
-      toast.error("No se pudieron cargar los dispositivos.");
+      toast.error('No se pudieron cargar los dispositivos.');
     } finally {
       setCargandoDispositivos(false);
     }
   }, [user, API_URL]);
 
-const registrarDispositivo = useCallback(async () => {
-  if (!user) return;
-  const { os, type } = detectarDispositivo();
-  
-  console.log("Registrando dispositivo:", { 
-    userId: user.id, 
-    userAgent: navigator.userAgent 
-  });
-  
-  try {
-    const res = await fetch(`${API_URL}/devices/register`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ 
-        userId: user.id, 
-        os, 
-        type, 
-        userAgent: navigator.userAgent 
-      }),
+  const registrarDispositivo = useCallback(async () => {
+    if (!user) return;
+    const { os, type } = detectarDispositivo();
+
+    console.log('Registrando dispositivo:', {
+      userId: user.id,
+      userAgent: navigator.userAgent,
     });
-    const data = await res.json();
-    console.log("Respuesta del backend:", data);
-    
-    if (!res.ok) return toast.error(data.message || "Error al registrar dispositivo");
-    obtenerDispositivos();
-  } catch (err) {
-    console.error(err);
-    toast.error("Error al registrar dispositivo");
-  }
-}, [user, API_URL, obtenerDispositivos]);
+
+    try {
+      const res = await fetch(`${API_URL}/devices/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: user.id,
+          os,
+          type,
+          userAgent: navigator.userAgent,
+        }),
+      });
+      const data = await res.json();
+      console.log('Respuesta del backend:', data);
+
+      if (!res.ok) return toast.error(data.message || 'Error al registrar dispositivo');
+      obtenerDispositivos();
+    } catch (err) {
+      console.error(err);
+      toast.error('Error al registrar dispositivo');
+    }
+  }, [user, API_URL, obtenerDispositivos]);
 
   const cerrarSesionDispositivo = async (_id: string) => {
     try {
-      await fetch(`${API_URL}/devices/${_id}`, { method: "DELETE" });
-      toast.success("Sesión cerrada correctamente ✔");
+      await fetch(`${API_URL}/devices/${_id}`, { method: 'DELETE' });
+      toast.success('Sesión cerrada correctamente ✔');
       setModalVisible(null);
-      
+
       // Solo hacer logout si es el dispositivo actual
-      const dispositivoActual = dispositivos.find(d => d.userAgent === navigator.userAgent);
+      const dispositivoActual = dispositivos.find((d) => d.userAgent === navigator.userAgent);
       if (dispositivoActual?._id === _id) {
         logout?.();
-        router.push("/login");
+        router.push('/login');
       } else {
         obtenerDispositivos();
       }
     } catch (err) {
       console.error(err);
-      toast.error("No se pudo cerrar la sesión.");
+      toast.error('No se pudo cerrar la sesión.');
     }
   };
 
   const cerrarTodasSesiones = async () => {
     try {
       const userAgent = navigator.userAgent;
-      const dispositivoActual = dispositivos.find(d => d.userAgent === userAgent);
+      const dispositivoActual = dispositivos.find((d) => d.userAgent === userAgent);
 
       if (!dispositivoActual) {
-        toast.error("No se pudo identificar el dispositivo actual");
+        toast.error('No se pudo identificar el dispositivo actual');
         return;
       }
 
       await fetch(`${API_URL}/devices/all/${user?.id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ except: dispositivoActual._id }),
       });
 
-      toast.success("Todas las sesiones cerradas excepto esta ✔");
+      toast.success('Todas las sesiones cerradas excepto esta ✔');
       setModalCerrarTodas(false);
       obtenerDispositivos();
     } catch (err) {
       console.error(err);
-      toast.error("No se pudieron cerrar las sesiones.");
+      toast.error('No se pudieron cerrar las sesiones.');
     }
   };
 
@@ -141,9 +141,12 @@ const registrarDispositivo = useCallback(async () => {
 
   const iconoPorTipo = (type: string) => {
     switch (type) {
-      case "mobile": return <Smartphone size={28} />;
-      case "tablet": return <Monitor size={28} />;
-      default: return <Laptop size={28} />;
+      case 'mobile':
+        return <Smartphone size={28} />;
+      case 'tablet':
+        return <Monitor size={28} />;
+      default:
+        return <Laptop size={28} />;
     }
   };
 
@@ -151,7 +154,7 @@ const registrarDispositivo = useCallback(async () => {
     <div className="p-6 max-w-2xl mx-auto flex flex-col items-center">
       <button
         className="flex items-center mb-5 text-blue-500 hover:text-blue-700 self-start"
-        onClick={() => router.push("/requesterEdit")}
+        onClick={() => router.push('/requesterEdit')}
       >
         <ArrowLeft className="mr-2" /> Volver
       </button>
@@ -173,7 +176,10 @@ const registrarDispositivo = useCallback(async () => {
       ) : (
         <div className="space-y-4 w-full">
           {dispositivos.map((dispositivo) => (
-            <div key={dispositivo._id} className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow">
+            <div
+              key={dispositivo._id}
+              className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow"
+            >
               <div className="flex items-center space-x-3">
                 {iconoPorTipo(dispositivo.type)}
                 <div>
