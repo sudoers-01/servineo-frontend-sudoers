@@ -1,5 +1,4 @@
 'use client';
-
 import { useState } from 'react';
 import ActivateOfferModal from '@/app/components/fixers/ActivateOfferModal';
 
@@ -8,23 +7,15 @@ export default function RequestersLanding() {
   const [isActive, setIsActive] = useState(true);
   const [open, setOpen] = useState(false);
 
-  const handleConfirm = async (newStatus: boolean, offerId: string) => {
-    console.log("Actualizando oferta:", offerId, " -> ", newStatus ? "active" : "inactive");
-
-    await fetch(`/api/offers/${offerId}`, {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state: newStatus ? "active" : "inactive" })
-    });
-
+  const handleConfirm = (newStatus: boolean, offerId: string) => {
     setIsActive(newStatus);
     setOpen(false);
+    console.log(`Oferta ${offerId} actualizada a ${newStatus ? 'active' : 'inactive'}`);
   };
 
   return (
     <main className="min-h-screen bg-white flex items-center justify-center">
       <div className="text-center space-y-8">
-        <h1 className="text-3xl font-semibold">Requesters</h1>
 
         <button
           onClick={() => setOpen(true)}
