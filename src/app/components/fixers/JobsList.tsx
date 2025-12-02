@@ -5,11 +5,37 @@ import { useRouter } from 'next/navigation';
 import { Job } from '@/types/job';
 import RequestedJob from './RequestedJob';
 import RegisterJobModal from './RegisterJobModal';
+import CreatePromoModal from './CreatePromoModal';
 import { useState } from 'react';
+import { createPromotion } from '@/services/promotions';
+
 export default function JobsList({ jobs }: { jobs: Job[] }) {
   const router = useRouter();
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState<boolean>(false);
+  const [isCreatePromoModalOpen, setIsCreatePromoModalOpen] = useState<boolean>(false);
   const [idJob, setIdJob] = useState<string>('');
+  const [fixerId, setFixerId] = useState<string>('');
+
+  const onSavePromo = async (promotion: {
+    title: string;
+    description: string;
+    offerId: string;
+    fixerId: string;
+    price: string;
+  }) => {
+    const result = await createPromotion({
+      title: promotion.title,
+      description: promotion.description,
+      offerId: promotion.offerId,
+      price: promotion.price,
+      fixerId: promotion.fixerId,
+    });
+
+    if (result) {
+      // Refresh the job list to show updated data
+      router.refresh();
+    }
+  };
 
   if (!jobs || jobs.length === 0) {
     return (
@@ -24,6 +50,13 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}
         id={idJob}
+      />
+      <CreatePromoModal
+        isOpen={isCreatePromoModalOpen}
+        onClose={() => setIsCreatePromoModalOpen(false)}
+        onSave={onSavePromo}
+        id={idJob}
+        fixerId={fixerId}
       />
 
       {jobs.map((job) => (
@@ -40,6 +73,11 @@ export default function JobsList({ jobs }: { jobs: Job[] }) {
           }}
           onViewPromos={() => {
             router.push(`/promotions/${job._id}`);
+          }}
+          onCreatePromo={() => {
+            setIsCreatePromoModalOpen(true);
+            setIdJob(job._id);
+            setFixerId(job.fixerId);
           }}
         />
       ))}

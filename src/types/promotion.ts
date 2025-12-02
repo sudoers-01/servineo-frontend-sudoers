@@ -7,3 +7,10 @@ export interface Promotion {
   fixerId: string;
   createdAt: string;
 }
+export interface CreatePromotion {
+  title: string;
+  description: string;
+  offerId: string;
+  price: string;
+  fixerId: string;
+}

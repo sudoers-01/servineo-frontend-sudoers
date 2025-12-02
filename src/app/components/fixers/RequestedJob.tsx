@@ -10,18 +10,29 @@ export default function RequestedJob({
   onAppointmentDetails,
   onRegisterJob,
   onViewPromos,
+  onCreatePromo,
   className = '',
+}: {
+  name: string;
+  jobTitle: string;
+  schedule: string;
+  state: string;
+  onAppointmentDetails?: () => void;
+  onRegisterJob?: () => void;
+  onViewPromos?: () => void;
+  onCreatePromo?: () => void;
+  className?: string;
 }) {
   const [open, setOpen] = useState(false);
-  const menuRef = useRef(null);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    function handleClickOutside(e) {
-      if (menuRef.current && !menuRef.current.contains(e.target)) {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
         setOpen(false);
       }
     }
-    function handleEsc(e) {
+    function handleEsc(e: KeyboardEvent) {
       if (e.key === 'Escape') setOpen(false);
     }
 
@@ -48,6 +59,10 @@ export default function RequestedJob({
 
   const handleViewPromos = () => {
     onViewPromos?.();
+    setOpen(false);
+  };
+  const handleCreatePromo = () => {
+    onCreatePromo?.();
     setOpen(false);
   };
 
@@ -122,6 +137,14 @@ export default function RequestedJob({
               >
                 View promos
               </button>
+              <div className='h-px bg-gray-100' />
+              <button
+                role='menuitem'
+                onClick={handleCreatePromo}
+                className='w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
+              >
+                Create promo
+              </button>
             </div>
           )}
         </div>
@@ -130,12 +153,12 @@ export default function RequestedJob({
   );
 }
 
-function capitalizeFirst(s) {
+function capitalizeFirst(s: string) {
   if (!s) return s;
   return s.charAt(0).toUpperCase() + s.slice(1);
 }
 
-function getStateBadgeClasses(state) {
+function getStateBadgeClasses(state: string) {
   switch (state) {
     case 'accepted':
       return 'bg-emerald-50 text-emerald-700 border-emerald-200';
@@ -150,7 +173,7 @@ function getStateBadgeClasses(state) {
   }
 }
 
-function KebabIcon(props) {
+function KebabIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg
       width='16'

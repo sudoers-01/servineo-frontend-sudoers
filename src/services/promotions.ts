@@ -1,5 +1,5 @@
 import { apiUrl } from '@/config/api';
-import { Promotion } from '@/types/promotion';
+import { Promotion, CreatePromotion } from '@/types/promotion';
 
 export async function getPromotionsByOfferId(offerId: string): Promise<Promotion[]> {
   try {
@@ -19,6 +19,26 @@ export async function getPromotionsByOfferId(offerId: string): Promise<Promotion
   } catch (error) {
     console.error('Failed to get promotions', error);
     return [];
+  }
+}
+export async function createPromotion(promotion: CreatePromotion): Promise<Promotion | null> {
+  try {
+    const response = await fetch(apiUrl('api/promotions'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(promotion),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error creating promotion: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to create promotion', error);
+    return null;
   }
 }
 
