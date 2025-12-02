@@ -46,23 +46,21 @@ export default function ActivateOfferModal({ open, isActive, offerId, onConfirm,
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/40 z-50">
-      <div className="bg-white rounded-xl p-6 shadow-lg w-80">
-        <h2 className="text-black font-semibold mb-4">
+    <div className='fixed inset-0 flex items-center justify-center bg-black/40 z-50'>
+      <div className='bg-white rounded-xl p-6 shadow-lg w-80'>
+        <h2 className='text-black font-semibold mb-4'>
           {nextStatus ? 'Activar oferta' : 'Desactivar oferta'}
         </h2>
 
-        <p className="text-gray-800 mb-4">
+        <p className='text-gray-800 mb-4'>
           ¿Estás seguro de que quieres {nextStatus ? 'activar' : 'desactivar'} esta oferta?
         </p>
 
-        {error && (
-          <div className="mb-4 text-sm text-red-700 bg-red-100 p-2 rounded">{error}</div>
-        )}
+        {error && <div className='mb-4 text-sm text-red-700 bg-red-100 p-2 rounded'>{error}</div>}
 
-        <div className="flex justify-end gap-3">
+        <div className='flex justify-end gap-3'>
           <button
-            className="px-4 py-2 rounded-lg bg-black hover:bg-gray-300"
+            className='px-4 py-2 rounded-lg bg-black hover:bg-gray-300'
             onClick={onClose}
             disabled={loading}
           >
