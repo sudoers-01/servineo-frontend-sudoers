@@ -1,10 +1,8 @@
-'use client';
+"use client";
 
-import dynamic from 'next/dynamic';
+import dynamic from "next/dynamic";
 
-const MapaLeaflet = dynamic(() => import('@/Components/requester/mapas/MapaLeaflet'), {
-  ssr: false,
-});
+const MapaLeaflet = dynamic(() => import("@/Components/requester/mapas/MapaLeaflet"), { ssr: false });
 
 export default function PageUbicacion() {
   return (
@@ -13,3 +11,4 @@ export default function PageUbicacion() {
     </div>
   );
 }
+
