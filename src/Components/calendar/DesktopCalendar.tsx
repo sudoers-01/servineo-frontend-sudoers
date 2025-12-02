@@ -23,9 +23,9 @@ export default function DesktopCalendar() {
 
   //    console.log(`Esta es la fecha actual ${selectedDate}`);
   return (
-    <div className="w-full flex flex-col items-center bg-white">
-      <div className="w-full max-w-5xl">
-        <div className="bg-blue-500 w-full p-1 flex items-center">
+    <div className='w-full flex flex-col items-center bg-white'>
+      <div className='w-full max-w-5xl'>
+        <div className='bg-blue-500 w-full p-1 flex items-center'>
           <HeaderDesktop
             year={year}
             month={month}
@@ -38,7 +38,7 @@ export default function DesktopCalendar() {
           />
         </div>
 
-        <div className=" w-full  justify-center">
+        <div className=' w-full  justify-center'>
           {view === 'month' && <DesktopMonthView year={year} month={month} />}
 
           {view === 'week' && <DesktopWeekView date={selectedDate} />}

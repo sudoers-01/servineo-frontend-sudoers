@@ -411,18 +411,18 @@ export default function HorarioDelDia({
     estado === 'cancelado_fixer' || estado === 'cancelado_requester';
 
   return (
-    <div className="mx-auto max-w-sm p-4 text-black">
-      <h1 className="text-2xl font-semibold mb-3">
+    <div className='mx-auto max-w-sm p-4 text-black'>
+      <h1 className='text-2xl font-semibold mb-3'>
         Calendario de Diego Paredes
         {!pickerMode && (
-          <span className="text-xs ml-2 text-slate-500">
+          <span className='text-xs ml-2 text-slate-500'>
             ({isFixer ? 'Vista Fixer' : 'Vista Requester'})
           </span>
         )}
       </h1>
 
-      <div className="mb-3">
-        <label className="block text-sm mb-1">Fecha</label>
+      <div className='mb-3'>
+        <label className='block text-sm mb-1'>Fecha</label>
         <DatePicker
           selectedDate={
             selectedDate
@@ -436,15 +436,15 @@ export default function HorarioDelDia({
       </div>
 
       {fixerLoading && (
-        <div className="mb-2 rounded-md bg-slate-100 text-slate-600 px-3 py-2 text-sm font-medium">
+        <div className='mb-2 rounded-md bg-slate-100 text-slate-600 px-3 py-2 text-sm font-medium'>
           Cargando…
         </div>
       )}
-      {error && <div className="text-red-600">{String(error)}</div>}
+      {error && <div className='text-red-600'>{String(error)}</div>}
 
       {datos && (
-        <div className="rounded-xl bg-slate-100 p-3 text-black">
-          <div className="text-sm font-semibold text-slate-600 mb-2">
+        <div className='rounded-xl bg-slate-100 p-3 text-black'>
+          <div className='text-sm font-semibold text-slate-600 mb-2'>
             {fecha
               ? convertirYMDaFechaLocal(fecha).toLocaleDateString('es-BO', {
                   day: '2-digit',
@@ -453,7 +453,7 @@ export default function HorarioDelDia({
               : ''}
           </div>
 
-          <div className="space-y-2">
+          <div className='space-y-2'>
             {datos.horarios &&
               (() => {
                 const horariosVisibles = pickerMode
@@ -461,7 +461,7 @@ export default function HorarioDelDia({
                   : datos.horarios;
 
                 return (
-                  <div className="space-y-2">
+                  <div className='space-y-2'>
                     {horariosVisibles.map((item, idx) => {
                       const meta = etiquetaPorEstado(item.estado_Horario);
 
@@ -505,7 +505,7 @@ export default function HorarioDelDia({
           </div>
 
           {noHayHorariosDisponibles && !fixerLoading && !pickerMode && (
-            <div className="mt-3 text-center text-sm font-semibold text-slate-600">
+            <div className='mt-3 text-center text-sm font-semibold text-slate-600'>
               No hay horarios disponibles
             </div>
           )}
