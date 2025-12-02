@@ -81,9 +81,9 @@ const jobOffersSlice = createSlice({
 
     setDate: (state, action: PayloadAction<string | null>) => {
       state.date = action.payload;
-        // if (state.shouldPersist) {
-        //   saveToStorage(STORAGE_KEYS.DATE, action.payload);
-        // }
+      // if (state.shouldPersist) {
+      //   saveToStorage(STORAGE_KEYS.DATE, action.payload);
+      // }
     },
 
     setRating: (state, action: PayloadAction<number | null>) => {
@@ -151,7 +151,7 @@ const jobOffersSlice = createSlice({
         limit,
         totalPages,
         listKey = 'offers',
-        isInitialSearch,
+        //isInitialSearch,
       } = action.payload;
 
       if (!state.paginaciones[listKey]) {

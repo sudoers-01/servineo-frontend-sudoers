@@ -1,4 +1,3 @@
-
 export const STORAGE_KEYS = {
   PAGE: 'jobOffers_paginaActual',
   PAGE_SIZE: 'jobOffers_registrosPorPagina',
@@ -16,7 +15,7 @@ export const STORAGE_KEYS = {
 
 /**
  * Helper para leer localStorage de forma segura
- *//*
+ */ /*
 export const getStoredValue = <T>(key: string, defaultValue: T): T => {
   if (typeof window === 'undefined') return defaultValue;
   try {
@@ -30,7 +29,7 @@ export const getStoredValue = <T>(key: string, defaultValue: T): T => {
 
 /**
  * Helper para guardar en localStorage
- *//*
+ */ /*
 export const saveToStorage = <T>(key: string, value: T): void => {
   if (typeof window !== 'undefined') {
     try {
@@ -43,7 +42,7 @@ export const saveToStorage = <T>(key: string, value: T): void => {
 
 /**
  * Helper para limpiar TODO el localStorage relacionado
- *//*
+ */ /*
 export const clearJobOffersStorage = (): void => {
   if (typeof window !== 'undefined') {
     try {
@@ -58,7 +57,7 @@ export const clearJobOffersStorage = (): void => {
 
 /**
  * Restaurar todo el estado desde localStorage
- *//*
+ */ /*
 export const restoreFromStorage = () => {
   return {
     search: getStoredValue(STORAGE_KEYS.SEARCH, ''),

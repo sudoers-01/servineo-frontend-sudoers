@@ -14,7 +14,7 @@ import {
   setTitleOnly,
   setExact,
   updatePagination,
-  restoreSavedState,
+  //restoreSavedState,
   resetFilters,
   enablePersistence,
   setError,
@@ -183,21 +183,21 @@ export function useInitialUrlParams() {
       // const migratedState = {
       //   ...restored,
       //   filters: {
-          // ...restored.filters,
-          // city: (() => {
-            // const cityValue = restored.filters.city;
-            // Si es string, convertir a array
-            // if (typeof cityValue === 'string') {
-            //   return cityValue ? [cityValue] : [];
-            // }
-            // Si ya es array, usar tal cual
-            // if (Array.isArray(cityValue)) {
-            //   return cityValue;
-            // }
-            // Fallback
-        //     return [];
-        //   })(),
-        // },
+      // ...restored.filters,
+      // city: (() => {
+      // const cityValue = restored.filters.city;
+      // Si es string, convertir a array
+      // if (typeof cityValue === 'string') {
+      //   return cityValue ? [cityValue] : [];
+      // }
+      // Si ya es array, usar tal cual
+      // if (Array.isArray(cityValue)) {
+      //   return cityValue;
+      // }
+      // Fallback
+      //     return [];
+      //   })(),
+      // },
       // };
 
       // dispatch(restoreSavedState(migratedState));
