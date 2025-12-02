@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation'; 
 import { Wallet, Building2, FileText, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
 import RecentEarningsModal from './RecentEarningsModal';
+import { showToast } from "nextjs-toast-notify";
 
 // --- Constantes Mock ---
 const MOCK_FIXER_ID = "690c1a08f32ebc5be9c5707c";
@@ -63,16 +64,13 @@ const CentroDePagos = () => {
     }
   }, [fixerIdFromUrl]);
 
-  // Toast notifications (comentado hasta instalar nextjs-toast-notify)
+  
   useEffect(() => {
     const toastInfo = fixerData?.lowBalanceInfo?.toast;
     console.log("🎯 Toast info en front:", toastInfo);
 
     if (!toastInfo) return;
 
-    // TODO: Descomentar cuando se instale nextjs-toast-notify
-    // npm install nextjs-toast-notify
-    /*
     const { level, message, shouldShow } = toastInfo;
 
     const baseOptions = {
@@ -105,7 +103,7 @@ const CentroDePagos = () => {
         baseOptions
       );
     }
-    */
+  
   }, [
     fixerData?.lowBalanceInfo?.toast?.shouldShow ?? null,
     fixerData?.lowBalanceInfo?.toast?.level ?? null,
