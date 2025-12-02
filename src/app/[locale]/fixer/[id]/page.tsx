@@ -56,149 +56,149 @@ export default function FixerProfilePage() {
 
   const mappedOffers: JobOfferData[] = fixerOffers?.map(mapJobOfferToCardData) || [];
   return (
-    <div className="min-h-screen bg-gray-50 pb-12">
+    <div className='min-h-screen bg-gray-50 pb-12'>
       {/* Profile Header */}
-      <div className="bg-white border-b">
-        <div className="container mx-auto px-4 py-8">
-          <div className="flex flex-col md:flex-row gap-6 items-start">
+      <div className='bg-white border-b'>
+        <div className='container mx-auto px-4 py-8'>
+          <div className='flex flex-col md:flex-row gap-6 items-start'>
             {/* Avatar */}
-            <div className="relative">
-              <div className="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg">
+            <div className='relative'>
+              <div className='w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg'>
                 <Image
                   src={MOCK_FIXER.photo}
                   alt={MOCK_FIXER.name}
                   width={128}
                   height={128}
-                  className="w-full h-full object-cover"
+                  className='w-full h-full object-cover'
                 />
               </div>
               {MOCK_FIXER.verified && (
                 <div
-                  className="absolute bottom-1 right-1 bg-blue-500 text-white p-1.5 rounded-full ring-2 ring-white"
-                  title="Verificado"
+                  className='absolute bottom-1 right-1 bg-blue-500 text-white p-1.5 rounded-full ring-2 ring-white'
+                  title='Verificado'
                 >
-                  <Star className="w-4 h-4 fill-current" />
+                  <Star className='w-4 h-4 fill-current' />
                 </div>
               )}
             </div>
 
             {/* Info */}
-            <div className="flex-1">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className='flex-1'>
+              <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
                 <div>
-                  <h1 className="text-3xl font-bold text-gray-900">{MOCK_FIXER.name}</h1>
-                  <p className="text-lg text-gray-600 font-medium">{MOCK_FIXER.role}</p>
+                  <h1 className='text-3xl font-bold text-gray-900'>{MOCK_FIXER.name}</h1>
+                  <p className='text-lg text-gray-600 font-medium'>{MOCK_FIXER.role}</p>
 
-                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-500">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                      <span className="font-semibold text-gray-900">{MOCK_FIXER.rating}</span>
+                  <div className='flex items-center gap-4 mt-2 text-sm text-gray-500'>
+                    <div className='flex items-center gap-1'>
+                      <Star className='w-4 h-4 text-amber-400 fill-amber-400' />
+                      <span className='font-semibold text-gray-900'>{MOCK_FIXER.rating}</span>
                       <span>({MOCK_FIXER.reviews} reseñas)</span>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <MapPin className="w-4 h-4" />
+                    <div className='flex items-center gap-1'>
+                      <MapPin className='w-4 h-4' />
                       <span>{MOCK_FIXER.location}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex gap-3">
-                  <PillButton className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2">
-                    <MessageCircle className="w-4 h-4" />
+                <div className='flex gap-3'>
+                  <PillButton className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'>
+                    <MessageCircle className='w-4 h-4' />
                     Contactar
                   </PillButton>
-                  <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-                    <Share2 className="w-5 h-5" />
+                  <button className='p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors'>
+                    <Share2 className='w-5 h-5' />
                   </button>
-                  <button className="p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors">
-                    <Flag className="w-5 h-5" />
+                  <button className='p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors'>
+                    <Flag className='w-5 h-5' />
                   </button>
                 </div>
               </div>
 
-              <p className="mt-4 text-gray-600 max-w-2xl leading-relaxed">{MOCK_FIXER.bio}</p>
+              <p className='mt-4 text-gray-600 max-w-2xl leading-relaxed'>{MOCK_FIXER.bio}</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* Content Tabs */}
-      <div className="container mx-auto px-4 py-8">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-          <TabsList className="bg-white p-1 rounded-xl border shadow-sm inline-flex">
-            <TabsTrigger value="resumen" className="px-6">
+      <div className='container mx-auto px-4 py-8'>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className='space-y-6'>
+          <TabsList className='bg-white p-1 rounded-xl border shadow-sm inline-flex'>
+            <TabsTrigger value='resumen' className='px-6'>
               Resumen
             </TabsTrigger>
-            <TabsTrigger value="ofertas" className="px-6">
+            <TabsTrigger value='ofertas' className='px-6'>
               Ofertas
             </TabsTrigger>
-            <TabsTrigger value="experiencia" className="px-6">
+            <TabsTrigger value='experiencia' className='px-6'>
               Experiencia
             </TabsTrigger>
-            <TabsTrigger value="certificaciones" className="px-6">
+            <TabsTrigger value='certificaciones' className='px-6'>
               Certificaciones
             </TabsTrigger>
-            <TabsTrigger value="portafolio" className="px-6">
+            <TabsTrigger value='portafolio' className='px-6'>
               Portafolio
             </TabsTrigger>
-            <TabsTrigger value="estadisticas" className="px-6">
+            <TabsTrigger value='estadisticas' className='px-6'>
               Estadísticas
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="resumen" className="space-y-8">
+          <TabsContent value='resumen' className='space-y-8'>
             <section>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Ofertas Destacadas</h2>
-              {isLoading && <p className="text-gray-500 text-sm">Cargando ofertas...</p>}
+              <h2 className='text-xl font-bold text-gray-900 mb-4'>Ofertas Destacadas</h2>
+              {isLoading && <p className='text-gray-500 text-sm'>Cargando ofertas...</p>}
               {isError && (
-                <p className="text-red-500 text-sm">
+                <p className='text-red-500 text-sm'>
                   No se pudieron cargar las ofertas de este fixer.
                 </p>
               )}
               {!isLoading && !isError && mappedOffers.length === 0 && (
-                <p className="text-gray-500 text-sm">Este fixer aún no tiene ofertas publicadas.</p>
+                <p className='text-gray-500 text-sm'>Este fixer aún no tiene ofertas publicadas.</p>
               )}
               {!isLoading && !isError && mappedOffers.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                   {mappedOffers.map((offer) => (
-                    <JobOfferCard key={offer._id} offer={offer} readOnly className="h-full" />
+                    <JobOfferCard key={offer._id} offer={offer} readOnly className='h-full' />
                   ))}
                 </div>
               )}
             </section>
           </TabsContent>
 
-          <TabsContent value="ofertas">
-            {isLoading && <p className="text-gray-500 text-sm">Cargando ofertas...</p>}
+          <TabsContent value='ofertas'>
+            {isLoading && <p className='text-gray-500 text-sm'>Cargando ofertas...</p>}
             {isError && (
-              <p className="text-red-500 text-sm">
+              <p className='text-red-500 text-sm'>
                 No se pudieron cargar las ofertas de este fixer.
               </p>
             )}
             {!isLoading && !isError && mappedOffers.length === 0 && (
-              <p className="text-gray-500 text-sm">Este fixer aún no tiene ofertas publicadas.</p>
+              <p className='text-gray-500 text-sm'>Este fixer aún no tiene ofertas publicadas.</p>
             )}
             {!isLoading && !isError && mappedOffers.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
                 {mappedOffers.map((offer) => (
-                  <JobOfferCard key={offer._id} offer={offer} readOnly className="h-full" />
+                  <JobOfferCard key={offer._id} offer={offer} readOnly className='h-full' />
                 ))}
               </div>
             )}
           </TabsContent>
 
-          <TabsContent value="experiencia">
+          <TabsContent value='experiencia'>
             <ExperienceSection readOnly />
           </TabsContent>
 
-          <TabsContent value="certificaciones">
+          <TabsContent value='certificaciones'>
             <CertificationsSection readOnly />
           </TabsContent>
 
-          <TabsContent value="portafolio">
+          <TabsContent value='portafolio'>
             <PortfolioSection readOnly />
           </TabsContent>
-          <TabsContent value="estadisticas">
+          <TabsContent value='estadisticas'>
             <EstadisticasTrabajos />
           </TabsContent>
         </Tabs>

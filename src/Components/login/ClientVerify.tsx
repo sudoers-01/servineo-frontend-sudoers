@@ -49,7 +49,7 @@ export default function ClientVerify({ token }: { token?: string }) {
   }, [token]);
 
   return (
-    <p role="status" aria-live="polite" className="text-gray-700">
+    <p role='status' aria-live='polite' className='text-gray-700'>
       {msg}
     </p>
   );

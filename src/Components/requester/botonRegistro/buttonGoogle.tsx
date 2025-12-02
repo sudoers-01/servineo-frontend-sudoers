@@ -15,7 +15,7 @@ export default function GoogleButton({
   onDisabledClick,
 }: GoogleButtonProps) {
   return (
-    <div className="relative inline-block">
+    <div className='relative inline-block'>
       <button
         className={`flex items-center gap-2 bg-white border border-gray-300 
           font-semibold py-2 px-4 rounded-lg shadow-sm text-black transition-colors
@@ -27,9 +27,9 @@ export default function GoogleButton({
       </button>
 
       {disabled ? (
-        <div className="absolute inset-0 cursor-not-allowed" onClick={() => onDisabledClick?.()} />
+        <div className='absolute inset-0 cursor-not-allowed' onClick={() => onDisabledClick?.()} />
       ) : (
-        <div className="absolute inset-0 opacity-0 cursor-pointer">
+        <div className='absolute inset-0 opacity-0 cursor-pointer'>
           <GoogleLogin
             onSuccess={onLoginSuccess}
             onError={() => console.log('Error al iniciar sesión con Google')}

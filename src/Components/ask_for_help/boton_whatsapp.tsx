@@ -56,19 +56,19 @@ const BotonWhatsapp = () => {
     <>
       {/* Botón Flotante */}
       <button
-        type="button"
+        type='button'
         onClick={handleInitialClick}
-        className="flex items-center justify-center
+        className='flex items-center justify-center
                         w-13 h-13
                         bg-[#2563EB] hover:bg-[#1D4ED8]
                         rounded-full shadow-lg
                         transition duration-300 transform hover:scale-105
-                        cursor-pointer"
-        aria-label="Contactar por WhatsApp"
+                        cursor-pointer'
+        aria-label='Contactar por WhatsApp'
       >
         <Image
-          src="https://drive.google.com/uc?export=view&id=1jmTcbSdFJdlMmUPZj3bUwahLGTZIdPI4"
-          alt="Logo de WhatsApp"
+          src='https://drive.google.com/uc?export=view&id=1jmTcbSdFJdlMmUPZj3bUwahLGTZIdPI4'
+          alt='Logo de WhatsApp'
           width={52}
           height={52}
         />
@@ -76,10 +76,10 @@ const BotonWhatsapp = () => {
 
       {/* 5. Modal / Overlay del Captcha */}
       {showCaptcha && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-lg shadow-xl relative flex flex-col items-center gap-4">
-            <h3 className="text-lg font-semibold text-gray-700">Verificación de seguridad</h3>
-            <p className="text-sm text-gray-500 mb-2">Confirma que eres humano para continuar.</p>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm'>
+          <div className='bg-white p-6 rounded-lg shadow-xl relative flex flex-col items-center gap-4'>
+            <h3 className='text-lg font-semibold text-gray-700'>Verificación de seguridad</h3>
+            <p className='text-sm text-gray-500 mb-2'>Confirma que eres humano para continuar.</p>
 
             <ReCAPTCHA
               ref={recaptchaRef}
@@ -90,7 +90,7 @@ const BotonWhatsapp = () => {
             {/* Botón para cerrar */}
             <button
               onClick={() => setShowCaptcha(false)}
-              className="text-gray-400 hover:text-gray-600 text-sm mt-2 underline"
+              className='text-gray-400 hover:text-gray-600 text-sm mt-2 underline'
             >
               Cancelar
             </button>
@@ -100,7 +100,7 @@ const BotonWhatsapp = () => {
 
       {showError && (
         <ErrorMessage
-          message="Hubo un problema de conexión. Intenta más tarde."
+          message='Hubo un problema de conexión. Intenta más tarde.'
           onClose={() => setShowError(false)}
         />
       )}

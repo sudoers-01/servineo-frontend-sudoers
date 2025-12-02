@@ -23,8 +23,8 @@ export function AdvancedSearchButton({}: AdvancedSearchButtonProps) {
     <Button
       onClick={handleClick}
       aria-label={t('goToAdvancedSearch')}
-      size="lg"
-      className="
+      size='lg'
+      className='
         bg-[#2B6AE0] text-white
         hover:bg-[#2B6AE0]/90
         shrink-0
@@ -36,10 +36,10 @@ export function AdvancedSearchButton({}: AdvancedSearchButtonProps) {
         shadow
         transition-all duration-200
         flex items-center justify-center
-      "
+      '
     >
-      <div className="flex-shrink-0">
-        <ZoomIn className="w-8 h-8" strokeWidth={2.8} />
+      <div className='flex-shrink-0'>
+        <ZoomIn className='w-8 h-8' strokeWidth={2.8} />
       </div>
     </Button>
   );
