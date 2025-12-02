@@ -26,9 +26,9 @@ export default function FixerWalletDashboard() {
   const searchParams = useSearchParams();
   const [receivedFixerId, setReceivedFixerId] = useState<string | null>(null);
   
-  // --- Estados para datos reales (inician vacíos) ---
+  // --- Estados para datos reales ---
   const [walletData, setWalletData] = useState<WalletData | null>(null);
-  const [transactions, setTransactions] = useState<Transaction[]>([]); // Inicia vacío
+  const [transactions, setTransactions] = useState<Transaction[]>([]); 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -38,7 +38,6 @@ export default function FixerWalletDashboard() {
     if (fixerId) {
       setReceivedFixerId(fixerId);
       console.log("Fixer ID Recibido en Wallet:", fixerId);
-      // Llama a la función de fetch
       fetchWalletData(fixerId); 
     } else {
       console.warn("No se recibió fixerId en la URL.");
@@ -52,18 +51,23 @@ export default function FixerWalletDashboard() {
     setLoading(true);
     setError(null);
     
-    //const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+    // 🟢 CORRECCIÓN: Usar variable de entorno para que funcione en Vercel y Render
+    const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
 
     try {
-      // Llama al endpoint que ya funciona
-      const res = await fetch(`http://localhost:8000/api/fixer/payment-center/${fixerId}`);
+      console.log(`📡 Conectando a: ${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
+
+      // 🟢 Usamos la URL dinámica
+      const res = await fetch(`${BACKEND_URL}/api/fixer/payment-center/${fixerId}`);
       
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || `Error ${res.status}`);
+        // Intentamos leer el error JSON, si falla devolvemos un objeto vacío
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || `Error ${res.status}: No se pudo conectar al servidor`);
       }
       
       const result = await res.json();
+
       if (result.success && result.data) {
         // Establece el saldo de la wallet
         setWalletData({
@@ -71,21 +75,16 @@ export default function FixerWalletDashboard() {
           currency: "BOB"
         });
         
-        // --- CAMBIO: Usa las transacciones de la API ---
-        // Mostramos solo los 3 más recientes en el dashboard
-        setTransactions(result.data.transactions.slice(0, 3) || []);
+        // Cargar transacciones
+        setTransactions(result.data.transactions?.slice(0, 3) || []);
 
       } else {
         throw new Error(result.error || 'No se pudieron cargar los datos.');
       }
       
-    } catch (err: unknown) {
+    } catch (err: any) {
       console.error("Error fetching wallet data:", err);
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Un error inesperado ocurrió.");
-      }
+      setError(err.message || "Un error inesperado ocurrió.");
     } finally {
       setLoading(false);
     }
@@ -111,7 +110,7 @@ export default function FixerWalletDashboard() {
         <div className="text-center bg-white p-8 rounded-lg shadow-md max-w-sm">
           <AlertCircle className="text-red-500 mx-auto mb-4" size={48} />
           <h2 className="text-xl font-bold text-gray-800 mb-2">Error al cargar la Billetera</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+          <p className="text-gray-600 mb-6 text-sm">{error}</p>
           <button
             onClick={() => router.push('/')}
             className="mt-6 bg-blue-600 text-white font-semibold py-2 px-6 rounded-xl hover:bg-blue-700 transition-colors"
@@ -131,7 +130,7 @@ export default function FixerWalletDashboard() {
         <h1 className="text-2xl font-bold">Fixer Wallet</h1>
       </div>
 
-      {/* --- Contenedor para centrar y limitar el ancho --- */}
+      {/* --- Contenedor principal --- */}
       <div className="max-w-3xl mx-auto px-4">
 
         {/* Balance Card */}
@@ -145,7 +144,6 @@ export default function FixerWalletDashboard() {
               Bs. {walletData?.balance?.toFixed(2) || '0.00'}
             </div>
             
-            {/* CORRECCIÓN: Ruta a 'recarga' (en español) */}
             <Link
               href={`/payment/FixerWallet/recarga?fixerId=${receivedFixerId}`}
               className="w-full block text-center bg-white text-blue-600 py-3 rounded-xl font-semibold hover:bg-gray-100 transition-colors"
@@ -160,7 +158,6 @@ export default function FixerWalletDashboard() {
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-gray-600 font-semibold text-lg">Movimientos Recientes</h2>
             
-            {/* CORRECCIÓN: Ruta a 'historial' (en español) */}
             <Link
               href={`/payment/historial?fixerId=${receivedFixerId}`}
               className="text-blue-600 font-semibold"
@@ -169,7 +166,6 @@ export default function FixerWalletDashboard() {
             </Link>
           </div>
 
-          {/* --- RENDERIZADO DINÁMICO --- */}
           <div className="space-y-3">
             {transactions.length > 0 ? (
               transactions.map((tx) => (
