@@ -1,9 +1,9 @@
 "use client";
 import { useState, useEffect } from "react";
-import { getSixMonthAppointments, Appointment } from '../../utils/Appointments/getSixMonthAppointments';
-import useSixMonthsAppointments from '../../hooks/Appointments/useSixMonthsAppointments';
+import { getSixMonthAppointments, Appointment } from '../../../utils/Appointments/getSixMonthAppointments';
+import useSixMonthsAppointments from '../../../hooks/Appointments/useSixMonthsAppointments';
 
-import useDailyConts from "../../utils/useDailyConts";
+import useDailyConts from "../../../utils/useDailyConts";
 const fixer_id = "68e87a9cdae3b73d8040102f";
 const requester_id = "68ec99ddf39c7c140f42fcfa";
 const today = new Date().toISOString().split('T')[0];
