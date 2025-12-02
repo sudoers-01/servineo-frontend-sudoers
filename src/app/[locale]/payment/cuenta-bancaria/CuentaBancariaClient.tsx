@@ -5,14 +5,13 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { ChevronLeft, Loader2, AlertCircle, CheckCircle } from 'lucide-react'; 
 import ReCAPTCHA from "react-google-recaptcha"; 
 
-
 // *************************************************************
 // 1. CONFIGURACIÓN DE URL Y CLAVES
 // *************************************************************
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
-// CLAVE PÚBLICA DEL SITIO RECAPTCHA V2
-const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY_V2 || '';
 
+// 🟢 CONFIGURACIÓN: Usamos tu variable _MINE y limpiamos espacios (.trim())
+const RECAPTCHA_SITE_KEY = (process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY_MINE || '').trim();
 
 // ------------------------------------------------------------------
 // Lógica Auxiliar y Componentes Internos
@@ -43,7 +42,6 @@ const PaymentSuccessContent = ({ fixerId, onBack }: { fixerId: string | null; on
       );
 };
 
-
 // ------------------------------------------------------------------
 // COMPONENTE PRINCIPAL (MiCuentaBancariaPage)
 // ------------------------------------------------------------------
@@ -67,7 +65,6 @@ const MiCuentaBancariaPage = () => {
     const [formData, setFormData] = useState({
         numeroCuenta: '',
         banco: 'Banco Nacional de Bolivia',
-        // ⚠️ Corregido para que coincida con el ENUM: 'Cuenta de Ahorros'
         nombreTitular: '',
         tipoCuenta: 'Cuenta de Ahorros', 
         identificacion: '',
@@ -83,7 +80,6 @@ const MiCuentaBancariaPage = () => {
     const [captchaToken, setCaptchaToken] = useState<string | null>(null); 
     const captchaRef = useRef<ReCAPTCHA>(null); 
     
-    // Función para manejar el cambio del token de CAPTCHA
     const handleCaptchaChange = (token: string | null) => {
         setCaptchaToken(token);
         if (token) {
@@ -91,7 +87,6 @@ const MiCuentaBancariaPage = () => {
             setDeleteError(null);
         }
     };
-
 
     useEffect(() => {
         if (!searchParams.get('fixerId')) {
@@ -102,7 +97,6 @@ const MiCuentaBancariaPage = () => {
         }
         setIsIdLoading(false);
         
-        // Verifica el estado de registro guardado
         if (localStorage.getItem('fix_bank_status') === 'CCB') {
             setAlreadyRegistered(true);
         } else {
@@ -111,7 +105,6 @@ const MiCuentaBancariaPage = () => {
     }, [searchParams, isSuccessScreen]);
 
 
-    // Función de validación de campos
     const validateField = (name: string, value: string) => {
         let error = '';
         if (name === 'numeroCuenta' && !isNumeric(value)) {
@@ -127,15 +120,12 @@ const MiCuentaBancariaPage = () => {
         return error === '';
     };
 
-    // Manejo de cambios en el formulario
     const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         validateField(name, value);
     };
 
-
-    // FUNCIÓN DE NAVEGACIÓN
     const handleGoBack = () => {
         const id = fixerId || ''; 
         router.replace(`/payment/centro-de-pagos?fixerId=${id}`); 
@@ -148,7 +138,6 @@ const MiCuentaBancariaPage = () => {
             return;
         }
 
-        // 🟢 CRÍTICO: VERIFICAR CAPTCHA antes de eliminar
         if (!captchaToken) {
             setDeleteError("Por favor, marca la casilla 'No soy un robot' para confirmar la eliminación.");
             return;
@@ -158,7 +147,6 @@ const MiCuentaBancariaPage = () => {
         setDeleteError(null);
         
         try {
-            // Enviamos el token en el cuerpo del DELETE
             const response = await fetch(`${BACKEND_URL}/api/bank-accounts/${fixerId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
@@ -170,17 +158,16 @@ const MiCuentaBancariaPage = () => {
                 throw new Error(errorData.message || `Fallo al eliminar (Status: ${response.status})`);
             }
 
-            // Actualizar estado local y local storage
             localStorage.setItem('fix_bank_status', 'SCB'); 
             localStorage.setItem('statusMessage', 'Cuenta bancaria eliminada exitosamente. Ahora puedes registrar una nueva.');
             
-            router.push(`/cuenta-bancaria?fixerId=${fixerId}&status=success`);
+            // 🟢 CORREGIDO: Redirección con ruta completa /payment/...
+            router.push(`/payment/cuenta-bancaria?fixerId=${fixerId}&status=success`);
 
         } catch (error: any) {
             console.error('Error al eliminar la cuenta:', error);
             setDeleteError(`Error al eliminar la cuenta: ${error.message || 'Error desconocido.'}`);
         } finally {
-            // 🟢 CRÍTICO: Resetear el CAPTCHA y el estado del token
             captchaRef.current?.reset(); 
             setCaptchaToken(null);
             setLoading(false);
@@ -193,7 +180,6 @@ const MiCuentaBancariaPage = () => {
         e.preventDefault();
         setFormError(null);
 
-        // Ejecutar todas las validaciones
         const formIsValid = Object.keys(formData).every(key => 
             validateField(key, formData[key as keyof typeof formData])
         ) && Object.values(fieldErrors).every(err => err === '');
@@ -203,7 +189,6 @@ const MiCuentaBancariaPage = () => {
             return;
         }
 
-        // 🟢 CRÍTICO: VERIFICAR CAPTCHA antes de registrar
         if (!captchaToken) {
             setFormError("Por favor, marca la casilla 'No soy un robot'.");
             return;
@@ -218,11 +203,11 @@ const MiCuentaBancariaPage = () => {
             accountNumber: formData.numeroCuenta,
             bankName: formData.banco,
             nameFixer: cleanNombre, 
-            accountType: formData.tipoCuenta, // Usa el valor literal del select
+            accountType: formData.tipoCuenta,
             identification:
                 formData.identificacion +
                 (formData.identificationSuffix ? '-' + formData.identificationSuffix.toUpperCase() : ''),
-            "g-recaptcha-response": captchaToken, // ENVIAR EL TOKEN AL BACKEND
+            "g-recaptcha-response": captchaToken,
         };
 
         try {
@@ -236,14 +221,12 @@ const MiCuentaBancariaPage = () => {
                 const errorData = await response.json(); 
                 let userError = 'Error interno del servidor al registrar la cuenta bancaria.';
                 
-                // Manejo de errores específicos
                 if (errorData.message && errorData.message.includes('Duplicate account number')) {
                      userError = 'El número de cuenta bancaria ya ha sido registrado. Por favor, verifica tus datos.';
                 } else if (errorData.message && errorData.message.includes('CAPTCHA')) {
                     userError = errorData.message; 
                 } else if (errorData.message && errorData.message.includes('enum value')) {
-                    // Mantenemos este error en caso de que el usuario envíe otro valor no válido
-                     userError = `Error de validación: El tipo de cuenta seleccionado no es válido en el servidor. Asegúrate que el valor sea idéntico al del modelo.`;
+                     userError = `Error de validación: El tipo de cuenta seleccionado no es válido.`;
                 } else if (errorData.message) {
                     userError = errorData.message;
                 }
@@ -251,18 +234,16 @@ const MiCuentaBancariaPage = () => {
                 throw new Error(userError); 
             }
 
-            // Actualizar estado local y local storage
-            localStorage.setItem('fix_bank_status', 'CCB'); // Con Cuenta Bancaria
+            localStorage.setItem('fix_bank_status', 'CCB'); 
             localStorage.setItem('statusMessage', 'Cuenta bancaria registrada exitosamente.');
             
-            router.push(`/cuenta-bancaria?fixerId=${fixerId}&status=success`);
+            // 🟢 CORREGIDO: Redirección con ruta completa /payment/...
+            router.push(`/payment/cuenta-bancaria?fixerId=${fixerId}&status=success`);
             
         } catch (error: any) {
             console.error('Error en el flujo de registro:', error);
-            const displayError = error.message;
-            setFormError(`Error al procesar la solicitud: ${displayError}`);
+            setFormError(`Error al procesar la solicitud: ${error.message}`);
         } finally {
-            // 🟢 CRÍTICO: Resetear el CAPTCHA y el estado del token
             captchaRef.current?.reset(); 
             setCaptchaToken(null);
             setLoading(false);
@@ -273,12 +254,7 @@ const MiCuentaBancariaPage = () => {
 
     // 1. Vista de Éxito
     if (isSuccessScreen) {
-        return (
-            <PaymentSuccessContent
-                fixerId={fixerId}
-                onBack={handleGoBack}
-            />
-        );
+        return <PaymentSuccessContent fixerId={fixerId} onBack={handleGoBack} />;
     }
     
     // 2. Vista de Carga o sin ID
@@ -293,7 +269,7 @@ const MiCuentaBancariaPage = () => {
         );
     }
 
-    // 4. Vista de Confirmación de Eliminación
+    // 3. Vista de Confirmación de Eliminación
     if (showDeleteConfirmation) {
         return (
             <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4">
@@ -305,7 +281,6 @@ const MiCuentaBancariaPage = () => {
                         Confirma la eliminación de la cuenta bancaria asociada a tu ID: <span className="font-mono text-sm bg-gray-100 px-2 py-1 rounded">{fixerId}</span>.
                     </p>
                     
-                    {/* 🟢 COMPONENTE CAPTCHA EN LA CONFIRMACIÓN */}
                     <div className="flex justify-center">
                         <ReCAPTCHA
                             ref={captchaRef}
@@ -313,7 +288,6 @@ const MiCuentaBancariaPage = () => {
                             onChange={handleCaptchaChange}
                         />
                     </div>
-                    {/* FIN CAPTCHA */}
 
                     {deleteError && (
                           <div className="p-3 bg-red-50 border border-red-400 text-red-700 rounded-lg text-sm">
@@ -335,7 +309,7 @@ const MiCuentaBancariaPage = () => {
                         </button>
                         <button
                             onClick={handleDelete} 
-                            disabled={loading || !captchaToken} // Deshabilitar si no hay token
+                            disabled={loading || !captchaToken} 
                             className="bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors duration-150 shadow-md"
                         >
                             {loading ? 'Eliminando...' : 'Confirmar Eliminación'}
@@ -346,7 +320,7 @@ const MiCuentaBancariaPage = () => {
         );
     }
 
-    // 5. Vista de Cuenta Ya Registrada
+    // 4. Vista de Cuenta Ya Registrada
     if (alreadyRegistered) {
         return (
             <div className="min-h-screen bg-blue-600 flex items-center justify-center p-4">
@@ -368,7 +342,7 @@ const MiCuentaBancariaPage = () => {
                         <button
                             onClick={() => {
                                 setShowDeleteConfirmation(true);
-                                captchaRef.current?.reset(); // Reiniciar CAPTCHA
+                                captchaRef.current?.reset(); 
                                 setCaptchaToken(null);
                             }}
                             className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors duration-150 shadow-md hover:shadow-lg"
@@ -381,8 +355,7 @@ const MiCuentaBancariaPage = () => {
         );
     }
 
-
-    // 6. Vista de Formulario de Registro (Default)
+    // 5. Vista de Formulario de Registro (Default)
     return (
         <div className="min-h-screen bg-blue-600 flex flex-col font-sans">
           
@@ -440,7 +413,6 @@ const MiCuentaBancariaPage = () => {
                     required
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-blue-500 focus:border-blue-500"
                   >
-                    {/* 🟢 CORREGIDO: DEBE COINCIDIR EXACTAMENTE CON EL ENUM DEL BACKEND */}
                     <option>Cuenta de Ahorros</option> 
                     <option>Cuenta Corriente</option>
                   </select>
@@ -525,7 +497,6 @@ const MiCuentaBancariaPage = () => {
                         onChange={handleCaptchaChange}
                     />
                 </div>
-                {/* FIN CAPTCHA */}
 
                 {formError && (
                   <div className="p-3 bg-red-50 border border-red-400 text-red-700 rounded-lg text-sm transition-all duration-300">
@@ -536,7 +507,6 @@ const MiCuentaBancariaPage = () => {
     
                 <button
                   type="submit"
-                  // Deshabilitar si está cargando o no hay token de captcha
                   disabled={loading || !captchaToken} 
                   className={`w-full font-semibold py-3 rounded-lg mt-6 transition duration-150 ease-in-out shadow-lg 
                     ${loading || !captchaToken ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-700 text-white hover:shadow-xl'}`}
