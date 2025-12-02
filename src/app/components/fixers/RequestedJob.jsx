@@ -10,6 +10,7 @@ export default function RequestedJob({
   onAppointmentDetails,
   onRegisterJob,
   onViewPromos,
+  onCreatePromo,
   className = '',
 }) {
   const [open, setOpen] = useState(false);
@@ -48,6 +49,10 @@ export default function RequestedJob({
 
   const handleViewPromos = () => {
     onViewPromos?.();
+    setOpen(false);
+  };
+  const handleCreatePromo = () => {
+    onCreatePromo?.();
     setOpen(false);
   };
 
@@ -121,6 +126,14 @@ export default function RequestedJob({
                 className='w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
               >
                 View promos
+              </button>
+              <div className='h-px bg-gray-100' />
+              <button
+                role='menuitem'
+                onClick={handleCreatePromo}
+                className='w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-50'
+              >
+                Create promo
               </button>
             </div>
           )}
