@@ -5,7 +5,7 @@ import { Briefcase, UserCog, ClipboardList } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/app/redux/hooks';
 import { resetFilters } from '@/app/redux/slice/jobOfert';
-import { clearJobOffersStorage } from '@/app/redux/features/jobOffers/storage';
+//import { clearJobOffersStorage } from '@/app/redux/features/jobOffers/storage';
 
 export function Navbar() {
   const pathname = usePathname();
@@ -17,7 +17,7 @@ export function Navbar() {
   const handleJobOffersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
 
-    clearJobOffersStorage();
+    //clearJobOffersStorage();
     dispatch(resetFilters());
     router.push('/job-offer-list');
   };
