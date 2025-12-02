@@ -2,6 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { useLogClickMutation } from '../../redux/services/activityApi';
+import { useLogSearchMutation, useUpdateFiltersMutation } from '../../redux/services/searchApi';
 import {
   SearchBar,
   NoResultsMessage,
@@ -37,8 +38,6 @@ import { JobOffersView, type ViewMode } from '@/Components/Job-offers/JobOffersV
 import { ViewModeToggle } from '@/Components/Job-offers/ViewModeToggle';
 import { useTranslations } from 'next-intl';
 import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
-import { adaptOfferToModalFormat } from '@/types/jobOffers';
-
 
 const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
 
@@ -56,12 +55,17 @@ export default function JobOffersPage() {
     paginaActual,
     registrosPorPagina,
     error: reduxError,
+    filters,
+    rating,
   } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
 
-  // Get user ID from localStorage
+  // ============================================================================
+  // USER DATA FROM LOCALSTORAGE
+  // ============================================================================
   const [userId, setUserId] = useState<string>('');
+  const [userRole, setUserRole] = useState<string>('visitor');
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -70,19 +74,230 @@ export default function JobOffersPage() {
         try {
           const userObj = JSON.parse(storedUser);
           console.log('User object from localStorage:', userObj);
-          // Intenta obtener el ID de diferentes propiedades posibles
+          // Obtener ID
           const id = userObj.id || userObj._id || userObj.userId || '';
+          // Obtener rol, si no existe usar 'visitor'
+          const role = userObj.role || 'visitor';
           setUserId(id);
-          console.log('Extracted user ID:', id);
+          setUserRole(role);
+          console.log('Extracted user ID:', id, 'Role:', role);
         } catch (error) {
           console.error('Error parsing user from localStorage:', error);
+          setUserRole('visitor');
         }
       } else {
         console.warn('No servineo_user found in localStorage');
+        setUserRole('visitor');
       }
     }
   }, []);
 
+  // ============================================================================
+  // SEARCH AND FILTER TRACKING
+  // ============================================================================
+  const [logSearch] = useLogSearchMutation();
+  const [updateFilters] = useUpdateFiltersMutation();
+
+  // Refs para rastrear valores anteriores y evitar envíos duplicados
+  const previousSearchQueryRef = useRef<string>('');
+  const previousFiltersRef = useRef<FilterState>(filters);
+  const isInitialMountRef = useRef<boolean>(true);
+
+  // Contador de filtros
+  const filterCounterRef = useRef<number>(1);
+
+  // Función para obtener el número real de resultados mostrados
+  const getSearchCount = (): number => {
+    // Si está cargando, retornar 0 o el valor actual
+    if (isLoading) return 0;
+
+    // Usar el total de ofertas que coinciden con los criterios actuales
+    // Este `total` viene de `useJobOffers()` y ya está filtrado por búsqueda y filtros
+    return total || 0;
+  };
+
+  // Función helper para obtener el valor del filtro fixer_name
+  const getFixerNameValue = (): string => {
+    const fixerNameFilter =
+      (filters as any).fixerName || (filters as any).fixer_name || (filters as any).fixerNames;
+
+    if (
+      !fixerNameFilter ||
+      (Array.isArray(fixerNameFilter) && fixerNameFilter.length === 0) ||
+      fixerNameFilter === ''
+    ) {
+      return 'not_applied';
+    }
+
+    if (Array.isArray(fixerNameFilter)) {
+      return fixerNameFilter.join(', ');
+    }
+
+    return fixerNameFilter.toString();
+  };
+
+  // Función helper para obtener el valor del filtro city
+  const getCityValue = (): string => {
+    if (!filters.city || (Array.isArray(filters.city) && filters.city.length === 0)) {
+      return 'not_applied';
+    }
+    if (Array.isArray(filters.city)) {
+      return filters.city.join(', ');
+    }
+    return filters.city;
+  };
+
+  // Función helper para obtener el valor del filtro job_type
+  const getJobTypeValue = (): string => {
+    if (!filters.category || filters.category.length === 0) {
+      return 'not_applied';
+    }
+    return filters.category.join(', ');
+  };
+
+  // ============================================================================
+  // HANDLE SEARCH SUBMIT - NUEVA BÚSQUEDA INDEPENDIENTE
+  // ============================================================================
+  const handleSearchSubmit = async (query: string) => {
+    scrollRestoredRef.current = true;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    dispatch(setSearch(query));
+    dispatch(resetPagination());
+
+    // Resetear contador de filtros para nueva búsqueda
+    filterCounterRef.current = 1;
+
+    // Pequeño delay para asegurar que los resultados se actualicen
+    const timeoutId = setTimeout(async () => {
+      // Solo enviar si el query es diferente al anterior o es una búsqueda nueva
+      if (query.trim().length > 0) {
+        const searchCount = getSearchCount();
+
+        const searchData = {
+          user_type: userRole,
+          search_query: query,
+          search_type: 'search_box',
+          filters: {
+            filter_1: {
+              fixer_name: getFixerNameValue(),
+              city: getCityValue(),
+              job_type: getJobTypeValue(),
+              search_count: searchCount,
+            },
+          },
+        };
+
+        try {
+          console.log(
+            'Enviando NUEVA BÚSQUEDA al backend (POST):',
+            JSON.stringify(searchData, null, 2),
+          );
+          await logSearch(searchData).unwrap();
+          console.log('Nueva búsqueda registrada exitosamente:', query, 'Resultados:', searchCount);
+          previousSearchQueryRef.current = query;
+        } catch (error) {
+          console.error('Error al registrar nueva búsqueda:', error);
+        }
+      }
+    }, 500); // Aumentado a 500ms para dar tiempo a que se actualicen los resultados
+
+    return () => clearTimeout(timeoutId);
+  };
+
+  // ============================================================================
+  // DETECTAR CAMBIOS EN FILTROS - SOLO PARA LA ÚLTIMA BÚSQUEDA
+  // ============================================================================
+  useEffect(() => {
+    // Skip en el montaje inicial
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      previousFiltersRef.current = { ...filters };
+      return;
+    }
+
+    // Solo procesar cambios de filtros si hay una búsqueda activa
+    if (!previousSearchQueryRef.current) {
+      previousFiltersRef.current = { ...filters };
+      return;
+    }
+
+    // Comparar si los filtros han cambiado realmente
+    const currentFilters = filters as any;
+    const previousFilters = previousFiltersRef.current as any;
+
+    const compareFilterValues = (prev: any, curr: any, key: string) => {
+      const prevValue = prev[key];
+      const currValue = curr[key];
+
+      if (Array.isArray(prevValue) && Array.isArray(currValue)) {
+        return JSON.stringify([...prevValue].sort()) !== JSON.stringify([...currValue].sort());
+      }
+
+      return prevValue !== currValue;
+    };
+
+    const filterKeys = ['city', 'category', 'range', 'fixerName', 'fixer_name', 'fixerNames'];
+
+    const filtersChanged = filterKeys.some((key) =>
+      compareFilterValues(previousFilters, currentFilters, key),
+    );
+
+    // Solo enviar si hay un cambio real en los filtros Y tenemos una búsqueda activa
+    if (filtersChanged && previousSearchQueryRef.current) {
+      // Actualizar ref primero para evitar envíos duplicados
+      previousFiltersRef.current = { ...filters };
+
+      // Usar un delay más largo para asegurar que los resultados se actualicen
+      const timeoutId = setTimeout(async () => {
+        // Incrementar contador para el nuevo filtro
+        filterCounterRef.current++;
+
+        const searchCount = getSearchCount();
+
+        const filterData = {
+          filters: {
+            fixer_name: getFixerNameValue(),
+            city: getCityValue(),
+            job_type: getJobTypeValue(),
+            search_count: searchCount,
+          },
+        };
+
+        try {
+          console.log(
+            `Enviando FILTRO para búsqueda: "${previousSearchQueryRef.current}"`,
+            JSON.stringify(filterData, null, 2),
+          );
+
+          await updateFilters(filterData).unwrap();
+          console.log(`Filtro registrado exitosamente. Resultados: ${searchCount}`);
+        } catch (error) {
+          console.error('Error al registrar filtro:', error);
+        }
+      }, 500); // Aumentado a 500ms para dar tiempo a que se actualicen los resultados
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [filters, updateFilters, isLoading, total]);
+
+  // ============================================================================
+  // RESET FILTERS HANDLER
+  // ============================================================================
+  const handleResetFilters = () => {
+    const pageToRestore = hasActiveFilters.current ? pageBeforeFilter.current : 1;
+    hasActiveFilters.current = false;
+
+    dispatch(resetFilters());
+
+    setTimeout(() => {
+      dispatch(enablePersistence());
+      dispatch(setPaginaActual(pageToRestore));
+    }, 0);
+  };
+
+  // ============================================================================
+  // EXISTING COMPONENT CODE
+  // ============================================================================
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const scrollRestoredRef = useRef(false);
@@ -116,7 +331,6 @@ export default function JobOffersPage() {
     setSelectedOffer(adaptedOffer);
     setIsModalOpen(true);
 
-    // Only log the click if userId is available
     if (!userId) {
       console.warn('User ID no disponible, no se registró el click');
       return;
@@ -125,7 +339,7 @@ export default function JobOffersPage() {
     const activityData = {
       userId: userId,
       date: new Date().toISOString(),
-      role: 'requester',
+      role: userRole,
       type: 'click',
       metadata: {
         button: 'job_offer',
@@ -151,6 +365,7 @@ export default function JobOffersPage() {
       if (params.toString() === '' && search !== '') {
         console.log('Navegación directa detectada, limpiando búsqueda guardada');
         dispatch(setSearch(''));
+        previousSearchQueryRef.current = '';
       }
     }
   }, [dispatch, search]);
@@ -231,7 +446,9 @@ export default function JobOffersPage() {
 
     const hasFilters =
       appliedFilters.range.length > 0 ||
-      (Array.isArray(appliedFilters.city) ? appliedFilters.city.length > 0 : !!appliedFilters.city) ||
+      (Array.isArray(appliedFilters.city)
+        ? appliedFilters.city.length > 0
+        : !!appliedFilters.city) ||
       appliedFilters.category.length > 0;
 
     if (hasFilters && !hasActiveFilters.current) {
@@ -254,40 +471,15 @@ export default function JobOffersPage() {
     dispatch(setSortBy(backendSort));
   };
 
-  const handleSearchSubmit = (query: string) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(setSearch(query));
-    dispatch(resetPagination());
-  };
-
-  const handleResetFilters = () => {
-    const pageToRestore = hasActiveFilters.current ? pageBeforeFilter.current : 1;
-    hasActiveFilters.current = false;
-
-    dispatch(resetFilters());
-
-    setTimeout(() => {
-      dispatch(enablePersistence());
-      dispatch(setPaginaActual(pageToRestore));
-    }, 0);
-  };
-
   const handlePageChange = (newPage: number) => {
     scrollRestoredRef.current = true;
     window.scrollTo({ top: 0, behavior: 'smooth' });
     dispatch(setPaginaActual(newPage));
   };
 
-  // Handler para abrir modal al hacer click en el área de la oferta
- /* const handleCardClick = (offer: JobOfferData) => {
-    const adaptedOffer = adaptOfferToModalFormat(offer);
-    setSelectedOffer(adaptedOffer);
-    setIsModalOpen(true);
-  };*/
-
   const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
 
+  // Resto del código JSX permanece igual...
   return (
     <>
       <h1 className="mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-0 text-center text-xl sm:text-2xl md:text-3xl font-bold pt-3 px-3">
@@ -367,7 +559,6 @@ export default function JobOffersPage() {
           onClose={() => setIsDrawerOpen(false)}
           onFiltersApply={handleFiltersApply}
           onRatingChange={(rating) => {
-            // rating is either integer 1..5 (from star filter) or null
             scrollRestoredRef.current = true;
             window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -401,7 +592,12 @@ export default function JobOffersPage() {
 
         <div className="w-full max-w-5xl mx-auto">
           {!isLoading && Array.isArray(offers) && offers.length > 0 ? (
-            <JobOffersView offers={offers} viewMode={viewMode} onOfferClick={handleCardClick} search={search} />
+            <JobOffersView
+              offers={offers}
+              viewMode={viewMode}
+              onOfferClick={handleCardClick}
+              search={search}
+            />
           ) : !isLoading ? (
             <NoResultsMessage search={search} />
           ) : null}
