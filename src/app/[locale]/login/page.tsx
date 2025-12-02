@@ -157,8 +157,8 @@ export default function LoginPage() {
         });
 
         setTimeout(() => {
-         window.location.href = '/';
-          }, 1500);
+          window.location.href = '/';
+        }, 1500);
       } else {
         const mensajeError =
           res.message ||
@@ -222,8 +222,8 @@ export default function LoginPage() {
             });
 
             setTimeout(() => {
-             window.location.href = '/';
-             }, 1500);
+              window.location.href = '/';
+            }, 1500);
           } else {
             setNotification({
               isOpen: true,

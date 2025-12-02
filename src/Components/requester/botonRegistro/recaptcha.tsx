@@ -13,8 +13,8 @@ const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified }) => {
   const verifyBackend = async (token: string) => {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/signUp/verify-recaptcha`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token }),
       });
 
@@ -22,7 +22,7 @@ const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified }) => {
 
       onVerified?.(data.success);
     } catch (err) {
-      console.error("Error comunicando con backend:", err);
+      console.error('Error comunicando con backend:', err);
       onVerified?.(false);
     }
   };
@@ -34,7 +34,7 @@ const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified }) => {
         sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
         onChange={(token) => {
           if (token) {
-            verifyBackend(token); 
+            verifyBackend(token);
           }
         }}
         onExpired={() => {
