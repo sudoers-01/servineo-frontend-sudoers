@@ -135,26 +135,26 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
   };
 
   return (
-    <Card title="Registrar ubicación de trabajo">
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <p className="text-sm text-gray-700">
+    <Card title='Registrar ubicación de trabajo'>
+      <div className='space-y-4'>
+        <div className='space-y-2'>
+          <p className='text-sm text-gray-700'>
             Haz clic en el mapa para seleccionar tu ubicación de trabajo{' '}
             <strong>solo en la región de Cochabamba</strong>
           </p>
-          <div className="rounded-lg bg-amber-50 p-3 border border-amber-200">
-            <p className="text-sm text-amber-800 font-medium">⚠️ Restricción de ubicación</p>
-            <p className="text-xs text-amber-700 mt-1">
+          <div className='rounded-lg bg-amber-50 p-3 border border-amber-200'>
+            <p className='text-sm text-amber-800 font-medium'>⚠️ Restricción de ubicación</p>
+            <p className='text-xs text-amber-700 mt-1'>
               Solo puedes seleccionar ubicaciones dentro del departamento de Cochabamba, Bolivia.
             </p>
           </div>
-          <div ref={mapRef} className="h-80 w-full rounded-xl border border-gray-300 bg-gray-100" />
+          <div ref={mapRef} className='h-80 w-full rounded-xl border border-gray-300 bg-gray-100' />
         </div>
 
         {outOfBounds && (
-          <div className="rounded-lg bg-red-50 p-3 border border-red-200">
-            <p className="text-sm text-red-800 font-medium">Ubicación fuera de Cochabamba</p>
-            <p className="text-xs text-red-700 mt-1">
+          <div className='rounded-lg bg-red-50 p-3 border border-red-200'>
+            <p className='text-sm text-red-800 font-medium'>Ubicación fuera de Cochabamba</p>
+            <p className='text-xs text-red-700 mt-1'>
               La ubicación seleccionada está fuera de la región de Cochabamba. Por favor, selecciona
               una ubicación dentro del departamento.
             </p>
@@ -162,41 +162,41 @@ export function LocationStep({ location, onLocationChange, error }: LocationStep
         )}
 
         {location && location.lat !== 0 && location.lng !== 0 && (
-          <div className="space-y-2 rounded-lg bg-blue-50 p-3">
-            <p className="text-sm font-medium text-blue-900">Ubicación seleccionada:</p>
-            <div className="grid grid-cols-2 gap-2">
+          <div className='space-y-2 rounded-lg bg-blue-50 p-3'>
+            <p className='text-sm font-medium text-blue-900'>Ubicación seleccionada:</p>
+            <div className='grid grid-cols-2 gap-2'>
               <div>
-                <label className="text-xs text-blue-700">Latitud</label>
+                <label className='text-xs text-blue-700'>Latitud</label>
                 <input
-                  type="number"
-                  step="0.000001"
+                  type='number'
+                  step='0.000001'
                   value={manualLat}
                   onChange={(e) => setManualLat(e.target.value)}
-                  className="w-full rounded-md border border-blue-200 bg-white px-2 py-1 text-sm"
+                  className='w-full rounded-md border border-blue-200 bg-white px-2 py-1 text-sm'
                 />
               </div>
               <div>
-                <label className="text-xs text-blue-700">Longitud</label>
+                <label className='text-xs text-blue-700'>Longitud</label>
                 <input
-                  type="number"
-                  step="0.000001"
+                  type='number'
+                  step='0.000001'
                   value={manualLng}
                   onChange={(e) => setManualLng(e.target.value)}
-                  className="w-full rounded-md border border-blue-200 bg-white px-2 py-1 text-sm"
+                  className='w-full rounded-md border border-blue-200 bg-white px-2 py-1 text-sm'
                 />
               </div>
             </div>
             <button
-              type="button"
+              type='button'
               onClick={handleManualUpdate}
-              className="w-full rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700"
+              className='w-full rounded-md bg-blue-600 px-3 py-1 text-sm text-white hover:bg-blue-700'
             >
               Actualizar ubicación
             </button>
           </div>
         )}
 
-        {error && <p className="text-sm text-red-600">{error}</p>}
+        {error && <p className='text-sm text-red-600'>{error}</p>}
       </div>
     </Card>
   );

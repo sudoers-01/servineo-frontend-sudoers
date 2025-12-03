@@ -207,7 +207,7 @@ export default function HourCell({ hour, date, isPast, isToday, view }: HourCell
 
   return (
     <div className={`flex items-center ${todayColor()} h-15 border-b border-r border-black`}>
-      <div className="w-full">
+      <div className='w-full'>
         {showHourCell() && (
           <div
             className={`mx-2  rounded-md text-center text-white ${getColor()} py-3 cursor-pointer`}

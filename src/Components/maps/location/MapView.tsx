@@ -15,7 +15,7 @@ export default function MapView({ onSelect, markerPosition }: MapViewProps) {
       zoom={13}
       style={{ height: 400, width: '100%' }}
     >
-      <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+      <TileLayer url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png' />
       <MarkerHandler onSelect={onSelect} markerPosition={markerPosition} />
     </MapContainer>
   );

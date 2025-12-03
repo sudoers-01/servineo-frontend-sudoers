@@ -18,7 +18,7 @@ export const SearchHighlight: React.FC<SearchHighlightProps> = ({
     <span className={className}>
       {parts.map((part, index) =>
         part.highlight ? (
-          <mark key={index} className="bg-yellow-200 font-semibold px-0.5 rounded">
+          <mark key={index} className='bg-yellow-200 font-semibold px-0.5 rounded'>
             {part.text}
           </mark>
         ) : (

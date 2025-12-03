@@ -32,16 +32,16 @@ const LoginGithub: React.FC<Props> = ({ onMensajeChange }) => {
   };
 
   return (
-    <div className="w-full flex justify-center">
+    <div className='w-full flex justify-center'>
       <button
-        type="button"
+        type='button'
         onClick={handleGithubClick}
-        className="inline-flex items-center justify-center gap-3
+        className='inline-flex items-center justify-center gap-3
                    bg-white border border-gray-300 rounded-xl
                    px-4 py-3 text-base font-medium
-                   hover:bg-gray-100 transition shadow-sm"
+                   hover:bg-gray-100 transition shadow-sm'
       >
-        <FaGithub className="text-xl" />
+        <FaGithub className='text-xl' />
         <span>Continuar con GitHub</span>
       </button>
     </div>
