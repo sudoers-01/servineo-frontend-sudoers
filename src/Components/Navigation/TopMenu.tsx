@@ -146,6 +146,31 @@ export default function TopMenu() {
         } border-b border-gray-100`}
         role='banner'
       >
+
+        <div className="hidden md:flex items-center gap-4" id="tour-auth-buttons-desktop">
+  {!isLogged ? (
+    <>
+      <Link
+        href="/login"
+        className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity"
+      >
+        Iniciar Sesión
+      </Link>
+      <Link
+        href="/signUp"
+        className="px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium hover:opacity-80 transition-opacity"
+      >
+        Registrarse
+      </Link>
+    </>
+  ) : (
+    <>
+      {getRoleButton()}
+      {/* ... resto del código del dropdown ... */}
+    </>
+  )}
+</div>
+
         <div className='w-full max-w-8xl mx-auto px-4 flex items-center h-16'>
           {/* Logo */}
           <button
@@ -187,6 +212,31 @@ export default function TopMenu() {
             </nav>
           </div>
           <div className='flex items-center gap-3'>
+
+              {!isLogged ? (
+  <div className="flex items-center gap-2 flex-nowrap" id="tour-auth-buttons-mobile">
+    <Link
+      href="/login"
+      className="px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+    >
+      Iniciar sesión
+    </Link>
+    <Link
+      href="/signUp"
+      className="px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+    >
+      Registrarse
+    </Link>
+  </div>
+) : (
+  <button
+    onClick={() => setAccountOpen(!accountOpen)}
+    className="flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
+  >
+    <span className="text-gray-700 font-medium">{user?.name}</span>
+  </button>
+)}
+
             {!isLogged ? (
               <>
                 <Link

@@ -633,3 +633,51 @@
   background-color: #1aa7ed;
   border-radius: 2px;
 }
+
+/* ============================================
+   ESTILOS PARA REACTOUR (GUÍA INTERACTIVA)
+   ============================================ */
+
+/* 1. Suavizar movimiento */
+.reactour__mask {
+  transition: all 0.4s ease-out !important;
+}
+
+.reactour__helper {
+  transition: all 0.4s ease-out !important;
+}
+
+/* 2. Estilizar los puntos de navegación (dots) */
+div[data-tour-elem="controls"] button[data-tour-elem="dot"] {
+  background-color: #e2e8f0 !important;
+  border: none !important;
+  width: 8px !important;
+  height: 8px !important;
+  margin: 0 5px !important;
+  border-radius: 50% !important;
+  transition: all 0.3s ease !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-width: 8px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Estilo del punto activo */
+div[data-tour-elem="controls"] button[data-tour-elem="dot"][data-active="true"] {
+  background-color: #2b6ae0 !important;
+  transform: scale(1.2);
+}
+
+/* 3. Centrar los puntos entre los botones */
+div[data-tour-elem="navigation"] {
+  display: flex !important;
+  justify-content: center !important;
+  flex: 1 !important;
+  margin: 0 10px !important;
+}
+
+/* 4. Asegurar el popover encima de todo */
+div[data-tour-elem="popover"] {
+  z-index: 100000 !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+}
