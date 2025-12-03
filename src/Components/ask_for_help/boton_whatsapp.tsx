@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef } from 'react';
-import Image from 'next/image';
+import { FaWhatsapp } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import ErrorMessage from './ErrorMessage';
 
@@ -59,19 +59,14 @@ const BotonWhatsapp = () => {
         type='button'
         onClick={handleInitialClick}
         className='flex items-center justify-center
-                        w-13 h-13
-                        bg-[#2563EB] hover:bg-[#1D4ED8]
+                        w-14 h-14
+                        bg-green-500 hover:bg-green-600
                         rounded-full shadow-lg
                         transition duration-300 transform hover:scale-105
                         cursor-pointer'
         aria-label='Contactar por WhatsApp'
       >
-        <Image
-          src='https://drive.google.com/uc?export=view&id=1jmTcbSdFJdlMmUPZj3bUwahLGTZIdPI4'
-          alt='Logo de WhatsApp'
-          width={52}
-          height={52}
-        />
+        <FaWhatsapp size={28} className='text-white' />
       </button>
 
       {/* 5. Modal / Overlay del Captcha */}
@@ -83,7 +78,11 @@ const BotonWhatsapp = () => {
 
             <ReCAPTCHA
               ref={recaptchaRef}
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+              sitekey={
+                process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY_V2 ||
+                process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
+                ''
+              }
               onChange={handleCaptchaChange}
             />
 
