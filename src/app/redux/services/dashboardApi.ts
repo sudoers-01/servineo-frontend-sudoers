@@ -1,13 +1,17 @@
 // redux/DashboardApi.ts
 import { baseApi } from './baseApi';
 
+export interface SearchDataItem {
+  [key: string]: unknown;
+}
+
 export interface StatisticsResponse {
   success: boolean;
   count: number;
   period: string;
   start_date: string;
   end_date: string;
-  data: any[];
+  data: SearchDataItem[];
   filter_statistics: {
     fixer_name: {
       'A-C': number;
