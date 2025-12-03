@@ -8,13 +8,16 @@ import HowItWorksSection from '@/Components/Home/HowItWorks-section';
 import CTASection from '@/Components/Home/CTA-section';
 import InspirationSection from '@/Components/Home/Inspiration-section';
 import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
-import RequestsSection from '@/Components/Home/Requests-section';
+
 import dynamic from 'next/dynamic';
 import { IUser } from '@/types/user';
 
 //const MyOffer = dynamic(() => import('@/Components/Home/MyOffer-section'), { ssr: false });
 const Map = dynamic(() => import('@/app/Mapa/Map'), { ssr: false });
-
+const RequestsSection = dynamic(
+  () => import('@/Components/Home/Requests-section'),
+  { ssr: false }, // esto fuerza a que se cargue solo en el cliente
+);
 interface RootState {
   user: {
     user: IUser | null;
@@ -66,11 +69,8 @@ export default function Home() {
           <RecentOffersSection />
         </div>
       </section>
-      {isFixer && (
-        <>
-          <RequestsSection />
-        </>
-      )}
+      {isFixer && <RequestsSection />}
+
       <ServicesSection />
       {!isFixer && (
         <>
