@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 import { useState } from 'react';
 import { useGetUserByIdQuery } from '../redux/services/userApi';
 import { setUser } from '../redux/slice/userSlice';
+import Map from '../Mapa/Map';
 
 export default function Home() {
   //const user = useSelector((state: { user: IUser }) => state.user);
