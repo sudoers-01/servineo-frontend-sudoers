@@ -24,9 +24,14 @@ export default function Home() {
   useEffect(() => {
     const token = localStorage.getItem('servineo_user');
     if (token) {
-      const userData = JSON.parse(token);
-      const id = userData._id || userData.id;
-      setUserId(id);
+      try {
+        const userData = JSON.parse(token);
+        const id = userData._id || userData.id;
+        setUserId(id);
+      } catch (e) {
+        // Optionally log the error or handle it as needed
+        console.warn('Failed to parse servineo_user from localStorage:', e);
+      }
     }
   }, []);
 
