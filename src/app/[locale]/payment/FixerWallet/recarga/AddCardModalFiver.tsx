@@ -62,9 +62,8 @@ export default function AddCardModalFixer({
       if (error) throw new Error(error.message);
 
       let cardId: string | null = null;
-
       if (saveCard) {
-        const cardRes = await fetch('http://localhost:8000/api/cardscreate', {
+        const cardRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/cardscreate`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -80,7 +79,7 @@ export default function AddCardModalFixer({
       }
 
       // Actualizar recarga en wallet
-      const walletRes = await fetch('http://localhost:8000/api/wallet/update', {
+      const walletRes = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/wallet/update`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

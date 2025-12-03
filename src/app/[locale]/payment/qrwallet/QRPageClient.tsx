@@ -53,7 +53,7 @@ export default function PaymentsPage() {
         const payload = { bookingId, providerId, amount, currency };
         console.log("→ POST /api/payments/intent payload =", payload);
 
-        const res = await fetch('http://localhost:8000/api/payments/intent', {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/payments/intent`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ bookingId, providerId, amount, currency }),

@@ -42,7 +42,7 @@ export default function TransferBank({ fixerId, servineoId, amount }: TransferBa
       }
 
       try {
-       const res = await fetch('http://localhost:8000/api/transferencia-bancaria/intent'   , {
+       const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/transferencia-bancaria/intent`   , {
         //const res = await fetch('/api/transferencia-bancaria/intent'   , {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
