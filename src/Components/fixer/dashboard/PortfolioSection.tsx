@@ -344,57 +344,57 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
       <Modal
         open={isModalOpen}
         onClose={handleCloseModal}
-        size="lg"
+        size='lg'
         closeOnOverlayClick={!isCreating}
-        className="rounded-2xl border-primary border-2"
+        className='rounded-2xl border-primary border-2'
       >
-        <Modal.Header className="text-center text-primary">
+        <Modal.Header className='text-center text-primary'>
           {modalType === 'image' ? 'Agregar Imagen' : 'Agregar Video'}
         </Modal.Header>
         <Modal.Body>
-          <form id="portfolioForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <input type="hidden" value={modalType} {...register('type')} />
+          <form id='portfolioForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+            <input type='hidden' value={modalType} {...register('type')} />
 
             {modalType === 'image' ? (
-              <div className="space-y-3">
+              <div className='space-y-3'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
                     URL de la Imagen *
                   </label>
-                  <div className="relative">
+                  <div className='relative'>
                     <input
                       {...register('url', { required: 'La URL es requerida' })}
-                      className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3 pr-10"
-                      placeholder="https://ejemplo.com/imagen.jpg"
+                      className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 pr-10'
+                      placeholder='https://ejemplo.com/imagen.jpg'
                     />
                     {isValidating && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                        <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
+                      <div className='absolute right-3 top-1/2 -translate-y-1/2'>
+                        <Loader2 className='animate-spin h-5 w-5 text-blue-600' />
                       </div>
                     )}
                     {!isValidating && isValidUrl === true && (
-                      <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
+                      <CheckCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600' />
                     )}
                     {!isValidating && isValidUrl === false && (
-                      <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600" />
+                      <XCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600' />
                     )}
                   </div>
                   {isValidUrl === false && (
-                    <p className="text-xs text-red-600 mt-1">
+                    <p className='text-xs text-red-600 mt-1'>
                       ❌ No se pudo cargar la imagen. Verifica la URL.
                     </p>
                   )}
                 </div>
 
                 {previewUrl && isValidUrl && (
-                  <div className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
-                    <p className="text-xs text-green-700 mb-2 font-semibold">✅ Vista Previa:</p>
-                    <div className="relative w-full h-48 rounded-lg overflow-hidden bg-white shadow-md">
+                  <div className='border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50'>
+                    <p className='text-xs text-green-700 mb-2 font-semibold'>✅ Vista Previa:</p>
+                    <div className='relative w-full h-48 rounded-lg overflow-hidden bg-white shadow-md'>
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
                         src={previewUrl}
-                        alt="Preview"
-                        className="w-full h-full object-contain"
+                        alt='Preview'
+                        className='w-full h-full object-contain'
                       />
                     </div>
                   </div>
@@ -403,24 +403,24 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             ) : (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
                     URL de YouTube *
                   </label>
                   <input
                     {...register('youtubeUrl', { required: 'La URL es requerida' })}
-                    className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3"
-                    placeholder="https://www.youtube.com/watch?v=..."
+                    className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                    placeholder='https://www.youtube.com/watch?v=...'
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
                     URL de Miniatura
                   </label>
                   <input
                     {...register('url')}
-                    className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3"
-                    placeholder="Se intentará extraer automáticamente si está vacío"
+                    className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                    placeholder='Se intentará extraer automáticamente si está vacío'
                   />
                 </div>
               </>
@@ -428,19 +428,19 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <div className="flex justify-end gap-2">
+          <div className='flex justify-end gap-2'>
             <button
-              type="button"
+              type='button'
               onClick={handleCloseModal}
-              className="border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors"
+              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
               disabled={isCreating}
             >
               Cancelar
             </button>
             <PillButton
-              type="submit"
-              form="portfolioForm"
-              className="bg-primary text-white hover:bg-blue-800"
+              type='submit'
+              form='portfolioForm'
+              className='bg-primary text-white hover:bg-blue-800'
               disabled={(modalType === 'image' && isValidUrl !== true) || isCreating}
             >
               {isCreating ? 'Guardando...' : 'Guardar'}

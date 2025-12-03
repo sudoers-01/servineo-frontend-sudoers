@@ -321,97 +321,97 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
       <Modal
         open={isModalOpen}
         onClose={handleCloseModal}
-        size="lg"
+        size='lg'
         closeOnOverlayClick={!isCreating && !isUpdating}
-        className="rounded-2xl border-primary border-2"
+        className='rounded-2xl border-primary border-2'
       >
-        <Modal.Header className="text-center text-primary">
+        <Modal.Header className='text-center text-primary'>
           {editingCert ? 'Editar Certificación' : 'Nueva Certificación'}
         </Modal.Header>
         <Modal.Body>
-          <form id="certificationForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form id='certificationForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Nombre de la certificación
               </label>
               <input
                 {...register('name', { required: true })}
-                className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3"
-                placeholder="Ej. Desarrollo Web Full Stack"
+                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                placeholder='Ej. Desarrollo Web Full Stack'
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Institución emisora
               </label>
               <input
                 {...register('institution', { required: true })}
-                className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3"
-                placeholder="Ej. Udemy, Coursera, Universidad..."
+                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                placeholder='Ej. Udemy, Coursera, Universidad...'
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
                   Fecha de emisión
                 </label>
                 <input
-                  type="date"
+                  type='date'
                   {...register('issueDate', { required: true })}
-                  className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white"
+                  className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Fecha de expiración <span className="text-gray-400 font-normal">(Opcional)</span>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  Fecha de expiración <span className='text-gray-400 font-normal'>(Opcional)</span>
                 </label>
                 <input
-                  type="date"
+                  type='date'
                   {...register('expiryDate')}
-                  className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white"
+                  className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                ID de la credencial <span className="text-gray-400 font-normal">(Opcional)</span>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                ID de la credencial <span className='text-gray-400 font-normal'>(Opcional)</span>
               </label>
               <input
                 {...register('credentialId')}
-                className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3"
-                placeholder="Ej. UC-12345678"
+                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                placeholder='Ej. UC-12345678'
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                URL de la credencial <span className="text-gray-400 font-normal">(Opcional)</span>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                URL de la credencial <span className='text-gray-400 font-normal'>(Opcional)</span>
               </label>
               <input
                 {...register('credentialUrl')}
-                type="url"
-                className="w-full rounded-lg border-primary border focus:outline-none py-2 px-3"
-                placeholder="https://..."
+                type='url'
+                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                placeholder='https://...'
               />
             </div>
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <div className="flex justify-end gap-2">
+          <div className='flex justify-end gap-2'>
             <button
-              type="button"
+              type='button'
               onClick={handleCloseModal}
-              className="border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors"
+              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
             >
               Cancelar
             </button>
             <PillButton
-              type="submit"
-              form="certificationForm"
-              className="bg-primary text-white hover:bg-blue-800"
+              type='submit'
+              form='certificationForm'
+              className='bg-primary text-white hover:bg-blue-800'
               disabled={isCreating || isUpdating}
             >
               {(isCreating || isUpdating) && <Loader2 className='animate-spin h-4 w-4' />}

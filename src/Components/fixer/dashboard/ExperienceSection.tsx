@@ -283,116 +283,116 @@ export function ExperienceSection({
           reset();
           setEditingExp(null);
         }}
-        size="lg"
+        size='lg'
         closeOnOverlayClick={!isCreating}
-        className="rounded-2xl border-primary border-2"
+        className='rounded-2xl border-primary border-2'
       >
-        <Modal.Header className="text-center text-primary">
+        <Modal.Header className='text-center text-primary'>
           {editingExp ? 'Editar Experiencia' : 'Nueva Experiencia'}
         </Modal.Header>
         <Modal.Body>
-          <form id="experienceForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form id='experienceForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Cargo / Título *
               </label>
               <input
                 {...register('jobTitle', { required: 'Este campo es requerido' })}
                 className={`w-full rounded-lg border ${errors.jobTitle ? 'border-red-500' : 'border-primary'} focus:outline-none py-2 px-3`}
-                placeholder="Ej: Plomero Senior"
+                placeholder='Ej: Plomero Senior'
               />
               {errors.jobTitle && (
-                <p className="mt-1 text-sm text-red-600">{errors.jobTitle.message}</p>
+                <p className='mt-1 text-sm text-red-600'>{errors.jobTitle.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Empresa / Organización *
               </label>
               <input
                 {...register('organization', { required: 'Este campo es requerido' })}
                 className={`w-full rounded-lg border ${errors.organization ? 'border-red-500' : 'border-primary'} focus:outline-none py-2 px-3`}
-                placeholder="Ej: Servicios Generales S.A."
+                placeholder='Ej: Servicios Generales S.A.'
               />
               {errors.organization && (
-                <p className="mt-1 text-sm text-red-600">{errors.organization.message}</p>
+                <p className='mt-1 text-sm text-red-600'>{errors.organization.message}</p>
               )}
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 Tipo de Empleo *
               </label>
               <select
                 {...register('jobType', { required: 'Selecciona un tipo de empleo' })}
                 className={`w-full rounded-lg border ${errors.jobType ? 'border-red-500' : 'border-primary'} focus:outline-none py-2 px-3 bg-white`}
               >
-                <option value="">Selecciona un tipo</option>
-                <option value="Tiempo completo">Tiempo completo</option>
-                <option value="Medio tiempo">Medio tiempo</option>
-                <option value="Contrato">Contrato</option>
-                <option value="Freelance">Freelance</option>
+                <option value=''>Selecciona un tipo</option>
+                <option value='Tiempo completo'>Tiempo completo</option>
+                <option value='Medio tiempo'>Medio tiempo</option>
+                <option value='Contrato'>Contrato</option>
+                <option value='Freelance'>Freelance</option>
               </select>
               {errors.jobType && (
-                <p className="mt-1 text-sm text-red-600">{errors.jobType.message}</p>
+                <p className='mt-1 text-sm text-red-600'>{errors.jobType.message}</p>
               )}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
                   Fecha de Inicio *
                 </label>
                 <input
-                  type="date"
+                  type='date'
                   {...register('startDate', { required: 'Este campo es requerido' })}
                   className={`w-full rounded-lg border ${errors.startDate ? 'border-red-500' : 'border-primary'} focus:outline-none py-2 px-3 bg-white`}
                 />
                 {errors.startDate && (
-                  <p className="mt-1 text-sm text-red-600">{errors.startDate.message}</p>
+                  <p className='mt-1 text-sm text-red-600'>{errors.startDate.message}</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Fecha de Fin</label>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>Fecha de Fin</label>
                 <input
-                  type="date"
+                  type='date'
                   {...register('endDate')}
-                  className="w-full rounded-lg border border-primary focus:outline-none py-2 px-3 bg-white"
+                  className='w-full rounded-lg border border-primary focus:outline-none py-2 px-3 bg-white'
                 />
               </div>
             </div>
 
-            <div className="flex items-center gap-2 py-2">
+            <div className='flex items-center gap-2 py-2'>
               <input
-                type="checkbox"
-                id="isCurrent"
+                type='checkbox'
+                id='isCurrent'
                 {...register('isCurrent')}
-                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                className='h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500'
               />
-              <label htmlFor="isCurrent" className="text-sm font-medium text-gray-700">
+              <label htmlFor='isCurrent' className='text-sm font-medium text-gray-700'>
                 Actualmente trabajo aquí
               </label>
             </div>
           </form>
         </Modal.Body>
         <Modal.Footer>
-          <div className="flex justify-end gap-2">
+          <div className='flex justify-end gap-2'>
             <button
-              type="button"
+              type='button'
               onClick={() => {
                 setIsModalOpen(false);
                 reset();
               }}
-              className="border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors"
+              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
               disabled={isCreating}
             >
               Cancelar
             </button>
             <PillButton
-              type="submit"
-              form="experienceForm"
-              className="bg-primary text-white hover:bg-blue-800"
+              type='submit'
+              form='experienceForm'
+              className='bg-primary text-white hover:bg-blue-800'
               disabled={isCreating}
             >
               {isCreating ? 'Guardando...' : 'Guardar'}
