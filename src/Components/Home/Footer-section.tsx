@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
 interface FooterSectionProps {
@@ -8,11 +9,19 @@ interface FooterSectionProps {
 }
 
 export default function FooterSection({ onRestartTour }: FooterSectionProps = {}) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const handleRestartTour = () => {
-    if (onRestartTour) {
-      onRestartTour();
+    // Borrar la flag de que ya vio el tour
+    localStorage.removeItem('servineoTourVisto');
+    
+    // Si NO estamos en el home, redirigir primero
+    if (pathname !== '/' && !pathname.endsWith('/es') && !pathname.endsWith('/en')) {
+      // Redirigir al home y la recarga automática activará el tour
+      router.push('/');
     } else {
-      localStorage.removeItem('servineoTourVisto');
+      // Si ya estamos en el home, solo recargar
       window.location.reload();
     }
   };

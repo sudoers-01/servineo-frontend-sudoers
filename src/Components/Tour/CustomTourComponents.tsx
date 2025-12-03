@@ -1,75 +1,95 @@
-"use client";
+'use client';
+
+import React from 'react';
 
 interface NextBtnProps {
   currentStep: number;
   stepsLength: number;
-  setCurrentStep?: (cb: (n: number) => number) => void;
-  setIsOpen?: (v: boolean) => void;
+  setCurrentStep?: (updater: (step: number) => number) => void;
+  setIsOpen?: (isOpen: boolean) => void;
   steps?: unknown[];
 }
 
-export const NextBtn = ({
-  currentStep,
-  stepsLength,
-  setCurrentStep,
-  setIsOpen,
-  steps,
-}: NextBtnProps) => {
-  const last = currentStep === stepsLength - 1;
-  if (currentStep === 0) return null;
+export const NextBtn = ({ ...props }: NextBtnProps) => {
+  const isLastStep = props.currentStep === props.stepsLength - 1;
+  if (props.currentStep === 0) return null;
 
-  const click = () => {
-    if (!setCurrentStep || !steps) return;
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
 
-    if (last) {
-      setIsOpen?.(false);
-      localStorage.setItem("servineoTourVisto", "true");
-      return;
+    if (props.setCurrentStep && props.steps) {
+        if (isLastStep) {
+            if (props.setIsOpen) {
+              props.setIsOpen(false);
+            }
+            localStorage.setItem('servineoTourVisto', 'true');
+        } else {
+            props.setCurrentStep((s: number) => s + 1);
+        }
     }
-
-    setCurrentStep((s) => s + 1);
   };
 
   return (
     <button
-      onClick={click}
-      style={{
-        backgroundColor: "#2B6AE0",
-        color: "white",
-        padding: "12px 28px",
-        borderRadius: "10px",
-        fontWeight: "700",
-        border: "none",
-        fontSize: "15px",
-        cursor: "pointer",
-        zIndex: 999999,
-        boxShadow: "0 4px 12px rgba(43,106,224,0.3)",
-      }}
+        onClick={handleClick}
+        type="button"
+        style={{
+            backgroundColor: '#2B6AE0',
+            color: 'white',
+            fontWeight: '700',
+            padding: '10px 24px',
+            borderRadius: '10px',
+            fontSize: '14px',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'all 0.2s ease',
+            pointerEvents: 'auto',
+            position: 'relative',
+            zIndex: 1000001,
+            boxShadow: '0 4px 12px rgba(43, 106, 224, 0.3)',
+            whiteSpace: 'nowrap',
+        }}
     >
-      {last ? "Finalizar" : "Siguiente"}
+      {isLastStep ? 'Finalizar' : 'Siguiente'}
     </button>
   );
 };
 
-interface PrevProps {
+interface PrevBtnProps {
   currentStep: number;
-  setCurrentStep?: (cb: (n: number) => number) => void;
+  setCurrentStep?: (updater: (step: number) => number) => void;
 }
 
-export const PrevBtn = ({ currentStep, setCurrentStep }: PrevProps) => {
-  if (currentStep === 0) return null;
+export const PrevBtn = ({ ...props }: PrevBtnProps) => {
+  if (props.currentStep === 0) return null;
+ 
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (props.setCurrentStep) {
+          props.setCurrentStep((s: number) => s - 1);
+      }
+  };
 
   return (
     <button
-      onClick={() => setCurrentStep?.((s) => s - 1)}
-      style={{
-        color: "#666",
-        padding: "12px 20px",
-        background: "transparent",
-        borderRadius: "10px",
-        cursor: "pointer",
-        fontWeight: "600",
-      }}
+      onClick={handleClick}
+        style={{
+            color: '#666',
+            fontWeight: '600',
+            fontSize: '14px',
+            padding: '10px 18px',
+            border: '2px solid transparent',
+            background: 'transparent',
+            cursor: 'pointer',
+            borderRadius: '10px',
+            transition: 'all 0.2s ease',
+            pointerEvents: 'auto',
+            position: 'relative',
+            zIndex: 1000001,
+            whiteSpace: 'nowrap',
+        }}
     >
       Anterior
     </button>

@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useTour } from '@reactour/tour';
 import { tourSteps } from './TourSteps';
 
 export function TourLogic() {
+  const pathname = usePathname();
   const { setSteps, setIsOpen, setCurrentStep, isOpen } = useTour();
   const [hasStarted, setHasStarted] = useState(false);
 
@@ -21,6 +23,14 @@ export function TourLogic() {
 
     setSteps(filteredSteps);
 
+    // IMPORTANTE: Solo iniciar el tour si estamos en la página principal
+    const isHomePage = pathname === '/' || pathname === '/es' || pathname === '/en';
+    
+    if (!isHomePage) {
+      // Si no estamos en el home, no iniciar el tour
+      return;
+    }
+
     // Lógica de inicio
     const tourVisto = localStorage.getItem('servineoTourVisto');
    
@@ -36,7 +46,7 @@ export function TourLogic() {
      
       return () => clearTimeout(timer);
     }
-  }, [setSteps, setIsOpen, setCurrentStep]);
+  }, [setSteps, setIsOpen, setCurrentStep, pathname]);
 
   // Guardar que se vio SOLO al cerrar el tour voluntariamente
   useEffect(() => {

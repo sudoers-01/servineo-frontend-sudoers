@@ -16,10 +16,8 @@ export default function Home() {
       {/* Ancla invisible para el inicio del Tour */}
       <div id="tour-start-point" className="absolute top-0 left-0 w-1 h-1 opacity-0 pointer-events-none" />
 
-      {/* Hero Section con ID para el tour */}
-      <div id="tour-search-bar">
-        <HeroSection />
-      </div>
+      {/* Hero Section */}
+      <HeroSection />
 
       <section className="py-16 px-4 bg-white">
         <div className="max-w-7xl mx-auto">

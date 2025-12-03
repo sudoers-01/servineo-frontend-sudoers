@@ -4,24 +4,24 @@ export const tourSteps: StepType[] = [
   {
     selector: '#tour-start-point',
     content: ({ setIsOpen, setCurrentStep }: any) => (
-      <div className="text-center p-4">
-        <h3 className="text-2xl font-bold text-[#2B6AE0] mb-4">¡Hola! Bienvenido a Servineo</h3>
-        <p className="text-gray-700 leading-relaxed text-base mb-6">
+      <div className="text-center p-2">
+        <h3 className="text-2xl font-bold text-[#2B6AE0] mb-3">¡Hola! Bienvenido a Servineo</h3>
+        <p className="text-gray-700 leading-relaxed text-base mb-5">
           ¿Te gustaría realizar un breve recorrido para conocer las funciones principales de la plataforma?
         </p>
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-3">
           <button
             onClick={() => {
                 setIsOpen(false);
                 localStorage.setItem('servineoTourVisto', 'true');
             }}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition"
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-100 transition text-sm"
           >
             No, gracias
           </button>
           <button
             onClick={() => setCurrentStep(1)}
-            className="px-4 py-2 bg-[#2B6AE0] text-white rounded-lg font-bold hover:bg-blue-700 transition shadow-md"
+            className="px-4 py-2 bg-[#2B6AE0] text-white rounded-lg font-bold hover:bg-blue-700 transition shadow-md text-sm"
           >
             Iniciar Recorrido
           </button>
