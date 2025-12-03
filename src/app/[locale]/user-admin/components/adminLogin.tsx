@@ -4,11 +4,35 @@ import { useRouter } from 'next/navigation';
 import styles from '../styles/admin.module.css';
 import { adminAPI } from '../lib/api';
 
+// Definir tipo para la respuesta de Google Token Client
+interface GoogleTokenResponse {
+    access_token?: string;
+    error?: string;
+    credential?: string;
+}
+
+// Definir tipo para el callback de Google
+type GoogleTokenCallback = (response: GoogleTokenResponse) => void;
+
+// Extender la interfaz Window para incluir Google
 declare global {
     interface Window {
-        google?: any;
+        google?: {
+            accounts: {
+                oauth2: {
+                    initTokenClient: (config: {
+                        client_id: string;
+                        scope: string;
+                        callback: GoogleTokenCallback;
+                    }) => {
+                        requestAccessToken: () => void;
+                    };
+                    };
+            };
+        };
     }
 }
+
 
 export default function AdminLogin() {
     const [email, setEmail] = useState('');
@@ -33,14 +57,26 @@ export default function AdminLogin() {
                 throw new Error('Google API no disponible');
             }
 
+            const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
+
+            if (!clientId) {
+                throw new Error('Google Client ID no configurado');
+            }
             // Solicitar token
             client({
-                client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
+                client_id: clientId,
                 scope: 'email profile',
-                callback: async (response: any) => {
+                callback: async (response: GoogleTokenResponse) => {
                     if (response.error) {
                         console.error('Google auth error:', response);
                         alert('Error con Google Login');
+                        setGoogleLoading(false);
+                        return;
+                    }
+
+                    if (!response.credential) {
+                        console.error('No credential received from Google');
+                        alert('Error: No se recibió credencial de Google');
                         setGoogleLoading(false);
                         return;
                     }
@@ -72,7 +108,7 @@ export default function AdminLogin() {
     };
 
     // Función para cargar script de Google
-    const loadGoogleScript = () => {
+    const loadGoogleScript = (): Promise<boolean> => {
         return new Promise((resolve, reject) => {
             if (window.google) {
                 resolve(true);
