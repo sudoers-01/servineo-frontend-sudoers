@@ -189,7 +189,7 @@ export default function TopMenu() {
           >
             <div className="relative overflow-hidden rounded-full shadow-md">
               <Image
-                src="/icon.png"
+                src="/es/img/icon.png"
                 alt="Logo de Servineo"
                 width={40}
                 height={40}
