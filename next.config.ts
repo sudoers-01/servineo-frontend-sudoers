@@ -46,7 +46,7 @@ const nextConfig: NextConfig = {
       },
       {
         protocol: 'https',
-        hostname: 'doc-*.googleusercontent.com',
+        hostname: 'regex:^doc-[^.]+\\.googleusercontent\\.com$',
         pathname: '/**',
       },
     ],
