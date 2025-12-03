@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getPromotionsByOfferId, deletePromotion } from '@/services/promotions';
 import { getJobInfo } from '@/services/job-info';
@@ -19,14 +19,14 @@ export default function JobPromotionsPage() {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       try {
         const jobData = await getJobInfo(jobId);
         if (jobData?.title) setJobTitle(jobData.title);
       } catch (e) {
-        console.warn('No se pudo cargar info del trabajo.');
+        console.warn('No se pudo cargar info del trabajo.', e);
       }
 
       const promosData = await getPromotionsByOfferId(jobId);
@@ -36,11 +36,11 @@ export default function JobPromotionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId]);
 
   useEffect(() => {
     if (jobId) loadData();
-  }, [jobId]);
+  }, [jobId, loadData]);
 
   const toggleSelection = (id: string) => {
     setSelectedIds((prev) =>
@@ -59,6 +59,7 @@ export default function JobPromotionsPage() {
       setIsDeleteModalOpen(false);
     } catch (error) {
       alert('Hubo un error al eliminar algunas promociones');
+      console.error('Error deleting promotions:', error);
     } finally {
       setIsDeleting(false);
     }
