@@ -26,7 +26,7 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
     setLoading(true);
 
     try {
-      const res: ApiResponse<GoogleLoginResponse> = await api.post('/auth/google', {
+      const res: ApiResponse<GoogleLoginResponse> = await api.post('/login/google', {
         credential: credentialResponse.credential,
         token: credentialResponse.credential,
         modo: 'login',
@@ -60,13 +60,13 @@ export default function LoginGoogle({ onMensajeChange }: LoginGoogleProps) {
   };
 
   return (
-    <div className="flex flex-col items-center gap-2">
-      <div className="w-full flex justify-center">
+    <div className='flex flex-col items-center gap-2'>
+      <div className='w-full flex justify-center'>
         <GoogleLogin onSuccess={handleSuccess} onError={handleError} />
       </div>
 
       {loading && (
-        <p className="text-sm text-gray-500 mt-2 animate-pulse">Verificando credenciales...</p>
+        <p className='text-sm text-gray-500 mt-2 animate-pulse'>Verificando credenciales...</p>
       )}
     </div>
   );

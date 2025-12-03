@@ -183,12 +183,12 @@ export function ExperienceSection({
     setPendingDelete(null);
   };
 
-  if (isLoading) return <div className="text-center p-8">Cargando experiencia...</div>;
+  if (isLoading) return <div className='text-center p-8'>Cargando experiencia...</div>;
   if (isError)
-    return <div className="text-center p-8 text-red-600">Error al cargar la experiencia.</div>;
+    return <div className='text-center p-8 text-red-600'>Error al cargar la experiencia.</div>;
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <NotificationModal
         isOpen={notification.isOpen}
         onClose={() => {
@@ -203,42 +203,42 @@ export function ExperienceSection({
         onCancel={cancelDelete}
       />
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <Building2 className="h-5 w-5 text-blue-600" />
+      <div className='flex items-center justify-between'>
+        <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
+          <Building2 className='h-5 w-5 text-blue-600' />
           {readOnly ? 'Experiencia Laboral' : 'Mi Experiencia Laboral'}
         </h2>
         {!readOnly && (
           <PillButton
             onClick={() => setIsModalOpen(true)}
-            className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+            className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
           >
-            <Plus className="h-4 w-4" /> Agregar Experiencia
+            <Plus className='h-4 w-4' /> Agregar Experiencia
           </PillButton>
         )}
       </div>
 
       {experiences.length === 0 ? (
-        <div className="text-center p-8 text-gray-500">
+        <div className='text-center p-8 text-gray-500'>
           {readOnly
             ? 'Este profesional aún no ha registrado experiencia laboral.'
             : 'Aún no has agregado ninguna experiencia laboral.'}
         </div>
       ) : (
-        <div className="relative border-l-2 border-gray-200 ml-3 space-y-8 py-2">
+        <div className='relative border-l-2 border-gray-200 ml-3 space-y-8 py-2'>
           {experiences.map((exp) => (
-            <div key={exp._id} className="relative pl-8 group">
-              <div className="absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-600 shadow-sm" />
-              <div className="bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-all hover:border-blue-200">
-                <div className="flex justify-between items-start gap-4">
-                  <div className="space-y-2">
-                    <h3 className="font-semibold text-gray-900 text-lg">{exp.jobTitle}</h3>
-                    <div className="flex items-center gap-2 text-gray-600 font-medium">
-                      <Briefcase className="h-4 w-4" /> <span>{exp.organization}</span>
+            <div key={exp._id} className='relative pl-8 group'>
+              <div className='absolute -left-[9px] top-1 h-4 w-4 rounded-full border-2 border-white bg-blue-600 shadow-sm' />
+              <div className='bg-white rounded-xl border border-gray-200 p-5 hover:shadow-md transition-all hover:border-blue-200'>
+                <div className='flex justify-between items-start gap-4'>
+                  <div className='space-y-2'>
+                    <h3 className='font-semibold text-gray-900 text-lg'>{exp.jobTitle}</h3>
+                    <div className='flex items-center gap-2 text-gray-600 font-medium'>
+                      <Briefcase className='h-4 w-4' /> <span>{exp.organization}</span>
                     </div>
-                    <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-                      <span className="inline-flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-md">
-                        <Calendar className="h-3.5 w-3.5" />{' '}
+                    <div className='flex flex-wrap gap-4 text-sm text-gray-500'>
+                      <span className='inline-flex items-center gap-1.5 bg-gray-50 px-2.5 py-1 rounded-md'>
+                        <Calendar className='h-3.5 w-3.5' />{' '}
                         {new Date(exp.startDate).toLocaleDateString()} -{' '}
                         {exp.isCurrent
                           ? 'Presente'
@@ -246,26 +246,26 @@ export function ExperienceSection({
                             ? new Date(exp.endDate).toLocaleDateString()
                             : ''}
                       </span>
-                      <span className="px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md font-medium text-xs uppercase tracking-wide">
+                      <span className='px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md font-medium text-xs uppercase tracking-wide'>
                         {exp.jobType}
                       </span>
                     </div>
                   </div>
                   {!readOnly && (
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className='flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity'>
                       <button
                         onClick={() => handleEdit(exp)}
-                        className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                        title="Editar"
+                        className='p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors'
+                        title='Editar'
                       >
-                        <Edit2 className="h-4 w-4" />
+                        <Edit2 className='h-4 w-4' />
                       </button>
                       <button
                         onClick={() => handleDelete(exp._id!)}
-                        className="p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors "
-                        title="Eliminar"
+                        className='p-2 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors '
+                        title='Eliminar'
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className='h-4 w-4' />
                       </button>
                     </div>
                   )}

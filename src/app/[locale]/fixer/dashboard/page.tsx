@@ -49,7 +49,7 @@ export default function FixerDashboardPage() {
   const [updateDescription] = useUpdateDescriptionMutation();
 
   if (!user) {
-    return <div className="p-8 text-center">Cargando perfil...</div>;
+    return <div className='p-8 text-center'>Cargando perfil...</div>;
   }
 
   const handleSaveDescription = async () => {
@@ -65,47 +65,47 @@ export default function FixerDashboardPage() {
   };
 
   return (
-    <div className="container mx-auto max-w-6xl p-4 space-y-6">
+    <div className='container mx-auto max-w-6xl p-4 space-y-6'>
       {/* Profile Header */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="h-32 bg-gradient-to-r from-blue-600 to-blue-400"></div>
-        <div className="px-6 pb-6">
-          <div className="relative flex justify-between items-end -mt-12 mb-4">
-            <div className="relative">
-              <div className="h-24 w-24 rounded-full border-4 border-white bg-gray-200 overflow-hidden">
+      <div className='bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden'>
+        <div className='h-32 bg-gradient-to-r from-blue-600 to-blue-400'></div>
+        <div className='px-6 pb-6'>
+          <div className='relative flex justify-between items-end -mt-12 mb-4'>
+            <div className='relative'>
+              <div className='h-24 w-24 rounded-full border-4 border-white bg-gray-200 overflow-hidden'>
                 {user.url_photo ? (
                   <Image
                     src={user.url_photo}
                     alt={user.name}
                     fill
-                    className="object-cover"
+                    className='object-cover'
                     priority
-                    sizes="96px"
+                    sizes='96px'
                   />
                 ) : (
-                  <User className="h-full w-full p-4 text-gray-400" />
+                  <User className='h-full w-full p-4 text-gray-400' />
                 )}
               </div>
               <div
-                className="absolute bottom-0 right-0 h-6 w-6 bg-green-500 border-2 border-white rounded-full"
-                title="Disponible"
+                className='absolute bottom-0 right-0 h-6 w-6 bg-green-500 border-2 border-white rounded-full'
+                title='Disponible'
               ></div>
             </div>
-            <div className="flex gap-2">
+            <div className='flex gap-2'>
               {!editingDescription ? (
                 <button
                   onClick={() => setEditingDescription(true)}
-                  className="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors flex items-center gap-1"
+                  className='px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full text-sm font-medium transition-colors flex items-center gap-1'
                 >
-                  <Edit2 className="h-4 w-4" />
+                  <Edit2 className='h-4 w-4' />
                   Editar Perfil
                 </button>
               ) : (
                 <button
                   onClick={handleSaveDescription}
-                  className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm font-medium transition-colors flex items-center gap-1"
+                  className='px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-full text-sm font-medium transition-colors flex items-center gap-1'
                 >
-                  <Check className="h-4 w-4" />
+                  <Check className='h-4 w-4' />
                   Guardar
                 </button>
               )}
@@ -113,34 +113,34 @@ export default function FixerDashboardPage() {
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{user.name}</h1>
+            <h1 className='text-2xl font-bold text-gray-900'>{user.name}</h1>
 
             {!editingDescription ? (
-              <p className="text-gray-500 font-medium">{descriptionValue}</p>
+              <p className='text-gray-500 font-medium'>{descriptionValue}</p>
             ) : (
               <input
-                type="text"
+                type='text'
                 value={descriptionValue}
                 onChange={(e) => setDescriptionValue(e.target.value)}
-                className="border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 w-full max-w-xs"
+                className='border border-gray-300 rounded-md px-2 py-1 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-500 w-full max-w-xs'
               />
             )}
 
-            <div className="mt-4 flex flex-wrap gap-4 text-sm text-gray-600">
+            <div className='mt-4 flex flex-wrap gap-4 text-sm text-gray-600'>
               {user.email && (
-                <div className="flex items-center gap-1">
-                  <Mail className="h-4 w-4" />
+                <div className='flex items-center gap-1'>
+                  <Mail className='h-4 w-4' />
                   {user.email}
                 </div>
               )}
               {user.telefono && (
-                <div className="flex items-center gap-1">
-                  <Phone className="h-4 w-4" />
+                <div className='flex items-center gap-1'>
+                  <Phone className='h-4 w-4' />
                   {user.telefono}
                 </div>
               )}
-              <div className="flex items-center gap-1">
-                <MapPin className="h-4 w-4" />
+              <div className='flex items-center gap-1'>
+                <MapPin className='h-4 w-4' />
                 Cochabamba, Bolivia
               </div>
             </div>
@@ -148,10 +148,10 @@ export default function FixerDashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className='grid grid-cols-1 lg:grid-cols-4 gap-6'>
         {/* Sidebar Navigation */}
-        <div className="lg:col-span-1 space-y-2">
-          <nav className="flex flex-col gap-1">
+        <div className='lg:col-span-1 space-y-2'>
+          <nav className='flex flex-col gap-1'>
             <button
               onClick={() => setActiveTab('offers')}
               className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
@@ -160,7 +160,7 @@ export default function FixerDashboardPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <Briefcase className="h-5 w-5" />
+              <Briefcase className='h-5 w-5' />
               Ofertas de Trabajo
             </button>
             <button
@@ -171,7 +171,7 @@ export default function FixerDashboardPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <Award className="h-5 w-5" />
+              <Award className='h-5 w-5' />
               Certificaciones
             </button>
             <button
@@ -182,7 +182,7 @@ export default function FixerDashboardPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <Building2 className="h-5 w-5" />
+              <Building2 className='h-5 w-5' />
               Experiencia
             </button>
             <button
@@ -193,7 +193,7 @@ export default function FixerDashboardPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <ImageIcon className="h-5 w-5" />
+              <ImageIcon className='h-5 w-5' />
               Portafolio
             </button>
             <button
@@ -204,15 +204,15 @@ export default function FixerDashboardPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-              <Award className="h-5 w-5" />
+              <Award className='h-5 w-5' />
               Estadísticas
             </button>
           </nav>
         </div>
 
         {/* Main Content */}
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 min-h-[500px]">
+        <div className='lg:col-span-3'>
+          <div className='bg-white rounded-2xl p-6 shadow-sm border border-gray-200 min-h-[500px]'>
             {activeTab === 'offers' && <JobOffersSection />}
 
             {activeTab === 'certs' && <CertificationsSection fixerId={user._id || user.id} />}

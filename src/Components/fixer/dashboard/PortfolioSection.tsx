@@ -206,12 +206,12 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     setDeleteId(null);
   };
 
-  if (isLoading) return <div className="text-center p-8 text-gray-500">Cargando portafolio...</div>;
+  if (isLoading) return <div className='text-center p-8 text-gray-500'>Cargando portafolio...</div>;
   if (isError)
-    return <div className="text-center p-8 text-red-500">Error al cargar el portafolio.</div>;
+    return <div className='text-center p-8 text-red-500'>Error al cargar el portafolio.</div>;
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <NotificationModal
         isOpen={notification.isOpen}
         onClose={() => setNotification((prev) => ({ ...prev, isOpen: false }))}
@@ -224,27 +224,27 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         onCancel={deleteId ? cancelDelete : undefined}
       />
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <ImageIcon className="h-5 w-5 text-blue-600" />
+      <div className='flex items-center justify-between'>
+        <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
+          <ImageIcon className='h-5 w-5 text-blue-600' />
           {readOnly ? 'Portafolio' : 'Mi Portafolio'}
         </h2>
 
         {!readOnly && (
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <PillButton
               onClick={() => handleOpenModal('video')}
-              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
             >
-              <Video className="h-4 w-4" />
+              <Video className='h-4 w-4' />
               Video
             </PillButton>
 
             <PillButton
               onClick={() => handleOpenModal('image')}
-              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
             >
-              <Plus className="h-4 w-4" />
+              <Plus className='h-4 w-4' />
               Imagen
             </PillButton>
           </div>
@@ -252,11 +252,11 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-          <p className="text-gray-500">No hay elementos en el portafolio aún.</p>
+        <div className='text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-300'>
+          <p className='text-gray-500'>No hay elementos en el portafolio aún.</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
           {items.map((item) => {
             const isVideo = item.type === 'video';
             const videoId = getYouTubeId(item.youtubeUrl || undefined);
@@ -268,7 +268,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             return (
               <div
                 key={item._id}
-                className="group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-lg transition-all"
+                className='group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-lg transition-all'
               >
                 {/* BOTÓN DE ELIMINAR ARRIBA A LA DERECHA */}
                 {!readOnly && (
@@ -278,60 +278,60 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                       handleDeleteRequest(item._id!);
                     }}
                     disabled={isDeleting}
-                    className="absolute top-2 right-2 z-10 p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-all shadow-md hover:scale-110 opacity-0 group-hover:opacity-100"
-                    title="Eliminar"
+                    className='absolute top-2 right-2 z-10 p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-all shadow-md hover:scale-110 opacity-0 group-hover:opacity-100'
+                    title='Eliminar'
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className='h-4 w-4' />
                   </button>
                 )}
 
                 {/* CONTENIDO DEL ITEM */}
                 {isVideo && videoId ? (
-                  <div className="absolute inset-0 w-full h-full">
+                  <div className='absolute inset-0 w-full h-full'>
                     <iframe
-                      className="w-full h-full rounded-2xl"
+                      className='w-full h-full rounded-2xl'
                       src={`https://www.youtube.com/embed/${videoId}`}
-                      title="YouTube video"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      title='YouTube video'
+                      frameBorder='0'
+                      allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
                       allowFullScreen
                     />
                   </div>
                 ) : hasUrl ? (
                   <div
-                    className="absolute inset-0 cursor-pointer"
+                    className='absolute inset-0 cursor-pointer'
                     onClick={() => setFullscreenImage(item.url || null)}
                   >
                     {isDataUrl ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={item.url!}
-                        alt="Portfolio item"
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        alt='Portfolio item'
+                        className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
                       />
                     ) : isHttpUrl ? (
                       <Image
                         src={item.url!}
-                        alt="Portfolio item"
+                        alt='Portfolio item'
                         fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes='(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
+                        className='object-cover transition-transform duration-500 group-hover:scale-110'
                         unoptimized={true}
                       />
                     ) : (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={item.url!}
-                        alt="Portfolio item"
-                        className="w-full h-full object-cover"
+                        alt='Portfolio item'
+                        className='w-full h-full object-cover'
                       />
                     )}
                   </div>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                    <div className="text-center p-4">
-                      <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-xs text-gray-500 font-medium">Sin imagen</p>
+                  <div className='absolute inset-0 flex items-center justify-center bg-gray-100'>
+                    <div className='text-center p-4'>
+                      <ImageIcon className='h-12 w-12 text-gray-400 mx-auto mb-2' />
+                      <p className='text-xs text-gray-500 font-medium'>Sin imagen</p>
                     </div>
                   </div>
                 )}
@@ -447,24 +447,24 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
 
       {fullscreenImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fade-in"
+          className='fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fade-in'
           onClick={() => setFullscreenImage(null)}
         >
           <button
             onClick={() => setFullscreenImage(null)}
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+            className='absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10'
           >
-            <X className="h-6 w-6" />
+            <X className='h-6 w-6' />
           </button>
           <div
-            className="relative w-full h-full max-w-6xl max-h-[90vh]"
+            className='relative w-full h-full max-w-6xl max-h-[90vh]'
             onClick={(e) => e.stopPropagation()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={fullscreenImage}
-              alt="Imagen completa"
-              className="w-full h-full object-contain"
+              alt='Imagen completa'
+              className='w-full h-full object-contain'
             />
           </div>
         </div>

@@ -349,32 +349,32 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
           }
         `}</style>
 
-        <div className="p-4 sm:p-6 h-full flex flex-col">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-base sm:text-lg font-bold">{t('filters')}</h2>
+        <div className='p-4 sm:p-6 h-full flex flex-col'>
+          <div className='flex justify-between items-center mb-6'>
+            <h2 className='text-base sm:text-lg font-bold'>{t('filters')}</h2>
 
-            <div className="flex items-center gap-2">
+            <div className='flex items-center gap-2'>
               <button
                 onClick={handleReset}
-                className="bg-[#2B6AE0] text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#2B31E0] transition-colors"
+                className='bg-[#2B6AE0] text-white px-3 sm:px-4 py-2 rounded-lg text-sm font-semibold hover:bg-[#2B31E0] transition-colors'
               >
                 {t('resetButton.desktop')}
               </button>
             </div>
           </div>
 
-          <div className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className='flex-1 overflow-y-auto custom-scrollbar'>
             {/* Filtro: Nombre de Fixer */}
-            <div className="mb-6">
+            <div className='mb-6'>
               <div
-                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+                className='bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors'
                 onClick={() => toggleSection('fixer')}
               >
-                <span className="truncate">{t('fixerName')}</span>
+                <span className='truncate'>{t('fixerName')}</span>
               </div>
               {openSections.fixer && (
-                <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
-                  <div className="flex flex-col gap-2">
+                <div className='bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar'>
+                  <div className='flex flex-col gap-2'>
                     {nameOptions.map((range) => {
                       const count = getRangeCount(range.dbValue);
                       const disabled = false;
@@ -385,16 +385,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                         >
                           <div className={`flex items-center gap-2`}>
                             <input
-                              type="checkbox"
-                              className="w-4 h-4 cursor-pointer flex-shrink-0"
+                              type='checkbox'
+                              className='w-4 h-4 cursor-pointer flex-shrink-0'
                               checked={selectedRanges.includes(range.dbValue)}
                               onChange={() => handleRangeChange(range.dbValue)}
                               disabled={disabled}
                             />
-                            <span className="truncate">{range.label}</span>
+                            <span className='truncate'>{range.label}</span>
                           </div>
                           {loadingCounts ? (
-                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                            <span className='inline-block h-4 w-8 bg-gray-200 rounded animate-pulse' />
                           ) : (
                             <span
                               className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}
@@ -411,16 +411,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
             </div>
 
             {/* Filtro: Ciudad */}
-            <div className="mb-6">
+            <div className='mb-6'>
               <div
-                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+                className='bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors'
                 onClick={() => toggleSection('ciudad')}
               >
-                <span className="truncate">{t('city')}</span>
+                <span className='truncate'>{t('city')}</span>
               </div>
               {openSections.ciudad && (
-                <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
-                  <div className="flex flex-col gap-2">
+                <div className='bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar'>
+                  <div className='flex flex-col gap-2'>
                     {cities.map((city) => {
                       const isSelected = selectedCities.includes(city.dbValue);
                       const isAutoMarked =
@@ -442,16 +442,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             className={`flex items-center gap-2 ${disabled ? 'pointer-events-none' : ''}`}
                           >
                             <input
-                              type="checkbox"
-                              className="w-4 h-4 flex-shrink-0 cursor-pointer"
+                              type='checkbox'
+                              className='w-4 h-4 flex-shrink-0 cursor-pointer'
                               checked={isSelected}
                               onChange={() => handleCityChange(city.dbValue)}
                               disabled={disabled}
                             />
-                            <span className="truncate">{city.label}</span>
+                            <span className='truncate'>{city.label}</span>
                           </div>
                           {loadingCounts ? (
-                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                            <span className='inline-block h-4 w-8 bg-gray-200 rounded animate-pulse' />
                           ) : (
                             <span
                               className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}
@@ -468,16 +468,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
             </div>
 
             {/* Filtro: Tipo de Trabajo */}
-            <div className="mb-6">
+            <div className='mb-6'>
               <div
-                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+                className='bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors'
                 onClick={() => toggleSection('trabajo')}
               >
-                <span className="truncate">{t('jobCategory')}</span>
+                <span className='truncate'>{t('jobCategory')}</span>
               </div>
               {openSections.trabajo && (
-                <div className="bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar">
-                  <div className="flex flex-col gap-2">
+                <div className='bg-white border border-gray-200 p-4 rounded max-h-[130px] overflow-y-auto custom-scrollbar'>
+                  <div className='flex flex-col gap-2'>
                     {jobTypesSorted.map((job) => {
                       const isSelected = selectedJobs.includes(job.dbValue);
                       const count = backendCounts?.categories?.[job.dbValue] ?? 0;
@@ -487,20 +487,20 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                       return (
                         <label
                           key={job.dbValue}
-                          className="flex items-center justify-between gap-2 text-xs min-w-0 transition-colors cursor-pointer hover:text-[#2B31E0]"
+                          className='flex items-center justify-between gap-2 text-xs min-w-0 transition-colors cursor-pointer hover:text-[#2B31E0]'
                         >
-                          <div className="flex items-center gap-2">
+                          <div className='flex items-center gap-2'>
                             <input
-                              type="checkbox"
-                              className="w-4 h-4 flex-shrink-0 cursor-pointer"
+                              type='checkbox'
+                              className='w-4 h-4 flex-shrink-0 cursor-pointer'
                               checked={isSelected}
                               onChange={() => handleJobChange(job.dbValue)}
                               disabled={disabled}
                             />
-                            <span className="truncate">{job.label}</span>
+                            <span className='truncate'>{job.label}</span>
                           </div>
                           {loadingCounts ? (
-                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                            <span className='inline-block h-4 w-8 bg-gray-200 rounded animate-pulse' />
                           ) : (
                             <span
                               className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs`}
@@ -517,16 +517,16 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
             </div>
 
             {/* Filtro: Calificación */}
-            <div className="mb-6">
+            <div className='mb-6'>
               <div
-                className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors"
+                className='bg-[#2B6AE0] text-white px-4 py-2 text-sm font-semibold mb-3 cursor-pointer hover:bg-[#2B31E0] rounded-none transition-colors'
                 onClick={() => toggleSection('rating')}
               >
-                <span className="truncate">Calificación</span>
+                <span className='truncate'>Calificación</span>
               </div>
               {openSections.rating && (
-                <div className="bg-white border border-gray-200 p-3 sm:p-4 rounded">
-                  <div className="flex items-center gap-1 justify-center">
+                <div className='bg-white border border-gray-200 p-3 sm:p-4 rounded'>
+                  <div className='flex items-center gap-1 justify-center'>
                     {Array.from({ length: 5 }, (_, idx) => {
                       const starNumber = idx + 1;
                       const filled = (selectedRating ?? 0) >= starNumber;
@@ -536,10 +536,10 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                       return (
                         <div
                           key={starNumber}
-                          className="flex flex-col items-center gap-1 min-w-[32px]"
+                          className='flex flex-col items-center gap-1 min-w-[32px]'
                         >
                           <button
-                            type="button"
+                            type='button'
                             onClick={() => !disabled && handleRatingClick(starNumber)}
                             className={`transition-transform touch-manipulation flex-shrink-0 ${
                               disabled
@@ -550,14 +550,14 @@ export function FilterDrawer({ isOpen, onClose, onFiltersApply, onReset }: Filte
                             disabled={disabled}
                           >
                             <Star
-                              className="w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]"
+                              className='w-[22px] h-[22px] sm:w-[26px] sm:h-[26px]'
                               fill={filled ? '#fbbf24' : '#ffffff'}
-                              stroke="#000000"
+                              stroke='#000000'
                               strokeWidth={2}
                             />
                           </button>
                           {loadingCounts ? (
-                            <span className="inline-block h-4 w-8 bg-gray-200 rounded animate-pulse" />
+                            <span className='inline-block h-4 w-8 bg-gray-200 rounded animate-pulse' />
                           ) : (
                             <span
                               className={`${count > 0 ? 'text-[#2B6AE0]' : 'text-gray-400'} text-xs whitespace-nowrap`}
