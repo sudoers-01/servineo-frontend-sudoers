@@ -18,6 +18,7 @@ export const serviceStyles: Record<string, ServiceStyle> = {
   "otros":        { color: "#2B31E0", iconUrl: "/avatar.png" },
 };
 
+
 export function getServiceStyle(service: string): ServiceStyle {
   return serviceStyles[service.toLowerCase()] || serviceStyles.otros;
 }
