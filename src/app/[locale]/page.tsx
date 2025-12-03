@@ -8,11 +8,9 @@ import MapSection from "@/Components/Home/Map-section";
 import InspirationSection from "@/Components/Home/Inspiration-section";
 import RecentOffersSection from "@/Components/Home/RecentOffer-secction";
 import FooterSection from "@/Components/Home/Footer-section";
-import { useTranslations } from "next-intl";
 
 
 export default function Home() {
-  const t = useTranslations('SignUp');
   return (
     <div className='min-h-screen bg-white'>
       <HeroSection />

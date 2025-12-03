@@ -219,7 +219,7 @@ export async function generateAvailableSlotsFromAPI(
     for (const schedule of fixerSchedules) {
       const start = moment(schedule.starting_time).toDate();
       const end = moment(schedule.finishing_time).toDate();
-      let slot: SlotEvent = {
+      const slot: SlotEvent = {
         title: "Disponible",
         start,
         end,

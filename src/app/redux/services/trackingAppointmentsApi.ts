@@ -44,7 +44,7 @@ export const trackingAppointmentsApi = baseApi.injectEndpoints({
 
     getTrackingMetrics: builder.query<TrackingMetrics, FilterArgs>({
       query: ({ startDate, endDate }) => {
-        let url = '/api/admin/metrics'; 
+        const url = '/api/admin/metrics'; 
         const params = new URLSearchParams();
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);

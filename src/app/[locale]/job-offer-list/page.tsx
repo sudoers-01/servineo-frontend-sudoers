@@ -58,7 +58,6 @@ export default function JobOffersPage() {
     registrosPorPagina,
     error: reduxError,
     filters,
-    rating,
   } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
@@ -122,32 +121,10 @@ export default function JobOffersPage() {
     return 0;
   }, [isLoading, total]);
 
-  // Actualizar el conteo cuando cambian los resultados
-  useEffect(() => {
-    const currentCount = calculateSearchCount();
-    if (currentCount !== actualSearchCountRef.current) {
-      console.log('Actualizando conteo de resultados:', {
-        anterior: actualSearchCountRef.current,
-        nuevo: currentCount,
-        total: total,
-        isLoading: isLoading,
-      });
-      actualSearchCountRef.current = currentCount;
-
-      // Si hay una búsqueda pendiente y ya tenemos el conteo correcto, enviarla
-      if (
-        hasSentSearchRef.current === false &&
-        previousSearchQueryRef.current &&
-        currentCount > 0
-      ) {
-        sendPendingSearch();
-      }
-    }
-  }, [calculateSearchCount, total, isLoading]);
-
   const getFixerNameValue = useCallback((): string => {
+    const filterObj = filters as unknown as Record<string, unknown>;
     const fixerNameFilter =
-      (filters as any).fixerName || (filters as any).fixer_name || (filters as any).fixerNames;
+      filterObj.fixerName || filterObj.fixer_name || filterObj.fixerNames;
 
     if (
       !fixerNameFilter ||
@@ -231,6 +208,29 @@ export default function JobOffersPage() {
     }
   }, [userRole, logSearch, getFixerNameValue, getCityValue, getJobTypeValue]);
 
+  // Actualizar el conteo cuando cambian los resultados
+  useEffect(() => {
+    const currentCount = calculateSearchCount();
+    if (currentCount !== actualSearchCountRef.current) {
+      console.log('Actualizando conteo de resultados:', {
+        anterior: actualSearchCountRef.current,
+        nuevo: currentCount,
+        total: total,
+        isLoading: isLoading,
+      });
+      actualSearchCountRef.current = currentCount;
+
+      // Si hay una búsqueda pendiente y ya tenemos el conteo correcto, enviarla
+      if (
+        hasSentSearchRef.current === false &&
+        previousSearchQueryRef.current &&
+        currentCount > 0
+      ) {
+        sendPendingSearch();
+      }
+    }
+  }, [calculateSearchCount, total, isLoading, sendPendingSearch]);
+
   const handleSearchSubmit = useCallback(
     async (query: string) => {
       scrollRestoredRef.current = true;
@@ -274,10 +274,10 @@ export default function JobOffersPage() {
       return;
     }
 
-    const currentFilters = filters as any;
-    const previousFilters = previousFiltersRef.current as any;
+    const currentFilters = filters as unknown as Record<string, unknown>;
+    const previousFilters = previousFiltersRef.current as unknown as Record<string, unknown>;
 
-    const compareFilterValues = (prev: any, curr: any, key: string) => {
+    const compareFilterValues = (prev: Record<string, unknown>, curr: Record<string, unknown>, key: string) => {
       const prevValue = prev[key];
       const currValue = curr[key];
 

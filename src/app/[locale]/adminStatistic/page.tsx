@@ -16,7 +16,7 @@ export default function Page() {
   }, [selectedPeriod, refetch]);
 
   // Transformar los datos del backend al formato que esperan los componentes
-  const transformFilterData = (filterData: any) => {
+  const transformFilterData = (filterData: Record<string, number> | undefined) => {
     if (!filterData) return [];
     return Object.entries(filterData).map(([name, value]) => ({
       name,

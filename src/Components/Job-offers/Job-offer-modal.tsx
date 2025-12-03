@@ -21,36 +21,37 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
 
   // Type guard: AdaptedJobOffer (comes from backend shape that already has services)
   const isAdapted = (o: JobOfferData | AdaptedJobOffer): o is AdaptedJobOffer => {
-    return 'services' in o && Array.isArray((o as any).services);
+    return 'services' in o && Array.isArray(o.services);
   };
 
   // Normalize common fields
   const title = offer.title ?? '';
   const description = offer.description ?? '';
-  const price = (offer as any).price ?? 0;
+  const price = isAdapted(offer) ? offer.price : (offer as JobOfferData).price ?? 0;
   const city = offer.city ?? '';
-  const createdAt = (offer as any).createdAt ?? new Date();
-  const tags: string[] = (offer as any).tags ?? [];
+  const createdAt = isAdapted(offer) 
+    ? offer.createdAt 
+    : (offer as JobOfferData).createdAt ?? new Date();
   const category = isAdapted(offer)
     ? (offer.services?.[0] ?? 'General')
-    : ((offer as any).category ?? 'General');
+    : ((offer as JobOfferData).category ?? 'General');
 
   // phone/whatsapp normalization
   const phone = isAdapted(offer)
-    ? ((offer as any).phone ?? '')
-    : ((offer as any).contactPhone ?? '');
-  const whatsappRaw = (offer as any).whatsapp ?? phone ?? '';
+    ? (offer.phone ?? '')
+    : ((offer as JobOfferData).contactPhone ?? '');
+  const whatsappRaw = phone ?? '';
   const whatsappClean = (whatsappRaw || '').toString().replace(/\D/g, '');
 
   // Images collection
   const images: string[] = (() => {
     if (isAdapted(offer)) {
-      return (offer as AdaptedJobOffer).photos ?? [];
+      return offer.photos ?? [];
     } else {
       const o = offer as JobOfferData;
       if (o.allImages && o.allImages.length > 0) return o.allImages;
       if (o.photos && o.photos.length > 0) return o.photos;
-      if ((o as any).imagenUrl) return [(o as any).imagenUrl];
+      if (o.imagenUrl) return [o.imagenUrl];
       return [];
     }
   })();
@@ -58,12 +59,12 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
   // Services list (fallback to tags)
   const servicesList: string[] = isAdapted(offer)
     ? (offer.services ?? (offer.tags ?? []))
-    : (offer as any).services ?? (offer as any).tags ?? [];
+    : (offer as JobOfferData).tags ?? [];
 
   // Calendar click: set sessionStorage for scheduling flow
   const handleClickCalendar = () => {
     if (typeof window === 'undefined') return;
-    const fixerId = (offer as any).fixerId ?? (offer as any).id ?? (offer as any)._id ?? '';
+    const fixerId = isAdapted(offer) ? offer.fixerId : (offer as JobOfferData).fixerId;
     const requesterId = sessionStorage.getItem('requester_id') ?? '';
     sessionStorage.setItem('fixer_id', fixerId);
     sessionStorage.setItem('requester_id', requesterId);
