@@ -2,7 +2,7 @@
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
 // Force /api to use Next.js proxy
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000/api';
+const API_URL = process.env.NEXT_PUBLIC_API_URL + '/api';
 
 // Log para debugging (solo en desarrollo)
 if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
@@ -16,7 +16,7 @@ export const baseQuery = fetchBaseQuery({
     if (token) {
       headers.set('authorization', `Bearer ${token}`);
     }
-    headers.set('Content-Type', 'application/json');
+    //  headers.set('Content-Type', 'application/json');
     return headers;
   },
   credentials: 'include',
@@ -47,6 +47,7 @@ export const baseApi = createApi({
     'SearchHistory',
     'Experience',
     'Portfolio',
+    'Certification',
   ],
   endpoints: () => ({}),
 });

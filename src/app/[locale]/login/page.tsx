@@ -1,18 +1,24 @@
 'use client';
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api, ApiResponse } from '@/app/redux/services/loginApi';
 import { Eye, EyeOff } from 'lucide-react';
-import LoginGoogle from '@/Components/login/google/LoginGoogle';
+import LoginGoogle from '@/Components/login/Proveedores/LoginGoogle';
 import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import NotificationModal from '@/Components/Modal-notifications';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { useTranslations } from 'next-intl';
 import { useAppDispatch } from '@/app/redux/hooks';
 import { setUser } from '@/app/redux/slice/userSlice';
+import LoginGithub from '@/Components/login/Proveedores/LoginGitHub';
+import LoginDiscord from '@/Components/login/Proveedores/LoginDiscord';
+// Nuevos modales para 2FA / selección de método
+import OpcionesLoginModal from '@/Components/login/SeleccionMetodoModal';
+import AuthenticatorSesion from '@/Components/requester/Authenticator/AuthenticatorSesionModal';
+import AuthenticatorTOTPModal from '@/Components/requester/Authenticator/AuthenticatorTOTPModal';
+import CodigoRecuperacionModal from '@/Components/requester/Authenticator/AuthenticatorCodigoModal';
 
 /* ----------------------------- Interfaces ----------------------------- */
 interface LoginFormData {
@@ -36,6 +42,11 @@ interface LoginResponse {
   token: string;
   user: BackendUser;
   message?: string;
+  // propiedades opcionales que el backend puede devolver para MFA
+  requires2FA?: boolean;
+  mfaRequired?: boolean;
+  mfaMethods?: string[];
+  email?: string;
 }
 
 interface NotificationState {
@@ -70,6 +81,10 @@ export default function LoginPage() {
     message: '',
   });
 
+  // Estado para los nuevos modales de autenticación/métodos
+  const [modalActivo, setModalActivo] = useState<'none' | 'opciones' | 'sesion' | 'totp' | 'codigo'>('none');
+  const [emailTOTP, setEmailTOTP] = useState('');
+
   const {
     register,
     handleSubmit,
@@ -95,8 +110,46 @@ export default function LoginPage() {
           url_photo: (datos.user.picture || datos.user.url_photo || null) as string | undefined,
           role: (datos.user.role || 'requester') as 'requester' | 'fixer' | 'admin',
         };
+        // Detectar si el backend requiere MFA/2FA y abrir los modales correspondientes
+        const needs2FA = Boolean(
+          datos.requires2FA ||
+            datos.mfaRequired ||
+            (datos.mfaMethods && datos.mfaMethods.length > 0),
+        );
 
-        localStorage.setItem('servineo_token', datos.token);
+        if (needs2FA) {
+          const emailFor2FA = datos.email || datos.user?.email || data.email;
+          setEmailTOTP(emailFor2FA ?? '');
+
+          const methods = datos.mfaMethods || [];
+
+          if (methods.includes('passwordless') || methods.includes('session')) {
+            setModalActivo('sesion');
+          } else if (
+            methods.includes('totp') ||
+            methods.includes('otp') ||
+            methods.includes('totp_sms')
+          ) {
+            setModalActivo('totp');
+          } else {
+            setModalActivo('opciones');
+          }
+
+          setNotification({
+            isOpen: true,
+            type: 'info',
+            title: 'Verificación adicional requerida',
+            message: datos.message || 'Se requiere un paso adicional para verificar tu cuenta.',
+          });
+
+          // No guardar token/localStorage hasta completar el flujo de MFA
+          return;
+        }
+
+        // Si no requiere 2FA, proceder normalmente
+        if (datos.token) {
+          localStorage.setItem('servineo_token', datos.token);
+        }
         localStorage.setItem('servineo_user', JSON.stringify(normalizedUser));
 
         dispatch(setUser(normalizedUser));
@@ -146,6 +199,148 @@ export default function LoginPage() {
       message: mensaje,
     });
   };
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        if (!apiUrl) return;
+
+        const apiOrigin = new URL(apiUrl).origin;
+        if (event.origin !== apiOrigin) return;
+
+        const data = event.data || {};
+        const { type, token, user, message } = data;
+
+        if (type === 'GITHUB_AUTH_SUCCESS') {
+          if (token && user) {
+            localStorage.setItem('servineo_token', token);
+            localStorage.setItem('servineo_user', JSON.stringify(user));
+
+            const nombre = (user as { name?: string }).name || 'Usuario';
+
+            setNotification({
+              isOpen: true,
+              type: 'success',
+              title: 'Inicio de sesión exitoso',
+              message: `¡Bienvenido, ${nombre}!`,
+            });
+
+            setTimeout(() => {
+              window.location.href = '/';
+            }, 1500);
+          } else {
+            setNotification({
+              isOpen: true,
+              type: 'error',
+              title: 'Error al iniciar sesión',
+              message: 'Respuesta inválida desde GitHub. Inténtalo nuevamente.',
+            });
+          }
+        }
+
+        if (type === 'GITHUB_AUTH_ERROR') {
+          setNotification({
+            isOpen: true,
+            type: 'error',
+            title: 'Error al iniciar sesión',
+            message: message || 'No se pudo iniciar sesión con GitHub.',
+          });
+        }
+      } catch (err) {
+        console.error('Error procesando mensaje de GitHub:', err);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
+  // 🔹 Manejo de login con Discord (redirect a /login?provider=discord&code=...)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const search = window.location.search;
+    const params = new URLSearchParams(search);
+    const provider = params.get('provider');
+    const code = params.get('code');
+    const error = params.get('error');
+
+    // Solo nos interesa cuando viene de Discord
+    if (provider !== 'discord') return;
+
+    if (error) {
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: 'Error de autenticación',
+        message: error,
+      });
+      window.history.replaceState({}, '', '/login');
+      return;
+    }
+
+    if (!code) return;
+
+    const loginDiscord = async () => {
+      try {
+        setLoading(true);
+
+        const res: ApiResponse<LoginResponse> = await api.post('/auth/discord', { code });
+
+        if (res.success && res.data) {
+          const datos = res.data;
+
+          localStorage.setItem('servineo_token', datos.token);
+          localStorage.setItem('servineo_user', JSON.stringify(datos.user));
+
+          const mensajeExito = datos.message || `¡Bienvenido, ${datos.user.name}!`;
+
+          setNotification({
+            isOpen: true,
+            type: 'success',
+            title: 'Inicio de sesión exitoso',
+            message: mensajeExito,
+          });
+
+          // limpiar parámetros de la URL
+          window.history.replaceState({}, '', '/login');
+
+          setTimeout(() => {
+            window.location.href = '/';
+          }, 1500);
+        } else {
+          const mensajeError =
+            res.message ||
+            (res.data as unknown as { message?: string })?.message ||
+            (res as unknown as { error?: string })?.error ||
+            'No se pudo iniciar sesión con Discord.';
+
+          setNotification({
+            isOpen: true,
+            type: 'error',
+            title: 'Error al iniciar sesión',
+            message: mensajeError,
+          });
+
+          window.history.replaceState({}, '', '/login');
+        }
+      } catch (err: unknown) {
+        console.error('[LOGIN] Error en loginDiscord:', err);
+        const message = err instanceof Error ? err.message : 'No se pudo conectar con el servidor.';
+        setNotification({
+          isOpen: true,
+          type: 'error',
+          title: 'Error de conexión',
+          message,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loginDiscord();
+  }, []);
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
@@ -210,15 +405,16 @@ export default function LoginPage() {
               )}
             </div>
 
-            {/* Enlace auxiliar */}
-            <div className="flex justify-end items-center">
-              <Link
-                href="/login/forgotpass"
-                className="text-primary/90 hover:text-primary underline-offset-2 hover:underline text-sm font-medium"
+            {/* 🆕 UN SOLO BOTÓN que abre el modal de opciones */}
+            <p className="text-center text-sm text-muted-foreground">
+              <button
+                type="button"
+                onClick={() => setModalActivo('opciones')}
+                className="text-primary/90 hover:text-primary font-medium hover:underline transition"
               >
                 {t('links.forgotPassword')}
-              </Link>
-            </div>
+              </button>
+            </p>
 
             {/* Botón ingresar */}
             <button
@@ -240,8 +436,14 @@ export default function LoginPage() {
           </div>
 
           {/* Botón Google */}
-          <div className="mt-4">
+          <div className="flex flex-col items-center gap-3 mt-4">
             <LoginGoogle onMensajeChange={handleMensajeChange} />
+
+            {/* Botón GitHub */}
+            <LoginGithub onMensajeChange={handleMensajeChange} />
+
+            {/* Botón Discord */}
+            <LoginDiscord onMensajeChange={handleMensajeChange} />
           </div>
 
           {/* Registro */}
@@ -264,6 +466,45 @@ export default function LoginPage() {
           title={notification.title}
           message={notification.message}
         />
+        {/* 🆕 MODAL DE OPCIONES */}
+        <OpcionesLoginModal
+          showModal={modalActivo === 'opciones'}
+          onClose={() => setModalActivo('none')}
+          onSelectForgotPassword={() => router.push('/login/forgotpass')}
+          onSelectPasswordless={() => setModalActivo('sesion')}
+        />
+
+        {/* Modal Sesión */}
+        {modalActivo === 'sesion' && (
+          <AuthenticatorSesion
+            showModal={true}
+            setShowModal={() => setModalActivo('none')}
+            emailTOTP={emailTOTP}
+            setEmailTOTP={setEmailTOTP}
+            abrirTOTP={() => setModalActivo('totp')}
+          />
+        )}
+
+        {/* Modal TOTP */}
+        {modalActivo === 'totp' && (
+          <AuthenticatorTOTPModal
+            showModal={true}
+            setShowModal={() => setModalActivo('none')}
+            regresarSesionModal={() => setModalActivo('sesion')}
+            email={emailTOTP}
+            abrirModalCodigo={() => setModalActivo('codigo')}
+          />
+        )}
+
+        {/* Modal Código de recuperación */}
+        {modalActivo === 'codigo' && (
+          <CodigoRecuperacionModal
+            showModal={true}
+            cerrarModal={() => setModalActivo('none')}
+            volverATOTP={() => setModalActivo('totp')}
+            email={emailTOTP}
+          />
+        )}
       </main>
     </GoogleOAuthProvider>
   );

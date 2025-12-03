@@ -32,8 +32,8 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
   const hasInitialized = useRef(false);
   const lastBackendData = useRef<string[] | undefined>(undefined);
 
-  const { 
-    data: backendHistory, 
+  const {
+    data: backendHistory,
     isLoading: isLoadingHistory,
     error: historyError,
     refetch: refetchHistory,
@@ -64,7 +64,6 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
     (items: string[]) => {
       try {
         localStorage.setItem(storageKey, JSON.stringify(items));
-        console.log('💾 Persisted to localStorage:', items);
       } catch (error) {
         console.error('Error saving search history to localStorage:', error);
       }
@@ -76,11 +75,8 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
   useEffect(() => {
     if (hasInitialized.current) return;
 
-    console.log('🎬 Initializing search history...');
-
     // SIEMPRE cargar desde localStorage primero
     const localHistory = loadFromLocalStorage();
-    console.log('📂 Loaded from localStorage:', localHistory);
 
     if (localHistory.length > 0) {
       setHistory(localHistory);
@@ -101,15 +97,8 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
 
     // Evitar re-procesar los mismos datos del backend
     if (lastBackendData.current === backendHistory) {
-      console.log('⏭️ Skipping - same backend data');
       return;
     }
-
-    console.log('🔄 Backend data changed:', {
-      previous: lastBackendData.current,
-      current: backendHistory,
-      currentHistory: history,
-    });
 
     lastBackendData.current = backendHistory;
 
@@ -118,19 +107,6 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
       setHistory(backendHistory);
       persistToLocalStorage(backendHistory);
     }
-    // Si el backend está vacío Y nuestro estado actual también está vacío
-    else if (backendHistory.length === 0 && history.length === 0) {
-      console.log('📭 Both backend and state are empty');
-      // Todo bien, ambos vacíos
-    }
-    // Si el backend está vacío pero tenemos datos locales
-    else if (backendHistory.length === 0 && history.length > 0) {
-      console.log('⚠️ Backend empty but we have local data:', history);
-      console.log('🔒 KEEPING local data - NOT overwriting');
-      // NO sobrescribir - mantener los datos locales
-    }
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [useBackend, backendHistory, persistToLocalStorage]);
 
   // ===== ADD =====
@@ -177,7 +153,7 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
             throw new Error('Backend deletion failed');
           }
 
-          const shouldContain = previousHistory.filter(h => h !== item);
+          const shouldContain = previousHistory.filter((h) => h !== item);
           const backendReturned = result.updatedHistory;
 
           if (backendReturned.length === 0 && shouldContain.length > 0) {
@@ -200,7 +176,7 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
         persistToLocalStorage(previousHistory);
       }
     },
-    [history, useBackend, deleteHistoryItem, persistToLocalStorage],
+    [useBackend, deleteHistoryItem, persistToLocalStorage],
   );
 
   // ===== CLEAR (CORREGIDO) =====
@@ -222,8 +198,6 @@ export function useSearchHistory(options: UseSearchHistoryOptions = {}): UseSear
         if (!result.success) {
           throw new Error('Backend clear failed');
         }
-
-        console.log('✅ Backend confirmed clear:', result.updatedHistory);
         lastBackendData.current = result.updatedHistory;
         setHistory(result.updatedHistory);
         persistToLocalStorage(result.updatedHistory);

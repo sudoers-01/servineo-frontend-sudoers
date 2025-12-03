@@ -14,6 +14,7 @@ interface RegistroFormProps {
     title: string;
     message: string;
   }) => void;
+  captchaValid: boolean; // <-- NUEVO
 }
 
 const nameRegex = /^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/;
@@ -26,7 +27,7 @@ type RegistroSchema = {
   confirmarPassword: string;
 };
 
-export default function RegistroForm({ onNotify }: RegistroFormProps) {
+export default function RegistroForm({ onNotify, captchaValid }: RegistroFormProps) {
   const t = useTranslations('RegistroForm');
   const router = useRouter();
 
@@ -63,6 +64,7 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
     password: '',
     confirmarPassword: '',
   });
+
   const [errors, setErrors] = useState<Partial<Record<keyof RegistroSchema, string>>>({});
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmarPassword, setMostrarConfirmarPassword] = useState(false);
@@ -106,6 +108,15 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!captchaValid) {
+      onNotify?.({
+        type: 'warning',
+        title: 'Completa la verificación',
+        message: 'Debes completar el captcha antes de continuar.',
+      });
+      return;
+    }
+
     const validation = registroSchema.safeParse(formData);
 
     if (!validation.success) {
@@ -135,7 +146,6 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
 
       if (data.success) {
         if (data.token) localStorage.setItem('servineo_token', data.token);
-        if (data.user) localStorage.setItem('servineo_user', JSON.stringify(data.user));
 
         onNotify?.({
           type: 'success',
@@ -309,7 +319,11 @@ export default function RegistroForm({ onNotify }: RegistroFormProps) {
       <button
         type="submit"
         disabled={cargando}
-        className="w-full flex items-center justify-center gap-2 bg-[#4046ee] hover:bg-[#3d43ff] text-white font-semibold rounded-xl p-2.5 mt-2 transition-all duration-300 shadow-md hover:shadow-lg disabled:opacity-60"
+        className={`w-full flex items-center justify-center gap-2
+      ${!captchaValid ? 'bg-primary/60 cursor-not-allowed' : 'bg-primary/90 hover:bg-primary'}
+       ${cargando ? 'opacity-60 cursor-not-allowed' : ''}
+       text-white font-semibold rounded-xl p-2.5 mt-2 transition-all duration-300
+       shadow-md hover:shadow-lg`}
       >
         {cargando ? (
           <>

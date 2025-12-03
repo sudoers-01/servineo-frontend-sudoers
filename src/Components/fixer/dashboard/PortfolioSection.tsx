@@ -36,7 +36,6 @@ interface PortfolioSectionProps {
   fixerId?: string;
 }
 
-// Helper para YouTube
 function getYouTubeId(rawUrl?: string): string | undefined {
   if (!rawUrl) return undefined;
   try {
@@ -57,17 +56,14 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
   // ID efectivo
   const effectiveFixerId = fixerId || '69285d2860ea986813517593';
 
-  // --- Estados UI ---
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [modalType, setModalType] = useState<'image' | 'video'>('image');
   const [fullscreenImage, setFullscreenImage] = useState<string | null>(null);
 
-  // Validación de imagen
   const [previewUrl, setPreviewUrl] = useState<string>('');
   const [isValidUrl, setIsValidUrl] = useState<boolean | null>(null);
   const [isValidating, setIsValidating] = useState(false);
 
-  // Notificaciones
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [notification, setNotification] = useState({
     isOpen: false,
@@ -76,7 +72,6 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     message: '',
   });
 
-  // --- RTK Query Hooks ---
   const {
     data: items = [],
     isLoading,
@@ -88,11 +83,9 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
   const [createItem, { isLoading: isCreating }] = useCreatePortfolioItemMutation();
   const [deleteItem, { isLoading: isDeleting }] = useDeletePortfolioItemMutation();
 
-  // --- React Hook Form ---
   const { register, handleSubmit, reset, watch } = useForm<PortfolioFormValues>();
   const watchedUrl = watch('url');
 
-  // Efecto de validación de imagen
   useEffect(() => {
     if (!watchedUrl || modalType !== 'image') {
       setPreviewUrl('');
@@ -119,7 +112,6 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     return () => clearTimeout(timeoutId);
   }, [watchedUrl, modalType]);
 
-  // Helper de error seguro
   const getErrorMessage = (error: unknown) => {
     if (isApiError(error)) return error.data.message || t('errors.unknown');
     return t('errors.unexpected');
@@ -133,7 +125,6 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     setNotification({ isOpen: true, type, title, message });
   };
 
-  // --- Handlers ---
   const handleOpenModal = (type: 'image' | 'video') => {
     if (readOnly) return;
     setModalType(type);
@@ -280,22 +271,42 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             return (
               <div
                 key={item._id}
-                className="group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-lg transition-all cursor-pointer"
-                onClick={() => !isVideo && hasUrl && setFullscreenImage(item.url || null)}
+                className="group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-lg transition-all"
               >
+                {/* BOTÓN DE ELIMINAR ARRIBA A LA DERECHA */}
+                {!readOnly && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteRequest(item._id!);
+                    }}
+                    disabled={isDeleting}
+                    className="absolute top-2 right-2 z-10 p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-all shadow-md hover:scale-110 opacity-0 group-hover:opacity-100"
+                    title="Eliminar"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+
+                {/* CONTENIDO DEL ITEM */}
                 {isVideo && videoId ? (
-                  <iframe
-                    className="absolute inset-0 w-full h-full rounded-2xl pointer-events-none"
-                    src={`https://www.youtube.com/embed/${videoId}`}
-                    title="YouTube video"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowFullScreen
-                  />
+                  <div className="absolute inset-0 w-full h-full">
+                    <iframe
+                      className="w-full h-full rounded-2xl"
+                      src={`https://www.youtube.com/embed/${videoId}`}
+                      title="YouTube video"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
                 ) : hasUrl ? (
-                  <div className="absolute inset-0">
+                  <div
+                    className="absolute inset-0 cursor-pointer"
+                    onClick={() => setFullscreenImage(item.url || null)}
+                  >
                     {isDataUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={item.url!}
                         alt={t('image.alt')}
@@ -311,7 +322,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                         unoptimized={true}
                       />
                     ) : (
-                      // eslint-disable-next-line @next/next/no-img-element
+                      /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={item.url!}
                         alt={t('image.alt')}
@@ -325,22 +336,6 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                       <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
                       <p className="text-xs text-gray-500 font-medium">{t('noImage')}</p>
                     </div>
-                  </div>
-                )}
-
-                {!readOnly && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-end p-4 pointer-events-none">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteRequest(item._id!);
-                      }}
-                      disabled={isDeleting}
-                      className="self-end p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-colors shadow-sm hover:scale-110 pointer-events-auto"
-                      title={t('tooltips.delete')}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
                   </div>
                 )}
               </div>

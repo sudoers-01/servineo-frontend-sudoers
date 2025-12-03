@@ -15,20 +15,20 @@ import {
   clearJobTypeSelection,
   autoSelectCity,
   clearCitySelection,
-} from "../app/redux/slice/filterSlice"
-import { useJobTypeAutoMatch } from "@/lib/useJobTypeAutoMatch"
-import { Search, Settings2, Trash2, X, Clock, FilterIcon } from "lucide-react"
+} from '../app/redux/slice/filterSlice';
+import { useJobTypeAutoMatch } from '@/lib/useJobTypeAutoMatch';
+import { Search, Settings2, Trash2, X, Clock, FilterIcon } from 'lucide-react';
 
 export function SearchHeader() {
-  const t = useTranslations('search')
-  const { findMatchingJobType, findMatchingCity } = useJobTypeAutoMatch()
-  
-  const dispatch = useAppDispatch()
-  const searchQuery = useAppSelector(selectSearchQuery)
-  const recentSearches = useAppSelector(selectRecentSearches)
-  const sidebarOpen = useAppSelector(selectSidebarOpen)
-  const [showRecent, setShowRecent] = useState(false)
-  const searchRef = useRef<HTMLDivElement>(null)
+  const t = useTranslations('search');
+  const { findMatchingJobType, findMatchingCity } = useJobTypeAutoMatch();
+
+  const dispatch = useAppDispatch();
+  const searchQuery = useAppSelector(selectSearchQuery);
+  const recentSearches = useAppSelector(selectRecentSearches);
+  const sidebarOpen = useAppSelector(selectSidebarOpen);
+  const [showRecent, setShowRecent] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -43,22 +43,22 @@ export function SearchHeader() {
   }, []);
 
   const handleSearchChange = (query: string) => {
-    dispatch(setSearchQuery(query))
+    dispatch(setSearchQuery(query));
 
-    const matchedJobType = findMatchingJobType(query)
+    const matchedJobType = findMatchingJobType(query);
     if (matchedJobType) {
-      dispatch(autoSelectJobType(matchedJobType))
+      dispatch(autoSelectJobType(matchedJobType));
     } else {
-      dispatch(clearJobTypeSelection())
+      dispatch(clearJobTypeSelection());
     }
 
-    const matchedCity = findMatchingCity(query)
+    const matchedCity = findMatchingCity(query);
     if (matchedCity) {
-      dispatch(autoSelectCity(matchedCity))
+      dispatch(autoSelectCity(matchedCity));
     } else {
-      dispatch(clearCitySelection())
+      dispatch(clearCitySelection());
     }
-  }
+  };
 
   const handleSearch = (query: string) => {
     dispatch(setSearchQuery(query));
@@ -104,10 +104,10 @@ export function SearchHeader() {
               <button
                 type="button"
                 onClick={() => {
-                  dispatch(setSearchQuery(""))
-                  dispatch(clearJobTypeSelection())
-                  dispatch(clearCitySelection())
-                  setShowRecent(true)
+                  dispatch(setSearchQuery(''));
+                  dispatch(clearJobTypeSelection());
+                  dispatch(clearCitySelection());
+                  setShowRecent(true);
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-primary/10 rounded-full transition-all"
                 title={t('clearSearch')}

@@ -48,7 +48,7 @@ export function parseUrlToFilters(searchParams: URLSearchParams): {
   const ranges = searchParams.getAll('range');
   const cityRaw = searchParams.get('city') || '';
   const city = cityRaw ? cityRaw.split(',').filter(Boolean) : [];
-  
+
   const categoryRaw = searchParams.get('category') || '';
   const category = categoryRaw ? categoryRaw.split(',').filter(Boolean) : [];
 
@@ -76,7 +76,7 @@ export function parseUrlToFilters(searchParams: URLSearchParams): {
 
   // ✅ NUEVO: Detectar si la categoría fue automarcada desde búsqueda
   const isAutoSelectedCategory = search.trim() !== '' && category.length > 0;
-  
+
   // ✅ NUEVO: Detectar si la ciudad fue automarcada desde búsqueda
   const isAutoSelectedCity = search.trim() !== '' && city.length > 0;
 
@@ -89,8 +89,8 @@ export function parseUrlToFilters(searchParams: URLSearchParams): {
       tags,
       minPrice,
       maxPrice,
-      isAutoSelectedCategory,  // ✅ Agregado
-      isAutoSelectedCity,      // ✅ Agregado
+      isAutoSelectedCategory, // ✅ Agregado
+      isAutoSelectedCity, // ✅ Agregado
     },
     sortBy,
     page,

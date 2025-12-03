@@ -200,7 +200,8 @@
       "step8": "Seleccionar fecha de publicación: más recientes, más antiguos o fecha específica mediante el calendario.",
       "step9": "Seleccionar rango de calificación (1-5 estrellas). Al hacer click en una estrella muestra subrangos (1-9).",
       "step10": "Hacer click en \"Aplicar búsqueda\" para mostrar resultados con todos los filtros seleccionados.",
-      "step11": "Usar el botón \"Limpiar datos\" para borrar todos los filtros y volver al estado inicial."
+      "step11": "Usar el botón \"Limpiar datos\" para borrar todos los filtros y volver al estado inicial.",
+      "step12": "Puedes salir de la búsqueda avanzada en cualquier momento presionando la tecla \"ESC\"."
     }
   },
   "resultsAdvSearch": {
@@ -881,8 +882,9 @@
         "label": "Fecha de Vencimiento"
       },
       "credentialId": {
-        "label": "ID Credencial",
-        "placeholder": "Opcional"
+        "label": "ID de la Credencial",
+        "placeholder": "Opcional",
+        "label2":"URL de la credencial"
       },
       "credentialUrl": {
         "label": "URL Credencial",
@@ -1140,5 +1142,23 @@
     "title": "8. CONTACTO",
     "content": "Para consultas, reclamos o sugerencias, los usuarios pueden comunicarse con el equipo de Servero a través del correo electrónico:"
   }
-}
+  },
+  "TopMenu": {
+    "nav": {
+      "home": "Inicio",
+      "jobOffers": "Ofertas de trabajo",
+      "help": "Ayuda"
+    },
+    "buttons": {
+      "login": "Iniciar Sesión",
+      "register": "Regístrate",
+      "myAccount": "Mi cuenta",
+      "becomeFixer": "Convertir a Fixer",
+      "fixerProfile": "Perfil de Fixer"
+    },
+    "dropdown": {
+      "editProfile": "Editar perfil",
+      "logout": "Cerrar sesión"
+    }
+  }
 }

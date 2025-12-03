@@ -9,6 +9,7 @@ import { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { TranslationButton } from '@/Components/Shared/TranslationButton';
+import BotonesFlotantes from '@/Components/ask_for_help/contenedor';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -60,18 +61,24 @@ export default async function RootLayout({ children, params }: Props) {
   const messages = await loader();
 
   return (
-  <html lang={locale} className={roboto.className}>
-    <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-      <NextIntlClientProvider locale={locale} messages={messages}>
-        <ReduxProvider>
-          <div className="">
-            <TopMenu/>
-          </div>
-          {children}
-          <TranslationButton/>
-        </ReduxProvider>
-      </NextIntlClientProvider>
-    </body>
-  </html>
-);
+    <html lang={locale} className={`${roboto.className}`} suppressHydrationWarning>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={true}
+      >
+        <NextIntlClientProvider locale={locale} messages={messages}>
+          <ReduxProvider>
+            <div className="text-black fixed bottom-7 left-7 z-9999">
+              <BotonesFlotantes />
+            </div>
+            <div className="">
+              <TopMenu />
+            </div>
+            {children}
+            <TranslationButton />
+          </ReduxProvider>
+        </NextIntlClientProvider>
+      </body>
+    </html>
+  );
 }

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
 import { useLogClickMutation } from '../../redux/services/activityApi';
 import { useLogSearchMutation, useUpdateFiltersMutation } from '../../redux/services/searchApi';
 import {
@@ -26,6 +26,7 @@ import {
   resetFilters,
   enablePersistence,
 } from '@/app/redux/slice/jobOfert';
+import { STORAGE_KEYS } from '@/app/redux/features/jobOffers/storage';
 import type { FilterState } from '@/app/redux/features/jobOffers/types';
 import { getSortValue } from '../../lib/constants/sortOptions';
 import {
@@ -53,6 +54,7 @@ export default function JobOffersPage() {
     sortBy,
     search,
     paginaActual,
+    totalPages,
     registrosPorPagina,
     error: reduxError,
     filters,
@@ -71,9 +73,7 @@ export default function JobOffersPage() {
         try {
           const userObj = JSON.parse(storedUser);
           console.log('User object from localStorage:', userObj);
-          // Obtener ID
           const id = userObj.id || userObj._id || userObj.userId || '';
-          // Obtener rol, si no existe usar 'visitor'
           const role = userObj.role || 'visitor';
           setUserId(id);
           setUserRole(role);
@@ -91,20 +91,27 @@ export default function JobOffersPage() {
 
   const [logSearch] = useLogSearchMutation();
   const [updateFilters] = useUpdateFiltersMutation();
+  const [logClick] = useLogClickMutation();
 
   const previousSearchQueryRef = useRef<string>('');
   const previousFiltersRef = useRef<FilterState>(filters);
   const isInitialMountRef = useRef<boolean>(true);
-
   const filterCounterRef = useRef<number>(1);
+  const stickyRef = useRef<HTMLDivElement | null>(null);
+  const scrollRestoredRef = useRef(false);
+  const pageBeforeFilter = useRef<number>(1);
+  const hasActiveFilters = useRef<boolean>(false);
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('list');
+  const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const getSearchCount = (): number => {
     if (isLoading) return 0;
-
     return total || 0;
   };
 
-  // Función helper para obtener el valor del filtro fixer_name
   const getFixerNameValue = (): string => {
     const fixerNameFilter =
       (filters as any).fixerName || (filters as any).fixer_name || (filters as any).fixerNames;
@@ -141,48 +148,68 @@ export default function JobOffersPage() {
     return filters.category.join(', ');
   };
 
-  const handleSearchSubmit = async (query: string) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(setSearch(query));
-    dispatch(resetPagination());
-
-    filterCounterRef.current = 1;
-
-    const timeoutId = setTimeout(async () => {
-      if (query.trim().length > 0) {
-        const searchCount = getSearchCount();
-
-        const searchData = {
-          user_type: userRole,
-          search_query: query,
-          search_type: 'search_box',
-          filters: {
-            filter_1: {
-              fixer_name: getFixerNameValue(),
-              city: getCityValue(),
-              job_type: getJobTypeValue(),
-              search_count: searchCount,
-            },
-          },
-        };
-
-        try {
-          console.log(
-            'Enviando NUEVA BÚSQUEDA al backend (POST):',
-            JSON.stringify(searchData, null, 2),
-          );
-          await logSearch(searchData).unwrap();
-          console.log('Nueva búsqueda registrada exitosamente:', query, 'Resultados:', searchCount);
-          previousSearchQueryRef.current = query;
-        } catch (error) {
-          console.error('Error al registrar nueva búsqueda:', error);
-        }
-      }
-    }, 500);
-
-    return () => clearTimeout(timeoutId);
+  const adaptJobOffer = (offer: JobOfferData): AdaptedJobOffer => {
+    return {
+      _id: offer._id,
+      fixerId: offer.fixerId,
+      name: offer.fixerName,
+      title: offer.title,
+      description: offer.description,
+      tags: offer.tags || [],
+      phone: offer.contactPhone,
+      photos: offer.photos || [],
+      services: offer.category ? [offer.category] : [],
+      price: offer.price,
+      createdAt: offer.createdAt instanceof Date ? offer.createdAt : new Date(offer.createdAt),
+      city: offer.city,
+    };
   };
+
+  const handleSearchSubmit = useCallback(
+    async (query: string) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      dispatch(setSearch(query));
+      dispatch(resetPagination());
+
+      filterCounterRef.current = 1;
+
+      const timeoutId = setTimeout(async () => {
+        if (query.trim().length > 0) {
+          const searchCount = getSearchCount();
+
+          const searchData = {
+            user_type: userRole,
+            search_query: query,
+            search_type: 'search_box',
+            filters: {
+              filter_1: {
+                fixer_name: getFixerNameValue(),
+                city: getCityValue(),
+                job_type: getJobTypeValue(),
+                search_count: searchCount,
+              },
+            },
+          };
+
+          try {
+            console.log(
+              'Enviando NUEVA BÚSQUEDA al backend (POST):',
+              JSON.stringify(searchData, null, 2),
+            );
+            await logSearch(searchData).unwrap();
+            console.log('Nueva búsqueda registrada exitosamente:', query, 'Resultados:', searchCount);
+            previousSearchQueryRef.current = query;
+          } catch (error) {
+            console.error('Error al registrar nueva búsqueda:', error);
+          }
+        }
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    },
+    [dispatch, userRole, logSearch],
+  );
 
   useEffect(() => {
     if (isInitialMountRef.current) {
@@ -250,84 +277,79 @@ export default function JobOffersPage() {
     }
   }, [filters, updateFilters, isLoading, total]);
 
-  const handleResetFilters = () => {
-    const pageToRestore = hasActiveFilters.current ? pageBeforeFilter.current : 1;
-    hasActiveFilters.current = false;
+  const handleCardClick = useCallback(
+    async (offer: JobOfferData) => {
+      const adaptedOffer = adaptJobOffer(offer);
+      setSelectedOffer(adaptedOffer);
+      setIsModalOpen(true);
 
-    dispatch(resetFilters());
+      if (!userId) {
+        console.warn('User ID no disponible, no se registró el click');
+        return;
+      }
 
-    setTimeout(() => {
-      dispatch(enablePersistence());
-      dispatch(setPaginaActual(pageToRestore));
-    }, 0);
-  };
+      const activityData = {
+        userId: userId,
+        date: new Date().toISOString(),
+        role: userRole,
+        type: 'click',
+        metadata: {
+          button: 'job_offer',
+          jobTitle: adaptedOffer.title || 'Sin título',
+          jobId: adaptedOffer._id,
+        },
+        timestamp: new Date().toISOString(),
+      };
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const stickyRef = useRef<HTMLDivElement | null>(null);
-  const scrollRestoredRef = useRef(false);
-  const pageBeforeFilter = useRef<number>(1);
-  const hasActiveFilters = useRef<boolean>(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('list');
-  const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [logClick] = useLogClickMutation();
+      try {
+        await logClick(activityData).unwrap();
+        console.log('Click registrado:', adaptedOffer.title);
+      } catch (error) {
+        console.error('Error al registrar clic:', error);
+      }
+    },
+    [userId, userRole, logClick],
+  );
 
-  const adaptJobOffer = (offer: JobOfferData): AdaptedJobOffer => {
-    return {
-      _id: offer._id,
-      fixerId: offer.fixerId,
-      name: offer.fixerName,
-      title: offer.title,
-      description: offer.description,
-      tags: offer.tags || [],
-      phone: offer.contactPhone,
-      photos: offer.photos || [],
-      services: offer.category ? [offer.category] : [],
-      price: offer.price,
-      createdAt: offer.createdAt instanceof Date ? offer.createdAt : new Date(offer.createdAt),
-      city: offer.city,
-    };
-  };
+  useEffect(() => {
+    if (!isLoading && totalPages > 0) {
+      const params = new URLSearchParams(window.location.search);
+      const pageParam = Number(params.get('page') || 1);
 
-  const handleCardClick = async (offer: JobOfferData) => {
-    const adaptedOffer = adaptJobOffer(offer);
-    setSelectedOffer(adaptedOffer);
-    setIsModalOpen(true);
+      let correctedPage = pageParam;
 
-    if (!userId) {
-      console.warn('User ID no disponible, no se registró el click');
-      return;
+      if (pageParam < 1 || isNaN(pageParam)) {
+        correctedPage = 1;
+      } else if (pageParam > totalPages) {
+        correctedPage = totalPages;
+      }
+
+      if (correctedPage !== pageParam) {
+        params.set('page', correctedPage.toString());
+        window.history.replaceState(null, '', `${window.location.pathname}?${params.toString()}`);
+        dispatch(setPaginaActual(correctedPage));
+      }
     }
-
-    const activityData = {
-      userId: userId,
-      date: new Date().toISOString(),
-      role: userRole,
-      type: 'click',
-      metadata: {
-        button: 'job_offer',
-        jobTitle: adaptedOffer.title || 'Sin título',
-        jobId: adaptedOffer._id,
-      },
-      timestamp: new Date().toISOString(),
-    };
-
-    try {
-      await logClick(activityData).unwrap();
-      console.log('Click registrado:', adaptedOffer.title);
-    } catch (error) {
-      console.error('Error al registrar clic:', error);
-    }
-  };
+  }, [isLoading, totalPages, dispatch]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
 
       if (params.toString() === '' && search !== '') {
-        console.log('Navegación directa detectada, limpiando búsqueda guardada');
-        dispatch(setSearch(''));
-        previousSearchQueryRef.current = '';
+        let hasSavedSearch = false;
+        try {
+          hasSavedSearch = !!window.localStorage.getItem(STORAGE_KEYS.SEARCH);
+        } catch (e) {
+          hasSavedSearch = false;
+          console.error('Error accessing localStorage:', e);
+        }
+
+        if (!hasSavedSearch) {
+          console.log('Navegación directa detectada, limpiando búsqueda guardada');
+          dispatch(setSearch(''));
+          previousSearchQueryRef.current = '';
+        }
       }
     }
   }, [dispatch, search]);
@@ -388,51 +410,107 @@ export default function JobOffersPage() {
     };
   }, []);
 
-  // Handlers
-  const handleRegistrosPorPaginaChange = (valor: number) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(setRegistrosPorPagina(valor));
-  };
+  const handleCloseModal = useCallback(() => {
+    setIsModalOpen(false);
+  }, []);
 
-  const handleFiltersApply = (appliedFilters: FilterState) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleRegistrosPorPaginaChange = useCallback(
+    (valor: number) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      dispatch(setRegistrosPorPagina(valor));
+    },
+    [dispatch],
+  );
 
-    const hasFilters =
-      appliedFilters.range.length > 0 ||
-      (Array.isArray(appliedFilters.city)
-        ? appliedFilters.city.length > 0
-        : !!appliedFilters.city) ||
-      appliedFilters.category.length > 0;
+  const handleFiltersApply = useCallback(
+    (appliedFilters: FilterState) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
 
-    if (hasFilters && !hasActiveFilters.current) {
-      pageBeforeFilter.current = paginaActual;
-      hasActiveFilters.current = true;
-    }
+      const hasFilters =
+        appliedFilters.range.length > 0 ||
+        (Array.isArray(appliedFilters.city)
+          ? appliedFilters.city.length > 0
+          : !!appliedFilters.city) ||
+        appliedFilters.category.length > 0;
 
-    if (!hasFilters) {
-      hasActiveFilters.current = false;
-    }
+      if (hasFilters && !hasActiveFilters.current) {
+        pageBeforeFilter.current = paginaActual;
+        hasActiveFilters.current = true;
+      }
 
-    dispatch(setFilters(appliedFilters));
-    dispatch(resetPagination());
-  };
+      if (!hasFilters) {
+        hasActiveFilters.current = false;
+      }
 
-  const handleSortChange = (option: string) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    const backendSort = getSortValue(option);
-    dispatch(setSortBy(backendSort));
-  };
+      dispatch(setFilters(appliedFilters));
+      dispatch(resetPagination());
+    },
+    [dispatch, paginaActual],
+  );
 
-  const handlePageChange = (newPage: number) => {
-    scrollRestoredRef.current = true;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-    dispatch(setPaginaActual(newPage));
-  };
+  const handleSortChange = useCallback(
+    (option: string) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      const backendSort = getSortValue(option);
+      dispatch(setSortBy(backendSort));
+    },
+    [dispatch],
+  );
 
-  const toggleDrawer = () => setIsDrawerOpen(!isDrawerOpen);
+  const handleResetFilters = useCallback(() => {
+    const pageToRestore = hasActiveFilters.current ? pageBeforeFilter.current : 1;
+    hasActiveFilters.current = false;
+
+    dispatch(resetFilters());
+
+    setTimeout(() => {
+      dispatch(enablePersistence());
+      dispatch(setPaginaActual(pageToRestore));
+    }, 0);
+  }, [dispatch]);
+
+  const handlePageChange = useCallback(
+    (newPage: number) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      dispatch(setPaginaActual(newPage));
+    },
+    [dispatch],
+  );
+
+  const handleRatingChange = useCallback(
+    (rating: number | null) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const hasRatingFilter = rating != null;
+      if (hasRatingFilter && !hasActiveFilters.current) {
+        pageBeforeFilter.current = paginaActual;
+        hasActiveFilters.current = true;
+      }
+
+      if (!hasRatingFilter) {
+        hasActiveFilters.current = false;
+      }
+
+      dispatch(setRating(rating));
+      dispatch(resetPagination());
+    },
+    [dispatch, paginaActual],
+  );
+
+  const toggleDrawer = useCallback(() => setIsDrawerOpen((prev) => !prev), []);
+
+  const handleViewModeChange = useCallback((mode: ViewMode) => {
+    setViewMode(mode);
+  }, []);
+
+  const processedOffers = useMemo(() => {
+    return offers;
+  }, [offers]);
 
   return (
     <>
@@ -461,7 +539,7 @@ export default function JobOffersPage() {
               {/* Mobile view toggle */}
               <ViewModeToggle
                 viewMode={viewMode}
-                onChange={setViewMode}
+                onChange={handleViewModeChange}
                 variant="mobile"
                 className="flex lg:hidden"
               />
@@ -469,7 +547,7 @@ export default function JobOffersPage() {
               {/* Desktop view toggle */}
               <ViewModeToggle
                 viewMode={viewMode}
-                onChange={setViewMode}
+                onChange={handleViewModeChange}
                 variant="desktop"
                 className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2"
               />
@@ -503,32 +581,11 @@ export default function JobOffersPage() {
           </div>
         )}
 
-        {/* Overlay cuando el drawer está abierto */}
-        {isDrawerOpen && (
-          <div className="fixed bg-black z-40" onClick={() => setIsDrawerOpen(false)} />
-        )}
-
         <FilterDrawer
           isOpen={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           onFiltersApply={handleFiltersApply}
-          onRatingChange={(rating) => {
-            scrollRestoredRef.current = true;
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-
-            const hasRatingFilter = rating != null;
-            if (hasRatingFilter && !hasActiveFilters.current) {
-              pageBeforeFilter.current = paginaActual;
-              hasActiveFilters.current = true;
-            }
-
-            if (!hasRatingFilter) {
-              hasActiveFilters.current = false;
-            }
-
-            dispatch(setRating(rating));
-            dispatch(resetPagination());
-          }}
+          onRatingChange={handleRatingChange}
           onReset={handleResetFilters}
         />
 
@@ -547,7 +604,7 @@ export default function JobOffersPage() {
         <div className="w-full max-w-5xl mx-auto">
           {!isLoading && Array.isArray(offers) && offers.length > 0 ? (
             <JobOffersView
-              offers={offers}
+              offers={processedOffers}
               viewMode={viewMode}
               onOfferClick={handleCardClick}
               search={search}
@@ -569,11 +626,7 @@ export default function JobOffersPage() {
         )}
       </main>
 
-      <JobOfferModal
-        offer={selectedOffer}
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-      />
+      <JobOfferModal offer={selectedOffer} isOpen={isModalOpen} onClose={handleCloseModal} />
     </>
   );
 }

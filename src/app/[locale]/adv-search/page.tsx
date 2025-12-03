@@ -61,7 +61,7 @@ function AdvancedSearchPage() {
     selectedTags,
     selectedPriceKey,
     loading,
-    totalRegistros,
+    resultsCount,
     storeLoading,
     clearSignal,
     skipSyncRef,
@@ -158,7 +158,7 @@ function AdvancedSearchPage() {
         <div className="max-w-7xl mx-auto">
           <div className="w-full sm:w-[700px] mx-auto">
             <div className="mb-3">
-              <ResultsCounter total={totalRegistros ?? 0} loading={storeLoading ?? loading} />
+              <ResultsCounter total={resultsCount ?? 0} loading={storeLoading ?? loading} />
             </div>
 
             <div className="mb-4">

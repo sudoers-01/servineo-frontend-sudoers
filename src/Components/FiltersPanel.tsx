@@ -13,20 +13,20 @@ import {
   selectIsAutoSelectedCity,
   selectSidebarOpen,
   setSidebarOpen,
-} from "../app/redux/slice/filterSlice"
-import { DB_VALUES } from "@/app/redux/contants"
-import { X } from "lucide-react"
-import { useTranslations } from "next-intl"
+} from '../app/redux/slice/filterSlice';
+import { DB_VALUES } from '@/app/redux/contants';
+import { X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function FiltersPanel() {
-  const t = useTranslations("filtersPanel")
-  const dispatch = useAppDispatch()
-  const sidebarOpen = useAppSelector(selectSidebarOpen)
-  const selectedFixerNames = useAppSelector(selectSelectedFixerNames)
-  const selectedCities = useAppSelector(selectSelectedCities)
-  const selectedJobTypes = useAppSelector(selectSelectedJobTypes)
-  const isAutoSelectedJobType = useAppSelector(selectIsAutoSelectedJobType)
-  const isAutoSelectedCity = useAppSelector(selectIsAutoSelectedCity)
+  const t = useTranslations('filtersPanel');
+  const dispatch = useAppDispatch();
+  const sidebarOpen = useAppSelector(selectSidebarOpen);
+  const selectedFixerNames = useAppSelector(selectSelectedFixerNames);
+  const selectedCities = useAppSelector(selectSelectedCities);
+  const selectedJobTypes = useAppSelector(selectSelectedJobTypes);
+  const isAutoSelectedJobType = useAppSelector(selectIsAutoSelectedJobType);
+  const isAutoSelectedCity = useAppSelector(selectIsAutoSelectedCity);
 
   return (
     <>
@@ -107,9 +107,9 @@ export function FiltersPanel() {
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {DB_VALUES.cities.map((city) => {
-                  const isSelected = selectedCities.includes(city)
-                  const isAutoMarked = isAutoSelectedCity && isSelected
-                  const isDisabled = isAutoSelectedCity && !isSelected
+                  const isSelected = selectedCities.includes(city);
+                  const isAutoMarked = isAutoSelectedCity && isSelected;
+                  const isDisabled = isAutoSelectedCity && !isSelected;
 
                   return (
                     <label
@@ -125,21 +125,17 @@ export function FiltersPanel() {
                         checked={isSelected}
                         onChange={() => {
                           // Si es automarcado, no permite deseleccionar
-                          if (isAutoMarked) return
-                          dispatch(toggleCity(city))
+                          if (isAutoMarked) return;
+                          dispatch(toggleCity(city));
                         }}
                         disabled={isDisabled}
                         className={`w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer`}
                       />
-                      <span
-                        className={`text-sm ${
-                          isDisabled ? 'text-gray-400' : 'text-gray-700'
-                        }`}
-                      >
+                      <span className={`text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
                         {city}
                       </span>
                     </label>
-                  )
+                  );
                 })}
               </div>
             </div>
@@ -151,9 +147,9 @@ export function FiltersPanel() {
               </div>
               <div className="space-y-2 max-h-48 overflow-y-auto pr-2">
                 {DB_VALUES.jobTypes.map((type) => {
-                  const isSelected = selectedJobTypes.includes(type)
-                  const isAutoMarked = isAutoSelectedJobType && isSelected
-                  const isDisabled = isAutoSelectedJobType && !isSelected
+                  const isSelected = selectedJobTypes.includes(type);
+                  const isAutoMarked = isAutoSelectedJobType && isSelected;
+                  const isDisabled = isAutoSelectedJobType && !isSelected;
 
                   return (
                     <label
@@ -162,8 +158,8 @@ export function FiltersPanel() {
                         isDisabled
                           ? 'cursor-not-allowed opacity-50 bg-gray-200'
                           : isAutoMarked
-                          ? 'cursor-pointer hover:bg-gray-50'
-                          : 'cursor-pointer hover:bg-gray-50'
+                            ? 'cursor-pointer hover:bg-gray-50'
+                            : 'cursor-pointer hover:bg-gray-50'
                       }`}
                     >
                       <input
@@ -171,21 +167,17 @@ export function FiltersPanel() {
                         checked={isSelected}
                         onChange={() => {
                           // Si es automarcado, no permite deseleccionar
-                          if (isAutoMarked) return
-                          dispatch(toggleJobType(type))
+                          if (isAutoMarked) return;
+                          dispatch(toggleJobType(type));
                         }}
                         disabled={isDisabled}
                         className={`w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 cursor-pointer`}
                       />
-                      <span
-                        className={`text-sm ${
-                          isDisabled ? 'text-gray-400' : 'text-gray-700'
-                        }`}
-                      >
+                      <span className={`text-sm ${isDisabled ? 'text-gray-400' : 'text-gray-700'}`}>
                         {type}
                       </span>
                     </label>
-                  )
+                  );
                 })}
               </div>
             </div>

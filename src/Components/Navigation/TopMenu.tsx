@@ -7,6 +7,7 @@ import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
 import { IUser } from '@/types/user';
+import { useTranslations } from 'next-intl';
 
 interface UserState {
   user: IUser | null;
@@ -19,10 +20,9 @@ interface RootState {
 }
 
 export default function TopMenu() {
+  const t = useTranslations('TopMenu');
   const dispatch = useDispatch();
-  // Acceder correctamente al estado
   const { user, loading } = useSelector((state: RootState) => state.user);
-  console.log('User in TopMenu:', user);
 
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -33,8 +33,9 @@ export default function TopMenu() {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const navItems = [
-    { name: 'Inicio', href: '/' },
-    { name: 'Ofertas de trabajo', href: '/job-offer-list' },
+    { name: t('nav.home'), href: '/' },
+    { name: t('nav.jobOffers'), href: '/job-offer-list' },
+    { name: t('nav.help'), href: '/ask-for-help/centro_de_ayuda' },
   ];
 
   // Obtener userId desde localStorage
@@ -80,19 +81,17 @@ export default function TopMenu() {
 
   // Determinar qué botón mostrar según el rol
   const getRoleButton = () => {
-    // Si está cargando, mostrar skeleton o nada
     if (loading || !user) return null;
-
     if (!user.role) return null;
 
     if (user.role === 'requester') {
       return (
         <Link
           href="/become-fixer"
-          className="flex items-center gap-2  px-4 py-2 rounded-md text-sm font-medium text-primary transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-primary transition-colors"
         >
           <Wrench className="h-4 w-4" />
-          Convertir a Fixer
+          {t('buttons.becomeFixer')}
         </Link>
       );
     }
@@ -101,10 +100,10 @@ export default function TopMenu() {
       return (
         <Link
           href="/fixer/dashboard"
-          className="flex items-center gap-2  text-white px-4 py-2 rounded-md text-sm font-medium bg-primary transition-colors"
+          className="flex items-center gap-2 text-white px-4 py-2 rounded-md text-sm font-medium bg-primary transition-colors"
         >
           <UserCircle className="h-4 w-4" />
-          Perfil de Fixer
+          {t('buttons.fixerProfile')}
         </Link>
       );
     }
@@ -113,9 +112,7 @@ export default function TopMenu() {
   };
 
   const getRoleButtonMobile = () => {
-    // Si está cargando, mostrar skeleton o nada
     if (loading || !user) return null;
-
     if (!user.role) return null;
 
     if (user.role === 'requester') {
@@ -126,7 +123,7 @@ export default function TopMenu() {
           onClick={() => setIsOpen(false)}
         >
           <Wrench className="h-4 w-4" />
-          Convertir a Fixer
+          {t('buttons.becomeFixer')}
         </Link>
       );
     }
@@ -139,7 +136,7 @@ export default function TopMenu() {
           onClick={() => setIsOpen(false)}
         >
           <UserCircle className="h-4 w-4" />
-          Perfil de Fixer
+          {t('buttons.fixerProfile')}
         </Link>
       );
     }
@@ -182,18 +179,17 @@ export default function TopMenu() {
                     href="/login"
                     className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
                   >
-                    Iniciar Sesión
+                    {t('buttons.login')}
                   </Link>
                   <Link
                     href="/signUp"
                     className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
                   >
-                    Regístrate
+                    {t('buttons.register')}
                   </Link>
                 </>
               ) : (
                 <>
-                  {/* Botón según rol del usuario */}
                   {getRoleButton()}
 
                   <div className="relative" ref={dropdownRef}>
@@ -201,7 +197,7 @@ export default function TopMenu() {
                       onClick={() => setAccountOpen(!accountOpen)}
                       className="text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors"
                     >
-                      Mi cuenta
+                      {t('buttons.myAccount')}
                     </button>
                     {accountOpen && (
                       <div className="absolute right-0 mt-2 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50">
@@ -209,7 +205,7 @@ export default function TopMenu() {
                           href="/requesterEdit"
                           className="block px-4 py-2 text-gray-700 hover:bg-gray-50"
                         >
-                          Editar perfil
+                          {t('dropdown.editProfile')}
                         </Link>
                         <button
                           onClick={() => {
@@ -219,7 +215,7 @@ export default function TopMenu() {
                           }}
                           className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50"
                         >
-                          Cerrar sesión
+                          {t('dropdown.logout')}
                         </button>
                       </div>
                     )}
@@ -266,19 +262,18 @@ export default function TopMenu() {
                     className="block w-full text-center text-primary px-4 py-2 rounded-md text-base font-medium hover:bg-gray-50"
                     onClick={() => setIsOpen(false)}
                   >
-                    Iniciar Sesión
+                    {t('buttons.login')}
                   </Link>
                   <Link
                     href="/signUp"
                     className="block w-full text-center text-white bg-primary px-4 py-2 rounded-md text-base font-medium hover:bg-primary/90"
                     onClick={() => setIsOpen(false)}
                   >
-                    Regístrate
+                    {t('buttons.register')}
                   </Link>
                 </>
               ) : (
                 <>
-                  {/* Botón según rol - Mobile */}
                   {getRoleButtonMobile()}
 
                   <Link
@@ -286,14 +281,14 @@ export default function TopMenu() {
                     className="block px-4 py-2 text-primary hover:bg-gray-50 rounded-md"
                     onClick={() => setIsOpen(false)}
                   >
-                    Mi cuenta
+                    {t('buttons.myAccount')}
                   </Link>
                   <Link
                     href="/requesterEdit"
                     className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
                     onClick={() => setIsOpen(false)}
                   >
-                    Editar perfil
+                    {t('dropdown.editProfile')}
                   </Link>
                   <button
                     onClick={() => {
@@ -303,7 +298,7 @@ export default function TopMenu() {
                     }}
                     className="block w-full text-left text-red-600 px-4 py-2 rounded-md text-base font-medium hover:bg-red-50"
                   >
-                    Cerrar sesión
+                    {t('dropdown.logout')}
                   </button>
                 </>
               )}
