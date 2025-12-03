@@ -3,16 +3,20 @@ import { Droplets } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
+interface ServicesSectionProps {
+  showHero?: boolean;
+  showAllServices?: boolean;
+  showCTA?: boolean;
+  title?: string;
+  subtitle?: string;
+}
 
-export default function ServicesSection() {
-  const t=useTranslations("Services");
-  const services = [
+const services = [
   {
-    name: t("name services"),
-    icon: <Droplets className="w-8 h-8 text-primary" />,
-    description: t("Description")
+    name: 'Plomería',
+    icon: <Droplets className='w-8 h-8 text-primary' />,
+    description: 'Reparaciones e instalaciones de fontanería',
   },
-  
 ];
 
 export default function ServicesSection({
