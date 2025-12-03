@@ -50,7 +50,7 @@ export default function BecomeFixerPage() {
     email: user?.email || '',
     phone: user?.telefono || '',
   };
-  
+
   return (
     <div>
       <div className="container mx-auto max-w-4xl p-4">

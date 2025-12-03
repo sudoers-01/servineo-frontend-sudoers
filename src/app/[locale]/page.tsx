@@ -8,15 +8,15 @@ import InspirationSection from '@/Components/Home/Inspiration-section';
 import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
 import FooterSection from '@/Components/Home/Footer-section';
 import { useEffect } from 'react';
-import { useSelector } from 'react-redux';
-import { IUser } from '@/types/user';
+//import { useSelector } from 'react-redux';
+//import { IUser } from '@/types/user';
 import { useDispatch } from 'react-redux';
 import { useState } from 'react';
 import { useGetUserByIdQuery } from '../redux/services/userApi';
 import { setUser } from '../redux/slice/userSlice';
 
 export default function Home() {
-  const user = useSelector((state: { user: IUser }) => state.user);
+  //const user = useSelector((state: { user: IUser }) => state.user);
   const dispatch = useDispatch();
   const [userId, setUserId] = useState<string | null>(null);
 

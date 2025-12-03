@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
         hostname: 'picsum.photos',
         pathname: '/**',
       },
-// Google Drive thumbnails
+      // Google Drive thumbnails
       {
         protocol: 'https',
         hostname: 'drive.google.com',
@@ -43,8 +43,6 @@ const nextConfig: NextConfig = {
         hostname: 'doc-*.googleusercontent.com',
         pathname: '/**',
       },
-  
-
     ],
   },
   async rewrites() {

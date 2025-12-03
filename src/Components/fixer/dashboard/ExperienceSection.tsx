@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Building2, Calendar, Briefcase, Plus, Loader2, Edit2, Trash2 } from 'lucide-react';
+import { Building2, Calendar, Briefcase, Plus, Edit2, Trash2 } from 'lucide-react';
 import NotificationModal from '@/Components/Modal-notifications';
 import type { IExperience } from '@/types/fixer-profile';
 import {
@@ -293,7 +293,9 @@ export function ExperienceSection({
         <Modal.Body>
           <form id="experienceForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Cargo / Título *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Cargo / Título *
+              </label>
               <input
                 {...register('jobTitle', { required: 'Este campo es requerido' })}
                 className={`w-full rounded-lg border ${errors.jobTitle ? 'border-red-500' : 'border-primary'} focus:outline-none py-2 px-3`}
@@ -319,7 +321,9 @@ export function ExperienceSection({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipo de Empleo *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tipo de Empleo *
+              </label>
               <select
                 {...register('jobType', { required: 'Selecciona un tipo de empleo' })}
                 className={`w-full rounded-lg border ${errors.jobType ? 'border-red-500' : 'border-primary'} focus:outline-none py-2 px-3 bg-white`}
