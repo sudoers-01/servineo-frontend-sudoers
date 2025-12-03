@@ -3,14 +3,11 @@
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
 
-// ✅ Imports de Redux (API)
 import { useGetMapLocationsQuery, useGetTrackingMetricsQuery, useGetFixerStatsQuery } from '@/app/redux/services/trackingAppointmentsApi';
 
-// ✅ Imports de Componentes UI
 import FixerStatsTable from '@/Components/Statistics-panel/fixer-stats-table';
 import MetricsCards from '@/Components/Statistics-panel/metrics-cards';
 
-// ✅ Carga dinámica del Mapa (sin SSR)
 const AdminMap = dynamic(
   () => import('@/Components/Statistics-panel/admin-map'),
   { 
@@ -20,28 +17,28 @@ const AdminMap = dynamic(
 );
 
 const StatisticsPage: React.FC = () => {
-  // --- Estados Locales (Filtros) ---
+
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
-  // --- Hooks de Redux (Datos del Backend) ---
+
   
-  // 1. Métricas Generales
+
   const { 
     data: metrics = { total: 0, active: 0, cancelled: 0 }, 
     isLoading: loadingMetrics 
   } = useGetTrackingMetricsQuery({ startDate, endDate });
 
-  // 2. Datos del Mapa
+
   const { 
     data: rawMapData = [], 
     isLoading: loadingMap 
   } = useGetMapLocationsQuery();
 
-  // 3. Tabla de Fixers
+
   const { data: fixerStats = [] } = useGetFixerStatsQuery();
 
-  // --- Lógica de Filtrado Local para el Mapa ---
+
   const filteredAppointments = React.useMemo(() => {
     if (!rawMapData) return [];
 
@@ -56,7 +53,7 @@ const StatisticsPage: React.FC = () => {
         lng: Number(app.lon),
         service: ''
       }))
-      // Filtro de seguridad: Coordenadas válidas
+      
       .filter((app: any) => !isNaN(app.lat) && !isNaN(app.lng))
       // Filtro de fechas
       .filter((app: any) => {

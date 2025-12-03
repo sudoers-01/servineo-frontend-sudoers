@@ -33,10 +33,9 @@ interface FilterArgs {
 
 export const trackingAppointmentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-  
-      getMapLocations: builder.query<MapLocation[], void>({
+    getMapLocations: builder.query<MapLocation[], void>({
       query: () => ({
-        url: '/api/admin/map-locations', 
+        url: '/admin/map-locations', 
         method: 'GET',
       }),
       providesTags: ['Statistics'],
@@ -44,7 +43,7 @@ export const trackingAppointmentsApi = baseApi.injectEndpoints({
 
     getTrackingMetrics: builder.query<TrackingMetrics, FilterArgs>({
       query: ({ startDate, endDate }) => {
-        let url = '/api/admin/metrics'; 
+        let url = '/admin/metrics';
         const params = new URLSearchParams();
         if (startDate) params.append('startDate', startDate);
         if (endDate) params.append('endDate', endDate);
@@ -60,7 +59,7 @@ export const trackingAppointmentsApi = baseApi.injectEndpoints({
 
     getFixerStats: builder.query<FixerStat[], void>({
       query: () => ({
-        url: '/api/admin/fixer-stats', 
+        url: '/admin/fixer-stats',
         method: 'GET',
       }),
       providesTags: ['Statistics'],
