@@ -207,3 +207,4 @@ export default function JobPromotionsPage() {
     </div>
   );
 }
+//conclitos resueltos
