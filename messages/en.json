@@ -1145,5 +1145,23 @@
     "title": "8. CONTACT",
     "content": "For inquiries, complaints, or suggestions, users can contact the Servero team via email:"
   }
-}
+  },
+  "TopMenu": {
+    "nav": {
+      "home": "Home",
+      "jobOffers": "Job Offers",
+      "help": "Help"
+    },
+    "buttons": {
+      "login": "Log In",
+      "register": "Sign Up",
+      "myAccount": "My Account",
+      "becomeFixer": "Become a Fixer",
+      "fixerProfile": "Fixer Profile"
+    },
+    "dropdown": {
+      "editProfile": "Edit Profile",
+      "logout": "Log Out"
+    }
+  } 
 }

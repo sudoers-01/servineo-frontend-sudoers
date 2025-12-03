@@ -1142,5 +1142,23 @@
     "title": "8. CONTACTO",
     "content": "Para consultas, reclamos o sugerencias, los usuarios pueden comunicarse con el equipo de Servero a través del correo electrónico:"
   }
-}
+  },
+  "TopMenu": {
+    "nav": {
+      "home": "Inicio",
+      "jobOffers": "Ofertas de trabajo",
+      "help": "Ayuda"
+    },
+    "buttons": {
+      "login": "Iniciar Sesión",
+      "register": "Regístrate",
+      "myAccount": "Mi cuenta",
+      "becomeFixer": "Convertir a Fixer",
+      "fixerProfile": "Perfil de Fixer"
+    },
+    "dropdown": {
+      "editProfile": "Editar perfil",
+      "logout": "Cerrar sesión"
+    }
+  }
 }
