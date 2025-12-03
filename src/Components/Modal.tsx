@@ -89,7 +89,7 @@ const Modal: React.FC<ModalProps> & {
   const content = (
     <div
       ref={overlayRef}
-      role="presentation"
+      role='presentation'
       className={[
         // Layout
         'fixed inset-0 z-[1000] flex',
@@ -107,8 +107,8 @@ const Modal: React.FC<ModalProps> & {
       }}
     >
       <div
-        role="dialog"
-        aria-modal="true"
+        role='dialog'
+        aria-modal='true'
         aria-label={typeof title === 'string' ? title : undefined}
         tabIndex={-1}
         ref={panelRef}
@@ -129,17 +129,17 @@ const Modal: React.FC<ModalProps> & {
       >
         {/* Renderizado condicional del Header automático */}
         {(title || showCloseButton) && (
-          <div className="flex items-center justify-between gap-4 border-b border-gray-100 px-6 py-4 shrink-0 bg-white rounded-t-2xl">
-            {title && <div className="text-lg font-bold text-gray-900 leading-6">{title}</div>}
+          <div className='flex items-center justify-between gap-4 border-b border-gray-100 px-6 py-4 shrink-0 bg-white rounded-t-2xl'>
+            {title && <div className='text-lg font-bold text-gray-900 leading-6'>{title}</div>}
 
             {showCloseButton && (
               <button
-                type="button"
-                aria-label="Cerrar"
+                type='button'
+                aria-label='Cerrar'
                 onClick={onClose}
-                className="group relative -mr-2 p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+                className='group relative -mr-2 p-2 rounded-full hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20'
               >
-                <X className="h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
+                <X className='h-5 w-5 text-gray-400 group-hover:text-gray-600 transition-colors' />
               </button>
             )}
           </div>
@@ -151,7 +151,7 @@ const Modal: React.FC<ModalProps> & {
 
         {/* Renderizado condicional del Footer automático */}
         {footer && (
-          <div className="border-t border-gray-100 px-6 py-4 bg-gray-50/50 rounded-b-2xl shrink-0 flex justify-end gap-3">
+          <div className='border-t border-gray-100 px-6 py-4 bg-gray-50/50 rounded-b-2xl shrink-0 flex justify-end gap-3'>
             {footer}
           </div>
         )}

@@ -248,12 +248,12 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   }`;
 
   return (
-    <div className="w-full" ref={containerRef}>
-      <div className="flex flex-row w-full items-center gap-2">
-        <div className="relative flex-1 min-w-0 self-center">
+    <div className='w-full' ref={containerRef}>
+      <div className='flex flex-row w-full items-center gap-2'>
+        <div className='relative flex-1 min-w-0 self-center'>
           <SearchIcon hasError={hasError} />
           <Input
-            type="text"
+            type='text'
             placeholder={t('placeholder')}
             className={inputClasses}
             value={previewValue ?? value}
@@ -296,14 +296,14 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
           />
         </div>
 
-        <div className="flex gap-2 items-center shrink-0">
+        <div className='flex gap-2 items-center shrink-0'>
           <SearchButton onClick={handleSearch} />
           <AdvancedSearchButton />
           {onFilter && <FilterButton onClick={onFilter} />}
         </div>
       </div>
-      <div className="min-h-5 mt-1">
-        {hasError && <p className="text-red-500 text-sm leading-4">{error}</p>}
+      <div className='min-h-5 mt-1'>
+        {hasError && <p className='text-red-500 text-sm leading-4'>{error}</p>}
       </div>
     </div>
   );

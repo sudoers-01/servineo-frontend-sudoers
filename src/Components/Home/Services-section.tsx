@@ -14,7 +14,7 @@ interface ServicesSectionProps {
 const services = [
   {
     name: 'Plomería',
-    icon: <Droplets className="w-8 h-8 text-primary" />,
+    icon: <Droplets className='w-8 h-8 text-primary' />,
     description: 'Reparaciones e instalaciones de fontanería',
   },
 ];

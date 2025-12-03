@@ -5,8 +5,8 @@ import React from 'react';
 export function FilterButton(props: React.ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
     <Button
-      size="lg"
-      className="
+      size='lg'
+      className='
         bg-[#2B6AE0] text-white hover:bg-[#2B6AE0]/90 
         shrink-0
         w-10
@@ -19,10 +19,10 @@ export function FilterButton(props: React.ButtonHTMLAttributes<HTMLButtonElement
         cursor-pointer 
         border
         transition-all duration-200
-      "
+      '
       {...props}
     >
-      <SlidersHorizontal size={18} color="white" strokeWidth={2.8} />
+      <SlidersHorizontal size={18} color='white' strokeWidth={2.8} />
     </Button>
   );
 }

@@ -163,12 +163,12 @@ export default function InspirationSection() {
   }, []);
 
   return (
-    <section className="py-16 px-4 bg-white">
-      <div className="max-w-5xl mx-auto">
+    <section className='py-16 px-4 bg-white'>
+      <div className='max-w-5xl mx-auto'>
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{t('insTitle')}</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t('insDescription')}</p>
+        <div className='text-center mb-12'>
+          <h2 className='text-3xl md:text-4xl font-bold text-gray-800 mb-4'>{t('insTitle')}</h2>
+          <p className='text-lg text-gray-600 max-w-2xl mx-auto'>{t('insDescription')}</p>
         </div>
 
         {/* Carousel */}
@@ -204,18 +204,15 @@ export default function InspirationSection() {
 
               <div className="carrusel-overlay"></div>
               <div className="carrusel-content">
-                {/* CATEGORÍA arriba */}
                 <span className="carrusel-category bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm [text-shadow:_0_0_8px_black,_0_0_4px_black,_0_0_2px_black]">
                   {slide.category}
                 </span>
 
                 <div className="carrusel-text-group">
-                  {/* TÍTULO con sombra ULTRA GRUESA */}
                   <h2 className="carrusel-title text-white font-bold text-3xl md:text-5xl [text-shadow:_0_0_20px_black,_0_0_12px_black,_0_0_6px_black,_0_0_3px_black]">
                     {slide.title}
                   </h2>
 
-                  {/* SUBTÍTULO con sombra gruesa */}
                   <p className="carrusel-subtitle text-white font-medium text-lg md:text-xl [text-shadow:_0_0_12px_black,_0_0_6px_black,_0_0_3px_black]">
                     {slide.subtitle}
                   </p>
@@ -229,16 +226,15 @@ export default function InspirationSection() {
             className="carrusel-arrow carrusel-arrow-left"
             aria-label="Diapositiva anterior"
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className='w-6 h-6' />
           </button>
           <button
             onClick={nextSlide}
             className="carrusel-arrow carrusel-arrow-right"
             aria-label="Diapositiva siguiente"
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className='w-6 h-6' />
           </button>
-
           <div className="carrusel-dots">
             {slides.map((_, index) => (
               <span

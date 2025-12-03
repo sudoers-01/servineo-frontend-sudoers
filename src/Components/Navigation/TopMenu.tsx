@@ -117,7 +117,7 @@ export default function TopMenu() {
           href="/become-fixer"
           className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors"
         >
-          <Wrench className="h-4 w-4" />
+          <Wrench className='h-4 w-4' />
           Convertir a Fixer
         </Link>
       );
@@ -129,7 +129,7 @@ export default function TopMenu() {
           href="/fixer/dashboard"
           className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity"
         >
-          <UserCircle className="h-4 w-4" />
+          <UserCircle className='h-4 w-4' />
           Perfil de Fixer
         </Link>
       );
@@ -147,7 +147,7 @@ export default function TopMenu() {
         } border-b border-gray-100`}
         role="banner"
       >
-        <div className="w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20">
+        <div className="w-full max-w-8xl mx-auto px-4 flex items-center h-16">
           {/* Logo */}
           <button
             ref={logoRef}
@@ -173,6 +173,7 @@ export default function TopMenu() {
           </button>
 
           {/* Desktop Nav */}
+          <div className="flex-1 flex justify-center">
           <nav className="flex gap-6" role="navigation" aria-label="Menú principal">
             {navItems.map((item) => (
               <Link
@@ -185,9 +186,8 @@ export default function TopMenu() {
               </Link>
             ))}
           </nav>
-
-          {/* Desktop Right */}
-          <div className="flex items-center gap-4">
+          </div>
+          <div className="flex items-center gap-3">
             {!isLogged ? (
               <>
                 <Link
@@ -235,7 +235,7 @@ export default function TopMenu() {
               </>
             )}
           </div>
-        </div>
+          </div>
       </header>
 
       {/* MOBILE/TABLET HEADER */}
@@ -245,7 +245,7 @@ export default function TopMenu() {
           {/* Logo */}
           <button onClick={handleLogoClick} className="flex items-center gap-2 min-w-0">
             <div className="relative overflow-hidden rounded-full shadow-md shrink-0">
-              <Image src="/icon.png" alt="Servineo" width={32} height={32} />
+              <Image src="/es/img/icon.png" alt="Servineo" width={32} height={32} />
             </div>
             <span className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]">
               Servineo
@@ -300,7 +300,7 @@ export default function TopMenu() {
       </div>
 
       {/* Spacer Desktop */}
-      <div className="hidden lg:block h-20" />
+      <div className="hidden lg:block h-16" />
     </>
   );
 }

@@ -30,9 +30,9 @@ export const FAQList: React.FC<FAQListProps> = ({ faqs }) => {
 
   if (faqs.length === 0) {
     return (
-      <div className="text-center p-12 bg-gray-50 border border-gray-200 rounded-lg mt-8">
-        <h3 className="text-xl font-semibold text-gray-800 mb-2">No se encontraron resultados</h3>
-        <p className="text-gray-600">
+      <div className='text-center p-12 bg-gray-50 border border-gray-200 rounded-lg mt-8'>
+        <h3 className='text-xl font-semibold text-gray-800 mb-2'>No se encontraron resultados</h3>
+        <p className='text-gray-600'>
           Intenta con otras palabras clave o navega por todas las preguntas frecuentes.
         </p>
       </div>
@@ -42,7 +42,7 @@ export const FAQList: React.FC<FAQListProps> = ({ faqs }) => {
   return (
     <div>
       {/* Lista de Preguntas Frecuentes */}
-      <div className="space-y-4">
+      <div className='space-y-4'>
         {faqsToShow.map((faq) => (
           <FAQItem
             key={faq._id}
@@ -55,10 +55,10 @@ export const FAQList: React.FC<FAQListProps> = ({ faqs }) => {
 
       {/* Botón Ver más / Ver menos */}
       {hasMore && (
-        <div className="mt-6 text-center">
+        <div className='mt-6 text-center'>
           <button
             onClick={() => setShowAll(!showAll)}
-            className="
+            className='
               text-blue-600 
               hover:text-blue-700   
               font-semibold 
@@ -69,7 +69,7 @@ export const FAQList: React.FC<FAQListProps> = ({ faqs }) => {
               ease-in-out 
               border 
               border-blue-600
-            "
+            '
           >
             {showAll
               ? `Ver menos (${itemsShownCount} resultados)`
