@@ -92,7 +92,7 @@ export default function ServicesSection({
   };
 
   return (
-    <div className="min-h-screen bg-white pt-16">
+    <div className={showHero ? "min-h-screen bg-white pt-16" : "bg-white"}>
       {showHero && (
         <section className="w-full py-16 px-4 bg-gradient-to-b from-blue-600 to-blue-800 text-white">
           <div className="max-w-7xl mx-auto text-center">
@@ -126,7 +126,7 @@ export default function ServicesSection({
                 onKeyDown={(e) => handleCardKey(e, index, service.slug)}
                 onClick={() => router.push(`/servicios/${service.slug}`)}
                 onFocus={() => setActiveIndex(index)}
-                className="select-none bg-white p-8 rounded-xl shadow-lg border border-gray-200 transition-all duration-200 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                className="select-none bg-white p-8 rounded-xl shadow-lg border border-gray-200 transition-all duration-200 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 cursor-pointer"
               >
                 <div className="flex items-start justify-between mb-6">
                   <div className="text-5xl">{service.icon}</div>
@@ -155,7 +155,7 @@ export default function ServicesSection({
             <div className="flex justify-center mt-12">
               <Link
                 href="/servicios"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-8 rounded-lg transition-colors duration-300 shadow-md hover:shadow-lg"
               >
                 Ver más
               </Link>

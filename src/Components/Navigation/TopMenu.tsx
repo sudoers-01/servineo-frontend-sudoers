@@ -4,7 +4,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Wrench, UserCircle, ClipboardList, HelpCircle} from 'lucide-react';
+import { Wrench, UserCircle, ClipboardList, HelpCircle, Tag } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
@@ -27,9 +27,7 @@ export default function TopMenu() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { user, isAuthenticated } = useSelector(
-    (state: RootState) => state.user
-  );
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
 
   // UI state
   const [isOpen, setIsOpen] = useState(false);
@@ -38,12 +36,10 @@ export default function TopMenu() {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [currentPath, setCurrentPath] = useState<string>(
-    typeof window !== 'undefined' ? window.location.pathname : ''
+    typeof window !== 'undefined' ? window.location.pathname : '',
   );
   const [isLogged, setIsLogged] = useState<boolean>(() =>
-    typeof window !== 'undefined'
-      ? Boolean(localStorage.getItem('servineo_token'))
-      : false
+    typeof window !== 'undefined' ? Boolean(localStorage.getItem('servineo_token')) : false,
   );
 
   // Refs
@@ -54,56 +50,67 @@ export default function TopMenu() {
   const profileButtonRef = useRef<HTMLButtonElement | null>(null);
   const [isClient, setIsClient] = useState(false);
 
-useEffect(() => {
-  setIsClient(true);
-}, []);
-
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Determine if we're in auth flow
   const isInAuthFlow = () => {
     if (typeof window === 'undefined') return false;
     const authRoutes = ['/login', '/signUp'];
-    const isInAuthRoute = authRoutes.some((route) =>
-      pathname?.includes(route)
-    );
+    const isInAuthRoute = authRoutes.some((route) => pathname?.includes(route));
     const authInProgress = sessionStorage.getItem('auth_in_progress') === 'true';
     return isInAuthRoute || authInProgress;
   };
   const inAuthFlow = isInAuthFlow();
 
   // NAV items (kept same visual)
-  const navItems = [
-    { name: 'Servicios', href: '/servicios', icon: <Wrench className="h-5 w-5" /> },
-    {
-      name: 'Ofertas de trabajo',
-      href: '/job-offer-list',
-      icon: <ClipboardList className="h-5 w-5" />,
-    },
-    {
-      name: 'Ayuda',
-      href: '/ask-for-help/centro_de_ayuda',
-      icon: <HelpCircle className="h-5 w-5" />,
-    },
-  ];
+  const navItems =
+    user?.role === 'fixer'
+      ? [
+          { name: 'Servicios', href: '/servicios', icon: <Wrench className='h-5 w-5' /> },
+          {
+            name: 'Ofertas de trabajo',
+            href: '/job-offer-list',
+            icon: <ClipboardList className='h-5 w-5' />,
+          },
+          {
+            name: 'Ayuda',
+            href: '/ask-for-help/centro_de_ayuda',
+            icon: <HelpCircle className='h-5 w-5' />,
+          },
+        ]
+      : [
+          { name: 'Servicios', href: '/servicios', icon: <Wrench className='h-5 w-5' /> },
+          {
+            name: 'Ofertas de trabajo',
+            href: '/job-offer-list',
+            icon: <ClipboardList className='h-5 w-5' />,
+          },
+          {
+            name: 'Ayuda',
+            href: '/ask-for-help/centro_de_ayuda',
+            icon: <HelpCircle className='h-5 w-5' />,
+          },
+        ];
 
   /* ---------- Helpers ---------- */
 
-const getPhoto = (u?: IUser | null) => {
-  if (!u) return '/es/img/icon.png';
+  const getPhoto = (u?: IUser | null) => {
+    if (!u) return '/es/img/icon.png';
 
-  // normalizar campos que pueden venir vacíos o null
-  const photo = typeof u.photo === 'string' ? u.photo.trim() : '';
-  const picture = typeof u.picture === 'string' ? u.picture.trim() : '';
-  const urlPhoto = typeof u.url_photo === 'string' ? u.url_photo.trim() : '';
+    // normalizar campos que pueden venir vacíos o null
+    const photo = typeof u.photo === 'string' ? u.photo.trim() : '';
+    const picture = typeof u.picture === 'string' ? u.picture.trim() : '';
+    const urlPhoto = typeof u.url_photo === 'string' ? u.url_photo.trim() : '';
 
-  // si es base64 o url valida, devuélvela
-  if (photo) return photo;
-  if (picture) return picture;
-  if (urlPhoto) return urlPhoto;
+    // si es base64 o url valida, devuélvela
+    if (photo) return photo;
+    if (picture) return picture;
+    if (urlPhoto) return urlPhoto;
 
-  return '/es/img/icon.png';
-};
-
+    return '/es/img/icon.png';
+  };
 
   const userPhoto = getPhoto(user);
 
@@ -240,36 +247,32 @@ const getPhoto = (u?: IUser | null) => {
   }, [dispatch, router]);
 
   // close profile menu on outside click
-useEffect(() => {
-  const handleOutside = (e: MouseEvent) => {
-    if (
-      profileMenuOpen &&
-      dropdownRef.current && // ESTE es el ref correcto
-      !dropdownRef.current.contains(e.target as Node) &&
-      !profileButtonRef.current?.contains(e.target as Node)
-    ) {
-      setProfileMenuOpen(false);
-    }
-  };
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (
+        profileMenuOpen &&
+        dropdownRef.current && // ESTE es el ref correcto
+        !dropdownRef.current.contains(e.target as Node) &&
+        !profileButtonRef.current?.contains(e.target as Node)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    };
 
-  document.addEventListener('mousedown', handleOutside);
-  return () => document.removeEventListener('mousedown', handleOutside);
-}, [profileMenuOpen]);
+    document.addEventListener('mousedown', handleOutside);
+    return () => document.removeEventListener('mousedown', handleOutside);
+  }, [profileMenuOpen]);
 
   // close account dropdown on click outside (mobile)
-useEffect(() => {
-  const handleClickOutside = (event: MouseEvent) => {
-    if (
-      mobileMenuRef.current &&
-      !mobileMenuRef.current.contains(event.target as Node)
-    ) {
-      setAccountOpen(false);
-    }
-  };
-  document.addEventListener('mousedown', handleClickOutside);
-  return () => document.removeEventListener('mousedown', handleClickOutside);
-}, []);
-
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setAccountOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   /* ---------- RTK Query: fetch user by ID (if present) ---------- */
   const { data: fetchedUser } = useGetUserByIdQuery(userId ?? skipToken);
@@ -307,34 +310,34 @@ useEffect(() => {
   };
 
   /* ---------- Render ---------- */
-return (
+  return (
     <>
       {/* DESKTOP HEADER */}
       <header
         className={`hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? 'bg-white shadow-md' : 'bg-white'
         } border-b border-gray-100`}
-        role="banner"
+        role='banner'
       >
-        <div className="w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20">
+        <div className='w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20'>
           {/* Logo */}
           <button
             ref={logoRef}
             onClick={handleLogoClick}
-            className="flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]"
-            aria-label="Ir al inicio"
+            className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]'
+            aria-label='Ir al inicio'
           >
-            <div className="relative overflow-hidden rounded-full shadow-md">
+            <div className='relative overflow-hidden rounded-full shadow-md'>
               <Image
-                src="/es/img/icon.png"
-                alt="Logo de Servineo"
+                src='/es/img/icon.png'
+                alt='Logo de Servineo'
                 width={40}
                 height={40}
-                className="transition-transform duration-300 group-hover:scale-110"
+                className='transition-transform duration-300 group-hover:scale-110'
               />
             </div>
             <span
-              className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]"
+              className='text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]'
               style={{ fontFamily: 'var(--font-sans)' }}
             >
               Servineo
@@ -342,7 +345,7 @@ return (
           </button>
 
           {/* Desktop Nav */}
-          <nav className="flex gap-6" role="navigation" aria-label="Menú principal">
+          <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -356,41 +359,43 @@ return (
           </nav>
 
           {/* Desktop Right */}
-          <div className="flex items-center gap-4" id="tour-auth-buttons-desktop">
-           {!isClient ? (
-           // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
-           <div style={{ width: 100, height: 10 }} />
+          <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
+            {!isClient ? (
+              // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
+              <div style={{ width: 100, height: 10 }} />
             ) : !isLogged ? (
               <>
                 <Link
-                  href="/login"
-                  className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity"
+                  href='/login'
+                  className='px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity'
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
-                  href="/signUp"
-                  className="px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium hover:opacity-80 transition-opacity"
+                  href='/signUp'
+                  className='px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium hover:opacity-80 transition-opacity'
                 >
                   Registrarse
                 </Link>
               </>
             ) : (
-              <div className="relative">
+              <div className='relative'>
                 <button
                   ref={profileButtonRef}
                   onClick={() => setProfileMenuOpen((v) => !v)}
-                  className="flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
+                  className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
                 >
                   {/* Using img to keep visual identical to provided code */}
                   {/* If you prefer next/image here, you can switch, but next/image inside buttons can be heavier */}
                   <img
                     src={userPhoto}
                     alt={user?.name ?? 'Usuario'}
-                    className="w-10 h-10 rounded-full object-cover border"
-                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png'; }}
+                    className='w-10 h-10 rounded-full object-cover border'
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
+                    }}
                   />
-                  <span className="font-medium text-gray-700 hover:text-primary">
+                  <span className='font-medium text-gray-700 hover:text-primary'>
                     {user?.name ?? fetchedUser?.name ?? 'Usuario'}
                   </span>
                 </button>
@@ -400,25 +405,25 @@ return (
                   <div
                     ref={dropdownRef}
                     className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
-                    role="dialog"
-                    aria-label="Menu de usuario"
+                    role='dialog'
+                    aria-label='Menu de usuario'
                   >
-                    <div className="menuHeader">
+                    <div className='menuHeader'>
                       <strong>Mi cuenta</strong>
                       <button
-                        className="closeBtn"
+                        className='closeBtn'
                         onClick={() => setProfileMenuOpen(false)}
-                        aria-label="Cerrar menu"
+                        aria-label='Cerrar menu'
                       >
                         ✕
                       </button>
                     </div>
 
-                    <img className="profilePreview" src={userPhoto} alt={user?.name ?? 'Usuario'} />
+                    <img className='profilePreview' src={userPhoto} alt={user?.name ?? 'Usuario'} />
 
-                    <div className="menuLabel">{user?.name}</div>
-                    <div className="menuLabel">{user?.email}</div>
-                    <div className="menuLabel">{user?.telefono}</div>
+                    <div className='menuLabel'>{user?.name}</div>
+                    <div className='menuLabel'>{user?.email}</div>
+                    <div className='menuLabel'>{user?.telefono}</div>
 
                     <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
@@ -429,7 +434,7 @@ return (
                             setProfileMenuOpen(false);
                             router.push('/requesterEdit/perfil');
                           }}
-                          className="menuItem"
+                          className='menuItem'
                         >
                           Editar perfil
                         </button>
@@ -439,7 +444,7 @@ return (
                             setProfileMenuOpen(false);
                             router.push('/become-fixer');
                           }}
-                          className="menuItem"
+                          className='menuItem'
                         >
                           Convertirse en Fixer
                         </button>
@@ -449,10 +454,10 @@ return (
                     {user?.role === 'fixer' && (
                       <>
                         <Link
-                          href="/fixer/dashboard"
-                          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity"
+                          href='/fixer/dashboard'
+                          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
                         >
-                          <UserCircle className="h-4 w-4" />
+                          <UserCircle className='h-4 w-4' />
                           Perfil de Fixer
                         </Link>
                       </>
@@ -470,34 +475,34 @@ return (
       </header>
 
       {/* MOBILE/TABLET HEADER */}
-      <div className="lg:hidden">
+      <div className='lg:hidden'>
         {/* Barra superior */}
-        <div className="flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
+        <div className='flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
           {/* Logo */}
-          <button onClick={handleLogoClick} className="flex items-center gap-2 min-w-0">
-            <div className="relative overflow-hidden rounded-full shadow-md shrink-0">
-              <Image src="/es/img/icon.png" alt="Servineo" width={32} height={32} />
+          <button onClick={handleLogoClick} className='flex items-center gap-2 min-w-0'>
+            <div className='relative overflow-hidden rounded-full shadow-md shrink-0'>
+              <Image src='/es/img/icon.png' alt='Servineo' width={32} height={32} />
             </div>
-            <span className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]">
+            <span className='text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]'>
               Servineo
             </span>
           </button>
 
           {/* Auth Buttons */}
-{!isClient ? (
-  // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
-  <div style={{ width: 100, height: 10 }} />
-) : !isLogged ? (
-            <div className="flex items-center gap-2 flex-nowrap">
+          {!isClient ? (
+            // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
+            <div style={{ width: 100, height: 10 }} />
+          ) : !isLogged ? (
+            <div className='flex items-center gap-2 flex-nowrap'>
               <Link
-                href="/login"
-                className="px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+                href='/login'
+                className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
               >
                 Iniciar sesión
               </Link>
               <Link
-                href="/signUp"
-                className="px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+                href='/signUp'
+                className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
               >
                 Registrarse
               </Link>
@@ -507,39 +512,43 @@ return (
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                 ref={profileButtonRef}
-                className="flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
+                className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
               >
                 <img
                   src={userPhoto}
                   alt={user?.name ?? 'Usuario'}
-                  className="w-8 h-8 rounded-full object-cover border"
-                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png'; }}
+                  className='w-8 h-8 rounded-full object-cover border'
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
+                  }}
                 />
-                <span className="text-gray-700 font-medium">{user?.name ?? fetchedUser?.name ?? 'Usuario'}</span>
+                <span className='text-gray-700 font-medium'>
+                  {user?.name ?? fetchedUser?.name ?? 'Usuario'}
+                </span>
               </button>
               {profileMenuOpen && (
                 <div
                   ref={dropdownRef}
                   className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
-                  role="dialog"
-                  aria-label="Menu de usuario"
+                  role='dialog'
+                  aria-label='Menu de usuario'
                 >
-                  <div className="menuHeader">
+                  <div className='menuHeader'>
                     <strong>Mi cuenta</strong>
                     <button
-                      className="closeBtn"
+                      className='closeBtn'
                       onClick={() => setProfileMenuOpen(false)}
-                      aria-label="Cerrar menu"
+                      aria-label='Cerrar menu'
                     >
                       ✕
                     </button>
                   </div>
 
-                  <img className="profilePreview" src={userPhoto} alt="Foto" />
+                  <img className='profilePreview' src={userPhoto} alt='Foto' />
 
-                  <div className="menuLabel">{user?.name}</div>
-                  <div className="menuLabel">{user?.email}</div>
-                  <div className="menuLabel">{user?.telefono}</div>
+                  <div className='menuLabel'>{user?.name}</div>
+                  <div className='menuLabel'>{user?.email}</div>
+                  <div className='menuLabel'>{user?.telefono}</div>
 
                   <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
@@ -550,7 +559,7 @@ return (
                           setProfileMenuOpen(false);
                           router.push('/requesterEdit/perfil');
                         }}
-                        className="menuItem"
+                        className='menuItem'
                       >
                         Editar perfil
                       </button>
@@ -560,7 +569,7 @@ return (
                           setProfileMenuOpen(false);
                           router.push('/become-fixer');
                         }}
-                        className="menuItem"
+                        className='menuItem'
                       >
                         Convertirse en Fixer
                       </button>
@@ -570,10 +579,10 @@ return (
                   {user?.role === 'fixer' && (
                     <>
                       <Link
-                        href="/fixer/dashboard"
-                        className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity"
+                        href='/fixer/dashboard'
+                        className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
                       >
-                        <UserCircle className="h-4 w-4" />
+                        <UserCircle className='h-4 w-4' />
                         Perfil de Fixer
                       </Link>
                     </>
@@ -588,7 +597,7 @@ return (
           )}
         </div>
         {/* Barra inferior fija con iconos */}
-        <nav className="fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50">
+        <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
           {navItems.map((item) => (
             <button
               key={item.name}
@@ -600,17 +609,17 @@ return (
               }`}
             >
               {item.icon}
-              <span className="mt-1">{item.name}</span>
+              <span className='mt-1'>{item.name}</span>
             </button>
           ))}
         </nav>
         {/* Espaciadores para contenido */}
-        <div className="h-16" /> {/* top */}
-        <div className="h-16" /> {/* bottom */}
+        <div className='h-16' /> {/* top */}
+        <div className='h-16' /> {/* bottom */}
       </div>
 
       {/* Spacer Desktop */}
-      <div className="hidden lg:block h-20" />
+      <div className='hidden lg:block h-20' />
     </>
   );
 }
