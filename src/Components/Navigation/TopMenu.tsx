@@ -3,11 +3,13 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Wrench, UserCircle, ClipboardList, HelpCircle } from 'lucide-react';
+import { Wrench, UserCircle, ClipboardList, HelpCircle} from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
+import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
-import { IUser } from '@/types/user';
+import type { IUser } from '@/types/user';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface UserState {
   user: IUser | null;
@@ -21,150 +23,317 @@ interface RootState {
 
 export default function TopMenu() {
   const dispatch = useDispatch();
-  const { user, loading } = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+  const pathname = usePathname();
 
+  const { user, isAuthenticated } = useSelector(
+    (state: RootState) => state.user
+  );
+
+  // UI state
+  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [currentPath, setCurrentPath] = useState<string>(
+    typeof window !== 'undefined' ? window.location.pathname : ''
+  );
+  const [isLogged, setIsLogged] = useState<boolean>(() =>
+    typeof window !== 'undefined'
+      ? Boolean(localStorage.getItem('servineo_token'))
+      : false
+  );
 
+  // Refs
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLButtonElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const profileButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
+useEffect(() => {
+  setIsClient(true);
+}, []);
+
+
+  // Determine if we're in auth flow
+  const isInAuthFlow = () => {
+    if (typeof window === 'undefined') return false;
+    const authRoutes = ['/login', '/signUp'];
+    const isInAuthRoute = authRoutes.some((route) =>
+      pathname?.includes(route)
+    );
+    const authInProgress = sessionStorage.getItem('auth_in_progress') === 'true';
+    return isInAuthRoute || authInProgress;
+  };
+  const inAuthFlow = isInAuthFlow();
+
+  // NAV items (kept same visual)
   const navItems = [
-    { name: 'Servicios', href: '/servicios', icon: <Wrench className='h-5 w-5' /> },
+    { name: 'Servicios', href: '/servicios', icon: <Wrench className="h-5 w-5" /> },
     {
       name: 'Ofertas de trabajo',
       href: '/job-offer-list',
-      icon: <ClipboardList className='h-5 w-5' />,
+      icon: <ClipboardList className="h-5 w-5" />,
     },
     {
       name: 'Ayuda',
       href: '/ask-for-help/centro_de_ayuda',
-      icon: <HelpCircle className='h-5 w-5' />,
+      icon: <HelpCircle className="h-5 w-5" />,
     },
   ];
 
-  const [currentPath, setCurrentPath] = useState('');
+  /* ---------- Helpers ---------- */
 
-  // Detectar ruta actual
+const getPhoto = (u?: IUser | null) => {
+  if (!u) return '/es/img/icon.png';
+
+  // normalizar campos que pueden venir vacíos o null
+  const photo = typeof u.photo === 'string' ? u.photo.trim() : '';
+  const picture = typeof u.picture === 'string' ? u.picture.trim() : '';
+  const urlPhoto = typeof u.url_photo === 'string' ? u.url_photo.trim() : '';
+
+  // si es base64 o url valida, devuélvela
+  if (photo) return photo;
+  if (picture) return picture;
+  if (urlPhoto) return urlPhoto;
+
+  return '/es/img/icon.png';
+};
+
+
+  const userPhoto = getPhoto(user);
+
+  /* ---------- Effects (single, non-duplicated) ---------- */
+
+  // scroll header
   useEffect(() => {
-    setCurrentPath(window.location.pathname);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Obtener userId desde localStorage
+  // set currentPath on mount and when pathname changes
   useEffect(() => {
-    const token = localStorage.getItem('servineo_user');
-    if (token) {
-      const userData = JSON.parse(token);
-      setUserId(userData._id);
+    if (typeof window !== 'undefined') setCurrentPath(window.location.pathname);
+  }, [pathname]);
+
+  // hydrate redux from localStorage (safe)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try {
+      const rawUser = localStorage.getItem('servineo_user');
+      const rawToken = localStorage.getItem('servineo_token');
+      if (rawUser && rawUser !== 'undefined') {
+        const parsed: IUser = JSON.parse(rawUser);
+        const userWithPhoto: IUser = {
+          ...parsed,
+          picture: parsed.picture || parsed.photo || parsed.url_photo,
+          photo: parsed.picture || parsed.photo || parsed.url_photo,
+          url_photo: parsed.picture || parsed.photo || parsed.url_photo,
+        } as IUser;
+        if (!user || user._id !== userWithPhoto._id) {
+          dispatch(setUser(userWithPhoto));
+        } else if (user.photo !== userWithPhoto.photo || user.picture !== userWithPhoto.picture) {
+          dispatch(setUser(userWithPhoto));
+        }
+        if (rawToken) sessionStorage.removeItem('auth_in_progress');
+        setIsLogged(!!rawToken);
+        setUserId(userWithPhoto._id || userWithPhoto.id || null);
+      } else {
+        const token = rawToken;
+        setIsLogged(!!token);
+      }
+    } catch (err) {
+      console.warn('Error parsing stored user', err);
+      localStorage.removeItem('servineo_user');
+      dispatch(setUser(null));
+      setIsLogged(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Consultar user por ID
-  const { data: userData } = useGetUserByIdQuery(userId!, {
-    skip: !userId,
-  });
-
-  // Guardar user en redux
+  // listen storage changes (other tabs) & custom event
   useEffect(() => {
-    if (userData) dispatch(setUser(userData));
-  }, [userData, dispatch]);
-
-  // Scroll y login
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-
-    const token = localStorage.getItem('servineo_token');
-    setIsLogged(!!token);
-
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Click fuera del dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setAccountOpen(false);
+    const syncUserState = () => {
+      try {
+        const rawUser = localStorage.getItem('servineo_user');
+        const rawToken = localStorage.getItem('servineo_token');
+        if (rawUser && rawUser !== 'undefined') {
+          const parsed: IUser = JSON.parse(rawUser);
+          const userWithPhoto: IUser = {
+            ...parsed,
+            picture: parsed.picture || parsed.photo || parsed.url_photo,
+            photo: parsed.picture || parsed.photo || parsed.url_photo,
+            url_photo: parsed.picture || parsed.photo || parsed.url_photo,
+          } as IUser;
+          dispatch(setUser(userWithPhoto));
+          if (rawToken) sessionStorage.removeItem('auth_in_progress');
+          setIsLogged(!!rawToken);
+          setUserId(userWithPhoto._id || userWithPhoto.id || null);
+        } else {
+          dispatch(setUser(null));
+          setIsLogged(false);
+          setUserId(null);
+        }
+      } catch {
+        dispatch(setUser(null));
+        setIsLogged(false);
+        setUserId(null);
       }
     };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
-  const logout = () => {
-    localStorage.removeItem('servineo_token');
-    localStorage.removeItem('servineo_user');
-    window.location.reload();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === 'servineo_user' || e.key === 'servineo_token') {
+        syncUserState();
+        if (e.key === 'servineo_token' && e.newValue) {
+          sessionStorage.removeItem('auth_in_progress');
+        }
+      }
+    };
+
+    const onUserUpdated = () => syncUserState();
+
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('servineo_user_updated', onUserUpdated);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('servineo_user_updated', onUserUpdated);
+    };
+  }, [dispatch]);
+
+  // auto-logout on inactivity (15 minutes)
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const logoutOnIdle = () => {
+      try {
+        const raw = localStorage.getItem('servineo_user');
+        const email = raw ? (JSON.parse(raw)?.email ?? '') : '';
+        if (email) sessionStorage.setItem('prefill_email', email);
+      } catch {}
+      localStorage.removeItem('servineo_token');
+      localStorage.removeItem('servineo_user');
+      dispatch(setUser(null));
+      sessionStorage.setItem('session_expired', '1');
+      const emailParam = sessionStorage.getItem('prefill_email')
+        ? `&email=${encodeURIComponent(sessionStorage.getItem('prefill_email') || '')}`
+        : '';
+      router.push(`/login?expired=1${emailParam}`);
+    };
+
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(logoutOnIdle, 15 * 60 * 1000);
+    };
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'] as const;
+    events.forEach((ev) => window.addEventListener(ev, resetTimer));
+
+    resetTimer();
+    return () => {
+      if (timer) clearTimeout(timer);
+      events.forEach((ev) => window.removeEventListener(ev, resetTimer));
+    };
+  }, [dispatch, router]);
+
+  // close profile menu on outside click
+useEffect(() => {
+  const handleOutside = (e: MouseEvent) => {
+    if (
+      profileMenuOpen &&
+      dropdownRef.current && // ESTE es el ref correcto
+      !dropdownRef.current.contains(e.target as Node) &&
+      !profileButtonRef.current?.contains(e.target as Node)
+    ) {
+      setProfileMenuOpen(false);
+    }
   };
 
+  document.addEventListener('mousedown', handleOutside);
+  return () => document.removeEventListener('mousedown', handleOutside);
+}, [profileMenuOpen]);
+
+  // close account dropdown on click outside (mobile)
+useEffect(() => {
+  const handleClickOutside = (event: MouseEvent) => {
+    if (
+      mobileMenuRef.current &&
+      !mobileMenuRef.current.contains(event.target as Node)
+    ) {
+      setAccountOpen(false);
+    }
+  };
+  document.addEventListener('mousedown', handleClickOutside);
+  return () => document.removeEventListener('mousedown', handleClickOutside);
+}, []);
+
+
+  /* ---------- RTK Query: fetch user by ID (if present) ---------- */
+  const { data: fetchedUser } = useGetUserByIdQuery(userId ?? skipToken);
+
+  useEffect(() => {
+    if (fetchedUser) {
+      dispatch(setUser(fetchedUser as IUser));
+      setIsLogged(true);
+    }
+  }, [fetchedUser, dispatch]);
+
+  /* ---------- Handlers ---------- */
+
   const handleLogoClick = () => {
+    if (typeof window === 'undefined') return;
     if (window.location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      window.location.href = '/';
+      router.push('/');
     }
   };
 
-  const getRoleButton = () => {
-    if (loading || !user) return null;
-    if (!user.role) return null;
-
-    if (user.role === 'requester') {
-      return (
-        <Link
-          href='/become-fixer'
-          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white transition-colors'
-        >
-          <Wrench className='h-4 w-4' />
-          Convertir a Fixer
-        </Link>
-      );
-    }
-
-    if (user.role === 'fixer') {
-      return (
-        <Link
-          href='/fixer/dashboard'
-          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
-        >
-          <UserCircle className='h-4 w-4' />
-          Perfil de Fixer
-        </Link>
-      );
-    }
-    return null;
+  const doLogout = () => {
+    try {
+      const raw = localStorage.getItem('servineo_user');
+      const email = raw ? (JSON.parse(raw)?.email ?? '') : '';
+      if (email) sessionStorage.setItem('prefill_email', email);
+    } catch {}
+    localStorage.removeItem('servineo_token');
+    localStorage.removeItem('servineo_user');
+    dispatch(setUser(null));
+    setProfileMenuOpen(false);
+    setIsLogged(false);
+    router.push('/');
   };
 
-  return (
+  /* ---------- Render ---------- */
+return (
     <>
       {/* DESKTOP HEADER */}
       <header
         className={`hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? 'bg-white shadow-md' : 'bg-white'
         } border-b border-gray-100`}
-        role='banner'
+        role="banner"
       >
-        <div className='w-full max-w-8xl mx-auto px-4 flex items-center h-16'>
+        <div className="w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20">
           {/* Logo */}
           <button
             ref={logoRef}
             onClick={handleLogoClick}
-            className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]'
-            aria-label='Ir al inicio'
+            className="flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]"
+            aria-label="Ir al inicio"
           >
-            <div className='relative overflow-hidden rounded-full shadow-md'>
+            <div className="relative overflow-hidden rounded-full shadow-md">
               <Image
-                src='/es/img/icon.png'
-                alt='Logo de Servineo'
+                src="/es/img/icon.png"
+                alt="Logo de Servineo"
                 width={40}
                 height={40}
-                className='transition-transform duration-300 group-hover:scale-110'
+                className="transition-transform duration-300 group-hover:scale-110"
               />
             </div>
             <span
-              className='text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]'
+              className="text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]"
               style={{ fontFamily: 'var(--font-sans)' }}
             >
               Servineo
@@ -172,112 +341,253 @@ export default function TopMenu() {
           </button>
 
           {/* Desktop Nav */}
-          <div className='flex-1 flex justify-center'>
-            <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
+          <nav className="flex gap-6" role="navigation" aria-label="Menú principal">
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
                   ${currentPath === item.href ? 'text-[var(--color-primary)] after:w-full' : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'}`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          <div className='flex items-center gap-3'>
-            {!isLogged ? (
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          {/* Desktop Right */}
+          <div className="flex items-center gap-4" id="tour-auth-buttons-desktop">
+           {!isClient ? (
+           // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
+           <div style={{ width: 100, height: 10 }} />
+            ) : !isLogged ? (
               <>
                 <Link
-                  href='/login'
-                  className='px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity'
+                  href="/login"
+                  className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity"
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
-                  href='/signUp'
-                  className='px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium hover:opacity-80 transition-opacity'
+                  href="/signUp"
+                  className="px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium hover:opacity-80 transition-opacity"
                 >
                   Registrarse
                 </Link>
               </>
             ) : (
-              <>
-                {getRoleButton()}
-                <div className='relative' ref={dropdownRef}>
-                  <button
-                    onClick={() => setAccountOpen(!accountOpen)}
-                    className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
+              <div className="relative">
+                <button
+                  ref={profileButtonRef}
+                  onClick={() => setProfileMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
+                >
+                  {/* Using img to keep visual identical to provided code */}
+                  {/* If you prefer next/image here, you can switch, but next/image inside buttons can be heavier */}
+                  <img
+                    src={userPhoto}
+                    alt={user?.name ?? 'Usuario'}
+                    className="w-10 h-10 rounded-full object-cover border"
+                    onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png'; }}
+                  />
+                  <span className="font-medium text-gray-700 hover:text-primary">
+                    {user?.name ?? fetchedUser?.name ?? 'Usuario'}
+                  </span>
+                </button>
+
+                {/* Profile dropdown */}
+                {profileMenuOpen && (
+                  <div
+                    ref={dropdownRef}
+                    className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
+                    role="dialog"
+                    aria-label="Menu de usuario"
                   >
-                    <span className='font-medium text-gray-700 hover:text-primary'>
-                      {user?.name}
-                    </span>
-                  </button>
-                  {accountOpen && (
-                    <div className='absolute right-0 mt-2 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50'>
-                      <Link
-                        href='/requesterEdit'
-                        className='block px-4 py-2 text-gray-700 hover:bg-gray-50'
-                      >
-                        Editar perfil
-                      </Link>
+                    <div className="menuHeader">
+                      <strong>Mi cuenta</strong>
                       <button
-                        onClick={logout}
-                        className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
+                        className="closeBtn"
+                        onClick={() => setProfileMenuOpen(false)}
+                        aria-label="Cerrar menu"
                       >
-                        Cerrar sesión
+                        ✕
                       </button>
                     </div>
-                  )}
-                </div>
-              </>
+
+                    <img className="profilePreview" src={userPhoto} alt={user?.name ?? 'Usuario'} />
+
+                    <div className="menuLabel">{user?.name}</div>
+                    <div className="menuLabel">{user?.email}</div>
+                    <div className="menuLabel">{user?.telefono}</div>
+
+                    <hr style={{ margin: '8px 0', opacity: 0.3 }} />
+
+                    {user?.role !== 'fixer' && (
+                      <>
+                        <button
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            router.push('/requesterEdit/perfil');
+                          }}
+                          className="menuItem"
+                        >
+                          Editar perfil
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            setProfileMenuOpen(false);
+                            router.push('/become-fixer');
+                          }}
+                          className="menuItem"
+                        >
+                          Convertirse en Fixer
+                        </button>
+                      </>
+                    )}
+
+                    {user?.role === 'fixer' && (
+                      <>
+                        <Link
+                          href="/fixer/dashboard"
+                          className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity"
+                        >
+                          <UserCircle className="h-4 w-4" />
+                          Perfil de Fixer
+                        </Link>
+                      </>
+                    )}
+
+                    <button onClick={doLogout} className={`menuItem logoutBtn`}>
+                      Cerrar sesión
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
       </header>
 
       {/* MOBILE/TABLET HEADER */}
-      <div className='lg:hidden'>
+      <div className="lg:hidden">
         {/* Barra superior */}
-        <div className='flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
+        <div className="flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
           {/* Logo */}
-          <button onClick={handleLogoClick} className='flex items-center gap-2 min-w-0'>
-            <div className='relative overflow-hidden rounded-full shadow-md shrink-0'>
-              <Image src='/es/img/icon.png' alt='Servineo' width={32} height={32} />
+          <button onClick={handleLogoClick} className="flex items-center gap-2 min-w-0">
+            <div className="relative overflow-hidden rounded-full shadow-md shrink-0">
+              <Image src="/es/img/icon.png" alt="Servineo" width={32} height={32} />
             </div>
-            <span className='text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]'>
+            <span className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]">
               Servineo
             </span>
           </button>
 
           {/* Auth Buttons */}
-          {!isLogged ? (
-            <div className='flex items-center gap-2 flex-nowrap'>
+{!isClient ? (
+  // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
+  <div style={{ width: 100, height: 10 }} />
+) : !isLogged ? (
+            <div className="flex items-center gap-2 flex-nowrap">
               <Link
-                href='/login'
-                className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+                href="/login"
+                className="px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
               >
                 Iniciar sesión
               </Link>
               <Link
-                href='/signUp'
-                className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+                href="/signUp"
+                className="px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
               >
                 Registrarse
               </Link>
             </div>
           ) : (
-            <button
-              onClick={() => setAccountOpen(!accountOpen)}
-              className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
-            >
-              <span className='text-gray-700 font-medium'>{user?.name}</span>
-            </button>
+            <>
+              <button
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                ref={profileButtonRef}
+                className="flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
+              >
+                <img
+                  src={userPhoto}
+                  alt={user?.name ?? 'Usuario'}
+                  className="w-8 h-8 rounded-full object-cover border"
+                  onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png'; }}
+                />
+                <span className="text-gray-700 font-medium">{user?.name ?? fetchedUser?.name ?? 'Usuario'}</span>
+              </button>
+              {profileMenuOpen && (
+                <div
+                  ref={dropdownRef}
+                  className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
+                  role="dialog"
+                  aria-label="Menu de usuario"
+                >
+                  <div className="menuHeader">
+                    <strong>Mi cuenta</strong>
+                    <button
+                      className="closeBtn"
+                      onClick={() => setProfileMenuOpen(false)}
+                      aria-label="Cerrar menu"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <img className="profilePreview" src={userPhoto} alt="Foto" />
+
+                  <div className="menuLabel">{user?.name}</div>
+                  <div className="menuLabel">{user?.email}</div>
+                  <div className="menuLabel">{user?.telefono}</div>
+
+                  <hr style={{ margin: '8px 0', opacity: 0.3 }} />
+
+                  {user?.role !== 'fixer' && (
+                    <>
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          router.push('/requesterEdit/perfil');
+                        }}
+                        className="menuItem"
+                      >
+                        Editar perfil
+                      </button>
+
+                      <button
+                        onClick={() => {
+                          setProfileMenuOpen(false);
+                          router.push('/become-fixer');
+                        }}
+                        className="menuItem"
+                      >
+                        Convertirse en Fixer
+                      </button>
+                    </>
+                  )}
+
+                  {user?.role === 'fixer' && (
+                    <>
+                      <Link
+                        href="/fixer/dashboard"
+                        className="flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity"
+                      >
+                        <UserCircle className="h-4 w-4" />
+                        Perfil de Fixer
+                      </Link>
+                    </>
+                  )}
+
+                  <button onClick={doLogout} className={`menuItem logoutBtn`}>
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </>
           )}
         </div>
         {/* Barra inferior fija con iconos */}
-        <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
+        <nav className="fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50">
           {navItems.map((item) => (
             <button
               key={item.name}
@@ -289,17 +599,17 @@ export default function TopMenu() {
               }`}
             >
               {item.icon}
-              <span className='mt-1'>{item.name}</span>
+              <span className="mt-1">{item.name}</span>
             </button>
           ))}
         </nav>
         {/* Espaciadores para contenido */}
-        <div className='h-16' /> {/* top */}
-        <div className='h-16' /> {/* bottom */}
+        <div className="h-16" /> {/* top */}
+        <div className="h-16" /> {/* bottom */}
       </div>
 
       {/* Spacer Desktop */}
-      <div className='hidden lg:block h-16' />
+      <div className="hidden lg:block h-20" />
     </>
   );
 }
