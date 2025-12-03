@@ -11,7 +11,7 @@ export default function CTASection() {
         <p className='text-xl mb-8 opacity-90'>{t('footerSubtitle')}</p>
         <div className='flex flex-col sm:flex-row justify-center gap-4'>
           <Link
-            href='/registro'
+            href='/signUp'
             className='px-8 py-3 bg-white text-primary font-semibold rounded-lg hover:bg-gray-100 transition-colors'
           >
             {t('footerButton')}
