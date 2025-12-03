@@ -6,18 +6,18 @@ const subtitle = "Perfecciona tu uso sobre la plataforma,\naqui tenemos algunos 
 const consejos = [
     {
         title:"Filtros",
-        imageUrl:"/img/imgHowUseServineo/consejosFiltros.png",
+        imageUrl:"/es/img/imgHowUseServineo/consejosFiltros.png",
         descripcion:"Aplica los filtros de búsqueda, palabras claves o consulta nuestro mapa si hay fixers cercanos a tu ubicación."
     },
     { 
         title:"Calificaciones y reseñas",
-        imageUrl:"/img/imgHowUseServineo/reseñas.png",
+        imageUrl:"/es/img/imgHowUseServineo/reseñas.png",
         descripcion:"Consulta las calificaciones y opiniones de otras personas para saber mas sobre el desempeño de cierto fixer."     
     },
     {
         title:"Comunicación",
-        imageUrl:"/img/imgHowUseServineo/comunicacion.png",
-        descripcion:"Comunícate con el fixer para tener mas detalles del servicio y aclarar las dudas que tengas."
+        imageUrl:"/es/img/imgHowUseServineo/comunicacion.png",
+        descripcion:"Comunícate con el fixer para tener más detalles del servicio y aclarar las dudas que tengas."
     }
 ]
 

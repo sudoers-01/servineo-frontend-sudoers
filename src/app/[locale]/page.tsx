@@ -11,7 +11,7 @@ const Map = dynamic(() => import('@/app/Mapa/Map'), { ssr: false });
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white overflow-x-hidden">
       <HeroSection />
       <section className="py-16 px-4 bg-white">
         <div className="max-w-7xl mx-auto">
