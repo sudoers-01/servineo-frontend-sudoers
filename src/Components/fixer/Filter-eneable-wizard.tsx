@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useForm, FormProvider, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import Image from 'next/image';
 import { StepIndicator } from './Step-indicator';
 import { Card } from '../Card';
 import { PillButton } from './Pill-button';
