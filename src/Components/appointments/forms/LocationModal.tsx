@@ -8,7 +8,7 @@ const MapView = dynamic(() => import('@/Components/maps/location/MapView'), {
   loading: () => (
     <div
       style={{ height: 400, width: '100%' }}
-      className="flex items-center justify-center bg-gray-100"
+      className='flex items-center justify-center bg-gray-100'
     >
       <p>Cargando mapa...</p>
     </div>
@@ -61,27 +61,27 @@ export default function LocationModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto overflow-hidden">
-        <div className="p-4">
-          <h3 className="text-lg font-semibold mb-2">Seleccionar ubicación</h3>
+    <div className='fixed inset-0 z-50 flex items-center justify-center px-4'>
+      <div className='absolute inset-0 bg-black/50' onClick={onClose} />
+      <div className='relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto overflow-hidden'>
+        <div className='p-4'>
+          <h3 className='text-lg font-semibold mb-2'>Seleccionar ubicación</h3>
           <MapView onSelect={handleSelect} markerPosition={coords} />
 
           {coords && (
-            <p className="text-sm mt-3 text-gray-700">
+            <p className='text-sm mt-3 text-gray-700'>
               <b>Dirección:</b> {address || 'Cargando...'}
             </p>
           )}
-          <div className="flex justify-end gap-2 mt-4">
-            <button onClick={onClose} className="px-4 py-2 rounded bg-gray-300 text-black text-sm">
+          <div className='flex justify-end gap-2 mt-4'>
+            <button onClick={onClose} className='px-4 py-2 rounded bg-gray-300 text-black text-sm'>
               Cancelar
             </button>
             {formtype !== 'view' ? (
               <button
                 onClick={() => coords && onConfirm({ ...coords, address })}
                 disabled={!coords}
-                className="px-4 py-2 rounded bg-blue-600 text-white text-sm disabled:opacity-60"
+                className='px-4 py-2 rounded bg-blue-600 text-white text-sm disabled:opacity-60'
               >
                 Confirmar ubicación
               </button>

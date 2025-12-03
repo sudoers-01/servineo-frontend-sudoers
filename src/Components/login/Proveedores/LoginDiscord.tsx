@@ -34,16 +34,16 @@ const LoginDiscord: React.FC<Props> = ({ onMensajeChange }) => {
   };
 
   return (
-    <div className="w-full flex justify-center">
+    <div className='w-full flex justify-center'>
       <button
-        type="button"
+        type='button'
         onClick={handleDiscordClick}
-        className="inline-flex items-center justify-center gap-3
+        className='inline-flex items-center justify-center gap-3
                    bg-[#5865F2] text-white rounded-xl
                    px-4 py-3 text-base font-medium
-                   hover:bg-[#4752C4] transition shadow-sm"
+                   hover:bg-[#4752C4] transition shadow-sm'
       >
-        <FaDiscord className="text-xl" />
+        <FaDiscord className='text-xl' />
         <span>Continuar con Discord</span>
       </button>
     </div>

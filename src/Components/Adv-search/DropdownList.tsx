@@ -102,23 +102,23 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
   if (isLoading) {
     return (
-      <div className="w-full border border-gray-300 rounded-lg p-8 text-center">
-        <div className="animate-pulse space-y-3">
-          <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
-          <div className="h-4 bg-gray-200 rounded w-2/3 mx-auto"></div>
-          <div className="h-4 bg-gray-200 rounded w-3/4 mx-auto"></div>
+      <div className='w-full border border-gray-300 rounded-lg p-8 text-center'>
+        <div className='animate-pulse space-y-3'>
+          <div className='h-4 bg-gray-200 rounded w-3/4 mx-auto'></div>
+          <div className='h-4 bg-gray-200 rounded w-2/3 mx-auto'></div>
+          <div className='h-4 bg-gray-200 rounded w-3/4 mx-auto'></div>
         </div>
-        <p className="text-gray-500 text-xs mt-2">{tCommon('resultsCounter.loading')}</p>
+        <p className='text-gray-500 text-xs mt-2'>{tCommon('resultsCounter.loading')}</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="w-full border border-red-300 rounded-lg p-4 bg-red-50">
-        <div className="text-center">
-          <p className="text-red-600 text-sm font-semibold mb-2">⚠️ Error al cargar categorías</p>
-          <p className="text-red-500 text-xs mb-3">{error}</p>
+      <div className='w-full border border-red-300 rounded-lg p-4 bg-red-50'>
+        <div className='text-center'>
+          <p className='text-red-600 text-sm font-semibold mb-2'>⚠️ Error al cargar categorías</p>
+          <p className='text-red-500 text-xs mb-3'>{error}</p>
         </div>
       </div>
     );
@@ -132,15 +132,15 @@ const DropdownList: React.FC<DropdownListProps> = ({
 
   if (displayCategories.length === 0) {
     return (
-      <div className="w-full border border-gray-300 rounded-lg p-4">
-        <p className="text-gray-500 text-sm text-center">{tCommon('resultsCounter.noResults')}</p>
+      <div className='w-full border border-gray-300 rounded-lg p-4'>
+        <p className='text-gray-500 text-sm text-center'>{tCommon('resultsCounter.noResults')}</p>
       </div>
     );
   }
 
   return (
-    <div className="w-full border border-gray-300 rounded-lg overflow-hidden">
-      <div className="max-h-64 overflow-y-auto">
+    <div className='w-full border border-gray-300 rounded-lg overflow-hidden'>
+      <div className='max-h-64 overflow-y-auto'>
         {displayCategories.map((category, index) => (
           <label
             key={`${category}-${index}`}
@@ -149,12 +149,12 @@ const DropdownList: React.FC<DropdownListProps> = ({
             }`}
           >
             <input
-              type="checkbox"
+              type='checkbox'
               checked={selectedCategories.includes(category)}
               onChange={() => handleCheckboxChange(category)}
-              className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer"
+              className='w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500 cursor-pointer'
             />
-            <span className="ml-3 text-sm text-gray-700 capitalize">{category}</span>
+            <span className='ml-3 text-sm text-gray-700 capitalize'>{category}</span>
           </label>
         ))}
       </div>

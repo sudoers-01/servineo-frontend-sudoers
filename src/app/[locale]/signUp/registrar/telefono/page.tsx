@@ -8,7 +8,7 @@ const RegistroTelefono = dynamic(() => import('@/Components/requester/telefono/R
 
 export default function PageTelefono() {
   return (
-    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-50">
+    <div className='w-full min-h-screen flex flex-col items-center justify-center bg-gray-50'>
       <RegistroTelefono />
     </div>
   );

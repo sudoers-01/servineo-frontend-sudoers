@@ -280,18 +280,18 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
 
   return (
     <FormProvider {...methods}>
-      <div className="mx-auto w-full max-w-3xl animate-fade-in">
+      <div className='mx-auto w-full max-w-3xl animate-fade-in'>
         <StepIndicator step={step} total={total} />
         {success ? (
-          <Card title="¡Listo!">
-            <div className="space-y-4 text-center">
-              <div className="flex justify-center">
-                <CheckCircle2 className="h-16 w-16 text-green-600 animate-scale-in" />
+          <Card title='¡Listo!'>
+            <div className='space-y-4 text-center'>
+              <div className='flex justify-center'>
+                <CheckCircle2 className='h-16 w-16 text-green-600 animate-scale-in' />
               </div>
-              <p className="text-lg font-semibold text-gray-900">
+              <p className='text-lg font-semibold text-gray-900'>
                 {user.name} ahora está habilitado como FIXER.
               </p>
-              <div className="text-sm text-gray-600 space-y-1">
+              <div className='text-sm text-gray-600 space-y-1'>
                 <p>CI: {ci}</p>
                 <p>
                   Ubicación: {workLocation?.lat.toFixed(5)}, {workLocation?.lng.toFixed(5)}
@@ -299,12 +299,12 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
                 <p>Servicios: {servicios?.length}</p>
                 <p>Métodos de pago: {getPaymentArray().join(', ')}</p>
                 <p>Vehículo: {vehiculo?.hasVehiculo ? `Sí (${vehiculo.tipoVehiculo})` : 'No'}</p>
-                <p className="text-xs text-gray-500 mt-4">Estado: En revisión (pending)</p>
+                <p className='text-xs text-gray-500 mt-4'>Estado: En revisión (pending)</p>
               </div>
             </div>
           </Card>
         ) : (
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             {step === 0 && (
               <ProfilePhotoStep
                 photoUrl={url_photo}
@@ -380,38 +380,38 @@ export function FixerEnableWizard({ user }: FixerEnableWizardProps) {
             )}
 
             {errors.root && (
-              <div className="bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm">
+              <div className='bg-red-50 border border-red-200 rounded-lg p-3 text-red-700 text-sm'>
                 {errors.root.message}
               </div>
             )}
 
-            <div className="flex items-center justify-between">
+            <div className='flex items-center justify-between'>
               <PillButton
-                type="button"
+                type='button'
                 disabled={step === 0}
                 onClick={goPrev}
-                className="bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:opacity-50 flex items-center gap-2"
+                className='bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:opacity-50 flex items-center gap-2'
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ArrowLeft className='h-4 w-4' />
                 Atrás
               </PillButton>
               {step < total - 1 ? (
                 <PillButton
-                  type="button"
+                  type='button'
                   onClick={goNext}
-                  className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+                  className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
                 >
                   Siguiente
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className='h-4 w-4' />
                 </PillButton>
               ) : (
                 <PillButton
-                  type="submit"
+                  type='submit'
                   disabled={isSubmitting || !acceptTerms}
-                  className="bg-primary text-white hover:bg-blue-800 disabled:opacity-50 flex items-center gap-2"
+                  className='bg-primary text-white hover:bg-blue-800 disabled:opacity-50 flex items-center gap-2'
                 >
                   {isSubmitting ? 'Registrando...' : 'Registrar'}
-                  <CheckCircle2 className="h-4 w-4" />
+                  <CheckCircle2 className='h-4 w-4' />
                 </PillButton>
               )}
             </div>

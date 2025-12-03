@@ -159,72 +159,72 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
   /* --------------------------- UI --------------------------- */
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
       {/* Nombre y Apellido */}
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <label className="block text-sm font-semibold text-gray-600 mb-2">Nombre*</label>
+      <div className='flex gap-3'>
+        <div className='flex-1'>
+          <label className='block text-sm font-semibold text-gray-600 mb-2'>Nombre*</label>
           <input
-            name="nombre"
+            name='nombre'
             value={formData.nombre}
             onChange={handleChange}
-            placeholder="Ingresa tu nombre"
+            placeholder='Ingresa tu nombre'
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
               errors.nombre
                 ? 'border-red-500 focus:ring-red-400'
                 : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
-          {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
+          {errors.nombre && <p className='text-red-500 text-xs mt-1'>{errors.nombre}</p>}
         </div>
 
-        <div className="flex-1">
-          <label className="block text-sm font-semibold text-gray-600 mb-2">Apellido*</label>
+        <div className='flex-1'>
+          <label className='block text-sm font-semibold text-gray-600 mb-2'>Apellido*</label>
           <input
-            name="apellido"
+            name='apellido'
             value={formData.apellido}
             onChange={handleChange}
-            placeholder="Ingresa tu apellido"
+            placeholder='Ingresa tu apellido'
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
               errors.apellido
                 ? 'border-red-500 focus:ring-red-400'
                 : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
-          {errors.apellido && <p className="text-red-500 text-xs mt-1">{errors.apellido}</p>}
+          {errors.apellido && <p className='text-red-500 text-xs mt-1'>{errors.apellido}</p>}
         </div>
       </div>
 
       {/* Correo */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">
+        <label className='block text-sm font-semibold text-gray-600 mb-2'>
           Correo electrónico*
         </label>
         <input
-          name="email"
-          type="email"
+          name='email'
+          type='email'
           value={formData.email}
           onChange={handleChange}
-          placeholder="nombre@dominio.com"
+          placeholder='nombre@dominio.com'
           className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
             errors.email
               ? 'border-red-500 focus:ring-red-400'
               : 'border-gray-300 focus:ring-servineo-400'
           }`}
         />
-        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+        {errors.email && <p className='text-red-500 text-xs mt-1'>{errors.email}</p>}
       </div>
 
       {/* Contraseña */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">Contraseña*</label>
-        <div className="relative">
+        <label className='block text-sm font-semibold text-gray-600 mb-2'>Contraseña*</label>
+        <div className='relative'>
           <input
-            name="password"
+            name='password'
             type={mostrarPassword ? 'text' : 'password'}
             value={formData.password}
             onChange={handleChange}
-            placeholder="Ingresa tu contraseña"
+            placeholder='Ingresa tu contraseña'
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
               errors.password
                 ? 'border-red-500 focus:ring-red-400'
@@ -232,27 +232,27 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             }`}
           />
           <button
-            type="button"
+            type='button'
             onClick={() => setMostrarPassword(!mostrarPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+            className='absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700'
           >
             {mostrarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
-        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+        {errors.password && <p className='text-red-500 text-xs mt-1'>{errors.password}</p>}
 
         <button
-          type="button"
+          type='button'
           onClick={handleGenerarContrasena}
           onMouseEnter={() => setMostrarTooltip(true)}
           onMouseLeave={() => setMostrarTooltip(false)}
-          className="text-sm text-servineo-500 hover:underline mt-1"
+          className='text-sm text-servineo-500 hover:underline mt-1'
         >
           Generar contraseña segura
         </button>
 
         {mostrarTooltip && (
-          <div className="absolute top-full left-0 mt-1 bg-gray-100 border border-gray-300 text-gray-700 text-xs px-3 py-2 rounded-lg shadow-md animate-fade-in z-10">
+          <div className='absolute top-full left-0 mt-1 bg-gray-100 border border-gray-300 text-gray-700 text-xs px-3 py-2 rounded-lg shadow-md animate-fade-in z-10'>
             Se copiará automáticamente al portapapeles
           </div>
         )}
@@ -260,16 +260,16 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
       {/* Confirmar contraseña */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">
+        <label className='block text-sm font-semibold text-gray-600 mb-2'>
           Confirmar contraseña*
         </label>
-        <div className="relative">
+        <div className='relative'>
           <input
-            name="confirmarPassword"
+            name='confirmarPassword'
             type={mostrarConfirmarPassword ? 'text' : 'password'}
             value={formData.confirmarPassword}
             onChange={handleChange}
-            placeholder="Confirma tu contraseña"
+            placeholder='Confirma tu contraseña'
             className={`w-full border rounded-xl p-2.5 text-gray-800 focus:outline-none focus:ring-2 transition ${
               errors.confirmarPassword
                 ? 'border-red-500 focus:ring-red-400'
@@ -277,21 +277,21 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             }`}
           />
           <button
-            type="button"
+            type='button'
             onClick={() => setMostrarConfirmarPassword(!mostrarConfirmarPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+            className='absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700'
           >
             {mostrarConfirmarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
         {errors.confirmarPassword && (
-          <p className="text-red-500 text-xs mt-1">{errors.confirmarPassword}</p>
+          <p className='text-red-500 text-xs mt-1'>{errors.confirmarPassword}</p>
         )}
       </div>
 
       {/* Submit */}
       <button
-        type="submit"
+        type='submit'
         disabled={cargando}
         className={`w-full flex items-center justify-center gap-2
       ${!captchaValid ? 'bg-primary/60 cursor-not-allowed' : 'bg-primary/90 hover:bg-primary'}
@@ -301,7 +301,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
       >
         {cargando ? (
           <>
-            <Loader2 className="animate-spin w-5 h-5" />
+            <Loader2 className='animate-spin w-5 h-5' />
             Registrando...
           </>
         ) : (
