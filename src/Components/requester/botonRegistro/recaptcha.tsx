@@ -11,7 +11,10 @@ interface ReCaptchaFormProps {
 const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified, sitekey }) => {
   const captchaRef = useRef<ReCAPTCHA>(null);
 
-  const resolvedSiteKey = useMemo(() => sitekey || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '', [sitekey]);
+  const resolvedSiteKey = useMemo(
+    () => sitekey || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '',
+    [sitekey],
+  );
 
   const verifyBackend = async (token: string) => {
     try {
@@ -47,8 +50,9 @@ const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified, sitekey }) =>
           }}
         />
       ) : (
-        <div role="alert" aria-live="polite">
-          No se encontró la clave de reCAPTCHA. Configure `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` o pase `sitekey` como prop.
+        <div role='alert' aria-live='polite'>
+          No se encontró la clave de reCAPTCHA. Configure `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` o pase
+          `sitekey` como prop.
         </div>
       )}
     </div>

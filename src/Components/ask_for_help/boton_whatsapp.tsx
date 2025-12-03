@@ -89,11 +89,7 @@ const BotonWhatsapp = () => {
             <h3 className='text-lg font-semibold text-gray-700'>Verificación de seguridad</h3>
             <p className='text-sm text-gray-500 mb-2'>Confirma que eres humano para continuar.</p>
 
-            <ReCAPTCHA
-              ref={recaptchaRef}
-              sitekey={sitekey}
-              onChange={handleCaptchaChange}
-            />
+            <ReCAPTCHA ref={recaptchaRef} sitekey={sitekey} onChange={handleCaptchaChange} />
 
             {/* Botón para cerrar */}
             <button
@@ -108,9 +104,11 @@ const BotonWhatsapp = () => {
 
       {showError && (
         <ErrorMessage
-          message={sitekey
-            ? 'Hubo un problema de conexión. Intenta más tarde.'
-            : 'Configuración incompleta: falta NEXT_PUBLIC_RECAPTCHA_SITE_KEY para mostrar el reCAPTCHA.'}
+          message={
+            sitekey
+              ? 'Hubo un problema de conexión. Intenta más tarde.'
+              : 'Configuración incompleta: falta NEXT_PUBLIC_RECAPTCHA_SITE_KEY para mostrar el reCAPTCHA.'
+          }
           onClose={() => setShowError(false)}
         />
       )}
