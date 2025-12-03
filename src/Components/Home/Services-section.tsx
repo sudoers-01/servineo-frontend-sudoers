@@ -10,7 +10,15 @@ const services = [
   },
 ];
 
-export default function ServicesSection() {
+interface ServicesSectionProps {
+  showHero?: boolean;
+  showAllServices?: boolean;
+  showCTA?: boolean;
+  title?: string;
+  subtitle?: string;
+} 
+
+export default function ServicesSection({showHero, showAllServices, showCTA, title, subtitle}: ServicesSectionProps) {
   const t = useTranslations('Services');
   return (
     <section className="py-16 px-4 bg-white">
