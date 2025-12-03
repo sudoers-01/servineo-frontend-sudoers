@@ -1,7 +1,7 @@
 import { jwtDecode } from 'jwt-decode';
 
 interface DecodedToken {
-  id: string;
+  _id: string;
   email: string;
   name: string;
   iat?: number;
@@ -14,7 +14,7 @@ export function getUserIdFromToken(): string | null {
     if (!token) return null;
 
     const decoded = jwtDecode<DecodedToken>(token);
-    return decoded.id;
+    return decoded._id;
   } catch (error) {
     console.error('Error decodificando token:', error);
     return null;
