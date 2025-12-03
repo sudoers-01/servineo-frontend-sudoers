@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, KeyboardEvent } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, Wrench, UserCircle } from 'lucide-react';
+import { Menu, X, Wrench, UserCircle, Home, ClipboardList, HelpCircle } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
@@ -33,16 +33,22 @@ export default function TopMenu() {
   const logoRef = useRef<HTMLButtonElement | null>(null);
 
   const navItems = [
-    { name: 'Inicio', href: '/' },
-    { name: 'Ofertas de trabajo', href: '/job-offer-list' },
-    { name: 'Ayuda', href: '/ask-for-help/centro_de_ayuda' },
+    { name: 'Inicio', href: '/', icon: <Home className="h-5 w-5" /> },
+    { name: 'Ofertas', href: '/job-offer-list', icon: <ClipboardList className="h-5 w-5" /> },
+    {
+      name: 'Ayuda',
+      href: '/ask-for-help/centro_de_ayuda',
+      icon: <HelpCircle className="h-5 w-5" />,
+    },
   ];
 
   const [currentPath, setCurrentPath] = useState('');
 
+  // Detectar ruta actual
   useEffect(() => {
-    setCurrentPath(window.location.pathname); // Solo se ejecuta en el cliente
+    setCurrentPath(window.location.pathname);
   }, []);
+
   // Obtener userId desde localStorage
   useEffect(() => {
     const token = localStorage.getItem('servineo_user');
@@ -62,7 +68,7 @@ export default function TopMenu() {
     if (userData) dispatch(setUser(userData));
   }, [userData, dispatch]);
 
-  // Detectar scroll y login
+  // Scroll y login
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
@@ -84,14 +90,20 @@ export default function TopMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Función logout
   const logout = () => {
     localStorage.removeItem('servineo_token');
     localStorage.removeItem('servineo_user');
     window.location.reload();
   };
 
-  // Botones por rol
+  const handleLogoClick = () => {
+    if (window.location.pathname === '/') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else {
+      window.location.href = '/';
+    }
+  };
+
   const getRoleButton = () => {
     if (loading || !user) return null;
     if (!user.role) return null;
@@ -154,58 +166,16 @@ export default function TopMenu() {
     return null;
   };
 
-  // Scroll al top desde logo
-  const handleLogoClick = () => {
-    if (window.location.pathname === '/') {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else {
-      window.location.href = '/';
-    }
-  };
-
-  // Navegación con flechas en desktop
-  const handleDesktopNavKeyDown = (e: KeyboardEvent<HTMLElement>) => {
-    const logoItems = logoRef.current ? [logoRef.current] : [];
-    const navItemsEls = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        'nav[aria-label="Menú principal"] a, nav[aria-label="Menú principal"] [href]',
-      ),
-    );
-    const buttonItems = Array.from(
-      document.querySelectorAll<HTMLElement>(
-        '#desktop-auth-buttons a, #desktop-auth-buttons button',
-      ),
-    );
-
-    const allItems: HTMLElement[] = [...logoItems, ...navItemsEls, ...buttonItems];
-    if (allItems.length === 0) return;
-
-    const index = allItems.indexOf(document.activeElement as HTMLElement);
-
-    if (e.key === 'ArrowRight') {
-      e.preventDefault();
-      const next = index === -1 ? 0 : (index + 1) % allItems.length;
-      allItems[next].focus();
-    } else if (e.key === 'ArrowLeft') {
-      e.preventDefault();
-      const prev =
-        index === -1 ? allItems.length - 1 : (index - 1 + allItems.length) % allItems.length;
-      allItems[prev].focus();
-    }
-  };
-
   return (
     <>
+      {/* DESKTOP HEADER */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled ? 'bg-white shadow-md' : 'bg-white'
         } border-b border-gray-100`}
         role="banner"
       >
-        <div
-          className="w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20"
-          onKeyDown={handleDesktopNavKeyDown}
-        >
+        <div className="w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20">
           {/* Logo */}
           <button
             ref={logoRef}
@@ -231,17 +201,13 @@ export default function TopMenu() {
           </button>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex gap-6" role="navigation" aria-label="Menú principal">
+          <nav className="flex gap-6" role="navigation" aria-label="Menú principal">
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
                 className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
-                  ${
-                    currentPath === item.href
-                      ? 'text-[var(--color-primary)] after:w-full'
-                      : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'
-                  }`}
+                  ${currentPath === item.href ? 'text-[var(--color-primary)] after:w-full' : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'}`}
               >
                 {item.name}
               </Link>
@@ -249,18 +215,18 @@ export default function TopMenu() {
           </nav>
 
           {/* Desktop Right */}
-          <div className="hidden md:flex items-center gap-4" id="desktop-auth-buttons">
+          <div className="flex items-center gap-4">
             {!isLogged ? (
               <>
                 <Link
                   href="/login"
-                  className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium transition-opacity duration-300 hover:opacity-90"
+                  className="px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity"
                 >
                   Iniciar Sesión
                 </Link>
                 <Link
                   href="/signUp"
-                  className="px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium transition-opacity duration-300 hover:opacity-80"
+                  className="px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium hover:opacity-80 transition-opacity"
                 >
                   Registrarse
                 </Link>
@@ -271,7 +237,7 @@ export default function TopMenu() {
                 <div className="relative" ref={dropdownRef}>
                   <button
                     onClick={() => setAccountOpen(!accountOpen)}
-                    className="flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
+                    className="flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
                   >
                     <span className="font-medium text-gray-700 hover:text-primary">
                       {user?.name}
@@ -297,77 +263,72 @@ export default function TopMenu() {
               </>
             )}
           </div>
-
-          {/* Mobile Menu Button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="inline-flex items-center justify-center p-2 rounded-md text-primary hover:bg-gray-100 transition-colors"
-            >
-              {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu */}
-        <div
-          className={`md:hidden ${isOpen ? 'block' : 'hidden'} bg-white border-t border-gray-200`}
-        >
-          <div className="px-2 pt-2 pb-3 space-y-1">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50"
-                onClick={() => setIsOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-
-            <div className="pt-4 pb-2 border-t border-gray-200 px-2 space-y-2">
-              {!isLogged ? (
-                <>
-                  <Link
-                    href="/login"
-                    className="block w-full text-center text-white bg-[var(--color-primary)] px-4 py-2 rounded-md text-base font-medium hover:opacity-90"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Iniciar Sesión
-                  </Link>
-                  <Link
-                    href="/signUp"
-                    className="block w-full text-center text-white bg-[var(--color-primary)] px-4 py-2 rounded-md text-base font-medium hover:opacity-90"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Registrarse
-                  </Link>
-                </>
-              ) : (
-                <>
-                  {getRoleButtonMobile()}
-                  <Link
-                    href="/requesterEdit"
-                    className="block px-4 py-2 text-gray-700 hover:bg-gray-50 rounded-md"
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Editar perfil
-                  </Link>
-                  <button
-                    onClick={logout}
-                    className="block w-full text-left text-red-600 px-4 py-2 rounded-md text-base font-medium hover:bg-red-50"
-                  >
-                    Cerrar sesión
-                  </button>
-                </>
-              )}
-            </div>
-          </div>
         </div>
       </header>
 
-      {/* Spacer para header fijo */}
-      <div className="h-20" />
+      {/* MOBILE/TABLET HEADER */}
+      <div className="lg:hidden">
+        {/* Barra superior */}
+        <div className="flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50">
+          {/* Logo */}
+          <button onClick={handleLogoClick} className="flex items-center gap-2 min-w-0">
+            <div className="relative overflow-hidden rounded-full shadow-md shrink-0">
+              <Image src="/icon.png" alt="Servineo" width={32} height={32} />
+            </div>
+            <span className="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]">
+              Servineo
+            </span>
+          </button>
+
+          {/* Auth Buttons */}
+          {!isLogged ? (
+            <div className="flex items-center gap-2 flex-nowrap">
+              <Link
+                href="/login"
+                className="px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/signUp"
+                className="px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap"
+              >
+                Registrarse
+              </Link>
+            </div>
+          ) : (
+            <button
+              onClick={() => setAccountOpen(!accountOpen)}
+              className="flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition"
+            >
+              <span className="text-gray-700 font-medium">{user?.name}</span>
+            </button>
+          )}
+        </div>
+        {/* Barra inferior fija con iconos */}
+        <nav className="fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50">
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => (window.location.href = item.href)}
+              className={`flex flex-col items-center text-[11px] px-1 py-1 ${
+                currentPath === item.href
+                  ? 'text-[var(--color-primary)]'
+                  : 'text-gray-900 hover:text-[var(--color-primary)]'
+              }`}
+            >
+              {item.icon}
+              <span className="mt-1">{item.name}</span>
+            </button>
+          ))}
+        </nav>
+        {/* Espaciadores para contenido */}
+        <div className="h-16" /> {/* top */}
+        <div className="h-16" /> {/* bottom */}
+      </div>
+
+      {/* Spacer Desktop */}
+      <div className="hidden lg:block h-20" />
     </>
   );
 }
