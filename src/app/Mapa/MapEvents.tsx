@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import { useMapEvents } from "react-leaflet";
-import { LatLngExpression } from "leaflet";
-import { useState, useEffect } from "react";
+import { useMapEvents } from 'react-leaflet';
+import { LatLngExpression } from 'leaflet';
+import { useState, useEffect } from 'react';
 
 interface MapEventsProps {
   onClick?: (pos: LatLngExpression) => void;
@@ -26,12 +26,12 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener("online", handleOnline);
-    window.addEventListener("offline", handleOffline);
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
 
     return () => {
-      window.removeEventListener("online", handleOnline);
-      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
     };
   }, []);
 
@@ -67,10 +67,10 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
       }
     };
 
-    map.on("zoomstart", handleZoomStart);
+    map.on('zoomstart', handleZoomStart);
 
     return () => {
-      map.off("zoomstart", handleZoomStart);
+      map.off('zoomstart', handleZoomStart);
     };
   }, [isOnline, map]);
 
@@ -105,11 +105,11 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
     <>
       {showMessage && (
         <div
-          className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white font-bold px-6 py-3 rounded-xl shadow-lg text-center transition-all duration-700 ease-in-out"
+          className='absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white font-bold px-6 py-3 rounded-xl shadow-lg text-center transition-all duration-700 ease-in-out'
           style={{
-            pointerEvents: "none",
-            backgroundColor: "#E74C3C",
-            transform: showMessage ? "translateY(0)" : "translateY(-20px)",
+            pointerEvents: 'none',
+            backgroundColor: '#E74C3C',
+            transform: showMessage ? 'translateY(0)' : 'translateY(-20px)',
             opacity: showMessage ? 1 : 0,
           }}
         >

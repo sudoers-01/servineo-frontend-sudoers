@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import { useEffect, useState, useRef } from "react";
-import { useMap, Circle } from "react-leaflet";
+import { useEffect, useState, useRef } from 'react';
+import { useMap, Circle } from 'react-leaflet';
 
 interface RecenterMapProps {
   position: [number, number];
@@ -20,7 +20,12 @@ export default function RecenterMap({ position }: RecenterMapProps) {
       return;
     }
 
-    if (!position || (prevPosition.current && position[0] === prevPosition.current[0] && position[1] === prevPosition.current[1])) {
+    if (
+      !position ||
+      (prevPosition.current &&
+        position[0] === prevPosition.current[0] &&
+        position[1] === prevPosition.current[1])
+    ) {
       return;
     }
 
@@ -40,7 +45,7 @@ export default function RecenterMap({ position }: RecenterMapProps) {
         <Circle
           center={position}
           radius={50}
-          pathOptions={{ color: "#3b82f6", fillColor: "#3b82f6", fillOpacity: 0.2, weight: 0 }}
+          pathOptions={{ color: '#3b82f6', fillColor: '#3b82f6', fillOpacity: 0.2, weight: 0 }}
         />
       )}
     </>
