@@ -10,26 +10,26 @@ const pasos = [
     {
         number: 1,
         title:"Navega y busca",
-        imageUrl:"/img/imgHowUseServineo/navegarYBuscar.jpg",
-        descripcion:"Explotra nuestro servicios utilizando la barra de busqueda, filtros por categorias y palabras claves para encontrar lo que buscas."
+        imageUrl:"/es/img/imgHowUseServineo/navegarYBuscar.jpg",
+        descripcion:"Explora nuestros servicios utilizando la barra de búsqueda, filtros por categorías y palabras claves para encontrar lo que buscas."
     },
     {
         number: 2,
         title:"Contacta",
-        imageUrl:"/img/imgHowUseServineo/contacta.jpg",
-        descripcion:"Comunicate con el fixer directamente mediante su numero telefonico para poder saber mas sobre el servicio o coordinar el trabajo."
+        imageUrl:"/es/img/imgHowUseServineo/contacta.jpg",
+        descripcion:"Comunícate con el fixer directamente mediante su número telefónico para poder saber más sobre el servicio o coordinar el trabajo."
     },
     {
         number: 3,  
         title:"Coordina tu servicio",
-        imageUrl:"/img/imgHowUseServineo/coordinar.jpg",
-        descripcion:"Coordina con tu fixer para que el servicio sea lo que tu buscas y elige una oferta antes de enviar los datos necesitados por el fixer."
+        imageUrl:"/es/img/imgHowUseServineo/coordinar.jpg",
+        descripcion:"Coordina con tu fixer para que el servicio sea lo que tu busca y elige una oferta antes de enviar los datos necesitados por el fixer."
     },
     {
         number: 4,  
         title:"Aprueba y contacta",
-        imageUrl:"/img/imgHowUseServineo/contrata.jpg",
-        descripcion:"Recibe el servicio y deja tus comentatios sobre la calidad del servicio."
+        imageUrl:"/es/img/imgHowUseServineo/contrata.jpg",
+        descripcion:"Recibe el servicio y deja tus comentarios sobre la calidad del servicio."
     }
 ]
 
