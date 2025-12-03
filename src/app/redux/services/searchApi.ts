@@ -27,7 +27,7 @@ export const searchApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     logSearch: builder.mutation<void, SearchData>({
       query: (searchData) => ({
-        url: '/api/searches',
+        url: '/searches',
         method: 'POST',
         body: searchData,
       }),
@@ -35,7 +35,7 @@ export const searchApi = baseApi.injectEndpoints({
     }),
     updateFilters: builder.mutation<void, FilterData>({
       query: (filterData) => ({
-        url: '/api/searches',
+        url: '/searches',
         method: 'PATCH',
         body: filterData,
       }),
