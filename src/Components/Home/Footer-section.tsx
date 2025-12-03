@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { Facebook, Instagram, Twitter, Mail, Phone, MapPin, Globe } from 'lucide-react';
+import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
 interface FooterSectionProps {
   onRestartTour?: () => void;

@@ -5,6 +5,7 @@ import L from "leaflet";
 import { Fixer } from "@/Components/interface/Fixer_Interface";
 import { getServiceStyle } from "@/app/Mapa/serviceStyles";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 interface FixerMarkerProps { 
   fixer: Fixer;
@@ -86,12 +87,12 @@ export default function FixerMarker({ fixer }: FixerMarkerProps) {
           }}
         >
           <div style={{ display: "flex", alignItems: "center", gap: "12px", marginBottom: "12px" }}>
-            <img
+            <Image
               src={style.iconUrl}
               alt="Avatar"
+              width={46}
+              height={46}
               style={{
-                width: "46px",
-                height: "46px",
                 borderRadius: "50%",
                 objectFit: "cover",
                 border: `4px solid ${fixer.available ? style.color : palette.iconBorderBusy}`,

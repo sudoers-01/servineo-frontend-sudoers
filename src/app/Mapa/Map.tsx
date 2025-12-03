@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Fixer } from "@/Components/interface/Fixer_Interface";
@@ -109,7 +109,7 @@ export default function Map() {
       center: mapCenter,
       zoom: zoom,
     }),
-    []
+    [mapCenter, zoom]
   );
 
   useEffect(() => {

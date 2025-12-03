@@ -80,7 +80,9 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
         showOfflineMessage();
         return;
       }
-      onClick && onClick([e.latlng.lat, e.latlng.lng]);
+      if (onClick) {
+        onClick([e.latlng.lat, e.latlng.lng]);
+      }
     },
     moveend: (e) => {
       if (!isOnline) {
@@ -88,7 +90,9 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
         e.target.setView(e.target.getCenter()); // mantener vista
         return;
       }
-      onMove && onMove(e.target.getCenter());
+      if (onMove) {
+        onMove(e.target.getCenter());
+      }
     },
     zoomend: (e) => {
       if (!isOnline) {
@@ -96,7 +100,9 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
         e.target.setZoom(e.target.getZoom()); // mantener zoom
         return;
       }
-      onZoom && onZoom(e.target.getZoom());
+      if (onZoom) {
+        onZoom(e.target.getZoom());
+      }
     },
   });
 

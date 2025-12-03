@@ -1,6 +1,6 @@
 "use client";
 
-import { Popup, useMap } from "react-leaflet";
+import { Popup } from "react-leaflet";
 
 interface NoResultsProps {
   show: boolean;
@@ -8,7 +8,6 @@ interface NoResultsProps {
 }
 
 export default function NoResults({ show, position }: NoResultsProps) {
-  const map = useMap();
 
   if (!show) return null;
 
