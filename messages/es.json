@@ -882,8 +882,9 @@
         "label": "Fecha de Vencimiento"
       },
       "credentialId": {
-        "label": "ID Credencial",
-        "placeholder": "Opcional"
+        "label": "ID de la Credencial",
+        "placeholder": "Opcional",
+        "label2":"URL de la credencial"
       },
       "credentialUrl": {
         "label": "URL Credencial",

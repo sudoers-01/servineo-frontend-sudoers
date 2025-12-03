@@ -886,7 +886,8 @@
       },
       "credentialId": {
         "label": "Credential ID",
-        "placeholder": "Optional"
+        "placeholder": "Optional",
+        "label2":"URL credential"
       },
       "credentialUrl": {
         "label": "Credential URL",

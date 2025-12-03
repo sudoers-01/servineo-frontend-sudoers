@@ -68,7 +68,7 @@ export default async function RootLayout({ children, params }: Props) {
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ReduxProvider>
-            <div className="text-black fixed bottom-7 right-7 z-[9999]">
+            <div className="text-black fixed bottom-7 right-7 z-9999">
               <BotonesFlotantes />
             </div>
             <div className="">
