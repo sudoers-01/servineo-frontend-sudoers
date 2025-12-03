@@ -75,6 +75,8 @@
   --sidebar-ring: oklch(0.65 0.18 250);
 }
 
+
+
 @theme inline {
   --font-sans: var(--font-roboto), 'Roboto', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
@@ -117,14 +119,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+
 
 /* Map Styles */
 .map-tiles {
@@ -635,49 +630,71 @@
 }
 
 /* ============================================
-   ESTILOS PARA REACTOUR (GUÍA INTERACTIVA)
+   ESTILOS PARA REACTOUR (GUÍA INTERACTIVA) - CORREGIDO
    ============================================ */
 
-/* 1. Suavizar movimiento */
+/* 1. Asegurar visibilidad correcta de la máscara */
 .reactour__mask {
-  transition: all 0.4s ease-out !important;
+  color: #1d1b1b !important; /* Color base para la opacidad */
+  opacity: 0.4 !important; /* Ajusta la oscuridad del fondo */
+  mix-blend-mode: normal !important; /* Evita que se mezcle mal con el fondo */
+  z-index: 9999 !important;
 }
 
-.reactour__helper {
-  transition: all 0.4s ease-out !important;
+/* 2. El área resaltada (spotlight) */
+.reactour__spotlight {
+  border-radius: 12px !important;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.6) !important; /* Fallback visual */
+  background-color: transparent !important;
+  z-index: 9998 !important;
 }
 
-/* 2. Estilizar los puntos de navegación (dots) */
+/* 3. Popover encima de todo */
+.reactour__popover {
+  z-index: 10000 !important;
+  position: fixed !important;
+  background-color: rgb(255, 255, 255) !important;
+  color: #6e6e6e !important;
+  border-radius: 12px !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+}
+
+/* Si estás en modo oscuro, forzar fondo blanco para el popover de la guía para legibilidad */
+.dark .reactour__popover {
+  background-color: #1a1a1a !important;
+  color: #fff !important;
+  border: 1px solid #333;
+}
+
+/* Botones de navegación (puntos) */
 div[data-tour-elem="controls"] button[data-tour-elem="dot"] {
-  background-color: #e2e8f0 !important;
+  background-color: #cbd5e1 !important;
   border: none !important;
-  width: 8px !important;
-  height: 8px !important;
-  margin: 0 5px !important;
+  width: 10px !important;
+  height: 10px !important;
+  margin: 0 6px !important;
   border-radius: 50% !important;
   transition: all 0.3s ease !important;
-  box-shadow: none !important;
   padding: 0 !important;
-  min-width: 8px !important;
-  flex-shrink: 0 !important;
 }
 
-/* Estilo del punto activo */
 div[data-tour-elem="controls"] button[data-tour-elem="dot"][data-active="true"] {
   background-color: #2b6ae0 !important;
-  transform: scale(1.2);
+  transform: scale(1.3);
 }
 
-/* 3. Centrar los puntos entre los botones */
 div[data-tour-elem="navigation"] {
   display: flex !important;
   justify-content: center !important;
-  flex: 1 !important;
-  margin: 0 10px !important;
+  margin-top: 15px !important;
 }
 
-/* 4. Asegurar el popover encima de todo */
-div[data-tour-elem="popover"] {
-  z-index: 100000 !important;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
-}
+/* Estilos de Mapas y Carrusel (Mantener originales) */
+.map-tiles { filter: saturate(1.05) contrast(1.05) brightness(1.02); }
+.custom-offer-marker { transition: all 0.3s; }
+.custom-offer-marker:hover { transform: translateY(-4px); }
+.glass { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(20px); }
+
+/* Animaciones */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-fadeInUp { animation: fadeInUp 0.5s ease-out forwards; }

@@ -11,6 +11,7 @@ import { NextIntlClientProvider } from 'next-intl';
 import { TranslationButton } from '@/Components/Shared/TranslationButton';
 import BotonesFlotantes from '@/Components/ask_for_help/contenedor';
 import FooterSection from '@/Components/Home/Footer-section';
+import { TourLogic } from '@/Components/Tour/TourLogic';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -53,26 +54,20 @@ export default async function RootLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={`${roboto.className}`}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-        suppressHydrationWarning={true}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
-
-            {/* ❗️IMPORTANTE:
-                Eliminado <TourLogic /> para evitar doble inicialización 
-                El Tour se ejecuta dentro de Providers → TourProviderWrapper */}
-
+            {/* ESTA LÍNEA ES LA QUE HACE QUE LA GUÍA FUNCIONE */}
+            <TourLogic />
+           
             <div className="text-black fixed bottom-7 right-7 z-[9999]">
               <TranslationButton />
               <BotonesFlotantes />
             </div>
-
-            <TopMenu />
-
+            <div className="">
+              <TopMenu />
+            </div>
             {children}
-
             <FooterSection />
           </Providers>
         </NextIntlClientProvider>
