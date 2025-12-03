@@ -20,7 +20,7 @@ const MetricsCards: React.FC<MetricsCardsProps> = ({ metrics }) => {
         <p className="text-2xl font-bold text-blue-600">{total}</p>
       </div>
       <div className="bg-white shadow-sm rounded p-4 border-l-4 border-green-500">
-        <h3 className="text-lg font-semibold text-gray-800">Citas Activas</h3>
+        <h3 className="text-lg font-semibold text-gray-800">Citas Agendadas</h3>
         <p className="text-2xl font-bold text-green-600">{active}</p>
       </div>
       <div className="bg-white shadow-sm rounded p-4 border-l-4 border-red-500">
