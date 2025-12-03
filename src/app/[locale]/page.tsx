@@ -3,7 +3,6 @@ import HeroSection from '@/Components/Home/Hero-section';
 import ServicesSection from '@/Components/Home/Services-section';
 import HowItWorksSection from '@/Components/Home/HowItWorks-section';
 import CTASection from '@/Components/Home/CTA-section';
-import MapSection from '@/Components/Home/Map-section';
 import InspirationSection from '@/Components/Home/Inspiration-section';
 import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
 import dynamic from 'next/dynamic';

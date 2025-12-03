@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect, useRef, KeyboardEvent } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, Wrench, UserCircle, Home, ClipboardList, HelpCircle } from 'lucide-react';
+import { Wrench, UserCircle, ClipboardList, HelpCircle } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
@@ -23,7 +23,6 @@ export default function TopMenu() {
   const dispatch = useDispatch();
   const { user, loading } = useSelector((state: RootState) => state.user);
 
-  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -138,37 +137,6 @@ export default function TopMenu() {
     return null;
   };
 
-  const getRoleButtonMobile = () => {
-    if (loading || !user) return null;
-    if (!user.role) return null;
-
-    if (user.role === 'requester') {
-      return (
-        <Link
-          href="/become-fixer"
-          className="flex items-center justify-center gap-2 w-full bg-[var(--color-primary)] text-white px-4 py-2 rounded-md text-base font-medium hover:opacity-90 transition-opacity"
-          onClick={() => setIsOpen(false)}
-        >
-          <Wrench className="h-4 w-4" />
-          Convertir a Fixer
-        </Link>
-      );
-    }
-
-    if (user.role === 'fixer') {
-      return (
-        <Link
-          href="/fixer/dashboard"
-          className="flex items-center justify-center gap-2 w-full bg-[var(--color-primary)] text-white px-4 py-2 rounded-md text-base font-medium hover:opacity-90 transition-opacity"
-          onClick={() => setIsOpen(false)}
-        >
-          <UserCircle className="h-4 w-4" />
-          Perfil de Fixer
-        </Link>
-      );
-    }
-    return null;
-  };
 
   return (
     <>
@@ -189,7 +157,7 @@ export default function TopMenu() {
           >
             <div className="relative overflow-hidden rounded-full shadow-md">
               <Image
-                src="/icon.png"
+                src="/es/img/icon.png"
                 alt="Logo de Servineo"
                 width={40}
                 height={40}
