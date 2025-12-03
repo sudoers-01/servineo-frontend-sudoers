@@ -1,14 +1,17 @@
 'use client';
 
-import { useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 interface ReCaptchaFormProps {
   onVerified?: (success: boolean) => void;
+  sitekey?: string;
 }
 
-const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified }) => {
+const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified, sitekey }) => {
   const captchaRef = useRef<ReCAPTCHA>(null);
+
+  const resolvedSiteKey = useMemo(() => sitekey || process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '', [sitekey]);
 
   const verifyBackend = async (token: string) => {
     try {
@@ -29,19 +32,25 @@ const ReCaptchaForm: React.FC<ReCaptchaFormProps> = ({ onVerified }) => {
 
   return (
     <div>
-      <ReCAPTCHA
-        ref={captchaRef}
-        sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
-        onChange={(token) => {
-          if (token) {
-            verifyBackend(token);
-          }
-        }}
-        onExpired={() => {
-          onVerified?.(false);
-          captchaRef.current?.reset();
-        }}
-      />
+      {resolvedSiteKey ? (
+        <ReCAPTCHA
+          ref={captchaRef}
+          sitekey={resolvedSiteKey}
+          onChange={(token) => {
+            if (token) {
+              verifyBackend(token);
+            }
+          }}
+          onExpired={() => {
+            onVerified?.(false);
+            captchaRef.current?.reset();
+          }}
+        />
+      ) : (
+        <div role="alert" aria-live="polite">
+          No se encontró la clave de reCAPTCHA. Configure `NEXT_PUBLIC_RECAPTCHA_SITE_KEY` o pase `sitekey` como prop.
+        </div>
+      )}
     </div>
   );
 };

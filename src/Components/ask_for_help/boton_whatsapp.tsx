@@ -8,6 +8,7 @@ const BotonWhatsapp = () => {
   const [showError, setShowError] = useState(false);
   const [showCaptcha, setShowCaptcha] = useState(false);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
+  const sitekey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
 
   const numerowhapi = '59178194834';
   const mensaje = '';
@@ -17,11 +18,18 @@ const BotonWhatsapp = () => {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
 
   const handleInitialClick = () => {
-    if (navigator.onLine) {
-      setShowCaptcha(true);
-    } else {
+    if (!navigator.onLine) {
       setShowError(true);
+      return;
     }
+
+    if (!sitekey) {
+      console.error('Falta NEXT_PUBLIC_RECAPTCHA_SITE_KEY para renderizar ReCAPTCHA.');
+      setShowError(true);
+      return;
+    }
+
+    setShowCaptcha(true);
   };
 
   const handleCaptchaChange = async (token: string | null) => {
@@ -75,7 +83,7 @@ const BotonWhatsapp = () => {
       </button>
 
       {/* 5. Modal / Overlay del Captcha */}
-      {showCaptcha && (
+      {showCaptcha && sitekey && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm'>
           <div className='bg-white p-6 rounded-lg shadow-xl relative flex flex-col items-center gap-4'>
             <h3 className='text-lg font-semibold text-gray-700'>Verificación de seguridad</h3>
@@ -83,7 +91,7 @@ const BotonWhatsapp = () => {
 
             <ReCAPTCHA
               ref={recaptchaRef}
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+              sitekey={sitekey}
               onChange={handleCaptchaChange}
             />
 
@@ -100,7 +108,9 @@ const BotonWhatsapp = () => {
 
       {showError && (
         <ErrorMessage
-          message='Hubo un problema de conexión. Intenta más tarde.'
+          message={sitekey
+            ? 'Hubo un problema de conexión. Intenta más tarde.'
+            : 'Configuración incompleta: falta NEXT_PUBLIC_RECAPTCHA_SITE_KEY para mostrar el reCAPTCHA.'}
           onClose={() => setShowError(false)}
         />
       )}
