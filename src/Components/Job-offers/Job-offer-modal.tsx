@@ -4,6 +4,11 @@ import { X, MessageCircle, MapPin, Sparkles, Calendar, Tag } from 'lucide-react'
 import Image from 'next/image';
 import { useTranslations } from 'next-intl';
 import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
+import JobRequestModal from '../../app/[locale]/job-request/ModalFormMap/JobRequestModal';
+import { useState } from 'react';
+import { useSelector } from 'react-redux';
+import { IUser } from '@/types/user';
+import { useRouter } from 'next/navigation';
 
 interface Props {
   offer: JobOfferData | AdaptedJobOffer | null;
@@ -11,7 +16,20 @@ interface Props {
   onClose: () => void;
 }
 
+interface UserState {
+  user: IUser | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+}
+interface RootState {
+  user: UserState;
+}
+
 export function JobOfferModal({ offer, isOpen, onClose }: Props) {
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+
   //const t = useTranslations('cardJob');
   const tCat = useTranslations('Categories');
 
@@ -46,6 +64,17 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
   const handleWhatsAppClick = () => {
     const cleanPhone = phone.replace(/\D/g, '');
     window.open(`https://wa.me/${cleanPhone}`, '_blank');
+  };
+
+  const handleRequestJobClick = () => {
+    if (!isAuthenticated) {
+      router.push('/signUp');
+      return;
+    }
+    if (user?.role === 'fixer') {
+      return;
+    }
+    setIsMapModalOpen(true);
   };
 
   return (
@@ -163,6 +192,27 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             <MessageCircle className='w-5 h-5' />
             Contactar por WhatsApp
           </button>
+
+          {user?.role !== 'fixer' && (
+            <>
+              <button
+                onClick={handleRequestJobClick}
+                className='flex-1 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2'
+              >
+                Solicitar trabajo
+              </button>
+
+              {isAuthenticated && (
+                <JobRequestModal
+                  isOpen={isMapModalOpen}
+                  onClose={() => setIsMapModalOpen(false)}
+                  onSubmit={(data) => console.log('Solicitud enviada:', data)}
+                  fixerId={offer.fixerId}
+                  offerId={offer._id}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
