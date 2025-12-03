@@ -26,28 +26,33 @@ const nextConfig: NextConfig = {
         hostname: 'picsum.photos',
         pathname: '/**',
       },
-      // Google Drive thumbnails
+       {
+        protocol: 'https',
+        hostname: 'drive.google.com',
+        pathname: '/thumbnail',
+      },
+      // Google Drive - direct access
       {
         protocol: 'https',
         hostname: 'drive.google.com',
-        pathname: '/thumbnail/**',
+        pathname: '/uc',
       },
-      // Google Drive direct file access
-      {
-        protocol: 'https',
-        hostname: 'drive.google.com',
-        pathname: '/uc/**',
-      },
-      // Google User Content (donde se alojan archivos de Drive)
+      // Google User Content (donde se sirven las imágenes)
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
-        pathname: '/**',
       },
       {
         protocol: 'https',
-        hostname: 'regex:^doc-[^.]+\\.googleusercontent\\.com$',
-        pathname: '/**',
+        hostname: 'lh4.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh5.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'lh6.googleusercontent.com',
       },
     ],
   },

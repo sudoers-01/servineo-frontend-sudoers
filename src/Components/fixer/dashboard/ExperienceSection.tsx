@@ -13,10 +13,9 @@ import {
 import { Modal } from '@/Components/Modal';
 import { useForm } from 'react-hook-form';
 import { PillButton } from '../Pill-button';
-//import { SerializedError } from "@reduxjs/toolkit"
 import { FetchBaseQueryError } from '@reduxjs/toolkit/query';
 
-// Type guard para errores de API
+// Type guards para errores de API
 function isFetchBaseQueryError(error: unknown): error is FetchBaseQueryError {
   return typeof error === 'object' && error != null && 'status' in error;
 }
@@ -73,7 +72,6 @@ export function ExperienceSection({
     skip: !fixerId,
   });
 
-  console.log('experiences', experiences);
   const [createExperience, { isLoading: isCreating }] = useCreateExperienceMutation();
   const [updateExperience] = useUpdateExperienceMutation();
   const [deleteExperience] = useDeleteExperienceMutation();
@@ -115,6 +113,7 @@ export function ExperienceSection({
         errorMessage = error.message;
       }
 
+      // Solo mostrar notificación de error, sin botones
       setNotification({
         isOpen: true,
         type: 'error',
@@ -137,6 +136,7 @@ export function ExperienceSection({
 
   const handleDelete = (id: string) => {
     setPendingDelete(id);
+    // Solo para eliminar mostramos los botones de confirmación
     setNotification({
       isOpen: true,
       type: 'warning',
@@ -181,6 +181,7 @@ export function ExperienceSection({
 
   const cancelDelete = () => {
     setPendingDelete(null);
+    setNotification((prev) => ({ ...prev, isOpen: false }));
   };
 
   if (isLoading) return <div className='text-center p-8'>Cargando experiencia...</div>;
@@ -199,8 +200,9 @@ export function ExperienceSection({
         message={notification.message}
         autoClose={notification.type !== 'warning'}
         autoCloseDelay={5000}
-        onConfirm={confirmDelete}
-        onCancel={cancelDelete}
+        // Solo mostrar botones de confirmación cuando hay pendingDelete (eliminar)
+        onConfirm={pendingDelete ? confirmDelete : undefined}
+        onCancel={pendingDelete ? cancelDelete : undefined}
       />
 
       <div className='flex items-center justify-between'>

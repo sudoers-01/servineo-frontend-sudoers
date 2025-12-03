@@ -104,10 +104,15 @@ export const JobOfferCard = memo<JobOfferCardProps>(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         if (offer.fixerId) {
+          // Si quieres mantener el console.log(offer), debes incluir 'offer' en las dependencias.
+          // Si eliminas el console.log, podrías dejar solo [offer.fixerId, router]
+          console.log(offer);
+          console.log('Navigating to fixer with ID:', offer.fixerId);
           router.push(`/fixer/${offer.fixerId}`);
         }
       },
-      [offer.fixerId, router],
+      // CORRECCIÓN: Se agregó 'offer' aquí porque se usa dentro del console.log
+      [offer, router], 
     );
 
     const handleCardClick = useCallback(() => {
@@ -294,6 +299,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
             onClick={handleFixerClick}
           >
             <div className='w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100'>
+   
               {offer.fixerPhoto ? (
                 <Image
                   src={offer.fixerPhoto}
