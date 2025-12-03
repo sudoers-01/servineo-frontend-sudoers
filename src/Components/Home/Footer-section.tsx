@@ -35,7 +35,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
     { name: 'Ofrece tus servicios', path: '/info/reparador' },
     { name: 'Ofertas de trabajo', path: '/job-offer-list' },
   ];
-
+  
   return (
     <footer
       id="footer-principal"
@@ -132,10 +132,10 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
                   aria-hidden="true"
                 />
                 <a
-                  href="https://maps.app.goo.gl/z8DHcrdYNUSLiFmi7"
+                  href="https://maps.app.goo.gl/PwgW3ERYuFQMEoNT7"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#1AA7ED] transition-colors"
+                  className="footerLink"
                   aria-label="Ver ubicación en Google Maps: Cochabamba, Bolivia"
                 >
                   Cochabamba, Bolivia
@@ -147,7 +147,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
                   href="https://wa.me/59175139742?text=Hola%2C%20me%20gustaria%20recibir%20informacion%20sobre%20los%20servicios%20que%20ofrece%20SERVINEO.%20Muchas%20gracias."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:text-[#1AA7ED] transition-colors"
+                  className="footerLink"
                   aria-label="Enviar mensaje por WhatsApp al +591 75139742"
                 >
                   +591 751-39742
@@ -156,11 +156,11 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
               <div className="flex items-center" aria-label="Correo electrónico de contacto">
                 <Mail className="h-5 w-5 text-blue-400 mr-2" aria-hidden="true" />
                 <a
-                  href="mailto:contacto@servineo.bo"
-                  className="hover:text-[#1AA7ED] transition-colors"
-                  aria-label="Enviar correo electrónico a contacto@servineo.bo"
+                  href="mailto:servineo.serviciostecnicos@gmail.com?subject=Solicitud%20de%20informacion&body=Hola,%20me%20gustaria%20recibir%20informacion%20sobre%20los%20servicios%20que%20ofrece%20SERVINEO.%20Muchas%20gracias."
+                  className="footerLink"
+                  aria-label="Enviar correo electrónico a servineo.serviciostecnicos@gmail.com"
                 >
-                  contacto@servineo.bo
+                  servineo@gmail.com
                 </a>
               </div>
             </div>
@@ -208,18 +208,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
               </a>
             </div>
           </div>
-          <div className="flex items-center justify-center sm:justify-end gap-2">
-            <Globe className="h-5 w-5 text-gray-400" aria-hidden="true" />
-            <span className="text-gray-200 font-medium">Idiomas</span>
-            <select
-              className="bg-[#0D1B3E] text-white border border-gray-600 rounded px-2 py-1 focus:outline-none focus:border-[#1AA7ED]"
-              aria-label="Seleccionar idioma"
-              defaultValue="es"
-            >
-              <option value="es">Español</option>
-              <option value="en">Inglés</option>
-            </select>
-          </div>
+         
         </div>
         <div className="border-t border-gray-700" role="separator" aria-hidden="true" />
         <div
