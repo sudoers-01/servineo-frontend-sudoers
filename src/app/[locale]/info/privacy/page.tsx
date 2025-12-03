@@ -179,7 +179,7 @@ export default function PrivacyPage() {
 }
 
 /* Subcomponentes para limpieza */
-function SectionBlock({ index, title, gradient, borderColor, children }: SectionBlockProps) {
+function SectionBlock({ index, title, borderColor, children }: SectionBlockProps) {
   return (
     <div
       className="pl-5 border-l-4 rounded-lg bg-white p-5 shadow-sm"

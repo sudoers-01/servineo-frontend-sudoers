@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useMemo } from "react";
-import { MapContainer, TileLayer, Marker, Circle, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer,  Popup, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { Fixer } from "@/Components/interface/Fixer_Interface";
@@ -43,6 +43,21 @@ export default function Map() {
   const [pinPosition, setPinPosition] = useState<[number, number]>(defaultPosition);
   const [mapCenter, setMapCenter] = useState<[number, number]>(defaultPosition);
   const [zoom, setZoom] = useState(14);
+
+
+// Estado independiente para el círculo
+const [circleCenter, setCircleCenter] = useState<[number, number]>(pinPosition);
+
+// Mantenerlo actualizado cuando cambie pinPosition
+useEffect(() => {
+  setCircleCenter(pinPosition);
+}, [pinPosition]);
+
+
+
+
+
+
   const [loading, setLoading] = useState(true);
   const mapRef = useRef<LeafletMapType | null>(null);
   const [mapKey, setMapKey] = useState(0);
@@ -103,14 +118,18 @@ export default function Map() {
     localStorage.removeItem("mapCenter");
     localStorage.removeItem("mapZoom");
   };
-
+   // ====== Memoizar el círculo ======
+const memoizedCircle = useMemo(() => {
+  return <MapCircle center={pinPosition} radius={5000} />;
+}, [pinPosition]);
   const initialMap = useMemo(
-    () => ({
-      center: mapCenter,
-      zoom: zoom,
-    }),
-    []
-  );
+  () => ({
+    center: mapCenter,
+    zoom: zoom,
+  }),
+  [mapCenter, zoom] // <- ahora depende de ellos
+);
+
 
   useEffect(() => {
     const handleResize = () => {
@@ -129,14 +148,14 @@ export default function Map() {
         isOnline={navigator.onLine} 
       />
 
-      <MapContainer
-        key={mapKey}
-        center={initialMap.center}
-        zoom={initialMap.zoom}
-        scrollWheelZoom
-        style={{ height: "100%", width: "100%" }}
-        ref={mapRef}
-      >
+     <MapContainer
+  center={initialMap.center}
+  zoom={initialMap.zoom}
+  scrollWheelZoom
+  style={{ height: "100%", width: "100%" }}
+  ref={mapRef}
+>
+
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -146,7 +165,7 @@ export default function Map() {
         <RecenterMap position={mapCenter} />
 
         <UserMarker position={pinPosition} />
-        <MapCircle center={pinPosition} radius={5000} />
+<MapCircle center={circleCenter} radius={5000} />
 
         {nearbyFixers.map((f) => (
           <FixerMarker key={f.id} fixer={f} />
@@ -159,9 +178,13 @@ export default function Map() {
         />
 
         {nearbyFixers.length === 0 && (
-          <Popup position={pinPosition} closeButton={false} autoPan={true}>
-            ⚠️ No se encontraron fixers cercanos
-          </Popup>
+         <Popup position={pinPosition} closeButton={false} autoPan={true}>
+  <div className="text-black px-4 py-2 rounded-lg font-semibold text-center shadow-md min-w-[180px]">
+    ⚠️ No se encontraron fixers cercanos
+  </div>
+</Popup>
+
+
         )}
       </MapContainer>
 
