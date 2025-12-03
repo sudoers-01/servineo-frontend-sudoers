@@ -66,7 +66,7 @@ export default function HeaderDesktop({
   const { start, end } = getWeekRange();
 
   return (
-    <div className="text-black flex  justify-between items-center my-1 px-2 w-full">
+    <div className='text-black flex  justify-between items-center my-1 px-2 w-full'>
       <HeaderSection
         buttons={[
           { label: 'Anterior', onClick: handlePrev, disabled: isPrevDisabled },
@@ -76,17 +76,17 @@ export default function HeaderDesktop({
       />
 
       {view === 'month' && (
-        <span className="text-lg font-semibold">
+        <span className='text-lg font-semibold'>
           {monthNames[month]} {year}{' '}
         </span>
       )}
       {view === 'week' && (
-        <span className="text-lg font-semibold">
+        <span className='text-lg font-semibold'>
           {monthNames[month]} {start.getDate()} - {end.getDate()}
         </span>
       )}
       {view === 'day' && (
-        <span className="text-lg font-semibold">
+        <span className='text-lg font-semibold'>
           {monthNames[month]} {date}{' '}
         </span>
       )}

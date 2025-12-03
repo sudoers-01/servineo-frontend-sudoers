@@ -68,8 +68,8 @@ export default function InspirationSection() {
   const t = useTranslations('Inspiration');
   const [currentIndex, setCurrentIndex] = useState<number>(0);
   const [failedMap, setFailedMap] = useState<Record<number, boolean>>({});
-  const [loadingMap, setLoadingMap] = useState<Record<number, boolean>>(
-    () => Object.fromEntries(slides.map((_, i) => [i, true]))
+  const [loadingMap, setLoadingMap] = useState<Record<number, boolean>>(() =>
+    Object.fromEntries(slides.map((_, i) => [i, true])),
   );
 
   const [touchStart, setTouchStart] = useState<number>(0);
@@ -104,7 +104,8 @@ export default function InspirationSection() {
           window.clearTimeout(timer);
           setFailedMap((prev) => ({ ...prev, [index]: true }));
         };
-        const src = typeof slides[index].image === 'string' ? slides[index].image : slides[index].image.src;
+        const src =
+          typeof slides[index].image === 'string' ? slides[index].image : slides[index].image.src;
         img.src = src;
       } catch {
         setFailedMap((prev) => ({ ...prev, [index]: true }));
@@ -163,34 +164,31 @@ export default function InspirationSection() {
   }, []);
 
   return (
-    <section className="py-16 px-4 bg-white">
-      <div className="max-w-5xl mx-auto">
+    <section className='py-16 px-4 bg-white'>
+      <div className='max-w-5xl mx-auto'>
         {/* Header */}
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{t('insTitle')}</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">{t('insDescription')}</p>
+        <div className='text-center mb-12'>
+          <h2 className='text-3xl md:text-4xl font-bold text-gray-800 mb-4'>{t('insTitle')}</h2>
+          <p className='text-lg text-gray-600 max-w-2xl mx-auto'>{t('insDescription')}</p>
         </div>
 
         {/* Carousel */}
         <div
-          className="carrusel-container"
+          className='carrusel-container'
           onTouchStart={handleTouchStart}
           onTouchMove={handleTouchMove}
           onTouchEnd={handleTouchEnd}
         >
           {slides.map((slide, index) => (
-            <div
-              key={index}
-              className={`carrusel-slide ${index === currentIndex ? 'active' : ''}`}
-            >
+            <div key={index} className={`carrusel-slide ${index === currentIndex ? 'active' : ''}`}>
               <Image
                 src={failedMap[index] ? fallbackSrc : slide.image}
                 alt={slide.title}
                 fill
                 style={{ objectFit: 'cover' }}
-                className="carrusel-image"
+                className='carrusel-image'
                 priority={index === 0}
-                placeholder="blur"
+                placeholder='blur'
                 blurDataURL={blurDataURL}
                 onError={() => {
                   setFailedMap((prev) => ({ ...prev, [index]: true }));
@@ -200,23 +198,20 @@ export default function InspirationSection() {
                 }}
               />
 
-              {loadingMap[index] && <div className="carrusel-skeleton" />}
+              {loadingMap[index] && <div className='carrusel-skeleton' />}
 
-              <div className="carrusel-overlay"></div>
-              <div className="carrusel-content">
-                {/* CATEGORÍA arriba */}
-                <span className="carrusel-category bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm [text-shadow:_0_0_8px_black,_0_0_4px_black,_0_0_2px_black]">
+              <div className='carrusel-overlay'></div>
+              <div className='carrusel-content'>
+                <span className='carrusel-category bg-primary text-white px-4 py-2 rounded-lg font-bold text-sm [text-shadow:_0_0_8px_black,_0_0_4px_black,_0_0_2px_black]'>
                   {slide.category}
                 </span>
 
-                <div className="carrusel-text-group">
-                  {/* TÍTULO con sombra ULTRA GRUESA */}
-                  <h2 className="carrusel-title text-white font-bold text-3xl md:text-5xl [text-shadow:_0_0_20px_black,_0_0_12px_black,_0_0_6px_black,_0_0_3px_black]">
+                <div className='carrusel-text-group'>
+                  <h2 className='carrusel-title text-white font-bold text-3xl md:text-5xl [text-shadow:_0_0_20px_black,_0_0_12px_black,_0_0_6px_black,_0_0_3px_black]'>
                     {slide.title}
                   </h2>
 
-                  {/* SUBTÍTULO con sombra gruesa */}
-                  <p className="carrusel-subtitle text-white font-medium text-lg md:text-xl [text-shadow:_0_0_12px_black,_0_0_6px_black,_0_0_3px_black]">
+                  <p className='carrusel-subtitle text-white font-medium text-lg md:text-xl [text-shadow:_0_0_12px_black,_0_0_6px_black,_0_0_3px_black]'>
                     {slide.subtitle}
                   </p>
                 </div>
@@ -226,20 +221,19 @@ export default function InspirationSection() {
 
           <button
             onClick={prevSlide}
-            className="carrusel-arrow carrusel-arrow-left"
-            aria-label="Diapositiva anterior"
+            className='carrusel-arrow carrusel-arrow-left'
+            aria-label='Diapositiva anterior'
           >
-            <ChevronLeft className="w-6 h-6" />
+            <ChevronLeft className='w-6 h-6' />
           </button>
           <button
             onClick={nextSlide}
-            className="carrusel-arrow carrusel-arrow-right"
-            aria-label="Diapositiva siguiente"
+            className='carrusel-arrow carrusel-arrow-right'
+            aria-label='Diapositiva siguiente'
           >
-            <ChevronRight className="w-6 h-6" />
+            <ChevronRight className='w-6 h-6' />
           </button>
-
-          <div className="carrusel-dots">
+          <div className='carrusel-dots'>
             {slides.map((_, index) => (
               <span
                 key={index}

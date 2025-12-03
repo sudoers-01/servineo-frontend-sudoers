@@ -1,14 +1,26 @@
 import type { NextConfig } from 'next';
 import createNextIntlPlugin from 'next-intl/plugin';
+import path from 'path';
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig: NextConfig = {
+  // Ensure Next resolves from this project, not parent directory
+  turbopack: {
+    root: __dirname,
+  },
+  outputFileTracingRoot: path.join(__dirname),
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'drive.google.com',
+        pathname: '/**',
       },
       {
         protocol: 'https',

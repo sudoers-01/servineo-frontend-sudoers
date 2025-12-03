@@ -53,84 +53,84 @@ export default function FixerRegisterForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className='space-y-4'>
       {/* NAME */}
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Nombre Completo</label>
+      <div className='space-y-1'>
+        <label className='text-sm font-medium'>Nombre Completo</label>
         <Controller
-          name="name"
+          name='name'
           control={control}
           render={({ field }) => (
-            <div className="relative">
+            <div className='relative'>
               <input
                 {...field}
                 maxLength={30}
-                className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm"
-                placeholder="Ingrese su nombre completo"
+                className='w-full rounded-full bg-gray-200 px-4 py-2 text-sm'
+                placeholder='Ingrese su nombre completo'
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 30);
                   field.onChange(value);
                 }}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+              <span className='absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500'>
                 {field.value?.length || 0}/30
               </span>
             </div>
           )}
         />
-        {errors.name && <p className="text-xs text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className='text-xs text-red-600'>{errors.name.message}</p>}
       </div>
 
       {/* EMAIL */}
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Email</label>
+      <div className='space-y-1'>
+        <label className='text-sm font-medium'>Email</label>
         <Controller
-          name="email"
+          name='email'
           control={control}
           render={({ field }) => (
             <input
               {...field}
-              type="email"
-              className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm"
-              placeholder="correo@ejemplo.com"
+              type='email'
+              className='w-full rounded-full bg-gray-200 px-4 py-2 text-sm'
+              placeholder='correo@ejemplo.com'
             />
           )}
         />
-        {errors.email && <p className="text-xs text-red-600">{errors.email.message}</p>}
+        {errors.email && <p className='text-xs text-red-600'>{errors.email.message}</p>}
       </div>
 
       {/* PHONE */}
-      <div className="space-y-1">
-        <label className="text-sm font-medium">Teléfono</label>
+      <div className='space-y-1'>
+        <label className='text-sm font-medium'>Teléfono</label>
         <Controller
-          name="phone"
+          name='phone'
           control={control}
           render={({ field }) => (
-            <div className="relative">
+            <div className='relative'>
               <input
                 {...field}
-                type="tel"
-                className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm pr-20"
-                placeholder="+591 70123456"
+                type='tel'
+                className='w-full rounded-full bg-gray-200 px-4 py-2 text-sm pr-20'
+                placeholder='+591 70123456'
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^\d\s+-]/g, '');
                   field.onChange(value);
                 }}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+              <span className='absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500'>
                 {field.value ? field.value.replace(/\D/g, '').length : 0}/10 dígitos
               </span>
             </div>
           )}
         />
-        {errors.phone && <p className="text-xs text-red-600">{errors.phone.message}</p>}
+        {errors.phone && <p className='text-xs text-red-600'>{errors.phone.message}</p>}
       </div>
 
       {/* BUTTON */}
       <button
-        type="submit"
+        type='submit'
         disabled={isSubmitting}
-        className="w-full rounded-full bg-primary text-white py-2.5 text-sm font-semibold"
+        className='w-full rounded-full bg-primary text-white py-2.5 text-sm font-semibold'
       >
         {isSubmitting ? 'Registrando...' : submitButtonText}
       </button>

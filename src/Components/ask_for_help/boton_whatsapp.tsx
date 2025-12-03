@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef } from 'react';
-import Image from 'next/image';
+import { FaWhatsapp } from 'react-icons/fa';
 import ReCAPTCHA from 'react-google-recaptcha';
 import ErrorMessage from './ErrorMessage';
 
@@ -56,41 +56,40 @@ const BotonWhatsapp = () => {
     <>
       {/* Botón Flotante */}
       <button
-        type="button"
+        type='button'
         onClick={handleInitialClick}
-        className="flex items-center justify-center
-                        w-13 h-13
-                        bg-[#2563EB] hover:bg-[#1D4ED8]
+        className='flex items-center justify-center
+                        w-14 h-14
+                        bg-green-500 hover:bg-green-600
                         rounded-full shadow-lg
                         transition duration-300 transform hover:scale-105
-                        cursor-pointer"
-        aria-label="Contactar por WhatsApp"
+                        cursor-pointer'
+        aria-label='Contactar por WhatsApp'
       >
-        <Image
-          src="https://drive.google.com/uc?export=view&id=1jmTcbSdFJdlMmUPZj3bUwahLGTZIdPI4"
-          alt="Logo de WhatsApp"
-          width={52}
-          height={52}
-        />
+        <FaWhatsapp size={28} className='text-white' />
       </button>
 
       {/* 5. Modal / Overlay del Captcha */}
       {showCaptcha && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm">
-          <div className="bg-white p-6 rounded-lg shadow-xl relative flex flex-col items-center gap-4">
-            <h3 className="text-lg font-semibold text-gray-700">Verificación de seguridad</h3>
-            <p className="text-sm text-gray-500 mb-2">Confirma que eres humano para continuar.</p>
+        <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm'>
+          <div className='bg-white p-6 rounded-lg shadow-xl relative flex flex-col items-center gap-4'>
+            <h3 className='text-lg font-semibold text-gray-700'>Verificación de seguridad</h3>
+            <p className='text-sm text-gray-500 mb-2'>Confirma que eres humano para continuar.</p>
 
             <ReCAPTCHA
               ref={recaptchaRef}
-              sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''}
+              sitekey={
+                process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY_V2 ||
+                process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ||
+                ''
+              }
               onChange={handleCaptchaChange}
             />
 
             {/* Botón para cerrar */}
             <button
               onClick={() => setShowCaptcha(false)}
-              className="text-gray-400 hover:text-gray-600 text-sm mt-2 underline"
+              className='text-gray-400 hover:text-gray-600 text-sm mt-2 underline'
             >
               Cancelar
             </button>
@@ -100,7 +99,7 @@ const BotonWhatsapp = () => {
 
       {showError && (
         <ErrorMessage
-          message="Hubo un problema de conexión. Intenta más tarde."
+          message='Hubo un problema de conexión. Intenta más tarde.'
           onClose={() => setShowError(false)}
         />
       )}

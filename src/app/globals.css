@@ -251,6 +251,99 @@
   backdrop-filter: blur(20px);
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.profileMenu {
+  position: fixed;
+  top: 70px;
+  right: 20px;
+  background: #fff;
+  color: #000;
+  border-radius: 12px;
+  box-shadow: 0 2px 18px rgba(0, 0, 0, .15);
+  width: 280px;
+  padding: 12px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 9999;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+}
+
+.show {
+  display: flex;
+  animation: fadeIn .18s ease;
+}
+
+.menuHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.closeBtn {
+  cursor: pointer;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.profilePreview {
+  width: 82px;
+  height: 82px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin: 8px auto;
+  border: 3px solid #fff;
+  background: #f0f0f0;
+}
+
+.menuItem {
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  border: 1px solid #d0d4e6;
+  background: #f8f9ff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.menuItem:hover {
+  background: #2B6AF0;
+  color: #fff;
+  border-color: #2B6AF0;
+  box-shadow: 0 2px 6px rgba(43,106,240,0.25);
+}
+
+.logoutBtn {}
+
+@media (max-width: 480px) {
+  .profileMenu {
+    width: 94%;
+    right: 3%;
+    top: 88px;
+  }
+}
+
+.shadow-neu-inner {
+  box-shadow: 8px 8px 16px rgba(0,0,0,0.08), -8px -8px 16px rgba(255,255,255,0.9);
+}
+
+.menuLabel {
+  text-align: center;
+  font-weight: 600;
+}
+
+
 /* ============================================
    CARRUSEL DE INSPIRACIÓN - INICIO
    ============================================ */
@@ -583,17 +676,19 @@
   text-decoration: none;
   padding: 4px 6px;
   border-radius: 4px;
-  transition: color 0.3s ease, transform 0.3s ease;
+  transition:
+    color 0.3s ease,
+    transform 0.3s ease;
 }
 
 .footerLink::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   bottom: -3px;
   width: 100%;
   height: 2px;
-  background-color: #1AA7ED;
+  background-color: #1aa7ed;
   transform: scaleX(0);
   transform-origin: center;
   transition: transform 0.3s ease;
@@ -610,7 +705,7 @@
 }
 
 .footerLink:focus-visible {
-  outline: 2px solid #1AA7ED;
+  outline: 2px solid #1aa7ed;
   outline-offset: 3px;
 }
 
@@ -618,16 +713,16 @@
   position: relative;
   display: inline-block;
   padding-bottom: 10px;
-  color: #1AA7ED;
+  color: #1aa7ed;
 }
 
 .footerTitle::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 0;
   bottom: 0;
   width: 95%;
   height: 3px;
-  background-color: #1AA7ED;
+  background-color: #1aa7ed;
   border-radius: 2px;
 }

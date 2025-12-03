@@ -1,9 +1,6 @@
+'use client';
 
-
-
-"use client";
-
-import { Circle } from "react-leaflet";
+import { Circle } from 'react-leaflet';
 
 interface MapCircleProps {
   center: [number, number];
@@ -11,5 +8,7 @@ interface MapCircleProps {
 }
 
 export default function MapCircle({ center, radius = 5000 }: MapCircleProps) {
-  return <Circle center={center} radius={radius} pathOptions={{ color: "blue", fillOpacity: 0.1 }} />;
+  return (
+    <Circle center={center} radius={radius} pathOptions={{ color: 'blue', fillOpacity: 0.1 }} />
+  );
 }
