@@ -360,7 +360,7 @@ export function ExperienceSection({ readOnly = false, fixerId }: ExperienceSecti
               </label>
               <input
                 type="date"
-                {...register('startDate', { required: true })}
+                {...register('startDate', { required: t('form.startDate.required') })}
                 className={`w-full rounded-lg border ${errors.startDate ? 'border-red-500' : 'border-gray-300'} focus:border-blue-500 focus:ring-blue-500`}
               />
               {errors.startDate && (

@@ -115,35 +115,33 @@ export default function AccountLoginSettings({ token = "" }: Props) {
           {t('linkedAccounts.title', { count: linkedMethods.length })}
         </h2>
 
-        <div className="space-y-3">
+        <div className='space-y-3'>
           {linkedMethods.map((method) => (
             <div
               key={method.provider}
-              className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition"
+              className='w-full flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition'
             >
-              <div className="flex items-center gap-3">
-                {/* Íconos con mismo estilo que los componentes de vinculación */}
+              {/* Icono */}
+              <div className='flex-shrink-0'>
                 {method.provider === 'google' && <FcGoogle size={30} />}
-                {method.provider === 'github' && <FaGithub size={30} className="text-gray-800" />}
-                {method.provider === 'email' && <Mail size={28} className="text-gray-800" />}
+                {method.provider === 'github' && <FaGithub size={30} className='text-gray-800' />}
+                {method.provider === 'email' && <Mail size={28} className='text-gray-800' />}
                 {method.provider === 'discord' && (
-                  <FaDiscord size={30} className="text-[#5865F2]" />
+                  <FaDiscord size={30} className='text-[#5865F2]' />
                 )}
+              </div>
 
-                <div className="flex flex-col">
-                  <span className="text-sm font-semibold text-gray-800 flex items-center gap-2">
-                    {method.name}
-                    <span className="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
-                      {t('status.active')}
-                    </span>
+              {/* Texto */}
+              <div className='flex-1 min-w-0 flex flex-col'>
+                <span className='text-sm font-semibold text-gray-800 flex items-center gap-2 truncate'>
+                  {method.name}
+                  <span className='text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full'>
+                    Activo
                   </span>
-                  {method.email && (
-                    <span className="text-xs text-gray-500 mt-0.5">{method.email}</span>
-                  )}
-                  {method.providerId && !method.email && (
-                    <span className="text-xs text-gray-500 mt-0.5">{method.providerId}</span>
-                  )}
-                </div>
+                </span>
+                {method.providerId && (
+                  <span className='text-xs text-gray-500 truncate'>{method.providerId}</span>
+                )}
               </div>
 
               {/* Botón de Desvincular con estilo coherente */}
@@ -174,12 +172,12 @@ export default function AccountLoginSettings({ token = "" }: Props) {
             {t('availableMethods.allLinked')}
           </p>
         ) : (
-          <div className="space-y-3">
+          <div className='space-y-3'>
             {availableMethods.map((method) => {
               if (method.provider === 'google') {
                 return (
                   <VincularGoogle
-                    key="google"
+                    key='google'
                     tokenUsuario={token}
                     onLinked={() => handleLink('google')}
                   />
@@ -187,17 +185,17 @@ export default function AccountLoginSettings({ token = "" }: Props) {
               }
 
               if (method.provider === 'github') {
-                return <VincularGithub key="github" onLinked={() => handleLink('github')} />;
+                return <VincularGithub key='github' onLinked={() => handleLink('github')} />;
               }
 
               if (method.provider === 'discord') {
-                return <VincularDiscord key="discord" onLinked={() => handleLink('discord')} />;
+                return <VincularDiscord key='discord' onLinked={() => handleLink('discord')} />;
               }
 
               if (method.provider === 'email') {
                 return (
                   <VincularCorreo
-                    key="email"
+                    key='email'
                     token={token}
                     onLinked={(client) => {
                       if (!client) return;

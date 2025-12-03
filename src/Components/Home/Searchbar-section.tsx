@@ -190,7 +190,7 @@ export function SearchBar({
   return (
     <div className={`flex-1 relative group ${className}`} ref={containerRef}>
       {/* Icono de búsqueda */}
-      <div className="absolute left-4 top-1/3 -translate-y-1/2 z-10">
+      <div className='absolute left-4 top-1/3 -translate-y-1/2 z-10'>
         <Search
           className={`w-5 h-5 transition-all duration-300 ${
             isFocused
@@ -207,17 +207,17 @@ export function SearchBar({
             onChange('');
             setPreviewValue(null);
           }}
-          className="absolute right-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 hover:text-gray-600 transition-colors"
-          aria-label="Limpiar búsqueda"
+          className='absolute right-4 top-1/2 -translate-y-1/2 z-10 text-gray-400 hover:text-gray-600 transition-colors'
+          aria-label='Limpiar búsqueda'
         >
-          <X className="w-4 h-4" />
+          <X className='w-4 h-4' />
         </button>
       )}
 
       {/* Input de búsqueda */}
       <input
         ref={inputRef}
-        type="text"
+        type='text'
         placeholder={placeholder}
         value={previewValue ?? value}
         onChange={handleInputChange}
@@ -258,7 +258,7 @@ export function SearchBar({
 
       {/* Línea de animación en focus */}
       {isFocused && !disabled && (
-        <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse" />
+        <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse' />
       )}
 
       {/* Dropdown unificado */}
@@ -290,11 +290,11 @@ export function SearchBar({
         onCancelDelete={() => setLongPressedItem(null)}
         maxVisibleHistory={5}
         maxVisibleSuggestions={5}
-        className="border-2 border-primary/20 rounded-2xl shadow-2xl backdrop-blur-md"
+        className='border-2 border-primary/20 rounded-2xl shadow-2xl backdrop-blur-md'
       />
       {/* Mensaje de error */}
-      <div className="min-h-5 mt-1">
-        {error && <p className="text-red-500 text-sm leading-4">{error}</p>}
+      <div className='min-h-5 mt-1'>
+        {error && <p className='text-red-500 text-sm leading-4'>{error}</p>}
       </div>
     </div>
   );

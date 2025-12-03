@@ -173,7 +173,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
   /* --------------------------- UI --------------------------- */
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
       {/* Nombre y Apellido */}
       <div className="flex gap-3">
         <div className="flex-1">
@@ -181,7 +181,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             {t('fields.nombre.label')}*
           </label>
           <input
-            name="nombre"
+            name='nombre'
             value={formData.nombre}
             onChange={handleChange}
             placeholder={t('fields.nombre.placeholder')}
@@ -191,7 +191,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
                 : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
-          {errors.nombre && <p className="text-red-500 text-xs mt-1">{errors.nombre}</p>}
+          {errors.nombre && <p className='text-red-500 text-xs mt-1'>{errors.nombre}</p>}
         </div>
 
         <div className="flex-1">
@@ -199,7 +199,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             {t('fields.apellido.label')}*
           </label>
           <input
-            name="apellido"
+            name='apellido'
             value={formData.apellido}
             onChange={handleChange}
             placeholder={t('fields.apellido.placeholder')}
@@ -209,7 +209,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
                 : 'border-gray-300 focus:ring-servineo-400'
             }`}
           />
-          {errors.apellido && <p className="text-red-500 text-xs mt-1">{errors.apellido}</p>}
+          {errors.apellido && <p className='text-red-500 text-xs mt-1'>{errors.apellido}</p>}
         </div>
       </div>
 
@@ -219,8 +219,8 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           {t('fields.email.label')}*
         </label>
         <input
-          name="email"
-          type="email"
+          name='email'
+          type='email'
           value={formData.email}
           onChange={handleChange}
           placeholder={t('fields.email.placeholder')}
@@ -230,7 +230,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
               : 'border-gray-300 focus:ring-servineo-400'
           }`}
         />
-        {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
+        {errors.email && <p className='text-red-500 text-xs mt-1'>{errors.email}</p>}
       </div>
 
       {/* Contraseña */}
@@ -240,7 +240,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
         </label>
         <div className="relative">
           <input
-            name="password"
+            name='password'
             type={mostrarPassword ? 'text' : 'password'}
             value={formData.password}
             onChange={handleChange}
@@ -252,7 +252,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             }`}
           />
           <button
-            type="button"
+            type='button'
             onClick={() => setMostrarPassword(!mostrarPassword)}
             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
             aria-label={mostrarPassword ? t('aria.hidePassword') : t('aria.showPassword')}
@@ -260,7 +260,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             {mostrarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
         </div>
-        {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+        {errors.password && <p className='text-red-500 text-xs mt-1'>{errors.password}</p>}
 
         <div className="relative">
           <button
@@ -286,9 +286,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
         <label className="block text-sm font-semibold text-gray-600 mb-2">
           {t('fields.confirmarPassword.label')}*
         </label>
-        <div className="relative">
+        <div className='relative'>
           <input
-            name="confirmarPassword"
+            name='confirmarPassword'
             type={mostrarConfirmarPassword ? 'text' : 'password'}
             value={formData.confirmarPassword}
             onChange={handleChange}
@@ -300,7 +300,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
             }`}
           />
           <button
-            type="button"
+            type='button'
             onClick={() => setMostrarConfirmarPassword(!mostrarConfirmarPassword)}
             className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
             aria-label={
@@ -311,13 +311,13 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           </button>
         </div>
         {errors.confirmarPassword && (
-          <p className="text-red-500 text-xs mt-1">{errors.confirmarPassword}</p>
+          <p className='text-red-500 text-xs mt-1'>{errors.confirmarPassword}</p>
         )}
       </div>
 
       {/* Submit */}
       <button
-        type="submit"
+        type='submit'
         disabled={cargando}
         className={`w-full flex items-center justify-center gap-2
       ${!captchaValid ? 'bg-primary/60 cursor-not-allowed' : 'bg-primary/90 hover:bg-primary'}

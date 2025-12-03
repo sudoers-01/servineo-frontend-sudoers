@@ -85,11 +85,11 @@ export const JobOffersView = memo<JobOffersViewProps>(
       return (
         <div className={className}>
           {showTitle && (
-            <h1 className="text-lg font-semibold mb-4 border-b border-gray-400 pb-2">
+            <h1 className='text-lg font-semibold mb-4 border-b border-gray-400 pb-2'>
               {t('searchResults')}
             </h1>
           )}
-          <p className="text-gray-500 text-center">{t('noResults')}</p>
+          <p className='text-gray-500 text-center'>{t('noResults')}</p>
         </div>
       );
     }
@@ -98,7 +98,7 @@ export const JobOffersView = memo<JobOffersViewProps>(
     if (effectiveViewMode === 'map') {
       return (
         <div className={className}>
-          <div className="h-[calc(100vh-250px)] rounded-lg overflow-hidden border border-gray-200 bg-white mb-8">
+          <div className='h-[calc(100vh-250px)] rounded-lg overflow-hidden border border-gray-200 bg-white mb-8'>
             <MapView offers={mockJobOffers} onOfferClick={handleMapOfferClick} />
           </div>
         </div>
@@ -109,7 +109,7 @@ export const JobOffersView = memo<JobOffersViewProps>(
     return (
       <div className={className}>
         {showTitle && (
-          <h1 className="text-lg font-semibold mb-4 border-b border-gray-400 pb-2">
+          <h1 className='text-lg font-semibold mb-4 border-b border-gray-400 pb-2'>
             {t('searchResults')}
           </h1>
         )}

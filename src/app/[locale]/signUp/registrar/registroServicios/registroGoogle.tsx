@@ -102,7 +102,7 @@ export default function RegistroGoogle({
   };
 
   return (
-    <div className="flex justify-center">
+    <div className='flex justify-center'>
       <GoogleButton
         onLoginSuccess={handleLoginSuccess}
         disabled={!captchaValid}

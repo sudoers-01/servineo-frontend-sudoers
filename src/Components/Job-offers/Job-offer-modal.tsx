@@ -5,7 +5,7 @@ import { X, MessageCircle, MapPin, Sparkles, Calendar, Tag, Share2 } from 'lucid
 import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers'; // ajusta si tu ruta es distinta
+import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
 
 interface Props {
   offer: JobOfferData | AdaptedJobOffer | null;
@@ -14,8 +14,8 @@ interface Props {
 }
 
 export function JobOfferModal({ offer, isOpen, onClose }: Props) {
-  const tCat = useTranslations?.('Categories');
-  const t = useTranslations?.('cardJob');
+  const tCat = useTranslations('Categories');
+  const t = useTranslations('JobOfferModal');
 
   if (!isOpen || !offer) return null;
 
@@ -31,10 +31,14 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
   const city = offer.city ?? '';
   const createdAt = (offer as any).createdAt ?? new Date();
   const tags: string[] = (offer as any).tags ?? [];
-  const category = isAdapted(offer) ? (offer.services?.[0] ?? 'General') : ((offer as any).category ?? 'General');
+  const category = isAdapted(offer)
+    ? (offer.services?.[0] ?? 'General')
+    : ((offer as any).category ?? 'General');
 
   // phone/whatsapp normalization
-  const phone = isAdapted(offer) ? ((offer as any).phone ?? '') : ((offer as any).contactPhone ?? '');
+  const phone = isAdapted(offer)
+    ? ((offer as any).phone ?? '')
+    : ((offer as any).contactPhone ?? '');
   const whatsappRaw = (offer as any).whatsapp ?? phone ?? '';
   const whatsappClean = (whatsappRaw || '').toString().replace(/\D/g, '');
 
@@ -59,7 +63,6 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
   // Calendar click: set sessionStorage for scheduling flow
   const handleClickCalendar = () => {
     if (typeof window === 'undefined') return;
-    // prefer fixerId / id depending on shape
     const fixerId = (offer as any).fixerId ?? (offer as any).id ?? (offer as any)._id ?? '';
     const requesterId = sessionStorage.getItem('requester_id') ?? '';
     sessionStorage.setItem('fixer_id', fixerId);
@@ -71,6 +74,11 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
     if (!whatsappClean) return;
     const url = `https://wa.me/${whatsappClean}`;
     window.open(url, '_blank');
+  };
+
+  const handleShare = () => {
+    const url = typeof window !== 'undefined' ? window.location.href : '';
+    navigator.clipboard?.writeText(url);
   };
 
   return (
@@ -87,7 +95,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             <Image src={images[0]} alt={title} fill className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <span className="text-lg font-medium">{t?.('noImage') ?? 'No image available'}</span>
+              <span className="text-lg font-medium">{t('noImage')}</span>
             </div>
           )}
 
@@ -96,7 +104,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-all"
-            aria-label="Cerrar modal"
+            aria-label={t('closeModal')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -104,7 +112,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <div className="absolute bottom-4 left-6 right-6 text-white">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-1 bg-primary/90 rounded-full text-xs font-semibold backdrop-blur-sm">
-                {tCat ? tCat(category) : category}
+                {tCat(category)}
               </span>
               <div className="flex items-center gap-1 text-xs font-medium bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm">
                 <MapPin className="w-3 h-3" />
@@ -112,7 +120,9 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
               </div>
             </div>
 
-            <h2 className="text-2xl sm:text-3xl font-bold leading-tight drop-shadow-md">{title}</h2>
+            <h2 className="text-2xl sm:text-3xl font-bold leading-tight drop-shadow-md">
+              {title}
+            </h2>
           </div>
         </div>
 
@@ -131,7 +141,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-gray-900 font-semibold">
               <Sparkles className="w-4 h-4 text-amber-500" />
-              <h3>Descripción</h3>
+              <h3>{t('description')}</h3>
             </div>
             <p className="text-gray-600 leading-relaxed text-sm sm:text-base">{description}</p>
           </div>
@@ -141,11 +151,14 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-gray-900 font-semibold">
                 <Tag className="w-4 h-4 text-blue-500" />
-                <h3>Servicios</h3>
+                <h3>{t('services')}</h3>
               </div>
               <div className="flex flex-wrap gap-2">
                 {servicesList.map((s, i) => (
-                  <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-lg font-medium">
+                  <span
+                    key={i}
+                    className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-lg font-medium"
+                  >
                     {s}
                   </span>
                 ))}
@@ -156,7 +169,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           {/* Gallery grid (if more images) */}
           {images.length > 1 && (
             <div className="space-y-3">
-              <h3 className="font-semibold text-gray-900">Galería</h3>
+              <h3 className="font-semibold text-gray-900">{t('gallery')}</h3>
               <div className="grid grid-cols-2 gap-2">
                 {images.slice(1).map((img, idx) => (
                   <div
@@ -165,7 +178,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
                   >
                     <Image
                       src={img}
-                      alt={`Gallery ${idx}`}
+                      alt={`${t('gallery')} ${idx}`}
                       fill
                       className="object-cover hover:scale-105 transition-transform duration-500"
                     />
@@ -177,7 +190,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
 
           {/* Contact & Meta */}
           <div className="pt-4 border-t border-border/50">
-            <h3 className="font-bold text-lg mb-4">Información de Contacto</h3>
+            <h3 className="font-bold text-lg mb-4">{t('contactInfo')}</h3>
             <div className="grid md:grid-cols-2 gap-3">
               <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
                 <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
@@ -194,7 +207,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
                   <MapPin className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-muted-foreground">Ciudad</p>
+                  <p className="text-xs text-muted-foreground">{t('city')}</p>
                   <p className="font-semibold">{city || '—'}</p>
                 </div>
               </div>
@@ -207,10 +220,14 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <button
             onClick={handleWhatsAppClick}
             disabled={!whatsappClean}
-            className={`flex-1 ${whatsappClean ? 'bg-primary hover:bg-primary/90 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'} py-3 rounded-xl font-semibold shadow-sm flex items-center justify-center gap-2 transition-all`}
+            className={`flex-1 ${
+              whatsappClean
+                ? 'bg-primary hover:bg-primary/90 text-white'
+                : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+            } py-3 rounded-xl font-semibold shadow-sm flex items-center justify-center gap-2 transition-all`}
           >
             <MessageCircle className="w-5 h-5" />
-            Contactar por WhatsApp
+            {t('contactWhatsApp')}
           </button>
 
           <Link
@@ -219,17 +236,13 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             className="flex-1 bg-white border border-gray-200 text-gray-800 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-sm transition-all"
           >
             <Calendar className="w-5 h-5" />
-            Agendar Cita
+            {t('scheduleAppointment')}
           </Link>
 
           <button
-            onClick={() => {
-              // share behavior: simple copy link (improve as needed)
-              const url = typeof window !== 'undefined' ? window.location.href : '';
-              navigator.clipboard?.writeText(url);
-            }}
+            onClick={handleShare}
             className="p-3 rounded-lg bg-white border border-gray-200 hover:shadow-sm"
-            title="Compartir"
+            title={t('share')}
           >
             <Share2 className="w-5 h-5" />
           </button>

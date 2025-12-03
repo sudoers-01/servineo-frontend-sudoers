@@ -41,7 +41,7 @@ export default function BecomeFixerPage() {
           </p>
         </header>
 
-        <section className="space-y-6">
+        <section className='space-y-6'>
           {!requester ? (
             <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">
               <h2 className="mb-3 text-center text-lg font-semibold">
@@ -67,7 +67,7 @@ export default function BecomeFixerPage() {
               />
             </div>
           ) : (
-            <div className="animate-fade-in">
+            <div className='animate-fade-in'>
               <FixerEnableWizard user={requester} />
             </div>
           )}

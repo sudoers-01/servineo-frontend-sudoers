@@ -151,21 +151,21 @@ function AdvancedSearchPage() {
       <main
         className={`pt-20 lg:pt-24 px-4 sm:px-6 md:px-12 lg:px-24 transition-all duration-300 ${isCalendarOpen ? 'pb-96' : 'pb-12'}`}
       >
-        <h1 className="text-center text-xl sm:text-2xl md:text-3xl font-bold mb-8 mt-4">
+        <h1 className='text-center text-xl sm:text-2xl md:text-3xl font-bold mb-8 mt-4'>
           {t('pageTitle')}
         </h1>
 
-        <div className="max-w-7xl mx-auto">
-          <div className="w-full sm:w-[700px] mx-auto">
-            <div className="mb-3">
+        <div className='max-w-7xl mx-auto'>
+          <div className='w-full sm:w-[700px] mx-auto'>
+            <div className='mb-3'>
               <ResultsCounter total={resultsCount ?? 0} loading={storeLoading ?? loading} />
             </div>
 
-            <div className="mb-4">
+            <div className='mb-4'>
               <InputOnlySearch onSearch={handleSearch} onValueChange={(v) => setSearchQuery(v)} />
             </div>
 
-            <div className="mb-6">
+            <div className='mb-6'>
               <SearchCheckboxes
                 titleOnly={titleOnly}
                 setTitleOnly={(val) => {
@@ -180,13 +180,13 @@ function AdvancedSearchPage() {
               />
             </div>
 
-            <div className="bg-[#2B6AE0] text-white px-4 py-2 text-sm font-bold mb-6 rounded-lg text-left">
+            <div className='bg-[#2B6AE0] text-white px-4 py-2 text-sm font-bold mb-6 rounded-lg text-left'>
               {t('selectableParams')}
             </div>
 
             {/* Filtro: Nombre de Fixer */}
-            <div className="mb-6">
-              <h3 className="text-base mb-2">{t('fixerName.label')}</h3>
+            <div className='mb-6'>
+              <h3 className='text-base mb-2'>{t('fixerName.label')}</h3>
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
                   ${
@@ -196,34 +196,34 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('fixer')}
               >
-                <span className="truncate">{t('fixerName.placeholder')}</span>
+                <span className='truncate'>{t('fixerName.placeholder')}</span>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns='http://www.w3.org/2000/svg'
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.fixer ? 'rotate-180' : 'rotate-0'}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                  strokeWidth='2'
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap='round' strokeLinejoin='round' d='M19 9l-7 7-7-7' />
                 </svg>
               </div>
 
               {openSections.fixer && (
-                <div className="bg-white border border-t-0 border-gray-300 p-4 rounded-b-lg shadow-sm">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div className='bg-white border border-t-0 border-gray-300 p-4 rounded-b-lg shadow-sm'>
+                  <div className='grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4'>
                     {FIXER_RANGES.flat().map((range) => (
                       <label
                         key={range.dbValue}
-                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors"
+                        className='flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors'
                       >
                         <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
+                          type='checkbox'
+                          className='w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]'
                           checked={selectedRanges.includes(range.dbValue)}
                           onChange={() => handleRangeChange(range.dbValue)}
                         />
-                        <span className="truncate">{range.label}</span>
+                        <span className='truncate'>{range.label}</span>
                       </label>
                     ))}
                   </div>
@@ -232,8 +232,8 @@ function AdvancedSearchPage() {
             </div>
 
             {/* Filtro: Ciudad */}
-            <div className="mb-6">
-              <h3 className="text-base mb-2">{t('city.label')}</h3>
+            <div className='mb-6'>
+              <h3 className='text-base mb-2'>{t('city.label')}</h3>
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
                   ${
@@ -243,34 +243,34 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('ciudad')}
               >
-                <span className="truncate">{t('city.placeholder')}</span>
+                <span className='truncate'>{t('city.placeholder')}</span>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns='http://www.w3.org/2000/svg'
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.ciudad ? 'rotate-180' : 'rotate-0'}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                  strokeWidth='2'
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap='round' strokeLinejoin='round' d='M19 9l-7 7-7-7' />
                 </svg>
               </div>
 
               {openSections.ciudad && (
-                <div className="bg-white border border-t-0 border-gray-300 p-4 rounded-b-lg shadow-sm max-h-[200px] overflow-y-auto">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className='bg-white border border-t-0 border-gray-300 p-4 rounded-b-lg shadow-sm max-h-[200px] overflow-y-auto'>
+                  <div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
                     {CITIES.map((city) => (
                       <label
                         key={city.dbValue}
-                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors"
+                        className='flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors'
                       >
                         <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]"
+                          type='checkbox'
+                          className='w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]'
                           checked={selectedCity.includes(city.dbValue)}
                           onChange={() => handleCityChange(city.dbValue)}
                         />
-                        <span className="truncate">{city.label}</span>
+                        <span className='truncate'>{city.label}</span>
                       </label>
                     ))}
                   </div>
@@ -279,8 +279,8 @@ function AdvancedSearchPage() {
             </div>
 
             {/* Filtro: Tipo de Trabajo */}
-            <div className="mb-6">
-              <h3 className="text-base mb-2">{t('jobType.label')}</h3>
+            <div className='mb-6'>
+              <h3 className='text-base mb-2'>{t('jobType.label')}</h3>
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
                   ${
@@ -290,34 +290,34 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('trabajo')}
               >
-                <span className="truncate">{t('jobType.placeholder')}</span>
+                <span className='truncate'>{t('jobType.placeholder')}</span>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns='http://www.w3.org/2000/svg'
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.trabajo ? 'rotate-180' : 'rotate-0'}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                  strokeWidth='2'
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap='round' strokeLinejoin='round' d='M19 9l-7 7-7-7' />
                 </svg>
               </div>
 
               {openSections.trabajo && (
-                <div className="bg-white border border-t-0 border-gray-300 p-4 rounded-b-lg shadow-sm max-h-[200px] overflow-y-auto">
-                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                <div className='bg-white border border-t-0 border-gray-300 p-4 rounded-b-lg shadow-sm max-h-[200px] overflow-y-auto'>
+                  <div className='grid grid-cols-2 sm:grid-cols-3 gap-4'>
                     {JOBS.map((job) => (
                       <label
                         key={job.dbValue}
-                        className="flex items-center gap-2 text-sm cursor-pointer hover:text-[#2a69df] transition-colors"
+                        className='flex items-center gap-2 text-sm cursor-pointer hover:text-[#2B31E0] transition-colors'
                       >
                         <input
-                          type="checkbox"
-                          className="w-4 h-4 cursor-pointer flex-shrink-0 text-[#2a69df] rounded border-gray-300 focus:ring-[#2B6AE0]"
+                          type='checkbox'
+                          className='w-4 h-4 cursor-pointer flex-shrink-0 text-[#2B6AE0] rounded border-gray-300 focus:ring-[#2B6AE0]'
                           checked={selectedJobs.includes(job.dbValue)}
                           onChange={() => handleJobChange(job.dbValue)}
                         />
-                        <span className="truncate">{job.label}</span>
+                        <span className='truncate'>{job.label}</span>
                       </label>
                     ))}
                   </div>
@@ -326,8 +326,8 @@ function AdvancedSearchPage() {
             </div>
 
             {/* Filtro: Etiquetas */}
-            <div className="mb-6">
-              <h3 className="text-base mb-2">{t('tags.label')}</h3>
+            <div className='mb-6'>
+              <h3 className='text-base mb-2'>{t('tags.label')}</h3>
 
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
@@ -338,21 +338,21 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('categorias')}
               >
-                <span className="truncate">{t('tags.placeholder')}</span>
+                <span className='truncate'>{t('tags.placeholder')}</span>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns='http://www.w3.org/2000/svg'
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.categorias ? 'rotate-180' : 'rotate-0'}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                  strokeWidth='2'
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap='round' strokeLinejoin='round' d='M19 9l-7 7-7-7' />
                 </svg>
               </div>
 
               {openSections.categorias && (
-                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg shadow-sm">
+                <div className='bg-white border border-t-0 border-gray-300 rounded-b-lg shadow-sm'>
                   <DropdownList
                     onFilterChange={handleDropdownChange}
                     clearSignal={clearSignal}
@@ -364,8 +364,8 @@ function AdvancedSearchPage() {
             </div>
 
             {/* Filtro: Precio */}
-            <div className="mb-6">
-              <h3 className="text-base mb-2">{t('price.label')}</h3>
+            <div className='mb-6'>
+              <h3 className='text-base mb-2'>{t('price.label')}</h3>
 
               <div
                 className={`bg-gray-100 text-gray-500 px-4 py-2 text-sm cursor-pointer hover:bg-gray-200 transition-colors flex justify-between items-center 
@@ -376,21 +376,21 @@ function AdvancedSearchPage() {
                   }`}
                 onClick={() => toggleSection('precio')}
               >
-                <span className="truncate">{t('price.placeholder')}</span>
+                <span className='truncate'>{t('price.placeholder')}</span>
                 <svg
-                  xmlns="http://www.w3.org/2000/svg"
+                  xmlns='http://www.w3.org/2000/svg'
                   className={`h-4 w-4 transform transition-transform duration-200 ${openSections.precio ? 'rotate-180' : 'rotate-0'}`}
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth="2"
+                  fill='none'
+                  viewBox='0 0 24 24'
+                  stroke='currentColor'
+                  strokeWidth='2'
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                  <path strokeLinecap='round' strokeLinejoin='round' d='M19 9l-7 7-7-7' />
                 </svg>
               </div>
 
               {openSections.precio && (
-                <div className="bg-white border border-t-0 border-gray-300 rounded-b-lg shadow-sm">
+                <div className='bg-white border border-t-0 border-gray-300 rounded-b-lg shadow-sm'>
                   <PriceRangeList
                     onFilterChange={handlePriceRangeChange}
                     clearSignal={clearSignal}
@@ -418,7 +418,7 @@ function AdvancedSearchPage() {
             </div>
 
             {/* Botones: Aplicar Búsqueda y Limpiar Datos */}
-            <div className="flex justify-center items-center gap-4 mt-8">
+            <div className='flex justify-center items-center gap-4 mt-8'>
               <ButtonAplicarBus
                 onClick={() => handleSearch(searchQuery)}
                 loading={storeLoading ?? loading}

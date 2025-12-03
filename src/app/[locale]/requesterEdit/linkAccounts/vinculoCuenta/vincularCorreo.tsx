@@ -1,31 +1,29 @@
 'use client';
 
-import { useState } from "react";
-import { Mail, Eye, EyeOff } from "lucide-react";
-import { toast } from "sonner";
-import { vincularCorreoContrasena, Client } from "@/app/redux/services/services/api";
-import { z } from "zod";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { Mail, Eye, EyeOff } from 'lucide-react';
+import { toast } from 'sonner';
+import { vincularCorreoContrasena, Client } from '@/app/redux/services/services/api';
+import { z } from 'zod';
+import { useTranslations } from 'next-intl';
 
-const schema = (t: (key: string) => string) => 
+const schema = (t: (key: string) => string) =>
   z
-  .object({
-    email: z
-      .string()
-      .email(t("errors.invalidEmail")),
-    password: z
-      .string()
-      .min(8, t("errors.passwordMinLength"))
-      .regex(/[A-Z]/, t("errors.passwordUppercase"))
-      .regex(/[a-z]/, t("errors.passwordLowercase"))
-      .regex(/[0-9]/, t("errors.passwordNumber"))
-      .regex(/[^A-Za-z0-9]/, t("errors.passwordSymbol")),
-    repeatPassword: z.string(),
-  })
-  .refine((data) => data.password === data.repeatPassword, {
-    message: t("errors.passwordsDoNotMatch"),
-    path: ["repeatPassword"],
-  });
+    .object({
+      email: z.string().email(t('errors.invalidEmail')),
+      password: z
+        .string()
+        .min(8, t('errors.passwordMinLength'))
+        .regex(/[A-Z]/, t('errors.passwordUppercase'))
+        .regex(/[a-z]/, t('errors.passwordLowercase'))
+        .regex(/[0-9]/, t('errors.passwordNumber'))
+        .regex(/[^A-Za-z0-9]/, t('errors.passwordSymbol')),
+      repeatPassword: z.string(),
+    })
+    .refine((data) => data.password === data.repeatPassword, {
+      message: t('errors.passwordsDoNotMatch'),
+      path: ['repeatPassword'],
+    });
 
 interface VincularCorreoProps {
   token: string;
@@ -105,12 +103,8 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
         <div className="flex items-center gap-3 align-middle">
           <Mail size={28} className="text-gray-800" />
           <div className="flex flex-col">
-            <span className="text-sm font-semibold text-gray-800">
-              {t('title')}
-            </span>
-            <span className="text-xs text-gray-500">
-              {t('subtitle')}
-            </span>
+            <span className="text-sm font-semibold text-gray-800">{t('title')}</span>
+            <span className="text-xs text-gray-500">{t('subtitle')}</span>
           </div>
         </div>
 
@@ -144,7 +138,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           {/* Contraseña */}
           <div className="relative mb-3">
             <input
-              type={mostrarPassword ? "text" : "password"}
+              type={mostrarPassword ? 'text' : 'password'}
               placeholder={t('form.password.placeholder')}
               value={password}
               onChange={(e) => {
@@ -168,7 +162,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           {/* Repetir contraseña */}
           <div className="relative mb-3">
             <input
-              type={mostrarRepeatPassword ? "text" : "password"}
+              type={mostrarRepeatPassword ? 'text' : 'password'}
               placeholder={t('form.repeatPassword.placeholder')}
               value={repeatPassword}
               onChange={(e) => {
@@ -201,9 +195,7 @@ export default function VincularCorreo({ token, onLinked }: VincularCorreoProps)
           </button>
 
           {success && (
-            <p className="mt-3 text-sm text-green-600 font-medium">
-              {t('success.message')}
-            </p>
+            <p className="mt-3 text-sm text-green-600 font-medium">{t('success.message')}</p>
           )}
         </div>
       )}

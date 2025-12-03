@@ -299,9 +299,6 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
         closeOnOverlayClick={!isSubmitting}
         className="rounded-2xl border-primary border-2"
       >
-        <Modal.Header className="text-center text-primary">
-          {editingOffer ? 'Editar Oferta' : 'Crear Oferta'}
-        </Modal.Header>
         <Modal.Body>
           <form id="offerForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             {/* Título */}
@@ -376,9 +373,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 defaultValue=""
               >
                 <option value="" disabled>
-                  {currentTags.length >= 5
-                    ? t('form.tags.limitReached')
-                    : t('form.tags.addTag')}
+                  {currentTags.length >= 5 ? t('form.tags.limitReached') : t('form.tags.addTag')}
                 </option>
                 {jobCategories.map((cat) => (
                   <option

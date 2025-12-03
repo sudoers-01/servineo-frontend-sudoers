@@ -14,10 +14,10 @@ import { useTranslations } from "next-intl";
 export default function Home() {
   const t = useTranslations('SignUp');
   return (
-    <div className="min-h-screen bg-white">
+    <div className='min-h-screen bg-white'>
       <HeroSection />
-      <section className="py-16 px-4 bg-white">
-        <div className="max-w-7xl mx-auto">
+      <section className='py-16 px-4 bg-white'>
+        <div className='max-w-7xl mx-auto'>
           <MapSection />
           <InspirationSection />
           <RecentOffersSection />

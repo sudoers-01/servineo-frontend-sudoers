@@ -71,7 +71,7 @@ export default async function RootLayout({ children, params }: Props) {
             <div className="text-black fixed bottom-7 left-7 z-9999">
               <BotonesFlotantes />
             </div>
-            <div className="">
+            <div className=''>
               <TopMenu />
             </div>
             {children}

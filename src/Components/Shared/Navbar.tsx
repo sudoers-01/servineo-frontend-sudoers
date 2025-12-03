@@ -27,9 +27,9 @@ export function Navbar() {
 
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-blue-100 shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
+    <nav className='sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-blue-100 shadow-sm'>
+      <div className='container mx-auto px-4'>
+        <div className='flex items-center justify-between h-16'>
           {/* Logo o nombre del sitio */}
           <Link 
             href={`/${locale}`}
@@ -39,7 +39,7 @@ export function Navbar() {
           </Link>
 
           {/* Navegación principal */}
-          <div className="flex items-center gap-1">
+          <div className='flex items-center gap-1'>
             <Link
               href={`/${locale}/job-offer-list`}
               onClick={handleJobOffersClick}
@@ -66,7 +66,7 @@ export function Navbar() {
             </Link>
 
             <Link
-              href="/become-fixer"
+              href='/become-fixer'
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
                 isActive('/become-fixer')
                   ? 'bg-primary text-white shadow-lg shadow-blue-500/30'

@@ -514,7 +514,7 @@ export default function JobOffersPage() {
 
   return (
     <>
-      <h1 className="mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-0 text-center text-xl sm:text-2xl md:text-3xl font-bold pt-3 px-3">
+      <h1 className='mt-20 sm:mt-24 md:mt-28 lg:mt-32 mb-0 text-center text-xl sm:text-2xl md:text-3xl font-bold pt-3 px-3'>
         {t('pageTitle')}
       </h1>
 
@@ -524,15 +524,15 @@ export default function JobOffersPage() {
           isDrawerOpen ? 'z-10' : 'z-50'
         }`}
       >
-        <div className="flex gap-2">
+        <div className='flex gap-2'>
           <FilterButton onClick={toggleDrawer} />
           <SearchBar onSearch={handleSearchSubmit} />
         </div>
 
         {!isLoading && Array.isArray(offers) && offers.length > 0 && (
-          <div className="flex flex-col gap-2 mt-2">
-            <div className="flex justify-between items-center gap-2">
-              <div className="w-auto">
+          <div className='flex flex-col gap-2 mt-2'>
+            <div className='flex justify-between items-center gap-2'>
+              <div className='w-auto'>
                 <SortCard value={sortBy} onSelect={handleSortChange} />
               </div>
 
@@ -540,19 +540,19 @@ export default function JobOffersPage() {
               <ViewModeToggle
                 viewMode={viewMode}
                 onChange={handleViewModeChange}
-                variant="mobile"
-                className="flex lg:hidden"
+                variant='mobile'
+                className='flex lg:hidden'
               />
 
               {/* Desktop view toggle */}
               <ViewModeToggle
                 viewMode={viewMode}
                 onChange={handleViewModeChange}
-                variant="desktop"
-                className="hidden lg:flex absolute left-1/2 transform -translate-x-1/2"
+                variant='desktop'
+                className='hidden lg:flex absolute left-1/2 transform -translate-x-1/2'
               />
 
-              <div className="hidden lg:block w-auto">
+              <div className='hidden lg:block w-auto'>
                 <PaginationSelector
                   registrosPorPagina={registrosPorPagina}
                   onChange={handleRegistrosPorPaginaChange}
@@ -560,7 +560,7 @@ export default function JobOffersPage() {
               </div>
             </div>
 
-            <div className="flex justify-center lg:hidden">
+            <div className='flex justify-center lg:hidden'>
               <PaginationSelector
                 registrosPorPagina={registrosPorPagina}
                 onChange={handleRegistrosPorPaginaChange}
@@ -570,13 +570,13 @@ export default function JobOffersPage() {
         )}
       </div>
 
-      <main className="px-4 sm:px-6 md:px-12 lg:px-24">
+      <main className='px-4 sm:px-6 md:px-12 lg:px-24'>
         {reduxError && (
-          <div className="text-red-500 text-center mb-4 p-3 bg-red-100 rounded">{t('error')}</div>
+          <div className='text-red-500 text-center mb-4 p-3 bg-red-100 rounded'>{reduxError}</div>
         )}
 
         {isLoading && (
-          <div className="text-blue-500 text-center mb-4 p-3 bg-blue-100 rounded">
+          <div className='text-blue-500 text-center mb-4 p-3 bg-blue-100 rounded'>
             {t('loading', { default: 'Cargando ofertas...' })}
           </div>
         )}
@@ -590,8 +590,8 @@ export default function JobOffersPage() {
         />
 
         {!isLoading && Array.isArray(offers) && offers.length > 0 && (
-          <div className="w-full max-w-5xl mx-auto mb-4">
-            <div className="flex justify-center">
+          <div className='w-full max-w-5xl mx-auto mb-4'>
+            <div className='flex justify-center'>
               <PaginationInfo
                 paginaActual={paginaActual}
                 registrosPorPagina={registrosPorPagina}
@@ -601,7 +601,7 @@ export default function JobOffersPage() {
           </div>
         )}
 
-        <div className="w-full max-w-5xl mx-auto">
+        <div className='w-full max-w-5xl mx-auto'>
           {!isLoading && Array.isArray(offers) && offers.length > 0 ? (
             <JobOffersView
               offers={processedOffers}
@@ -615,7 +615,7 @@ export default function JobOffersPage() {
         </div>
 
         {!isLoading && Array.isArray(offers) && offers.length > 0 && viewMode !== 'map' && (
-          <div className="mt-8 mb-24 flex justify-center">
+          <div className='mt-8 mb-24 flex justify-center'>
             <Paginacion
               paginaActual={paginaActual}
               registrosPorPagina={registrosPorPagina}

@@ -56,26 +56,26 @@ export default function SignUp() {
             <div className="flex-1 h-px bg-gray-300" />
           </div>
 
-          <div className="flex flex-col items-center space-y-3 mt-3">
+          <div className='flex flex-col items-center space-y-3 mt-3'>
             <RegistroGoogle onNotify={handleNotify} captchaValid={captchaValid} />
             <GithubButton onNotify={handleNotify} captchaValid={captchaValid} />
 
             <DiscordButton onNotify={handleNotify} captchaValid={captchaValid} />
           </div>
-          <div className="mt-5">
+          <div className='mt-5'>
             <ReCaptchaForm onVerified={(success) => setCaptchaValid(success)} />
           </div>
 
-          <div className="flex items-start mt-5 text-sm text-gray-600">
+          <div className='flex items-start mt-5 text-sm text-gray-600'>
             <input
-              type="checkbox"
-              className="mt-1 mr-2 accent-blue-500 focus:ring-2 focus:ring-blue-300 rounded"
+              type='checkbox'
+              className='mt-1 mr-2 accent-blue-500 focus:ring-2 focus:ring-blue-300 rounded'
             />
             <p>
                {t('terms.text')}{" "}
               <Link
-                href="signUp/registrar/Terminosycondiciones"
-                className="text-blue-500 hover:text-blue-400 font-semibold hover:underline transition"
+                href='signUp/registrar/Terminosycondiciones'
+                className='text-blue-500 hover:text-blue-400 font-semibold hover:underline transition'
               >
                 {t('terms.link')}
               </Link>
@@ -86,8 +86,8 @@ export default function SignUp() {
           <p className="mt-6 text-center text-gray-700 text-sm">
             {t('login.text')}{" "}
             <Link
-              href="login"
-              className="text-blue-500 hover:text-blue-400 font-semibold hover:underline transition"
+              href='login'
+              className='text-blue-500 hover:text-blue-400 font-semibold hover:underline transition'
             >
               {t('login.link')}
             </Link>

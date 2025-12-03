@@ -50,17 +50,17 @@ export default function FixerRegisterForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+    <form onSubmit={handleSubmit(handleFormSubmit)} className='space-y-4'>
       {/* NAME */}
       <div className="space-y-1">
         <label htmlFor="name" className="block text-sm font-medium text-gray-700">
           {t("fields.name.label")} <span className="text-red-500">*</span>
         </label>
         <Controller
-          name="name"
+          name='name'
           control={control}
           render={({ field }) => (
-            <div className="relative">
+            <div className='relative'>
               <input
                 {...field}
                 maxLength={30}
@@ -71,13 +71,13 @@ export default function FixerRegisterForm({
                   field.onChange(value);
                 }}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500">
+              <span className='absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-500'>
                 {field.value?.length || 0}/30
               </span>
             </div>
           )}
         />
-        {errors.name && <p className="text-xs text-red-600">{errors.name.message}</p>}
+        {errors.name && <p className='text-xs text-red-600'>{errors.name.message}</p>}
       </div>
 
       {/* EMAIL */}
@@ -86,7 +86,7 @@ export default function FixerRegisterForm({
           {t("fields.email.label")} <span className="text-red-500">*</span>
         </label>
         <Controller
-          name="email"
+          name='email'
           control={control}
           render={({ field }) => (
             <input
@@ -97,7 +97,7 @@ export default function FixerRegisterForm({
             />
           )}
         />
-        {errors.email && <p className="text-xs text-red-600">{errors.email.message}</p>}
+        {errors.email && <p className='text-xs text-red-600'>{errors.email.message}</p>}
       </div>
 
       {/* PHONE */}
@@ -106,10 +106,10 @@ export default function FixerRegisterForm({
           {t("fields.phone.label")} <span className="text-red-500">*</span>
         </label>
         <Controller
-          name="phone"
+          name='phone'
           control={control}
           render={({ field }) => (
-            <div className="relative">
+            <div className='relative'>
               <input
                 {...field}
                 type="tel"
@@ -126,14 +126,14 @@ export default function FixerRegisterForm({
             </div>
           )}
         />
-        {errors.phone && <p className="text-xs text-red-600">{errors.phone.message}</p>}
+        {errors.phone && <p className='text-xs text-red-600'>{errors.phone.message}</p>}
       </div>
 
       {/* BUTTON */}
       <button
-        type="submit"
+        type='submit'
         disabled={isSubmitting}
-        className="w-full rounded-full bg-primary text-white py-2.5 text-sm font-semibold"
+        className='w-full rounded-full bg-primary text-white py-2.5 text-sm font-semibold'
       >
         {isSubmitting ? t("buttons.submitting") : (submitButtonText || t("buttons.submit"))}
       </button>

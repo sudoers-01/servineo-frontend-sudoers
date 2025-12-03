@@ -214,7 +214,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
   if (isError) return <div className="text-center p-8 text-red-500">{t('loadError')}</div>;
 
   return (
-    <div className="space-y-6">
+    <div className='space-y-6'>
       <NotificationModal
         isOpen={notification.isOpen}
         onClose={() => setNotification((prev) => ({ ...prev, isOpen: false }))}
@@ -234,10 +234,10 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         </h2>
 
         {!readOnly && (
-          <div className="flex gap-2">
+          <div className='flex gap-2'>
             <PillButton
               onClick={() => handleOpenModal('video')}
-              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
             >
               <Video className="h-4 w-4" />
               {t('buttons.video')}
@@ -245,7 +245,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
 
             <PillButton
               onClick={() => handleOpenModal('image')}
-              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
             >
               <Plus className="h-4 w-4" />
               {t('buttons.image')}
@@ -259,7 +259,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
           <p className="text-gray-500">{t('emptyState')}</p>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
           {items.map((item) => {
             const isVideo = item.type === 'video';
             const videoId = getYouTubeId(item.youtubeUrl || undefined);
@@ -271,7 +271,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             return (
               <div
                 key={item._id}
-                className="group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-lg transition-all"
+                className='group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-lg transition-all'
               >
                 {/* BOTÓN DE ELIMINAR ARRIBA A LA DERECHA */}
                 {!readOnly && (
@@ -281,28 +281,28 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                       handleDeleteRequest(item._id!);
                     }}
                     disabled={isDeleting}
-                    className="absolute top-2 right-2 z-10 p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-all shadow-md hover:scale-110 opacity-0 group-hover:opacity-100"
-                    title="Eliminar"
+                    className='absolute top-2 right-2 z-10 p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-all shadow-md hover:scale-110 opacity-0 group-hover:opacity-100'
+                    title='Eliminar'
                   >
-                    <Trash2 className="h-4 w-4" />
+                    <Trash2 className='h-4 w-4' />
                   </button>
                 )}
 
                 {/* CONTENIDO DEL ITEM */}
                 {isVideo && videoId ? (
-                  <div className="absolute inset-0 w-full h-full">
+                  <div className='absolute inset-0 w-full h-full'>
                     <iframe
-                      className="w-full h-full rounded-2xl"
+                      className='w-full h-full rounded-2xl'
                       src={`https://www.youtube.com/embed/${videoId}`}
-                      title="YouTube video"
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      title='YouTube video'
+                      frameBorder='0'
+                      allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
                       allowFullScreen
                     />
                   </div>
                 ) : hasUrl ? (
                   <div
-                    className="absolute inset-0 cursor-pointer"
+                    className='absolute inset-0 cursor-pointer'
                     onClick={() => setFullscreenImage(item.url || null)}
                   >
                     {isDataUrl ? (
@@ -317,8 +317,8 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                         src={item.url!}
                         alt={t('image.alt')}
                         fill
-                        sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-                        className="object-cover transition-transform duration-500 group-hover:scale-110"
+                        sizes='(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw'
+                        className='object-cover transition-transform duration-500 group-hover:scale-110'
                         unoptimized={true}
                       />
                     ) : (
@@ -350,31 +350,31 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         title={modalType === 'image' ? t('modal.addImage') : t('modal.addVideo')}
         size="md"
       >
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <input type="hidden" value={modalType} {...register('type')} />
+        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+          <input type='hidden' value={modalType} {...register('type')} />
 
           {modalType === 'image' ? (
-            <div className="space-y-3">
+            <div className='space-y-3'>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
                   {t('form.imageUrl.label')}
                 </label>
-                <div className="relative">
+                <div className='relative'>
                   <input
                     {...register('url', { required: t('form.imageUrl.required') })}
                     className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10"
                     placeholder={t('form.imageUrl.placeholder')}
                   />
                   {isValidating && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                      <Loader2 className="animate-spin h-5 w-5 text-blue-600" />
+                    <div className='absolute right-3 top-1/2 -translate-y-1/2'>
+                      <Loader2 className='animate-spin h-5 w-5 text-blue-600' />
                     </div>
                   )}
                   {!isValidating && isValidUrl === true && (
-                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600" />
+                    <CheckCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600' />
                   )}
                   {!isValidating && isValidUrl === false && (
-                    <XCircle className="absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600" />
+                    <XCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600' />
                   )}
                 </div>
                 {isValidUrl === false && (
@@ -389,7 +389,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                   <p className="text-xs text-green-700 mb-2 font-semibold">{t('form.preview')}</p>
                   <div className="relative w-full h-48 rounded-lg overflow-hidden bg-white shadow-md">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" />
+                    <img src={previewUrl} alt='Preview' className='w-full h-full object-contain' />
                   </div>
                 </div>
               )}
@@ -420,18 +420,18 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             </>
           )}
 
-          <div className="flex justify-end gap-2 pt-4">
+          <div className='flex justify-end gap-2 pt-4'>
             <PillButton
-              type="button"
+              type='button'
               onClick={handleCloseModal}
-              className="bg-gray-100 text-gray-700 hover:bg-gray-200"
+              className='bg-gray-100 text-gray-700 hover:bg-gray-200'
             >
               {t('buttons.cancel')}
             </PillButton>
 
             <PillButton
-              type="submit"
-              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              type='submit'
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
               disabled={(modalType === 'image' && isValidUrl !== true) || isCreating}
             >
               {isCreating ? (
@@ -448,17 +448,17 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
 
       {fullscreenImage && (
         <div
-          className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fade-in"
+          className='fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-fade-in'
           onClick={() => setFullscreenImage(null)}
         >
           <button
             onClick={() => setFullscreenImage(null)}
-            className="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10"
+            className='absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors z-10'
           >
-            <X className="h-6 w-6" />
+            <X className='h-6 w-6' />
           </button>
           <div
-            className="relative w-full h-full max-w-6xl max-h-[90vh]"
+            className='relative w-full h-full max-w-6xl max-h-[90vh]'
             onClick={(e) => e.stopPropagation()}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}

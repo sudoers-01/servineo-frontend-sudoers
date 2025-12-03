@@ -14,7 +14,7 @@ const ClearButton: React.FC<ClearButtonProps> = ({ onClick, disabled = false, cl
 
   return (
     <button
-      type="button"
+      type='button'
       onClick={onClick}
       disabled={disabled}
       className={`${

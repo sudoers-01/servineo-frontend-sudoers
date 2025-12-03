@@ -168,8 +168,8 @@ export const JobOfferCard = memo<JobOfferCardProps>(
             );
           })
         ) : (
-          <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-400">
-            <span className="text-sm">No image</span>
+          <div className='w-full h-full bg-gray-100 flex items-center justify-center text-gray-400'>
+            <span className='text-sm'>No image</span>
           </div>
         )}
 
@@ -178,25 +178,25 @@ export const JobOfferCard = memo<JobOfferCardProps>(
           <>
             <button
               onClick={handlePrevImage}
-              className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
+              className='absolute left-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95'
             >
-              <ChevronLeft className="w-4 h-4 text-gray-800" />
+              <ChevronLeft className='w-4 h-4 text-gray-800' />
             </button>
             <button
               onClick={handleNextImage}
-              className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95"
+              className='absolute right-2 top-1/2 -translate-y-1/2 bg-white/90 hover:bg-white p-1.5 rounded-full shadow-lg transition-all z-20 hover:scale-110 active:scale-95'
             >
-              <ChevronRight className="w-4 h-4 text-gray-800" />
+              <ChevronRight className='w-4 h-4 text-gray-800' />
             </button>
           </>
         )}
 
         {/* Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+        <div className='absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300' />
 
         {/* Indicators */}
         {totalImages > 1 && (
-          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+          <div className='absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10'>
             {Array.from({ length: totalImages }).map((_, idx) => (
               <div
                 key={idx}
@@ -207,14 +207,14 @@ export const JobOfferCard = memo<JobOfferCardProps>(
         )}
 
         {/* Badges */}
-        <div className="absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-medium shadow-sm border border-primary">
-          <MapPin className="w-3.5 h-3.5 text-primary" />
-          <span className="text-gray-700">{offer.city}</span>
+        <div className='absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur-sm px-3 py-1.5 text-xs font-medium shadow-sm border border-primary'>
+          <MapPin className='w-3.5 h-3.5 text-primary' />
+          <span className='text-gray-700'>{offer.city}</span>
         </div>
 
         {viewMode === 'grid' && (
-          <div className="absolute right-3 top-3 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20">
-            <span className="text-primary">{offer.price?.toLocaleString()} Bs</span>
+          <div className='absolute right-3 top-3 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20'>
+            <span className='text-primary'>{offer.price?.toLocaleString()} Bs</span>
           </div>
         )}
       </div>
@@ -224,8 +224,8 @@ export const JobOfferCard = memo<JobOfferCardProps>(
     const renderContent = () => (
       <div className={`flex flex-col ${viewMode === 'grid' ? 'p-4' : 'flex-1 p-4 relative'}`}>
         {viewMode === 'list' && (
-          <div className="absolute right-4 top-4 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20">
-            <span className="text-primary">{offer.price?.toLocaleString()} Bs</span>
+          <div className='absolute right-4 top-4 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20'>
+            <span className='text-primary'>{offer.price?.toLocaleString()} Bs</span>
           </div>
         )}
 
@@ -235,23 +235,23 @@ export const JobOfferCard = memo<JobOfferCardProps>(
           >
             <SearchHighlight text={offer.title} searchQuery={searchQuery} />
           </h3>
-          <p className="mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed">
+          <p className='mt-1.5 text-sm text-gray-500 line-clamp-2 leading-relaxed'>
             <SearchHighlight text={offer.description} searchQuery={searchQuery} />
           </p>
         </div>
 
-        <div className="mt-2 flex items-center justify-between">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
+        <div className='mt-2 flex items-center justify-between'>
+          <div className='flex items-center gap-2 flex-wrap'>
+            <span className='inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary'>
               {offer.category ? tCat(offer.category) : ''}
             </span>
             {offer.tags && offer.tags.length > 0 && (
-              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
+              <span className='inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600'>
                 {offer.tags[0]}
               </span>
             )}
           </div>
-          <span className="text-xs text-gray-400 font-medium ml-auto">
+          <span className='text-xs text-gray-400 font-medium ml-auto'>
             {new Date(offer.createdAt).toLocaleDateString()}
           </span>
         </div>
@@ -262,23 +262,23 @@ export const JobOfferCard = memo<JobOfferCardProps>(
     const renderFooter = () => {
       if (isDashboardMode && !readOnly) {
         return (
-          <div className="border-t border-gray-100 p-3 flex items-center justify-end gap-2 bg-gray-50/50">
+          <div className='border-t border-gray-100 p-3 flex items-center justify-end gap-2 bg-gray-50/50'>
             {onEdit && (
               <button
                 onClick={handleEditClick}
-                className="p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
-                title="Editar"
+                className='p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors'
+                title='Editar'
               >
-                <Edit2 className="w-4 h-4" />
+                <Edit2 className='w-4 h-4' />
               </button>
             )}
             {onDelete && (
               <button
                 onClick={handleDeleteClick}
-                className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
-                title="Eliminar"
+                className='p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors'
+                title='Eliminar'
               >
-                <Trash2 className="w-4 h-4" />
+                <Trash2 className='w-4 h-4' />
               </button>
             )}
           </div>
@@ -288,35 +288,35 @@ export const JobOfferCard = memo<JobOfferCardProps>(
       if (readOnly) return null;
 
       return (
-        <div className="border-t border-gray-100 p-3 flex items-center justify-between gap-3">
+        <div className='border-t border-gray-100 p-3 flex items-center justify-between gap-3'>
           <div
-            className="flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+            className='flex items-center gap-3 flex-1 min-w-0 cursor-pointer hover:opacity-80 transition-opacity'
             onClick={handleFixerClick}
           >
-            <div className="w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100">
+            <div className='w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100'>
               {offer.fixerPhoto ? (
                 <Image
                   src={offer.fixerPhoto}
                   alt={offer.fixerName}
                   width={36}
                   height={36}
-                  className="w-full h-full object-cover"
+                  className='w-full h-full object-cover'
                 />
               ) : (
-                <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold">
+                <div className='w-full h-full bg-primary/10 flex items-center justify-center text-primary text-sm font-bold'>
                   {offer.fixerName?.[0]?.toUpperCase() || 'U'}
                 </div>
               )}
             </div>
 
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-medium text-gray-900 truncate">
+            <div className='min-w-0 flex-1'>
+              <p className='text-sm font-medium text-gray-900 truncate'>
                 {offer.fixerName || t('defaultUserName')}
               </p>
               {offer.rating && (
-                <div className="flex items-center gap-1 mt-0.5">
-                  <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                  <span className="text-xs font-semibold text-gray-600">
+                <div className='flex items-center gap-1 mt-0.5'>
+                  <Star className='w-3.5 h-3.5 fill-amber-400 text-amber-400' />
+                  <span className='text-xs font-semibold text-gray-600'>
                     {offer.rating.toFixed(1)}
                   </span>
                 </div>
@@ -326,11 +326,11 @@ export const JobOfferCard = memo<JobOfferCardProps>(
 
           <button
             onClick={handleWhatsAppClick}
-            className="flex-shrink-0 bg-primary hover:bg-primary/90 rounded-full transition-all shadow-sm flex items-center gap-2 px-3 py-2"
+            className='flex-shrink-0 bg-primary hover:bg-primary/90 rounded-full transition-all shadow-sm flex items-center gap-2 px-3 py-2'
             aria-label={t('contactWhatsApp')}
           >
-            <MessageCircle className="w-4 h-4 text-white" />
-            <span className="text-white text-xs font-medium">{offer.contactPhone}</span>
+            <MessageCircle className='w-4 h-4 text-white' />
+            <span className='text-white text-xs font-medium'>{offer.contactPhone}</span>
           </button>
         </div>
       );
@@ -348,7 +348,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
       >
         {viewMode === 'grid' ? (
           <>
-            <div onClick={handleCardClick} className="cursor-pointer contents">
+            <div onClick={handleCardClick} className='cursor-pointer contents'>
               {renderImageCarousel()}
               {renderContent()}
             </div>
@@ -356,12 +356,12 @@ export const JobOfferCard = memo<JobOfferCardProps>(
           </>
         ) : (
           <>
-            <div onClick={handleCardClick} className="cursor-pointer">
+            <div onClick={handleCardClick} className='cursor-pointer'>
               {renderImageCarousel()}
             </div>
             {/* Contenedor vertical para contenido + footer */}
-            <div className="flex flex-col flex-1">
-              <div onClick={handleCardClick} className="cursor-pointer flex-1">
+            <div className='flex flex-col flex-1'>
+              <div onClick={handleCardClick} className='cursor-pointer flex-1'>
                 {renderContent()}
               </div>
               {renderFooter()}
