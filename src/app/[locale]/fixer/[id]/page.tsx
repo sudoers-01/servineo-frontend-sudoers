@@ -20,7 +20,7 @@ export default function FixerProfilePage() {
   const fixerId = params?.id;
   const [activeTab, setActiveTab] = useState('resumen');
   const fixerData = user?._id === fixerId ? user : null;
-  
+
   return (
     <div className='min-h-screen bg-gray-50 pb-12'>
       {/* Profile Header */}
@@ -59,7 +59,9 @@ export default function FixerProfilePage() {
                   <h1 className='text-3xl font-bold text-gray-900'>
                     {user?.name || 'Cargando...'}
                   </h1>
-                  <p className='text-lg text-gray-600 font-medium'>{user?.servicios?.join(', ') || 'Servicios Generales'}</p>
+                  <p className='text-lg text-gray-600 font-medium'>
+                    {user?.servicios?.join(', ') || 'Servicios Generales'}
+                  </p>
 
                   <div className='flex items-center gap-4 mt-2 text-sm text-gray-500'>
                     <div className='flex items-center gap-1'>
@@ -69,7 +71,11 @@ export default function FixerProfilePage() {
                     </div>
                     <div className='flex items-center gap-1'>
                       <MapPin className='w-4 h-4' />
-                      <span>{user?.ubicacion?.departamento || user?.workLocation?.direccion || 'Bolivia'}</span>
+                      <span>
+                        {user?.ubicacion?.departamento ||
+                          user?.workLocation?.direccion ||
+                          'Bolivia'}
+                      </span>
                     </div>
                   </div>
 
@@ -81,11 +87,14 @@ export default function FixerProfilePage() {
                 </div>
 
                 <div className='flex gap-3'>
-                  <PillButton 
+                  <PillButton
                     className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
                     onClick={() => {
                       if (fixerData?.telefono) {
-                        window.open(`https://wa.me/${fixerData.telefono.replace(/\s+/g, '')}`, '_blank');
+                        window.open(
+                          `https://wa.me/${fixerData.telefono.replace(/\s+/g, '')}`,
+                          '_blank',
+                        );
                       }
                     }}
                   >
@@ -135,7 +144,6 @@ export default function FixerProfilePage() {
         </div>
       </div>
 
-      
       <div className='container mx-auto px-4 py-8'>
         <Tabs value={activeTab} onValueChange={setActiveTab} className='space-y-6'>
           <TabsList className='bg-white p-1 rounded-xl border shadow-sm inline-flex'>
@@ -164,11 +172,11 @@ export default function FixerProfilePage() {
           </TabsContent>
 
           <TabsContent value='ofertas'>
-           <JobOffersSection readOnly />
+            <JobOffersSection readOnly />
           </TabsContent>
 
           <TabsContent value='experiencia'>
-            <ExperienceSection fixerId={fixerId as string} readOnly  />
+            <ExperienceSection fixerId={fixerId as string} readOnly />
           </TabsContent>
 
           <TabsContent value='certificaciones'>
@@ -178,7 +186,7 @@ export default function FixerProfilePage() {
           <TabsContent value='portafolio'>
             <PortfolioSection fixerId={fixerId as string} readOnly />
           </TabsContent>
-          
+
           <TabsContent value='estadisticas'>
             <EstadisticasTrabajos />
           </TabsContent>

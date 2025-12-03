@@ -112,7 +112,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
         }
       },
       // CORRECCIÓN: Se agregó 'offer' aquí porque se usa dentro del console.log
-      [offer, router], 
+      [offer, router],
     );
 
     const handleCardClick = useCallback(() => {
@@ -299,7 +299,6 @@ export const JobOfferCard = memo<JobOfferCardProps>(
             onClick={handleFixerClick}
           >
             <div className='w-9 h-9 rounded-full overflow-hidden flex-shrink-0 ring-2 ring-gray-100'>
-   
               {offer.fixerPhoto ? (
                 <Image
                   src={offer.fixerPhoto}

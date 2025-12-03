@@ -49,7 +49,7 @@ export const userApi = baseApi.injectEndpoints({
       query: (id) => `/user/${id}`,
       providesTags: ['User'],
     }),
-        updateLocation: builder.mutation<
+    updateLocation: builder.mutation<
       { success: boolean; user: IUser },
       {
         id: string;

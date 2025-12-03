@@ -32,7 +32,7 @@ const nextConfig: NextConfig = {
         hostname: 'picsum.photos',
         pathname: '/**',
       },
-       {
+      {
         protocol: 'https',
         hostname: 'drive.google.com',
         pathname: '/thumbnail',

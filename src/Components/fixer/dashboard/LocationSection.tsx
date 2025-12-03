@@ -33,12 +33,16 @@ declare global {
   }
 }
 
-export function LocationSection({ readOnly = false, fixerId, currentLocation }: LocationSectionProps) {
+export function LocationSection({
+  readOnly = false,
+  fixerId,
+  currentLocation,
+}: LocationSectionProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const [mapLoaded, setMapLoaded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<Location | null>(
-    currentLocation || null
+    currentLocation || null,
   );
   const [manualLat, setManualLat] = useState(currentLocation?.lat.toString() || '');
   const [manualLng, setManualLng] = useState(currentLocation?.lng.toString() || '');
@@ -59,7 +63,7 @@ export function LocationSection({ readOnly = false, fixerId, currentLocation }: 
       east: -65.8,
       west: -66.4,
     }),
-    []
+    [],
   );
 
   // Cargar Leaflet CSS y JS
@@ -91,7 +95,7 @@ export function LocationSection({ readOnly = false, fixerId, currentLocation }: 
         lng <= COCHABAMBA_BOUNDS.east
       );
     },
-    [COCHABAMBA_BOUNDS]
+    [COCHABAMBA_BOUNDS],
   );
 
   // Inicializar mapa
@@ -100,7 +104,7 @@ export function LocationSection({ readOnly = false, fixerId, currentLocation }: 
 
     const map: LeafletMap = window.L.map(mapRef.current).setView(
       selectedLocation ? [selectedLocation.lat, selectedLocation.lng] : [-17.3935, -66.157],
-      selectedLocation ? 15 : 13
+      selectedLocation ? 15 : 13,
     );
 
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -110,7 +114,7 @@ export function LocationSection({ readOnly = false, fixerId, currentLocation }: 
 
     const bounds = window.L.latLngBounds(
       window.L.latLng(COCHABAMBA_BOUNDS.south, COCHABAMBA_BOUNDS.west),
-      window.L.latLng(COCHABAMBA_BOUNDS.north, COCHABAMBA_BOUNDS.east)
+      window.L.latLng(COCHABAMBA_BOUNDS.north, COCHABAMBA_BOUNDS.east),
     );
     map.setMaxBounds(bounds);
     map.on('drag', () => {
@@ -269,8 +273,8 @@ export function LocationSection({ readOnly = false, fixerId, currentLocation }: 
           <div className='rounded-lg bg-red-50 p-3 border border-red-200'>
             <p className='text-sm text-red-800 font-medium'>Ubicación fuera de Cochabamba</p>
             <p className='text-xs text-red-700 mt-1'>
-              La ubicación seleccionada está fuera de la región de Cochabamba. Por favor,
-              selecciona una ubicación dentro del departamento.
+              La ubicación seleccionada está fuera de la región de Cochabamba. Por favor, selecciona
+              una ubicación dentro del departamento.
             </p>
           </div>
         )}

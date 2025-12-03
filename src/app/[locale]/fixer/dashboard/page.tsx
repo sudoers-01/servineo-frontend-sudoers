@@ -44,7 +44,7 @@ type Tab = 'offers' | 'certs' | 'experience' | 'portfolio' | 'location' | 'estad
 export default function FixerDashboardPage() {
   const { user: reduxUser } = useAppSelector((state) => state.user);
   const user = reduxUser;
-  
+
   const [activeTab, setActiveTab] = useState<Tab>('offers');
 
   // Estado para edición de descripción
@@ -95,8 +95,7 @@ export default function FixerDashboardPage() {
   };
 
   // Obtener ubicación
-  const location =
-    user.ubicacion?.departamento || user.workLocation?.direccion || 'Bolivia';
+  const location = user.ubicacion?.departamento || user.workLocation?.direccion || 'Bolivia';
 
   return (
     <div className='container mx-auto max-w-6xl p-4 space-y-6'>
@@ -174,9 +173,7 @@ export default function FixerDashboardPage() {
                   maxLength={255}
                 />
                 <div className='flex justify-between items-center mt-1'>
-                  {descriptionError && (
-                    <p className='text-red-500 text-xs'>{descriptionError}</p>
-                  )}
+                  {descriptionError && <p className='text-red-500 text-xs'>{descriptionError}</p>}
                   <p
                     className={`text-xs ml-auto ${descriptionValue.length > 255 ? 'text-red-500' : 'text-gray-400'}`}
                   >
@@ -319,7 +316,6 @@ export default function FixerDashboardPage() {
                   : 'text-gray-600 hover:bg-gray-50'
               }`}
             >
-            
               <MapPin className='h-5 w-5' />
               Ubicación
             </button>
@@ -351,7 +347,7 @@ export default function FixerDashboardPage() {
                 currentLocation={{
                   lat: user.workLocation?.lat ?? 0,
                   lng: user.workLocation?.lng ?? 0,
-                  direccion: user.workLocation?.direccion || ''
+                  direccion: user.workLocation?.direccion || '',
                 }}
               />
             )}
