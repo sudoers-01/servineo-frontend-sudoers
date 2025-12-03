@@ -8,6 +8,7 @@ interface NoResultsProps {
 }
 
 export default function NoResults({ show, position }: NoResultsProps) {
+  //const map = useMap();
 
   if (!show) return null;
 

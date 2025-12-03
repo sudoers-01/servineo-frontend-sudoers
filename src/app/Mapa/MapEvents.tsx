@@ -13,6 +13,7 @@ interface MapEventsProps {
 export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
   const [isOnline, setIsOnline] = useState(true);
   const [showMessage, setShowMessage] = useState(false);
+
   const map = useMapEvents({});
 
   const showOfflineMessage = () => {
@@ -20,7 +21,7 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
     setTimeout(() => setShowMessage(false), 3000);
   };
 
-  
+  // Escuchar cambios de conexión
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
@@ -34,7 +35,7 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
     };
   }, []);
 
-  
+  // Habilitar/deshabilitar interacción del mapa según conexión
   useEffect(() => {
     if (!map) return;
 
@@ -55,7 +56,7 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
     }
   }, [isOnline, map]);
 
-  // 🔹 Bloquear botones + y - del zoom
+  // Bloquear botones + y - del zoom cuando no hay conexión
   useEffect(() => {
     if (!map) return;
 
@@ -73,16 +74,14 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
     };
   }, [isOnline, map]);
 
-  // 🔹 Manejar eventos del mapa
+  // Manejar eventos del mapa
   useMapEvents({
     click: (e) => {
       if (!isOnline) {
         showOfflineMessage();
         return;
       }
-      if (onClick) {
-        onClick([e.latlng.lat, e.latlng.lng]);
-      }
+      if (onClick) onClick([e.latlng.lat, e.latlng.lng]);
     },
     moveend: (e) => {
       if (!isOnline) {
@@ -90,9 +89,7 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
         e.target.setView(e.target.getCenter()); // mantener vista
         return;
       }
-      if (onMove) {
-        onMove(e.target.getCenter());
-      }
+      if (onMove) onMove(e.target.getCenter());
     },
     zoomend: (e) => {
       if (!isOnline) {
@@ -100,9 +97,7 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
         e.target.setZoom(e.target.getZoom()); // mantener zoom
         return;
       }
-      if (onZoom) {
-        onZoom(e.target.getZoom());
-      }
+      if (onZoom) onZoom(e.target.getZoom());
     },
   });
 
@@ -113,7 +108,7 @@ export default function MapEvents({ onClick, onMove, onZoom }: MapEventsProps) {
           className="absolute top-4 left-1/2 -translate-x-1/2 z-[1000] text-white font-bold px-6 py-3 rounded-xl shadow-lg text-center transition-all duration-700 ease-in-out"
           style={{
             pointerEvents: "none",
-            backgroundColor: "#E74C3C", // rojo suave
+            backgroundColor: "#E74C3C",
             transform: showMessage ? "translateY(0)" : "translateY(-20px)",
             opacity: showMessage ? 1 : 0,
           }}
