@@ -6,11 +6,11 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import type { StaticImageData } from 'next/image';
 
-import carpinteriaImg from '../../../public/img/carpinteria.png';
-import electricistaImg from '../../../public/img/electricista.png';
-import limpiezaImg from '../../../public/img/limpieza.png';
-import pinturaImg from '../../../public/img/pintura.png';
-import plomeriaImg from '../../../public/img/plomeria.png';
+import carpinteriaImg from '../../../public/es/img/carpinteria.png';
+import electricistaImg from '../../../public/es/img/electricista.png';
+import limpiezaImg from '../../../public/es/img/limpieza.png';
+import pinturaImg from '../../../public/es/img/pintura.png';
+import plomeriaImg from '../../../public/es/img/plomeria.png';
 import fallbackImg from '../../../public/fallback-image.svg';
 
 interface Slide {

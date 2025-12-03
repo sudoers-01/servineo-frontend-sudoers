@@ -46,7 +46,7 @@ export default function WhyServineoPage() {
       title: 'Descubre quiénes están cerca de ti',
       description:
         'Explora tu ciudad desde el mapa interactivo de Servineo y descubre a los fixers disponibles cerca de ti. Podrás ver fácilmente su ubicación y acceder a su información con un solo clic. Así, Servineo te conecta de forma rápida y sencilla con los profesionales que realmente están a tu alcance.',
-      image: '/images/banner1.jpg',
+      image: '/es/img/banner1.jpg',
       alt: 'Mapa de la ciudad con marcadores que muestran fixers cerca del usuario',
       icon: (
         <MapPin className="inline-block w-6 h-6 mr-2 text-[var(--primary)]" aria-hidden="true" />
@@ -58,7 +58,7 @@ export default function WhyServineoPage() {
       title: 'Conócelos en detalle',
       description:
         'En Servineo, cada fixer cuenta con un perfil completo que muestra su experiencia, especialidades y disponibilidad. Explora sus trayectorias, conoce sus habilidades y elige con confianza al profesional que mejor se adapte a tus necesidades. Todo lo que necesitas saber para encontrar al fixer ideal, en un solo lugar.',
-      image: '/images/banner2.jpg',
+      image: '/es/img/banner2.jpg',
       alt: 'Perfil de un profesional mostrando su información y experiencia',
       icon: <User className="inline-block w-6 h-6 mr-2 text-[var(--primary)]" aria-hidden="true" />,
     },
@@ -67,7 +67,7 @@ export default function WhyServineoPage() {
       title: 'Agenda tu cita con facilidad',
       description:
         'Con Servineo, agendar un servicio es rápido y sin complicaciones. Elige al profesional que necesites, coordina los detalles por WhatsApp y confirma tu cita en el horario que prefieras. Todo desde una plataforma práctica que conecta fácilmente a quienes ofrecen y quienes buscan un servicio.',
-      image: '/images/banner3.jpg',
+      image: '/es/img/banner3.jpg',
       alt: 'Persona agendando una cita de servicio desde su dispositivo',
       icon: (
         <Calendar className="inline-block w-6 h-6 mr-2 text-[var(--primary)]" aria-hidden="true" />
@@ -79,7 +79,7 @@ export default function WhyServineoPage() {
       title: 'Confía en la calidad y seguridad del servicio',
       description:
         'En Servineo, la confianza es lo primero. Por eso, cada fixer pasa por un proceso de registro que valida su compromiso, responsabilidad y cumplimiento de nuestras políticas. Así, garantizamos que cada servicio dentro de la plataforma sea seguro, transparente y de calidad, brindándote la tranquilidad de contratar a profesionales en los que realmente puedes confiar.',
-      image: '/images/banner4.jpg',
+      image: '/es/img/banner4.jpg',
       alt: 'Profesional estrechando la mano de un cliente en señal de confianza',
       icon: (
         <ShieldCheck
