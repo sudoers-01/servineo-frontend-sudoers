@@ -89,33 +89,33 @@ export default function ForoDeUsuariosPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="container mx-auto px-4 max-w-5xl">
-        <div className="bg-white rounded-xl shadow-lg p-8 mb-8 relative">
+    <div className='min-h-screen bg-gray-50 py-8'>
+      <div className='container mx-auto px-4 max-w-5xl'>
+        <div className='bg-white rounded-xl shadow-lg p-8 mb-8 relative'>
           <button
             onClick={() => router.back()}
-            className="absolute top-6 left-6 text-2xl text-gray-600 hover:text-gray-800 transition"
-            aria-label="Volver atrás"
+            className='absolute top-6 left-6 text-2xl text-gray-600 hover:text-gray-800 transition'
+            aria-label='Volver atrás'
           >
             ←
           </button>
 
-          <h1 className="text-4xl font-bold text-gray-900 mb-3 text-center">Foro de Usuarios</h1>
-          <p className="text-gray-600 text-lg text-center">
+          <h1 className='text-4xl font-bold text-gray-900 mb-3 text-center'>Foro de Usuarios</h1>
+          <p className='text-gray-600 text-lg text-center'>
             Comparte tus dudas y ayuda a otros usuarios.
           </p>
         </div>
 
-        <div className="bg-white rounded-xl shadow-lg p-8">
+        <div className='bg-white rounded-xl shadow-lg p-8'>
           {/* barra de búsqueda + filtros + botón crear */}
-          <section className="mb-4">
-            <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+          <section className='mb-4'>
+            <div className='flex flex-col sm:flex-row gap-3 items-stretch'>
               <FORUMSearch query={query} onChange={setQuery} />
 
               <button
-                type="button"
+                type='button'
                 onClick={() => setShowCreateForm((v) => !v)}
-                className="px-4 py-2 border border-blue-600 rounded-md text-sm bg-blue-600 text-white hover:bg-blue-700 transition"
+                className='px-4 py-2 border border-blue-600 rounded-md text-sm bg-blue-600 text-white hover:bg-blue-700 transition'
               >
                 {showCreateForm ? 'Cerrar formulario' : 'Crear publicación'}
               </button>
@@ -142,7 +142,7 @@ export default function ForoDeUsuariosPage() {
             onSubmit={handleCreate}
           />
 
-          <hr className="mb-6" />
+          <hr className='mb-6' />
 
           {/* listado */}
           <FORUMThreadList

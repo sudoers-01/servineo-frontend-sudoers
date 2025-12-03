@@ -110,7 +110,7 @@ export default function GithubButton({ onNotify, captchaValid }: GithubButtonPro
         ${!captchaValid ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-100'}
       `}
     >
-      <FaGithub size={24} className="text-black" />
+      <FaGithub size={24} className='text-black' />
       {loading ? 'Cargando...' : 'Continuar con GitHub'}
     </button>
   );

@@ -315,44 +315,44 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
   const isLoading = loading || cancelLoading;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4">
-      <div className="bg-white rounded-lg w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col">
+    <div className='fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-2 sm:p-4'>
+      <div className='bg-white rounded-lg w-full max-w-md mx-auto max-h-[95vh] sm:max-h-[90vh] overflow-hidden flex flex-col'>
         {/* Header */}
-        <div className=" h-12 px-3 sm:px-4 flex items-center justify-between flex-shrink-0">
-          <div className="w-6"></div>
-          <h3 className="text-white font-semibold text-base sm:text-lg text-center">
+        <div className=' h-12 px-3 sm:px-4 flex items-center justify-between flex-shrink-0'>
+          <div className='w-6'></div>
+          <h3 className='text-white font-semibold text-base sm:text-lg text-center'>
             Cancelar Citas por Día
           </h3>
           <button
             onClick={onClose}
-            className="text-white hover:text-gray-200 transition-colors"
+            className='text-white hover:text-gray-200 transition-colors'
             disabled={isLoading}
           >
             <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
+              xmlns='http://www.w3.org/2000/svg'
+              fill='none'
+              viewBox='0 0 24 24'
               strokeWidth={2.5}
-              stroke="currentColor"
-              className="w-5 h-5 sm:w-6 sm:h-6"
+              stroke='currentColor'
+              className='w-5 h-5 sm:w-6 sm:h-6'
             >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap='round' strokeLinejoin='round' d='M6 18L18 6M6 6l12 12' />
             </svg>
           </button>
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden flex flex-col">
+        <div className='flex-1 overflow-hidden flex flex-col'>
           {/* Messages */}
           {(error || successMessage) && (
-            <div className="flex-shrink-0 px-3 sm:px-4 pt-3 sm:pt-4">
+            <div className='flex-shrink-0 px-3 sm:px-4 pt-3 sm:pt-4'>
               {error && (
-                <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded text-sm sm:text-base">
+                <div className='bg-red-100 border border-red-400 text-red-700 px-3 py-2 sm:px-4 sm:py-3 rounded text-sm sm:text-base'>
                   {error}
                 </div>
               )}
               {successMessage && (
-                <div className="bg-green-100 border border-green-400 text-green-700 px-3 py-2 sm:px-4 sm:py-3 rounded text-sm sm:text-base">
+                <div className='bg-green-100 border border-green-400 text-green-700 px-3 py-2 sm:px-4 sm:py-3 rounded text-sm sm:text-base'>
                   {successMessage}
                 </div>
               )}
@@ -360,32 +360,32 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
           )}
 
           {/* Month Navigation */}
-          <div className="flex items-center justify-between sm:justify-center sm:space-x-4 py-3 sm:py-4 flex-shrink-0 px-3 sm:px-0">
+          <div className='flex items-center justify-between sm:justify-center sm:space-x-4 py-3 sm:py-4 flex-shrink-0 px-3 sm:px-0'>
             <button
               onClick={() => changeMonth('prev')}
-              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 p-1"
+              className='text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 p-1'
               disabled={fetchLoading || isLoading}
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
                 strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
+                stroke='currentColor'
+                className='w-5 h-5'
               >
                 <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M15.75 19.5L8.25 12l7.5-7.5"
+                  strokeLinecap='round'
+                  strokeLinejoin='round'
+                  d='M15.75 19.5L8.25 12l7.5-7.5'
                 />
               </svg>
             </button>
 
-            <h2 className="text-black text-lg sm:text-xl text-center font-medium">
+            <h2 className='text-black text-lg sm:text-xl text-center font-medium'>
               {months[currentMonth]} {currentYear}
               {fetchLoading && (
-                <span className="text-sm font-normal block sm:inline sm:ml-2 mt-1 sm:mt-0">
+                <span className='text-sm font-normal block sm:inline sm:ml-2 mt-1 sm:mt-0'>
                   (Cargando...)
                 </span>
               )}
@@ -393,40 +393,40 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
 
             <button
               onClick={() => changeMonth('next')}
-              className="text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 p-1"
+              className='text-gray-600 hover:text-gray-800 transition-colors disabled:opacity-50 p-1'
               disabled={fetchLoading || isLoading}
             >
               <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
+                xmlns='http://www.w3.org/2000/svg'
+                fill='none'
+                viewBox='0 0 24 24'
                 strokeWidth={2}
-                stroke="currentColor"
-                className="w-5 h-5"
+                stroke='currentColor'
+                className='w-5 h-5'
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                <path strokeLinecap='round' strokeLinejoin='round' d='M8.25 4.5l7.5 7.5-7.5 7.5' />
               </svg>
             </button>
           </div>
 
           {/* Days List */}
-          <div className="px-3 sm:px-6 pb-3 sm:pb-4 flex-1 overflow-y-auto">
+          <div className='px-3 sm:px-6 pb-3 sm:pb-4 flex-1 overflow-y-auto'>
             {fetchLoading ? (
-              <div className="text-center py-6 sm:py-8">
-                <div className="inline-block animate-spin rounded-full h-7 w-7 sm:h-8 sm:w-8 border-b-2 border-blue-600"></div>
-                <p className="mt-2 text-gray-600 text-sm sm:text-base">Cargando citas...</p>
+              <div className='text-center py-6 sm:py-8'>
+                <div className='inline-block animate-spin rounded-full h-7 w-7 sm:h-8 sm:w-8 border-b-2 border-blue-600'></div>
+                <p className='mt-2 text-gray-600 text-sm sm:text-base'>Cargando citas...</p>
               </div>
             ) : daysWithAppointments.length === 0 ? (
-              <div className="text-center py-6 sm:py-8 text-gray-500 text-sm sm:text-base">
+              <div className='text-center py-6 sm:py-8 text-gray-500 text-sm sm:text-base'>
                 No hay citas programadas para {months[currentMonth]} {currentYear}
               </div>
             ) : (
               <>
-                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 text-center">
+                <p className='text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 text-center'>
                   Selecciona los días que deseas cancelar (máximo 5)
                 </p>
 
-                <div className="space-y-2 sm:space-y-3">
+                <div className='space-y-2 sm:space-y-3'>
                   {daysWithAppointments.map((day) => (
                     <div
                       key={day.date}
@@ -437,11 +437,11 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
                       } ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}
                       onClick={() => !isLoading && toggleDaySelection(day.date)}
                     >
-                      <div className="flex flex-col flex-1 min-w-0">
-                        <span className="font-semibold text-base sm:text-lg truncate">
+                      <div className='flex flex-col flex-1 min-w-0'>
+                        <span className='font-semibold text-base sm:text-lg truncate'>
                           {day.dayName} {day.dayNumber} de {day.monthName}
                         </span>
-                        <span className="text-xs sm:text-sm text-gray-600 mt-1">
+                        <span className='text-xs sm:text-sm text-gray-600 mt-1'>
                           {day.appointmentCount}{' '}
                           {day.appointmentCount === 1 ? 'cita programada' : 'citas programadas'}
                         </span>
@@ -456,15 +456,15 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
                       >
                         {selectedDays.includes(day.date) && (
                           <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                            className="w-3 h-3 sm:w-4 sm:h-4 text-white"
+                            xmlns='http://www.w3.org/2000/svg'
+                            viewBox='0 0 20 20'
+                            fill='currentColor'
+                            className='w-3 h-3 sm:w-4 sm:h-4 text-white'
                           >
                             <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
+                              fillRule='evenodd'
+                              d='M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z'
+                              clipRule='evenodd'
                             />
                           </svg>
                         )}
@@ -473,8 +473,8 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
                   ))}
                 </div>
 
-                <div className="mt-4 sm:mt-6 p-2 sm:p-3 bg-gray-50 rounded-lg text-left">
-                  <strong className="text-gray-800 text-sm sm:text-base">
+                <div className='mt-4 sm:mt-6 p-2 sm:p-3 bg-gray-50 rounded-lg text-left'>
+                  <strong className='text-gray-800 text-sm sm:text-base'>
                     Seleccionado: {selectedDays.length}
                   </strong>
                 </div>
@@ -482,12 +482,12 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
             )}
           </div>
         </div>
-        <div className="border-t p-3 sm:p-4 flex justify-end space-x-2 sm:space-x-3 flex-shrink-0">
+        <div className='border-t p-3 sm:p-4 flex justify-end space-x-2 sm:space-x-3 flex-shrink-0'>
           <Button
             onClick={handleConfirm}
             loading={cancelLoading}
             disabled={selectedDays.length === 0 || isLoading}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 font-medium disabled:opacity-50 min-w-28 sm:min-w-32 text-sm sm:text-base"
+            className='bg-red-600 hover:bg-red-700 text-white px-4 sm:px-6 py-2 font-medium disabled:opacity-50 min-w-28 sm:min-w-32 text-sm sm:text-base'
           >
             {cancelLoading ? 'Cancelando...' : `Cancelar`}
           </Button>
@@ -495,8 +495,8 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
           <AlertPopup
             open={showConfirmPopup}
             onClose={() => setShowConfirmPopup(false)}
-            variant="confirm"
-            title="Confirmar Cancelación"
+            variant='confirm'
+            title='Confirmar Cancelación'
             message={
               <div>
                 ¿Está seguro de que desea cancelar las citas de {selectedDays.length} día
@@ -504,11 +504,11 @@ export const CancelDaysAppointments: React.FC<CancelDaysAppointmentsProps> = ({
                 {totalAppointmentsToCancel !== 1 ? 's' : ''}) seleccionado
                 {selectedDays.length !== 1 ? 's' : ''}?
                 <br />
-                <span className="text-red-600 font-medium">Esta acción no se puede deshacer.</span>
+                <span className='text-red-600 font-medium'>Esta acción no se puede deshacer.</span>
               </div>
             }
-            confirmLabel="Sí, Cancelar"
-            cancelLabel="Volver"
+            confirmLabel='Sí, Cancelar'
+            cancelLabel='Volver'
             onConfirm={executeCancellation}
           />
         </div>

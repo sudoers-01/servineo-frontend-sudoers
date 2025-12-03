@@ -28,18 +28,18 @@ export default function BecomeFixerPage() {
 
   return (
     <div>
-      <div className="container mx-auto max-w-4xl p-4">
-        <header className="mb-6 text-center">
-          <h1 className="text-2xl font-bold">Conviértete en un Fixer</h1>
-          <p className="text-sm text-gray-500">
+      <div className='container mx-auto max-w-4xl p-4'>
+        <header className='mb-6 text-center'>
+          <h1 className='text-2xl font-bold'>Conviértete en un Fixer</h1>
+          <p className='text-sm text-gray-500'>
             Completa tu registro y habilita tu cuenta como FIXER
           </p>
         </header>
 
-        <section className="space-y-6">
+        <section className='space-y-6'>
           {!requester ? (
-            <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">
-              <h2 className="mb-3 text-center text-lg font-semibold">Datos iniciales</h2>
+            <div className='neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up'>
+              <h2 className='mb-3 text-center text-lg font-semibold'>Datos iniciales</h2>
 
               <FixerRegisterForm
                 defaultValues={defaultValues}
@@ -55,11 +55,11 @@ export default function BecomeFixerPage() {
 
                   setRequester(finalUser);
                 }}
-                submitButtonText="Continuar"
+                submitButtonText='Continuar'
               />
             </div>
           ) : (
-            <div className="animate-fade-in">
+            <div className='animate-fade-in'>
               <FixerEnableWizard user={requester} />
             </div>
           )}

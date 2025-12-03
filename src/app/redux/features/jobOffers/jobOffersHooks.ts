@@ -14,14 +14,14 @@ import {
   setTitleOnly,
   setExact,
   updatePagination,
-  restoreSavedState,
+  //restoreSavedState,
   resetFilters,
   enablePersistence,
   setError,
 } from '@/app/redux/slice/jobOfert';
 import { selectSearchParams, selectJobOffersState } from './selectors';
 import { parseUrlToFilters, filtersToUrlParams, parseAppliedParams } from './parsers';
-import { restoreFromStorage } from './storage';
+// import { restoreFromStorage } from './storage';
 import {
   isFromAdvSearch,
   clearAdvSearchMark,
@@ -177,30 +177,31 @@ export function useInitialUrlParams() {
       dispatch(setPaginaActual(parsed.page));
       dispatch(enablePersistence());
     } else {
-      const restored = restoreFromStorage();
+      // const restored = restoreFromStorage();
 
       // 🔧 MIGRACIÓN: Convertir city de string a string[]
-      const migratedState = {
-        ...restored,
-        filters: {
-          ...restored.filters,
-          city: (() => {
-            const cityValue = restored.filters.city;
-            // Si es string, convertir a array
-            if (typeof cityValue === 'string') {
-              return cityValue ? [cityValue] : [];
-            }
-            // Si ya es array, usar tal cual
-            if (Array.isArray(cityValue)) {
-              return cityValue;
-            }
-            // Fallback
-            return [];
-          })(),
-        },
-      };
+      // const migratedState = {
+      //   ...restored,
+      //   filters: {
+      // ...restored.filters,
+      // city: (() => {
+      // const cityValue = restored.filters.city;
+      // Si es string, convertir a array
+      // if (typeof cityValue === 'string') {
+      //   return cityValue ? [cityValue] : [];
+      // }
+      // Si ya es array, usar tal cual
+      // if (Array.isArray(cityValue)) {
+      //   return cityValue;
+      // }
+      // Fallback
+      //     return [];
+      //   })(),
+      // },
+      // };
 
-      dispatch(restoreSavedState(migratedState));
+      // dispatch(restoreSavedState(migratedState));
+      dispatch(enablePersistence());
     }
   }, [searchParams, dispatch]);
 }

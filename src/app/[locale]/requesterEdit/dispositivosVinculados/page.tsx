@@ -136,8 +136,8 @@ export default function DispositivosVinculados() {
     }
   }, [user, registrarDispositivo, obtenerDispositivos]);
 
-  if (loading) return <p className="text-center mt-10">Cargando usuario...</p>;
-  if (!user) return <p className="text-center mt-10">No hay usuario autenticado</p>;
+  if (loading) return <p className='text-center mt-10'>Cargando usuario...</p>;
+  if (!user) return <p className='text-center mt-10'>No hay usuario autenticado</p>;
 
   const iconoPorTipo = (type: string) => {
     switch (type) {
@@ -151,40 +151,40 @@ export default function DispositivosVinculados() {
   };
 
   return (
-    <div className="p-6 max-w-2xl mx-auto flex flex-col items-center">
+    <div className='p-6 max-w-2xl mx-auto flex flex-col items-center'>
       <button
-        className="flex items-center mb-5 text-blue-500 hover:text-blue-700 self-start"
+        className='flex items-center mb-5 text-blue-500 hover:text-blue-700 self-start'
         onClick={() => router.push('/requesterEdit')}
       >
-        <ArrowLeft className="mr-2" /> Volver
+        <ArrowLeft className='mr-2' /> Volver
       </button>
 
-      <h1 className="text-2xl font-semibold mb-4">Dispositivos vinculados</h1>
+      <h1 className='text-2xl font-semibold mb-4'>Dispositivos vinculados</h1>
 
       <button
         onClick={() => setModalCerrarTodas(true)}
-        className="mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+        className='mb-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600'
         disabled={dispositivos.length <= 1}
       >
         Cerrar todas las sesiones
       </button>
 
       {cargandoDispositivos ? (
-        <p className="text-center text-gray-500">Cargando dispositivos...</p>
+        <p className='text-center text-gray-500'>Cargando dispositivos...</p>
       ) : dispositivos.length === 0 ? (
-        <p className="text-center text-gray-500">No hay dispositivos vinculados</p>
+        <p className='text-center text-gray-500'>No hay dispositivos vinculados</p>
       ) : (
-        <div className="space-y-4 w-full">
+        <div className='space-y-4 w-full'>
           {dispositivos.map((dispositivo) => (
             <div
               key={dispositivo._id}
-              className="flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow"
+              className='flex items-center justify-between p-4 bg-gray-100 rounded-lg shadow'
             >
-              <div className="flex items-center space-x-3">
+              <div className='flex items-center space-x-3'>
                 {iconoPorTipo(dispositivo.type)}
                 <div>
-                  <p className="font-medium">{dispositivo.os}</p>
-                  <p className="text-xs text-gray-500">
+                  <p className='font-medium'>{dispositivo.os}</p>
+                  <p className='text-xs text-gray-500'>
                     Último acceso: {new Date(dispositivo.lastLogin).toLocaleString()}
                   </p>
                 </div>
@@ -192,25 +192,25 @@ export default function DispositivosVinculados() {
 
               <button
                 onClick={() => setModalVisible(dispositivo._id)}
-                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+                className='px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600'
               >
                 Cerrar sesión
               </button>
 
               {modalVisible === dispositivo._id && (
-                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[9999]">
-                  <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-80 text-center">
-                    <p className="mb-4">¿Deseas cerrar sesión en este dispositivo?</p>
-                    <div className="flex justify-around">
+                <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[9999]'>
+                  <div className='bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-80 text-center'>
+                    <p className='mb-4'>¿Deseas cerrar sesión en este dispositivo?</p>
+                    <div className='flex justify-around'>
                       <button
                         onClick={() => setModalVisible(null)}
-                        className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                        className='px-4 py-2 bg-gray-300 rounded hover:bg-gray-400'
                       >
                         Cancelar
                       </button>
                       <button
                         onClick={() => cerrarSesionDispositivo(dispositivo._id)}
-                        className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                        className='px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600'
                       >
                         Aceptar
                       </button>
@@ -224,21 +224,21 @@ export default function DispositivosVinculados() {
       )}
 
       {modalCerrarTodas && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[9999]">
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-80 text-center">
-            <p className="mb-4 font-semibold">
+        <div className='fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-[9999]'>
+          <div className='bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-80 text-center'>
+            <p className='mb-4 font-semibold'>
               ¿Seguro que quieres cerrar todas las sesiones excepto esta?
             </p>
-            <div className="flex justify-around">
+            <div className='flex justify-around'>
               <button
                 onClick={() => setModalCerrarTodas(false)}
-                className="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400"
+                className='px-4 py-2 bg-gray-300 rounded hover:bg-gray-400'
               >
                 Cancelar
               </button>
               <button
                 onClick={cerrarTodasSesiones}
-                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+                className='px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600'
               >
                 Sí, cerrar
               </button>

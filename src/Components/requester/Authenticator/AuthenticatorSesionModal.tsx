@@ -70,46 +70,46 @@ export default function AuthenticatorSesion({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-      <div className="bg-white w-[520px] rounded-lg shadow-lg p-8">
-        <h2 className="text-3xl font-bold text-center text-servineo-500 mb-1">
-          <span className="text-servineo-400">Servineo</span>
+    <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/60'>
+      <div className='bg-white w-[520px] rounded-lg shadow-lg p-8'>
+        <h2 className='text-3xl font-bold text-center text-servineo-500 mb-1'>
+          <span className='text-servineo-400'>Servineo</span>
         </h2>
-        <p className="text-2xl font-bold text-center text-servineo-500 mb-6">Authenticator App</p>
-        <p className="block text-sm font-semibold text-gray-600 mb-2">
+        <p className='text-2xl font-bold text-center text-servineo-500 mb-6'>Authenticator App</p>
+        <p className='block text-sm font-semibold text-gray-600 mb-2'>
           Debe de tener configurado su app Authenticator
         </p>
-        <p className="block text-sm font-semibold text-gray-600 mb-4">
+        <p className='block text-sm font-semibold text-gray-600 mb-4'>
           Para el ingreso sin contraseña, ingrese su correo electrónico
         </p>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">
+        <label className='block text-sm font-semibold text-gray-600 mb-2'>
           Correo electrónico*
         </label>
         <input
-          type="email"
+          type='email'
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="Ingrese su correo electrónico"
-          className="w-full border border-gray-300 rounded-xl p-3.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-servineo-400 transition mb-2"
+          placeholder='Ingrese su correo electrónico'
+          className='w-full border border-gray-300 rounded-xl p-3.5 text-gray-800 focus:outline-none focus:ring-2 focus:ring-servineo-400 transition mb-2'
         />
 
         {errorMessage && (
-          <p className="text-red-600 text-sm font-semibold mb-4 transition-opacity duration-1000">
+          <p className='text-red-600 text-sm font-semibold mb-4 transition-opacity duration-1000'>
             {errorMessage}
           </p>
         )}
 
-        <div className="mt-6 flex justify-end gap-3">
+        <div className='mt-6 flex justify-end gap-3'>
           <button
             onClick={setShowModal}
-            className="flex-1 rounded-md bg-[#E5F4FB] px-4 py-2 text-[#1A223F] font-semibold hover:bg-[#2BDDE0]/20"
+            className='flex-1 rounded-md bg-[#E5F4FB] px-4 py-2 text-[#1A223F] font-semibold hover:bg-[#2BDDE0]/20'
           >
             Cancelar
           </button>
 
           <button
             onClick={handleContinuar}
-            className="flex-1 rounded-md bg-[#1A223F] px-4 py-2 text-white font-semibold hover:bg-[#2B31E0]"
+            className='flex-1 rounded-md bg-[#1A223F] px-4 py-2 text-white font-semibold hover:bg-[#2B31E0]'
           >
             Continuar
           </button>

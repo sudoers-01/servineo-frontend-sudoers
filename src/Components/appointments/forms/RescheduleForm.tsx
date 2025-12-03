@@ -333,92 +333,92 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
-        <div className="absolute inset-0 bg-black/50" onClick={handleClose} aria-hidden />
+      <div className='fixed inset-0 z-50 flex items-center justify-center px-4'>
+        <div className='absolute inset-0 bg-black/50' onClick={handleClose} aria-hidden />
         <div
           ref={dialogRef}
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="reschedule-title"
-          className="relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto"
+          role='dialog'
+          aria-modal='true'
+          aria-labelledby='reschedule-title'
+          className='relative bg-white rounded-lg shadow-xl w-full max-w-xl mx-auto overflow-auto'
           style={{ maxHeight: '90vh' }}
         >
-          <div className="p-4 sm:p-6">
-            <div className="flex items-start justify-between">
-              <h2 id="reschedule-title" className="text-lg font-semibold text-black">
+          <div className='p-4 sm:p-6'>
+            <div className='flex items-start justify-between'>
+              <h2 id='reschedule-title' className='text-lg font-semibold text-black'>
                 Reprogramar cita
               </h2>
               <button
-                aria-label="Cerrar"
-                className="text-gray-500 hover:text-gray-700"
+                aria-label='Cerrar'
+                className='text-gray-500 hover:text-gray-700'
                 onClick={handleClose}
               >
                 ✕
               </button>
             </div>
 
-            <form onSubmit={handleSubmit} className="mt-4 space-y-4 text-black">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded">
-                <label className="block">
-                  <span className="text-sm font-medium">Fecha y hora nueva *</span>
+            <form onSubmit={handleSubmit} className='mt-4 space-y-4 text-black'>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded'>
+                <label className='block'>
+                  <span className='text-sm font-medium'>Fecha y hora nueva *</span>
                   <input
                     readOnly
                     value={newDatetime ? new Date(newDatetime).toLocaleString() : ''}
                     onClick={handleDatePickerOpen}
-                    className="mt-1 block w-full bg-gray-50 border border-gray-300 rounded px-3 py-2 text-sm cursor-pointer hover:bg-gray-100"
-                    placeholder="Click para seleccionar fecha"
+                    className='mt-1 block w-full bg-gray-50 border border-gray-300 rounded px-3 py-2 text-sm cursor-pointer hover:bg-gray-100'
+                    placeholder='Click para seleccionar fecha'
                   />
-                  {errors.general && <p className="text-red-600 text-sm mt-1">{errors.general}</p>}
+                  {errors.general && <p className='text-red-600 text-sm mt-1'>{errors.general}</p>}
                 </label>
 
-                <label className="block">
-                  <span className="text-sm font-medium">Modalidad *</span>
+                <label className='block'>
+                  <span className='text-sm font-medium'>Modalidad *</span>
                   <select
                     value={modality}
                     onChange={(e) => setModality(e.target.value as 'virtual' | 'presential')}
-                    className="mt-1 block w-full border rounded px-3 py-2 text-sm"
+                    className='mt-1 block w-full border rounded px-3 py-2 text-sm'
                   >
-                    <option value="virtual">Virtual</option>
-                    <option value="presential">Presencial</option>
+                    <option value='virtual'>Virtual</option>
+                    <option value='presential'>Presencial</option>
                   </select>
                 </label>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <label className="block">
-                  <span className="text-sm font-medium">Cliente *</span>
+              <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                <label className='block'>
+                  <span className='text-sm font-medium'>Cliente *</span>
                   <input
                     ref={firstRef}
                     value={client}
                     onChange={(e) => setClient(e.target.value)}
-                    className="mt-1 block w-full border rounded px-3 py-2 bg-white"
-                    placeholder="Nombre del cliente"
+                    className='mt-1 block w-full border rounded px-3 py-2 bg-white'
+                    placeholder='Nombre del cliente'
                   />
-                  {errors.client && <p className="text-red-600 text-sm mt-1">{errors.client}</p>}
+                  {errors.client && <p className='text-red-600 text-sm mt-1'>{errors.client}</p>}
                 </label>
-                <label className="block">
-                  <span className="text-sm font-medium">Contacto *</span>
+                <label className='block'>
+                  <span className='text-sm font-medium'>Contacto *</span>
                   <input
                     value={contact}
                     onChange={(e) => setContact(e.target.value)}
-                    className="mt-1 block w-full border rounded px-3 py-2 bg-white"
-                    placeholder="7XXXXXXX"
+                    className='mt-1 block w-full border rounded px-3 py-2 bg-white'
+                    placeholder='7XXXXXXX'
                     maxLength={8}
                   />
-                  {errors.contact && <p className="text-red-600 text-sm mt-1">{errors.contact}</p>}
+                  {errors.contact && <p className='text-red-600 text-sm mt-1'>{errors.contact}</p>}
                 </label>
               </div>
 
-              <label className="block">
-                <span className="text-sm font-medium">Descripción del trabajo *</span>
+              <label className='block'>
+                <span className='text-sm font-medium'>Descripción del trabajo *</span>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  className="mt-1 block w-full border rounded px-3 py-2 bg-white"
+                  className='mt-1 block w-full border rounded px-3 py-2 bg-white'
                   rows={3}
                 />
                 {errors.description && (
-                  <p className="text-red-600 text-sm mt-1">{errors.description}</p>
+                  <p className='text-red-600 text-sm mt-1'>{errors.description}</p>
                 )}
               </label>
 
@@ -426,46 +426,46 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
                 <>
                   <div
                     onClick={() => setShowLocationModal(true)}
-                    className="text-center py-3 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer"
+                    className='text-center py-3 border border-gray-300 rounded-lg bg-gray-50 hover:bg-gray-100 cursor-pointer'
                   >
-                    <p className="text-sm font-medium text-gray-700">
+                    <p className='text-sm font-medium text-gray-700'>
                       📍 {place ? 'Editar ubicación' : 'Seleccionar ubicación'}
                     </p>
                   </div>
                   {place && (
-                    <p className="text-sm text-green-700 px-2 mt-1">📌 Ubicación: {place}</p>
+                    <p className='text-sm text-green-700 px-2 mt-1'>📌 Ubicación: {place}</p>
                   )}
                   {errors.location && (
-                    <p className="text-red-600 text-sm mt-1">{errors.location}</p>
+                    <p className='text-red-600 text-sm mt-1'>{errors.location}</p>
                   )}
                 </>
               ) : (
-                <label className="block">
-                  <span className="text-sm font-medium">Enlace de reunión *</span>
+                <label className='block'>
+                  <span className='text-sm font-medium'>Enlace de reunión *</span>
                   <input
                     value={meetingLink}
                     onChange={(e) => setMeetingLink(e.target.value)}
-                    className="mt-1 block w-full border rounded px-3 py-2 bg-white"
-                    placeholder="https://meet.example.com/..."
+                    className='mt-1 block w-full border rounded px-3 py-2 bg-white'
+                    placeholder='https://meet.example.com/...'
                   />
                   {errors.meetingLink && (
-                    <p className="text-red-600 text-sm mt-1">{errors.meetingLink}</p>
+                    <p className='text-red-600 text-sm mt-1'>{errors.meetingLink}</p>
                   )}
                 </label>
               )}
 
-              <div className="flex items-center justify-end gap-2 pt-2">
+              <div className='flex items-center justify-end gap-2 pt-2'>
                 <button
-                  type="button"
+                  type='button'
                   onClick={handleClose}
-                  className="px-4 py-2 rounded bg-gray-300 text-sm"
+                  className='px-4 py-2 rounded bg-gray-300 text-sm'
                 >
                   Volver
                 </button>
                 <button
-                  type="submit"
+                  type='submit'
                   disabled={loading}
-                  className="px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                  className='px-4 py-2 rounded bg-[#2B6AE0] text-white text-sm disabled:opacity-60 disabled:cursor-not-allowed'
                 >
                   {loading ? 'Reprogramando...' : 'Reprogramar'}
                 </button>
@@ -484,23 +484,23 @@ export default forwardRef<RescheduleFormHandle, RescheduleFormProps>(function Re
 
       {/* Modal de selección de fecha/hora con calendario */}
       {showDatePicker && (
-        <div className="fixed inset-0 z-[60] flex items-center justify-center px-4">
-          <div className="absolute inset-0 bg-black/50" onClick={() => setShowDatePicker(false)} />
+        <div className='fixed inset-0 z-[60] flex items-center justify-center px-4'>
+          <div className='absolute inset-0 bg-black/50' onClick={() => setShowDatePicker(false)} />
           <div
-            className="relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto overflow-hidden"
+            className='relative bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto overflow-hidden'
             style={{ maxHeight: '90vh' }}
           >
-            <div className="p-4 border-b flex items-center justify-between">
-              <h4 className="text-lg font-semibold text-black">Seleccionar nueva fecha y hora</h4>
+            <div className='p-4 border-b flex items-center justify-between'>
+              <h4 className='text-lg font-semibold text-black'>Seleccionar nueva fecha y hora</h4>
               <button
                 onClick={() => setShowDatePicker(false)}
-                className="text-gray-500 hover:text-gray-700"
-                aria-label="Cerrar"
+                className='text-gray-500 hover:text-gray-700'
+                aria-label='Cerrar'
               >
                 ✕
               </button>
             </div>
-            <div className="overflow-auto" style={{ maxHeight: 'calc(90vh - 80px)' }}>
+            <div className='overflow-auto' style={{ maxHeight: 'calc(90vh - 80px)' }}>
               <MobileDayliView
                 selectedDate={pickerSelectedDate}
                 fixerId={fixerId}
