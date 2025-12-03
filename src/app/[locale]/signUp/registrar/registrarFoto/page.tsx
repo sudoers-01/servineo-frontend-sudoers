@@ -28,7 +28,7 @@ export default function FotoPerfil() {
 
   const handleCloseNotification = () => setNotification((prev) => ({ ...prev, isOpen: false }));
 
-  const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/controlC`;
+  const BASE_URL = `${process.env.NEXT_PUBLIC_API_URL}/api/signUp`;
 
   const manejarCambio = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,7 +68,7 @@ export default function FotoPerfil() {
       formData.append('foto', archivo);
       formData.append('usuarioId', usuarioId);
 
-      const response = await fetch(`${BASE_URL}/foto-perfil/usuarios/foto`, {
+      const response = await fetch(`${BASE_URL}/registrar/foto`, {
         method: 'PUT',
         body: formData,
       });

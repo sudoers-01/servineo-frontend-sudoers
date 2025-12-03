@@ -96,7 +96,7 @@ export default function LoginPage() {
   const manejarLogin = async (data: LoginFormData): Promise<void> => {
     setLoading(true);
     try {
-      const res: ApiResponse<LoginResponse> = await api.post('/auth/login', data);
+      const res: ApiResponse<LoginResponse> = await api.post('/login', data);
 
       if (res.success && res.data) {
         const datos = res.data;
@@ -163,7 +163,9 @@ export default function LoginPage() {
           message: mensajeExito,
         });
 
-        setTimeout(() => router.push('/'), 2000);
+        setTimeout(() => {
+          window.location.href = '/';
+        }, 1500);
       } else {
         const mensajeError =
           res.message ||
@@ -286,7 +288,7 @@ export default function LoginPage() {
       try {
         setLoading(true);
 
-        const res: ApiResponse<LoginResponse> = await api.post('/auth/discord', { code });
+        const res: ApiResponse<LoginResponse> = await api.post('/login/discord', { code });
 
         if (res.success && res.data) {
           const datos = res.data;
