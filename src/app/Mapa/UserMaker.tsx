@@ -16,7 +16,10 @@ export default function UserMarker({ position }: UserMarkerProps) {
         iconSize: [40, 40],
       })}
     >
-      <Popup>📍 Estás aquí</Popup>
+     <Popup>
+  <span className="text-black font-bold">📍 Estás aquí</span>
+</Popup>
+
     </Marker>
   );
 }
