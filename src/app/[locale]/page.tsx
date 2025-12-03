@@ -14,10 +14,6 @@ import { IUser } from '@/types/user';
 
 //const MyOffer = dynamic(() => import('@/Components/Home/MyOffer-section'), { ssr: false });
 const Map = dynamic(() => import('@/app/Mapa/Map'), { ssr: false });
-const RequestsSection = dynamic(
-  () => import('@/Components/Home/Requests-section'),
-  { ssr: false }, // esto fuerza a que se cargue solo en el cliente
-);
 interface RootState {
   user: {
     user: IUser | null;
