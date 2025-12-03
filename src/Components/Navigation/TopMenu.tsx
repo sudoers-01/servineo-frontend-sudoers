@@ -33,8 +33,12 @@ export default function TopMenu() {
   const logoRef = useRef<HTMLButtonElement | null>(null);
 
   const navItems = [
-    { name: 'Inicio', href: '/', icon: <Home className="h-5 w-5" /> },
-    { name: 'Ofertas', href: '/job-offer-list', icon: <ClipboardList className="h-5 w-5" /> },
+    { name: 'Servicios', href: '/servicios', icon: <Wrench className="h-5 w-5" /> },
+    {
+      name: 'Ofertas de trabajo',
+      href: '/job-offer-list',
+      icon: <ClipboardList className="h-5 w-5" />,
+    },
     {
       name: 'Ayuda',
       href: '/ask-for-help/centro_de_ayuda',
