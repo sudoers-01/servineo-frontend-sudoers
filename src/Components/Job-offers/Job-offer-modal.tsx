@@ -1,9 +1,11 @@
 'use client';
 
-import { X, MessageCircle, MapPin, Sparkles, Calendar, Tag } from 'lucide-react';
+import React from 'react';
+import { X, MessageCircle, MapPin, Sparkles, Calendar, Tag, Share2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
+import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers'; // ajusta si tu ruta es distinta
 
 interface Props {
   offer: JobOfferData | AdaptedJobOffer | null;
@@ -12,40 +14,63 @@ interface Props {
 }
 
 export function JobOfferModal({ offer, isOpen, onClose }: Props) {
-  //const t = useTranslations('cardJob');
-  const tCat = useTranslations('Categories');
+  const tCat = useTranslations?.('Categories');
+  const t = useTranslations?.('cardJob');
 
   if (!isOpen || !offer) return null;
 
-  // Normalize data
-  const isAdapted = (o: JobOfferData | AdaptedJobOffer): o is AdaptedJobOffer => 'services' in o;
+  // Type guard: AdaptedJobOffer (comes from backend shape that already has services)
+  const isAdapted = (o: JobOfferData | AdaptedJobOffer): o is AdaptedJobOffer => {
+    return 'services' in o && Array.isArray((o as any).services);
+  };
 
-  const title = offer.title;
-  const description = offer.description;
-  const price = offer.price;
-  const city = offer.city;
-  const tags = offer.tags || [];
-  const createdAt = offer.createdAt;
+  // Normalize common fields
+  const title = offer.title ?? '';
+  const description = offer.description ?? '';
+  const price = (offer as any).price ?? 0;
+  const city = offer.city ?? '';
+  const createdAt = (offer as any).createdAt ?? new Date();
+  const tags: string[] = (offer as any).tags ?? [];
+  const category = isAdapted(offer) ? (offer.services?.[0] ?? 'General') : ((offer as any).category ?? 'General');
 
-  const category = isAdapted(offer) ? offer.services?.[0] || 'General' : offer.category;
+  // phone/whatsapp normalization
+  const phone = isAdapted(offer) ? ((offer as any).phone ?? '') : ((offer as any).contactPhone ?? '');
+  const whatsappRaw = (offer as any).whatsapp ?? phone ?? '';
+  const whatsappClean = (whatsappRaw || '').toString().replace(/\D/g, '');
 
-  const phone = isAdapted(offer) ? offer.phone : offer.contactPhone;
-
-  // Prepare images
-  const images = (() => {
+  // Images collection
+  const images: string[] = (() => {
     if (isAdapted(offer)) {
-      return offer.photos || [];
+      return (offer as AdaptedJobOffer).photos ?? [];
     } else {
-      if (offer.allImages && offer.allImages.length > 0) return offer.allImages;
-      if (offer.photos && offer.photos.length > 0) return offer.photos;
-      if (offer.imagenUrl) return [offer.imagenUrl];
+      const o = offer as JobOfferData;
+      if (o.allImages && o.allImages.length > 0) return o.allImages;
+      if (o.photos && o.photos.length > 0) return o.photos;
+      if ((o as any).imagenUrl) return [(o as any).imagenUrl];
       return [];
     }
   })();
 
+  // Services list (fallback to tags)
+  const servicesList: string[] = isAdapted(offer)
+    ? (offer.services ?? (offer.tags ?? []))
+    : (offer as any).services ?? (offer as any).tags ?? [];
+
+  // Calendar click: set sessionStorage for scheduling flow
+  const handleClickCalendar = () => {
+    if (typeof window === 'undefined') return;
+    // prefer fixerId / id depending on shape
+    const fixerId = (offer as any).fixerId ?? (offer as any).id ?? (offer as any)._id ?? '';
+    const requesterId = sessionStorage.getItem('requester_id') ?? '';
+    sessionStorage.setItem('fixer_id', fixerId);
+    sessionStorage.setItem('requester_id', requesterId);
+    sessionStorage.setItem('roluser', 'requester');
+  };
+
   const handleWhatsAppClick = () => {
-    const cleanPhone = phone.replace(/\D/g, '');
-    window.open(`https://wa.me/${cleanPhone}`, '_blank');
+    if (!whatsappClean) return;
+    const url = `https://wa.me/${whatsappClean}`;
+    window.open(url, '_blank');
   };
 
   return (
@@ -62,7 +87,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             <Image src={images[0]} alt={title} fill className="object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-gray-400">
-              <span className="text-lg font-medium">No image available</span>
+              <span className="text-lg font-medium">{t?.('noImage') ?? 'No image available'}</span>
             </div>
           )}
 
@@ -71,6 +96,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 text-white rounded-full backdrop-blur-md transition-all"
+            aria-label="Cerrar modal"
           >
             <X className="w-5 h-5" />
           </button>
@@ -78,16 +104,15 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <div className="absolute bottom-4 left-6 right-6 text-white">
             <div className="flex items-center gap-2 mb-2">
               <span className="px-2.5 py-1 bg-primary/90 rounded-full text-xs font-semibold backdrop-blur-sm">
-                {tCat(category)}
+                {tCat ? tCat(category) : category}
               </span>
               <div className="flex items-center gap-1 text-xs font-medium bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm">
                 <MapPin className="w-3 h-3" />
-                {city}
+                <span>{city}</span>
               </div>
             </div>
-            <h2 className="text-2xl font-bold leading-tight shadow-black drop-shadow-md">
-              {title}
-            </h2>
+
+            <h2 className="text-2xl sm:text-3xl font-bold leading-tight drop-shadow-md">{title}</h2>
           </div>
         </div>
 
@@ -106,32 +131,29 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           <div className="space-y-3">
             <div className="flex items-center gap-2 text-gray-900 font-semibold">
               <Sparkles className="w-4 h-4 text-amber-500" />
-              <h3>Descripción del Trabajo</h3>
+              <h3>Descripción</h3>
             </div>
             <p className="text-gray-600 leading-relaxed text-sm sm:text-base">{description}</p>
           </div>
 
-          {/* Tags */}
-          {tags && tags.length > 0 && (
+          {/* Services / Tags */}
+          {servicesList && servicesList.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-gray-900 font-semibold">
                 <Tag className="w-4 h-4 text-blue-500" />
-                <h3>Etiquetas</h3>
+                <h3>Servicios</h3>
               </div>
               <div className="flex flex-wrap gap-2">
-                {tags.map((tag, idx) => (
-                  <span
-                    key={idx}
-                    className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-lg font-medium"
-                  >
-                    {tag}
+                {servicesList.map((s, i) => (
+                  <span key={i} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-lg font-medium">
+                    {s}
                   </span>
                 ))}
               </div>
             </div>
           )}
 
-          {/* Gallery Grid (if more than 1 image) */}
+          {/* Gallery grid (if more images) */}
           {images.length > 1 && (
             <div className="space-y-3">
               <h3 className="font-semibold text-gray-900">Galería</h3>
@@ -152,16 +174,64 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
               </div>
             </div>
           )}
+
+          {/* Contact & Meta */}
+          <div className="pt-4 border-t border-border/50">
+            <h3 className="font-bold text-lg mb-4">Información de Contacto</h3>
+            <div className="grid md:grid-cols-2 gap-3">
+              <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <MessageCircle className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">WhatsApp</p>
+                  <p className="font-semibold">{whatsappClean || phone || '—'}</p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3 p-4 bg-muted/50 rounded-xl">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                  <MapPin className="w-5 h-5 text-white" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Ciudad</p>
+                  <p className="font-semibold">{city || '—'}</p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Footer Actions */}
-        <div className="p-4 border-t bg-gray-50/50 flex flex-col sm:flex-row gap-3">
+        {/* Footer actions */}
+        <div className="p-4 border-t bg-gray-50 flex flex-col sm:flex-row gap-3">
           <button
             onClick={handleWhatsAppClick}
-            className="flex-1 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2"
+            disabled={!whatsappClean}
+            className={`flex-1 ${whatsappClean ? 'bg-primary hover:bg-primary/90 text-white' : 'bg-gray-200 text-gray-500 cursor-not-allowed'} py-3 rounded-xl font-semibold shadow-sm flex items-center justify-center gap-2 transition-all`}
           >
             <MessageCircle className="w-5 h-5" />
             Contactar por WhatsApp
+          </button>
+
+          <Link
+            href="/calendar"
+            onClick={handleClickCalendar}
+            className="flex-1 bg-white border border-gray-200 text-gray-800 py-3 rounded-xl font-semibold flex items-center justify-center gap-2 hover:shadow-sm transition-all"
+          >
+            <Calendar className="w-5 h-5" />
+            Agendar Cita
+          </Link>
+
+          <button
+            onClick={() => {
+              // share behavior: simple copy link (improve as needed)
+              const url = typeof window !== 'undefined' ? window.location.href : '';
+              navigator.clipboard?.writeText(url);
+            }}
+            className="p-3 rounded-lg bg-white border border-gray-200 hover:shadow-sm"
+            title="Compartir"
+          >
+            <Share2 className="w-5 h-5" />
           </button>
         </div>
       </div>

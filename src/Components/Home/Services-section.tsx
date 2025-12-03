@@ -1,17 +1,20 @@
-'use client';
-import { Droplets } from 'lucide-react';
-import Link from 'next/link';
-import { useTranslations } from 'next-intl';
-const services = [
-  {
-    name: 'Plomería',
-    icon: <Droplets className="w-8 h-8 text-primary" />,
-    description: 'Reparaciones e instalaciones de fontanería',
-  },
-];
+"use client";
+import { Droplets } from "lucide-react";
+import Link from "next/link";
+import { useTranslations } from "next-intl";
+
 
 export default function ServicesSection() {
-  const t = useTranslations('Services');
+  const t=useTranslations("Services");
+  const services = [
+  {
+    name: t("name services"),
+    icon: <Droplets className="w-8 h-8 text-primary" />,
+    description: t("Description")
+  },
+  
+];
+  
   return (
     <section className="py-16 px-4 bg-white">
       <div className="max-w-7xl mx-auto">

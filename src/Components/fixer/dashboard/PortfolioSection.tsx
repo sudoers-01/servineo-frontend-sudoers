@@ -16,6 +16,7 @@ import { Modal } from '@/Components/Modal';
 import NotificationModal from '@/Components/Modal-notifications';
 import { useForm } from 'react-hook-form';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
 
 import {
   useGetPortfolioByFixerQuery,
@@ -50,6 +51,9 @@ function getYouTubeId(rawUrl?: string): string | undefined {
 }
 
 export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSectionProps) {
+  const t = useTranslations('PortfolioSection');
+  
+  // ID efectivo
   const effectiveFixerId = fixerId || '69285d2860ea986813517593';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -109,8 +113,8 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
   }, [watchedUrl, modalType]);
 
   const getErrorMessage = (error: unknown) => {
-    if (isApiError(error)) return error.data.message || 'Error desconocido';
-    return 'Ocurrió un error inesperado';
+    if (isApiError(error)) return error.data.message || t('errors.unknown');
+    return t('errors.unexpected');
   };
 
   const showNotification = (
@@ -143,11 +147,11 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
 
       if (data.type === 'image') {
         if (!finalUrl) {
-          showNotification('error', 'Campo requerido', 'Por favor ingresa una URL');
+          showNotification('error', t('notifications.requiredField'), t('notifications.enterUrl'));
           return;
         }
         if (isValidUrl !== true) {
-          showNotification('error', 'URL Inválida', 'La imagen no pudo cargarse.');
+          showNotification('error', t('notifications.invalidUrl'), t('notifications.imageLoadError'));
           return;
         }
       }
@@ -159,7 +163,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             finalUrl = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
           }
         } else {
-          showNotification('error', 'URL Inválida', 'No se pudo identificar el video');
+          showNotification('error', t('notifications.invalidUrl'), t('notifications.videoIdError'));
           return;
         }
       }
@@ -173,10 +177,10 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
 
       await createItem(payload).unwrap();
 
-      showNotification('success', '¡Éxito!', 'Elemento agregado al portafolio');
+      showNotification('success', t('notifications.success'), t('notifications.itemAdded'));
       handleCloseModal();
     } catch (error) {
-      showNotification('error', 'Error al guardar', getErrorMessage(error));
+      showNotification('error', t('notifications.saveError'), getErrorMessage(error));
     }
   };
 
@@ -185,8 +189,8 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     setDeleteId(id);
     showNotification(
       'warning',
-      '¿Estás seguro?',
-      'Esta acción eliminará el elemento permanentemente.',
+      t('notifications.confirmDelete'),
+      t('notifications.deleteWarning'),
     );
   };
 
@@ -194,10 +198,10 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     if (!deleteId) return;
     try {
       await deleteItem(deleteId).unwrap();
-      showNotification('success', 'Eliminado', 'Elemento eliminado correctamente');
+      showNotification('success', t('notifications.deleted'), t('notifications.deletedSuccess'));
       setDeleteId(null);
     } catch (error) {
-      showNotification('error', 'Error', getErrorMessage(error));
+      showNotification('error', t('notifications.error'), getErrorMessage(error));
       setDeleteId(null);
     }
   };
@@ -206,9 +210,8 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     setDeleteId(null);
   };
 
-  if (isLoading) return <div className="text-center p-8 text-gray-500">Cargando portafolio...</div>;
-  if (isError)
-    return <div className="text-center p-8 text-red-500">Error al cargar el portafolio.</div>;
+  if (isLoading) return <div className="text-center p-8 text-gray-500">{t('loading')}</div>;
+  if (isError) return <div className="text-center p-8 text-red-500">{t('loadError')}</div>;
 
   return (
     <div className="space-y-6">
@@ -227,7 +230,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
           <ImageIcon className="h-5 w-5 text-blue-600" />
-          {readOnly ? 'Portafolio' : 'Mi Portafolio'}
+          {readOnly ? t('titles.portfolio') : t('titles.myPortfolio')}
         </h2>
 
         {!readOnly && (
@@ -237,7 +240,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
               className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
             >
               <Video className="h-4 w-4" />
-              Video
+              {t('buttons.video')}
             </PillButton>
 
             <PillButton
@@ -245,7 +248,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
               className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
             >
               <Plus className="h-4 w-4" />
-              Imagen
+              {t('buttons.image')}
             </PillButton>
           </div>
         )}
@@ -253,7 +256,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
 
       {items.length === 0 ? (
         <div className="text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-          <p className="text-gray-500">No hay elementos en el portafolio aún.</p>
+          <p className="text-gray-500">{t('emptyState')}</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -306,13 +309,13 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={item.url!}
-                        alt="Portfolio item"
+                        alt={t('image.alt')}
                         className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                       />
                     ) : isHttpUrl ? (
                       <Image
                         src={item.url!}
-                        alt="Portfolio item"
+                        alt={t('image.alt')}
                         fill
                         sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
                         className="object-cover transition-transform duration-500 group-hover:scale-110"
@@ -322,7 +325,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={item.url!}
-                        alt="Portfolio item"
+                        alt={t('image.alt')}
                         className="w-full h-full object-cover"
                       />
                     )}
@@ -331,7 +334,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
                     <div className="text-center p-4">
                       <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-xs text-gray-500 font-medium">Sin imagen</p>
+                      <p className="text-xs text-gray-500 font-medium">{t('noImage')}</p>
                     </div>
                   </div>
                 )}
@@ -344,7 +347,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
       <Modal
         open={isModalOpen}
         onClose={handleCloseModal}
-        title={modalType === 'image' ? 'Agregar Imagen' : 'Agregar Video'}
+        title={modalType === 'image' ? t('modal.addImage') : t('modal.addVideo')}
         size="md"
       >
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -354,13 +357,13 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL de la Imagen
+                  {t('form.imageUrl.label')}
                 </label>
                 <div className="relative">
                   <input
-                    {...register('url', { required: 'La URL es requerida' })}
+                    {...register('url', { required: t('form.imageUrl.required') })}
                     className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10"
-                    placeholder="https://ejemplo.com/imagen.jpg"
+                    placeholder={t('form.imageUrl.placeholder')}
                   />
                   {isValidating && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -376,14 +379,14 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                 </div>
                 {isValidUrl === false && (
                   <p className="text-xs text-red-600 mt-1">
-                    ❌ No se pudo cargar la imagen. Verifica la URL.
+                    {t('form.imageUrl.validationError')}
                   </p>
                 )}
               </div>
 
               {previewUrl && isValidUrl && (
                 <div className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
-                  <p className="text-xs text-green-700 mb-2 font-semibold">✅ Vista Previa:</p>
+                  <p className="text-xs text-green-700 mb-2 font-semibold">{t('form.preview')}</p>
                   <div className="relative w-full h-48 rounded-lg overflow-hidden bg-white shadow-md">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={previewUrl} alt="Preview" className="w-full h-full object-contain" />
@@ -395,23 +398,23 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             <>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL de YouTube
+                  {t('form.youtubeUrl.label')}
                 </label>
                 <input
-                  {...register('youtubeUrl', { required: 'La URL es requerida' })}
+                  {...register('youtubeUrl', { required: t('form.youtubeUrl.required') })}
                   className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="https://www.youtube.com/watch?v=..."
+                  placeholder={t('form.youtubeUrl.placeholder')}
                 />
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  URL de Miniatura (Opcional)
+                  {t('form.thumbnailUrl.label')}
                 </label>
                 <input
                   {...register('url')}
                   className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  placeholder="Se intentará extraer automáticamente si está vacío"
+                  placeholder={t('form.thumbnailUrl.placeholder')}
                 />
               </div>
             </>
@@ -423,7 +426,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
               onClick={handleCloseModal}
               className="bg-gray-100 text-gray-700 hover:bg-gray-200"
             >
-              Cancelar
+              {t('buttons.cancel')}
             </PillButton>
 
             <PillButton
@@ -433,10 +436,10 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             >
               {isCreating ? (
                 <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> Guardando...
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t('buttons.saving')}
                 </>
               ) : (
-                'Guardar'
+                t('buttons.save')
               )}
             </PillButton>
           </div>
@@ -461,7 +464,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={fullscreenImage}
-              alt="Imagen completa"
+              alt={t('fullscreen.alt')}
               className="w-full h-full object-contain"
             />
           </div>

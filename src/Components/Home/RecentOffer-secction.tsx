@@ -198,14 +198,20 @@ export default function RecentOffersSection() {
         {/* Offers Grid */}
         {!isLoading && !error && trabajos.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {trabajos.map((trabajo) => (
-              <JobOfferCard
-                key={trabajo._id}
-                offer={trabajo}
-                viewMode="grid"
-                onClick={handleCardClick}
-              />
-            ))}
+            {(() => {
+                  console.log('RecentOffersSection: trabajos', trabajos);
+                  return (trabajos ?? []).map((trabajo, i) => {
+                    console.log('RecentOffersSection: trabajo', i, trabajo);
+                    return (
+                      <JobOfferCard
+                        key={trabajo._id ?? `trabajo-${i}`}
+                        offer={trabajo}
+                        viewMode="grid"
+                        onClick={handleCardClick}
+                      />
+                    );
+                  });
+                })()}
           </div>
         )}
 

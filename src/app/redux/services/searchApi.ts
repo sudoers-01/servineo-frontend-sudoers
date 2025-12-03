@@ -5,7 +5,7 @@ export interface SearchData {
   search_query: string;
   search_type: string;
   filters: {
-    filter_1: {
+    [x: string]: {
       fixer_name: string;
       city: string;
       job_type: string;
@@ -27,7 +27,7 @@ export const searchApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     logSearch: builder.mutation<void, SearchData>({
       query: (searchData) => ({
-        url: '/searches',
+        url: '/api/searches',
         method: 'POST',
         body: searchData,
       }),
@@ -35,7 +35,7 @@ export const searchApi = baseApi.injectEndpoints({
     }),
     updateFilters: builder.mutation<void, FilterData>({
       query: (filterData) => ({
-        url: '/searches',
+        url: '/api/searches',
         method: 'PATCH',
         body: filterData,
       }),

@@ -14,6 +14,7 @@ interface WeekRange {
   start: Date;
   end: Date;
 }
+
 export default function useCalendarNavigation({
   initialYear,
   initialMonth,
@@ -44,7 +45,6 @@ export default function useCalendarNavigation({
     current.setHours(0, 0, 0, 0);
 
     const dayOfWeek = current.getDay();
-
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
     const start = new Date(current);
@@ -57,6 +57,7 @@ export default function useCalendarNavigation({
 
     return { start, end };
   };
+
   const handlePrev = () => {
     if (view === 'month') {
       if (month === 0) {

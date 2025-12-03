@@ -69,13 +69,13 @@ export default async function RootLayout({ children, params }: Props) {
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ReduxProvider>
             <div className="text-black fixed bottom-7 right-7 z-[9999]">
-              <TranslationButton />
               <BotonesFlotantes />
             </div>
             <div className="">
               <TopMenu />
             </div>
             {children}
+            <TranslationButton />
           </ReduxProvider>
         </NextIntlClientProvider>
       </body>

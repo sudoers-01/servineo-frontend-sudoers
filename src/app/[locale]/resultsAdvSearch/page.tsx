@@ -133,7 +133,7 @@ function ResultsAdvSearchPageContent() {
 }
 
 export default function ResultsAdvSearchPage() {
-  const t = useTranslations('resultsAdvSearch');
+  const t = useTranslations('AdvSearch');
 
   return (
     <Suspense
