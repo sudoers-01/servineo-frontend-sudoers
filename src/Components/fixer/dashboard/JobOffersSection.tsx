@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus, Briefcase, Upload, X, MoreVertical } from 'lucide-react';
+import { useParams, useRouter } from 'next/navigation';
 
 import { PillButton } from '../Pill-button';
 import { Modal } from '@/Components/Modal';
@@ -14,6 +15,8 @@ import { boliviaCities } from '@/app/lib/validations/Job-offer-Schemas';
 import { t } from 'i18next';
 //import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
+import CreatePromoModal from '@/app/components/fixers/CreatePromoModal';
+import { createPromotion } from '@/services/promotions';
 
 import {
   useGetJobsByFixerQuery,
@@ -50,6 +53,9 @@ export function JobOffersSection({
 }) {
   const { user } = useAppSelector((state) => state.user);
   const effectiveeffectiveeffectiveUserId = effectiveeffectiveUserId || user?._id || '';
+  const params = useParams<{ locale: string }>();
+  const router = useRouter();
+  const locale = params?.locale || 'es';
 
   const { data: apiOffers, isLoading } = useGetJobsByFixerQuery(effectiveeffectiveeffectiveUserId, {
     skip: !effectiveeffectiveeffectiveUserId,
@@ -73,6 +79,8 @@ export function JobOffersSection({
 
   const [filter, setFilter] = useState<JobStateFilter>('active');
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [isCreatePromoModalOpen, setIsCreatePromoModalOpen] = useState(false);
+  const [selectedJobId, setSelectedJobId] = useState<string>('');
 
   const {
     register,
@@ -183,6 +191,36 @@ export function JobOffersSection({
     } catch (err) {
       console.error(err);
       showNotify('error', 'Error', 'No se pudo cambiar el estado.');
+    }
+  };
+
+  // -------------------------
+  // 🔥 CREAR PROMOCIÓN
+  // -------------------------
+  const onSavePromo = async (promotion: {
+    title: string;
+    description: string;
+    offerId: string;
+    fixerId: string;
+    price: string;
+  }) => {
+    try {
+      const result = await createPromotion({
+        title: promotion.title,
+        description: promotion.description,
+        offerId: promotion.offerId,
+        price: promotion.price,
+        fixerId: promotion.fixerId,
+      });
+
+      if (result) {
+        showNotify('success', 'Promoción creada', 'La promoción se creó correctamente.');
+      } else {
+        showNotify('error', 'Error', 'No se pudo crear la promoción.');
+      }
+    } catch (error) {
+      console.error('Error creating promotion:', error);
+      showNotify('error', 'Error', 'Ocurrió un error al crear la promoción.');
     }
   };
 
@@ -299,13 +337,34 @@ export function JobOffersSection({
                       </button>
 
                       {openMenuId === id && (
-                        <div className='absolute right-0 top-full mt-1 w-40 bg-white border rounded-lg shadow-lg text-xs z-[100]'>
+                        <div className='absolute right-0 top-full mt-1 w-48 bg-white border rounded-lg shadow-lg text-xs z-[100]'>
                           <button
                             type='button'
                             onClick={() => handleToggleActive(id)}
-                            className='w-full text-left px-3 py-2 hover:bg-gray-50'
+                            className='w-full text-left px-3 py-2 hover:bg-gray-50 border-b'
                           >
                             {isActive ? 'Desactivar trabajo' : 'Activar trabajo'}
+                          </button>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              setSelectedJobId(id);
+                              setIsCreatePromoModalOpen(true);
+                            }}
+                            className='w-full text-left px-3 py-2 hover:bg-gray-50 text-green-600 border-b'
+                          >
+                            Agregar Promoción
+                          </button>
+                          <button
+                            type='button'
+                            onClick={() => {
+                              setOpenMenuId(null);
+                              router.push(`/${locale}/promotions/${id}`);
+                            }}
+                            className='w-full text-left px-3 py-2 hover:bg-gray-50 text-blue-600'
+                          >
+                            Ver Promociones
                           </button>
                         </div>
                       )}
@@ -581,6 +640,15 @@ export function JobOffersSection({
         onConfirm={notify.onConfirm}
         confirmText='Confirmar'
         autoClose={!notify.onConfirm}
+      />
+
+      {/* MODAL DE CREAR PROMOCIÓN */}
+      <CreatePromoModal
+        isOpen={isCreatePromoModalOpen}
+        onClose={() => setIsCreatePromoModalOpen(false)}
+        onSave={onSavePromo}
+        id={selectedJobId}
+        fixerId={effectiveeffectiveeffectiveUserId}
       />
     </div>
   );
