@@ -81,6 +81,4 @@ export const jobCategories = [
   //si van a umentar mas sacar del modelo offfer.model.ts
 ];
 
-export const boliviaCities = [
-  { value: 'Cochabamba', label: 'Cochabamba' },
-];
+export const boliviaCities = [{ value: 'Cochabamba', label: 'Cochabamba' }];

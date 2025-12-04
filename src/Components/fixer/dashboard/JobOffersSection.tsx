@@ -36,11 +36,19 @@ interface NotificationState {
   onConfirm?: () => void;
 }
 
-export function JobOffersSection({ readOnly = false, effectiveeffectiveUserId = '' }: { readOnly?: boolean; effectiveeffectiveUserId?: string }) {
+export function JobOffersSection({
+  readOnly = false,
+  effectiveeffectiveUserId = '',
+}: {
+  readOnly?: boolean;
+  effectiveeffectiveUserId?: string;
+}) {
   const { user } = useAppSelector((state) => state.user);
   const effectiveeffectiveeffectiveUserId = effectiveeffectiveUserId || user?._id || '';
 
-  const { data: apiOffers, isLoading } = useGetJobsByFixerQuery(effectiveeffectiveeffectiveUserId, { skip: !effectiveeffectiveeffectiveUserId });
+  const { data: apiOffers, isLoading } = useGetJobsByFixerQuery(effectiveeffectiveeffectiveUserId, {
+    skip: !effectiveeffectiveeffectiveUserId,
+  });
   const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
   const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
   const [deleteJob] = useDeleteJobMutation();

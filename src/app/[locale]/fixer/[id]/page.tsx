@@ -14,9 +14,7 @@ import { JobOffersSection } from '@/Components/fixer/dashboard/JobOffersSection'
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { LocationSection } from '@/Components/fixer/dashboard/LocationSection';
 
-
 export default function FixerProfilePage() {
-
   const params = useParams<{ locale: string; id: string }>();
 
   const fixerId = params?.id;
@@ -165,7 +163,7 @@ export default function FixerProfilePage() {
             <TabsTrigger value='portafolio' className='px-6'>
               Portafolio
             </TabsTrigger>
-             <TabsTrigger value='ubicacion' className='px-6'>
+            <TabsTrigger value='ubicacion' className='px-6'>
               Ubicación
             </TabsTrigger>
             <TabsTrigger value='estadisticas' className='px-6'>
@@ -193,16 +191,15 @@ export default function FixerProfilePage() {
             <PortfolioSection fixerId={userData?._id as string} readOnly />
           </TabsContent>
           <TabsContent value='ubicacion'>
-            <LocationSection 
-            fixerId={userData?._id as string} 
-            currentLocation={
-              {
+            <LocationSection
+              fixerId={userData?._id as string}
+              currentLocation={{
                 lat: userData?.workLocation?.lat ?? 0,
                 lng: userData?.workLocation?.lng ?? 0,
                 direccion: userData?.workLocation?.direccion || '',
-              }
-            } 
-            readOnly />
+              }}
+              readOnly
+            />
           </TabsContent>
 
           <TabsContent value='estadisticas'>
