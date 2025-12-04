@@ -72,5 +72,5 @@ export const {
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
-  useToggleJobStatusMutation, // 👈 NUEVO
+  useToggleJobStatusMutation, 
 } = jobApi;
