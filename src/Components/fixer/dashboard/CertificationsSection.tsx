@@ -259,7 +259,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                   </div>
 
                   {cert.credentialUrl && (
-                    
+                    <a  
                       href={cert.credentialUrl}
                       target='_blank'
                       rel='noopener noreferrer'
@@ -267,7 +267,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                     >
                       {t('card.viewCredential')} <ExternalLink className="h-3 w-3" />
                     </a>
-                  )}
+                )}
                 </div>
               </div>
 
