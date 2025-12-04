@@ -50,6 +50,19 @@ export const jobApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Job'],
     }),
+
+    toggleJobStatus: builder.mutation<
+  IJobOffer,
+  { jobId: string }
+>({
+  query: ({ jobId }) => ({
+    url: `/job-offers/${jobId}/toggle-status`,
+    method: 'PATCH',
+  }),
+  invalidatesTags: ['Job'],
+}),
+
+
   }),
   overrideExisting: false,
 });
@@ -60,4 +73,6 @@ export const {
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
+  useToggleJobStatusMutation,
+
 } = jobApi;

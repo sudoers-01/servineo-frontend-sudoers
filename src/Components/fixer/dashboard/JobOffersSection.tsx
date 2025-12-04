@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Briefcase, Upload, X } from 'lucide-react';
+import { Plus, Briefcase, Upload, X, MoreVertical } from 'lucide-react';
 import { PillButton } from '../Pill-button';
 import { Modal } from '@/Components/Modal';
 import NotificationModal from '@/Components/Modal-notifications';
@@ -12,6 +12,8 @@ import Image from 'next/image';
 import { boliviaCities } from '@/app/lib/validations/Job-offer-Schemas';
 import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
+import { useToggleJobStatusMutation } from "@/app/redux/services/jobApi";
+
 import {
   useGetJobsByFixerQuery,
   useCreateJobMutation,
@@ -35,6 +37,12 @@ interface NotificationState {
   onConfirm?: () => void;
 }
 
+/**
+ * Manejamos el estado Activa/Inactiva SOLO en frontend (mock),
+ * sin tocar backend todavía.
+ */
+type JobStateFilter = 'active' | 'inactive';
+
 export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
   const t = useTranslations('JobOffersSection');
   const { user } = useAppSelector((state) => state.user);
@@ -49,6 +57,8 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
   const [editingOffer, setEditingOffer] = useState<IJobOffer | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
+  const [toggleJobStatus] = useToggleJobStatusMutation();
+
 
   const [notify, setNotify] = useState<NotificationState>({
     isOpen: false,
@@ -57,6 +67,11 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     message: '',
   });
 
+  // 🔹 Estado local para activa/inactiva por oferta (mock)
+  const [jobStates, setJobStates] = useState<Record<string, boolean>>({});
+  const [filter, setFilter] = useState<JobStateFilter>('active');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
@@ -64,7 +79,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     setValue,
     watch,
     formState: { errors },
-  } = useForm({
+  } = useForm<JobOfferFormData>({
     resolver: zodResolver(jobOfferSchema),
     defaultValues: {
       price: 0,
@@ -78,6 +93,29 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
   });
 
   const currentTags = watch('tags') || [];
+
+  // ⬇️ Sincronizar estado local (activa/inactiva) cuando llegan ofertas
+  useEffect(() => {
+    if (apiOffers && apiOffers.length > 0) {
+      setJobStates((prev) => {
+        const next = { ...prev };
+        apiOffers.forEach((offer: any) => {
+          const id = offer._id as string;
+          if (id && typeof next[id] === 'undefined') {
+            next[id] = true; // por defecto, todas activas
+          }
+        });
+        return next;
+      });
+    }
+  }, [apiOffers]);
+
+  // Lista filtrada según estado
+  const filteredOffers = (apiOffers || []).filter((offer: any) => {
+    const id = offer._id as string;
+    const isActive = jobStates[id] ?? true;
+    return filter === 'active' ? isActive : !isActive;
+  });
 
   const showNotify = (
     type: NotificationState['type'],
@@ -125,7 +163,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
 
   const removeImage = (index: number) => {
     setSelectedImages((prev) => prev.filter((_, i) => i !== index));
-    if (previewUrls[index].startsWith('blob:')) {
+    if (previewUrls[index]?.startsWith('blob:')) {
       URL.revokeObjectURL(previewUrls[index]);
     }
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
@@ -212,6 +250,11 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     showNotify('warning', '¿Eliminar oferta?', 'Esta acción no se puede deshacer.', async () => {
       try {
         await deleteJob({ jobId, fixerId: userId }).unwrap();
+        // limpiar estado local de activa/inactiva
+        setJobStates((prev) => {
+          const { [jobId]: _, ...rest } = prev;
+          return rest;
+        });
         setTimeout(() => showNotify('success', 'Eliminado', 'Oferta eliminada.'), 300);
       } catch (error: unknown) {
         showNotify('error', 'Error', 'No se pudo eliminar la oferta.');
@@ -236,37 +279,68 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     photos: offer.photos || [],
     allImages: offer.photos || [],
     imagenUrl: offer.photos?.[0] || '',
-    status: 'active',
+    status: 'active', // el estado real lo manejamos en jobStates
   });
 
   const isSubmitting = isCreating || isUpdating;
 
-  if (isLoading) return <div className='p-10 text-center animate-pulse'>Cargando ofertas...</div>;
+  const handleToggleActive = async (jobId: string) => {
+  try {
+    await toggleJobStatus({ jobId }).unwrap();
+    setOpenMenuId(null);
+  } catch (err) {
+    console.error("Error al cambiar estado:", err);
+    showNotify("error", "Error", "No se pudo cambiar el estado.");
+  }
+};
+
+
+  if (isLoading)
+    return <div className='p-10 text-center animate-pulse'>Cargando ofertas...</div>;
 
   return (
     <div className='space-y-6'>
       {/* Header */}
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between gap-4'>
         <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
           <Briefcase className='h-5 w-5 text-blue-600' />
           {readOnly ? t('titles.jobOffers') : t('titles.myJobOffers')}
         </h2>
-        {!readOnly && (
-          <PillButton
-            onClick={() => handleOpenModal()}
-            className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
+
+        {/* Filtro Activas / Inactivas + botón Nueva Oferta */}
+        <div className='flex items-center gap-3'>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as JobStateFilter)}
+            className='border border-gray-300 rounded-full px-3 py-1.5 text-sm text-gray-700 bg-white shadow-sm'
           >
-            <Plus className='h-4 w-4' />
-            {t('buttons.newOffer')}
-          </PillButton>
-        )}
+            <option value='active'>Ofertas activas</option>
+            <option value='inactive'>Ofertas inactivas</option>
+          </select>
+
+          {!readOnly && (
+            <PillButton
+              onClick={() => handleOpenModal()}
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
+            >
+              <Plus className='h-4 w-4' />
+              {t('buttons.newOffer')}
+            </PillButton>
+          )}
+        </div>
       </div>
 
       {/* Grid */}
-      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {apiOffers?.map((offer) => (
+<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {filteredOffers.map((offer: any) => {
+    const id = offer._id as string;
+    const isActive = jobStates[id] ?? true;
+
+    return (
+      <div key={id} className="relative h-full">
+        {/* Card completa */}
+        <div className="h-full rounded-2xl shadow bg-white flex flex-col overflow-visible">
           <JobOfferCard
-            key={offer._id}
             offer={mapToCardData(offer as IJobOffer)}
             onEdit={
               !readOnly
@@ -274,21 +348,66 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                     handleOpenModal({
                       ...offer,
                       tags: offer.tags || [],
-                      _id: offer._id || '',
+                      _id: id || '',
                     } as IJobOffer)
                 : undefined
             }
-            onDelete={!readOnly ? () => confirmDelete(offer._id!) : undefined}
+            onDelete={!readOnly ? () => confirmDelete(id) : undefined}
             readOnly={readOnly}
-            className='h-full'
+            className="flex-1"
           />
-        ))}
-        {(!apiOffers || apiOffers.length === 0) && (
-          <div className='col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed'>
-            No hay ofertas publicadas aún.
+
+          {/* Footer interno: estado + menú */}
+          <div className="border-t px-3 py-2 flex items-center justify-between">
+            {/* Badge de estado */}
+            <span
+              className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                isActive
+                  ? 'bg-green-50 text-green-600 border-green-200'
+                  : 'bg-red-50 text-red-600 border-red-200'
+              }`}
+            >
+              {isActive ? 'Activa' : 'Inactiva'}
+            </span>
+
+            {/* Menú de 3 puntos */}
+            {!readOnly && (
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() =>
+                    setOpenMenuId((prev) => (prev === id ? null : id))
+                  }
+                  className="p-1 rounded-full border border-gray-200 bg-white shadow hover:bg-gray-50"
+                >
+                  <MoreVertical size={16} className="text-gray-600" />
+                </button>
+
+                {openMenuId === id && (
+                  <div className="absolute right-0 mt-2 w-40 bg-white border rounded-lg shadow-lg text-xs z-20">
+                    <button
+                      type="button"
+                      onClick={() => handleToggleActive(id)}
+                      className="w-full text-left px-3 py-2 hover:bg-gray-50"
+                    >
+                      {isActive ? 'Desactivar trabajo' : 'Activar trabajo'}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
+    );
+  })}
+
+  {(!apiOffers || apiOffers.length === 0) && (
+    <div className="col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed">
+      No hay ofertas publicadas aún.
+    </div>
+  )}
+</div>
 
       {/* Modal Formulario */}
       <Modal
@@ -347,7 +466,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 {currentTags.map((tag) => (
                   <span
                     key={tag}
-                    className='inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border border-blue-200 shadow-sm animate-fade-in'
+                    className='inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border border-blue-200 shadow-sm'
                   >
                     {tag}
                     <button
@@ -360,7 +479,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                   </span>
                 ))}
                 {currentTags.length === 0 && (
-                  <span className='text-xs text-gray-400 italic self-center'>
+                  <span className='text-xs text-gray-400 italic'>
                     {t('form.tags.empty')}
                   </span>
                 )}
@@ -373,7 +492,9 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 defaultValue=''
               >
                 <option value='' disabled>
-                  {currentTags.length >= 5 ? t('form.tags.limitReached') : t('form.tags.addTag')}
+                  {currentTags.length >= 5
+                    ? t('form.tags.limitReached')
+                    : t('form.tags.addTag')}
                 </option>
                 {jobCategories.map((cat) => (
                   <option
@@ -381,7 +502,8 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                     value={cat.value}
                     disabled={currentTags.includes(cat.value)}
                   >
-                    {cat.label} {currentTags.includes(cat.value) ? t('form.tags.alreadyAdded') : ''}
+                    {cat.label}{' '}
+                    {currentTags.includes(cat.value) ? t('form.tags.alreadyAdded') : ''}
                   </option>
                 ))}
               </select>
@@ -403,7 +525,9 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 placeholder={t('form.description.placeholder')}
               />
               {errors.description && (
-                <p className='text-red-500 text-xs mt-1'>{errors.description.message as string}</p>
+                <p className='text-red-500 text-xs mt-1'>
+                  {errors.description.message as string}
+                </p>
               )}
             </div>
 
@@ -452,7 +576,9 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
               />
               {errors.contactPhone && (
-                <p className='text-red-500 text-xs mt-1'>{errors.contactPhone.message as string}</p>
+                <p className='text-red-500 text-xs mt-1'>
+                  {errors.contactPhone.message as string}
+                </p>
               )}
             </div>
 
