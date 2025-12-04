@@ -14,6 +14,7 @@ export interface OfferData {
   photos?: string[];
   imagenUrl?: string;
   allImages?: string[];
+  status?: boolean;
 }
 
 export interface FilterState {
