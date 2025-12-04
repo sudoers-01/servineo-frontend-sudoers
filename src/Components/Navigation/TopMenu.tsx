@@ -317,7 +317,8 @@ export default function TopMenu() {
   };
 
   /* ---------- Render ---------- */
-  return (
+  /* ---------- Render ---------- */
+ return (
     <>
       {/* DESKTOP HEADER */}
       <header
@@ -366,10 +367,10 @@ export default function TopMenu() {
             ))}
           </nav>
 
+
           {/* Desktop Right */}
           <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
             {!isClient ? (
-              // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
               <div style={{ width: 100, height: 10 }} />
             ) : !isLogged ? (
               <>
@@ -393,8 +394,6 @@ export default function TopMenu() {
                   onClick={() => setProfileMenuOpen((v) => !v)}
                   className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
                 >
-                  {/* Using img to keep visual identical to provided code */}
-                  {/* If you prefer next/image here, you can switch, but next/image inside buttons can be heavier */}
                   <img
                     src={userPhoto}
                     alt={user?.name ?? 'Usuario'}
@@ -438,7 +437,9 @@ export default function TopMenu() {
                     {user?.role !== 'fixer' && (
                       <>
                         <button
-                          onClick={() => {
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setProfileMenuOpen(false);
                             router.push('/requesterEdit/perfil');
                           }}
@@ -448,7 +449,9 @@ export default function TopMenu() {
                         </button>
 
                         <button
-                          onClick={() => {
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
                             setProfileMenuOpen(false);
                             router.push('/become-fixer');
                           }}
@@ -463,6 +466,7 @@ export default function TopMenu() {
                       <>
                         <Link
                           href='/fixer/dashboard'
+                          onMouseDown={(e) => e.stopPropagation()}
                           className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
                         >
                           <UserCircle className='h-4 w-4' />
@@ -471,7 +475,14 @@ export default function TopMenu() {
                       </>
                     )}
 
-                    <button onClick={doLogout} className={`menuItem logoutBtn`}>
+                    <button
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        doLogout();
+                      }}
+                      className={`menuItem logoutBtn`}
+                    >
                       Cerrar sesión
                     </button>
                   </div>
@@ -563,7 +574,9 @@ export default function TopMenu() {
                   {user?.role !== 'fixer' && (
                     <>
                       <button
-                        onClick={() => {
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setProfileMenuOpen(false);
                           router.push('/requesterEdit/perfil');
                         }}
@@ -573,7 +586,9 @@ export default function TopMenu() {
                       </button>
 
                       <button
-                        onClick={() => {
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
                           setProfileMenuOpen(false);
                           router.push('/become-fixer');
                         }}
@@ -596,7 +611,14 @@ export default function TopMenu() {
                     </>
                   )}
 
-                  <button onClick={doLogout} className={`menuItem logoutBtn`}>
+                  <button
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      doLogout();
+                    }}
+                    className={`menuItem logoutBtn`}
+                  >
                     Cerrar sesión
                   </button>
                 </div>
@@ -604,7 +626,7 @@ export default function TopMenu() {
             </>
           )}
         </div>
-        {/* Barra inferior fija con iconos */}
+         {/* Barra inferior fija con iconos */}
         <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
           {navItems.map((item) => (
             <button

@@ -247,11 +247,13 @@
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
+/* animación */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
+/* contenedor pequeño del menú (scoped) */
 .profileMenu {
   position: fixed;
   top: 70px;
@@ -265,7 +267,7 @@
   display: none;
   flex-direction: column;
   gap: 8px;
-  z-index: 9999;
+  z-index: 9999; /* alto para que aparezca encima */
   max-height: calc(100vh - 120px);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
@@ -273,23 +275,27 @@
   touch-action: pan-y;
 }
 
+/* cuando está abierto lo mostramos */
 .show {
   display: flex;
   animation: fadeIn .18s ease;
 }
 
+/* header del menú */
 .menuHeader {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
+/* botón de cerrar */
 .closeBtn {
   cursor: pointer;
   font-size: 18px;
   font-weight: bold;
 }
 
+/* preview foto */
 .profilePreview {
   width: 82px;
   height: 82px;
@@ -300,6 +306,7 @@
   background: #f0f0f0;
 }
 
+/* items */
 .menuItem {
   padding: 10px;
   border-radius: 8px;
@@ -319,8 +326,12 @@
   box-shadow: 0 2px 6px rgba(43,106,240,0.25);
 }
 
-.logoutBtn {}
+/* botones especiales */
+.logoutBtn {
+  /* aplicamos la misma base que .menuItem, pero lo distinguimos */
+}
 
+/* responsivo: si quieres mover posición en móvil */
 @media (max-width: 480px) {
   .profileMenu {
     width: 94%;
@@ -334,9 +345,10 @@
 }
 
 .menuLabel {
-  text-align: center;
+  text-align: left;
   font-weight: 600;
 }
+
 
 
 /* ============================================
