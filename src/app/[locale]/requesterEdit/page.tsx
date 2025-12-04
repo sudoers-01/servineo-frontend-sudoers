@@ -13,6 +13,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/app/lib/hooks/usoAutentificacion';
 import AccountLoginSettings from './linkAccounts/page';
+import DispositivosVinculados from './dispositivosVinculados/dispositivosVinculados';
 import RequesterEditForm from '@/Components/requester/request/RequesterEditForm';
 import ChangePasswordForm from '@/Components/requester/request/ChangePasswordForm';
 import Image from 'next/image';
@@ -45,6 +46,7 @@ export default function ConfiguracionPage() {
     setProfileError(null);
 
     try {
+      // fetch datos si necesitas
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : t('errors.loadProfile');
       setProfileError(message);
@@ -88,35 +90,36 @@ export default function ConfiguracionPage() {
           </div>
         );
 
+      case 'dispositivos':
+        return (
+          <div className='max-w-4xl w-full'>
+            <h2 className='text-xl font-semibold text-center mb-4'>Dispositivos Vinculados</h2>
+            <DispositivosVinculados />
+          </div>
+        );
+
       case 'seguridad':
         return (
           <div className='max-w-4xl w-full'>
             <h2 className='text-xl font-semibold text-center mb-2'>{t('sections.security')}</h2>
-            <p className='text-sm text-center text-gray-600 mb-8'>
-              {t('sections.securityDescription')}
-            </p>
+            <p className='text-sm text-center text-gray-600 mb-8'>{t('sections.securityDescription')}</p>
 
             <div className='flex justify-center gap-6'>
-
               {/* Cambiar contraseña */}
               <button
                 onClick={() => setSeccionActiva('password')}
                 className='flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white cursor-pointer min-w-[220px]'
               >
-                <div className='p-2 rounded-md bg-blue-50'>
-                  <KeyRound className='w-8 h-8 text-blue-600' />
-                </div>
+                <KeyRound className='w-8 h-8 text-blue-600' />
                 <span className='font-medium'>{t('security.changePassword')}</span>
               </button>
 
               {/* Dispositivos */}
               <button
-                onClick={() => router.push('/requesterEdit/dispositivosVinculados/')}
+                onClick={() => setSeccionActiva('dispositivos')}
                 className='flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white cursor-pointer min-w-[220px]'
               >
-                <div className='p-2 rounded-md bg-blue-50'>
-                  <Smartphone className='w-7 h-7 text-blue-600' />
-                </div>
+                <Smartphone className='w-7 h-7 text-blue-600' />
                 <span className='font-medium'>{t('security.linkedDevices')}</span>
               </button>
 
@@ -125,12 +128,9 @@ export default function ConfiguracionPage() {
                 onClick={() => router.push('/requesterEdit/Seguridad/Authenticator/')}
                 className='flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 bg-white cursor-pointer min-w-[220px]'
               >
-                <div className='p-2 rounded-md bg-blue-50'>
-                  <ScanFace className='w-7 h-7 text-blue-600' />
-                </div>
+                <ScanFace className='w-7 h-7 text-blue-600' />
                 <span className='font-medium'>Authenticator</span>
               </button>
-
             </div>
           </div>
         );
@@ -156,12 +156,11 @@ export default function ConfiguracionPage() {
                     {getInitials(safeUser.name ?? safeUser.email ?? '')}
                   </div>
                 )}
-
                 <h2 className='text-2xl font-semibold mb-2 text-gray-800'>
-                  {t('welcome.title', { name: safeUser.name ?? safeUser.email ?? 'User' })}
+                  {t('welcome.title', { name: safeUser.name ?? t('welcome.defaultName') })}
+                  <span className='text-blue-600'> {safeUser.name ?? 'Usuario'}</span>
                 </h2>
-
-                <p className='text-gray-600 text-lg'>{safeUser.name ?? safeUser.email}</p>
+                <p className='text-gray-600 max-w-md text-center'>{t('welcome.description')}</p>
               </>
             ) : (
               <p className='text-gray-600'>{t('welcome.loginRequired')}</p>
@@ -174,7 +173,6 @@ export default function ConfiguracionPage() {
   return (
     <div className='font-sans flex flex-col min-h-screen bg-gray-50 text-gray-800'>
       <div className='flex flex-1'>
-
         {/* SIDEBAR */}
         <aside className='w-64 bg-white p-6 flex flex-col justify-between relative shadow-md'>
           <div>
@@ -191,13 +189,13 @@ export default function ConfiguracionPage() {
             </div>
 
             <nav className='space-y-2'>
-
               <button
                 onClick={() => setSeccionActiva('perfil')}
-                className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ${seccionActiva === 'perfil'
+                className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
+                  seccionActiva === 'perfil'
                     ? 'bg-blue-100 text-blue-600 font-semibold'
-                    : 'hover:bg-blue-50 hover:text-blue-600'
-                  }`}
+                    : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
+                }`}
               >
                 <UserPen className='w-6 h-6 text-blue-600' />
                 {t('navigation.editProfile')}
@@ -205,10 +203,11 @@ export default function ConfiguracionPage() {
 
               <button
                 onClick={() => setSeccionActiva('seguridad')}
-                className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ${seccionActiva === 'seguridad' || seccionActiva === 'password'
+                className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
+                  seccionActiva === 'seguridad' || seccionActiva === 'password'
                     ? 'bg-blue-100 text-blue-600 font-semibold'
-                    : 'hover:bg-blue-50 hover:text-blue-600'
-                  }`}
+                    : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
+                }`}
               >
                 <ShieldCheck className='w-7 h-7 text-blue-600' />
                 {t('navigation.security')}
@@ -216,15 +215,15 @@ export default function ConfiguracionPage() {
 
               <button
                 onClick={() => setSeccionActiva('cuentas')}
-                className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ${seccionActiva === 'cuentas'
+                className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
+                  seccionActiva === 'cuentas'
                     ? 'bg-blue-100 text-blue-600 font-semibold'
-                    : 'hover:bg-blue-50 hover:text-blue-600'
-                  }`}
+                    : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
+                }`}
               >
                 <Layers className='w-7 h-7 text-blue-600' />
                 {t('navigation.linkedAccounts')}
               </button>
-
             </nav>
           </div>
         </aside>
