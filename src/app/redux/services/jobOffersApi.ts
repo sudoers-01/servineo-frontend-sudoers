@@ -76,10 +76,10 @@ export const jobOffersApi = baseApi.injectEndpoints({
         if (params.rating != null) urlParams.append('rating', String(params.rating));
         if (params.titleOnly) urlParams.append('titleOnly', 'true');
         if (params.exact) urlParams.append('exact', 'true');
-        
+
         // Filtrar solo ofertas activas
         urlParams.append('status', 'true');
-        
+
         urlParams.append('page', String(params.page || 1));
         urlParams.append('limit', String(params.limit || 10));
 
