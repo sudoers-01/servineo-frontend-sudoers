@@ -1,158 +1,167 @@
 'use client';
 import React from 'react';
+// Importa íconos de Lucide React para un estilo más moderno
+import { Phone, Mail, Zap, Clock, Calendar, Users, Cpu } from 'lucide-react';
 
 export default function JoinPage() {
+  // ===================================
+  // CONFIGURACIÓN Y CONSTANTES
+  // ===================================
+  const CONTACT = {
+    WHATSAPP_NUMBER: '59175139742',
+    EMAIL: 'servineo.serviciostecnicos@gmail.com',
+  };
+
+  const WHATSAPP_MESSAGE = encodeURIComponent(
+    'Hola Servineo, quisiera postularme para trabajar en soporte técnico.'
+  );
+
+  // ===================================
+  // DATOS DE SECCIÓN
+  // ===================================
   const benefits = [
     {
-      title: 'Expande tu Clientele',
-      description:
-        'Accede a miles de solicitudes de servicios calificados en tu área, sin necesidad de gastar en publicidad.',
-      icon: 'M13 7h-6v6h6V7zM7 17h10M17 10h-2M15 17h2',
-      colorVar: '--primary',
+      title: 'Crecimiento Profesional',
+      description: 'Accede a una red de clientes en expansión y aumenta tus ingresos sin pagar publicidad.',
+      icon: Users,
     },
     {
-      title: 'Cotizaciones Rápidas con Video',
-      description:
-        'Utiliza nuestra herramienta de video inspección para cotizar trabajos complejos a distancia, ahorrando tiempo y traslados.',
-      icon: 'M15 10l4.55 4.55a1 1 0 010 1.41l-2.83 2.83a1 1 0 01-1.41 0L10 17M14 10l-2.5-2.5M10 14l2.5 2.5M3 17l4-4M3 17V7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2z',
-      colorVar: '--primary',
+      title: 'Eficiencia Digital',
+      description: 'Usa herramientas inteligentes para cotizar y gestionar servicios desde tu móvil, sin papeleo.',
+      icon: Zap,
     },
     {
-      title: 'Gestiona con Facilidad',
-      description:
-        'Organiza tu calendario, citas agendadas y pagos en un solo lugar con nuestra interfaz intuitiva.',
-      icon: 'M8 7v4m4-4v4m4-4v4m-6 8h6M5 13h14M8 17h8M5 5a2 2 0 012-2h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5z',
-      colorVar: '--primary',
+      title: 'Control Total',
+      description: 'Agenda citas, organiza pedidos y controla tus pagos desde un panel de administración intuitivo.',
+      icon: Calendar,
     },
     {
       title: 'Comunidad y Soporte',
-      description:
-        'Únete a una comunidad exclusiva de profesionales y recibe soporte técnico y operativo 24/7.',
-      icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0zM7 10a2 2 0 11-4 0 2 2 0z',
-      colorVar: '--primary',
+      description: 'Forma parte de una red de profesionales y recibe ayuda constante cuando la necesites.',
+      icon: Clock,
     },
   ];
 
-  const steps = [
-    { text: 'Crea tu Perfil y Verifica tu Identidad.', colorVar: '--primary' },
-    { text: 'Define tus Servicios, Precios y Disponibilidad.', colorVar: '--primary' },
-    { text: 'Comienza a Recibir Solicitudes y a Cotizar.', colorVar: '--primary' },
-  ];
-
-  const MainCTAButton = ({ text = 'Postúlate y Únete a la Red', size = 'text-xl' }) => (
+  // ===================================
+  // COMPONENTES REUTILIZABLES
+  // ===================================
+  const CTAButtonWhatsapp = () => (
     <button
-      className={`bg-gradient-to-r from-[var(--primary)] to-[var(--primary)] text-white ${size} font-bold px-12 py-4 rounded-full transition-all duration-300 shadow-md hover:shadow-lg transform hover:scale-[1.03]`}
+      onClick={() =>
+        window.open(
+          `wa.me{CONTACT.WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`,
+          '_blank'
+        )
+      }
+      className='bg-primary text-primary-foreground hover:bg-primary/90 transition duration-300 text-lg font-bold px-10 py-4 rounded-full shadow-lg hover:scale-105 flex items-center justify-center gap-3 w-full sm:w-auto'
     >
-      {text}
+      <Phone className="w-5 h-5" />
+      Postular por WhatsApp
     </button>
   );
 
+  const CTAButtonEmail = () => (
+    <a
+      href={`mailto:${CONTACT.EMAIL}?subject=Postulacion a soporte tecnico&body=Hola Servineo,%0A%0AQuisiera postularme para formar parte del equipo de soporte tecnico.`}
+      className='bg-background text-primary border-2 border-input text-lg font-bold px-10 py-4 rounded-full shadow-lg hover:bg-muted hover:scale-105 transition duration-300 flex items-center justify-center gap-3 w-full sm:w-auto'
+    >
+      <Mail className="w-5 h-5" />
+      Postular por Email
+    </a>
+  );
+
+  // ===================================
+  // RENDERIZADO PRINCIPAL
+  // ===================================
   return (
-    <div className='min-h-screen bg-[var(--background)] pb-16'>
-      {/* 1. Hero Section */}
-      <section className='relative bg-gradient-to-br from-[var(--primary)] to-[var(--primary)] text-white py-24 px-6 md:px-12 overflow-hidden shadow-2xl'>
-        <div className='absolute top-0 right-0 w-96 h-96 bg-[var(--primary)]/20 rounded-full blur-3xl opacity-50 transform translate-x-1/4 -translate-y-1/4'></div>
-        <div className='absolute bottom-0 left-0 w-72 h-72 bg-[var(--primary)]/20 rounded-full blur-2xl opacity-40 transform -translate-x-1/4 translate-y-1/4'></div>
+    <main className='min-h-screen bg-background text-foreground'>
+      
+      {/* HERO SECTION - Enfocado en atraer al profesional */}
+      <section className='bg-primary text-primary-foreground text-center py-16 px-6'>
+        <h1 className='text-5xl md:text-6xl font-extrabold mb-4'>
+          Impulsa tu carrera técnica con <span className='text-background/50'>Servineo</span>
+        </h1>
 
-        <div className='max-w-6xl mx-auto text-center relative z-10'>
-          <h1 className='text-4xl md:text-6xl font-extrabold mb-5 leading-tight tracking-tight'>
-            Únete a <span className='text-[#000000] drop-shadow-lg'>Servineo</span> y trabaja con
-            nosotros:
-          </h1>
-          <p className='text-lg md:text-xl mb-10 opacity-95 max-w-3xl mx-auto font-light'>
-            Maximiza tu potencial. Accede a trabajos cotizados, utiliza herramientas innovadoras y
-            gestiona tu negocio sin comisiones iniciales.
-          </p>
-          <MainCTAButton />
+        <p className='text-lg max-w-3xl mx-auto opacity-90'>
+          Estamos buscando técnicos comprometidos que quieran crecer y modernizar su forma de trabajar con nuestra plataforma líder en servicios.
+        </p>
+
+        <div className='mt-8 flex justify-center gap-6 flex-wrap'>
+          <CTAButtonWhatsapp />
+          <CTAButtonEmail />
         </div>
       </section>
 
-      {/* 2. Benefits */}
-      <section className='py-20 px-6 md:px-12'>
-        <div className='max-w-7xl mx-auto'>
-          <h2 className='text-4xl font-extrabold text-center text-[var(--primary)] mb-14'>
-            Beneficios Clave para tu Crecimiento
-          </h2>
+      {/* BENEFICIOS SECTION - Más compacto */}
+      <section className='py-12 px-6'>
+        <h2 className='text-4xl font-bold text-center mb-10 text-primary'>
+          Beneficios Clave
+        </h2>
 
-          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8'>
-            {benefits.map((benefit, index) => (
-              <div
-                key={index}
-                className='bg-white p-6 rounded-2xl shadow-xl transition-all duration-300 border-b-4 hover:shadow-2xl hover:translate-y-[-4px]'
-                style={{ borderColor: `var(${benefit.colorVar})` }}
-              >
-                <div
-                  className='w-14 h-14 mb-4 rounded-xl flex items-center justify-center shadow-lg'
-                  style={{ backgroundColor: `var(${benefit.colorVar})` }}
-                >
-                  <svg
-                    className='w-7 h-7 text-white'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'
-                  >
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d={benefit.icon}
-                    />
-                  </svg>
-                </div>
-                <h3 className='text-xl font-bold text-[var(--primary)] mb-2'>{benefit.title}</h3>
-                <p className='text-gray-600 text-sm'>{benefit.description}</p>
+        <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-4 max-w-6xl mx-auto'>
+          {benefits.map((item) => (
+            <div
+              key={item.title}
+              className='bg-card text-card-foreground rounded-2xl p-6 shadow-md hover:shadow-xl transition duration-300 transform hover:-translate-y-1'
+            >
+              <div className='w-12 h-12 flex items-center justify-center bg-primary text-primary-foreground rounded-xl mb-4 text-xl'>
+                <item.icon className="w-6 h-6" />
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Steps */}
-      <section className='bg-white py-16 px-6 md:px-12'>
-        <div className='max-w-6xl mx-auto'>
-          <h2 className='text-4xl font-extrabold text-center text-[var(--primary)] mb-16'>
-            Proceso de Integración en 3 Pasos
-          </h2>
-
-          <div className='relative flex flex-col md:flex-row justify-between items-start md:space-x-4'>
-            <div className='hidden md:block absolute top-10 left-0 right-0 h-1 bg-gray-200 mx-10'>
-              <div
-                className='absolute top-0 left-0 h-full bg-gradient-to-r from-[var(--primary)] to-[var(--primary)]'
-                style={{ width: '100%' }}
-              ></div>
+              <h3 className='text-xl font-bold mb-2 text-primary'>
+                {item.title}
+              </h3>
+              <p className='text-sm text-muted-foreground'>
+                {item.description}
+              </p>
             </div>
-
-            {steps.map((step, index) => (
-              <div
-                key={index}
-                className='flex flex-col items-center text-center max-w-xs p-4 bg-white z-10 w-full md:w-1/3 space-y-4'
-              >
-                <div
-                  className='w-16 h-16 rounded-full mb-2 flex items-center justify-center text-3xl font-extrabold text-white shadow-2xl border-4 border-white'
-                  style={{ backgroundColor: `var(${step.colorVar})` }}
-                >
-                  {index + 1}
-                </div>
-                <p className='font-semibold text-xl text-[var(--primary)]'>{step.text}</p>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* 4. CTA Final */}
-      <section className='py-20 px-6 md:px-12 text-center bg-[var(--background)]'>
-        <div className='max-w-5xl mx-auto p-10 rounded-3xl bg-gradient-to-br from-[var(--primary)] to-[var(--primary)] shadow-2xl transform transition-transform duration-500 hover:scale-[1.01]'>
-          <h2 className='text-4xl font-extrabold text-white mb-4 drop-shadow-md'>
-            Da el Salto. Únete a los Mejores.
-          </h2>
-          <p className='text-xl text-white/90 mb-10 font-light'>
-            Transforma la manera en que encuentras y cotizas trabajo. Tu próxima gran oportunidad
-            está a un clic.
-          </p>
-          <MainCTAButton text='Postularme Ahora' size='text-xl' />
+      {/* NUEVA SECCIÓN - Tecnología y Modernidad */}
+      <section className='bg-muted py-12 px-6'>
+        <div className='max-w-4xl mx-auto flex flex-col md:flex-row items-center gap-8'>
+            <div className='md:w-1/2'>
+                <Cpu className='w-24 h-24 text-primary mx-auto md:mx-0 mb-4' />
+                <h2 className='text-3xl font-bold mb-4 text-primary'>
+                    Tecnología a tu Servicio
+                </h2>
+                <p className='text-foreground mb-4'>
+                    Olvídate de los métodos anticuados. Servineo utiliza tecnología de vanguardia para conectar a los técnicos con los clientes de manera eficiente y segura.
+                </p>
+                <ul className='list-disc list-inside text-muted-foreground space-y-2'>
+                    <li>Gestión de rutas optimizada.</li>
+                    <li>Notificaciones instantáneas de nuevos trabajos.</li>
+                    <li>Pagos seguros y transparentes.</li>
+                </ul>
+            </div>
+            <div className='md:w-1/2'>
+                {/* Aquí es donde pones la imagen */}
+                <img 
+                    src="/reparadores.jpg" 
+                    alt="Técnicos de Servineo usando la plataforma" 
+                    className='rounded-xl shadow-lg w-full object-cover h-64'
+                />
+            </div>
         </div>
       </section>
-    </div>
+
+      {/* CTA FINAL SECTION - Compacto */}
+      <section className='bg-primary text-primary-foreground py-16 text-center px-6'>
+        <h2 className='text-4xl font-extrabold mb-4'>
+          ¿Listo para formar parte del equipo?
+        </h2>
+
+        <p className='text-lg opacity-90 max-w-2xl mx-auto mb-8'>
+          Escríbenos ahora y comienza tu camino profesional en Servineo.
+        </p>
+
+        <div className='flex justify-center gap-6 flex-wrap'>
+          <CTAButtonWhatsapp />
+          <CTAButtonEmail />
+        </div>
+      </section>
+
+    </main>
   );
 }
