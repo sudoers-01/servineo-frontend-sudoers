@@ -8,8 +8,6 @@ import InspirationSection from '@/Components/Home/Inspiration-section';
 import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
 import dynamic from 'next/dynamic';
 
-const Map = dynamic(() => import('@/app/Mapa/Map'), { ssr: false });
-import FooterSection from '@/Components/Home/Footer-section';
 import { useEffect } from 'react';
 //import { useSelector } from 'react-redux';
 //import { IUser } from '@/types/user';
