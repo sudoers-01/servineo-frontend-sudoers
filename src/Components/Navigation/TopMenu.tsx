@@ -118,21 +118,21 @@ export default function TopMenu() {
 
   /* ---------- Helpers ---------- */
 
-  const getPhoto = (u?: IUser | null) => {
-    if (!u) return '/es/img/icon.png';
+const getPhoto = (u?: IUser | null): string => {
+  if (!u) return '/es/img/icon.png';
 
-    // normalizar campos que pueden venir vacíos o null
-    const photo = typeof u.photo === 'string' ? u.photo.trim() : '';
-    const picture = typeof u.picture === 'string' ? u.picture.trim() : '';
-    const urlPhoto = typeof u.url_photo === 'string' ? u.url_photo.trim() : '';
+  const sources: (string | undefined)[] = [
+    u.photo,
+    u.picture,
+    u.url_photo,
+  ];
 
-    // si es base64 o url valida, devuélvela
-    if (photo) return photo;
-    if (picture) return picture;
-    if (urlPhoto) return urlPhoto;
+  const valid = sources.find(
+    (src) => typeof src === 'string' && src.trim().length > 0
+  );
 
-    return '/es/img/icon.png';
-  };
+  return valid ?? '/es/img/icon.png';
+};
 
   const userPhoto = getPhoto(user);
 
@@ -152,87 +152,78 @@ export default function TopMenu() {
 
   // hydrate redux from localStorage (safe)
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    try {
-      const rawUser = localStorage.getItem('servineo_user');
-      const rawToken = localStorage.getItem('servineo_token');
-      if (rawUser && rawUser !== 'undefined') {
-        const parsed: IUser = JSON.parse(rawUser);
-        const userWithPhoto: IUser = {
-          ...parsed,
-          picture: parsed.picture || parsed.photo || parsed.url_photo,
-          photo: parsed.picture || parsed.photo || parsed.url_photo,
-          url_photo: parsed.picture || parsed.photo || parsed.url_photo,
-        } as IUser;
-        if (!user || user._id !== userWithPhoto._id) {
-          dispatch(setUser(userWithPhoto));
-        } else if (user.photo !== userWithPhoto.photo || user.picture !== userWithPhoto.picture) {
-          dispatch(setUser(userWithPhoto));
-        }
-        if (rawToken) sessionStorage.removeItem('auth_in_progress');
-        setIsLogged(!!rawToken);
-        setUserId(userWithPhoto._id || userWithPhoto.id || null);
-      } else {
-        const token = rawToken;
-        setIsLogged(!!token);
-      }
-    } catch (err) {
-      console.warn('Error parsing stored user', err);
-      localStorage.removeItem('servineo_user');
+  if (typeof window === 'undefined') return;
+
+  try {
+    const raw = localStorage.getItem('servineo_user');
+    const token = localStorage.getItem('servineo_token');
+
+    if (raw && raw !== 'undefined') {
+      const parsed: IUser = JSON.parse(raw);
+
+      const normalized: IUser = {
+        ...parsed,
+        photo: parsed.photo || parsed.picture || parsed.url_photo || '',
+        picture: parsed.picture || parsed.photo || parsed.url_photo || '',
+        url_photo: parsed.url_photo || parsed.photo || parsed.picture || '',
+      };
+
+      dispatch(setUser(normalized));
+      setIsLogged(Boolean(token));
+      setUserId(normalized._id || normalized.id || null);
+    } else {
       dispatch(setUser(null));
       setIsLogged(false);
+      setUserId(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  } catch (e) {
+    localStorage.removeItem('servineo_user');
+    dispatch(setUser(null));
+    setIsLogged(false);
+  }
+}, []);
 
   // listen storage changes (other tabs) & custom event
   useEffect(() => {
-    const syncUserState = () => {
-      try {
-        const rawUser = localStorage.getItem('servineo_user');
-        const rawToken = localStorage.getItem('servineo_token');
-        if (rawUser && rawUser !== 'undefined') {
-          const parsed: IUser = JSON.parse(rawUser);
-          const userWithPhoto: IUser = {
-            ...parsed,
-            picture: parsed.picture || parsed.photo || parsed.url_photo,
-            photo: parsed.picture || parsed.photo || parsed.url_photo,
-            url_photo: parsed.picture || parsed.photo || parsed.url_photo,
-          } as IUser;
-          dispatch(setUser(userWithPhoto));
-          if (rawToken) sessionStorage.removeItem('auth_in_progress');
-          setIsLogged(!!rawToken);
-          setUserId(userWithPhoto._id || userWithPhoto.id || null);
-        } else {
-          dispatch(setUser(null));
-          setIsLogged(false);
-          setUserId(null);
-        }
-      } catch {
+  const sync = () => {
+    try {
+      const raw = localStorage.getItem('servineo_user');
+      const token = localStorage.getItem('servineo_token');
+
+      if (raw && raw !== 'undefined') {
+        const parsed: IUser = JSON.parse(raw);
+
+        const normalized: IUser = {
+          ...parsed,
+          photo: parsed.photo || parsed.picture || parsed.url_photo,
+          picture: parsed.picture || parsed.photo || parsed.url_photo,
+          url_photo: parsed.url_photo || parsed.photo || parsed.picture,
+        };
+
+        dispatch(setUser(normalized));
+        setIsLogged(Boolean(token));
+        setUserId(normalized._id || normalized.id || null);
+      } else {
         dispatch(setUser(null));
         setIsLogged(false);
         setUserId(null);
       }
-    };
+    } catch {
+      dispatch(setUser(null));
+      setIsLogged(false);
+      setUserId(null);
+    }
+  };
 
-    const onStorage = (e: StorageEvent) => {
-      if (e.key === 'servineo_user' || e.key === 'servineo_token') {
-        syncUserState();
-        if (e.key === 'servineo_token' && e.newValue) {
-          sessionStorage.removeItem('auth_in_progress');
-        }
-      }
-    };
+  window.addEventListener('storage', sync);
+  window.addEventListener('servineo_user_updated', sync);
 
-    const onUserUpdated = () => syncUserState();
+  return () => {
+    window.removeEventListener('storage', sync);
+    window.removeEventListener('servineo_user_updated', sync);
+  };
+}, [dispatch]);
 
-    window.addEventListener('storage', onStorage);
-    window.addEventListener('servineo_user_updated', onUserUpdated);
-    return () => {
-      window.removeEventListener('storage', onStorage);
-      window.removeEventListener('servineo_user_updated', onUserUpdated);
-    };
-  }, [dispatch]);
 
   // auto-logout on inactivity (15 minutes)
   useEffect(() => {
@@ -440,9 +431,10 @@ export default function TopMenu() {
 
                     <img className='profilePreview' src={userPhoto} alt={user?.name ?? 'Usuario'} />
 
-                    <div className='menuLabel'>{user?.name}</div>
-                    <div className='menuLabel'>{user?.email}</div>
-                    <div className='menuLabel'>{user?.telefono}</div>
+                    <div className='menuLabel'>{user?.name ?? fetchedUser?.name ?? 'Sin nombre'}</div>
+                    <div className='menuLabel'>{user?.email ?? fetchedUser?.email ?? 'Sin email'}</div>
+                    <div className='menuLabel'>{user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}</div>
+
 
                     <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
@@ -577,9 +569,10 @@ export default function TopMenu() {
 
                   <img className='profilePreview' src={userPhoto} alt='Foto' />
 
-                  <div className='menuLabel'>{user?.name}</div>
-                  <div className='menuLabel'>{user?.email}</div>
-                  <div className='menuLabel'>{user?.telefono}</div>
+                  <div className='menuLabel'>{user?.name ?? fetchedUser?.name ?? 'Sin nombre'}</div>
+                  <div className='menuLabel'>{user?.email ?? fetchedUser?.email ?? 'Sin email'}</div>
+                  <div className='menuLabel'>{user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}</div>
+
 
                   <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
@@ -651,7 +644,7 @@ export default function TopMenu() {
                 {t('dropdown.editProfile')}
               </Link>
               <button
-                onClick={logout}
+                onClick={doLogout}
                 className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
               >
                 {t('dropdown.logout')}
