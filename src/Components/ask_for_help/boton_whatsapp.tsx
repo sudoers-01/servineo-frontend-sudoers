@@ -54,22 +54,35 @@ const BotonWhatsapp = () => {
 
   return (
     <>
-      {/* Botón Flotante */}
+      {/* Botón Flotante - UN POCO MÁS ARRIBA */}
       <button
         type='button'
         onClick={handleInitialClick}
-        className='flex items-center justify-center
-                        w-14 h-14
-                        bg-green-500 hover:bg-green-600
-                        rounded-full shadow-lg
-                        transition duration-300 transform hover:scale-105
-                        cursor-pointer'
+        className='fixed z-40 flex items-center justify-center
+                   w-14 h-14 md:w-16 md:h-16
+                   bg-green-500 hover:bg-green-600
+                   rounded-full shadow-2xl shadow-green-500/50
+                   transition-all duration-300 transform hover:scale-110
+                   cursor-pointer
+                   /* Desktop: más arriba */
+                   bottom-20 right-6
+                   /* Tablet: ajustado */
+                   md:bottom-22 md:right-8
+                   /* Mobile: MÁS ARRIBA para no tapar header */
+                   sm:bottom-24 sm:right-5
+                   /* Mobile pequeño: aún más arriba */
+                   xs:bottom-28 xs:right-4
+                   /* Para teléfonos muy pequeños */
+                   max-sm:bottom-[7rem] max-sm:right-4'
         aria-label='Contactar por WhatsApp'
       >
-        <FaWhatsapp size={28} className='text-white' />
+        <FaWhatsapp size={32} className='text-white' />
+        
+        {/* Glow effect verde */}
+        <div className='absolute inset-0 rounded-full bg-green-400/20 animate-pulse'></div>
       </button>
 
-      {/* 5. Modal / Overlay del Captcha */}
+      {/* Modal / Overlay del Captcha */}
       {showCaptcha && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm'>
           <div className='bg-white p-6 rounded-lg shadow-xl relative flex flex-col items-center gap-4'>
