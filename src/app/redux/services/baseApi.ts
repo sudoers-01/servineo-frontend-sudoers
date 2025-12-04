@@ -12,11 +12,11 @@ if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
 export const baseQuery = fetchBaseQuery({
   baseUrl: API_URL,
   prepareHeaders: (headers) => {
-    const token = localStorage.getItem('servineo_token');
-    if (token) {
-      headers.set('authorization', `Bearer ${token}`);
-    }
-    //  headers.set('Content-Type', 'application/json');
+    //const token = localStorage.getItem('servineo_token');
+    // if (token) {
+    //   headers.set('authorization', `Bearer ${token}`);
+    // }
+    // //  headers.set('Content-Type', 'application/json');
     return headers;
   },
   credentials: 'include',
