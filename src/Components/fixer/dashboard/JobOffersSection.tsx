@@ -100,7 +100,8 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
 
   // ⭐ Filtrar según estado real del backend
   const filteredOffers = (apiOffers || []).filter((offer: any) => {
-    const isActive = offer.status ?? true;
+    const isActive = offer.status ?? false;
+
     return filter === 'active' ? isActive : !isActive;
   });
 
@@ -234,12 +235,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
 
         {filteredOffers.map((offer: any) => {
           const id = offer._id;
-          const isActive =
-            offer.status === true
-              ? true
-              : offer.status === false
-              ? false
-              : false; // si no existe, inactiva
+          const isActive = offer.status ?? true;
 
           return (
             <div key={id} className="relative h-full">
