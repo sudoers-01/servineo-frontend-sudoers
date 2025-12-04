@@ -63,7 +63,7 @@ const services = [
 ];
 
 export const CategoriasP = () => {
-  const t = useTranslations("CategoriasPopulares")
+  const t = useTranslations('CategoriasPopulares');
   const router = useRouter();
 
   // Tomar las 8 categorías más populares (ordenadas por demanda)
@@ -72,9 +72,9 @@ export const CategoriasP = () => {
   return (
     <div className='flex flex-col items-center gap-[40px] ml-[30px] mr-[30px] my-8 p-8 bg-white rounded-2xl shadow-2xl'>
       <div className='flex flex-col items-center gap-[25px]'>
-        <h1 className='text-center text-[35px] font-bold text-gray-800'> {t("title")} </h1>
-        <h2 className='text-center text-gray-600 text-lg'> {t("subtitle")} </h2>
-        <h3 className='text-center text-gray-500'> {t("subtitle2")} </h3>
+        <h1 className='text-center text-[35px] font-bold text-gray-800'> {t('title')} </h1>
+        <h2 className='text-center text-gray-600 text-lg'> {t('subtitle')} </h2>
+        <h3 className='text-center text-gray-500'> {t('subtitle2')} </h3>
       </div>
 
       {/* Grid de categorías */}
@@ -94,12 +94,14 @@ export const CategoriasP = () => {
             <h3 className='text-xl font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors'>
               {t(`card${index + 1}.name`)}
             </h3>
-            <p className='text-gray-600 mb-4 text-sm leading-relaxed'>{t(`card${index + 1}.description`)}</p>
+            <p className='text-gray-600 mb-4 text-sm leading-relaxed'>
+              {t(`card${index + 1}.description`)}
+            </p>
 
             <div className='mb-4'>
               <div className='flex justify-between items-center mb-1'>
                 <span className='text-xs font-medium text-gray-700'>
-                  {service.demand}% {t("demand")}
+                  {service.demand}% {t('demand')}
                 </span>
               </div>
               <div className='w-full bg-gray-200 rounded-full h-2'>
@@ -111,7 +113,7 @@ export const CategoriasP = () => {
             </div>
 
             <button className='w-full bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition-colors transform group-hover:scale-105 duration-200'>
-              {t("button")}
+              {t('button')}
             </button>
           </div>
         ))}
@@ -122,7 +124,7 @@ export const CategoriasP = () => {
         href='/servicios'
         className='mt-4 px-8 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium shadow-lg hover:shadow-xl'
       >
-        {t("button2")}
+        {t('button2')}
       </Link>
     </div>
   );

@@ -14,40 +14,40 @@ export default function RecenterMap({ position }: RecenterMapProps) {
   const isFirstRender = useRef(true);
 
   useEffect(() => {
-  if (!position) return;
+    if (!position) return;
 
-  // Evitar el primer render
-  if (isFirstRender.current) {
-    isFirstRender.current = false;
+    // Evitar el primer render
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      prevPosition.current = position;
+      return;
+    }
+
+    // Si la posición no cambió, salir
+    if (
+      prevPosition.current &&
+      position[0] === prevPosition.current[0] &&
+      position[1] === prevPosition.current[1]
+    ) {
+      return;
+    }
+
     prevPosition.current = position;
-    return;
-  }
 
-  // Si la posición no cambió, salir
-  if (
-    prevPosition.current &&
-    position[0] === prevPosition.current[0] &&
-    position[1] === prevPosition.current[1]
-  ) {
-    return;
-  }
+    // ===== DETECTAR MÓVIL =====
+    const isMobile = /Mobi|Android/i.test(navigator.userAgent);
 
-  prevPosition.current = position;
+    if (isMobile) {
+      map.setView(position, map.getZoom()); // móvil: sin animación
+    } else {
+      map.flyTo(position, map.getZoom(), { animate: true, duration: 0.8, easeLinearity: 0.3 }); // web: animación
+    }
 
-  // ===== DETECTAR MÓVIL =====
-  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+    setShowPulse(true);
+    const timer = setTimeout(() => setShowPulse(false), 1200);
 
-  if (isMobile) {
-    map.setView(position, map.getZoom()); // móvil: sin animación
-  } else {
-    map.flyTo(position, map.getZoom(), { animate: true, duration: 0.8, easeLinearity: 0.3 }); // web: animación
-  }
-
-  setShowPulse(true);
-  const timer = setTimeout(() => setShowPulse(false), 1200);
-
-  return () => clearTimeout(timer);
-}, [position, map]);
+    return () => clearTimeout(timer);
+  }, [position, map]);
 
   return (
     <>

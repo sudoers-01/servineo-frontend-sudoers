@@ -55,15 +55,15 @@ export default function Home() {
           <RecentOffersSection />
         </div>
       </section>
-      
-      <ServicesSection 
+
+      <ServicesSection
         showHero={false}
         showAllServices={false}
         showCTA={false}
-        title="Servicios Disponibles"
-        subtitle="Encuentra el profesional perfecto para cualquier trabajo en tu hogar"
+        title='Servicios Disponibles'
+        subtitle='Encuentra el profesional perfecto para cualquier trabajo en tu hogar'
       />
-      
+
       {!isFixer && (
         <>
           <HowItWorksSection />

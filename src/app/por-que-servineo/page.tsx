@@ -5,7 +5,6 @@ import { MapPin, User, Calendar, ShieldCheck } from 'lucide-react';
 import { Check, X } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 
-
 function useInViewMultiple(count: number, options?: IntersectionObserverInit) {
   const refs = useRef<(HTMLDivElement | null)[]>(Array(count).fill(null));
   const [inViewStates, setInViewStates] = useState<boolean[]>(Array(count).fill(false));
@@ -47,7 +46,7 @@ export default function WhyServineoPage() {
       image: '/img/imgWhyServineo/banner1.png',
       alt: 'Mapa de la ciudad con marcadores que muestran fixers cerca del usuario',
       icon: (
-        <MapPin className="inline-block w-6 h-6 mr-2 text-[var(--primary)]" aria-hidden="true" />
+        <MapPin className='inline-block w-6 h-6 mr-2 text-[var(--primary)]' aria-hidden='true' />
       ),
       button: { text: 'Explorar mapa', link: '/' },
     },
@@ -58,7 +57,7 @@ export default function WhyServineoPage() {
         'En Servineo, cada fixer cuenta con un perfil completo que muestra su experiencia, especialidades y disponibilidad. Explora sus trayectorias, conoce sus habilidades y elige con confianza al profesional que mejor se adapte a tus necesidades. Todo lo que necesitas saber para encontrar al fixer ideal, en un solo lugar.',
       image: '/img/imgWhyServineo/banner2.png',
       alt: 'Perfil de un profesional mostrando su información y experiencia',
-      icon: <User className="inline-block w-6 h-6 mr-2 text-[var(--primary)]" aria-hidden="true" />,
+      icon: <User className='inline-block w-6 h-6 mr-2 text-[var(--primary)]' aria-hidden='true' />,
     },
     {
       id: 3,
@@ -68,7 +67,7 @@ export default function WhyServineoPage() {
       image: '/img/imgWhyServineo/banner3.png',
       alt: 'Persona agendando una cita de servicio desde su dispositivo',
       icon: (
-        <Calendar className="inline-block w-6 h-6 mr-2 text-[var(--primary)]" aria-hidden="true" />
+        <Calendar className='inline-block w-6 h-6 mr-2 text-[var(--primary)]' aria-hidden='true' />
       ),
       button: { text: 'Agendar ahora', link: '/' },
     },
@@ -81,8 +80,8 @@ export default function WhyServineoPage() {
       alt: 'Profesional estrechando la mano de un cliente en señal de confianza',
       icon: (
         <ShieldCheck
-          className="inline-block w-6 h-6 mr-2 text-[var(--primary)]"
-          aria-hidden="true"
+          className='inline-block w-6 h-6 mr-2 text-[var(--primary)]'
+          aria-hidden='true'
         />
       ),
     },
@@ -129,13 +128,13 @@ export default function WhyServineoPage() {
   const { refs, inViewStates } = useInViewMultiple(banners.length);
 
   return (
-    <main className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+    <main className='min-h-screen bg-[var(--background)] text-[var(--foreground)]'>
       {/* Hero */}
-      <section className="max-w-5xl mx-auto px-6 py-24 text-center">
-        <h1 className="text-5xl md:text-6xl font-extrabold text-[var(--primary)] mb-8 leading-tight">
+      <section className='max-w-5xl mx-auto px-6 py-24 text-center'>
+        <h1 className='text-5xl md:text-6xl font-extrabold text-[var(--primary)] mb-8 leading-tight'>
           ¿Por qué Servineo?
         </h1>
-        <p className="text-lg md:text-xl leading-relaxed text-gray-700 max-w-3xl mx-auto">
+        <p className='text-lg md:text-xl leading-relaxed text-gray-700 max-w-3xl mx-auto'>
           En Servineo, creemos que encontrar ayuda profesional no debería ser complicado. Por eso,
           creamos una plataforma que te conecta con expertos de confianza, especializados en
           carpintería, plomería, electricidad y mucho más. Servineo transforma la manera de
@@ -154,18 +153,18 @@ export default function WhyServineoPage() {
             ${inViewStates[index] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6 sm:translate-y-8'}`}
         >
           {/* Texto */}
-          <div className="md:w-1/2 text-center md:text-left z-20">
-            <h2 className="text-2xl sm:text-2xl md:text-3xl font-semibold text-black mb-4 flex items-center justify-center md:justify-start">
+          <div className='md:w-1/2 text-center md:text-left z-20'>
+            <h2 className='text-2xl sm:text-2xl md:text-3xl font-semibold text-black mb-4 flex items-center justify-center md:justify-start'>
               {banner.icon}
               {banner.title}
             </h2>
-            <p className="text-base sm:text-lg md:text-lg leading-relaxed mb-4">
+            <p className='text-base sm:text-lg md:text-lg leading-relaxed mb-4'>
               {banner.description}
             </p>
             {banner.button && (
               <Link
                 href={banner.button.link}
-                className="inline-block bg-[var(--primary)] hover:bg-[var(--secondary)] text-white rounded-full px-6 py-3 shadow-md transition-all duration-300 transform hover:scale-105 mt-4"
+                className='inline-block bg-[var(--primary)] hover:bg-[var(--secondary)] text-white rounded-full px-6 py-3 shadow-md transition-all duration-300 transform hover:scale-105 mt-4'
               >
                 {banner.button.text}
               </Link>
@@ -173,59 +172,59 @@ export default function WhyServineoPage() {
           </div>
 
           {/* Imagen - CAMBIO PRINCIPAL AQUÍ */}
-          <div className="md:w-1/2 relative z-10 flex justify-center md:justify-end">
+          <div className='md:w-1/2 relative z-10 flex justify-center md:justify-end'>
             <div
-              className="hidden xl:block absolute rounded-3xl shadow-lg
+              className='hidden xl:block absolute rounded-3xl shadow-lg
                 top-0 right-0 w-5/6 sm:w-4/5 h-5/6 sm:h-4/5 translate-x-6 sm:translate-x-14 -translate-y-4 sm:-translate-y-6
-                bg-[var(--primary)] z-0"
-              aria-hidden="true"
+                bg-[var(--primary)] z-0'
+              aria-hidden='true'
             />
-            <div className="relative rounded-3xl shadow-lg overflow-hidden w-full md:w-[90%] z-10 group bg-gray-100">
+            <div className='relative rounded-3xl shadow-lg overflow-hidden w-full md:w-[90%] z-10 group bg-gray-100'>
               {/* USANDO <img> NATIVO EN LUGAR DE <Image /> */}
               <img
                 src={banner.image}
                 alt={banner.alt}
-                className="w-full h-auto object-cover block transition duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:brightness-95"
-                loading="lazy"
-                decoding="async"
+                className='w-full h-auto object-cover block transition duration-500 group-hover:scale-105 group-hover:shadow-2xl group-hover:brightness-95'
+                loading='lazy'
+                decoding='async'
               />
             </div>
           </div>
         </section>
       ))}
       {/* Tabla comparativa */}
-      <section className="max-w-6xl mx-auto px-6 py-24 bg-[var(--background)] text-[var(--foreground)]">
+      <section className='max-w-6xl mx-auto px-6 py-24 bg-[var(--background)] text-[var(--foreground)]'>
         {/* Subtítulo */}
-        <h2 className="text-3xl md:text-4xl font-extrabold text-black mb-4 text-center">
+        <h2 className='text-3xl md:text-4xl font-extrabold text-black mb-4 text-center'>
           ¿Qué hace a Servineo diferente?
         </h2>
         {/* Descripción */}
-        <p className="text-base sm:text-lg md:text-lg leading-relaxed text-center text-gray-700 mb-12 max-w-3xl mx-auto">
+        <p className='text-base sm:text-lg md:text-lg leading-relaxed text-center text-gray-700 mb-12 max-w-3xl mx-auto'>
           Compara las principales plataformas de servicios y descubre por qué Servineo ofrece mayor
           seguridad, confianza y facilidad para agendar tus servicios.
         </p>
 
-        <div className="overflow-x-auto relative">
-          <table className="min-w-full border border-gray-200 rounded-2xl shadow-md overflow-hidden">
-            <thead className="bg-[var(--primary)] text-white">
+        <div className='overflow-x-auto relative'>
+          <table className='min-w-full border border-gray-200 rounded-2xl shadow-md overflow-hidden'>
+            <thead className='bg-[var(--primary)] text-white'>
               <tr>
-                <th className="p-4 text-center text-xl">Criterio</th>
-                <th className="p-4 text-center text-xl">Servineo</th>
-                <th className="p-4 text-center text-xl">
+                <th className='p-4 text-center text-xl'>Criterio</th>
+                <th className='p-4 text-center text-xl'>Servineo</th>
+                <th className='p-4 text-center text-xl'>
                   <a
-                    href="https://www.facebook.com/marketplace"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href='https://www.facebook.com/marketplace'
+                    target='_blank'
+                    rel='noopener noreferrer'
                     className="relative inline-block text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[2px] after:bg-white hover:after:w-full after:transition-all after:duration-300"
                   >
                     Facebook Marketplace
                   </a>
                 </th>
-                <th className="p-4 text-center text-xl">
+                <th className='p-4 text-center text-xl'>
                   <a
-                    href="https://bookaapp.com/services"
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    href='https://bookaapp.com/services'
+                    target='_blank'
+                    rel='noopener noreferrer'
                     className="relative inline-block text-white after:content-[''] after:absolute after:left-0 after:bottom-0 after:w-0 after:h-[2px] after:bg-white hover:after:w-full after:transition-all after:duration-300"
                   >
                     Foreign apps
@@ -233,154 +232,154 @@ export default function WhyServineoPage() {
                 </th>
               </tr>
             </thead>
-            <tbody className="bg-white">
+            <tbody className='bg-white'>
               {/* Verificación de usuarios */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">Verificación de usuarios</td>
-                <td className="p-4 bg-blue-50 rounded-lg shadow-sm text-center">
+              <tr className='border-b border-gray-200 hover:bg-gray-50 transition-colors'>
+                <td className='p-4 text-center'>Verificación de usuarios</td>
+                <td className='p-4 bg-blue-50 rounded-lg shadow-sm text-center'>
                   Perfiles reales y verificados
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Sin verificación obligatoria
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Validación básica
                   </span>
                 </td>
               </tr>
 
               {/* Reserva de citas */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">Reserva de citas</td>
-                <td className="p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer">
-                  <Check className="mx-auto text-green-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+              <tr className='border-b border-gray-200 hover:bg-gray-50 transition-colors'>
+                <td className='p-4 text-center'>Reserva de citas</td>
+                <td className='p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer'>
+                  <Check className='mx-auto text-green-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Reserva en segundos desde la plataforma
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Sin sistema de reservas
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <Check className="mx-auto text-green-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <Check className='mx-auto text-green-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Disponible, pero poco ágil
                   </span>
                 </td>
               </tr>
 
               {/* Seguridad y confianza */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">Seguridad y confianza</td>
-                <td className="p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer">
-                  <Check className="mx-auto text-green-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+              <tr className='border-b border-gray-200 hover:bg-gray-50 transition-colors'>
+                <td className='p-4 text-center'>Seguridad y confianza</td>
+                <td className='p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer'>
+                  <Check className='mx-auto text-green-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Opiniones reales y control de calidad
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Alto riesgo de fraudes
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Moderada, depende del país
                   </span>
                 </td>
               </tr>
 
               {/* Información del profesional */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">Información del profesional</td>
-                <td className="p-4 bg-blue-50 rounded-lg shadow-sm text-center">
+              <tr className='border-b border-gray-200 hover:bg-gray-50 transition-colors'>
+                <td className='p-4 text-center'>Información del profesional</td>
+                <td className='p-4 bg-blue-50 rounded-lg shadow-sm text-center'>
                   Perfiles con fotos, habilidades y disponibilidad
                 </td>
-                <td className="p-4 text-center">Información limitada</td>
-                <td className="p-4 text-center">Datos básicos</td>
+                <td className='p-4 text-center'>Información limitada</td>
+                <td className='p-4 text-center'>Datos básicos</td>
               </tr>
 
               {/* Atención al cliente */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">Atención al cliente</td>
-                <td className="p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer">
-                  <Check className="mx-auto text-green-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+              <tr className='border-b border-gray-200 hover:bg-gray-50 transition-colors'>
+                <td className='p-4 text-center'>Atención al cliente</td>
+                <td className='p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer'>
+                  <Check className='mx-auto text-green-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Soporte directo por WhatsApp o correo
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Sin atención personalizada
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Limitada
                   </span>
                 </td>
               </tr>
 
               {/* Diseño enfocado en servicios */}
-              <tr className="border-b border-gray-200 hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">Diseño enfocado en servicios</td>
-                <td className="p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer">
-                  <Check className="mx-auto text-green-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+              <tr className='border-b border-gray-200 hover:bg-gray-50 transition-colors'>
+                <td className='p-4 text-center'>Diseño enfocado en servicios</td>
+                <td className='p-4 bg-blue-50 rounded-lg shadow-sm text-center relative group cursor-pointer'>
+                  <Check className='mx-auto text-green-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Hecho para conectar profesionales y clientes
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Enfocado en ventas generales
                   </span>
                 </td>
-                <td className="p-4 text-center relative group cursor-pointer">
-                  <X className="mx-auto text-red-600" />
-                  <span className="absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all">
+                <td className='p-4 text-center relative group cursor-pointer'>
+                  <X className='mx-auto text-red-600' />
+                  <span className='absolute left-1/2 -translate-x-1/2 -top-10 hidden group-hover:block bg-white text-black text-base rounded-lg shadow-lg px-3 py-1 max-w-xs break-words transition-all'>
                     Orientado a experiencias
                   </span>
                 </td>
               </tr>
 
               {/* Costo de uso */}
-              <tr className="hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-center">Costo de uso</td>
-                <td className="p-4 bg-blue-50 rounded-lg shadow-sm text-center">
+              <tr className='hover:bg-gray-50 transition-colors'>
+                <td className='p-4 text-center'>Costo de uso</td>
+                <td className='p-4 bg-blue-50 rounded-lg shadow-sm text-center'>
                   Gratis y transparente
                 </td>
-                <td className="p-4 text-center">Gratis, pero sin soporte</td>
-                <td className="p-4 text-center">Costos variables</td>
+                <td className='p-4 text-center'>Gratis, pero sin soporte</td>
+                <td className='p-4 text-center'>Costos variables</td>
               </tr>
             </tbody>
           </table>
         </div>
       </section>
       {/* Sección de llamada a la acción */}
-      <section className="w-full bg-[var(--primary)] text-white py-16 px-6 flex flex-col items-center text-center">
-        <h2 className="text-3xl md:text-4xl font-extrabold mb-4">
+      <section className='w-full bg-[var(--primary)] text-white py-16 px-6 flex flex-col items-center text-center'>
+        <h2 className='text-3xl md:text-4xl font-extrabold mb-4'>
           ¡Conecta con los mejores profesionales en segundos!
         </h2>
-        <p className="text-lg md:text-xl leading-relaxed max-w-3xl mb-8">
+        <p className='text-lg md:text-xl leading-relaxed max-w-3xl mb-8'>
           Con Servineo, encontrar ayuda confiable nunca fue tan rápido y seguro. Dale el impulso que
           tu día necesita y empieza a disfrutar de servicios profesionales a tu alcance.
         </p>
         <button
           onClick={() => (window.location.href = '/')}
-          className="bg-white text-[var(--primary)] font-semibold rounded-full px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
+          className='bg-white text-[var(--primary)] font-semibold rounded-full px-8 py-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105'
         >
           ¡Prueba Servineo ahora!
         </button>

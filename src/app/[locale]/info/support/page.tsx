@@ -4,9 +4,7 @@ export default function SupportPage() {
   const WHATSAPP_NUMBER = '59175139742';
   const SUPPORT_EMAIL = 'servineo.serviciostecnicos@gmail.com';
 
-  const HELP_MESSAGE = encodeURIComponent(
-    'Hola Servineo, necesito ayuda por favor.'
-  );
+  const HELP_MESSAGE = encodeURIComponent('Hola Servineo, necesito ayuda por favor.');
   const faqs = [
     {
       category: 'Primeros pasos',
@@ -149,9 +147,9 @@ export default function SupportPage() {
         />
       ),
       action: 'Iniciar Chat',
-      link: `https://wa.me/${WHATSAPP_NUMBER}?text=${HELP_MESSAGE}`
+      link: `https://wa.me/${WHATSAPP_NUMBER}?text=${HELP_MESSAGE}`,
     },
-  
+
     {
       title: 'Email',
       description: SUPPORT_EMAIL,
@@ -164,9 +162,9 @@ export default function SupportPage() {
         />
       ),
       action: 'Enviar Email',
-      link: `mailto:${SUPPORT_EMAIL}?subject=Solicitud de ayuda&body=Hola Servineo,%0A%0ANecesito ayuda con uno de sus servicios.`
+      link: `mailto:${SUPPORT_EMAIL}?subject=Solicitud de ayuda&body=Hola Servineo,%0A%0ANecesito ayuda con uno de sus servicios.`,
     },
-  
+
     {
       title: 'WhatsApp',
       description: '+591 751 39742',
@@ -179,10 +177,10 @@ export default function SupportPage() {
         />
       ),
       action: 'Abrir WhatsApp',
-      link: `https://wa.me/${WHATSAPP_NUMBER}?text=${HELP_MESSAGE}`
-    }
+      link: `https://wa.me/${WHATSAPP_NUMBER}?text=${HELP_MESSAGE}`,
+    },
   ];
-  
+
   return (
     <main className='bg-[var(--background)] text-[var(--foreground)] min-h-screen'>
       {/* Hero */}
@@ -276,7 +274,6 @@ export default function SupportPage() {
               >
                 {option.action}
               </a>
-
             </div>
           ))}
         </div>
@@ -335,7 +332,6 @@ export default function SupportPage() {
           <p className='text-base leading-relaxed mb-5 opacity-95'>
             Nuestro equipo está listo para ayudarte. No dudes en contactarnos.
           </p>
-          
         </div>
       </section>
     </main>

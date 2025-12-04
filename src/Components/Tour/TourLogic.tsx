@@ -16,7 +16,7 @@ export function TourLogic() {
 
     // Filtrar pasos según dispositivo
     const isMobile = window.innerWidth < 1024;
-    const filteredSteps = tourSteps.filter(step => {
+    const filteredSteps = tourSteps.filter((step) => {
       if (isMobile) return step.selector !== '#tour-auth-buttons-desktop';
       return step.selector !== '#tour-auth-buttons-mobile';
     });
@@ -25,15 +25,19 @@ export function TourLogic() {
 
     // IMPORTANTE: Solo iniciar el tour si estamos en la página principal
     const isHomePage = pathname === '/' || pathname === '/es' || pathname === '/en';
-    
+
     if (!isHomePage) {
       // Si no estamos en el home, no iniciar el tour
       return;
     }
 
     // Lógica de inicio
-    const tourVisto = typeof window !== 'undefined' ? localStorage.getItem('servineoTourVisto') : null;
-    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+    const tourVisto =
+      typeof window !== 'undefined' ? localStorage.getItem('servineoTourVisto') : null;
+    const urlParams =
+      typeof window !== 'undefined'
+        ? new URLSearchParams(window.location.search)
+        : new URLSearchParams();
 
     // Mostrar el tour solo si estamos en home y NO se ha visto antes, a menos que
     // se solicite explícitamente via ?tour=1 (para volver a verlo).

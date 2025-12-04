@@ -43,7 +43,6 @@ export default function TopMenu() {
 
   const user = useSelector((state: RootState) => state.user.user);
 
-
   const isAuthenticated = !!user;
 
   // UI state
@@ -118,21 +117,15 @@ export default function TopMenu() {
 
   /* ---------- Helpers ---------- */
 
-const getPhoto = (u?: IUser | null): string => {
-  if (!u) return '/es/img/icon.png';
+  const getPhoto = (u?: IUser | null): string => {
+    if (!u) return '/es/img/icon.png';
 
-  const sources: (string | undefined)[] = [
-    u.photo,
-    u.picture,
-    u.url_photo,
-  ];
+    const sources: (string | undefined)[] = [u.photo, u.picture, u.url_photo];
 
-  const valid = sources.find(
-    (src) => typeof src === 'string' && src.trim().length > 0
-  );
+    const valid = sources.find((src) => typeof src === 'string' && src.trim().length > 0);
 
-  return valid ?? '/es/img/icon.png';
-};
+    return valid ?? '/es/img/icon.png';
+  };
 
   const userPhoto = getPhoto(user);
 
@@ -152,40 +145,8 @@ const getPhoto = (u?: IUser | null): string => {
 
   // hydrate redux from localStorage (safe)
   useEffect(() => {
-  if (typeof window === 'undefined') return;
+    if (typeof window === 'undefined') return;
 
-  try {
-    const raw = localStorage.getItem('servineo_user');
-    const token = localStorage.getItem('servineo_token');
-
-    if (raw && raw !== 'undefined') {
-      const parsed: IUser = JSON.parse(raw);
-
-      const normalized: IUser = {
-        ...parsed,
-        photo: parsed.photo || parsed.picture || parsed.url_photo || '',
-        picture: parsed.picture || parsed.photo || parsed.url_photo || '',
-        url_photo: parsed.url_photo || parsed.photo || parsed.picture || '',
-      };
-
-      dispatch(setUser(normalized));
-      setIsLogged(Boolean(token));
-      setUserId(normalized._id || normalized.id || null);
-    } else {
-      dispatch(setUser(null));
-      setIsLogged(false);
-      setUserId(null);
-    }
-  } catch (e) {
-    localStorage.removeItem('servineo_user');
-    dispatch(setUser(null));
-    setIsLogged(false);
-  }
-}, []);
-
-  // listen storage changes (other tabs) & custom event
-  useEffect(() => {
-  const sync = () => {
     try {
       const raw = localStorage.getItem('servineo_user');
       const token = localStorage.getItem('servineo_token');
@@ -195,9 +156,9 @@ const getPhoto = (u?: IUser | null): string => {
 
         const normalized: IUser = {
           ...parsed,
-          photo: parsed.photo || parsed.picture || parsed.url_photo,
-          picture: parsed.picture || parsed.photo || parsed.url_photo,
-          url_photo: parsed.url_photo || parsed.photo || parsed.picture,
+          photo: parsed.photo || parsed.picture || parsed.url_photo || '',
+          picture: parsed.picture || parsed.photo || parsed.url_photo || '',
+          url_photo: parsed.url_photo || parsed.photo || parsed.picture || '',
         };
 
         dispatch(setUser(normalized));
@@ -208,22 +169,53 @@ const getPhoto = (u?: IUser | null): string => {
         setIsLogged(false);
         setUserId(null);
       }
-    } catch {
+    } catch (e) {
+      localStorage.removeItem('servineo_user');
       dispatch(setUser(null));
       setIsLogged(false);
-      setUserId(null);
     }
-  };
+  }, []);
 
-  window.addEventListener('storage', sync);
-  window.addEventListener('servineo_user_updated', sync);
+  // listen storage changes (other tabs) & custom event
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const raw = localStorage.getItem('servineo_user');
+        const token = localStorage.getItem('servineo_token');
 
-  return () => {
-    window.removeEventListener('storage', sync);
-    window.removeEventListener('servineo_user_updated', sync);
-  };
-}, [dispatch]);
+        if (raw && raw !== 'undefined') {
+          const parsed: IUser = JSON.parse(raw);
 
+          const normalized: IUser = {
+            ...parsed,
+            photo: parsed.photo || parsed.picture || parsed.url_photo,
+            picture: parsed.picture || parsed.photo || parsed.url_photo,
+            url_photo: parsed.url_photo || parsed.photo || parsed.picture,
+          };
+
+          dispatch(setUser(normalized));
+          setIsLogged(Boolean(token));
+          setUserId(normalized._id || normalized.id || null);
+        } else {
+          dispatch(setUser(null));
+          setIsLogged(false);
+          setUserId(null);
+        }
+      } catch {
+        dispatch(setUser(null));
+        setIsLogged(false);
+        setUserId(null);
+      }
+    };
+
+    window.addEventListener('storage', sync);
+    window.addEventListener('servineo_user_updated', sync);
+
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('servineo_user_updated', sync);
+    };
+  }, [dispatch]);
 
   // auto-logout on inactivity (15 minutes)
   useEffect(() => {
@@ -431,10 +423,15 @@ const getPhoto = (u?: IUser | null): string => {
 
                     <img className='profilePreview' src={userPhoto} alt={user?.name ?? 'Usuario'} />
 
-                    <div className='menuLabel'>{user?.name ?? fetchedUser?.name ?? 'Sin nombre'}</div>
-                    <div className='menuLabel'>{user?.email ?? fetchedUser?.email ?? 'Sin email'}</div>
-                    <div className='menuLabel'>{user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}</div>
-
+                    <div className='menuLabel'>
+                      {user?.name ?? fetchedUser?.name ?? 'Sin nombre'}
+                    </div>
+                    <div className='menuLabel'>
+                      {user?.email ?? fetchedUser?.email ?? 'Sin email'}
+                    </div>
+                    <div className='menuLabel'>
+                      {user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}
+                    </div>
 
                     <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
@@ -570,9 +567,12 @@ const getPhoto = (u?: IUser | null): string => {
                   <img className='profilePreview' src={userPhoto} alt='Foto' />
 
                   <div className='menuLabel'>{user?.name ?? fetchedUser?.name ?? 'Sin nombre'}</div>
-                  <div className='menuLabel'>{user?.email ?? fetchedUser?.email ?? 'Sin email'}</div>
-                  <div className='menuLabel'>{user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}</div>
-
+                  <div className='menuLabel'>
+                    {user?.email ?? fetchedUser?.email ?? 'Sin email'}
+                  </div>
+                  <div className='menuLabel'>
+                    {user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}
+                  </div>
 
                   <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 

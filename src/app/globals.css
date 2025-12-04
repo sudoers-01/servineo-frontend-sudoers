@@ -75,8 +75,6 @@
   --sidebar-ring: oklch(0.65 0.18 250);
 }
 
-
-
 @theme inline {
   --font-sans: var(--font-roboto), 'Roboto', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
@@ -118,8 +116,6 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 }
-
-
 
 /* Map Styles */
 .map-tiles {
@@ -249,8 +245,12 @@
 
 /* animación */
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* contenedor pequeño del menú (scoped) */
@@ -261,7 +261,7 @@
   background: #fff;
   color: #000;
   border-radius: 12px;
-  box-shadow: 0 2px 18px rgba(0, 0, 0, .15);
+  box-shadow: 0 2px 18px rgba(0, 0, 0, 0.15);
   width: 280px;
   padding: 12px;
   display: none;
@@ -278,7 +278,7 @@
 /* cuando está abierto lo mostramos */
 .show {
   display: flex;
-  animation: fadeIn .18s ease;
+  animation: fadeIn 0.18s ease;
 }
 
 /* header del menú */
@@ -316,14 +316,14 @@
   transition: all 0.15s ease;
   border: 1px solid #d0d4e6;
   background: #f8f9ff;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
 .menuItem:hover {
-  background: #2B6AF0;
+  background: #2b6af0;
   color: #fff;
-  border-color: #2B6AF0;
-  box-shadow: 0 2px 6px rgba(43,106,240,0.25);
+  border-color: #2b6af0;
+  box-shadow: 0 2px 6px rgba(43, 106, 240, 0.25);
 }
 
 /* botones especiales */
@@ -341,15 +341,15 @@
 }
 
 .shadow-neu-inner {
-  box-shadow: 8px 8px 16px rgba(0,0,0,0.08), -8px -8px 16px rgba(255,255,255,0.9);
+  box-shadow:
+    8px 8px 16px rgba(0, 0, 0, 0.08),
+    -8px -8px 16px rgba(255, 255, 255, 0.9);
 }
 
 .menuLabel {
   text-align: left;
   font-weight: 600;
 }
-
-
 
 /* ============================================
    CARRUSEL DE INSPIRACIÓN - INICIO
@@ -750,7 +750,7 @@
 }
 
 /* 2. Estilizar los puntos de navegación (dots) */
-div[data-tour-elem="controls"] button[data-tour-elem="dot"] {
+div[data-tour-elem='controls'] button[data-tour-elem='dot'] {
   background-color: #e2e8f0 !important;
   border: none !important;
   width: 7px !important;
@@ -765,13 +765,13 @@ div[data-tour-elem="controls"] button[data-tour-elem="dot"] {
 }
 
 /* Estilo del punto activo */
-div[data-tour-elem="controls"] button[data-tour-elem="dot"][data-active="true"] {
+div[data-tour-elem='controls'] button[data-tour-elem='dot'][data-active='true'] {
   background-color: #2b6ae0 !important;
   transform: scale(1.2);
 }
 
 /* 3. Centrar los puntos entre los botones CON ESPACIO */
-div[data-tour-elem="navigation"] {
+div[data-tour-elem='navigation'] {
   display: flex !important;
   justify-content: center !important;
   align-items: center !important;
@@ -781,7 +781,7 @@ div[data-tour-elem="navigation"] {
 }
 
 /* 4. Mejorar el contenedor de controles */
-div[data-tour-elem="controls"] {
+div[data-tour-elem='controls'] {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -790,19 +790,21 @@ div[data-tour-elem="controls"] {
 }
 
 /* 5. Asegurar el popover encima de todo */
-div[data-tour-elem="popover"] {
+div[data-tour-elem='popover'] {
   z-index: 100000 !important;
-  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+  box-shadow:
+    0 20px 25px -5px rgb(0 0 0 / 0.1),
+    0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
 }
 
 /* 6. Asegurar visibilidad del elemento destacado */
-[data-tour-elem="badge"] {
+[data-tour-elem='badge'] {
   background-color: white !important;
   box-shadow: 0 0 0 4px rgba(43, 106, 224, 0.4) !important;
 }
 
 /* 7. Ajustar el contenido del popover */
-div[data-tour-elem="popover"] > div:first-child {
+div[data-tour-elem='popover'] > div:first-child {
   max-width: 100% !important;
   word-wrap: break-word !important;
 }

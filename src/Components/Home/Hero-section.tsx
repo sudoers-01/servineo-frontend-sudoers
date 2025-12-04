@@ -29,17 +29,16 @@ export default function HeroSection({ isFixer = false }: HeroSectionProps) {
 
   return (
     /* 🔥 FIX SCROLL: Cambiado a overflow-hidden para evitar la barra horizontal */
-    <section 
-      id='tour-hero-section' 
+    <section
+      id='tour-hero-section'
       className='relative w-full pt-28 pb-16 px-4 md:px-12 text-center bg-gradient-to-br from-primary/5 via-white to-primary/10 overflow-hidden'
     >
-
       {/* Decoraciones de fondo */}
-      <div className="absolute inset-0 opacity-20 pointer-events-none -z-10">
-        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
+      <div className='absolute inset-0 opacity-20 pointer-events-none -z-10'>
+        <div className='absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl' />
+        <div className='absolute -bottom-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl' />
       </div>
-      
+
       {/* Contenido */}
       <div className='max-w-6xl mx-auto relative z-10'>
         {/* Título */}

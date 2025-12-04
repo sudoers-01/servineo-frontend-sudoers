@@ -54,19 +54,22 @@ export default async function RootLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} className={`${roboto.className}`}>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning={true}>
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning={true}
+      >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <Providers>
             {/* ESTA LÍNEA ES LA QUE HACE QUE LA GUÍA FUNCIONE */}
             <TourLogic />
-           
-            <div className="text-black fixed bottom-7 right-7 z-[9999]">
+
+            <div className='text-black fixed bottom-7 right-7 z-[9999]'>
               <TranslationButton />
             </div>
-            <div className="">
+            <div className=''>
               <BotonesFlotantes />
             </div>
-            <div className="">
+            <div className=''>
               <TopMenu />
             </div>
             {children}

@@ -77,7 +77,7 @@ const BotonWhatsapp = () => {
         aria-label='Contactar por WhatsApp'
       >
         <FaWhatsapp size={32} className='text-white' />
-        
+
         {/* Glow effect verde */}
         <div className='absolute inset-0 rounded-full bg-green-400/20 animate-pulse'></div>
       </button>

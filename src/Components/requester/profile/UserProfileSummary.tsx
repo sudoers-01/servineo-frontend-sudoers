@@ -6,65 +6,60 @@ import { IUser } from '@/types/user';
 export default function UserProfileSummary() {
   const [user, setUser] = useState<IUser | null>(null);
 
-useEffect(() => {
-  const loadUser = () => {
-    const raw = localStorage.getItem("servineo_user");
-    setUser(raw ? JSON.parse(raw) : null);
-  };
+  useEffect(() => {
+    const loadUser = () => {
+      const raw = localStorage.getItem('servineo_user');
+      setUser(raw ? JSON.parse(raw) : null);
+    };
 
-  loadUser();
+    loadUser();
 
-  window.addEventListener("servineo_user_updated", loadUser);
-  window.addEventListener("storage", loadUser);
+    window.addEventListener('servineo_user_updated', loadUser);
+    window.addEventListener('storage', loadUser);
 
-  return () => {
-    window.removeEventListener("servineo_user_updated", loadUser);
-    window.removeEventListener("storage", loadUser);
-  };
-}, []);
+    return () => {
+      window.removeEventListener('servineo_user_updated', loadUser);
+      window.removeEventListener('storage', loadUser);
+    };
+  }, []);
 
-
-const userPhoto =
-  user?.photo?.trim() ||
-  user?.picture?.trim() ||
-  user?.url_photo?.trim() ||
-  "/icons/marcador-de-posicion.png";
+  const userPhoto =
+    user?.photo?.trim() ||
+    user?.picture?.trim() ||
+    user?.url_photo?.trim() ||
+    '/icons/marcador-de-posicion.png';
 
   return (
-    <div className="rounded-2xl p-6 shadow-lg bg-white/70 backdrop-blur-xl border border-white/30 max-w-full">
-
+    <div className='rounded-2xl p-6 shadow-lg bg-white/70 backdrop-blur-xl border border-white/30 max-w-full'>
       {/* FOTO + NOMBRE */}
-      <div className="flex flex-col items-center">
-        
+      <div className='flex flex-col items-center'>
         {/* CONTENEDOR DE FOTO MEJORADO */}
-        <div className="w-32 h-32 rounded-full overflow-hidden shadow-xl border-4 border-white/90 bg-white">
+        <div className='w-32 h-32 rounded-full overflow-hidden shadow-xl border-4 border-white/90 bg-white'>
           <img
             src={userPhoto}
             alt={user?.name ?? 'Usuario'}
-            className="w-full h-full object-cover object-center"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png'; }}
+            className='w-full h-full object-cover object-center'
+            onError={(e) => {
+              (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
+            }}
           />
         </div>
 
-        <h3 className="text-xl font-bold text-[#1A223F] mt-4">
-          {user?.name ?? "Usuario"}
-        </h3>
+        <h3 className='text-xl font-bold text-[#1A223F] mt-4'>{user?.name ?? 'Usuario'}</h3>
 
-        <p className="text-sm text-gray-500">{user?.email ?? "—"}</p>
-
+        <p className='text-sm text-gray-500'>{user?.email ?? '—'}</p>
       </div>
 
       {/* SEPARADOR */}
-      <div className="w-full h-px bg-gray-200 my-6" />
+      <div className='w-full h-px bg-gray-200 my-6' />
 
       {/* INFORMACIÓN */}
-      <div className="space-y-4 text-sm text-[#1A223F]">
-
+      <div className='space-y-4 text-sm text-[#1A223F]'>
         {/* TELÉFONO */}
-        <div className="flex items-center gap-3 p-2 bg-white rounded-xl shadow-inner">
-          <Phone size={18} className="text-primary" />
-          <span className="flex-1">
-            {user?.telefono ?? <span className="text-gray-400">Sin teléfono</span>}
+        <div className='flex items-center gap-3 p-2 bg-white rounded-xl shadow-inner'>
+          <Phone size={18} className='text-primary' />
+          <span className='flex-1'>
+            {user?.telefono ?? <span className='text-gray-400'>Sin teléfono</span>}
           </span>
         </div>
 
@@ -87,28 +82,23 @@ const userPhoto =
         </div>*/}
 
         {/* CONTRASEÑA */}
-        <div className="flex items-center gap-3 p-2 bg-white rounded-xl shadow-inner">
-          <Lock size={18} className="text-primary" />
-          <span className="flex-1">••••••••••••</span>
+        <div className='flex items-center gap-3 p-2 bg-white rounded-xl shadow-inner'>
+          <Lock size={18} className='text-primary' />
+          <span className='flex-1'>••••••••••••</span>
         </div>
-
       </div>
 
       {/* SEPARADOR */}
-      <div className="w-full h-px bg-gray-200 my-6" />
+      <div className='w-full h-px bg-gray-200 my-6' />
 
       {/* INFORMACIÓN EXTRA */}
-      <div className="mt-4 p-4 rounded-xl bg-gradient-to-br from-white to-white/60 border border-white shadow-inner">
-        <strong className="block mb-1 text-primary text-sm">
-          ¿Sabías qué?
-        </strong>
-        <p className="text-gray-600 text-sm leading-snug">
-          Mantener tu foto y ubicación actualizadas mejora las recomendaciones
-          y tu visibilidad dentro de la plataforma.
+      <div className='mt-4 p-4 rounded-xl bg-gradient-to-br from-white to-white/60 border border-white shadow-inner'>
+        <strong className='block mb-1 text-primary text-sm'>¿Sabías qué?</strong>
+        <p className='text-gray-600 text-sm leading-snug'>
+          Mantener tu foto y ubicación actualizadas mejora las recomendaciones y tu visibilidad
+          dentro de la plataforma.
         </p>
       </div>
-
     </div>
   );
 }
-

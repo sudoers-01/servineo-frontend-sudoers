@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable react/no-unescaped-entities */
 
-"use client";
+'use client';
 
 import { TourProvider } from '@reactour/tour';
 import { TourLogic } from './TourLogic';
@@ -33,7 +32,7 @@ const tourStyles = {
   }),
   badge: (base: any) => ({
     ...base,
-    display: 'none'
+    display: 'none',
   }),
   controls: (base: any, state: any) => ({
     ...base,
@@ -84,7 +83,7 @@ export function TourProviderWrapper({ children }: { children: React.ReactNode })
       prevButton={PrevBtn}
       nextButton={NextBtn}
       showBadge={false}
-      showDots={true}  
+      showDots={true}
       scrollSmooth={true}
       padding={{ mask: 10, popover: [5, 10] }}
       disableInteraction={true}

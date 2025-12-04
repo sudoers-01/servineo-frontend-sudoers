@@ -172,18 +172,16 @@ export default function Map() {
       </MapContainer>
 
       <LocationButton
-       onLocationFound={(lat, lng) => {
-      const newPos: [number, number] = [lat, lng];
-      setPinPosition(newPos);
-      setCircleCenter(newPos); // <--- agregar esto
-      savePin(newPos);
-      setMapCenter(newPos);
-      setZoom(15);
-      saveView(newPos, 15);
+        onLocationFound={(lat, lng) => {
+          const newPos: [number, number] = [lat, lng];
+          setPinPosition(newPos);
+          setCircleCenter(newPos); // <--- agregar esto
+          savePin(newPos);
+          setMapCenter(newPos);
+          setZoom(15);
+          saveView(newPos, 15);
         }}
       />
     </div>
   );
 }
-
-

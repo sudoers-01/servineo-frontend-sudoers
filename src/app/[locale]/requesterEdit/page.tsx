@@ -130,7 +130,9 @@ export default function ConfiguracionPage() {
 
         return (
           <div className='max-w-4xl w-full'>
-            <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>EInformación de contacto</h2>
+            <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>
+              EInformación de contacto
+            </h2>
             <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
               <RequesterEditForm />
             </div>

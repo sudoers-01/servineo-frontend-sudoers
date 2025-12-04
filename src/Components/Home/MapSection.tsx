@@ -11,7 +11,7 @@ export default function MapSection() {
   useEffect(() => {
     setIsMounted(true);
   }, []);
-  
+
   return (
     <section className='w-full py-16 px-4 bg-gray-50 scroll-mt-24'>
       <div className='max-w-7xl mx-auto'>
@@ -20,9 +20,9 @@ export default function MapSection() {
             Encuentra Servicios Cerca de Ti
           </h2>
         </div>
-        
+
         {/* Contenedor del mapa */}
-        <div 
+        <div
           id='titulo-seccion-mapa'
           className='h-[60vh] w-full bg-gray-100 rounded-xl overflow-visible relative shadow-sm border border-gray-200'
         >

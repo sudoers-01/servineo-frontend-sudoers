@@ -39,8 +39,7 @@ const pasos = [
 ];
 
 export const Pasos = () => {
-
-  const t = useTranslations("Pasos")
+  const t = useTranslations('Pasos');
 
   const router = useRouter();
 
@@ -51,10 +50,10 @@ export const Pasos = () => {
   return (
     <div className='flex flex-col items-center gap-[40px] ml-[30px] mr-[30px] my-8 p-8 bg-white rounded-2xl shadow-2xl'>
       <div className='flex flex-col items-center gap-[25px]'>
-        <h1 className='text-center text-[35px]'> {t("title")} </h1>
+        <h1 className='text-center text-[35px]'> {t('title')} </h1>
         <p className='text-center text-black opacity-[60%] text-[18px] whitespace-pre-line'>
           {' '}
-          {t("subtitle")}{' '}
+          {t('subtitle')}{' '}
         </p>
       </div>
 
@@ -75,7 +74,7 @@ export const Pasos = () => {
           className='cursor-pointer gap-[3px] bg-[#2B6EA0] hover:bg-[#2B31E0] duration-150 text-white h-9 w-40 rounded-[8px]'
           onClick={handleVerServicios}
         >
-          {t("button")}
+          {t('button')}
         </button>
       </div>
     </div>
