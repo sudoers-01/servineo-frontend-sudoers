@@ -27,7 +27,6 @@ import {
   jobOfferSchema,
   jobCategories,
   type JobOfferFormData,
-  type IJobOffer,
 } from '@/app/lib/validations/Job-offer-Schemas';
 
 import type { JobOfferData } from '@/types/jobOffers';
@@ -61,7 +60,7 @@ export function JobOffersSection({
   const [toggleJobStatus] = useToggleJobStatusMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingOffer, setEditingOffer] = useState<IJobOffer | null>(null);
+  const [editingOffer, setEditingOffer] = useState<JobOfferData | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
@@ -135,7 +134,7 @@ export function JobOffersSection({
       formData.append('city', data.city);
       formData.append('contactPhone', data.contactPhone);
       formData.append('tags', JSON.stringify(data.tags));
-      formData.append('rating', editingOffer ? editingOffer.rating.toString() : '5');
+      formData.append('rating', editingOffer?.rating ? editingOffer.rating.toString() : '5');
 
       selectedImages.forEach((file) => formData.append('photos', file));
 
@@ -453,7 +452,7 @@ export function JobOffersSection({
                 </label>
                 <input
                   type='number'
-                  {...register('price')}
+                  {...register('price', { valueAsNumber: true })}
                   className='w-full rounded-lg border-primary border p-2'
                 />
                 {errors.price && <p className='text-red-500 text-xs'>{errors.price.message}</p>}
