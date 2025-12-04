@@ -8,6 +8,7 @@ import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
 import { IUser } from '@/types/user';
+import NotificationSystem from '@/app/components/NotificationSystem';
 
 interface UserState {
   user: IUser | null;
@@ -187,6 +188,12 @@ export default function TopMenu() {
             </nav>
           </div>
           <div className='flex items-center gap-3'>
+            <NotificationSystem 
+              userId={userId || undefined}
+              userName={user?.name}
+              isAuthenticated={isLogged}
+              userRole={user?.role as 'fixer' | 'requester'}
+            />
             {!isLogged ? (
               <>
                 <Link
@@ -252,29 +259,37 @@ export default function TopMenu() {
           </button>
 
           {/* Auth Buttons */}
-          {!isLogged ? (
-            <div className='flex items-center gap-2 flex-nowrap'>
-              <Link
-                href='/login'
-                className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+          <div className='flex items-center gap-2 flex-nowrap'>
+            <NotificationSystem 
+              userId={userId || undefined}
+              userName={user?.name}
+              isAuthenticated={isLogged}
+              userRole={user?.role as 'fixer' | 'requester'}
+            />
+            {!isLogged ? (
+              <>
+                <Link
+                  href='/login'
+                  className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+                >
+                  Iniciar sesión
+                </Link>
+                <Link
+                  href='/signUp'
+                  className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+                >
+                  Registrarse
+                </Link>
+              </>
+            ) : (
+              <button
+                onClick={() => setAccountOpen(!accountOpen)}
+                className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
               >
-                Iniciar sesión
-              </Link>
-              <Link
-                href='/signUp'
-                className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
-              >
-                Registrarse
-              </Link>
-            </div>
-          ) : (
-            <button
-              onClick={() => setAccountOpen(!accountOpen)}
-              className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
-            >
-              <span className='text-gray-700 font-medium'>{user?.name}</span>
-            </button>
-          )}
+                <span className='text-gray-700 font-medium'>{user?.name}</span>
+              </button>
+            )}
+          </div>
         </div>
         {/* Barra inferior fija con iconos */}
         <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
