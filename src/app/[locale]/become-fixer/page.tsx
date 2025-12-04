@@ -76,6 +76,7 @@ export default function BecomeFixerPage() {
                     telefono: data.phone,
                     url_photo: user?.url_photo || 'https://picsum.photos/80',
                     role: user?.role || 'requester',
+                    //authProviders: user?.authProviders || [],
                   };
 
                   setRequester(finalUser);
