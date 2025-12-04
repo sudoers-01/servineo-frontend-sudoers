@@ -437,4 +437,96 @@
       "answer": "Los pagos son 100% seguros a través de nuestra plataforma. Solo liberas el pago cuando el trabajo esté completado y estés satisfecho con el resultado."
     }
   }
+  },
+  "TopMenu": {
+    "buttons": {
+      "login": "Iniciar Sesión",
+      "register": "Regístrate",
+      "logout": "Cerrar sesión"
+    },
+    "profile": "Perfil",
+    "notifications": "Notificaciones",
+    "help": "Ayuda"
+  },
+  "SignUpRegister": {
+    "title": "Crear Cuenta",
+    "mode": "Regístrate con tu correo",
+    "separator": "O continúa con",
+    "terms": {
+      "text": "Acepto los",
+      "link": "términos y condiciones"
+    },
+    "login": {
+      "text": "¿Ya tienes cuenta?",
+      "link": "Inicia sesión"
+    }
+  },
+  "RegistroForm": {
+    "validation": {
+      "nombre": {
+        "min": "El nombre debe tener al menos 3 caracteres",
+        "max": "El nombre no puede exceder 50 caracteres",
+        "regex": "El nombre solo debe contener letras y espacios"
+      },
+      "apellido": {
+        "min": "El apellido debe tener al menos 3 caracteres",
+        "max": "El apellido no puede exceder 50 caracteres",
+        "regex": "El apellido solo debe contener letras y espacios"
+      },
+      "email": {
+        "invalid": "Por favor ingresa un correo válido"
+      },
+      "password": {
+        "min": "La contraseña debe tener al menos 8 caracteres"
+      },
+      "confirmarPassword": {
+        "match": "Las contraseñas no coinciden"
+      }
+    },
+    "fields": {
+      "nombre": {
+        "label": "Nombre",
+        "placeholder": "Tu nombre"
+      },
+      "apellido": {
+        "label": "Apellido",
+        "placeholder": "Tu apellido"
+      },
+      "email": {
+        "label": "Correo electrónico",
+        "placeholder": "tu@correo.com"
+      },
+      "password": {
+        "label": "Contraseña",
+        "placeholder": "Contraseña segura"
+      },
+      "confirmarPassword": {
+        "label": "Confirmar contraseña",
+        "placeholder": "Confirmar contraseña"
+      }
+    },
+    "buttons": {
+      "submit": "Registrarse",
+      "generatePassword": "Generar contraseña"
+    },
+    "notifications": {
+      "passwordGenerated": {
+        "title": "Contraseña generada",
+        "message": "Contraseña copiada al portapapeles"
+      },
+      "validationError": {
+        "title": "Error de validación",
+        "message": "Por favor verifica los datos ingresados"
+      },
+      "success": {
+        "title": "¡Registro exitoso!",
+        "message": "Bienvenido {name}",
+        "toast": "Usuario {name} registrado correctamente"
+      },
+      "error": {
+        "title": "Error al registrar",
+        "message": "Hubo un problema al registrar tu cuenta"
+      }
+    }
+  }
 }

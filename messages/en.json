@@ -437,4 +437,96 @@
       "answer": "Payments are 100% secure through our platform. You only release payment when the work is completed and you are satisfied with the result."
     }
   }
+  },
+  "TopMenu": {
+    "buttons": {
+      "login": "Log in",
+      "register": "Register",
+      "logout": "Log out"
+    },
+    "profile": "Profile",
+    "notifications": "Notifications",
+    "help": "Help"
+  },
+  "SignUpRegister": {
+    "title": "Create Account",
+    "mode": "Sign up with your email",
+    "separator": "Or continue with",
+    "terms": {
+      "text": "I accept the",
+      "link": "terms and conditions"
+    },
+    "login": {
+      "text": "Already have an account?",
+      "link": "Sign in"
+    }
+  },
+  "RegistroForm": {
+    "validation": {
+      "nombre": {
+        "min": "Name must be at least 3 characters",
+        "max": "Name cannot exceed 50 characters",
+        "regex": "Name must only contain letters and spaces"
+      },
+      "apellido": {
+        "min": "Last name must be at least 3 characters",
+        "max": "Last name cannot exceed 50 characters",
+        "regex": "Last name must only contain letters and spaces"
+      },
+      "email": {
+        "invalid": "Please enter a valid email"
+      },
+      "password": {
+        "min": "Password must be at least 8 characters"
+      },
+      "confirmarPassword": {
+        "match": "Passwords do not match"
+      }
+    },
+    "fields": {
+      "nombre": {
+        "label": "Name",
+        "placeholder": "Your name"
+      },
+      "apellido": {
+        "label": "Last Name",
+        "placeholder": "Your last name"
+      },
+      "email": {
+        "label": "Email Address",
+        "placeholder": "you@email.com"
+      },
+      "password": {
+        "label": "Password",
+        "placeholder": "Secure password"
+      },
+      "confirmarPassword": {
+        "label": "Confirm Password",
+        "placeholder": "Confirm password"
+      }
+    },
+    "buttons": {
+      "submit": "Register",
+      "generatePassword": "Generate Password"
+    },
+    "notifications": {
+      "passwordGenerated": {
+        "title": "Password generated",
+        "message": "Password copied to clipboard"
+      },
+      "validationError": {
+        "title": "Validation error",
+        "message": "Please check the information entered"
+      },
+      "success": {
+        "title": "Registration successful!",
+        "message": "Welcome {name}",
+        "toast": "User {name} registered successfully"
+      },
+      "error": {
+        "title": "Registration error",
+        "message": "There was a problem registering your account"
+      }
+    }
+  }
 }

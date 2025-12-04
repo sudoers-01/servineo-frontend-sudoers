@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
 import type { IUser } from '@/types/user';
 import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface UserState {
   user: IUser | null;
@@ -22,6 +23,20 @@ interface RootState {
 }
 
 export default function TopMenu() {
+  const t = useTranslations();
+  const tGlobal = t;
+  const locale = useLocale();
+
+  const localeDefault = (es: string, en: string) => (locale === 'es' ? es : en);
+
+  const resolveT = (key: string, fallbackKey?: string, fallbackText?: string) => {
+    // Evitar invocar claves namespaced que están provocando MISSING_MESSAGE en runtime.
+    // Usamos primero el fallbackKey (ej. navigation.login) y finalmente el texto por defecto.
+    try {
+      if (fallbackKey) return t(fallbackKey);
+    } catch {}
+    return fallbackText ?? localeDefault('Iniciar Sesión', 'Log in');
+  };
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
@@ -368,21 +383,20 @@ export default function TopMenu() {
           {/* Desktop Right */}
           <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
             {!isClient ? (
-              // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
               <div style={{ width: 100, height: 10 }} />
             ) : !isLogged ? (
               <>
                 <Link
                   href='/login'
-                  className='px-4 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium hover:opacity-90 transition-opacity'
+                  className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
                 >
-                  Iniciar Sesión
+                  {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
                 </Link>
                 <Link
                   href='/signUp'
-                  className='px-4 py-2 rounded-md border border-[var(--color-primary)] text-[var(--color-primary)] font-medium hover:opacity-80 transition-opacity'
+                  className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
                 >
-                  Registrarse
+                  {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
                 </Link>
               </>
             ) : (
@@ -392,8 +406,6 @@ export default function TopMenu() {
                   onClick={() => setProfileMenuOpen((v) => !v)}
                   className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
                 >
-                  {/* Using img to keep visual identical to provided code */}
-                  {/* If you prefer next/image here, you can switch, but next/image inside buttons can be heavier */}
                   <img
                     src={userPhoto}
                     alt={user?.name ?? 'Usuario'}
@@ -517,13 +529,13 @@ export default function TopMenu() {
                 href='/login'
                 className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
               >
-                Iniciar sesión
+                {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
               </Link>
               <Link
                 href='/signUp'
                 className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
               >
-                Registrarse
+                {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
               </Link>
             </div>
           ) : (
@@ -624,6 +636,27 @@ export default function TopMenu() {
                 </div>
               )}
             </>
+          )}
+
+          {/* Dropdown Mobile */}
+          {accountOpen && isLogged && (
+            <div
+              ref={dropdownRef}
+              className='absolute top-16 right-3 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50'
+            >
+              <Link
+                href='/requesterEdit'
+                className='block px-4 py-2 text-gray-700 hover:bg-gray-50'
+              >
+                {t('dropdown.editProfile')}
+              </Link>
+              <button
+                onClick={logout}
+                className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
+              >
+                {t('dropdown.logout')}
+              </button>
+            </div>
           )}
         </div>
         {/* Barra inferior fija con iconos */}

@@ -8,7 +8,7 @@ import HowItWorksSection from '@/Components/Home/HowItWorks-section';
 import CTASection from '@/Components/Home/CTA-section';
 import InspirationSection from '@/Components/Home/Inspiration-section';
 import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
-import MapSection from '@/Components/Home/MapSection'; // ✅ IMPORTAR MapSection
+import MapSection from '@/Components/Home/MapSection';
 import { IUser } from '@/types/user';
 
 interface RootState {

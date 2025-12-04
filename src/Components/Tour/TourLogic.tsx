@@ -32,18 +32,24 @@ export function TourLogic() {
     }
 
     // Lógica de inicio
-    const tourVisto = localStorage.getItem('servineoTourVisto');
-   
-    // Si NO se ha visto (o se borró la key al hacer clic en "Ver guía nuevamente")
-    if (!tourVisto) {
+    const tourVisto = typeof window !== 'undefined' ? localStorage.getItem('servineoTourVisto') : null;
+
+    // Forzar mostrar en entorno de desarrollo o si se indica por query param (?tour=1)
+    const isDev = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development';
+    const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+    const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+    const forceShow = isDev || isLocalhost || urlParams.get('tour') === '1';
+
+    // Si NO se ha visto (o se borró la key) o estamos forzando la visualización, iniciamos
+    if (!tourVisto || forceShow) {
       setCurrentStep(0);
-     
+
       // Usamos un timeout un poco más largo para asegurar que la UI cargó completamente
       const timer = setTimeout(() => {
         setIsOpen(true);
         setHasStarted(true);
       }, 1500);
-     
+
       return () => clearTimeout(timer);
     }
   }, [setSteps, setIsOpen, setCurrentStep, pathname]);
@@ -51,8 +57,13 @@ export function TourLogic() {
   // Guardar que se vio SOLO al cerrar el tour voluntariamente
   useEffect(() => {
     if (!isOpen && hasStarted) {
-       localStorage.setItem('servineoTourVisto', 'true');
-       setHasStarted(false);
+      // En entorno de desarrollo/local no persistimos la marca para que se pueda ver siempre
+      const isDev = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development';
+      const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
+      if (!isDev && !isLocalhost) {
+        localStorage.setItem('servineoTourVisto', 'true');
+      }
+      setHasStarted(false);
     }
   }, [isOpen, hasStarted]);
 
