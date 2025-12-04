@@ -9,7 +9,6 @@ interface ApiResponse {
 
 export const jobApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-
     // Obtener todas las ofertas
     getAllJobs: builder.query<IJobOffer[], void>({
       query: () => '/job-offers',
@@ -72,5 +71,5 @@ export const {
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
-  useToggleJobStatusMutation, 
+  useToggleJobStatusMutation,
 } = jobApi;

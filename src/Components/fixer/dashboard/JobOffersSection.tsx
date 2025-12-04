@@ -30,7 +30,7 @@ import {
   type IJobOffer,
 } from '@/app/lib/validations/Job-offer-Schemas';
 
-
+import type { JobOfferData } from '@/types/jobOffers';
 
 interface NotificationState {
   isOpen: boolean;
@@ -107,25 +107,21 @@ export function JobOffersSection({
   };
 
   // ⭐ Filtrar según estado real del backend
-  const filteredOffers = (apiOffers || []).filter((offer: any) => {
-    const isActive = offer.status ?? false;
-
-    return filter === 'active' ? isActive : !isActive;
-  });
+  const filteredOffers = ((apiOffers as unknown as JobOfferData[]) || []).filter(
+    (offer: JobOfferData) => {
+      const isActive = offer.status ?? false;
+      return filter === 'active' ? isActive : !isActive;
+    },
+  );
 
   // -------------------------
   // 🔥 CREAR / EDITAR OFERTA
   // -------------------------
   const onSubmit = async (data: JobOfferFormData) => {
-    if (!user?._id)
-      return showNotify('error', 'Error', 'No se identificó al usuario.');
+    if (!user?._id) return showNotify('error', 'Error', 'No se identificó al usuario.');
 
     if (!editingOffer && selectedImages.length === 0) {
-      return showNotify(
-        'warning',
-        'Faltan imágenes',
-        'Debes subir al menos una foto.'
-      );
+      return showNotify('warning', 'Faltan imágenes', 'Debes subir al menos una foto.');
     }
 
     try {
@@ -156,7 +152,6 @@ export function JobOffersSection({
       setPreviewUrls([]);
       setEditingOffer(null);
       setIsModalOpen(false);
-
     } catch (error) {
       console.error(error);
       showNotify('error', 'Error', 'Error al procesar la solicitud.');
@@ -192,27 +187,25 @@ export function JobOffersSection({
     }
   };
 
-  if (isLoading)
-    return <div className="p-10 text-center animate-pulse">Cargando ofertas...</div>;
+  if (isLoading) return <div className='p-10 text-center animate-pulse'>Cargando ofertas...</div>;
 
   return (
-    <div className="space-y-6">
-
+    <div className='space-y-6'>
       {/* HEADER */}
-      <div className="flex items-center justify-between gap-4">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <Briefcase className="h-5 w-5 text-blue-600" />
+      <div className='flex items-center justify-between gap-4'>
+        <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
+          <Briefcase className='h-5 w-5 text-blue-600' />
           Mis Ofertas de Trabajo
         </h2>
 
-        <div className="flex items-center gap-3">
+        <div className='flex items-center gap-3'>
           <select
             value={filter}
             onChange={(e) => setFilter(e.target.value as JobStateFilter)}
-            className="border border-gray-300 rounded-full px-3 py-1.5 text-sm text-gray-700 bg-white shadow-sm"
+            className='border border-gray-300 rounded-full px-3 py-1.5 text-sm text-gray-700 bg-white shadow-sm'
           >
-            <option value="active">Ofertas activas</option>
-            <option value="inactive">Ofertas inactivas</option>
+            <option value='active'>Ofertas activas</option>
+            <option value='inactive'>Ofertas inactivas</option>
           </select>
 
           {!readOnly && (
@@ -224,25 +217,23 @@ export function JobOffersSection({
                 setEditingOffer(null);
                 setIsModalOpen(true);
               }}
-              className="bg-primary text-white hover:bg-blue-800 flex items-center gap-2"
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
             >
-              <Plus className="h-4 w-4" /> Nueva Oferta
+              <Plus className='h-4 w-4' /> Nueva Oferta
             </PillButton>
           )}
         </div>
       </div>
 
       {/* GRID DE OFERTAS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
-        {filteredOffers.map((offer: any) => {
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+        {filteredOffers.map((offer: JobOfferData) => {
           const id = offer._id;
           const isActive = offer.status ?? true;
 
           return (
-            <div key={id} className="relative h-full">
-              <div className="h-full rounded-2xl shadow bg-white flex flex-col overflow-visible">
-
+            <div key={id} className='relative h-full'>
+              <div className='h-full rounded-2xl shadow bg-white flex flex-col overflow-visible'>
                 <JobOfferCard
                   offer={{
                     _id: offer._id,
@@ -281,12 +272,11 @@ export function JobOffersSection({
                   }
                   onDelete={!readOnly ? () => confirmDelete(id) : undefined}
                   readOnly={readOnly}
-                  className="flex-1"
+                  className='flex-1'
                 />
 
                 {/* FOOTER: ESTADO + MENÚ */}
-                <div className="border-t px-3 py-2 flex items-center justify-between">
-
+                <div className='border-t px-3 py-2 flex items-center justify-between'>
                   {/* Estado */}
                   <span
                     className={`px-2 py-1 rounded-full text-xs font-medium border ${
@@ -300,23 +290,21 @@ export function JobOffersSection({
 
                   {/* Menú */}
                   {!readOnly && (
-                    <div className="relative">
+                    <div className='relative'>
                       <button
-                        type="button"
-                        onClick={() =>
-                          setOpenMenuId((prev) => (prev === id ? null : id))
-                        }
-                        className="p-1 rounded-full border border-gray-200 bg-white shadow hover:bg-gray-50"
+                        type='button'
+                        onClick={() => setOpenMenuId((prev) => (prev === id ? null : id))}
+                        className='p-1 rounded-full border border-gray-200 bg-white shadow hover:bg-gray-50'
                       >
-                        <MoreVertical size={16} className="text-gray-600" />
+                        <MoreVertical size={16} className='text-gray-600' />
                       </button>
 
                       {openMenuId === id && (
-                        <div className="absolute right-0 top-full mt-1 w-40 bg-white border rounded-lg shadow-lg text-xs z-[100]">
+                        <div className='absolute right-0 top-full mt-1 w-40 bg-white border rounded-lg shadow-lg text-xs z-[100]'>
                           <button
-                            type="button"
+                            type='button'
                             onClick={() => handleToggleActive(id)}
-                            className="w-full text-left px-3 py-2 hover:bg-gray-50"
+                            className='w-full text-left px-3 py-2 hover:bg-gray-50'
                           >
                             {isActive ? 'Desactivar trabajo' : 'Activar trabajo'}
                           </button>
@@ -325,7 +313,6 @@ export function JobOffersSection({
                     </div>
                   )}
                 </div>
-
               </div>
             </div>
           );
@@ -333,7 +320,7 @@ export function JobOffersSection({
 
         {/* Sin ofertas */}
         {(!apiOffers || apiOffers.length === 0) && (
-          <div className="col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed">
+          <div className='col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed'>
             No hay ofertas publicadas aún.
           </div>
         )}
@@ -352,69 +339,64 @@ export function JobOffersSection({
           setPreviewUrls([]);
         }}
         title={editingOffer ? t('modal.editTitle') : t('modal.newTitle')}
-        size="lg"
+        size='lg'
         closeOnOverlayClick={!isCreating && !isUpdating}
-        className="rounded-2xl border-primary border-2"
+        className='rounded-2xl border-primary border-2'
       >
         <Modal.Body>
-          <form id="offerForm" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-
+          <form id='offerForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             {/* Título */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 {t('form.title.label')}
               </label>
               <input
                 {...register('title')}
-                className="w-full rounded-lg border-primary border p-2"
+                className='w-full rounded-lg border-primary border p-2'
                 placeholder={t('form.title.placeholder')}
               />
-              {errors.title && (
-                <p className="text-red-500 text-xs">{errors.title.message}</p>
-              )}
+              {errors.title && <p className='text-red-500 text-xs'>{errors.title.message}</p>}
             </div>
 
             {/* Categoría */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 {t('form.category.label')}
               </label>
               <select
                 {...register('category')}
-                className="w-full rounded-lg border-primary border p-2 bg-white"
+                className='w-full rounded-lg border-primary border p-2 bg-white'
               >
-                <option value="">{t('form.category.select')}</option>
+                <option value=''>{t('form.category.select')}</option>
                 {jobCategories.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
                   </option>
                 ))}
               </select>
-              {errors.category && (
-                <p className="text-red-500 text-xs">{errors.category.message}</p>
-              )}
+              {errors.category && <p className='text-red-500 text-xs'>{errors.category.message}</p>}
             </div>
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
                 {t('form.tags.label')}
               </label>
 
-              <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300">
+              <div className='flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
                 {currentTags.map((tag) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border"
+                    className='inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border'
                   >
                     {tag}
                     <button
-                      type="button"
+                      type='button'
                       onClick={() => {
                         const newTags = currentTags.filter((t) => t !== tag);
                         setValue('tags', newTags);
                       }}
-                      className="hover:text-red-500"
+                      className='hover:text-red-500'
                     >
                       <X size={12} />
                     </button>
@@ -422,9 +404,7 @@ export function JobOffersSection({
                 ))}
 
                 {currentTags.length === 0 && (
-                  <span className="text-xs text-gray-400 italic">
-                    {t('form.tags.empty')}
-                  </span>
+                  <span className='text-xs text-gray-400 italic'>{t('form.tags.empty')}</span>
                 )}
               </div>
 
@@ -436,11 +416,9 @@ export function JobOffersSection({
                   }
                   e.target.value = '';
                 }}
-                className="w-full rounded-lg border-primary border p-2 bg-white mt-1"
+                className='w-full rounded-lg border-primary border p-2 bg-white mt-1'
               >
-                <option value="">
-                  {t('form.tags.addTag')}
-                </option>
+                <option value=''>{t('form.tags.addTag')}</option>
                 {jobCategories.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
@@ -448,51 +426,46 @@ export function JobOffersSection({
                 ))}
               </select>
 
-              {errors.tags && (
-                <p className="text-red-500 text-xs">{errors.tags.message}</p>
-              )}
+              {errors.tags && <p className='text-red-500 text-xs'>{errors.tags.message}</p>}
             </div>
 
             {/* Descripción */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 {t('form.description.label')}
               </label>
               <textarea
                 {...register('description')}
                 rows={4}
-                className="w-full rounded-lg border-primary border p-2"
+                className='w-full rounded-lg border-primary border p-2'
                 placeholder={t('form.description.placeholder')}
               />
               {errors.description && (
-                <p className="text-red-500 text-xs">{errors.description.message}</p>
+                <p className='text-red-500 text-xs'>{errors.description.message}</p>
               )}
             </div>
 
             {/* Precio + Ciudad */}
-            <div className="grid grid-cols-2 gap-4">
-
+            <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
                   {t('form.price.label')}
                 </label>
                 <input
-                  type="number"
+                  type='number'
                   {...register('price')}
-                  className="w-full rounded-lg border-primary border p-2"
+                  className='w-full rounded-lg border-primary border p-2'
                 />
-                {errors.price && (
-                  <p className="text-red-500 text-xs">{errors.price.message}</p>
-                )}
+                {errors.price && <p className='text-red-500 text-xs'>{errors.price.message}</p>}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
                   {t('form.city.label')}
                 </label>
                 <select
                   {...register('city')}
-                  className="w-full rounded-lg border-primary border p-2 bg-white"
+                  className='w-full rounded-lg border-primary border p-2 bg-white'
                 >
                   {boliviaCities.map((city) => (
                     <option key={city.value} value={city.value}>
@@ -500,50 +473,46 @@ export function JobOffersSection({
                     </option>
                   ))}
                 </select>
-                {errors.city && (
-                  <p className="text-red-500 text-xs">{errors.city.message}</p>
-                )}
+                {errors.city && <p className='text-red-500 text-xs'>{errors.city.message}</p>}
               </div>
-
             </div>
 
             {/* Teléfono */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 {t('form.contactPhone.label')}
               </label>
               <input
                 {...register('contactPhone')}
-                className="w-full rounded-lg border-primary border p-2"
+                className='w-full rounded-lg border-primary border p-2'
               />
               {errors.contactPhone && (
-                <p className="text-red-500 text-xs">{errors.contactPhone.message}</p>
+                <p className='text-red-500 text-xs'>{errors.contactPhone.message}</p>
               )}
             </div>
 
             {/* Imágenes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className='block text-sm font-medium text-gray-700 mb-2'>
                 {t('form.images.label')}
               </label>
 
-              <div className="grid grid-cols-4 gap-2">
-
+              <div className='grid grid-cols-4 gap-2'>
                 {previewUrls.map((url, idx) => (
-                  <div key={idx} className="relative aspect-square group">
+                  <div key={idx} className='relative aspect-square group'>
                     <Image
                       src={url}
-                      alt="preview"
+                      alt='preview'
                       fill
-                      className="object-cover rounded-lg border"
+                      className='object-cover rounded-lg border'
                     />
                     <button
-                      type="button"
+                      type='button'
                       onClick={() => {
-                        setPreviewUrls(prev => prev.filter((_, i) => i !== idx));
-                        setSelectedImages(prev => prev.filter((_, i) => i !== idx));
+                        setPreviewUrls((prev) => prev.filter((_, i) => i !== idx));
+                        setSelectedImages((prev) => prev.filter((_, i) => i !== idx));
                       }}
-                      className="absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100"
+                      className='absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100'
                     >
                       <X size={14} />
                     </button>
@@ -551,39 +520,33 @@ export function JobOffersSection({
                 ))}
 
                 {previewUrls.length < 5 && (
-                  <label className="flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:bg-gray-50">
-                    <Upload className="text-gray-400" />
+                  <label className='flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:bg-gray-50'>
+                    <Upload className='text-gray-400' />
                     <input
-                      type="file"
-                      className="hidden"
-                      accept="image/*"
+                      type='file'
+                      className='hidden'
+                      accept='image/*'
                       multiple
                       onChange={(e) => {
                         const files = Array.from(e.target.files || []);
-                        const filtered = files.filter(
-                          (file) => file.size <= 5 * 1024 * 1024
-                        );
+                        const filtered = files.filter((file) => file.size <= 5 * 1024 * 1024);
 
-                        setSelectedImages(prev => [...prev, ...filtered]);
-                        setPreviewUrls(prev => [
+                        setSelectedImages((prev) => [...prev, ...filtered]);
+                        setPreviewUrls((prev) => [
                           ...prev,
-                          ...filtered.map(f => URL.createObjectURL(f)),
+                          ...filtered.map((f) => URL.createObjectURL(f)),
                         ]);
                       }}
                     />
                   </label>
                 )}
-
               </div>
-
             </div>
-
           </form>
         </Modal.Body>
 
         <Modal.Footer>
-          <div className="flex justify-end gap-2">
-
+          <div className='flex justify-end gap-2'>
             <button
               onClick={() => {
                 reset();
@@ -592,20 +555,19 @@ export function JobOffersSection({
                 setSelectedImages([]);
                 setPreviewUrls([]);
               }}
-              className="border border-primary py-2 px-4 rounded-2xl text-primary hover:bg-primary hover:text-white"
+              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:bg-primary hover:text-white'
             >
               {t('buttons.cancel')}
             </button>
 
             <PillButton
-              type="submit"
-              form="offerForm"
-              className="bg-primary text-white hover:bg-blue-800"
+              type='submit'
+              form='offerForm'
+              className='bg-primary text-white hover:bg-blue-800'
               disabled={isCreating || isUpdating}
             >
-              {(isCreating || isUpdating) ? t('buttons.saving') : t('buttons.save')}
+              {isCreating || isUpdating ? t('buttons.saving') : t('buttons.save')}
             </PillButton>
-
           </div>
         </Modal.Footer>
       </Modal>
@@ -613,15 +575,14 @@ export function JobOffersSection({
       {/* NOTIFICACIONES */}
       <NotificationModal
         isOpen={notify.isOpen}
-        onClose={() => setNotify(prev => ({ ...prev, isOpen: false }))}
+        onClose={() => setNotify((prev) => ({ ...prev, isOpen: false }))}
         type={notify.type}
         title={notify.title}
         message={notify.message}
         onConfirm={notify.onConfirm}
-        confirmText="Confirmar"
+        confirmText='Confirmar'
         autoClose={!notify.onConfirm}
       />
-
     </div>
   );
 }
