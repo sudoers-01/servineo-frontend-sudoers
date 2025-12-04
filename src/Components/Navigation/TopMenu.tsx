@@ -266,8 +266,8 @@ export default function TopMenu() {
       }
     };
 
-    document.addEventListener('mousedown', handleOutside);
-    return () => document.removeEventListener('mousedown', handleOutside);
+    document.addEventListener('click', handleOutside);
+    return () => document.removeEventListener('click', handleOutside);
   }, [profileMenuOpen]);
 
   // close account dropdown on click outside (mobile)
@@ -317,8 +317,7 @@ export default function TopMenu() {
   };
 
   /* ---------- Render ---------- */
-  /* ---------- Render ---------- */
- return (
+  return (
     <>
       {/* DESKTOP HEADER */}
       <header
@@ -330,7 +329,6 @@ export default function TopMenu() {
         <div className='w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20'>
           {/* Logo */}
           <button
-            id="tour-logo"
             ref={logoRef}
             onClick={handleLogoClick}
             className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]'
@@ -354,7 +352,7 @@ export default function TopMenu() {
           </button>
 
           {/* Desktop Nav */}
-          <nav id="tour-desktop-nav" className='flex gap-6' role='navigation' aria-label='Menú principal'>
+          <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
             {navItems.map((item) => (
               <Link
                 key={item.name}
@@ -367,10 +365,10 @@ export default function TopMenu() {
             ))}
           </nav>
 
-
           {/* Desktop Right */}
           <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
             {!isClient ? (
+              // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
               <div style={{ width: 100, height: 10 }} />
             ) : !isLogged ? (
               <>
@@ -394,6 +392,8 @@ export default function TopMenu() {
                   onClick={() => setProfileMenuOpen((v) => !v)}
                   className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
                 >
+                  {/* Using img to keep visual identical to provided code */}
+                  {/* If you prefer next/image here, you can switch, but next/image inside buttons can be heavier */}
                   <img
                     src={userPhoto}
                     alt={user?.name ?? 'Usuario'}
@@ -626,7 +626,7 @@ export default function TopMenu() {
             </>
           )}
         </div>
-         {/* Barra inferior fija con iconos */}
+        {/* Barra inferior fija con iconos */}
         <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
           {navItems.map((item) => (
             <button
