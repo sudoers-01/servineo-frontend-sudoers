@@ -2,14 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 
-const MapComponent = dynamic(() => import('@/app/Mapa/Map'), {
-  loading: () => (
-    <div className="h-full w-full flex items-center justify-center bg-gray-100 text-gray-500">
-      Cargando mapa...
-    </div>
-  ),
-  ssr: false
-});
+// Import dinámico para Next.js (evitar SSR con mapas)
+const Map = dynamic(() => import('@/app/Mapa/Map'), { ssr: false });
 
 export default function MapSection() {
   const [isMounted, setIsMounted] = useState(false);
@@ -27,12 +21,12 @@ export default function MapSection() {
           </h2>
         </div>
         
-        {/* ✅ ID en el contenedor del mapa */}
+        {/* Contenedor del mapa */}
         <div 
           id='titulo-seccion-mapa'
-          className='h-[60vh] w-full bg-gray-100 rounded-xl overflow-hidden relative shadow-sm border border-gray-200'
+          className='h-[60vh] w-full bg-gray-100 rounded-xl overflow-visible relative shadow-sm border border-gray-200'
         >
-          {isMounted && <MapComponent />}
+          {isMounted && <Map />}
         </div>
       </div>
     </section>
