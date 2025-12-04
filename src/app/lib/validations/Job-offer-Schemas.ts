@@ -11,8 +11,8 @@ export const jobOfferSchema = z.object({
     .string()
     .min(20, { message: 'La descripción debe ser detallada (mínimo 20 letras)' }),
   category: z.string().min(1, { message: 'Selecciona una categoría válida' }),
-  price: z.coerce
-    .number({ error: 'El precio debe ser un número' })
+  price: z
+    .number()
     .positive({ message: 'El precio debe ser mayor a 0' }),
   city: z.string().min(1, { message: 'Selecciona una ciudad' }),
   contactPhone: z
@@ -81,14 +81,4 @@ export const jobCategories = [
   //si van a umentar mas sacar del modelo offfer.model.ts
 ];
 
-export const boliviaCities = [
-  { value: 'Beni', label: 'Beni' },
-  { value: 'Chuquisaca', label: 'Chuquisaca' },
-  { value: 'Cochabamba', label: 'Cochabamba' },
-  { value: 'La Paz', label: 'La Paz' },
-  { value: 'Oruro', label: 'Oruro' },
-  { value: 'Pando', label: 'Pando' },
-  { value: 'Potosí', label: 'Potosí' },
-  { value: 'Santa Cruz', label: 'Santa Cruz' },
-  { value: 'Tarija', label: 'Tarija' },
-];
+export const boliviaCities = [{ value: 'Cochabamba', label: 'Cochabamba' }];

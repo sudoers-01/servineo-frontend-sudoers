@@ -1,7 +1,9 @@
 'use client';
 
-import { useState, useRef, useMemo, useCallback } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+
 import DesktopCalendar from '@/Components/calendar/DesktopCalendar';
 import { UserRoleProvider } from '@/app/lib/utils/contexts/UserRoleContext';
 import MobileCalendar from '@/Components/calendar/mobile/MobileCalendar';
@@ -14,20 +16,33 @@ import useSixMonthsAppointments from '@/hooks/useSixMonthsAppointments';
 import { AppointmentsProvider } from '@/app/lib/utils/contexts/AppointmentsContext/AppoinmentsContext';
 import { AppointmentsStatusProvider } from '@/app/lib/utils/contexts/DayliViewRequesterContext';
 
-//const fixer_id = "68ef1993be38c7f1c3c2c777";
-const fixer_id = '68e87a9cdae3b73d8040102f';
-//const requester_id = "68ec99ddf39c7c140f42fcfa";
-
-//segundo
-const requester_id = '68f518e5ef03787169f81b22';
-
 export default function CalendarPage() {
+  const t = useTranslations('CalendarPage');
   const router = useRouter();
   const modeModalRef = useRef<ModeSelectionModalHandles>(null);
 
-  const [userRole, setUserRole] = useState<'requester' | 'fixer'>('fixer');
+  const [fixer_id, setFixerId] = useState<string>('');
+  const [requester_id, setRequesterId] = useState<string>('');
+  const [isLoading, setIsLoading] = useState(true);
+  const [userRole, setUserRole] = useState<'requester' | 'fixer'>('requester');
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
+  // Cargar datos de sessionStorage
+  useEffect(() => {
+    const storedFixerId = sessionStorage.getItem('fixer_id');
+    const storedRequesterId = sessionStorage.getItem('requester_id');
+    const storedRoleUser = sessionStorage.getItem('roluser');
+
+    if (storedFixerId) {
+      setFixerId(storedFixerId);
+      setRequesterId(storedRequesterId || '');
+      setUserRole(storedRoleUser === 'fixer' ? 'fixer' : 'requester');
+      setIsLoading(false);
+    } else {
+      router.push('/');
+    }
+  }, [router]);
 
   const today = useMemo(() => {
     const d = new Date();
@@ -40,11 +55,7 @@ export default function CalendarPage() {
   };
 
   const switchRole = () => {
-    if (userRole === 'requester') {
-      setUserRole('fixer');
-    } else {
-      setUserRole('requester');
-    }
+    setUserRole((prevRole) => (prevRole === 'requester' ? 'fixer' : 'requester'));
   };
 
   const handleOpenAvailabilityModal = () => {
@@ -58,11 +69,6 @@ export default function CalendarPage() {
   const closeCancelModal = () => {
     setIsCancelModalOpen(false);
   };
-
-  /*   Esto quedara como vestigio del lorem 
-     *   const handleConfirmCancel = (selectedDays: string[]) => {
-            //por alguna razon que no se explicar mandamos la logica pero xd funcion tonta que no quiero refactorizar 
-        }*/
 
   const {
     isHourBookedFixer,
@@ -103,6 +109,15 @@ export default function CalendarPage() {
       loading,
     ],
   );
+
+  // Mostrar loading mientras se cargan los datos de sessionStorage
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-screen'>
+        <p>{t('loading')}</p>
+      </div>
+    );
+  }
 
   return (
     <UserRoleProvider role={userRole} fixer_id={fixer_id} requester_id={requester_id}>
@@ -146,11 +161,13 @@ export default function CalendarPage() {
                 </button>
 
                 {userRole === 'fixer' && (
-                  <h2 className='text-black p-4 text-xl text-center flex-1'>Mi Calendario</h2>
+                  <h2 className='text-black p-4 text-xl text-center flex-1'>
+                    {t('titles.myCalendar')}
+                  </h2>
                 )}
                 {userRole === 'requester' && (
                   <h2 className='text-black p-4 text-xl text-center flex-1'>
-                    Calendario Diego Paredes
+                    {t('titles.fixerCalendar', { fixerName: 'Juan Carlos Peréz' })}
                   </h2>
                 )}
               </div>
@@ -162,13 +179,13 @@ export default function CalendarPage() {
                       className='flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm'
                       onClick={handleOpenAvailabilityModal}
                     >
-                      Modificar Disponibilidad
+                      {t('buttons.modifyAvailability')}
                     </button>
                     <button
                       className='flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors text-sm'
                       onClick={openCancelModal}
                     >
-                      Cancelar Citas
+                      {t('buttons.cancelAppointments')}
                     </button>
                   </div>
                 )}
@@ -176,7 +193,7 @@ export default function CalendarPage() {
                   onClick={switchRole}
                   className='w-full bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors cursor-pointer text-sm'
                 >
-                  Vista Actual: {userRole}
+                  {t('buttons.currentView', { role: userRole })}
                 </button>
               </div>
 
@@ -185,7 +202,7 @@ export default function CalendarPage() {
                   onClick={switchRole}
                   className='bg-green-700 text-white px-6 py-2 rounded hover:bg-green-600 transition-colors cursor-pointer whitespace-nowrap'
                 >
-                  Vista Actual: {userRole}
+                  {t('buttons.currentView', { role: userRole })}
                 </button>
 
                 {userRole === 'fixer' && (
@@ -194,13 +211,13 @@ export default function CalendarPage() {
                       className='bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors whitespace-nowrap'
                       onClick={handleOpenAvailabilityModal}
                     >
-                      Modificar Disponibilidad
+                      {t('buttons.modifyAvailability')}
                     </button>
                     <button
                       className='bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors whitespace-nowrap'
                       onClick={openCancelModal}
                     >
-                      Cancelar Citas
+                      {t('buttons.cancelAppointments')}
                     </button>
                   </div>
                 )}

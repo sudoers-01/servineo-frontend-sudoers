@@ -10,6 +10,7 @@ import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { TranslationButton } from '@/Components/Shared/TranslationButton';
 import BotonesFlotantes from '@/Components/ask_for_help/contenedor';
+import FooterSection from '@/Components/Home/Footer-section';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -68,14 +69,15 @@ export default async function RootLayout({ children, params }: Props) {
       >
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ReduxProvider>
-            <div className='text-black fixed bottom-7 right-7 z-[9999]'>
-              <TranslationButton />
+            <div className='text-black fixed bottom-7 left-7 z-9999'>
               <BotonesFlotantes />
             </div>
             <div className=''>
               <TopMenu />
             </div>
             {children}
+            <TranslationButton />
+            <FooterSection />
           </ReduxProvider>
         </NextIntlClientProvider>
       </body>

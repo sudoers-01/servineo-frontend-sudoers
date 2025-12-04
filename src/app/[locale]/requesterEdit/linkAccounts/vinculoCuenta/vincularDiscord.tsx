@@ -4,12 +4,14 @@ import { useState } from 'react';
 import { FaDiscord } from 'react-icons/fa';
 import { Loader2 } from 'lucide-react';
 import { vincularDiscord, Client } from '@/app/redux/services/services/api';
+import { useTranslations } from 'next-intl';
 
 interface VincularDiscordProps {
   onLinked?: (client?: Client) => void;
 }
 
 export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
+  const t = useTranslations('VincularDiscord');
   const [loading, setLoading] = useState(false);
 
   const handleVincularDiscord = () => {
@@ -35,8 +37,8 @@ export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
       <div className='flex items-center gap-3'>
         <FaDiscord size={30} className='text-[#5865F2]' />
         <div className='flex flex-col'>
-          <span className='text-sm font-semibold text-gray-800'>Discord</span>
-          <span className='text-xs text-gray-500'>Vincula tu cuenta de Discord</span>
+          <span className='text-sm font-semibold text-gray-800'>{t('title')}</span>
+          <span className='text-xs text-gray-500'>{t('subtitle')}</span>
         </div>
       </div>
 
@@ -47,10 +49,10 @@ export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
       >
         {loading ? (
           <>
-            <Loader2 className='w-4 h-4 animate-spin' /> Vinculando...
+            <Loader2 className='w-4 h-4 animate-spin' /> {t('buttons.linking')}
           </>
         ) : (
-          'Vincular'
+          t('buttons.link')
         )}
       </button>
     </div>

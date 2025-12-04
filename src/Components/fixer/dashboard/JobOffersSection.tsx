@@ -3,28 +3,33 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Briefcase, Upload, X } from 'lucide-react';
+import { Plus, Briefcase, Upload, X, MoreVertical } from 'lucide-react';
+
 import { PillButton } from '../Pill-button';
 import { Modal } from '@/Components/Modal';
 import NotificationModal from '@/Components/Modal-notifications';
 import { JobOfferCard } from '@/Components/Job-offers/JobOfferCard';
 import Image from 'next/image';
 import { boliviaCities } from '@/app/lib/validations/Job-offer-Schemas';
+import { t } from 'i18next';
+//import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
+
 import {
   useGetJobsByFixerQuery,
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
+  useToggleJobStatusMutation,
 } from '@/app/redux/services/jobApi';
 
 import {
   jobOfferSchema,
   jobCategories,
   type JobOfferFormData,
-  type IJobOffer,
 } from '@/app/lib/validations/Job-offer-Schemas';
-import type { JobOfferData } from '@/types/jobOffers';
+
+import type { IJobOffer } from '@/types/fixer-profile';
 
 interface NotificationState {
   isOpen: boolean;
@@ -34,14 +39,25 @@ interface NotificationState {
   onConfirm?: () => void;
 }
 
-export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
-  const { user } = useAppSelector((state) => state.user);
-  const userId = user?._id || '';
+type JobStateFilter = 'active' | 'inactive';
 
-  const { data: apiOffers, isLoading } = useGetJobsByFixerQuery(userId, { skip: !userId });
+export function JobOffersSection({
+  readOnly = false,
+  effectiveeffectiveUserId = '',
+}: {
+  readOnly?: boolean;
+  effectiveeffectiveUserId?: string;
+}) {
+  const { user } = useAppSelector((state) => state.user);
+  const effectiveeffectiveeffectiveUserId = effectiveeffectiveUserId || user?._id || '';
+
+  const { data: apiOffers, isLoading } = useGetJobsByFixerQuery(effectiveeffectiveeffectiveUserId, {
+    skip: !effectiveeffectiveeffectiveUserId,
+  });
   const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
   const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
   const [deleteJob] = useDeleteJobMutation();
+  const [toggleJobStatus] = useToggleJobStatusMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<IJobOffer | null>(null);
@@ -55,14 +71,17 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     message: '',
   });
 
+  const [filter, setFilter] = useState<JobStateFilter>('active');
+  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    watch, // Necesario para ver los tags en tiempo real
+    watch,
     formState: { errors },
-  } = useForm({
+  } = useForm<JobOfferFormData>({
     resolver: zodResolver(jobOfferSchema),
     defaultValues: {
       price: 0,
@@ -71,11 +90,10 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
       title: '',
       description: '',
       category: '',
-      tags: [] as string[], // Array de tags inicial
+      tags: [] as string[],
     },
   });
 
-  // Observamos los tags actuales para dibujarlos
   const currentTags = watch('tags') || [];
 
   const showNotify = (
@@ -87,97 +105,17 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     setNotify({ isOpen: true, type, title, message, onConfirm });
   };
 
-  // === Lógica de Tags ===
-  const handleAddTag = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
-    if (!value) return;
+  // ⭐ Filtrar según estado real del backend
+  const filteredOffers = (apiOffers || []).filter(
+    (offer) => {
+      const isActive = offer.status ?? false;
+      return filter === 'active' ? isActive : !isActive;
+    },
+  );
 
-    // Evitar duplicados y máximo 5 tags
-    if (!currentTags.includes(value) && currentTags.length < 5) {
-      setValue('tags', [...currentTags, value], { shouldValidate: true });
-    }
-
-    // Resetear el select visualmente para que vuelva a "Seleccionar..."
-    e.target.value = '';
-  };
-
-  const removeTag = (tagToRemove: string) => {
-    const newTags = currentTags.filter((t) => t !== tagToRemove);
-    setValue('tags', newTags, { shouldValidate: true });
-  };
-
-  // === Manejo de Imágenes ===
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
-    if (selectedImages.length + files.length > 5) {
-      showNotify('warning', 'Límite excedido', 'Solo puedes subir hasta 5 imágenes.');
-      return;
-    }
-    const newFiles: File[] = [];
-    files.forEach((file) => {
-      if (file.size > 5 * 1024 * 1024) {
-        showNotify('error', 'Imagen muy pesada', `La imagen ${file.name} excede 5MB.`);
-      } else {
-        newFiles.push(file);
-      }
-    });
-    const newPreviews = newFiles.map((file) => URL.createObjectURL(file));
-    setSelectedImages((prev) => [...prev, ...newFiles]);
-    setPreviewUrls((prev) => [...prev, ...newPreviews]);
-  };
-
-  const removeImage = (index: number) => {
-    setSelectedImages((prev) => prev.filter((_, i) => i !== index));
-    if (previewUrls[index].startsWith('blob:')) {
-      URL.revokeObjectURL(previewUrls[index]);
-    }
-    setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // === Handlers Modal ===
-  const handleOpenModal = (offer?: IJobOffer) => {
-    if (readOnly) return;
-
-    if (offer) {
-      setEditingOffer(offer);
-      setValue('title', offer.title);
-      setValue('description', offer.description);
-      setValue('category', offer.category);
-      setValue('price', offer.price);
-      setValue('city', offer.city);
-      setValue('contactPhone', offer.contactPhone);
-
-      // Cargar tags: Si tiene tags úsalos, si no, usa la categoría como tag inicial
-      setValue('tags', offer.tags && offer.tags.length > 0 ? offer.tags : [offer.category]);
-
-      setPreviewUrls(offer.photos || []);
-      setSelectedImages([]);
-    } else {
-      setEditingOffer(null);
-      reset({
-        title: '',
-        description: '',
-        price: 0,
-        category: '',
-        city: 'Cochabamba',
-        contactPhone: user?.telefono || '',
-        tags: [], // Resetear tags
-      });
-      setPreviewUrls([]);
-      setSelectedImages([]);
-    }
-    setIsModalOpen(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setEditingOffer(null);
-    setSelectedImages([]);
-    setPreviewUrls([]);
-    reset();
-  };
-
-  // === Submit (Create/Update) ===
+  // -------------------------
+  // 🔥 CREAR / EDITAR OFERTA
+  // -------------------------
   const onSubmit = async (data: JobOfferFormData) => {
     if (!user?._id) return showNotify('error', 'Error', 'No se identificó al usuario.');
 
@@ -195,12 +133,8 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
       formData.append('price', data.price.toString());
       formData.append('city', data.city);
       formData.append('contactPhone', data.contactPhone);
-
-      // --- CAMBIO IMPORTANTE: Enviamos los tags reales ---
       formData.append('tags', JSON.stringify(data.tags));
-      // --------------------------------------------------
-
-      formData.append('rating', editingOffer ? editingOffer.rating.toString() : '5');
+      formData.append('rating', editingOffer?.rating ? editingOffer.rating.toString() : '5');
 
       selectedImages.forEach((file) => formData.append('photos', file));
 
@@ -211,19 +145,26 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
         await createJob(formData).unwrap();
         showNotify('success', 'Publicado', 'Oferta creada correctamente.');
       }
-      handleCloseModal();
-    } catch (error: unknown) {
+
+      reset();
+      setSelectedImages([]);
+      setPreviewUrls([]);
+      setEditingOffer(null);
+      setIsModalOpen(false);
+    } catch (error) {
       console.error(error);
       showNotify('error', 'Error', 'Error al procesar la solicitud.');
     }
   };
 
-  // === Delete ===
+  // -------------------------
+  // 🔥 ELIMINAR OFERTA
+  // -------------------------
   const confirmDelete = (jobId: string) => {
-    if (!userId) return;
+    if (!effectiveeffectiveUserId) return;
     showNotify('warning', '¿Eliminar oferta?', 'Esta acción no se puede deshacer.', async () => {
       try {
-        await deleteJob({ jobId, fixerId: userId }).unwrap();
+        await deleteJob({ jobId, fixerId: effectiveeffectiveUserId }).unwrap();
         setTimeout(() => showNotify('success', 'Eliminado', 'Oferta eliminada.'), 300);
       } catch (error: unknown) {
         showNotify('error', 'Error', 'No se pudo eliminar la oferta.');
@@ -232,69 +173,151 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     });
   };
 
-  // === Mapeo de Datos ===
-  const mapToCardData = (offer: IJobOffer): JobOfferData => ({
-    _id: offer._id,
-    fixerId: offer.fixerId,
-    fixerName: offer.fixerName,
-    title: offer.title,
-    description: offer.description,
-    category: offer.category,
-    tags: offer.tags || [],
-    price: offer.price,
-    city: offer.city,
-    contactPhone: offer.contactPhone,
-    createdAt: offer.createdAt,
-    rating: offer.rating,
-    photos: offer.photos || [],
-    allImages: offer.photos || [],
-    imagenUrl: offer.photos?.[0] || '',
-    status: 'active',
-  });
-
-  const isSubmitting = isCreating || isUpdating;
+  // -------------------------
+  // 🔥 TOGGLE STATUS REAL
+  // -------------------------
+  const handleToggleActive = async (jobId: string) => {
+    try {
+      await toggleJobStatus({ jobId }).unwrap();
+      setOpenMenuId(null);
+    } catch (err) {
+      console.error(err);
+      showNotify('error', 'Error', 'No se pudo cambiar el estado.');
+    }
+  };
 
   if (isLoading) return <div className='p-10 text-center animate-pulse'>Cargando ofertas...</div>;
 
   return (
     <div className='space-y-6'>
-      {/* Header */}
-      <div className='flex items-center justify-between'>
+      {/* HEADER */}
+      <div className='flex items-center justify-between gap-4'>
         <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
           <Briefcase className='h-5 w-5 text-blue-600' />
-          {readOnly ? 'Ofertas Disponibles' : 'Mis Servicios'}
+          Mis Ofertas de Trabajo
         </h2>
-        {!readOnly && (
-          <PillButton
-            onClick={() => handleOpenModal()}
-            className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
+
+        <div className='flex items-center gap-3'>
+          <select
+            value={filter}
+            onChange={(e) => setFilter(e.target.value as JobStateFilter)}
+            className='border border-gray-300 rounded-full px-3 py-1.5 text-sm text-gray-700 bg-white shadow-sm'
           >
-            <Plus className='h-4 w-4' /> Nueva Oferta
-          </PillButton>
-        )}
+            <option value='active'>Ofertas activas</option>
+            <option value='inactive'>Ofertas inactivas</option>
+          </select>
+
+          {!readOnly && (
+            <PillButton
+              onClick={() => {
+                reset();
+                setSelectedImages([]);
+                setPreviewUrls([]);
+                setEditingOffer(null);
+                setIsModalOpen(true);
+              }}
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
+            >
+              <Plus className='h-4 w-4' /> Nueva Oferta
+            </PillButton>
+          )}
+        </div>
       </div>
 
-      {/* Grid */}
+      {/* GRID DE OFERTAS */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {apiOffers?.map((offer) => (
-          <JobOfferCard
-            key={offer._id}
-            offer={mapToCardData(offer as IJobOffer)}
-            onEdit={
-              !readOnly
-                ? () =>
-                    handleOpenModal({
-                      ...offer,
-                      tags: offer.tags || [],
-                      _id: offer._id || '',
-                    } as IJobOffer)
-                : undefined
-            }
-            onDelete={!readOnly ? () => confirmDelete(offer._id!) : undefined}
-            readOnly={readOnly}
-            className='h-full'
-          />
-        ))}
+        {filteredOffers.map((offer) => {
+          const id = offer._id;
+          const isActive = offer.status ?? true;
+
+          return (
+            <div key={id} className='relative h-full'>
+              <div className='h-full rounded-2xl shadow bg-white flex flex-col overflow-visible'>
+                <JobOfferCard
+                  offer={{
+                    _id: offer._id,
+                    fixerId: offer.fixerId,
+                    fixerName: offer.fixerName,
+                    title: offer.title,
+                    description: offer.description,
+                    category: offer.category,
+                    tags: offer.tags || [],
+                    price: offer.price,
+                    city: offer.city,
+                    contactPhone: offer.contactPhone,
+                    createdAt: offer.createdAt || new Date().toISOString(),
+                    rating: offer.rating,
+                    photos: offer.photos || [],
+                    allImages: offer.photos || [],
+                    imagenUrl: offer.photos?.[0] || '',
+                    status: offer.status,
+                  }}
+                  onEdit={
+                    !readOnly
+                      ? () => {
+                          setEditingOffer(offer);
+                          setValue('title', offer.title);
+                          setValue('description', offer.description);
+                          setValue('category', offer.category);
+                          setValue('price', offer.price);
+                          setValue('city', offer.city);
+                          setValue('contactPhone', offer.contactPhone);
+                          setValue('tags', offer.tags || []);
+                          setPreviewUrls(offer.photos || []);
+                          setSelectedImages([]);
+                          setIsModalOpen(true);
+                        }
+                      : undefined
+                  }
+                  onDelete={!readOnly ? () => confirmDelete(id) : undefined}
+                  readOnly={readOnly}
+                  className='flex-1'
+                />
+
+                {/* FOOTER: ESTADO + MENÚ */}
+                <div className='border-t px-3 py-2 flex items-center justify-between'>
+                  {/* Estado */}
+                  <span
+                    className={`px-2 py-1 rounded-full text-xs font-medium border ${
+                      isActive
+                        ? 'bg-green-50 text-green-600 border-green-200'
+                        : 'bg-red-50 text-red-600 border-red-200'
+                    }`}
+                  >
+                    {isActive ? 'Activa' : 'Inactiva'}
+                  </span>
+
+                  {/* Menú */}
+                  {!readOnly && (
+                    <div className='relative'>
+                      <button
+                        type='button'
+                        onClick={() => setOpenMenuId((prev) => (prev === id ? null : id))}
+                        className='p-1 rounded-full border border-gray-200 bg-white shadow hover:bg-gray-50'
+                      >
+                        <MoreVertical size={16} className='text-gray-600' />
+                      </button>
+
+                      {openMenuId === id && (
+                        <div className='absolute right-0 top-full mt-1 w-40 bg-white border rounded-lg shadow-lg text-xs z-[100]'>
+                          <button
+                            type='button'
+                            onClick={() => handleToggleActive(id)}
+                            className='w-full text-left px-3 py-2 hover:bg-gray-50'
+                          >
+                            {isActive ? 'Desactivar trabajo' : 'Activar trabajo'}
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+
+        {/* Sin ofertas */}
         {(!apiOffers || apiOffers.length === 0) && (
           <div className='col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed'>
             No hay ofertas publicadas aún.
@@ -302,145 +325,146 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
         )}
       </div>
 
-      {/* Modal Formulario */}
+      {/* ---------------------- */}
+      {/* MODAL DE CREAR/EDITAR */}
+      {/* ---------------------- */}
       <Modal
         open={isModalOpen}
-        onClose={handleCloseModal}
+        onClose={() => {
+          setIsModalOpen(false);
+          setEditingOffer(null);
+          reset();
+          setSelectedImages([]);
+          setPreviewUrls([]);
+        }}
+        title={editingOffer ? t('modal.editTitle') : t('modal.newTitle')}
         size='lg'
-        closeOnOverlayClick={!isSubmitting}
+        closeOnOverlayClick={!isCreating && !isUpdating}
         className='rounded-2xl border-primary border-2'
       >
-        <Modal.Header className='text-center text-primary'>
-          {editingOffer ? 'Editar Oferta' : 'Crear Oferta'}
-        </Modal.Header>
         <Modal.Body>
           <form id='offerForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             {/* Título */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Título</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {t('form.title.label')}
+              </label>
               <input
                 {...register('title')}
-                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='Ej: Reparación de fugas'
+                className='w-full rounded-lg border-primary border p-2'
+                placeholder={t('form.title.placeholder')}
               />
-              {errors.title && (
-                <p className='text-red-500 text-xs mt-1'>{errors.title.message as string}</p>
-              )}
+              {errors.title && <p className='text-red-500 text-xs'>{errors.title.message}</p>}
             </div>
 
             {/* Categoría */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Categoría Principal
+                {t('form.category.label')}
               </label>
               <select
                 {...register('category')}
-                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
+                className='w-full rounded-lg border-primary border p-2 bg-white'
               >
-                <option value=''>Seleccionar...</option>
+                <option value=''>{t('form.category.select')}</option>
                 {jobCategories.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
                   </option>
                 ))}
               </select>
-              {errors.category && (
-                <p className='text-red-500 text-xs mt-1'>{errors.category.message as string}</p>
-              )}
+              {errors.category && <p className='text-red-500 text-xs'>{errors.category.message}</p>}
             </div>
 
-            {/* === SECCIÓN DE TAGS (Etiquetas) === */}
+            {/* Tags */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Etiquetas Extra (Máx. 5)
+                {t('form.tags.label')}
               </label>
 
-              {/* Visualización de Tags seleccionados */}
-              <div className='flex flex-wrap gap-2 mb-2 min-h-[32px] p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
+              <div className='flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
                 {currentTags.map((tag) => (
                   <span
                     key={tag}
-                    className='inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border border-blue-200 shadow-sm animate-fade-in'
+                    className='inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border'
                   >
                     {tag}
                     <button
                       type='button'
-                      onClick={() => removeTag(tag)}
-                      className='hover:text-red-500 focus:outline-none ml-1 p-0.5 rounded-full hover:bg-white/50 transition-colors'
+                      onClick={() => {
+                        const newTags = currentTags.filter((t) => t !== tag);
+                        setValue('tags', newTags);
+                      }}
+                      className='hover:text-red-500'
                     >
                       <X size={12} />
                     </button>
                   </span>
                 ))}
+
                 {currentTags.length === 0 && (
-                  <span className='text-xs text-gray-400 italic self-center'>
-                    No hay etiquetas seleccionadas
-                  </span>
+                  <span className='text-xs text-gray-400 italic'>{t('form.tags.empty')}</span>
                 )}
               </div>
 
-              {/* Select para agregar tags */}
               <select
-                onChange={handleAddTag}
-                className='w-full rounded-lg border-primary border focus:outline-none bg-white py-2 px-3 cursor-pointer'
-                disabled={currentTags.length >= 5}
-                defaultValue=''
+                onChange={(e) => {
+                  const value = e.target.value;
+                  if (!currentTags.includes(value) && currentTags.length < 5) {
+                    setValue('tags', [...currentTags, value]);
+                  }
+                  e.target.value = '';
+                }}
+                className='w-full rounded-lg border-primary border p-2 bg-white mt-1'
               >
-                <option value='' disabled>
-                  {currentTags.length >= 5
-                    ? 'Límite de 5 etiquetas alcanzado'
-                    : '+ Agregar etiqueta...'}
-                </option>
+                <option value=''>{t('form.tags.addTag')}</option>
                 {jobCategories.map((cat) => (
-                  // Solo mostramos las que no están seleccionadas (opcional)
-                  <option
-                    key={cat.value}
-                    value={cat.value}
-                    disabled={currentTags.includes(cat.value)}
-                  >
-                    {cat.label} {currentTags.includes(cat.value) ? '(Ya agregado)' : ''}
+                  <option key={cat.value} value={cat.value}>
+                    {cat.label}
                   </option>
                 ))}
               </select>
 
-              {errors.tags && (
-                <p className='text-red-500 text-xs mt-1'>{errors.tags.message as string}</p>
-              )}
+              {errors.tags && <p className='text-red-500 text-xs'>{errors.tags.message}</p>}
             </div>
-            {/* ================================== */}
 
             {/* Descripción */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Descripción</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {t('form.description.label')}
+              </label>
               <textarea
                 {...register('description')}
                 rows={4}
-                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='Detalles del servicio...'
+                className='w-full rounded-lg border-primary border p-2'
+                placeholder={t('form.description.placeholder')}
               />
               {errors.description && (
-                <p className='text-red-500 text-xs mt-1'>{errors.description.message as string}</p>
+                <p className='text-red-500 text-xs'>{errors.description.message}</p>
               )}
             </div>
 
-            {/* Precio y Ciudad */}
+            {/* Precio + Ciudad */}
             <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Precio (Bs.)</label>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  {t('form.price.label')}
+                </label>
                 <input
                   type='number'
-                  {...register('price')}
-                  className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                  {...register('price', { valueAsNumber: true })}
+                  className='w-full rounded-lg border-primary border p-2'
                 />
-                {errors.price && (
-                  <p className='text-red-500 text-xs mt-1'>{errors.price.message as string}</p>
-                )}
+                {errors.price && <p className='text-red-500 text-xs'>{errors.price.message}</p>}
               </div>
+
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Ciudad</label>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  {t('form.city.label')}
+                </label>
                 <select
                   {...register('city')}
-                  className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
+                  className='w-full rounded-lg border-primary border p-2 bg-white'
                 >
                   {boliviaCities.map((city) => (
                     <option key={city.value} value={city.value}>
@@ -448,57 +472,70 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                     </option>
                   ))}
                 </select>
-                {errors.city && (
-                  <p className='text-red-500 text-xs mt-1'>{errors.city.message as string}</p>
-                )}
+                {errors.city && <p className='text-red-500 text-xs'>{errors.city.message}</p>}
               </div>
             </div>
 
             {/* Teléfono */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Celular</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {t('form.contactPhone.label')}
+              </label>
               <input
                 {...register('contactPhone')}
-                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                className='w-full rounded-lg border-primary border p-2'
               />
               {errors.contactPhone && (
-                <p className='text-red-500 text-xs mt-1'>{errors.contactPhone.message as string}</p>
+                <p className='text-red-500 text-xs'>{errors.contactPhone.message}</p>
               )}
             </div>
 
             {/* Imágenes */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Imágenes (Máx. 5)
+                {t('form.images.label')}
               </label>
-              <div className='grid grid-cols-4 gap-2 mb-2'>
+
+              <div className='grid grid-cols-4 gap-2'>
                 {previewUrls.map((url, idx) => (
                   <div key={idx} className='relative aspect-square group'>
                     <Image
                       src={url}
-                      className='w-full h-full object-cover rounded-lg border'
                       alt='preview'
-                      width={100}
-                      height={100}
+                      fill
+                      className='object-cover rounded-lg border'
                     />
                     <button
                       type='button'
-                      onClick={() => removeImage(idx)}
-                      className='absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
+                      onClick={() => {
+                        setPreviewUrls((prev) => prev.filter((_, i) => i !== idx));
+                        setSelectedImages((prev) => prev.filter((_, i) => i !== idx));
+                      }}
+                      className='absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100'
                     >
                       <X size={14} />
                     </button>
                   </div>
                 ))}
+
                 {previewUrls.length < 5 && (
-                  <label className='flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:bg-gray-50 transition-colors'>
+                  <label className='flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:bg-gray-50'>
                     <Upload className='text-gray-400' />
                     <input
                       type='file'
                       className='hidden'
                       accept='image/*'
                       multiple
-                      onChange={handleImageChange}
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        const filtered = files.filter((file) => file.size <= 5 * 1024 * 1024);
+
+                        setSelectedImages((prev) => [...prev, ...filtered]);
+                        setPreviewUrls((prev) => [
+                          ...prev,
+                          ...filtered.map((f) => URL.createObjectURL(f)),
+                        ]);
+                      }}
                     />
                   </label>
                 )}
@@ -506,26 +543,35 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
             </div>
           </form>
         </Modal.Body>
+
         <Modal.Footer>
           <div className='flex justify-end gap-2'>
             <button
-              onClick={handleCloseModal}
-              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
+              onClick={() => {
+                reset();
+                setIsModalOpen(false);
+                setEditingOffer(null);
+                setSelectedImages([]);
+                setPreviewUrls([]);
+              }}
+              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:bg-primary hover:text-white'
             >
-              Cancelar
+              {t('buttons.cancel')}
             </button>
+
             <PillButton
               type='submit'
               form='offerForm'
               className='bg-primary text-white hover:bg-blue-800'
-              disabled={isSubmitting}
+              disabled={isCreating || isUpdating}
             >
-              {isSubmitting ? 'Guardando...' : 'Guardar Oferta'}
+              {isCreating || isUpdating ? t('buttons.saving') : t('buttons.save')}
             </PillButton>
           </div>
         </Modal.Footer>
       </Modal>
 
+      {/* NOTIFICACIONES */}
       <NotificationModal
         isOpen={notify.isOpen}
         onClose={() => setNotify((prev) => ({ ...prev, isOpen: false }))}

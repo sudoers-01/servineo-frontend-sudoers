@@ -9,19 +9,20 @@ interface ApiResponse {
 
 export const jobApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Obtener todas las ofertas
     getAllJobs: builder.query<IJobOffer[], void>({
       query: () => '/job-offers',
       providesTags: ['Job'],
     }),
 
+    // Obtener ofertas por fixerId
     getJobsByFixer: builder.query<IJobOffer[], string>({
       query: (fixerId) => `/job-offers/fixer/${fixerId}`,
-      transformResponse: (response: ApiResponse) => {
-        return response.data;
-      },
+      transformResponse: (response: ApiResponse) => response.data,
       providesTags: ['Job'],
     }),
 
+    // Crear oferta
     createJob: builder.mutation<IJobOffer, FormData>({
       query: (formData) => ({
         url: '/job-offers',
@@ -30,8 +31,8 @@ export const jobApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Job'],
     }),
-    // ---------------------------
 
+    // Actualizar oferta
     updateJob: builder.mutation<IJobOffer, { jobId: string; formData: Partial<FormData> }>({
       query: ({ jobId, formData }) => ({
         url: `/job-offers/${jobId}`,
@@ -41,7 +42,7 @@ export const jobApi = baseApi.injectEndpoints({
       invalidatesTags: ['Job'],
     }),
 
-    // solo se necesita el id del la offerta
+    // Eliminar oferta
     deleteJob: builder.mutation<{ message: string }, { jobId: string; fixerId: string }>({
       query: ({ jobId, fixerId }) => ({
         url: `/job-offers/${jobId}`,
@@ -50,7 +51,17 @@ export const jobApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ['Job'],
     }),
+
+    //Activar / Desactivar oferta
+    toggleJobStatus: builder.mutation<IJobOffer, { jobId: string }>({
+      query: ({ jobId }) => ({
+        url: `/job-offers/${jobId}/toggle-status`,
+        method: 'PATCH',
+      }),
+      invalidatesTags: ['Job'],
+    }),
   }),
+
   overrideExisting: false,
 });
 
@@ -60,4 +71,5 @@ export const {
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
+  useToggleJobStatusMutation,
 } = jobApi;
