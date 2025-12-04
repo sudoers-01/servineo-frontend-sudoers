@@ -18,7 +18,6 @@ import Link from 'next/link'
 import type { Fixer } from "@/app/lib/mock-data"
 import FixerGraficCard from "@/Components/fixer/Fixer-grafic-card"
 import JobStatistics from "@/Components/fixer/Fixer-statistics"
-import { useTranslations } from 'next-intl'
 
 interface FixerProfileProps {
   fixer: Fixer;
@@ -40,7 +39,6 @@ interface LocationMapProps {
 // Remove duplicate Window interface declaration to avoid type conflicts
 
 export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
-  const t = useTranslations('fixerProfile.profile')
   const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<FormData>({
     bio: fixer.bio || '',
