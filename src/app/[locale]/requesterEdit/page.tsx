@@ -36,8 +36,6 @@ export default function ConfiguracionPage() {
 
   const [seccionActiva, setSeccionActiva] = useState('inicio');
 
-  // 🆕 Estados para HU5 (Editar Perfil)
-  //const [profileData, setProfileData] = useState<RequesterDataState>(INITIAL_DATA)
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
 
@@ -68,7 +66,7 @@ export default function ConfiguracionPage() {
     }
   }, [user, t]);
 
-  //Cargar datos cuando se activa la sección de perfil
+
   useEffect(() => {
     if (seccionActiva === 'perfil') {
       loadProfileData();
@@ -118,9 +116,6 @@ export default function ConfiguracionPage() {
 
         return (
           <div className='max-w-4xl w-full'>
-            <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>
-              {t('sections.editProfile')}
-            </h2>
             <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
               <RequesterEditForm />
             </div>
@@ -131,7 +126,6 @@ export default function ConfiguracionPage() {
         return (
           <div className='max-w-2xl w-full'>
             <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>
-              {t('sections.changePassword')}
             </h2>
             <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
               <ChangePasswordForm onCancel={handlePasswordCancel} onSaved={handlePasswordSaved} />
@@ -260,7 +254,6 @@ export default function ConfiguracionPage() {
             </div>
 
             <nav className='space-y-2'>
-              {/* Editar Perfil - Ahora interno */}
               <button
                 onClick={() => setSeccionActiva('perfil')}
                 className={`cursor-pointer flex items-center gap-2 w-full px-3 py-2 rounded-lg text-left transition-all duration-300 ease-out ${
