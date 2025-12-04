@@ -54,7 +54,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           message: t('validation.confirmarPassword.match'),
           path: ['confirmarPassword'],
         }),
-    [t]
+    [t],
   );
 
   const [formData, setFormData] = useState<RegistroSchema>({
@@ -155,7 +155,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
         sessionStorage.setItem(
           'toastMessage',
-          t('notifications.success.toast', { name: nombreCompleto })
+          t('notifications.success.toast', { name: nombreCompleto }),
         );
         router.push('/signUp/registrar/registrarFoto');
       } else {
@@ -175,9 +175,9 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
   return (
     <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
       {/* Nombre y Apellido */}
-      <div className="flex gap-3">
-        <div className="flex-1">
-          <label className="block text-sm font-semibold text-gray-600 mb-2">
+      <div className='flex gap-3'>
+        <div className='flex-1'>
+          <label className='block text-sm font-semibold text-gray-600 mb-2'>
             {t('fields.nombre.label')}*
           </label>
           <input
@@ -194,8 +194,8 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           {errors.nombre && <p className='text-red-500 text-xs mt-1'>{errors.nombre}</p>}
         </div>
 
-        <div className="flex-1">
-          <label className="block text-sm font-semibold text-gray-600 mb-2">
+        <div className='flex-1'>
+          <label className='block text-sm font-semibold text-gray-600 mb-2'>
             {t('fields.apellido.label')}*
           </label>
           <input
@@ -215,7 +215,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
       {/* Correo */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">
+        <label className='block text-sm font-semibold text-gray-600 mb-2'>
           {t('fields.email.label')}*
         </label>
         <input
@@ -235,10 +235,10 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
       {/* Contraseña */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">
+        <label className='block text-sm font-semibold text-gray-600 mb-2'>
           {t('fields.password.label')}*
         </label>
-        <div className="relative">
+        <div className='relative'>
           <input
             name='password'
             type={mostrarPassword ? 'text' : 'password'}
@@ -254,7 +254,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           <button
             type='button'
             onClick={() => setMostrarPassword(!mostrarPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
+            className='absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700'
             aria-label={mostrarPassword ? t('aria.hidePassword') : t('aria.showPassword')}
           >
             {mostrarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -262,19 +262,19 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
         </div>
         {errors.password && <p className='text-red-500 text-xs mt-1'>{errors.password}</p>}
 
-        <div className="relative">
+        <div className='relative'>
           <button
-            type="button"
+            type='button'
             onClick={handleGenerarContrasena}
             onMouseEnter={() => setMostrarTooltip(true)}
             onMouseLeave={() => setMostrarTooltip(false)}
-            className="text-sm text-servineo-500 hover:underline mt-1"
+            className='text-sm text-servineo-500 hover:underline mt-1'
           >
             {t('buttons.generatePassword')}
           </button>
 
           {mostrarTooltip && (
-            <div className="absolute top-full left-0 mt-1 bg-gray-100 border border-gray-300 text-gray-700 text-xs px-3 py-2 rounded-lg shadow-md animate-fade-in z-10">
+            <div className='absolute top-full left-0 mt-1 bg-gray-100 border border-gray-300 text-gray-700 text-xs px-3 py-2 rounded-lg shadow-md animate-fade-in z-10'>
               {t('tooltips.passwordCopy')}
             </div>
           )}
@@ -283,7 +283,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
 
       {/* Confirmar contraseña */}
       <div>
-        <label className="block text-sm font-semibold text-gray-600 mb-2">
+        <label className='block text-sm font-semibold text-gray-600 mb-2'>
           {t('fields.confirmarPassword.label')}*
         </label>
         <div className='relative'>
@@ -302,10 +302,8 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           <button
             type='button'
             onClick={() => setMostrarConfirmarPassword(!mostrarConfirmarPassword)}
-            className="absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700"
-            aria-label={
-              mostrarConfirmarPassword ? t('aria.hidePassword') : t('aria.showPassword')
-            }
+            className='absolute inset-y-0 right-3 flex items-center text-gray-500 hover:text-gray-700'
+            aria-label={mostrarConfirmarPassword ? t('aria.hidePassword') : t('aria.showPassword')}
           >
             {mostrarConfirmarPassword ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
@@ -327,7 +325,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
       >
         {cargando ? (
           <>
-            <Loader2 className="animate-spin w-5 h-5" />
+            <Loader2 className='animate-spin w-5 h-5' />
             {t('buttons.submitting')}
           </>
         ) : (

@@ -40,7 +40,7 @@ const formatBoDate = (isoString: string) => {
     year: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    hour12: false
+    hour12: false,
   }).format(date);
 };
 
@@ -50,7 +50,7 @@ function FitBounds({ appointments }: { appointments: Appointment[] }) {
 
   useEffect(() => {
     if (appointments.length > 0) {
-      const bounds = L.latLngBounds(appointments.map(app => [app.lat, app.lng]));
+      const bounds = L.latLngBounds(appointments.map((app) => [app.lat, app.lng]));
       map.fitBounds(bounds, { padding: [50, 50] });
     }
   }, [appointments, map]);
@@ -60,21 +60,23 @@ function FitBounds({ appointments }: { appointments: Appointment[] }) {
 
 // Íconos personalizados
 const bookedIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+  iconUrl:
+    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  shadowSize: [41, 41],
 });
 
 const cancelledIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
+  iconUrl:
+    'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-red.png',
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  shadowSize: [41, 41],
 });
 
 interface AdminMapProps {
@@ -83,18 +85,14 @@ interface AdminMapProps {
 
 const AdminMap: React.FC<AdminMapProps> = ({ appointments }) => {
   return (
-    <div className="h-full w-full relative z-0">
-      <MapContainer 
-        center={[-17.39, -66.15]} 
-        zoom={13} 
-        className="h-full w-full rounded-lg"
-      >
+    <div className='h-full w-full relative z-0'>
+      <MapContainer center={[-17.39, -66.15]} zoom={13} className='h-full w-full rounded-lg'>
         <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
           attribution='&copy; OpenStreetMap contributors'
         />
         <FitBounds appointments={appointments} />
-        
+
         {appointments.map((appointment) => (
           <Marker
             key={appointment.id}
@@ -102,15 +100,25 @@ const AdminMap: React.FC<AdminMapProps> = ({ appointments }) => {
             icon={appointment.status === 'booked' ? bookedIcon : cancelledIcon}
           >
             <Popup>
-              <div className="text-sm text-gray-800 min-w-[200px]">
-                <div className="mb-2 pb-1 border-b border-gray-200">
-                  <span className={`font-bold text-xs uppercase ${appointment.status === 'booked' ? 'text-green-600' : 'text-red-600'}`}>
+              <div className='text-sm text-gray-800 min-w-[200px]'>
+                <div className='mb-2 pb-1 border-b border-gray-200'>
+                  <span
+                    className={`font-bold text-xs uppercase ${appointment.status === 'booked' ? 'text-green-600' : 'text-red-600'}`}
+                  >
                     {appointment.status === 'booked' ? '• Cita Activa' : '• Cancelada'}
                   </span>
                 </div>
-                <p className="mb-1"><span className="font-bold text-blue-600">Fixer:</span> {appointment.fixerName}</p>
-                <p className="mb-1"><span className="font-bold text-gray-600">Requester:</span> {appointment.requesterName}</p>
-                <p className="mb-1"><span className="font-bold text-gray-600">Fecha:</span> {formatBoDate(appointment.date)}</p>
+                <p className='mb-1'>
+                  <span className='font-bold text-blue-600'>Fixer:</span> {appointment.fixerName}
+                </p>
+                <p className='mb-1'>
+                  <span className='font-bold text-gray-600'>Requester:</span>{' '}
+                  {appointment.requesterName}
+                </p>
+                <p className='mb-1'>
+                  <span className='font-bold text-gray-600'>Fecha:</span>{' '}
+                  {formatBoDate(appointment.date)}
+                </p>
               </div>
             </Popup>
           </Marker>

@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from "react";
-import { FaGithub } from "react-icons/fa";
-import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
-import { vincularGitHub, Client } from "@/app/redux/services/services/api";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { FaGithub } from 'react-icons/fa';
+import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
+import { vincularGitHub, Client } from '@/app/redux/services/services/api';
+import { useTranslations } from 'next-intl';
 
 interface VincularGithubProps {
   onLinked?: (client?: Client) => void;
@@ -18,7 +18,7 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
   const handleVincularGitHub = () => {
     const token = localStorage.getItem('servineo_token');
     if (!token) {
-      toast.error(t("errors.noSession"));
+      toast.error(t('errors.noSession'));
       return;
     }
 
@@ -27,7 +27,7 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
     vincularGitHub(
       token,
       (client) => {
-        toast.success(t("success.message"));
+        toast.success(t('success.message'));
         setLoading(false);
         onLinked?.(client);
       },
@@ -39,14 +39,12 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
   };
 
   return (
-    <div className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition">
-      <div className="flex items-center gap-3">
-        <FaGithub size={30} className="text-gray-800" />
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-gray-800">{t("title")}</span>
-          <span className="text-xs text-gray-500">
-            {t("subtitle")}
-          </span>
+    <div className='w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition'>
+      <div className='flex items-center gap-3'>
+        <FaGithub size={30} className='text-gray-800' />
+        <div className='flex flex-col'>
+          <span className='text-sm font-semibold text-gray-800'>{t('title')}</span>
+          <span className='text-xs text-gray-500'>{t('subtitle')}</span>
         </div>
       </div>
       <div>
@@ -57,10 +55,10 @@ export default function VincularGithub({ onLinked }: VincularGithubProps) {
         >
           {loading ? (
             <>
-              <Loader2 className="w-4 h-4 animate-spin" /> {t("buttons.linking")}
+              <Loader2 className='w-4 h-4 animate-spin' /> {t('buttons.linking')}
             </>
           ) : (
-            t("buttons.link")
+            t('buttons.link')
           )}
         </button>
       </div>

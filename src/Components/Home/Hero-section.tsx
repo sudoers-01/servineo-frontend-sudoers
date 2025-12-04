@@ -51,10 +51,10 @@ export default function HeroSection() {
           </div>
         </form>
 
-        <div className="mb-16">
-          <div className="flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 mb-6">
-            <span className="font-semibold text-gray-700 text-lg">{t("a")}</span>
-            <div className="flex flex-wrap justify-center gap-2">
+        <div className='mb-16'>
+          <div className='flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 mb-6'>
+            <span className='font-semibold text-gray-700 text-lg'>{t('a')}</span>
+            <div className='flex flex-wrap justify-center gap-2'>
               {['Plomero', 'Electricista', 'Pintor', 'Carpintero'].map((tag) => (
                 <button
                   key={tag}
@@ -69,10 +69,10 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16">
-          <StatCard number="1,000+" text={t("professional")}/>
-          <StatCard number="5,000+" text={t("Projects completed")} />
-          <StatCard number="4.8★" text={t("Overall grade")} />
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16'>
+          <StatCard number='1,000+' text={t('professional')} />
+          <StatCard number='5,000+' text={t('Projects completed')} />
+          <StatCard number='4.8★' text={t('Overall grade')} />
         </div>
       </div>
     </section>

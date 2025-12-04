@@ -5,7 +5,7 @@ export interface MapLocation {
   lat: string;
   lon: string;
   schedule_state: 'booked' | 'cancelled';
-  fixerName: string; 
+  fixerName: string;
   current_requester_name: string;
   starting_time: string;
 }
@@ -35,7 +35,7 @@ export const trackingAppointmentsApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     getMapLocations: builder.query<MapLocation[], void>({
       query: () => ({
-        url: '/admin/map-locations', 
+        url: '/admin/map-locations',
         method: 'GET',
       }),
       providesTags: ['Statistics'],
@@ -64,12 +64,8 @@ export const trackingAppointmentsApi = baseApi.injectEndpoints({
       }),
       providesTags: ['Statistics'],
     }),
-
   }),
 });
 
-export const { 
-  useGetMapLocationsQuery, 
-  useGetTrackingMetricsQuery,
-  useGetFixerStatsQuery 
-} = trackingAppointmentsApi;
+export const { useGetMapLocationsQuery, useGetTrackingMetricsQuery, useGetFixerStatsQuery } =
+  trackingAppointmentsApi;

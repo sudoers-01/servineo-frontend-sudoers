@@ -41,7 +41,6 @@ export default function ConfiguracionPage() {
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
 
-
   type SafeUser = { name?: string; email?: string; url_photo?: string };
   const safeUser = (user as SafeUser) ?? null;
 
@@ -53,7 +52,6 @@ export default function ConfiguracionPage() {
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
   }
 
-
   const loadProfileData = useCallback(async () => {
     if (!user) return;
 
@@ -61,15 +59,14 @@ export default function ConfiguracionPage() {
     setProfileError(null);
 
     try {
-
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : t('errors.loadProfile')
-      setProfileError(message)
+      const message = err instanceof Error ? err.message : t('errors.loadProfile');
+      setProfileError(message);
       //setProfileData(INITIAL_DATA)
     } finally {
       setProfileLoading(false);
     }
-  }, [user, t])
+  }, [user, t]);
 
   //Cargar datos cuando se activa la sección de perfil
   useEffect(() => {
@@ -96,17 +93,18 @@ export default function ConfiguracionPage() {
       case 'perfil':
         if (profileLoading) {
           return (
-            <div className="flex items-center justify-center h-64">
-              <p className="text-blue-600 text-lg animate-pulse">{t('loading.profile')}</p>
+            <div className='flex items-center justify-center h-64'>
+              <p className='text-blue-600 text-lg animate-pulse'>{t('loading.profile')}</p>
             </div>
           );
         }
 
         if (profileError) {
           return (
-            <div className="max-w-md mx-auto text-center">
-              <h2 className="text-xl font-semibold text-red-600 mb-4">{t('errors.loadTitle')}</h2>
-              <p className="text-gray-600 mb-6">{t('errors.loadMessage', { error: profileError })} 
+            <div className='max-w-md mx-auto text-center'>
+              <h2 className='text-xl font-semibold text-red-600 mb-4'>{t('errors.loadTitle')}</h2>
+              <p className='text-gray-600 mb-6'>
+                {t('errors.loadMessage', { error: profileError })}
               </p>
               <button
                 onClick={loadProfileData}
@@ -119,11 +117,11 @@ export default function ConfiguracionPage() {
         }
 
         return (
-          <div className="max-w-4xl w-full">
-            <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">
+          <div className='max-w-4xl w-full'>
+            <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>
               {t('sections.editProfile')}
             </h2>
-            <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-200">
+            <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
               <RequesterEditForm />
             </div>
           </div>
@@ -131,8 +129,8 @@ export default function ConfiguracionPage() {
 
       case 'password':
         return (
-          <div className="max-w-2xl w-full">
-            <h2 className="text-2xl font-bold text-center mb-8 text-gray-800">
+          <div className='max-w-2xl w-full'>
+            <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>
               {t('sections.changePassword')}
             </h2>
             <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
@@ -143,9 +141,9 @@ export default function ConfiguracionPage() {
 
       case 'seguridad':
         return (
-          <div className="max-w-4xl w-full">
-            <h2 className="text-xl font-semibold text-center mb-2">{t('sections.security')}</h2>
-            <p className="text-sm text-center text-gray-600 mb-8">
+          <div className='max-w-4xl w-full'>
+            <h2 className='text-xl font-semibold text-center mb-2'>{t('sections.security')}</h2>
+            <p className='text-sm text-center text-gray-600 mb-8'>
               {t('sections.securityDescription')}
             </p>
 
@@ -155,15 +153,16 @@ export default function ConfiguracionPage() {
                 onClick={() => setSeccionActiva('password')}
                 className='flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out bg-white text-gray-800 cursor-pointer min-w-[220px]'
               >
-                <div className="p-2 rounded-md bg-blue-50">
-                  <Image 
-                  src="/icons/edit-pass.png" 
-                  alt={t('security.changePassword')}  
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 object-contain text-blue-600" />
+                <div className='p-2 rounded-md bg-blue-50'>
+                  <Image
+                    src='/icons/edit-pass.png'
+                    alt={t('security.changePassword')}
+                    width={32}
+                    height={32}
+                    className='w-8 h-8 object-contain text-blue-600'
+                  />
                 </div>
-                <span className="font-medium">{t('security.changePassword')}</span>
+                <span className='font-medium'>{t('security.changePassword')}</span>
               </button>
 
               {/* Dispositivos vinculados */}
@@ -171,15 +170,16 @@ export default function ConfiguracionPage() {
                 onClick={() => router.push('/requesterEdit/dispositivosVinculados/')}
                 className='flex items-center gap-3 px-6 py-4 rounded-lg border border-gray-200 shadow-sm hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ease-out bg-white text-gray-800 cursor-pointer min-w-[220px]'
               >
-                <div className="p-2 rounded-md bg-blue-50">
-                  <Image 
-                  src="/icons/logins.png" 
-                  alt={t('security.linkedDevices')} 
-                  width={24}
-                  height={24}
-                  className="w-6 h-6 object-contain text-blue-600" />
+                <div className='p-2 rounded-md bg-blue-50'>
+                  <Image
+                    src='/icons/logins.png'
+                    alt={t('security.linkedDevices')}
+                    width={24}
+                    height={24}
+                    className='w-6 h-6 object-contain text-blue-600'
+                  />
                 </div>
-                <span className="font-medium">{t('security.linkedDevices')}</span>
+                <span className='font-medium'>{t('security.linkedDevices')}</span>
               </button>
 
               {/* 🆕 Authenticator (nuevo botón) */}
@@ -212,27 +212,27 @@ export default function ConfiguracionPage() {
               <>
                 <div className='mb-4'>
                   {safeUser.url_photo ? (
-                    <Image 
-                    src={safeUser.url_photo} 
-                    alt={t('welcome.profilePhoto')}
-                    width={112} 
-                    height={112} 
-                    className="w-28 h-28 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm"/>
+                    <Image
+                      src={safeUser.url_photo}
+                      alt={t('welcome.profilePhoto')}
+                      width={112}
+                      height={112}
+                      className='w-28 h-28 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm'
+                    />
                   ) : (
                     <div className='w-28 h-28 rounded-full bg-blue-100 flex items-center justify-center text-2xl font-semibold text-blue-700 mb-4 shadow-sm border-4 border-blue-200'>
                       {getInitials(safeUser.name ?? safeUser.email ?? '')}
                     </div>
                   )}
                 </div>
-                <h2 className="text-2xl font-semibold mb-2 text-gray-800">
-                  {t('welcome.title', { name: safeUser.name ?? t('welcome.defaultName') })} <span className="text-blue-600">{safeUser.name ?? 'Usuario'}</span>
+                <h2 className='text-2xl font-semibold mb-2 text-gray-800'>
+                  {t('welcome.title', { name: safeUser.name ?? t('welcome.defaultName') })}{' '}
+                  <span className='text-blue-600'>{safeUser.name ?? 'Usuario'}</span>
                 </h2>
-                <p className="text-gray-600 max-w-md text-center">
-                  {t('welcome.description')}
-                </p>
+                <p className='text-gray-600 max-w-md text-center'>{t('welcome.description')}</p>
               </>
             ) : (
-              <p className="text-gray-600">{t('welcome.loginRequired')}</p>
+              <p className='text-gray-600'>{t('welcome.loginRequired')}</p>
             )}
           </div>
         );
@@ -269,12 +269,13 @@ export default function ConfiguracionPage() {
                     : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
                 }`}
               >
-                <Image 
-                src="/icons/edit-config.png" 
-                alt={t('navigation.editProfile')}
-                width={24}
-                height={24}
-                className="w-6 h-6" />
+                <Image
+                  src='/icons/edit-config.png'
+                  alt={t('navigation.editProfile')}
+                  width={24}
+                  height={24}
+                  className='w-6 h-6'
+                />
                 {t('navigation.editProfile')}
               </button>
 
@@ -287,12 +288,13 @@ export default function ConfiguracionPage() {
                     : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
                 }`}
               >
-                <Image 
-                src="/icons/seguridad-config.png" 
-                alt={t('navigation.security')}
-                width={28}
-                height={28}
-                className="w-7 h-7" />
+                <Image
+                  src='/icons/seguridad-config.png'
+                  alt={t('navigation.security')}
+                  width={28}
+                  height={28}
+                  className='w-7 h-7'
+                />
                 {t('navigation.security')}
               </button>
 
@@ -305,12 +307,13 @@ export default function ConfiguracionPage() {
                     : 'hover:bg-blue-50 hover:text-blue-600 hover:font-semibold'
                 }`}
               >
-                <Image 
-                src="/icons/cuentas.png" 
-                alt={t('navigation.linkedAccounts')} 
-                width={28}
-                height={28}
-                className="w-7 h-7" />
+                <Image
+                  src='/icons/cuentas.png'
+                  alt={t('navigation.linkedAccounts')}
+                  width={28}
+                  height={28}
+                  className='w-7 h-7'
+                />
                 {t('navigation.linkedAccounts')}
               </button>
             </nav>

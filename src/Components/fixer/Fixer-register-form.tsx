@@ -1,9 +1,12 @@
-"use client"
-import { useForm, Controller } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { initialRegistrationSchema, type InitialRegistrationData } from "@/app/lib/validations/fixer-schemas"
-import { useState, useEffect } from "react"
-import { useTranslations } from "next-intl"
+'use client';
+import { useForm, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import {
+  initialRegistrationSchema,
+  type InitialRegistrationData,
+} from '@/app/lib/validations/fixer-schemas';
+import { useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 
 interface FixerRegisterFormProps {
   onSubmit: (data: InitialRegistrationData) => void;
@@ -16,9 +19,9 @@ export default function FixerRegisterForm({
   submitButtonText,
   defaultValues = {},
 }: FixerRegisterFormProps) {
-  const t = useTranslations("becomeFixer");
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  
+  const t = useTranslations('becomeFixer');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const {
     control,
     handleSubmit,
@@ -52,9 +55,9 @@ export default function FixerRegisterForm({
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className='space-y-4'>
       {/* NAME */}
-      <div className="space-y-1">
-        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-          {t("fields.name.label")} <span className="text-red-500">*</span>
+      <div className='space-y-1'>
+        <label htmlFor='name' className='block text-sm font-medium text-gray-700'>
+          {t('fields.name.label')} <span className='text-red-500'>*</span>
         </label>
         <Controller
           name='name'
@@ -64,8 +67,8 @@ export default function FixerRegisterForm({
               <input
                 {...field}
                 maxLength={30}
-                className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm"
-                placeholder={t("fields.name.placeholder")}
+                className='w-full rounded-full bg-gray-200 px-4 py-2 text-sm'
+                placeholder={t('fields.name.placeholder')}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^A-Za-záéíóúÁÉÍÓÚñÑ\s]/g, '').slice(0, 30);
                   field.onChange(value);
@@ -81,9 +84,9 @@ export default function FixerRegisterForm({
       </div>
 
       {/* EMAIL */}
-      <div className="space-y-1">
-        <label htmlFor="email" className="block text-sm font-medium text-gray-700">
-          {t("fields.email.label")} <span className="text-red-500">*</span>
+      <div className='space-y-1'>
+        <label htmlFor='email' className='block text-sm font-medium text-gray-700'>
+          {t('fields.email.label')} <span className='text-red-500'>*</span>
         </label>
         <Controller
           name='email'
@@ -91,9 +94,9 @@ export default function FixerRegisterForm({
           render={({ field }) => (
             <input
               {...field}
-              type="email"
-              className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm"
-              placeholder={t("fields.email.placeholder")}
+              type='email'
+              className='w-full rounded-full bg-gray-200 px-4 py-2 text-sm'
+              placeholder={t('fields.email.placeholder')}
             />
           )}
         />
@@ -101,9 +104,9 @@ export default function FixerRegisterForm({
       </div>
 
       {/* PHONE */}
-      <div className="space-y-1">
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-          {t("fields.phone.label")} <span className="text-red-500">*</span>
+      <div className='space-y-1'>
+        <label htmlFor='phone' className='block text-sm font-medium text-gray-700'>
+          {t('fields.phone.label')} <span className='text-red-500'>*</span>
         </label>
         <Controller
           name='phone'
@@ -112,16 +115,16 @@ export default function FixerRegisterForm({
             <div className='relative'>
               <input
                 {...field}
-                type="tel"
-                className="w-full rounded-full bg-gray-200 px-4 py-2 text-sm pr-20"
-                placeholder={t("fields.phone.placeholder")}
+                type='tel'
+                className='w-full rounded-full bg-gray-200 px-4 py-2 text-sm pr-20'
+                placeholder={t('fields.phone.placeholder')}
                 onChange={(e) => {
                   const value = e.target.value.replace(/[^\d\s+-]/g, '');
                   field.onChange(value);
                 }}
               />
-              <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400">
-                {field.value ? field.value.replace(/\D/g, '').length : 0} {t("digits")}
+              <span className='absolute right-4 top-1/2 -translate-y-1/2 text-xs text-gray-400'>
+                {field.value ? field.value.replace(/\D/g, '').length : 0} {t('digits')}
               </span>
             </div>
           )}
@@ -135,7 +138,7 @@ export default function FixerRegisterForm({
         disabled={isSubmitting}
         className='w-full rounded-full bg-primary text-white py-2.5 text-sm font-semibold'
       >
-        {isSubmitting ? t("buttons.submitting") : (submitButtonText || t("buttons.submit"))}
+        {isSubmitting ? t('buttons.submitting') : submitButtonText || t('buttons.submit')}
       </button>
     </form>
   );

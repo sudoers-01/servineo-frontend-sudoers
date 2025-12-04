@@ -8,12 +8,12 @@ import {
   obtenerMetodosCliente,
   desvincularMetodo,
   AuthProvider,
-} from "@/app/redux/services/services/api";
-import VincularCorreo from "./vinculoCuenta/vincularCorreo";
-import VincularGoogle from "./vinculoCuenta/vincularGoogle";
-import VincularGithub from "./vinculoCuenta/vincularGithub";
-import VincularDiscord from "./vinculoCuenta/vincularDiscord";
-import { useTranslations } from "next-intl";
+} from '@/app/redux/services/services/api';
+import VincularCorreo from './vinculoCuenta/vincularCorreo';
+import VincularGoogle from './vinculoCuenta/vincularGoogle';
+import VincularGithub from './vinculoCuenta/vincularGithub';
+import VincularDiscord from './vinculoCuenta/vincularDiscord';
+import { useTranslations } from 'next-intl';
 
 interface Props {
   token?: string;
@@ -33,8 +33,8 @@ interface FullAuthProvider extends AuthProvider {
   email?: string;
 }
 
-export default function AccountLoginSettings({ token = "" }: Props) {
-  const t = useTranslations('AccountLoginSettings'); 
+export default function AccountLoginSettings({ token = '' }: Props) {
+  const t = useTranslations('AccountLoginSettings');
   const [methods, setMethods] = useState<FullAuthProvider[]>([]);
 
   const buildFullMethodsList = (linkedMethodsFromAPI: AuthProvider[]): FullAuthProvider[] => {
@@ -79,7 +79,10 @@ export default function AccountLoginSettings({ token = "" }: Props) {
     } catch (err) {
       console.error(err);
       alert(
-        t('errors.linkError', { provider, error: err instanceof Error ? err.message : t('errors.unknown') })
+        t('errors.linkError', {
+          provider,
+          error: err instanceof Error ? err.message : t('errors.unknown'),
+        }),
       );
     }
   };
@@ -97,21 +100,22 @@ export default function AccountLoginSettings({ token = "" }: Props) {
       } catch (err) {
         console.error(err);
         alert(
-          t('errors.unlinkError', { provider, error: err instanceof Error ? err.message : t('errors.unknown') })
+          t('errors.unlinkError', {
+            provider,
+            error: err instanceof Error ? err.message : t('errors.unknown'),
+          }),
         );
       }
     }
   };
 
   return (
-    <div className="w-full max-w-3xl bg-white border border-gray-200 rounded-2xl shadow-md p-8 mx-auto">
-      <h1 className="text-2xl font-semibold text-gray-900 mb-6 text-center">
-        {t('title')}
-      </h1>
+    <div className='w-full max-w-3xl bg-white border border-gray-200 rounded-2xl shadow-md p-8 mx-auto'>
+      <h1 className='text-2xl font-semibold text-gray-900 mb-6 text-center'>{t('title')}</h1>
 
       {/* Métodos vinculados */}
-      <section className="mb-10">
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">
+      <section className='mb-10'>
+        <h2 className='text-lg font-semibold text-gray-800 mb-3'>
           {t('linkedAccounts.title', { count: linkedMethods.length })}
         </h2>
 
@@ -163,14 +167,12 @@ export default function AccountLoginSettings({ token = "" }: Props) {
 
       {/* Métodos disponibles */}
       <section>
-        <h2 className="text-lg font-semibold text-gray-800 mb-3">
+        <h2 className='text-lg font-semibold text-gray-800 mb-3'>
           {t('availableMethods.title', { count: availableMethods.length })}
         </h2>
 
         {availableMethods.length === 0 ? (
-          <p className="text-gray-400 text-center py-4">
-            {t('availableMethods.allLinked')}
-          </p>
+          <p className='text-gray-400 text-center py-4'>{t('availableMethods.allLinked')}</p>
         ) : (
           <div className='space-y-3'>
             {availableMethods.map((method) => {

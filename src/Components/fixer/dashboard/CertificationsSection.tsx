@@ -39,7 +39,7 @@ interface NotificationState {
 
 export function CertificationsSection({ readOnly = false, fixerId }: CertificationsSectionProps) {
   const t = useTranslations('CertificationsSection');
-  
+
   const { data: certs = [], isLoading } = useGetCertificationsByFixerQuery(fixerId || '', {
     skip: !fixerId,
     refetchOnMountOrArgChange: true,
@@ -174,11 +174,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
   };
 
   if (!fixerId) {
-    return (
-      <div className='p-4 text-center text-gray-500'>
-        {t('errors.noFixerProfile')}
-      </div>
-    );
+    return <div className='p-4 text-center text-gray-500'>{t('errors.noFixerProfile')}</div>;
   }
 
   if (isLoading)
@@ -191,9 +187,9 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
   return (
     <div className='space-y-6'>
       {/* Encabezado */}
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <Award className="h-5 w-5 text-blue-600" />
+      <div className='flex items-center justify-between'>
+        <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
+          <Award className='h-5 w-5 text-blue-600' />
           {readOnly ? t('titles.certifications') : t('titles.myCertifications')}
         </h2>
         {!readOnly && (
@@ -201,7 +197,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
             onClick={() => handleOpenModal()}
             className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
           >
-            <Plus className="h-4 w-4" />
+            <Plus className='h-4 w-4' />
             {t('buttons.addCertification')}
           </PillButton>
         )}
@@ -259,15 +255,15 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                   </div>
 
                   {cert.credentialUrl && (
-                    <a  
+                    <a
                       href={cert.credentialUrl}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline text-sm mt-3 font-medium transition-colors'
                     >
-                      {t('card.viewCredential')} <ExternalLink className="h-3 w-3" />
+                      {t('card.viewCredential')} <ExternalLink className='h-3 w-3' />
                     </a>
-                )}
+                  )}
                 </div>
               </div>
 
@@ -276,7 +272,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                 <div className='flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity absolute top-4 right-4 md:static md:opacity-100'>
                   <button
                     onClick={() => handleOpenModal(cert)}
-                    className="p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors"
+                    className='p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors'
                     title={t('tooltips.edit')}
                   >
                     <Edit2 className='h-4 w-4' />
@@ -315,7 +311,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
         <Modal.Body>
           <form id='certificationForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 {t('form.name.label')}
               </label>
               <input
@@ -326,7 +322,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
                 {t('form.institution.label')}
               </label>
               <input
@@ -338,7 +334,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
 
             <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
                   {t('form.issueDate.label')}
                 </label>
                 <input
@@ -348,8 +344,9 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.expiryDate.label')} <span className="text-gray-400 font-normal">({t('form.optional')})</span>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  {t('form.expiryDate.label')}{' '}
+                  <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
                 </label>
                 <input
                   type='date'
@@ -361,7 +358,8 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
 
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                {t('form.credentialId.label')} <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
+                {t('form.credentialId.label')}{' '}
+                <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
               </label>
               <input
                 {...register('credentialId')}
@@ -372,7 +370,8 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
 
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                {t('form.credentialUrl.label')} <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
+                {t('form.credentialUrl.label')}{' '}
+                <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
               </label>
               <input
                 {...register('credentialUrl')}

@@ -52,7 +52,7 @@ function getYouTubeId(rawUrl?: string): string | undefined {
 
 export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSectionProps) {
   const t = useTranslations('PortfolioSection');
-  
+
   const effectiveFixerId = fixerId || '69285d2860ea986813517593';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -150,7 +150,11 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
           return;
         }
         if (isValidUrl !== true) {
-          showNotification('error', t('notifications.invalidUrl'), t('notifications.imageLoadError'));
+          showNotification(
+            'error',
+            t('notifications.invalidUrl'),
+            t('notifications.imageLoadError'),
+          );
           return;
         }
       }
@@ -186,11 +190,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
   const handleDeleteRequest = (id: string) => {
     if (readOnly) return;
     setDeleteId(id);
-    showNotification(
-      'warning',
-      t('notifications.confirmDelete'),
-      t('notifications.deleteWarning'),
-    );
+    showNotification('warning', t('notifications.confirmDelete'), t('notifications.deleteWarning'));
   };
 
   const confirmDelete = async () => {
@@ -209,8 +209,8 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
     setDeleteId(null);
   };
 
-  if (isLoading) return <div className="text-center p-8 text-gray-500">{t('loading')}</div>;
-  if (isError) return <div className="text-center p-8 text-red-500">{t('loadError')}</div>;
+  if (isLoading) return <div className='text-center p-8 text-gray-500'>{t('loading')}</div>;
+  if (isError) return <div className='text-center p-8 text-red-500'>{t('loadError')}</div>;
 
   return (
     <div className='space-y-6'>
@@ -226,9 +226,9 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         onCancel={deleteId ? cancelDelete : undefined}
       />
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
-          <ImageIcon className="h-5 w-5 text-blue-600" />
+      <div className='flex items-center justify-between'>
+        <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
+          <ImageIcon className='h-5 w-5 text-blue-600' />
           {readOnly ? t('titles.portfolio') : t('titles.myPortfolio')}
         </h2>
 
@@ -238,7 +238,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
               onClick={() => handleOpenModal('video')}
               className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
             >
-              <Video className="h-4 w-4" />
+              <Video className='h-4 w-4' />
               {t('buttons.video')}
             </PillButton>
 
@@ -246,7 +246,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
               onClick={() => handleOpenModal('image')}
               className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
             >
-              <Plus className="h-4 w-4" />
+              <Plus className='h-4 w-4' />
               {t('buttons.image')}
             </PillButton>
           </div>
@@ -254,8 +254,8 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
       </div>
 
       {items.length === 0 ? (
-        <div className="text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-300">
-          <p className="text-gray-500">{t('emptyState')}</p>
+        <div className='text-center p-12 bg-gray-50 rounded-xl border border-dashed border-gray-300'>
+          <p className='text-gray-500'>{t('emptyState')}</p>
         </div>
       ) : (
         <div className='grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4'>
@@ -307,7 +307,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                       <img
                         src={item.url!}
                         alt={t('image.alt')}
-                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        className='w-full h-full object-cover transition-transform duration-500 group-hover:scale-110'
                       />
                     ) : isHttpUrl ? (
                       <Image
@@ -323,15 +323,15 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                       <img
                         src={item.url!}
                         alt={t('image.alt')}
-                        className="w-full h-full object-cover"
+                        className='w-full h-full object-cover'
                       />
                     )}
                   </div>
                 ) : (
-                  <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-                    <div className="text-center p-4">
-                      <ImageIcon className="h-12 w-12 text-gray-400 mx-auto mb-2" />
-                      <p className="text-xs text-gray-500 font-medium">{t('noImage')}</p>
+                  <div className='absolute inset-0 flex items-center justify-center bg-gray-100'>
+                    <div className='text-center p-4'>
+                      <ImageIcon className='h-12 w-12 text-gray-400 mx-auto mb-2' />
+                      <p className='text-xs text-gray-500 font-medium'>{t('noImage')}</p>
                     </div>
                   </div>
                 )}
@@ -345,7 +345,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         open={isModalOpen}
         onClose={handleCloseModal}
         title={modalType === 'image' ? t('modal.addImage') : t('modal.addVideo')}
-        size="lg"
+        size='lg'
         closeOnOverlayClick={!isCreating}
         className='rounded-2xl border-primary border-2'
       >
@@ -359,7 +359,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             {modalType === 'image' ? (
               <div className='space-y-3'>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
                     {t('form.imageUrl.label')} *
                   </label>
                   <div className='relative'>
@@ -404,7 +404,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             ) : (
               <>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
                     {t('form.youtubeUrl.label')} *
                   </label>
                   <input
@@ -415,7 +415,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className='block text-sm font-medium text-gray-700 mb-1'>
                     {t('form.thumbnailUrl.label')}
                   </label>
                   <input
@@ -444,7 +444,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
               className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
               disabled={(modalType === 'image' && isValidUrl !== true) || isCreating}
             >
-              {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isCreating && <Loader2 className='h-4 w-4 animate-spin' />}
               {isCreating ? t('buttons.saving') : t('buttons.save')}
             </PillButton>
           </div>
@@ -470,7 +470,7 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
             <img
               src={fullscreenImage}
               alt={t('fullscreen.alt')}
-              className="w-full h-full object-contain"
+              className='w-full h-full object-contain'
             />
           </div>
         </div>

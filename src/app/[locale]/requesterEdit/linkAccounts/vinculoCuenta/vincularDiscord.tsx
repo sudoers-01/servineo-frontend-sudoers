@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from "react";
-import { FaDiscord } from "react-icons/fa";
-import { Loader2 } from "lucide-react";
-import { vincularDiscord, Client } from "@/app/redux/services/services/api";
-import { useTranslations } from "next-intl";
+import { useState } from 'react';
+import { FaDiscord } from 'react-icons/fa';
+import { Loader2 } from 'lucide-react';
+import { vincularDiscord, Client } from '@/app/redux/services/services/api';
+import { useTranslations } from 'next-intl';
 
 interface VincularDiscordProps {
   onLinked?: (client?: Client) => void;
@@ -33,14 +33,12 @@ export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
   };
 
   return (
-    <div className="w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition">
-      <div className="flex items-center gap-3">
-        <FaDiscord size={30} className="text-[#5865F2]" />
-        <div className="flex flex-col">
-          <span className="text-sm font-semibold text-gray-800">{t('title')}</span>
-          <span className="text-xs text-gray-500">
-            {t('subtitle')}
-          </span>
+    <div className='w-full flex items-center justify-between bg-white border border-gray-200 rounded-2xl px-4 py-3 shadow-sm hover:bg-gray-50 transition'>
+      <div className='flex items-center gap-3'>
+        <FaDiscord size={30} className='text-[#5865F2]' />
+        <div className='flex flex-col'>
+          <span className='text-sm font-semibold text-gray-800'>{t('title')}</span>
+          <span className='text-xs text-gray-500'>{t('subtitle')}</span>
         </div>
       </div>
 
@@ -51,7 +49,7 @@ export default function VincularDiscord({ onLinked }: VincularDiscordProps) {
       >
         {loading ? (
           <>
-            <Loader2 className="w-4 h-4 animate-spin" /> {t('buttons.linking')}
+            <Loader2 className='w-4 h-4 animate-spin' /> {t('buttons.linking')}
           </>
         ) : (
           t('buttons.link')

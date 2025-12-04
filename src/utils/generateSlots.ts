@@ -28,37 +28,34 @@ export interface Schedule {
   lon: number;
 }
 
-//Combinar las Schedules pautadas de todos los requesters (que seran ocupadas) y 
+//Combinar las Schedules pautadas de todos los requesters (que seran ocupadas) y
 //las del requester que esta viendo el calendario de Fixer (booked)
 function combineSchedules(
   currentRequesterSchedules: Schedule[],
-  otherRequesterSchedules: Schedule[]
+  otherRequesterSchedules: Schedule[],
 ): Schedule[] {
   // Combinar ambos arrays
-  const combined = [
-    ...currentRequesterSchedules,
-    ...otherRequesterSchedules
-  ];
+  const combined = [...currentRequesterSchedules, ...otherRequesterSchedules];
 
-  for(const schedule of currentRequesterSchedules){
-    if(schedule.schedule_state != 'cancelled'){
+  for (const schedule of currentRequesterSchedules) {
+    if (schedule.schedule_state != 'cancelled') {
       schedule.schedule_state = 'booked';
     }
   }
 
-  for(const schedule of otherRequesterSchedules){
+  for (const schedule of otherRequesterSchedules) {
     schedule.schedule_state = 'occupied';
   }
 
-  console.log("desde combinedSchedules: ", combined);
+  console.log('desde combinedSchedules: ', combined);
   // Ordenar por starting_time ascendente (con Z)
   combined.sort((a, b) => a.starting_time.localeCompare(b.starting_time));
 
   // Convertir a formato sin Z después del sort
-  const schedulesWithoutZ = combined.map(schedule => ({
+  const schedulesWithoutZ = combined.map((schedule) => ({
     ...schedule,
     starting_time: schedule.starting_time ? schedule.starting_time.replace('Z', '') : '',
-    finishing_time: schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : ''
+    finishing_time: schedule.finishing_time ? schedule.finishing_time.replace('Z', '') : '',
   }));
 
   return schedulesWithoutZ;
@@ -97,33 +94,33 @@ function generateAvailableSlotsForMonth(month: number, year: number, fixerId: st
           // Para el día actual, solo generar slots futuros (no horas pasadas)
           if (start > new Date()) {
             slots.push({
-              title: "Disponible",
+              title: 'Disponible',
               start,
               end,
               booked: false,
-              color: "#16A34A",
+              color: '#16A34A',
               isBreakTime: false,
-              id: `available-${fixerId}-${start.toISOString()}`
+              id: `available-${fixerId}-${start.toISOString()}`,
             });
           }
         }
 
         // Horarios no Disponibles 12 - 14
-        for(let hour = 12; hour < 14; hour++){
+        for (let hour = 12; hour < 14; hour++) {
           const start = new Date(current);
-          start.setHours(hour, 0, 0,0);
+          start.setHours(hour, 0, 0, 0);
           const end = new Date(start);
           end.setHours(hour + 1);
 
           slots.push({
-            title: "No Disponible",
+            title: 'No Disponible',
             start,
             end,
             booked: true,
             editable: false,
-            color: "#64748B",
+            color: '#64748B',
             isBreakTime: true,
-            id: `occupied-${fixerId}-${start.toISOString()}`
+            id: `occupied-${fixerId}-${start.toISOString()}`,
           });
         }
 
@@ -137,13 +134,13 @@ function generateAvailableSlotsForMonth(month: number, year: number, fixerId: st
           // Para el día actual, solo generar slots futuros (no horas pasadas)
           if (start > new Date()) {
             slots.push({
-              title: "Disponible",
+              title: 'Disponible',
               start,
               end,
               booked: false,
-              color: "#16A34A",
+              color: '#16A34A',
               isBreakTime: false,
-              id: `available-${fixerId}-${start.toISOString()}`
+              id: `available-${fixerId}-${start.toISOString()}`,
             });
           }
         }
@@ -160,9 +157,9 @@ function generateAvailableSlotsForMonth(month: number, year: number, fixerId: st
  * Genera los slots de un fixer específico desde la API + slots disponibles
  */
 export async function generateAvailableSlotsFromAPI(
-  fixerId: string, 
+  fixerId: string,
   requesterId: string,
-  selectedDate: Date
+  selectedDate: Date,
 ): Promise<SlotEvent[]> {
   const slots: SlotEvent[] = [];
 
@@ -179,16 +176,16 @@ export async function generateAvailableSlotsFromAPI(
         params: {
           fixer_id: fixerId,
           requester_id: requesterId,
-          month: month + 1
-        }
+          month: month + 1,
+        },
       }),
       axios.get(`${API}/api/crud_read/schedules/get_by_fixer_other_requesters_month`, {
         params: {
           fixer_id: fixerId,
           requester_id: requesterId,
-          month: month + 1
-        }
-      })
+          month: month + 1,
+        },
+      }),
     ]);
 
     // Sin Axios
@@ -203,7 +200,10 @@ export async function generateAvailableSlotsFromAPI(
     //console.log("Schedules del requester actual:", currentRequesterFixerSchedules);
     //console.log("Schedules de otros requesters:", otherRequesterFixerSchedules);
 
-    const fixerSchedules: Schedule[] = combineSchedules(currentRequesterFixerSchedules, otherRequesterFixerSchedules);
+    const fixerSchedules: Schedule[] = combineSchedules(
+      currentRequesterFixerSchedules,
+      otherRequesterFixerSchedules,
+    );
 
     // for(const schedule of fixerSchedules) {
     //   const start = moment(schedule.starting_time).toDate();
@@ -220,7 +220,7 @@ export async function generateAvailableSlotsFromAPI(
       const start = moment(schedule.starting_time).toDate();
       const end = moment(schedule.finishing_time).toDate();
       const slot: SlotEvent = {
-        title: "Disponible",
+        title: 'Disponible',
         start,
         end,
         booked: false,
@@ -229,27 +229,27 @@ export async function generateAvailableSlotsFromAPI(
       };
       // Determinar estado basado en el schedule
       switch (schedule.schedule_state) {
-        case "occupied":
-          slot.title = "Ocupado";
-          slot.color = "#FF5F57";
+        case 'occupied':
+          slot.title = 'Ocupado';
+          slot.color = '#FF5F57';
           slot.booked = true;
           break;
-        case "cancelled":
-          slot.title = "Cancelado";
-          slot.color = "#FF5F57";
+        case 'cancelled':
+          slot.title = 'Cancelado';
+          slot.color = '#FF5F57';
           slot.cancelledByUser = true;
           slot.booked = true;
           break;
-        case "booked":
-          slot.title = "Reservado";
-          slot.color = "#F59E0B";
+        case 'booked':
+          slot.title = 'Reservado';
+          slot.color = '#F59E0B';
           slot.booked = true;
           slot.editable = true;
           break;
-        case "available":
+        case 'available':
         default:
-          slot.title = "Disponible";
-          slot.color = "#16A34A";
+          slot.title = 'Disponible';
+          slot.color = '#16A34A';
           break;
       }
       slots.push(slot);
@@ -258,23 +258,24 @@ export async function generateAvailableSlotsFromAPI(
     const finalSlots: SlotEvent[] = [...slots];
     // Agregar slots disponibles que no tienen schedule en la API
     for (const availableSlot of availableSlots) {
-      const exists = slots.some(scheduleSlot => 
-        scheduleSlot.start.getTime() === availableSlot.start.getTime()
+      const exists = slots.some(
+        (scheduleSlot) => scheduleSlot.start.getTime() === availableSlot.start.getTime(),
       );
       if (!exists) {
         finalSlots.push(availableSlot);
       }
     }
-    const filteredSlots = finalSlots.filter(slot => slot.start >= now);
+    const filteredSlots = finalSlots.filter((slot) => slot.start >= now);
 
     // Ordenar por fecha
     filteredSlots.sort((a, b) => a.start.getTime() - b.start.getTime());
 
     return filteredSlots;
-    
   } catch (err) {
-    console.log("Error al generar los slots para el fixer:", fixerId, selectedDate, month ,err);
+    console.log('Error al generar los slots para el fixer:', fixerId, selectedDate, month, err);
 
-    throw new Error("No se pudieron cargar los horarios disponibles. Por favor, intenta más tarde.");
+    throw new Error(
+      'No se pudieron cargar los horarios disponibles. Por favor, intenta más tarde.',
+    );
   }
 }

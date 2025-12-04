@@ -107,13 +107,13 @@ export default function CalendarPage() {
       refetchHour,
       getAppointmentsForDay,
       loading,
-    ]
+    ],
   );
 
   // Mostrar loading mientras se cargan los datos de sessionStorage
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className='flex items-center justify-center min-h-screen'>
         <p>{t('loading')}</p>
       </div>
     );
@@ -161,12 +161,12 @@ export default function CalendarPage() {
                 </button>
 
                 {userRole === 'fixer' && (
-                  <h2 className="text-black p-4 text-xl text-center flex-1">
+                  <h2 className='text-black p-4 text-xl text-center flex-1'>
                     {t('titles.myCalendar')}
                   </h2>
                 )}
                 {userRole === 'requester' && (
-                  <h2 className="text-black p-4 text-xl text-center flex-1">
+                  <h2 className='text-black p-4 text-xl text-center flex-1'>
                     {t('titles.fixerCalendar', { fixerName: 'Juan Carlos Peréz' })}
                   </h2>
                 )}

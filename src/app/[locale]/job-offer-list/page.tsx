@@ -123,8 +123,7 @@ export default function JobOffersPage() {
 
   const getFixerNameValue = useCallback((): string => {
     const filterObj = filters as unknown as Record<string, unknown>;
-    const fixerNameFilter =
-      filterObj.fixerName || filterObj.fixer_name || filterObj.fixerNames;
+    const fixerNameFilter = filterObj.fixerName || filterObj.fixer_name || filterObj.fixerNames;
 
     if (
       !fixerNameFilter ||
@@ -277,7 +276,11 @@ export default function JobOffersPage() {
     const currentFilters = filters as unknown as Record<string, unknown>;
     const previousFilters = previousFiltersRef.current as unknown as Record<string, unknown>;
 
-    const compareFilterValues = (prev: Record<string, unknown>, curr: Record<string, unknown>, key: string) => {
+    const compareFilterValues = (
+      prev: Record<string, unknown>,
+      curr: Record<string, unknown>,
+      key: string,
+    ) => {
       const prevValue = prev[key];
       const currValue = curr[key];
 

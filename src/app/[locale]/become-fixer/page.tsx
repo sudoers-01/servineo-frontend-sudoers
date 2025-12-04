@@ -16,7 +16,7 @@ export default function BecomeFixerPage() {
   const t = useTranslations('becomeFixer');
   const router = useRouter();
   const dispatch = useDispatch();
-  
+
   const { user: reduxUser } = useAppSelector((state) => state.user);
   const [userId, setUserId] = useState<string | null>(null);
   const [requester, setRequester] = useState<IUser | null>(null);
@@ -58,19 +58,15 @@ export default function BecomeFixerPage() {
   return (
     <div>
       <Navbar />
-      <div className="container mx-auto max-w-4xl p-4">
-        <header className="mb-6 text-center">
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
-          <p className="text-sm text-gray-500">
-            {t('description')}
-          </p>
+      <div className='container mx-auto max-w-4xl p-4'>
+        <header className='mb-6 text-center'>
+          <h1 className='text-2xl font-bold'>{t('title')}</h1>
+          <p className='text-sm text-gray-500'>{t('description')}</p>
         </header>
         <section className='space-y-6'>
           {!requester ? (
-            <div className="neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up">
-              <h2 className="mb-3 text-center text-lg font-semibold">
-                {t('InputData')}
-              </h2>
+            <div className='neon-border glass-panel rounded-2xl border border-gray-200 p-4 shadow-sm animate-slide-up'>
+              <h2 className='mb-3 text-center text-lg font-semibold'>{t('InputData')}</h2>
               <FixerRegisterForm
                 defaultValues={defaultValues}
                 onSubmit={(data) => {

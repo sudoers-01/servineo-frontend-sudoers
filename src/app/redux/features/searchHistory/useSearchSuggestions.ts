@@ -1,7 +1,10 @@
 // src/app/redux/features/searchHistory/useSearchSuggestions.ts
 import { useState, useEffect, useRef } from 'react';
 import { useLazyGetSearchSuggestionsQuery } from '@/app/redux/services/searchHistoryApi';
-import { translateSuggestions, translateWithDictionary } from '@/app/lib/utils/translate/dictionary';
+import {
+  translateSuggestions,
+  translateWithDictionary,
+} from '@/app/lib/utils/translate/dictionary';
 
 interface UseSearchSuggestionsOptions {
   enabled?: boolean;
@@ -21,10 +24,10 @@ export function useSearchSuggestions(
   query: string,
   options: UseSearchSuggestionsOptions = {},
 ): UseSearchSuggestionsReturn {
-  const { 
-    enabled = true, 
-    minLength = 1, 
-    debounceMs = 300, 
+  const {
+    enabled = true,
+    minLength = 1,
+    debounceMs = 300,
     maxResults = 6,
     language = 'es',
   } = options;

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useTranslations, useLocale } from 'next-intl'
+import { useTranslations, useLocale } from 'next-intl';
 import { Briefcase, UserCog, ClipboardList } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAppDispatch } from '@/app/redux/hooks';
@@ -15,7 +15,7 @@ export function Navbar() {
   const router = useRouter();
   const dispatch = useAppDispatch();
 
-  const isActive = (path: string) => pathname === `/${locale}${path}`
+  const isActive = (path: string) => pathname === `/${locale}${path}`;
 
   const handleJobOffersClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -25,15 +25,14 @@ export function Navbar() {
     router.push('/job-offer-list');
   };
 
-
   return (
     <nav className='sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-blue-100 shadow-sm'>
       <div className='container mx-auto px-4'>
         <div className='flex items-center justify-between h-16'>
           {/* Logo o nombre del sitio */}
-          <Link 
+          <Link
             href={`/${locale}`}
-            className="text-xl font-bold bg-primary bg-clip-text text-transparent"
+            className='text-xl font-bold bg-primary bg-clip-text text-transparent'
           >
             {t('logo')}
           </Link>
@@ -49,8 +48,8 @@ export function Navbar() {
                   : 'text-blue-900 hover:bg-blue-50'
               }`}
             >
-              <Briefcase className="w-4 h-4" />
-              <span className="font-medium">{t('jobOffers')}</span>
+              <Briefcase className='w-4 h-4' />
+              <span className='font-medium'>{t('jobOffers')}</span>
             </Link>
 
             <Link
@@ -61,8 +60,8 @@ export function Navbar() {
                   : 'text-blue-900 hover:bg-blue-50'
               }`}
             >
-              <ClipboardList className="w-4 h-4" />
-              <span className="font-medium">{t('a')}</span>
+              <ClipboardList className='w-4 h-4' />
+              <span className='font-medium'>{t('a')}</span>
             </Link>
 
             <Link
@@ -73,8 +72,8 @@ export function Navbar() {
                   : 'text-blue-900 hover:bg-blue-50'
               }`}
             >
-              <UserCog className="w-4 h-4" />
-              <span className="font-medium">{t('becomeFixer')}</span>
+              <UserCog className='w-4 h-4' />
+              <span className='font-medium'>{t('becomeFixer')}</span>
             </Link>
 
             <Link
@@ -85,8 +84,8 @@ export function Navbar() {
                   : 'text-blue-900 hover:bg-blue-50'
               }`}
             >
-              <ClipboardList className="w-4 h-4" />
-              <span className="font-medium">{t('myOffers')}</span>
+              <ClipboardList className='w-4 h-4' />
+              <span className='font-medium'>{t('myOffers')}</span>
             </Link>
           </div>
         </div>
