@@ -61,5 +61,3 @@ export default function RecenterMap({ position }: RecenterMapProps) {
     </>
   );
 }
-
-
