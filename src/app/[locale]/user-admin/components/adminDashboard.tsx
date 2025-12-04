@@ -75,12 +75,16 @@ export default function AdminDashboard() {
       <div className={styles.externalModulesSection}>
         <h3>🔧 Módulos Administrativos</h3>
         <p className={styles.sectionSubtitle}>Accede a las herramientas específicas del sistema</p>
-          
+
         <div className={styles.modulesGrid}>
-            
           {/* Botón para Estadísticas Avanzadas */}
-          <button 
-            onClick={() => window.open('https://servineo-frontend-bytes-bandidos.vercel.app/es/adminStatistic', '_self')}
+          <button
+            onClick={() =>
+              window.open(
+                'https://servineo-frontend-bytes-bandidos.vercel.app/es/adminStatistic',
+                '_self',
+              )
+            }
             className={styles.moduleButton}
           >
             <div className={styles.moduleIcon}>📊</div>
@@ -96,8 +100,13 @@ export default function AdminDashboard() {
           </button>
 
           {/* Botón para Seguimiento de Citas */}
-          <button 
-            onClick={() => window.open('https://servineo-frontend-bytes-bandidos.vercel.app/es/tracking-appointments', '_self')}
+          <button
+            onClick={() =>
+              window.open(
+                'https://servineo-frontend-bytes-bandidos.vercel.app/es/tracking-appointments',
+                '_self',
+              )
+            }
             className={styles.moduleButton}
           >
             <div className={styles.moduleIcon}>📍</div>

@@ -499,9 +499,6 @@
   opacity: 0.8;
 }
 
-
-
-
 /* Botones para estadisticas avanzadas */
 .moduleButton {
   display: flex;
@@ -554,7 +551,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
@@ -595,7 +592,9 @@
   font-size: 1.5rem;
   font-weight: bold;
   opacity: 0.7;
-  transition: opacity 0.3s, transform 0.3s;
+  transition:
+    opacity 0.3s,
+    transform 0.3s;
 }
 
 .moduleButton:hover .moduleArrow {
@@ -603,17 +602,13 @@
   transform: translateX(5px);
 }
 
-
-
-
-
 /* Estilos para la sección de distribución de usuarios */
 .usersSection {
   background: white;
   border-radius: 12px;
   padding: 1.5rem;
   margin: 2rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .usersSection h3 {
@@ -654,7 +649,7 @@
   align-items: center;
   justify-content: center;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   flex-shrink: 0;
 }
 
@@ -716,9 +711,6 @@
   color: #0070f3;
 }
 
-
-
-
 /* Estilos para el dashboard simplificado */
 .dashboard {
   padding: 2rem;
@@ -773,7 +765,7 @@
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .chartsSection h3 {
@@ -788,7 +780,7 @@
   border-radius: 12px;
   padding: 1.5rem;
   margin: 2rem 0;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .externalModulesSection h3 {
@@ -828,7 +820,7 @@
   background: #e9ecef;
   border-color: #0070f3;
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0,112,243,0.1);
+  box-shadow: 0 4px 12px rgba(0, 112, 243, 0.1);
 }
 
 .moduleIcon {
