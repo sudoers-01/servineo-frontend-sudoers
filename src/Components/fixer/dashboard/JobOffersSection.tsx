@@ -29,7 +29,7 @@ import {
   type JobOfferFormData,
 } from '@/app/lib/validations/Job-offer-Schemas';
 
-import type { JobOfferData } from '@/types/jobOffers';
+import type { IJobOffer } from '@/types/fixer-profile';
 
 interface NotificationState {
   isOpen: boolean;
@@ -60,7 +60,7 @@ export function JobOffersSection({
   const [toggleJobStatus] = useToggleJobStatusMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [editingOffer, setEditingOffer] = useState<JobOfferData | null>(null);
+  const [editingOffer, setEditingOffer] = useState<IJobOffer | null>(null);
   const [selectedImages, setSelectedImages] = useState<File[]>([]);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 
@@ -106,8 +106,8 @@ export function JobOffersSection({
   };
 
   // ⭐ Filtrar según estado real del backend
-  const filteredOffers = ((apiOffers as unknown as JobOfferData[]) || []).filter(
-    (offer: JobOfferData) => {
+  const filteredOffers = (apiOffers || []).filter(
+    (offer) => {
       const isActive = offer.status ?? false;
       return filter === 'active' ? isActive : !isActive;
     },
@@ -226,7 +226,7 @@ export function JobOffersSection({
 
       {/* GRID DE OFERTAS */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {filteredOffers.map((offer: JobOfferData) => {
+        {filteredOffers.map((offer) => {
           const id = offer._id;
           const isActive = offer.status ?? true;
 
@@ -245,7 +245,7 @@ export function JobOffersSection({
                     price: offer.price,
                     city: offer.city,
                     contactPhone: offer.contactPhone,
-                    createdAt: offer.createdAt,
+                    createdAt: offer.createdAt || new Date().toISOString(),
                     rating: offer.rating,
                     photos: offer.photos || [],
                     allImages: offer.photos || [],
