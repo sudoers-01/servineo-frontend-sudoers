@@ -14,30 +14,40 @@ export default function RecenterMap({ position }: RecenterMapProps) {
   const isFirstRender = useRef(true);
 
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      prevPosition.current = position;
-      return;
-    }
+  if (!position) return;
 
-    if (
-      !position ||
-      (prevPosition.current &&
-        position[0] === prevPosition.current[0] &&
-        position[1] === prevPosition.current[1])
-    ) {
-      return;
-    }
-
+  // Evitar el primer render
+  if (isFirstRender.current) {
+    isFirstRender.current = false;
     prevPosition.current = position;
+    return;
+  }
 
-    map.flyTo(position, map.getZoom(), { animate: true, duration: 0.8, easeLinearity: 0.3 });
+  // Si la posición no cambió, salir
+  if (
+    prevPosition.current &&
+    position[0] === prevPosition.current[0] &&
+    position[1] === prevPosition.current[1]
+  ) {
+    return;
+  }
 
-    setShowPulse(true);
-    const timer = setTimeout(() => setShowPulse(false), 1200);
+  prevPosition.current = position;
 
-    return () => clearTimeout(timer);
-  }, [position, map]);
+  // ===== DETECTAR MÓVIL =====
+  const isMobile = /Mobi|Android/i.test(navigator.userAgent);
+
+  if (isMobile) {
+    map.setView(position, map.getZoom()); // móvil: sin animación
+  } else {
+    map.flyTo(position, map.getZoom(), { animate: true, duration: 0.8, easeLinearity: 0.3 }); // web: animación
+  }
+
+  setShowPulse(true);
+  const timer = setTimeout(() => setShowPulse(false), 1200);
+
+  return () => clearTimeout(timer);
+}, [position, map]);
 
   return (
     <>
@@ -51,3 +61,5 @@ export default function RecenterMap({ position }: RecenterMapProps) {
     </>
   );
 }
+
+

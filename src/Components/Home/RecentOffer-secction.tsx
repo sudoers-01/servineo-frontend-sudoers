@@ -1,4 +1,3 @@
-// src/Components/Home/RecentOffer-section.tsx
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
@@ -90,7 +89,7 @@ export default function RecentOffersSection() {
   };
 
   return (
-    <section className='w-full py-12 px-4'>
+    <section id='tour-recent-offers' className='w-full py-12 px-4'>
       <div className='max-w-7xl mx-auto'>
         {/* Header */}
         <div className='flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4'>
@@ -111,7 +110,7 @@ export default function RecentOffersSection() {
         </div>
 
         {/* Category Filter */}
-        <div className='mb-6'>
+        <div id='tour-category-filters' className='mb-6'>
           {isMobile ? (
             <div className='relative'>
               <div className='flex items-center gap-2'>

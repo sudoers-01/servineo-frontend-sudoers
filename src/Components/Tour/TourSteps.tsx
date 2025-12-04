@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react/no-unescaped-entities */
+
 import { StepType } from '@reactour/tour';
 
 export const tourSteps: StepType[] = [
@@ -43,16 +46,40 @@ export const tourSteps: StepType[] = [
     position: 'bottom',
   },
   {
-    selector: '#tour-map-section',
+    selector: '#titulo-seccion-mapa',
     content: (
       <div>
         <h4 className="font-bold text-lg mb-2 text-gray-800">2. Mapa de Fixers</h4>
         <p className="text-gray-600 text-sm">
-          Visualiza a los profesionales en tu zona en tiempo real.
+          Visualiza a los profesionales disponibles en tu zona en tiempo real.
         </p>
       </div>
     ),
     position: 'top',
+    // ✅ Función que se ejecuta ANTES de mostrar este paso
+    actionAfter: async (node: any) => {
+      return new Promise<void>((resolve) => {
+        // Verificar que el elemento existe
+        const element = document.querySelector('#titulo-seccion-mapa');
+        
+        if (element) {
+          // Hacer scroll suave hacia el elemento
+          element.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center',
+            inline: 'nearest'
+          });
+          
+          // Esperar 1 segundo para que termine el scroll y el mapa se cargue
+          setTimeout(() => {
+            resolve();
+          }, 1000);
+        } else {
+          console.warn('Elemento #titulo-seccion-mapa no encontrado');
+          resolve();
+        }
+      });
+    },
   },
   {
     selector: '#tour-inspiration-section',
@@ -65,6 +92,17 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'top',
+    actionAfter: async (node: any) => {
+      return new Promise<void>((resolve) => {
+        const element = document.querySelector('#tour-inspiration-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => resolve(), 700);
+        } else {
+          resolve();
+        }
+      });
+    },
   },
   {
     selector: '#tour-recent-offers',
@@ -77,6 +115,17 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'top',
+    actionAfter: async (node: any) => {
+      return new Promise<void>((resolve) => {
+        const element = document.querySelector('#tour-recent-offers');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => resolve(), 700);
+        } else {
+          resolve();
+        }
+      });
+    },
   },
   {
     selector: '#tour-services-section',
@@ -89,6 +138,17 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'top',
+    actionAfter: async (node: any) => {
+      return new Promise<void>((resolve) => {
+        const element = document.querySelector('#tour-services-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => resolve(), 700);
+        } else {
+          resolve();
+        }
+      });
+    },
   },
   {
     selector: '#tour-how-it-works',
@@ -101,6 +161,17 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'top',
+    actionAfter: async (node: any) => {
+      return new Promise<void>((resolve) => {
+        const element = document.querySelector('#tour-how-it-works');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => resolve(), 700);
+        } else {
+          resolve();
+        }
+      });
+    },
   },
   {
     selector: '#tour-cta-section',
@@ -113,6 +184,17 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'top',
+    actionAfter: async (node: any) => {
+      return new Promise<void>((resolve) => {
+        const element = document.querySelector('#tour-cta-section');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => resolve(), 700);
+        } else {
+          resolve();
+        }
+      });
+    },
   },
   {
     selector: '#footer-principal',
@@ -125,6 +207,17 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'top',
+    actionAfter: async (node: any) => {
+      return new Promise<void>((resolve) => {
+        const element = document.querySelector('#footer-principal');
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          setTimeout(() => resolve(), 700);
+        } else {
+          resolve();
+        }
+      });
+    },
   },
   {
     selector: '#tour-auth-buttons-desktop',
@@ -137,6 +230,12 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'bottom',
+    actionAfter: async () => {
+      return new Promise<void>((resolve) => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => resolve(), 700);
+      });
+    },
   },
   {
     selector: '#tour-auth-buttons-mobile',
@@ -149,5 +248,11 @@ export const tourSteps: StepType[] = [
       </div>
     ),
     position: 'bottom',
+    actionAfter: async () => {
+      return new Promise<void>((resolve) => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        setTimeout(() => resolve(), 700);
+      });
+    },
   },
 ];
