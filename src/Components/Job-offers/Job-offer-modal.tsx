@@ -6,6 +6,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
+import JobRequestModal from '../../app/[locale]/job-request/ModalFormMap/JobRequestModal';
+import { useSelector } from 'react-redux';
+import { IUser } from '@/types/user';
+import { useRouter } from 'next/navigation';
 import { getPromotionsByOfferId } from '@/services/promotions';
 import type { Promotion } from '@/types/promotion';
 
@@ -15,7 +19,21 @@ interface Props {
   onClose: () => void;
 }
 
+interface UserState {
+  user: IUser | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+}
+interface RootState {
+  user: UserState;
+}
+
 export function JobOfferModal({ offer, isOpen, onClose }: Props) {
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
+  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+
+  //const t = useTranslations('cardJob');
   const tCat = useTranslations('Categories');
   const t = useTranslations('JobOfferModal');
   const [promotions, setPromotions] = useState<Promotion[]>([]);
@@ -105,6 +123,17 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
   const handleShare = () => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
     navigator.clipboard?.writeText(url);
+  };
+
+  const handleRequestJobClick = () => {
+    if (!isAuthenticated) {
+      router.push('/signUp');
+      return;
+    }
+    if (user?.role === 'fixer') {
+      return;
+    }
+    setIsMapModalOpen(true);
   };
 
   return (
@@ -291,6 +320,27 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
           >
             <Share2 className='w-5 h-5' />
           </button>
+
+          {user?.role !== 'fixer' && (
+            <>
+              <button
+                onClick={handleRequestJobClick}
+                className='flex-1 bg-primary hover:bg-primary/90 text-white py-3 rounded-xl font-semibold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2'
+              >
+                Solicitar trabajo
+              </button>
+
+              {isAuthenticated && (
+                <JobRequestModal
+                  isOpen={isMapModalOpen}
+                  onClose={() => setIsMapModalOpen(false)}
+                  onSubmit={(data) => console.log('Solicitud enviada:', data)}
+                  fixerId={offer.fixerId}
+                  offerId={offer._id}
+                />
+              )}
+            </>
+          )}
         </div>
       </div>
     </div>
