@@ -10,6 +10,8 @@ import ChangePasswordForm from '@/Components/requester/request/ChangePasswordFor
 //import { obtenerDatosUsuarioLogueado } from '../redux/services/editNumber';
 //import CloseSessionPage from '@/app/requesterEdit/closeSession/page';
 import Image from 'next/image';
+import { useTranslations } from 'next-intl';
+
 /*
 interface RequesterDataState {
   requesterId: string
@@ -27,6 +29,7 @@ const INITIAL_DATA: RequesterDataState = {
 }
 */
 export default function ConfiguracionPage() {
+  const t = useTranslations('ConfiguracionPage');
   const { user } = useAuth();
   const router = useRouter();
   //const [menuOpen, setMenuOpen] = useState(false);
@@ -37,9 +40,6 @@ export default function ConfiguracionPage() {
   //const [profileData, setProfileData] = useState<RequesterDataState>(INITIAL_DATA)
   const [profileLoading, setProfileLoading] = useState(false);
   const [profileError, setProfileError] = useState<string | null>(null);
-
-  // 🆕 Estados para HU8 (Cambiar Contraseña)
-  //onst [passwordChanging, setPasswordChanging] = useState(false)
 
   type SafeUser = { name?: string; email?: string; url_photo?: string };
   const safeUser = (user as SafeUser) ?? null;
@@ -52,7 +52,6 @@ export default function ConfiguracionPage() {
     return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
   }
 
-  //Función para cargar datos de perfil (HU5)
   const loadProfileData = useCallback(async () => {
     if (!user) return;
 
@@ -60,27 +59,14 @@ export default function ConfiguracionPage() {
     setProfileError(null);
 
     try {
-      //const rawData = await obtenerDatosUsuarioLogueado()
-      /*
-      const data: RequesterDataState = {
-        requesterId: rawData.requesterId,
-        phone: rawData.telefono || '',
-        direction: rawData.ubicacion?.direccion || '',
-        coordinates: [
-          rawData.ubicacion?.lat || 0,
-          rawData.ubicacion?.lng || 0,
-        ],
-      }
-      */
-      //setProfileData(data)
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'Error al cargar los datos del perfil.';
+      const message = err instanceof Error ? err.message : t('errors.loadProfile');
       setProfileError(message);
       //setProfileData(INITIAL_DATA)
     } finally {
       setProfileLoading(false);
     }
-  }, [user]);
+  }, [user, t]);
 
   //Cargar datos cuando se activa la sección de perfil
   useEffect(() => {
@@ -108,7 +94,7 @@ export default function ConfiguracionPage() {
         if (profileLoading) {
           return (
             <div className='flex items-center justify-center h-64'>
-              <p className='text-blue-600 text-lg animate-pulse'>Cargando datos del perfil...</p>
+              <p className='text-blue-600 text-lg animate-pulse'>{t('loading.profile')}</p>
             </div>
           );
         }
@@ -116,13 +102,15 @@ export default function ConfiguracionPage() {
         if (profileError) {
           return (
             <div className='max-w-md mx-auto text-center'>
-              <h2 className='text-xl font-semibold text-red-600 mb-4'>Error de Carga</h2>
-              <p className='text-gray-600 mb-6'>No se pudo cargar el perfil: {profileError}</p>
+              <h2 className='text-xl font-semibold text-red-600 mb-4'>{t('errors.loadTitle')}</h2>
+              <p className='text-gray-600 mb-6'>
+                {t('errors.loadMessage', { error: profileError })}
+              </p>
               <button
                 onClick={loadProfileData}
                 className='bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-300'
               >
-                Reintentar Carga
+                {t('buttons.retry')}
               </button>
             </div>
           );
@@ -130,7 +118,9 @@ export default function ConfiguracionPage() {
 
         return (
           <div className='max-w-4xl w-full'>
-            <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>Editar Perfil</h2>
+            <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>
+              {t('sections.editProfile')}
+            </h2>
             <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
               <RequesterEditForm />
             </div>
@@ -141,7 +131,7 @@ export default function ConfiguracionPage() {
         return (
           <div className='max-w-2xl w-full'>
             <h2 className='text-2xl font-bold text-center mb-8 text-gray-800'>
-              Cambiar Contraseña
+              {t('sections.changePassword')}
             </h2>
             <div className='bg-white rounded-2xl shadow-lg p-6 border border-gray-200'>
               <ChangePasswordForm onCancel={handlePasswordCancel} onSaved={handlePasswordSaved} />
@@ -152,9 +142,9 @@ export default function ConfiguracionPage() {
       case 'seguridad':
         return (
           <div className='max-w-4xl w-full'>
-            <h2 className='text-xl font-semibold text-center mb-2'>Seguridad</h2>
+            <h2 className='text-xl font-semibold text-center mb-2'>{t('sections.security')}</h2>
             <p className='text-sm text-center text-gray-600 mb-8'>
-              Opciones y recomendaciones que te ayudan a proteger tu cuenta
+              {t('sections.securityDescription')}
             </p>
 
             <div className='flex justify-center gap-6'>
@@ -166,13 +156,13 @@ export default function ConfiguracionPage() {
                 <div className='p-2 rounded-md bg-blue-50'>
                   <Image
                     src='/icons/edit-pass.png'
-                    alt='Cambiar contraseña'
+                    alt={t('security.changePassword')}
                     width={32}
                     height={32}
                     className='w-8 h-8 object-contain text-blue-600'
                   />
                 </div>
-                <span className='font-medium'>Cambiar contraseña</span>
+                <span className='font-medium'>{t('security.changePassword')}</span>
               </button>
 
               {/* Dispositivos vinculados */}
@@ -183,13 +173,13 @@ export default function ConfiguracionPage() {
                 <div className='p-2 rounded-md bg-blue-50'>
                   <Image
                     src='/icons/logins.png'
-                    alt='Dispositivos vinculados'
+                    alt={t('security.linkedDevices')}
                     width={24}
                     height={24}
                     className='w-6 h-6 object-contain text-blue-600'
                   />
                 </div>
-                <span className='font-medium'>Dispositivos vinculados</span>
+                <span className='font-medium'>{t('security.linkedDevices')}</span>
               </button>
 
               {/* 🆕 Authenticator (nuevo botón) */}
@@ -224,7 +214,7 @@ export default function ConfiguracionPage() {
                   {safeUser.url_photo ? (
                     <Image
                       src={safeUser.url_photo}
-                      alt='Foto de perfil'
+                      alt={t('welcome.profilePhoto')}
                       width={112}
                       height={112}
                       className='w-28 h-28 rounded-full border-4 border-blue-100 object-cover mb-4 shadow-sm'
@@ -236,16 +226,13 @@ export default function ConfiguracionPage() {
                   )}
                 </div>
                 <h2 className='text-2xl font-semibold mb-2 text-gray-800'>
-                  Te damos la bienvenida,{' '}
+                  {t('welcome.title', { name: safeUser.name ?? t('welcome.defaultName') })}{' '}
                   <span className='text-blue-600'>{safeUser.name ?? 'Usuario'}</span>
                 </h2>
-                <p className='text-gray-600 max-w-md text-center'>
-                  Gestiona tu información, privacidad y seguridad para mejorar tu experiencia en{' '}
-                  <strong>Servineo</strong>.
-                </p>
+                <p className='text-gray-600 max-w-md text-center'>{t('welcome.description')}</p>
               </>
             ) : (
-              <p className='text-gray-600'>Inicia sesión para ver tus configuraciones.</p>
+              <p className='text-gray-600'>{t('welcome.loginRequired')}</p>
             )}
           </div>
         );
@@ -268,7 +255,7 @@ export default function ConfiguracionPage() {
                 >
                   <ArrowLeft className='w-4 h-4' />
                 </button>
-                Configuración
+                {t('title')}
               </h2>
             </div>
 
@@ -284,12 +271,12 @@ export default function ConfiguracionPage() {
               >
                 <Image
                   src='/icons/edit-config.png'
-                  alt='Editar Perfil'
+                  alt={t('navigation.editProfile')}
                   width={24}
                   height={24}
                   className='w-6 h-6'
                 />
-                Editar Perfil
+                {t('navigation.editProfile')}
               </button>
 
               {/* Seguridad - Estado interno */}
@@ -303,12 +290,12 @@ export default function ConfiguracionPage() {
               >
                 <Image
                   src='/icons/seguridad-config.png'
-                  alt='Seguridad'
+                  alt={t('navigation.security')}
                   width={28}
                   height={28}
                   className='w-7 h-7'
                 />
-                Seguridad
+                {t('navigation.security')}
               </button>
 
               {/* Cuentas vinculadas - Estado interno */}
@@ -322,12 +309,12 @@ export default function ConfiguracionPage() {
               >
                 <Image
                   src='/icons/cuentas.png'
-                  alt='Cuentas'
+                  alt={t('navigation.linkedAccounts')}
                   width={28}
                   height={28}
                   className='w-7 h-7'
                 />
-                Cuentas vinculadas
+                {t('navigation.linkedAccounts')}
               </button>
             </nav>
           </div>

@@ -15,8 +15,8 @@ import {
 import { ICertification } from '@/types/fixer-profile';
 import { Modal } from '@/Components/Modal';
 import { useForm } from 'react-hook-form';
-// Importamos tu componente de notificaciones
 import NotificationModal from '@/Components/Modal-notifications';
+import { useTranslations } from 'next-intl';
 import {
   useGetCertificationsByFixerQuery,
   useCreateCertificationMutation,
@@ -29,17 +29,17 @@ interface CertificationsSectionProps {
   fixerId?: string;
 }
 
-// Interfaz para el estado de la notificación
 interface NotificationState {
   isOpen: boolean;
   type: 'success' | 'error' | 'info' | 'warning';
   title: string;
   message: string;
-  onConfirm?: () => void; // Solo necesario para el delete
+  onConfirm?: () => void;
 }
 
 export function CertificationsSection({ readOnly = false, fixerId }: CertificationsSectionProps) {
-  // Queries y Mutations
+  const t = useTranslations('CertificationsSection');
+
   const { data: certs = [], isLoading } = useGetCertificationsByFixerQuery(fixerId || '', {
     skip: !fixerId,
     refetchOnMountOrArgChange: true,
@@ -49,11 +49,9 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
   const [updateCertification, { isLoading: isUpdating }] = useUpdateCertificationMutation();
   const [deleteCertification, { isLoading: isDeleting }] = useDeleteCertificationMutation();
 
-  // Estados locales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingCert, setEditingCert] = useState<ICertification | null>(null);
 
-  // Estado para manejar tu NotificationModal
   const [notification, setNotification] = useState<NotificationState>({
     isOpen: false,
     type: 'info',
@@ -62,10 +60,8 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
     onConfirm: undefined,
   });
 
-  // React Hook Form
   const { register, handleSubmit, reset, setValue } = useForm<ICertification>();
 
-  // --- Manejadores de Notificación ---
   const closeNotification = () => {
     setNotification((prev) => ({ ...prev, isOpen: false }));
   };
@@ -74,7 +70,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
     setNotification({
       isOpen: true,
       type: 'success',
-      title: '¡Operación Exitosa!',
+      title: t('notifications.success'),
       message,
       onConfirm: undefined,
     });
@@ -84,13 +80,11 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
     setNotification({
       isOpen: true,
       type: 'error',
-      title: 'Ocurrió un error',
+      title: t('notifications.error'),
       message,
       onConfirm: undefined,
     });
   };
-
-  // --- Lógica del Formulario ---
 
   const handleOpenModal = (cert?: ICertification) => {
     if (readOnly) return;
@@ -134,67 +128,53 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
 
     try {
       if (editingCert && editingCert._id) {
-        // UPDATE
         await updateCertification({
           id: editingCert._id,
           data: { ...data, fixerId },
         }).unwrap();
-        showSuccess('La certificación ha sido actualizada correctamente.');
+        showSuccess(t('notifications.updateSuccess'));
       } else {
-        // CREATE
         await createCertification({
           ...data,
           fixerId,
         }).unwrap();
-        showSuccess('La nueva certificación ha sido agregada.');
+        showSuccess(t('notifications.createSuccess'));
       }
       handleCloseModal();
     } catch (error) {
       console.error(error);
-      showError('No se pudo guardar la certificación. Inténtalo de nuevo.');
+      showError(t('notifications.saveError'));
     }
   };
 
-  // --- Lógica de Eliminado con tu Modal ---
-
-  // 1. Paso 1: El usuario hace clic en el botón de basura
   const handleDeleteClick = (id: string) => {
     if (readOnly) return;
 
-    // Abrimos el modal en modo WARNING
     setNotification({
       isOpen: true,
       type: 'warning',
-      title: '¿Eliminar certificación?',
-      message:
-        'Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminarla permanentemente?',
-      onConfirm: () => confirmDelete(id), // Pasamos la función que ejecuta el borrado
+      title: t('notifications.deleteTitle'),
+      message: t('notifications.deleteMessage'),
+      onConfirm: () => confirmDelete(id),
     });
   };
 
-  // 2. Paso 2: El usuario confirma en el modal
   const confirmDelete = async (id: string) => {
     try {
       await deleteCertification(id).unwrap();
-      // Mostramos éxito después de borrar
-      // Pequeño timeout para que la transición del modal se sienta natural
       setTimeout(() => {
-        showSuccess('Certificación eliminada correctamente.');
+        showSuccess(t('notifications.deleteSuccess'));
       }, 300);
     } catch (error) {
       console.error(error);
       setTimeout(() => {
-        showError('No se pudo eliminar la certificación.');
+        showError(t('notifications.deleteError'));
       }, 300);
     }
   };
 
   if (!fixerId) {
-    return (
-      <div className='p-4 text-center text-gray-500'>
-        No se puede cargar certificaciones sin un perfil de fixer.
-      </div>
-    );
+    return <div className='p-4 text-center text-gray-500'>{t('errors.noFixerProfile')}</div>;
   }
 
   if (isLoading)
@@ -210,7 +190,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
       <div className='flex items-center justify-between'>
         <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
           <Award className='h-5 w-5 text-blue-600' />
-          {readOnly ? 'Certificaciones' : 'Mis Certificaciones'}
+          {readOnly ? t('titles.certifications') : t('titles.myCertifications')}
         </h2>
         {!readOnly && (
           <PillButton
@@ -218,7 +198,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
             className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
           >
             <Plus className='h-4 w-4' />
-            Agregar
+            {t('buttons.addCertification')}
           </PillButton>
         )}
       </div>
@@ -227,7 +207,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
       <div className='grid gap-4'>
         {certs.length === 0 && (
           <div className='text-gray-500 text-center py-8 border border-dashed border-gray-300 rounded-lg bg-gray-50'>
-            No hay certificaciones registradas aún.
+            {t('empty')}
           </div>
         )}
 
@@ -255,7 +235,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                     <div className='flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded'>
                       <Calendar className='h-3.5 w-3.5' />
                       <span>
-                        Emitido:{' '}
+                        {t('card.issued')}:{' '}
                         {new Date(cert.issueDate).toLocaleDateString(undefined, {
                           timeZone: 'UTC',
                         })}
@@ -265,7 +245,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                       <div className='flex items-center gap-1.5 bg-gray-50 px-2 py-1 rounded'>
                         <Calendar className='h-3.5 w-3.5' />
                         <span>
-                          Expira:{' '}
+                          {t('card.expires')}:{' '}
                           {new Date(cert.expiryDate).toLocaleDateString(undefined, {
                             timeZone: 'UTC',
                           })}
@@ -281,28 +261,27 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
                       rel='noopener noreferrer'
                       className='inline-flex items-center gap-1 text-blue-600 hover:text-blue-700 hover:underline text-sm mt-3 font-medium transition-colors'
                     >
-                      Ver credencial <ExternalLink className='h-3 w-3' />
+                      {t('card.viewCredential')} <ExternalLink className='h-3 w-3' />
                     </a>
                   )}
                 </div>
               </div>
 
-              {/* Botones de acción (Editar / Eliminar) */}
+              {/* Botones de acción */}
               {!readOnly && (
                 <div className='flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity absolute top-4 right-4 md:static md:opacity-100'>
                   <button
                     onClick={() => handleOpenModal(cert)}
-                    className='p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors'
-                    title='Editar'
+                    className='p-2 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors'
+                    title={t('tooltips.edit')}
                   >
                     <Edit2 className='h-4 w-4' />
                   </button>
                   <button
-                    // CAMBIO: Ahora llamamos a handleDeleteClick para abrir el modal
                     onClick={() => cert._id && handleDeleteClick(cert._id)}
                     disabled={isDeleting}
                     className='p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50'
-                    title='Eliminar'
+                    title={t('tooltips.delete')}
                   >
                     {isDeleting ? (
                       <Loader2 className='h-4 w-4 animate-spin' />
@@ -317,45 +296,46 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
         ))}
       </div>
 
-      {/* Modal Formulario (Crear/Editar) */}
+      {/* Modal Formulario */}
       <Modal
         open={isModalOpen}
         onClose={handleCloseModal}
+        title={editingCert ? t('modal.editTitle') : t('modal.newTitle')}
         size='lg'
         closeOnOverlayClick={!isCreating && !isUpdating}
         className='rounded-2xl border-primary border-2'
       >
         <Modal.Header className='text-center text-primary'>
-          {editingCert ? 'Editar Certificación' : 'Nueva Certificación'}
+          {editingCert ? t('modal.editTitle') : t('modal.newTitle')}
         </Modal.Header>
         <Modal.Body>
           <form id='certificationForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Nombre de la certificación
+                {t('form.name.label')}
               </label>
               <input
                 {...register('name', { required: true })}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='Ej. Desarrollo Web Full Stack'
+                placeholder={t('form.name.placeholder')}
               />
             </div>
 
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Institución emisora
+                {t('form.institution.label')}
               </label>
               <input
                 {...register('institution', { required: true })}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='Ej. Udemy, Coursera, Universidad...'
+                placeholder={t('form.institution.placeholder')}
               />
             </div>
 
             <div className='grid grid-cols-2 gap-4'>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  Fecha de emisión
+                  {t('form.issueDate.label')}
                 </label>
                 <input
                   type='date'
@@ -365,7 +345,8 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
               </div>
               <div>
                 <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  Fecha de expiración <span className='text-gray-400 font-normal'>(Opcional)</span>
+                  {t('form.expiryDate.label')}{' '}
+                  <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
                 </label>
                 <input
                   type='date'
@@ -377,24 +358,26 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
 
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                ID de la credencial <span className='text-gray-400 font-normal'>(Opcional)</span>
+                {t('form.credentialId.label')}{' '}
+                <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
               </label>
               <input
                 {...register('credentialId')}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='Ej. UC-12345678'
+                placeholder={t('form.credentialId.placeholder')}
               />
             </div>
 
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                URL de la credencial <span className='text-gray-400 font-normal'>(Opcional)</span>
+                {t('form.credentialUrl.label')}{' '}
+                <span className='text-gray-400 font-normal'>({t('form.optional')})</span>
               </label>
               <input
                 {...register('credentialUrl')}
                 type='url'
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='https://...'
+                placeholder={t('form.credentialUrl.placeholder')}
               />
             </div>
           </form>
@@ -406,7 +389,7 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
               onClick={handleCloseModal}
               className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
             >
-              Cancelar
+              {t('buttons.cancel')}
             </button>
             <PillButton
               type='submit'
@@ -414,14 +397,14 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
               className='bg-primary text-white hover:bg-blue-800'
               disabled={isCreating || isUpdating}
             >
-              {(isCreating || isUpdating) && <Loader2 className='animate-spin h-4 w-4' />}
-              {isCreating || isUpdating ? 'Guardando...' : 'Guardar Certificación'}
+              {(isCreating || isUpdating) && <Loader2 className='animate-spin h-4 w-4 mr-2' />}
+              {isCreating || isUpdating ? t('buttons.saving') : t('buttons.save')}
             </PillButton>
           </div>
         </Modal.Footer>
       </Modal>
 
-      {/* TU MODAL DE NOTIFICACIONES */}
+      {/* Modal de Notificaciones */}
       <NotificationModal
         isOpen={notification.isOpen}
         onClose={closeNotification}
@@ -429,8 +412,8 @@ export function CertificationsSection({ readOnly = false, fixerId }: Certificati
         title={notification.title}
         message={notification.message}
         onConfirm={notification.onConfirm}
-        confirmText='Eliminar'
-        cancelText='Cancelar'
+        confirmText={t('buttons.delete')}
+        cancelText={t('buttons.cancel')}
       />
     </div>
   );
