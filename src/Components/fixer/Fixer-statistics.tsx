@@ -1,12 +1,13 @@
 'use client';
 
+import { useTranslations } from 'next-intl';
 import { Pie, PieChart, Cell, Tooltip } from 'recharts';
 import { useGetJobStatisticsQuery } from '../../app/redux/services/statisticsApi';
 
 const COLORS = {
-  Completados: '#10B981',
-  'En proceso': '#3B82F6',
-  Pendientes: '#F59E0B',
+  completed: 'blue',
+  inProgress: '#3B82F6',
+  pending: '#1AA7ED',
 };
 
 interface TooltipPayload {
@@ -35,17 +36,15 @@ const CustomTooltip = ({ active, payload }: TooltipProps) => {
 };
 
 export default function EstadisticasTrabajos() {
+  const t = useTranslations('statistics.jobs');
+
   const { data: jobLogs, isLoading, isError } = useGetJobStatisticsQuery();
 
   if (isLoading) {
-    return <div className='text-center p-8'>Cargando estadísticas...</div>;
+    return <div className='text-center p-8'>{t('loading')}</div>;
   }
   if (isError || !jobLogs) {
-    return (
-      <div className='text-center p-8 text-red-600'>
-        Error al cargar datos o datos no disponibles.
-      </div>
-    );
+    return <div className='text-center p-8 text-red-600'>{t('error')}</div>;
   }
 
   const dailyStatusLog = jobLogs
@@ -53,19 +52,15 @@ export default function EstadisticasTrabajos() {
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())[0];
 
   if (!dailyStatusLog) {
-    return (
-      <div className='text-center p-8 text-gray-500'>
-        No se encontraron logs de estado de trabajos.
-      </div>
-    );
+    return <div className='text-center p-8 text-gray-500'>{t('noLogs')}</div>;
   }
 
   const stats = dailyStatusLog.metadata;
 
   const chartData = [
-    { estado: 'Completados', cantidad: stats.completed },
-    { estado: 'En proceso', cantidad: stats.inProgress },
-    { estado: 'Pendientes', cantidad: stats.pending },
+    { estado: 'completed', estadoLabel: t('status.completed'), cantidad: stats.completed },
+    { estado: 'inProgress', estadoLabel: t('status.inProgress'), cantidad: stats.inProgress },
+    { estado: 'pending', estadoLabel: t('status.pending'), cantidad: stats.pending },
   ];
 
   const totalTrabajos = stats.total;
@@ -73,7 +68,7 @@ export default function EstadisticasTrabajos() {
   return (
     <div className="flex flex-col font-['Roboto'] shadow-md rounded-2xl p-4 bg-white max-w-sm mx-auto">
       <div className='flex justify-center pb-2'>
-        <h2 className='text-xl font-semibold text-gray-800'>Estadísticas de trabajos</h2>
+        <h2 className='text-xl font-semibold text-gray-800'>{t('title')}</h2>
       </div>
       <div className='flex flex-col items-center justify-center'>
         <PieChart width={300} height={300}>
@@ -81,7 +76,7 @@ export default function EstadisticasTrabajos() {
           <Pie
             data={chartData}
             dataKey='cantidad'
-            nameKey='estado'
+            nameKey='estadoLabel'
             outerRadius={100}
             labelLine={false}
             label={({ payload, ...props }) => (
@@ -116,11 +111,11 @@ export default function EstadisticasTrabajos() {
                 className='inline-block w-3 h-3 rounded-full mr-2'
                 style={{ backgroundColor: COLORS[item.estado as keyof typeof COLORS] }}
               ></span>
-              {item.estado}
+              {item.estadoLabel}
             </span>
 
             <span>
-              {item.cantidad} trabajos
+              {item.cantidad} {t('jobs')}
               <span className='ml-2 font-normal text-gray-500'>
                 ({((item.cantidad / totalTrabajos) * 100).toFixed(0)}%)
               </span>
@@ -129,8 +124,10 @@ export default function EstadisticasTrabajos() {
         ))}
 
         <div className='flex justify-between px-4 py-1 mt-2 border-t-2 border-gray-300 font-bold'>
-          <span>Total</span>
-          <span>{totalTrabajos} trabajos</span>
+          <span>{t('total')}</span>
+          <span>
+            {totalTrabajos} {t('jobs')}
+          </span>
         </div>
       </div>
     </div>

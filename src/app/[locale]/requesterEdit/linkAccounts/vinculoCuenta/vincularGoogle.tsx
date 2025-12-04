@@ -6,6 +6,7 @@ import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { vincularGoogle, Client } from '@/app/redux/services/services/api';
+import { useTranslations } from 'next-intl';
 
 interface VincularGoogleProps {
   onLinked?: (client?: Client) => void;
@@ -13,14 +14,15 @@ interface VincularGoogleProps {
 }
 
 export default function VincularGoogle({ onLinked, tokenUsuario }: VincularGoogleProps) {
+  const t = useTranslations('VincularGoogle');
   const [loading, setLoading] = useState(false);
 
   const handleLoginSuccess = async (credentialResponse: CredentialResponse) => {
     const tokenGoogle = credentialResponse?.credential;
-    if (!tokenGoogle) return console.error('Token de Google vacío');
+    if (!tokenGoogle) return console.error(t('errors.emptyToken'));
 
     if (!tokenUsuario) {
-      toast.error('No hay sesión activa para vincular cuenta');
+      toast.error(t('errors.noSession'));
       return;
     }
 
@@ -43,8 +45,8 @@ export default function VincularGoogle({ onLinked, tokenUsuario }: VincularGoogl
       <div className='flex items-center gap-3'>
         <FcGoogle size={30} />
         <div className='flex flex-col'>
-          <span className='text-sm font-semibold text-gray-800'>Google</span>
-          <span className='text-xs text-gray-500'>Vincula tu cuenta de Google</span>
+          <span className='text-sm font-semibold text-gray-800'>{t('title')}</span>
+          <span className='text-xs text-gray-500'>{t('subtitle')}</span>
         </div>
       </div>
 
@@ -55,17 +57,17 @@ export default function VincularGoogle({ onLinked, tokenUsuario }: VincularGoogl
         >
           {loading ? (
             <>
-              <Loader2 className='w-4 h-4 animate-spin' /> Vinculando...
+              <Loader2 className='w-4 h-4 animate-spin' /> {t('buttons.linking')}
             </>
           ) : (
-            'Vincular'
+            t('buttons.link')
           )}
         </button>
 
         <div className='absolute inset-0 opacity-0 cursor-pointer'>
           <GoogleLogin
             onSuccess={handleLoginSuccess}
-            onError={() => toast.error('Error al iniciar sesión con Google')}
+            onError={() => toast.error(t('errors.loginError'))}
           />
         </div>
       </div>
