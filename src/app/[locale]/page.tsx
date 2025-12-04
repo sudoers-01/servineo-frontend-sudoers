@@ -15,7 +15,9 @@ import { useDispatch } from 'react-redux';
 import { useState } from 'react';
 import { useGetUserByIdQuery } from '../redux/services/userApi';
 import { setUser } from '../redux/slice/userSlice';
-import Map from '../Mapa/Map';
+
+// Importar Map dinámicamente sin SSR
+const Map = dynamic(() => import('../Mapa/Map'), { ssr: false });
 
 export default function Home() {
   //const user = useSelector((state: { user: IUser }) => state.user);
