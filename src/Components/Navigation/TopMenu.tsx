@@ -74,6 +74,11 @@ export default function TopMenu() {
             icon: <ClipboardList className='h-5 w-5' />,
           },
           {
+            name: 'Agenda',
+            href: '/agenda',
+            icon: <ClipboardList className='h-5 w-5' />,
+          },
+          {
             name: 'Ayuda',
             href: '/ask-for-help/centro_de_ayuda',
             icon: <HelpCircle className='h-5 w-5' />,
