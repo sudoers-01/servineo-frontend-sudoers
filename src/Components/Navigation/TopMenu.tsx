@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Wrench, UserCircle, ClipboardList, HelpCircle, Tag } from 'lucide-react';
+import { Wrench, UserCircle, ClipboardList, HelpCircle, Calendar } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
@@ -76,7 +76,7 @@ export default function TopMenu() {
           {
             name: 'Agenda',
             href: '/agenda',
-            icon: <ClipboardList className='h-5 w-5' />,
+            icon: <Calendar className='h-5 w-5' />,
           },
           {
             name: 'Ayuda',
