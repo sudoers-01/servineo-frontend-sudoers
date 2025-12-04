@@ -12,7 +12,6 @@ import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
 import dynamic from 'next/dynamic';
 import { IUser } from '@/types/user';
 
-//const MyOffer = dynamic(() => import('@/Components/Home/MyOffer-section'), { ssr: false });
 const Map = dynamic(() => import('@/app/Mapa/Map'), { ssr: false });
 interface RootState {
   user: {
@@ -36,7 +35,6 @@ export default function Home() {
 
   return (
     <div className='min-h-screen bg-white relative'>
-      {/* ANCLA INVISIBLE */}
       <div
         id='tour-start-point'
         className='absolute top-0 left-0 w-1 h-1 opacity-0 pointer-events-none'
