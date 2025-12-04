@@ -53,7 +53,6 @@ function getYouTubeId(rawUrl?: string): string | undefined {
 export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSectionProps) {
   const t = useTranslations('PortfolioSection');
   
-  // ID efectivo
   const effectiveFixerId = fixerId || '69285d2860ea986813517593';
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -273,7 +272,6 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                 key={item._id}
                 className='group relative aspect-square rounded-2xl overflow-hidden bg-gray-100 border border-gray-200 shadow-sm hover:shadow-lg transition-all'
               >
-                {/* BOTÓN DE ELIMINAR ARRIBA A LA DERECHA */}
                 {!readOnly && (
                   <button
                     onClick={(e) => {
@@ -282,13 +280,12 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
                     }}
                     disabled={isDeleting}
                     className='absolute top-2 right-2 z-10 p-2 bg-white/90 text-red-600 rounded-full hover:bg-white transition-all shadow-md hover:scale-110 opacity-0 group-hover:opacity-100'
-                    title='Eliminar'
+                    title={t('tooltips.delete')}
                   >
                     <Trash2 className='h-4 w-4' />
                   </button>
                 )}
 
-                {/* CONTENIDO DEL ITEM */}
                 {isVideo && videoId ? (
                   <div className='absolute inset-0 w-full h-full'>
                     <iframe
@@ -348,102 +345,110 @@ export function PortfolioSection({ readOnly = false, fixerId }: PortfolioSection
         open={isModalOpen}
         onClose={handleCloseModal}
         title={modalType === 'image' ? t('modal.addImage') : t('modal.addVideo')}
-        size="md"
+        size="lg"
+        closeOnOverlayClick={!isCreating}
+        className='rounded-2xl border-primary border-2'
       >
-        <form onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-          <input type='hidden' value={modalType} {...register('type')} />
+        <Modal.Header className='text-center text-primary'>
+          {modalType === 'image' ? t('modal.addImage') : t('modal.addVideo')}
+        </Modal.Header>
+        <Modal.Body>
+          <form id='portfolioForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+            <input type='hidden' value={modalType} {...register('type')} />
 
-          {modalType === 'image' ? (
-            <div className='space-y-3'>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.imageUrl.label')}
-                </label>
-                <div className='relative'>
-                  <input
-                    {...register('url', { required: t('form.imageUrl.required') })}
-                    className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500 pr-10"
-                    placeholder={t('form.imageUrl.placeholder')}
-                  />
-                  {isValidating && (
-                    <div className='absolute right-3 top-1/2 -translate-y-1/2'>
-                      <Loader2 className='animate-spin h-5 w-5 text-blue-600' />
-                    </div>
-                  )}
-                  {!isValidating && isValidUrl === true && (
-                    <CheckCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600' />
-                  )}
-                  {!isValidating && isValidUrl === false && (
-                    <XCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600' />
+            {modalType === 'image' ? (
+              <div className='space-y-3'>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('form.imageUrl.label')} *
+                  </label>
+                  <div className='relative'>
+                    <input
+                      {...register('url', { required: t('form.imageUrl.required') })}
+                      className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 pr-10'
+                      placeholder={t('form.imageUrl.placeholder')}
+                    />
+                    {isValidating && (
+                      <div className='absolute right-3 top-1/2 -translate-y-1/2'>
+                        <Loader2 className='animate-spin h-5 w-5 text-blue-600' />
+                      </div>
+                    )}
+                    {!isValidating && isValidUrl === true && (
+                      <CheckCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-green-600' />
+                    )}
+                    {!isValidating && isValidUrl === false && (
+                      <XCircle className='absolute right-3 top-1/2 -translate-y-1/2 h-5 w-5 text-red-600' />
+                    )}
+                  </div>
+                  {isValidUrl === false && (
+                    <p className='text-xs text-red-600 mt-1'>
+                      {t('form.imageUrl.validationError')}
+                    </p>
                   )}
                 </div>
-                {isValidUrl === false && (
-                  <p className="text-xs text-red-600 mt-1">
-                    {t('form.imageUrl.validationError')}
-                  </p>
+
+                {previewUrl && isValidUrl && (
+                  <div className='border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50'>
+                    <p className='text-xs text-green-700 mb-2 font-semibold'>{t('form.preview')}</p>
+                    <div className='relative w-full h-48 rounded-lg overflow-hidden bg-white shadow-md'>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={previewUrl}
+                        alt='Preview'
+                        className='w-full h-full object-contain'
+                      />
+                    </div>
+                  </div>
                 )}
               </div>
-
-              {previewUrl && isValidUrl && (
-                <div className="border-2 border-dashed border-green-300 rounded-lg p-4 bg-green-50">
-                  <p className="text-xs text-green-700 mb-2 font-semibold">{t('form.preview')}</p>
-                  <div className="relative w-full h-48 rounded-lg overflow-hidden bg-white shadow-md">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={previewUrl} alt='Preview' className='w-full h-full object-contain' />
-                  </div>
+            ) : (
+              <>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('form.youtubeUrl.label')} *
+                  </label>
+                  <input
+                    {...register('youtubeUrl', { required: t('form.youtubeUrl.required') })}
+                    className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                    placeholder={t('form.youtubeUrl.placeholder')}
+                  />
                 </div>
-              )}
-            </div>
-          ) : (
-            <>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.youtubeUrl.label')}
-                </label>
-                <input
-                  {...register('youtubeUrl', { required: t('form.youtubeUrl.required') })}
-                  className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  placeholder={t('form.youtubeUrl.placeholder')}
-                />
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  {t('form.thumbnailUrl.label')}
-                </label>
-                <input
-                  {...register('url')}
-                  className="w-full rounded-lg border-gray-300 focus:border-blue-500 focus:ring-blue-500"
-                  placeholder={t('form.thumbnailUrl.placeholder')}
-                />
-              </div>
-            </>
-          )}
-
-          <div className='flex justify-end gap-2 pt-4'>
-            <PillButton
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    {t('form.thumbnailUrl.label')}
+                  </label>
+                  <input
+                    {...register('url')}
+                    className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+                    placeholder={t('form.thumbnailUrl.placeholder')}
+                  />
+                </div>
+              </>
+            )}
+          </form>
+        </Modal.Body>
+        <Modal.Footer>
+          <div className='flex justify-end gap-2'>
+            <button
               type='button'
               onClick={handleCloseModal}
-              className='bg-gray-100 text-gray-700 hover:bg-gray-200'
+              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
+              disabled={isCreating}
             >
               {t('buttons.cancel')}
-            </PillButton>
-
+            </button>
             <PillButton
               type='submit'
+              form='portfolioForm'
               className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
               disabled={(modalType === 'image' && isValidUrl !== true) || isCreating}
             >
-              {isCreating ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" /> {t('buttons.saving')}
-                </>
-              ) : (
-                t('buttons.save')
-              )}
+              {isCreating && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isCreating ? t('buttons.saving') : t('buttons.save')}
             </PillButton>
           </div>
-        </form>
+        </Modal.Footer>
       </Modal>
 
       {fullscreenImage && (

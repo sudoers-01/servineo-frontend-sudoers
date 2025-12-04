@@ -1,254 +1,197 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useTranslations } from 'next-intl';
+import { useState } from 'react';
+import Image from 'next/image';
+import { MapPin, Star, MessageCircle, Share2, Flag, User } from 'lucide-react';
+import { PillButton } from '@/Components/Pill-button';
+import { CertificationsSection } from '@/Components/fixer/dashboard/CertificationsSection';
+import { ExperienceSection } from '@/Components/fixer/dashboard/ExperienceSection';
+import { PortfolioSection } from '@/Components/fixer/dashboard/PortfolioSection';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/Components/Tabs/Tabs';
+import EstadisticasTrabajos from '@/Components/fixer/Fixer-statistics';
+import { useParams } from 'next/navigation';
+import { useSelector } from 'react-redux';
+import { IUser } from '@/types/user';
+import { JobOffersSection } from '@/Components/fixer/dashboard/JobOffersSection';
 
-import DesktopCalendar from '@/Components/calendar/DesktopCalendar';
-import { UserRoleProvider } from '@/app/lib/utils/contexts/UserRoleContext';
-import MobileCalendar from '@/Components/calendar/mobile/MobileCalendar';
-import MobileList from '@/Components/list/MobileList';
-import ModeSelectionModal from '@/Components/appointments/forms/ModeSelectionModal';
-import { ModeSelectionModalHandles } from '@/Components/appointments/forms/ModeSelectionModal';
-import CancelDaysAppointments from '@/Components/appointments/forms/CancelDaysAppointment';
-import useDailyConts from '@/app/lib/utils/useDailyConts';
-import useSixMonthsAppointments from '@/hooks/useSixMonthsAppointments';
-import { AppointmentsProvider } from '@/app/lib/utils/contexts/AppointmentsContext/AppoinmentsContext';
-import { AppointmentsStatusProvider } from '@/app/lib/utils/contexts/DayliViewRequesterContext';
-
-export default function CalendarPage() {
-  const t = useTranslations('CalendarPage');
-  const router = useRouter();
-  const modeModalRef = useRef<ModeSelectionModalHandles>(null);
-
-  const [fixer_id, setFixerId] = useState<string>('');
-  const [requester_id, setRequesterId] = useState<string>('');
-  const [isLoading, setIsLoading] = useState(true);
-  const [userRole, setUserRole] = useState<'requester' | 'fixer'>('requester');
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
-
-  // Cargar datos de sessionStorage
-  useEffect(() => {
-    const storedFixerId = sessionStorage.getItem('fixer_id');
-    const storedRequesterId = sessionStorage.getItem('requester_id');
-    const storedRoleUser = sessionStorage.getItem('roluser');
-
-    if (storedFixerId) {
-      setFixerId(storedFixerId);
-      setRequesterId(storedRequesterId || '');
-      setUserRole(storedRoleUser === 'fixer' ? 'fixer' : 'requester');
-      setIsLoading(false);
-    } else {
-      router.push('/');
-    }
-  }, [router]);
-
-  const today = useMemo(() => {
-    const d = new Date();
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }, []);
-
-  const handleDataChange = (newDate: Date) => {
-    setSelectedDate(newDate);
-  };
-
-  const switchRole = () => {
-    setUserRole((prevRole) => (prevRole === 'requester' ? 'fixer' : 'requester'));
-  };
-
-  const handleOpenAvailabilityModal = () => {
-    modeModalRef.current?.open();
-  };
-
-  const openCancelModal = () => {
-    setIsCancelModalOpen(true);
-  };
-
-  const closeCancelModal = () => {
-    setIsCancelModalOpen(false);
-  };
-
-  const {
-    isHourBookedFixer,
-    isHourBooked,
-    isEnabled,
-    isCanceled,
-    refetch: refetchSixMonths,
-    refetchHour,
-    loading,
-  } = useSixMonthsAppointments(fixer_id, today);
-
-  const { getAppointmentsForDay, refetch: refetchConts } = useDailyConts({ date: today, fixer_id });
-
-  const refetchAll = useCallback(() => {
-    refetchSixMonths();
-    refetchConts();
-  }, [refetchSixMonths, refetchConts]);
-
-  const providerValue = useMemo(
-    () => ({
-      isHourBookedFixer,
-      isHourBooked,
-      isEnabled,
-      isCanceled,
-      getAppointmentsForDay,
-      refetchAll,
-      refetchHour,
-      loading,
-    }),
-    [
-      isHourBookedFixer,
-      isHourBooked,
-      isEnabled,
-      isCanceled,
-      refetchAll,
-      refetchHour,
-      getAppointmentsForDay,
-      loading,
-    ]
-  );
-
-  // Mostrar loading mientras se cargan los datos de sessionStorage
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p>{t('loading')}</p>
-      </div>
-    );
-  }
+export default function FixerProfilePage() {
+  const params = useParams<{ locale: string; id: string }>();
+  const user = useSelector((state: { user: { user: IUser } }) => state.user.user);
+  const fixerId = params?.id;
+  const [activeTab, setActiveTab] = useState('resumen');
+  const fixerData = user?._id === fixerId ? user : null;
 
   return (
-    <UserRoleProvider role={userRole} fixer_id={fixer_id} requester_id={requester_id}>
-      <AppointmentsProvider
-        isHourBookedFixer={providerValue.isHourBookedFixer}
-        isHourBooked={providerValue.isHourBooked}
-        isEnabled={providerValue.isEnabled}
-        isCanceled={providerValue.isCanceled}
-        getAppointmentsForDay={providerValue.getAppointmentsForDay}
-        refetchAll={providerValue.refetchAll}
-        refetchHour={providerValue.refetchHour}
-        loading={providerValue.loading}
-      >
-        <AppointmentsStatusProvider
-          fixerId={fixer_id}
-          requesterId={requester_id}
-          selectedDate={selectedDate}
-        >
-          <div className="flex flex-col bg-white min-h-screen">
-            <div className="flex flex-col md:flex-row md:items-center">
-              <div className="flex items-center">
-                <button
-                  onClick={() => router.back()}
-                  className="p-2 m-4 text-gray-600 hover:text-black hover:bg-gray-100 transition-colors self-start"
+    <div className='min-h-screen bg-gray-50 pb-12'>
+      {/* Profile Header */}
+      <div className='bg-white border-b'>
+        <div className='container mx-auto px-4 py-8'>
+          <div className='flex flex-col md:flex-row gap-6 items-start'>
+            {/* Avatar */}
+            <div className='relative'>
+              <div className='w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-lg bg-gray-200 flex items-center justify-center'>
+                {user ? (
+                  <Image
+                    src={user?.url_photo || '/default-avatar.png'}
+                    alt={user?.name || 'Fixer'}
+                    width={128}
+                    height={128}
+                    className='w-full h-full object-cover'
+                  />
+                ) : (
+                  <User className='w-16 h-16 text-gray-400' />
+                )}
+              </div>
+              {fixerData?.fixerProfile === 'completed' && (
+                <div
+                  className='absolute bottom-1 right-1 bg-blue-500 text-white p-1.5 rounded-full ring-2 ring-white'
+                  title='Perfil Verificado'
                 >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="w-6 h-6"
+                  <Star className='w-4 h-4 fill-current' />
+                </div>
+              )}
+            </div>
+
+            {/* Info */}
+            <div className='flex-1'>
+              <div className='flex flex-col md:flex-row md:items-center justify-between gap-4'>
+                <div>
+                  <h1 className='text-3xl font-bold text-gray-900'>
+                    {user?.name || 'Cargando...'}
+                  </h1>
+                  <p className='text-lg text-gray-600 font-medium'>
+                    {user?.servicios?.join(', ') || 'Servicios Generales'}
+                  </p>
+
+                  <div className='flex items-center gap-4 mt-2 text-sm text-gray-500'>
+                    <div className='flex items-center gap-1'>
+                      <Star className='w-4 h-4 text-amber-400 fill-amber-400' />
+                      <span className='font-semibold text-gray-900'>{'N/A'}</span>
+                      <span>({'Sin calificaciones aún'})</span>
+                    </div>
+                    <div className='flex items-center gap-1'>
+                      <MapPin className='w-4 h-4' />
+                      <span>
+                        {user?.ubicacion?.departamento ||
+                          user?.workLocation?.direccion ||
+                          'Bolivia'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {fixerData?.telefono && (
+                    <div className='mt-2 text-sm text-gray-600'>
+                      <span className='font-semibold'>Teléfono:</span> {fixerData.telefono}
+                    </div>
+                  )}
+                </div>
+
+                <div className='flex gap-3'>
+                  <PillButton
+                    className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
+                    onClick={() => {
+                      if (fixerData?.telefono) {
+                        window.open(
+                          `https://wa.me/${fixerData.telefono.replace(/\s+/g, '')}`,
+                          '_blank',
+                        );
+                      }
+                    }}
                   >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M6 6l12 12M6 18L18 6"
-                      strokeWidth={2}
-                    />
-                  </svg>
-                </button>
-
-                {userRole === 'fixer' && (
-                  <h2 className="text-black p-4 text-xl text-center flex-1">
-                    {t('titles.myCalendar')}
-                  </h2>
-                )}
-                {userRole === 'requester' && (
-                  <h2 className="text-black p-4 text-xl text-center flex-1">
-                    {t('titles.fixerCalendar', { fixerName: 'Juan Carlos Peréz' })}
-                  </h2>
-                )}
+                    <MessageCircle className='w-4 h-4' />
+                    Contactar
+                  </PillButton>
+                  <button className='p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors'>
+                    <Share2 className='w-5 h-5' />
+                  </button>
+                  <button className='p-2 text-gray-500 hover:bg-gray-100 rounded-full transition-colors'>
+                    <Flag className='w-5 h-5' />
+                  </button>
+                </div>
               </div>
 
-              <div className="flex flex-col md:hidden gap-2 px-4 pb-4">
-                {userRole === 'fixer' && (
-                  <div className="flex gap-2">
-                    <button
-                      className="flex-1 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors text-sm"
-                      onClick={handleOpenAvailabilityModal}
-                    >
-                      {t('buttons.modifyAvailability')}
-                    </button>
-                    <button
-                      className="flex-1 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors text-sm"
-                      onClick={openCancelModal}
-                    >
-                      {t('buttons.cancelAppointments')}
-                    </button>
-                  </div>
+              {fixerData?.description && (
+                <p className='mt-4 text-gray-600 max-w-2xl leading-relaxed'>
+                  {fixerData.description}
+                </p>
+              )}
+
+              {/* Información adicional */}
+              <div className='mt-4 flex flex-wrap gap-4 text-sm'>
+                {fixerData?.vehiculo?.hasVehiculo && (
+                  <span className='px-3 py-1 bg-green-100 text-green-700 rounded-full'>
+                    🚗 Vehículo propio
+                  </span>
                 )}
-                <button
-                  onClick={switchRole}
-                  className="w-full bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 transition-colors cursor-pointer text-sm"
-                >
-                  {t('buttons.currentView', { role: userRole })}
-                </button>
-              </div>
-
-              <div className="hidden md:flex md:items-center md:ml-auto md:mr-4 md:gap-4">
-                <button
-                  onClick={switchRole}
-                  className="bg-green-700 text-white px-6 py-2 rounded hover:bg-green-600 transition-colors cursor-pointer whitespace-nowrap"
-                >
-                  {t('buttons.currentView', { role: userRole })}
-                </button>
-
-                {userRole === 'fixer' && (
-                  <div className="flex items-center gap-2">
-                    <button
-                      className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors whitespace-nowrap"
-                      onClick={handleOpenAvailabilityModal}
-                    >
-                      {t('buttons.modifyAvailability')}
-                    </button>
-                    <button
-                      className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition-colors whitespace-nowrap"
-                      onClick={openCancelModal}
-                    >
-                      {t('buttons.cancelAppointments')}
-                    </button>
-                  </div>
+                {fixerData?.metodoPago?.hasEfectivo && (
+                  <span className='px-3 py-1 bg-blue-100 text-blue-700 rounded-full'>
+                    💵 Acepta efectivo
+                  </span>
+                )}
+                {fixerData?.metodoPago?.qr && (
+                  <span className='px-3 py-1 bg-purple-100 text-purple-700 rounded-full'>
+                    📱 Acepta QR
+                  </span>
+                )}
+                {fixerData?.metodoPago?.tarjetaCredito && (
+                  <span className='px-3 py-1 bg-orange-100 text-orange-700 rounded-full'>
+                    💳 Acepta tarjeta
+                  </span>
                 )}
               </div>
             </div>
-
-            <div className="flex justify-center md:block hidden">
-              <DesktopCalendar />
-            </div>
-
-            <div className="flex flex-col md:hidden justify-center gap-4">
-              <MobileCalendar selectedDate={selectedDate} onSelectDate={handleDataChange} />
-              <div></div>
-              <MobileList
-                selectedDate={selectedDate}
-                fixerId={fixer_id}
-                requesterId={requester_id}
-                onDateChange={handleDataChange}
-              />
-            </div>
-
-            <ModeSelectionModal ref={modeModalRef} fixerId={fixer_id} />
-
-            <CancelDaysAppointments
-              isOpen={isCancelModalOpen}
-              onClose={closeCancelModal}
-              fixer_id={fixer_id}
-            />
           </div>
-        </AppointmentsStatusProvider>
-      </AppointmentsProvider>
-    </UserRoleProvider>
+        </div>
+      </div>
+
+      <div className='container mx-auto px-4 py-8'>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className='space-y-6'>
+          <TabsList className='bg-white p-1 rounded-xl border shadow-sm inline-flex'>
+            <TabsTrigger value='resumen' className='px-6'>
+              Resumen
+            </TabsTrigger>
+            <TabsTrigger value='ofertas' className='px-6'>
+              Ofertas
+            </TabsTrigger>
+            <TabsTrigger value='experiencia' className='px-6'>
+              Experiencia
+            </TabsTrigger>
+            <TabsTrigger value='certificaciones' className='px-6'>
+              Certificaciones
+            </TabsTrigger>
+            <TabsTrigger value='portafolio' className='px-6'>
+              Portafolio
+            </TabsTrigger>
+            <TabsTrigger value='estadisticas' className='px-6'>
+              Estadísticas
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value='resumen' className='space-y-8'>
+            <JobOffersSection readOnly />
+          </TabsContent>
+
+          <TabsContent value='ofertas'>
+            <JobOffersSection readOnly />
+          </TabsContent>
+
+          <TabsContent value='experiencia'>
+            <ExperienceSection fixerId={fixerId as string} readOnly />
+          </TabsContent>
+
+          <TabsContent value='certificaciones'>
+            <CertificationsSection fixerId={fixerId as string} readOnly />
+          </TabsContent>
+
+          <TabsContent value='portafolio'>
+            <PortfolioSection fixerId={fixerId as string} readOnly />
+          </TabsContent>
+
+          <TabsContent value='estadisticas'>
+            <EstadisticasTrabajos />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
   );
 }
