@@ -53,7 +53,7 @@ export default function HeroSection() {
 
         <div className='mb-16'>
           <div className='flex flex-col md:flex-row justify-center items-center space-y-4 md:space-y-0 md:space-x-4 mb-6'>
-            <span className='font-semibold text-gray-700 text-lg'>Búsquedas populares:</span>
+            <span className='font-semibold text-gray-700 text-lg'>{t('a')}</span>
             <div className='flex flex-wrap justify-center gap-2'>
               {['Plomero', 'Electricista', 'Pintor', 'Carpintero'].map((tag) => (
                 <button
@@ -70,9 +70,9 @@ export default function HeroSection() {
         </div>
 
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16'>
-          <StatCard number='1,000+' text='Profesionales' />
-          <StatCard number='5,000+' text='Trabajos realizados' />
-          <StatCard number='4.8★' text='Calificación promedio' />
+          <StatCard number='1,000+' text={t('professional')} />
+          <StatCard number='5,000+' text={t('Projects completed')} />
+          <StatCard number='4.8★' text={t('Overall grade')} />
         </div>
       </div>
     </section>

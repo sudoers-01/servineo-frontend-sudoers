@@ -3,7 +3,7 @@
 
 import { Search, X } from 'lucide-react';
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation'; // 👈 TU CAMBIO: agregado usePathname
 import { useSearchHistory } from '@/app/redux/features/searchHistory/useSearchHistory';
 import { useSearchSuggestions } from '@/app/redux/features/searchHistory/useSearchSuggestions';
 import { useSearchKeyboard } from '@/app/redux/features/searchHistory/useSearchKeyboard';
@@ -29,6 +29,7 @@ export function SearchBar({
   onSearch,
 }: SearchBarProps) {
   const router = useRouter();
+  const pathname = usePathname();
 
   // Estado local
   const [isFocused, setIsFocused] = useState(false);
@@ -40,6 +41,11 @@ export function SearchBar({
 
   const containerRef = useRef<HTMLDivElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const currentLanguage = useMemo(() => {
+    const pathSegments = (pathname || '').split('/').filter(Boolean);
+    const langSegment = pathSegments[0];
+    return ['en', 'es'].includes(langSegment) ? langSegment : 'es';
+  }, [pathname]);
 
   // Hooks personalizados para historial y sugerencias
   const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistory({
@@ -51,6 +57,7 @@ export function SearchBar({
     minLength: 1,
     debounceMs: 300,
     maxResults: 6,
+    language: currentLanguage, // 👈 TU CAMBIO: Pasar idioma
   });
 
   // Función para realizar la búsqueda con redirección

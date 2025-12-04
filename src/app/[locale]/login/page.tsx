@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -7,9 +7,9 @@ import { api, ApiResponse } from '@/app/redux/services/loginApi';
 import { Eye, EyeOff } from 'lucide-react';
 import LoginGoogle from '@/Components/login/Proveedores/LoginGoogle';
 import { useRouter } from 'next/navigation';
-//import Link from 'next/link';
 import NotificationModal from '@/Components/Modal-notifications';
 import { GoogleOAuthProvider } from '@react-oauth/google';
+import { useTranslations } from 'next-intl';
 import { useAppDispatch } from '@/app/redux/hooks';
 import { setUser } from '@/app/redux/slice/userSlice';
 import LoginGithub from '@/Components/login/Proveedores/LoginGitHub';
@@ -20,22 +20,20 @@ import AuthenticatorSesion from '@/Components/requester/Authenticator/Authentica
 import AuthenticatorTOTPModal from '@/Components/requester/Authenticator/AuthenticatorTOTPModal';
 import CodigoRecuperacionModal from '@/Components/requester/Authenticator/AuthenticatorCodigoModal';
 
-const loginSchema = z.object({
-  email: z.string().email('Debe ingresar un correo válido'),
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
-});
-
+/* ----------------------------- Interfaces ----------------------------- */
 interface LoginFormData {
   email: string;
   password: string;
 }
 
 interface BackendUser {
-  // Ajusta si tu backend usa otras claves; solo usamos 'name' aquí
   name: string;
-  // Opcionales por si los tienes
   id?: string;
+  _id?: string;
   email?: string;
+  picture?: string;
+  url_photo?: string;
+  displayName?: string;
   [key: string]: unknown;
   role?: string;
 }
@@ -60,10 +58,21 @@ interface NotificationState {
 
 /* ------------------------------ Component ----------------------------- */
 export default function LoginPage() {
+  const t = useTranslations('Login');
   const [mostrarPass, setMostrarPass] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const router = useRouter();
   const dispatch = useAppDispatch();
+
+  // ✅ Schema de Zod usando useMemo para que no se recree en cada render
+  const loginSchema = useMemo(
+    () =>
+      z.object({
+        email: z.string().email(t('errors.invalidEmail')),
+        password: z.string().min(6, t('errors.passwordMinLength')),
+      }),
+    [t],
+  );
 
   const [notification, setNotification] = useState<NotificationState>({
     isOpen: false,
@@ -106,8 +115,8 @@ export default function LoginPage() {
         // Detectar si el backend requiere MFA/2FA y abrir los modales correspondientes
         const needs2FA = Boolean(
           datos.requires2FA ||
-            datos.mfaRequired ||
-            (datos.mfaMethods && datos.mfaMethods.length > 0),
+          datos.mfaRequired ||
+          (datos.mfaMethods && datos.mfaMethods.length > 0),
         );
 
         if (needs2FA) {
@@ -145,14 +154,14 @@ export default function LoginPage() {
         }
         localStorage.setItem('servineo_user', JSON.stringify(normalizedUser));
 
-        dispatch(setUser(normalizedUser)); // ← ahora sí, sin errores
+        dispatch(setUser(normalizedUser));
 
-        const mensajeExito = datos.message || `¡Bienvenido, ${normalizedUser.name}!`;
+        const mensajeExito = datos.message || t('success.welcome', { name: normalizedUser.name });
 
         setNotification({
           isOpen: true,
           type: 'success',
-          title: 'Inicio de sesión exitoso',
+          title: t('success.title'),
           message: mensajeExito,
         });
 
@@ -164,21 +173,21 @@ export default function LoginPage() {
           res.message ||
           (res.data as unknown as { message?: string })?.message ||
           (res as unknown as { error?: string })?.error ||
-          'Credenciales inválidas o error en el servidor.';
+          t('errors.invalidCredentials');
 
         setNotification({
           isOpen: true,
           type: 'error',
-          title: 'Error al iniciar sesión',
+          title: t('errors.loginError'),
           message: mensajeError,
         });
       }
     } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : 'No se pudo conectar con el servidor.';
+      const message = err instanceof Error ? err.message : t('errors.connectionError');
       setNotification({
         isOpen: true,
         type: 'error',
-        title: 'Error de conexión',
+        title: t('errors.connectionErrorTitle'),
         message,
       });
     } finally {
@@ -190,7 +199,7 @@ export default function LoginPage() {
     setNotification({
       isOpen: true,
       type: 'error',
-      title: 'Error con Google',
+      title: t('errors.googleError'),
       message: mensaje,
     });
   };
@@ -339,7 +348,6 @@ export default function LoginPage() {
 
   return (
     <GoogleOAuthProvider clientId={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!}>
-      {/* 🔹 Todo el contenido dentro de un solo elemento raíz */}
       <main className='relative min-h-screen flex items-center justify-center px-6 text-foreground'>
         {/* Fondo ultra sutil */}
         <div className='pointer-events-none absolute inset-0 -z-10'>
@@ -351,20 +359,20 @@ export default function LoginPage() {
         {/* Card de Login */}
         <div className='w-full max-w-sm bg-card/95 backdrop-blur-sm rounded-3xl shadow-lg p-10 border border-border/70'>
           <h1 className='text-3xl font-bold text-center mb-2 bg-gradient-to-r from-primary/80 to-primary/60 bg-clip-text text-transparent'>
-            Iniciar sesión <span className='sr-only'>Servineo</span>
+            {t('title')} <span className='sr-only'>Servineo</span>
           </h1>
-          <p className='text-center text-sm text-muted-foreground mb-8'>Modo requester</p>
+          <p className='text-center text-sm text-muted-foreground mb-8'>{t('mode')}</p>
 
           {/* Formulario */}
           <form onSubmit={handleSubmit(manejarLogin)} className='flex flex-col gap-5'>
             {/* Correo */}
             <div>
               <label className='block text-sm font-semibold text-foreground/80 mb-2'>
-                Correo electrónico*
+                {t('form.email.label')}*
               </label>
               <input
                 type='email'
-                placeholder='Ingrese su correo'
+                placeholder={t('form.email.placeholder')}
                 {...register('email')}
                 className='w-full rounded-xl p-3.5 text-foreground bg-background border border-border
                            focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition'
@@ -376,12 +384,12 @@ export default function LoginPage() {
             {/* Contraseña */}
             <div>
               <label className='block text-sm font-semibold text-foreground/80 mb-2'>
-                Contraseña*
+                {t('form.password.label')}*
               </label>
               <div className='relative'>
                 <input
                   type={mostrarPass ? 'text' : 'password'}
-                  placeholder='Ingrese su contraseña'
+                  placeholder={t('form.password.placeholder')}
                   {...register('password')}
                   className='w-full rounded-xl p-3.5 pr-10 text-foreground bg-background border border-border
                              focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary/40 transition'
@@ -391,7 +399,7 @@ export default function LoginPage() {
                   type='button'
                   onClick={() => setMostrarPass(!mostrarPass)}
                   className='absolute inset-y-0 right-3 flex items-center text-muted-foreground hover:text-primary/80 transition'
-                  aria-label={mostrarPass ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                  aria-label={mostrarPass ? t('aria.hidePassword') : t('aria.showPassword')}
                 >
                   {mostrarPass ? <EyeOff size={20} /> : <Eye size={20} />}
                 </button>
@@ -402,13 +410,13 @@ export default function LoginPage() {
             </div>
 
             {/* 🆕 UN SOLO BOTÓN que abre el modal de opciones */}
-            <p className='text-center text-sm text-gray-500'>
+            <p className='text-center text-sm text-muted-foreground'>
               <button
                 type='button'
                 onClick={() => setModalActivo('opciones')}
                 className='text-primary/90 hover:text-primary font-medium hover:underline transition'
               >
-                ¿Necesitas ayuda para ingresar?
+                {t('links.forgotPassword')}
               </button>
             </p>
 
@@ -420,14 +428,14 @@ export default function LoginPage() {
                          bg-primary/90 hover:bg-primary transition-all duration-300
                          shadow-sm hover:shadow disabled:opacity-60'
             >
-              {loading ? 'Ingresando...' : 'Ingresar'}
+              {loading ? t('buttons.loading') : t('buttons.login')}
             </button>
           </form>
 
           {/* Separador */}
           <div className='flex items-center my-8'>
             <div className='flex-1 h-px bg-border/70' />
-            <span className='px-2 text-muted-foreground text-sm'>o</span>
+            <span className='px-2 text-muted-foreground text-sm'>{t('separator')}</span>
             <div className='flex-1 h-px bg-border/70' />
           </div>
 
@@ -444,12 +452,12 @@ export default function LoginPage() {
 
           {/* Registro */}
           <p className='mt-8 text-center text-sm text-muted-foreground'>
-            ¿No tienes cuenta?{' '}
+            {t('links.noAccount')}{' '}
             <button
               onClick={() => router.push('../signUp')}
               className='text-primary/90 hover:text-primary font-medium underline-offset-2 hover:underline'
             >
-              Regístrate
+              {t('links.register')}
             </button>
           </p>
         </div>

@@ -37,7 +37,7 @@ export function ImageCarousel({ images, alt }: ImageCarouselProps) {
   }
 
   return (
-    <div className='relative aspect-[16/9] overflow-hidden group'>
+    <div className='relative aspect-video overflow-hidden group'>
       <Image
         src={images[currentIndex]}
         alt={`${alt} - Imagen ${currentIndex + 1}`}

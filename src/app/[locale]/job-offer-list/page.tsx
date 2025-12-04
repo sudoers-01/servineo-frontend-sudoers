@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useLogClickMutation } from '../../redux/services/activityApi';
+import { useLogSearchMutation, useUpdateFiltersMutation } from '../../redux/services/searchApi';
 import {
   SearchBar,
   NoResultsMessage,
@@ -37,7 +39,6 @@ import { JobOffersView, type ViewMode } from '@/Components/Job-offers/JobOffersV
 import { ViewModeToggle } from '@/Components/Job-offers/ViewModeToggle';
 import { useTranslations } from 'next-intl';
 import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
-import { adaptOfferToModalFormat } from '@/types/jobOffers';
 
 const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
 
@@ -56,21 +57,341 @@ export default function JobOffersPage() {
     totalPages,
     registrosPorPagina,
     error: reduxError,
+    filters,
   } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [userId, setUserId] = useState<string>('');
+  const [userRole, setUserRole] = useState<string>('visitor');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('servineo_user');
+      if (storedUser) {
+        try {
+          const userObj = JSON.parse(storedUser);
+          console.log('User object from localStorage:', userObj);
+          const id = userObj.id || userObj._id || userObj.userId || '';
+          const role = userObj.role || 'visitor';
+          setUserId(id);
+          setUserRole(role);
+          console.log('Extracted user ID:', id, 'Role:', role);
+        } catch (error) {
+          console.error('Error parsing user from localStorage:', error);
+          setUserRole('visitor');
+        }
+      } else {
+        console.warn('No servineo_user found in localStorage');
+        setUserRole('visitor');
+      }
+    }
+  }, []);
+
+  const [logSearch] = useLogSearchMutation();
+  const [updateFilters] = useUpdateFiltersMutation();
+  const [logClick] = useLogClickMutation();
+
+  const previousSearchQueryRef = useRef<string>('');
+  const previousFiltersRef = useRef<FilterState>(filters);
+  const isInitialMountRef = useRef<boolean>(true);
+  const filterCounterRef = useRef<number>(1);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const scrollRestoredRef = useRef(false);
   const pageBeforeFilter = useRef<number>(1);
   const hasActiveFilters = useRef<boolean>(false);
+
+  // Ref para almacenar el número real de resultados basado en la paginación
+  const actualSearchCountRef = useRef<number>(0);
+
+  // Ref para verificar si ya hemos enviado la búsqueda con el conteo correcto
+  const hasSentSearchRef = useRef<boolean>(false);
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Función para calcular el número de resultados basado en la paginación
+  const calculateSearchCount = useCallback(() => {
+    // El total de useJobOffers ya está filtrado por búsqueda y filtros
+    if (!isLoading && total !== undefined && total !== null) {
+      return total;
+    }
+    return 0;
+  }, [isLoading, total]);
+
+  const getFixerNameValue = useCallback((): string => {
+    const filterObj = filters as unknown as Record<string, unknown>;
+    const fixerNameFilter = filterObj.fixerName || filterObj.fixer_name || filterObj.fixerNames;
+
+    if (
+      !fixerNameFilter ||
+      (Array.isArray(fixerNameFilter) && fixerNameFilter.length === 0) ||
+      fixerNameFilter === ''
+    ) {
+      return 'not_applied';
+    }
+
+    if (Array.isArray(fixerNameFilter)) {
+      return fixerNameFilter.join(', ');
+    }
+
+    return fixerNameFilter.toString();
+  }, [filters]);
+
+  const getCityValue = useCallback((): string => {
+    if (!filters.city || (Array.isArray(filters.city) && filters.city.length === 0)) {
+      return 'not_applied';
+    }
+    if (Array.isArray(filters.city)) {
+      return filters.city.join(', ');
+    }
+    return filters.city;
+  }, [filters]);
+
+  const getJobTypeValue = useCallback((): string => {
+    if (!filters.category || filters.category.length === 0) {
+      return 'not_applied';
+    }
+    return filters.category.join(', ');
+  }, [filters]);
+
+  const adaptJobOffer = useCallback((offer: JobOfferData): AdaptedJobOffer => {
+    return {
+      _id: offer._id,
+      fixerId: offer.fixerId,
+      name: offer.fixerName,
+      title: offer.title,
+      description: offer.description,
+      tags: offer.tags || [],
+      phone: offer.contactPhone,
+      photos: offer.photos || [],
+      services: offer.category ? [offer.category] : [],
+      price: offer.price,
+      createdAt: offer.createdAt instanceof Date ? offer.createdAt : new Date(offer.createdAt),
+      city: offer.city,
+    };
+  }, []);
+
+  // Función para enviar una búsqueda pendiente
+  const sendPendingSearch = useCallback(async () => {
+    if (!previousSearchQueryRef.current || previousSearchQueryRef.current.trim().length === 0) {
+      return;
+    }
+
+    const searchCount = actualSearchCountRef.current;
+    const query = previousSearchQueryRef.current;
+
+    const searchData = {
+      user_type: userRole,
+      search_query: query,
+      search_type: 'search_box',
+      filters: {
+        filter_1: {
+          fixer_name: getFixerNameValue(),
+          city: getCityValue(),
+          job_type: getJobTypeValue(),
+          search_count: searchCount,
+        },
+      },
+    };
+
+    try {
+      console.log('Enviando BÚSQUEDA PENDIENTE al backend:', JSON.stringify(searchData, null, 2));
+      await logSearch(searchData).unwrap();
+      console.log('Búsqueda registrada exitosamente:', query, 'Resultados:', searchCount);
+      hasSentSearchRef.current = true;
+    } catch (error) {
+      console.error('Error al registrar búsqueda pendiente:', error);
+    }
+  }, [userRole, logSearch, getFixerNameValue, getCityValue, getJobTypeValue]);
+
+  // Actualizar el conteo cuando cambian los resultados
   useEffect(() => {
-    // corregir pagina actual si esta fuera del limite
+    const currentCount = calculateSearchCount();
+    if (currentCount !== actualSearchCountRef.current) {
+      console.log('Actualizando conteo de resultados:', {
+        anterior: actualSearchCountRef.current,
+        nuevo: currentCount,
+        total: total,
+        isLoading: isLoading,
+      });
+      actualSearchCountRef.current = currentCount;
+
+      // Si hay una búsqueda pendiente y ya tenemos el conteo correcto, enviarla
+      if (
+        hasSentSearchRef.current === false &&
+        previousSearchQueryRef.current &&
+        currentCount > 0
+      ) {
+        sendPendingSearch();
+      }
+    }
+  }, [calculateSearchCount, total, isLoading, sendPendingSearch]);
+
+  const handleSearchSubmit = useCallback(
+    async (query: string) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      dispatch(setSearch(query));
+      dispatch(resetPagination());
+
+      filterCounterRef.current = 1;
+      previousSearchQueryRef.current = query;
+      hasSentSearchRef.current = false; // Resetear el flag
+
+      console.log('Búsqueda iniciada:', query, 'Esperando resultados...');
+
+      // Esperar un tiempo razonable para que se carguen los resultados
+      const timeoutId = setTimeout(async () => {
+        const searchCount = calculateSearchCount();
+        console.log('Después de timeout - Conteo calculado:', searchCount, 'Total:', total);
+
+        // Si ya tenemos resultados, enviar inmediatamente
+        if (searchCount > 0 && query === previousSearchQueryRef.current) {
+          await sendPendingSearch();
+        }
+        // Si no tenemos resultados aún, waitForResults se encargará más tarde
+      }, 800);
+
+      return () => clearTimeout(timeoutId);
+    },
+    [dispatch, calculateSearchCount, total, sendPendingSearch],
+  );
+
+  // Efecto para detectar cambios en filtros
+  useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      previousFiltersRef.current = { ...filters };
+      return;
+    }
+
+    if (!previousSearchQueryRef.current) {
+      previousFiltersRef.current = { ...filters };
+      return;
+    }
+
+    const currentFilters = filters as unknown as Record<string, unknown>;
+    const previousFilters = previousFiltersRef.current as unknown as Record<string, unknown>;
+
+    const compareFilterValues = (
+      prev: Record<string, unknown>,
+      curr: Record<string, unknown>,
+      key: string,
+    ) => {
+      const prevValue = prev[key];
+      const currValue = curr[key];
+
+      if (Array.isArray(prevValue) && Array.isArray(currValue)) {
+        return JSON.stringify([...prevValue].sort()) !== JSON.stringify([...currValue].sort());
+      }
+
+      return prevValue !== currValue;
+    };
+
+    const filterKeys = ['city', 'category', 'range', 'fixerName', 'fixer_name', 'fixerNames'];
+
+    const filtersChanged = filterKeys.some((key) =>
+      compareFilterValues(previousFilters, currentFilters, key),
+    );
+
+    if (filtersChanged && previousSearchQueryRef.current) {
+      previousFiltersRef.current = { ...filters };
+
+      // Esperar a que los resultados se actualicen con los nuevos filtros
+      const timeoutId = setTimeout(async () => {
+        filterCounterRef.current++;
+
+        const searchCount = calculateSearchCount();
+        console.log('Después de cambiar filtros - Conteo:', searchCount, 'Total:', total);
+
+        const filterData = {
+          filters: {
+            fixer_name: getFixerNameValue(),
+            city: getCityValue(),
+            job_type: getJobTypeValue(),
+            search_count: searchCount,
+          },
+        };
+
+        try {
+          console.log(
+            `Enviando FILTRO para búsqueda: "${previousSearchQueryRef.current}"`,
+            JSON.stringify(filterData, null, 2),
+          );
+
+          await updateFilters(filterData).unwrap();
+          console.log(`Filtro registrado exitosamente. Resultados: ${searchCount}`);
+        } catch (error) {
+          console.error('Error al registrar filtro:', error);
+        }
+      }, 800);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [
+    filters,
+    updateFilters,
+    total,
+    calculateSearchCount,
+    getFixerNameValue,
+    getCityValue,
+    getJobTypeValue,
+  ]);
+
+  const handleCardClick = useCallback(
+    async (offer: JobOfferData) => {
+      const adaptedOffer = adaptJobOffer(offer);
+      setSelectedOffer(adaptedOffer);
+      setIsModalOpen(true);
+
+      if (!userId) {
+        console.warn('User ID no disponible, no se registró el click');
+        return;
+      }
+
+      const activityData = {
+        userId: userId,
+        date: new Date().toISOString(),
+        role: userRole,
+        type: 'click',
+        metadata: {
+          button: 'job_offer',
+          jobTitle: adaptedOffer.title || 'Sin título',
+          jobId: adaptedOffer._id,
+        },
+        timestamp: new Date().toISOString(),
+      };
+
+      try {
+        await logClick(activityData).unwrap();
+        console.log('Click registrado:', adaptedOffer.title);
+      } catch (error) {
+        console.error('Error al registrar clic:', error);
+      }
+    },
+    [userId, userRole, logClick, adaptJobOffer],
+  );
+
+  // Efecto para asegurar que la búsqueda se envíe cuando los resultados estén listos
+  useEffect(() => {
+    if (!isLoading && previousSearchQueryRef.current && !hasSentSearchRef.current) {
+      const searchCount = calculateSearchCount();
+      if (searchCount > 0) {
+        // Pequeño delay para asegurar que todo esté estable
+        const timeoutId = setTimeout(() => {
+          sendPendingSearch();
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+      }
+    }
+  }, [isLoading, calculateSearchCount, sendPendingSearch]);
+
+  // Resto del código permanece igual...
+  useEffect(() => {
     if (!isLoading && totalPages > 0) {
       const params = new URLSearchParams(window.location.search);
       const pageParam = Number(params.get('page') || 1);
@@ -91,8 +412,6 @@ export default function JobOffersPage() {
     }
   }, [isLoading, totalPages, dispatch]);
 
-  // Limpiar búsqueda si se navega directamente sin parámetros
-  // Pero no limpiar si existe un valor guardado en localStorage (persistencia)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -106,19 +425,20 @@ export default function JobOffersPage() {
           console.error('Error accessing localStorage:', e);
         }
 
-        if (!hasSavedSearch) dispatch(setSearch(''));
+        if (!hasSavedSearch) {
+          console.log('Navegación directa detectada, limpiando búsqueda guardada');
+          dispatch(setSearch(''));
+          previousSearchQueryRef.current = '';
+        }
       }
     }
   }, [dispatch, search]);
 
-  // Guardar posición del scroll
   useEffect(() => {
     const saveScrollPosition = () => {
       try {
         sessionStorage.setItem(SCROLL_POSITION_KEY, window.scrollY.toString());
-      } catch {
-        // ignorar errores
-      }
+      } catch {}
     };
 
     window.addEventListener('beforeunload', saveScrollPosition);
@@ -127,7 +447,6 @@ export default function JobOffersPage() {
     };
   }, []);
 
-  // Restaurar posición del scroll
   useEffect(() => {
     if (!isLoading && Array.isArray(offers) && offers.length > 0 && !scrollRestoredRef.current) {
       try {
@@ -142,13 +461,10 @@ export default function JobOffersPage() {
             }, 100);
           }
         }
-      } catch {
-        // ignorar errores
-      }
+      } catch {}
     }
   }, [isLoading, offers]);
 
-  // Sticky header
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -172,12 +488,6 @@ export default function JobOffersPage() {
       window.removeEventListener('resize', update);
       if (mo) mo.disconnect();
     };
-  }, []);
-
-  const handleCardClick = useCallback((offer: JobOfferData) => {
-    const adaptedOffer = adaptOfferToModalFormat(offer);
-    setSelectedOffer(adaptedOffer);
-    setIsModalOpen(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
@@ -226,16 +536,6 @@ export default function JobOffersPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       const backendSort = getSortValue(option);
       dispatch(setSortBy(backendSort));
-    },
-    [dispatch],
-  );
-
-  const handleSearchSubmit = useCallback(
-    (query: string) => {
-      scrollRestoredRef.current = true;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      dispatch(setSearch(query));
-      dispatch(resetPagination());
     },
     [dispatch],
   );

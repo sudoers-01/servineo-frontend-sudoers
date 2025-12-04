@@ -40,7 +40,7 @@ function AdvancedSearchPage() {
   const CITIES = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
     label: t(
-      `city.options.${['beni', 'chuquisaca', 'cochabamba', 'laPaz', 'oruro', 'pando', 'potosi', 'santaCruz', 'tarija'][index]}`,
+      `city.options.${['Beni', 'Chuquisaca', 'Cochabamba', 'LaPaz', 'Oruro', 'Pando', 'Potosi', 'Santa Cruz', 'Tarija'][index]}`,
     ),
   }));
 
@@ -403,7 +403,7 @@ function AdvancedSearchPage() {
 
             {/* Filtro de Fecha y Calificación */}
             <div className='mb-6 flex flex-col md:flex-row gap-6 items-start'>
-              <div className='flex-shrink-0 order-2 md:order-1 w-full md:w-auto'>
+              <div className='shrink-0 order-2 md:order-1 w-full md:w-auto'>
                 <DateFilterSelector
                   selectedFilter={selectedDateFilter}
                   selectedDate={selectedSpecificDate}
@@ -414,7 +414,7 @@ function AdvancedSearchPage() {
                   onCalendarToggle={setIsCalendarOpen}
                 />
               </div>
-              <div className='flex-shrink-0 order-1 md:order-2 w-full md:w-auto'>
+              <div className='shrink-0 order-1 md:order-2 w-full md:w-auto'>
                 <CalificacionEstrella value={selectedRating} onChange={setSelectedRating} />
               </div>
             </div>
