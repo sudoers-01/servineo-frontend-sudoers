@@ -94,7 +94,7 @@ export default function ServicesSection({
   return (
     <div className={showHero ? "min-h-screen bg-white pt-16" : "bg-white"}>
       {showHero && (
-        <section className="w-full py-16 px-4 bg-gradient-to-b from-blue-600 to-blue-800 text-white">
+        <section id="tour-services-hero" className="w-full py-16 px-4 bg-gradient-to-b from-blue-600 to-blue-800 text-white">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl md:text-6xl font-bold mb-6">
               {title || 'Servicios disponibles'}
@@ -106,7 +106,7 @@ export default function ServicesSection({
         </section>
       )}
 
-      <section className="w-full py-16 px-4">
+      <section id="tour-services-section" className="w-full py-16 px-4">
         <div className="max-w-7xl mx-auto">
           {!showHero && title && (
             <div className="text-center mb-12">
@@ -124,7 +124,7 @@ export default function ServicesSection({
                 aria-label={`Abrir detalles del servicio ${service.name}`}
                 data-service-card="true"
                 onKeyDown={(e) => handleCardKey(e, index, service.slug)}
-                onClick={() => router.push(`/servicios/${service.slug}`)}
+                onClick={() => router.push(`/services/${service.slug}`)}
                 onFocus={() => setActiveIndex(index)}
                 className="select-none bg-white p-8 rounded-xl shadow-lg border border-gray-200 transition-all duration-200 hover:bg-blue-50 hover:border-blue-300 hover:shadow-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 cursor-pointer"
               >

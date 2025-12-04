@@ -1,4 +1,3 @@
-// src/Components/Navigation/TopMenu.tsx
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
@@ -27,7 +26,10 @@ export default function TopMenu() {
   const router = useRouter();
   const pathname = usePathname();
 
-  const { user, isAuthenticated } = useSelector((state: RootState) => state.user);
+  const user = useSelector((state: RootState) => state.user.user);
+
+
+  const isAuthenticated = !!user;
 
   // UI state
   const [isOpen, setIsOpen] = useState(false);
@@ -322,6 +324,7 @@ export default function TopMenu() {
         <div className='w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20'>
           {/* Logo */}
           <button
+            id="tour-logo"
             ref={logoRef}
             onClick={handleLogoClick}
             className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]'
@@ -345,7 +348,7 @@ export default function TopMenu() {
           </button>
 
           {/* Desktop Nav */}
-          <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
+          <nav id="tour-desktop-nav" className='flex gap-6' role='navigation' aria-label='Menú principal'>
             {navItems.map((item) => (
               <Link
                 key={item.name}
