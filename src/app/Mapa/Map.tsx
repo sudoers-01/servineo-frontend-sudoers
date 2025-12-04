@@ -151,7 +151,7 @@ export default function Map() {
         />
 
         <MapResizeHandler />
-        <RecenterMap position={mapCenter} />
+        <RecenterMap position={pinPosition} />
 
         <UserMarker position={pinPosition} />
         <MapCircle center={circleCenter} radius={5000} />
@@ -172,14 +172,18 @@ export default function Map() {
       </MapContainer>
 
       <LocationButton
-        onLocationFound={(lat, lng) => {
-          setPinPosition([lat, lng]);
-          savePin([lat, lng]);
-          setMapCenter([lat, lng]);
-          setZoom(15);
-          saveView([lat, lng], 15);
+       onLocationFound={(lat, lng) => {
+      const newPos: [number, number] = [lat, lng];
+      setPinPosition(newPos);
+      setCircleCenter(newPos); // <--- agregar esto
+      savePin(newPos);
+      setMapCenter(newPos);
+      setZoom(15);
+      saveView(newPos, 15);
         }}
       />
     </div>
   );
 }
+
+
