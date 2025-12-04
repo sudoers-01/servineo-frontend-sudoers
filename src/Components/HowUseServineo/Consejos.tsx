@@ -1,5 +1,6 @@
 import React from 'react';
 import { ConsejosCard } from './ConsejosCard';
+import { useTranslations } from 'next-intl';
 
 const subtitle = 'Perfecciona tu uso sobre la plataforma,\naqui tenemos algunos consejos';
 
@@ -25,20 +26,21 @@ const consejos = [
 ];
 
 export const Consejos = () => {
+  const t = useTranslations("Consejos")
   return (
     <div className='flex flex-col items-center gap-[40px] ml-[30px] mr-[30px] my-8 p-8 bg-white rounded-2xl shadow-2xl'>
       <div className='flex flex-col items-center gap-[25px]'>
-        <h1 className='text-center text-[35px]'> Consejos para un mejor uso </h1>
-        <h1 className='text-center opacity-[60%] whitespace-pre-line'> {subtitle} </h1>
+        <h1 className='text-center text-[35px]'> {t("title")} </h1>
+        <h1 className='text-center opacity-[60%] whitespace-pre-line'> {t("subtitle")} </h1>
       </div>
 
       <div className='grid gap-4 grid-cols-1 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3'>
         {consejos.map((item, index) => (
           <ConsejosCard
             key={index}
-            title={item.title}
+            title={t(`tip${index + 1}.title`)}
             imageUrl={item.imageUrl}
-            descripcion={item.descripcion}
+            descripcion={t(`tip${index + 1}.description`)}
           />
         ))}
       </div>

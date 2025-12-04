@@ -1,8 +1,10 @@
 'use client';
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 const Accordion = () => {
+  const t = useTranslations("Accordion");
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   const faqs = [
@@ -34,12 +36,13 @@ const Accordion = () => {
   ];
 
   const toggleAccordion = (index: number) => {
+    
     setOpenIndex(openIndex === index ? null : index);
   };
 
   return (
     <section className='max-w-4xl mx-auto px-4 py-8' aria-label='Preguntas frecuentes'>
-      <h2 className='text-3xl font-bold text-gray-800 mb-8 text-center'>Preguntas Frecuentes</h2>
+      <h2 className='text-3xl font-bold text-gray-800 mb-8 text-center'>{t("title")}</h2>
 
       <div className='space-y-2'>
         {faqs.map((faq, index) => (
@@ -53,7 +56,7 @@ const Accordion = () => {
               aria-expanded={openIndex === index}
               aria-controls={`answer-${index}`}
             >
-              <span className='text-lg font-medium text-gray-800 pr-4'>{faq.question}</span>
+              <span className='text-lg font-medium text-gray-800 pr-4'>{t(`section${index+1}.question`)}</span>
               <span className='flex-shrink-0 transition-transform duration-300'>
                 {openIndex === index ? (
                   <ChevronUp className='h-5 w-5 text-blue-600' aria-hidden='true' />
@@ -72,7 +75,7 @@ const Accordion = () => {
               aria-labelledby={`question-${index}`}
             >
               <div className='border-t border-gray-100 pt-4'>
-                <p className='text-gray-600 leading-relaxed'>{faq.answer}</p>
+                <p className='text-gray-600 leading-relaxed'>{t(`section${index+1}.answer`)}</p>
               </div>
             </div>
           </div>
