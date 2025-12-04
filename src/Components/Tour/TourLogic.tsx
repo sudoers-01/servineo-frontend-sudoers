@@ -33,22 +33,20 @@ export function TourLogic() {
 
     // Lógica de inicio
     const tourVisto = typeof window !== 'undefined' ? localStorage.getItem('servineoTourVisto') : null;
-
-    // Forzar mostrar en entorno de desarrollo o si se indica por query param (?tour=1)
-    const isDev = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development';
-    const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
     const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
-    const forceShow = isDev || isLocalhost || urlParams.get('tour') === '1';
 
-    // Si NO se ha visto (o se borró la key) o estamos forzando la visualización, iniciamos
-    if (!tourVisto || forceShow) {
+    // Mostrar el tour solo si estamos en home y NO se ha visto antes, a menos que
+    // se solicite explícitamente via ?tour=1 (para volver a verlo).
+    const shouldForce = urlParams.get('tour') === '1';
+
+    if (!tourVisto || shouldForce) {
       setCurrentStep(0);
 
-      // Usamos un timeout un poco más largo para asegurar que la UI cargó completamente
+      // Esperar a que la UI termine de montarse
       const timer = setTimeout(() => {
         setIsOpen(true);
         setHasStarted(true);
-      }, 1500);
+      }, 1200);
 
       return () => clearTimeout(timer);
     }
@@ -57,11 +55,11 @@ export function TourLogic() {
   // Guardar que se vio SOLO al cerrar el tour voluntariamente
   useEffect(() => {
     if (!isOpen && hasStarted) {
-      // En entorno de desarrollo/local no persistimos la marca para que se pueda ver siempre
-      const isDev = typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'development';
-      const isLocalhost = typeof window !== 'undefined' && window.location.hostname.includes('localhost');
-      if (!isDev && !isLocalhost) {
+      // Guardar que el usuario vio el tour para que no se vuelva a mostrar automáticamente
+      try {
         localStorage.setItem('servineoTourVisto', 'true');
+      } catch (e) {
+        // si localStorage no está disponible, no hacemos nada
       }
       setHasStarted(false);
     }
