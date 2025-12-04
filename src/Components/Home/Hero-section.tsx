@@ -28,11 +28,19 @@ export default function HeroSection({ isFixer = false }: HeroSectionProps) {
   const placeholderText = isFixer ? 'Busca solicitudes de trabajo' : '¿Qué servicio necesitas?';
 
   return (
-    <section className='relative w-full pt-28 pb-16 px-4 md:px-12 text-center bg-gradient-to-br from-primary/5 via-white to-primary/10'>
-      <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyMCAyMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cGF0aCBkPSJNMCAwaDIwdjIwSDB6IiBmaWxsPSJub25lIi8+PHBhdGggZD0iTTAgMGgyMHYyMEgweiIgZmlsbD0iIzAwMCIgZmlsbC1vcGFjaXR5PSIwLjA1IiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L3N2Zz4=')] opacity-5" />
-      <div className='absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl animate-[pulse_8s_ease-in-out_infinite]' />
-      <div className='absolute -bottom-24 -left-24 w-96 h-96 bg-primary/20 rounded-full mix-blend-multiply filter blur-3xl animate-[pulse_8s_ease-in-out_infinite] animation-delay-2000' />
+    /* 🔥 FIX SCROLL: Cambiado a overflow-hidden para evitar la barra horizontal */
+    <section 
+      id='tour-hero-section' 
+      className='relative w-full pt-28 pb-16 px-4 md:px-12 text-center bg-gradient-to-br from-primary/5 via-white to-primary/10 overflow-hidden'
+    >
 
+      {/* Decoraciones de fondo */}
+      <div className="absolute inset-0 opacity-20 pointer-events-none -z-10">
+        <div className="absolute -top-24 -right-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-primary/20 rounded-full blur-3xl" />
+      </div>
+      
+      {/* Contenido */}
       <div className='max-w-6xl mx-auto relative z-10'>
         {/* Título */}
         <h1 className='text-4xl md:text-6xl font-bold mb-6 bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent drop-shadow-sm'>
@@ -90,7 +98,7 @@ export default function HeroSection({ isFixer = false }: HeroSectionProps) {
         )}
 
         {/* Stats: cambian según rol */}
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16'>
+        <div id='tour-stats-section' className='grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-16'>
           {isFixer ? (
             <>
               <StatCard number='24/7' text='Soporte disponible' />

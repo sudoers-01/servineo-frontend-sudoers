@@ -8,11 +8,9 @@ import HowItWorksSection from '@/Components/Home/HowItWorks-section';
 import CTASection from '@/Components/Home/CTA-section';
 import InspirationSection from '@/Components/Home/Inspiration-section';
 import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
-
-import dynamic from 'next/dynamic';
+import MapSection from '@/Components/Home/MapSection'; // ✅ IMPORTAR MapSection
 import { IUser } from '@/types/user';
 
-const Map = dynamic(() => import('@/app/Mapa/Map'), { ssr: false });
 interface RootState {
   user: {
     user: IUser | null;
@@ -48,14 +46,8 @@ export default function Home() {
           {/* Mapa e inspiración solo para requesters */}
           {!isFixer && (
             <>
-              <section id='mapa' className='w-full py-16 px-4 bg-gray-50 scroll-mt-24'>
-                <div className='max-w-7xl mx-auto text-center'>
-                  <h2 className='text-3xl md:text-4xl font-bold text-gray-800 mb-8'>
-                    Encuentra Servicios Cerca de Ti
-                  </h2>
-                  <Map />
-                </div>
-              </section>
+              {/* ✅ USAR MapSection en lugar del código anterior */}
+              <MapSection />
 
               <InspirationSection />
             </>
@@ -63,7 +55,15 @@ export default function Home() {
           <RecentOffersSection />
         </div>
       </section>
-      <ServicesSection />
+      
+      <ServicesSection 
+        showHero={false}
+        showAllServices={false}
+        showCTA={false}
+        title="Servicios Disponibles"
+        subtitle="Encuentra el profesional perfecto para cualquier trabajo en tu hogar"
+      />
+      
       {!isFixer && (
         <>
           <HowItWorksSection />

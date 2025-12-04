@@ -75,6 +75,8 @@
   --sidebar-ring: oklch(0.65 0.18 250);
 }
 
+
+
 @theme inline {
   --font-sans: var(--font-roboto), 'Roboto', system-ui, -apple-system, sans-serif;
   --font-mono: 'Geist Mono', 'Geist Mono Fallback';
@@ -117,14 +119,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-}
+
 
 /* Map Styles */
 .map-tiles {
@@ -725,4 +720,77 @@
   height: 3px;
   background-color: #1aa7ed;
   border-radius: 2px;
+}
+
+/* ============================================
+   ESTILOS PARA REACTOUR (GUÍA INTERACTIVA)
+   ============================================ */
+
+/* 1. Suavizar movimiento y reducir opacidad */
+.reactour__mask {
+  transition: all 0.4s ease-out !important;
+  opacity: 0.3 !important;
+}
+
+.reactour__helper {
+  transition: all 0.4s ease-out !important;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3) !important;
+}
+
+/* 2. Estilizar los puntos de navegación (dots) */
+div[data-tour-elem="controls"] button[data-tour-elem="dot"] {
+  background-color: #e2e8f0 !important;
+  border: none !important;
+  width: 7px !important;
+  height: 7px !important;
+  margin: 0 3px !important;
+  border-radius: 50% !important;
+  transition: all 0.3s ease !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  min-width: 7px !important;
+  flex-shrink: 0 !important;
+}
+
+/* Estilo del punto activo */
+div[data-tour-elem="controls"] button[data-tour-elem="dot"][data-active="true"] {
+  background-color: #2b6ae0 !important;
+  transform: scale(1.2);
+}
+
+/* 3. Centrar los puntos entre los botones CON ESPACIO */
+div[data-tour-elem="navigation"] {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  flex: 1 !important;
+  margin: 0 12px !important; /* Más margen para separar de los botones */
+  min-width: 0 !important; /* Permitir que se contraiga si es necesario */
+}
+
+/* 4. Mejorar el contenedor de controles */
+div[data-tour-elem="controls"] {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important; /* Espacio entre elementos */
+  width: 100% !important;
+}
+
+/* 5. Asegurar el popover encima de todo */
+div[data-tour-elem="popover"] {
+  z-index: 100000 !important;
+  box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+}
+
+/* 6. Asegurar visibilidad del elemento destacado */
+[data-tour-elem="badge"] {
+  background-color: white !important;
+  box-shadow: 0 0 0 4px rgba(43, 106, 224, 0.4) !important;
+}
+
+/* 7. Ajustar el contenido del popover */
+div[data-tour-elem="popover"] > div:first-child {
+  max-width: 100% !important;
+  word-wrap: break-word !important;
 }

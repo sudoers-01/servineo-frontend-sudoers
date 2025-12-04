@@ -18,6 +18,7 @@ import { distanceKm } from '@/app/lib/utils/distance';
 
 const defaultPosition: [number, number] = [-17.39381, -66.15693];
 
+// Componente para manejar el redimensionamiento
 function MapResizeHandler() {
   const map = useMap();
   useEffect(() => {
@@ -43,19 +44,17 @@ export default function Map() {
   const [pinPosition, setPinPosition] = useState<[number, number]>(defaultPosition);
   const [mapCenter, setMapCenter] = useState<[number, number]>(defaultPosition);
   const [zoom, setZoom] = useState(14);
-
-  // Estado independiente para el círculo
   const [circleCenter, setCircleCenter] = useState<[number, number]>(pinPosition);
 
-  // Mantenerlo actualizado cuando cambie pinPosition
+  // Mantener círculo actualizado con el pin
   useEffect(() => {
     setCircleCenter(pinPosition);
   }, [pinPosition]);
 
   const [loading, setLoading] = useState(true);
   const mapRef = useRef<LeafletMapType | null>(null);
-  const [mapKey, setMapKey] = useState(0);
 
+  // Cargar datos
   useEffect(() => {
     import('@/jsons/fixers.json')
       .then((module) => setFixers(module.default))
@@ -63,6 +62,7 @@ export default function Map() {
       .finally(() => setLoading(false));
   }, []);
 
+  // Cargar configuración guardada
   useEffect(() => {
     const savedPin = localStorage.getItem('pinPosition');
     const savedCenter = localStorage.getItem('mapCenter');
@@ -112,30 +112,20 @@ export default function Map() {
     localStorage.removeItem('mapCenter');
     localStorage.removeItem('mapZoom');
   };
-  // ====== Memoizar el círculo ======
-  const memoizedCircle = useMemo(() => {
-    return <MapCircle center={pinPosition} radius={5000} />;
-  }, [pinPosition]);
+
   const initialMap = useMemo(
     () => ({
       center: mapCenter,
       zoom: zoom,
     }),
-    [mapCenter, zoom], // <- ahora depende de ellos
+    [mapCenter, zoom]
   );
-
-  useEffect(() => {
-    const handleResize = () => {
-      setMapKey((prev) => prev + 1);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   if (loading) return <div>Cargando mapa...</div>;
 
   return (
-    <div className='relative z-0' style={{ height: '60vh', width: '100%', marginTop: '10px' }}>
+    // Agregamos un ID interno por si acaso, pero el importante es el del contenedor padre
+    <div id="leaflet-map-container" className='relative z-0' style={{ height: '60vh', width: '100%', marginTop: '10px' }}>
       <ResetMapButton onReset={handleReset} isOnline={navigator.onLine} />
 
       <MapContainer
@@ -154,6 +144,7 @@ export default function Map() {
         <RecenterMap position={mapCenter} />
 
         <UserMarker position={pinPosition} />
+        {/* Usamos el componente directo, ya no la variable memoizedCircle que daba warning */}
         <MapCircle center={circleCenter} radius={5000} />
 
         {nearbyFixers.map((f) => (
