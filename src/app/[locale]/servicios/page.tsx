@@ -1,12 +1,4 @@
-import ServicesSection from '@/Components/Home/Services-section';
-
-/*  Props de ServicesSection borrados:
-        showHero={'true'}
-        showAllServices={true}
-        showCTA={false}
-        title="Todos Nuestros Servicios"
-        subtitle="Explora la gama completa de soluciones que ofrecemos para tu hogar"
-*/
+import ServicesSection from "@/Components/Home/Services-section";
 
 export default function Page() {
   return (
@@ -14,8 +6,8 @@ export default function Page() {
       showHero={true}
       showAllServices={true}
       showCTA={false}
-      title='Todos Nuestros Servicios'
-      subtitle='Explora la gama completa de soluciones que ofrecemos para tu hogar'
+      title="Todos Nuestros Servicios"
+      subtitle="Explora la gama completa de soluciones que ofrecemos para tu hogar"
     />
   );
 }
