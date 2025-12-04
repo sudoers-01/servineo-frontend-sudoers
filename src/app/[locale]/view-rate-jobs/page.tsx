@@ -1,11 +1,12 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { Roboto } from 'next/font/google';
 import type { RatedJob } from './utils';
 import { apiFetch } from '../../../config/api'; // corrige la ruta según tu estructura
 import Link from 'next/link';
+import { useAppSelector } from '@/app/redux/hooks';
 
 const roboto = Roboto({
   subsets: ['latin'],
@@ -183,7 +184,7 @@ function GenericDropdown({
   );
 }
 
-function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
+function RatedJobsList({ jobs, userId }: { jobs: RatedJob[]; userId?: string }) {
   return (
     <section className='space-y-6 relative w-full'>
       <div className='relative max-h-[65vh] overflow-y-auto pr-1'>
@@ -219,8 +220,12 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
 
       <div className='w-full flex justify-end mt-4'>
         <Link
-          href='/fixers/68e87a9cdae3b73d8040102f/comments'
-          className='px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium shadow hover:bg-blue-700 transition'
+          href={userId ? `/fixers/${userId}/comments` : '#'}
+          className={`px-5 py-2 rounded-lg text-white text-sm font-medium shadow transition ${
+            userId
+              ? 'bg-blue-600 hover:bg-blue-700 cursor-pointer'
+              : 'bg-gray-400 cursor-not-allowed'
+          }`}
         >
           Ir a los comentarios
         </Link>
@@ -230,13 +235,21 @@ function RatedJobsList({ jobs }: { jobs: RatedJob[] }) {
 }
 
 export default function RatedJobsPage() {
+  const { user } = useAppSelector((state) => state.user);
+  const userId = user?._id || user?.id;
+
   const [jobs, setJobs] = useState<RatedJob[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [slowLoading, setSlowLoading] = useState<boolean>(false);
   const [currentSort, setCurrentSort] = useState<string>('recent');
 
-  const fetchJobs = async (sortParam: string) => {
+  const fetchJobs = useCallback(async (sortParam: string) => {
+    if (!userId) {
+      setError('Usuario no autenticado');
+      return;
+    }
+
     const slowTimer: ReturnType<typeof setTimeout> = setTimeout(() => {
       setSlowLoading(true);
     }, 2000);
@@ -245,7 +258,9 @@ export default function RatedJobsPage() {
     setError(null);
 
     try {
-      const result = await apiFetch<{ data?: RatedJob[] }>(`api/rated-jobs?sortBy=${sortParam}`);
+      const result = await apiFetch<{ data?: RatedJob[] }>(
+        `api/rated-jobs/user/${userId}?sortBy=${sortParam}`,
+      );
       setJobs(result.data ?? []);
     } catch (err) {
       console.warn('Error fetching jobs:', err);
@@ -255,11 +270,13 @@ export default function RatedJobsPage() {
       clearTimeout(slowTimer);
       setSlowLoading(false);
     }
-  };
+  }, [userId]);
 
   useEffect(() => {
-    fetchJobs('recent');
-  }, []);
+    if (userId) {
+      fetchJobs('recent');
+    }
+  }, [userId, fetchJobs]);
 
   const handleRatingSort = (key: string) => {
     setCurrentSort(key);
@@ -367,7 +384,7 @@ export default function RatedJobsPage() {
           </div>
         </header>
 
-        <RatedJobsList jobs={jobs} />
+        <RatedJobsList jobs={jobs} userId={userId} />
       </div>
     </main>
   );

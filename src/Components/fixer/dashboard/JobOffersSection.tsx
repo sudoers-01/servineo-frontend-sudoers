@@ -113,9 +113,7 @@ export function JobOffersSection({
     },
   );
 
-  // -------------------------
-  // 🔥 CREAR / EDITAR OFERTA
-  // -------------------------
+  //CREAR / EDITAR OFERTA
   const onSubmit = async (data: JobOfferFormData) => {
     if (!user?._id) return showNotify('error', 'Error', 'No se identificó al usuario.');
 
@@ -157,9 +155,8 @@ export function JobOffersSection({
     }
   };
 
-  // -------------------------
-  // 🔥 ELIMINAR OFERTA
-  // -------------------------
+  // ELIMINAR OFERTA
+
   const confirmDelete = (jobId: string) => {
     if (!effectiveeffectiveUserId) return;
     showNotify('warning', '¿Eliminar oferta?', 'Esta acción no se puede deshacer.', async () => {
@@ -173,8 +170,7 @@ export function JobOffersSection({
     });
   };
 
-  // -------------------------
-  // 🔥 TOGGLE STATUS REAL
+  // TOGGLE STATUS REAL
   // -------------------------
   const handleToggleActive = async (jobId: string) => {
     try {
