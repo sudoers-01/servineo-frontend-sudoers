@@ -355,12 +355,13 @@ export default function TopMenu() {
                 </Link>
               ))}
             </nav>
-          <div className='flex items-center gap-3'>
+          <div className='flex items-center gap-8'>
             <NotificationSystem
               userId={userId || undefined}
               userName={user?.name}
               isAuthenticated={isLogged}
               userRole={user?.role as 'fixer' | 'requester'}
+
             />
 
             {isLogged ? (
