@@ -34,19 +34,16 @@ function getClientSessionId(): string {
   }
 
   let sid = localStorage.getItem('sessionId');
-
   if (!sid) {
     sid = crypto.randomUUID?.() || `sid-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
     localStorage.setItem('sessionId', sid);
   }
-
   return sid;
 }
 
 // Helper para actualizar sessionId desde backend
 function updateSessionIdFromResponse(response: { sessionId?: string }) {
   if (typeof window === 'undefined') return;
-
   if (response.sessionId) {
     const currentSid = localStorage.getItem('sessionId');
     if (currentSid !== response.sessionId) {
@@ -67,7 +64,6 @@ function buildUrlWithParams(
       searchParams.append(key, String(value));
     }
   });
-
   const queryString = searchParams.toString();
   return queryString ? `${base}?${queryString}` : base;
 }
@@ -78,7 +74,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
     getSearchHistory: builder.query<string[], string>({
       query: (searchTerm = '') => {
         const sessionId = getClientSessionId();
-
         if (!sessionId) {
           console.error('❌ No se pudo obtener sessionId');
           return { url: '/devmaster/offers', method: 'GET' };
@@ -89,7 +84,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
           search: searchTerm,
           sessionId: sessionId,
         });
-
         return { url, method: 'GET' };
       },
       transformResponse: (response: HistoryResponse) => {
@@ -98,7 +92,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
         if (response.success && response.searchHistory) {
           return response.searchHistory.map((item) => item.searchTerm);
         }
-
         return [];
       },
       providesTags: ['SearchHistory'],
@@ -108,7 +101,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
     deleteSearchHistory: builder.mutation<{ success: boolean; updatedHistory: string[] }, string>({
       query: (searchTerm) => {
         const sessionId = getClientSessionId();
-
         if (!sessionId) {
           console.error('❌ No se pudo obtener sessionId');
           return { url: '/devmaster/offers', method: 'GET' };
@@ -119,7 +111,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
           searchTerm: searchTerm,
           sessionId: sessionId,
         });
-
         return { url, method: 'GET' };
       },
       transformResponse: (response: HistoryResponse) => {
@@ -135,7 +126,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
     clearSearchHistory: builder.mutation<{ success: boolean; updatedHistory: string[] }, void>({
       query: () => {
         const sessionId = getClientSessionId();
-
         if (!sessionId) {
           console.error('❌ No se pudo obtener sessionId');
           return { url: '/devmaster/offers', method: 'GET' };
@@ -145,7 +135,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
           action: 'clearAllHistory',
           sessionId: sessionId,
         });
-
         return { url, method: 'GET' };
       },
       transformResponse: (response: HistoryResponse) => {
@@ -161,7 +150,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
     getSearchSuggestions: builder.query<string[], { query: string; limit?: number }>({
       query: ({ query, limit = 6 }) => {
         const sessionId = getClientSessionId();
-
         if (!sessionId) {
           console.error('❌ No se pudo obtener sessionId');
           return { url: '/devmaster/offers', method: 'GET' };
@@ -173,7 +161,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
           record: false,
           sessionId: sessionId,
         });
-
         return { url, method: 'GET' };
       },
       transformResponse: (response: SuggestionsResponse) => {
@@ -182,7 +169,6 @@ export const searchHistoryApi = baseApi.injectEndpoints({
         if (response.success && response.suggestions) {
           return response.suggestions.map((s) => String(s.term ?? '')).filter(Boolean);
         }
-
         return [];
       },
     }),
