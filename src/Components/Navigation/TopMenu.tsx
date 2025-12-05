@@ -7,6 +7,7 @@ import { Wrench, UserCircle, Home, Briefcase, HelpCircle } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
+import { resetFilters } from '@/app/redux/slice/jobOfert';
 import { IUser } from '@/types/user';
 import { useTranslations } from 'next-intl';
 
@@ -94,6 +95,20 @@ export default function TopMenu() {
   const logout = () => {
     localStorage.removeItem('servineo_token');
     localStorage.removeItem('servineo_user');
+    // Limpiar estado y persistencia de job offers al cerrar sesión
+    try {
+      dispatch(resetFilters());
+    } catch (e) {
+      // no bloquear logout si falla el dispatch
+      console.error('Error resetting job offers state on logout', e);
+    }
+    try {
+      // Eliminar query string para evitar que se restaure search/page desde la URL
+      const path = window.location.pathname;
+      window.history.replaceState(null, '', path);
+    } catch (e) {
+      // ignore
+    }
     window.location.reload();
   };
 
