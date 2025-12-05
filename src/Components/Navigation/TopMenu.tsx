@@ -357,28 +357,14 @@ export default function TopMenu() {
             </nav>
           </div>
           <div className='flex items-center gap-3'>
-            <NotificationSystem 
+            <NotificationSystem
               userId={userId || undefined}
               userName={user?.name}
               isAuthenticated={isLogged}
               userRole={user?.role as 'fixer' | 'requester'}
             />
-            {!isLogged ? (
-              <>
-                <Link
-                  href='/login'
-                  className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
-                >
-                  {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
-                </Link>
-                <Link
-                  href='/signUp'
-                  className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
-                >
-                  {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
-                </Link>
-              </>
-            ) : (
+
+            {isLogged ? (
               <div className='relative'>
                 <button
                   ref={profileButtonRef}
@@ -510,6 +496,21 @@ export default function TopMenu() {
                   </div>
                 )}
               </div>
+            ) : (
+              <>
+                <Link
+                  href='/login'
+                  className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
+                >
+                  {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
+                </Link>
+                <Link
+                  href='/signUp'
+                  className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
+                >
+                  {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
+                </Link>
+              </>
             )}
           </div>
         </div>
