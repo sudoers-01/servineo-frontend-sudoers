@@ -494,6 +494,7 @@
   },
   "jobOfferModal": {
     "closeModal": "Close modal",
+    "noImage": "No image available",
     "description": "Description",
     "servicesOffered": "Services Offered",
     "gallery": "Work Gallery",
@@ -501,7 +502,10 @@
     "contactInfo": "Contact Information",
     "whatsapp": "WhatsApp",
     "city": "City",
-    "contactButton": "Contact via WhatsApp"
+    "contactButton": "Contact via WhatsApp",
+    "contactWhatsApp": "Contact via WhatsApp",
+    "scheduleAppointment": "Schedule Appointment",
+    "share": "Share"
   },
   "navbar": {
     "logo": "Logo",
@@ -612,7 +616,6 @@
       "message": "Your account has been created successfully"
     }
   },
-
   "Calendar": {
     "fixer": "Fixer",
     "viewCalendar": "View Calendar",
@@ -849,9 +852,11 @@
       "myCertifications": "My Certifications"
     },
     "buttons": {
-      "addCertification": "Add Certification",
-      "cancel": "Cancel",
-      "save": "Save"
+    "addCertification": "Add Certification",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete"
     },
     "card": {
       "issued": "Issued",
@@ -867,6 +872,7 @@
       "newTitle": "New Certification"
     },
     "form": {
+      "optional": "optional",
       "name": {
         "label": "Certification Name",
         "placeholder": "Ex: Electrical Technician",
@@ -893,6 +899,24 @@
         "placeholder": "https://..."
       }
     },
+    "empty": "No certifications added yet",
+    "loading": "Loading certifications...",
+    "errors": {
+      "noFixerProfile": "No fixer profile found",
+      "saveError": "Error saving certification",
+      "deleteError": "Error deleting certification",
+      "loadError": "Error loading certifications"
+    },
+    "notifications": {
+      "success": "Success",
+      "error": "Error",
+      "createSuccess": "Certification added successfully",
+      "updateSuccess": "Certification updated successfully",
+      "deleteTitle": "Delete Certification",
+      "deleteMessage": "Are you sure you want to delete this certification?",
+      "deleteSuccessTitle": "Deleted",
+      "deleteSuccess": "Certification deleted successfully"
+    },
     "deleteConfirmation": "Are you sure you want to delete this certification?"
   },
   "ExperienceSection": {
@@ -903,7 +927,8 @@
     "buttons": {
       "addExperience": "Add Experience",
       "cancel": "Cancel",
-      "save": "Save"
+      "save": "Save",
+      "saving": "Saving..."
     },
     "card": {
       "present": "Present"
@@ -929,6 +954,8 @@
       },
       "jobType": {
         "label": "Employment Type",
+        "select": "Select an option...",
+        "required": "Employment type is required",
         "options": {
           "fullTime": "Full Time",
           "partTime": "Part Time",
@@ -936,19 +963,39 @@
           "freelance": "Freelance"
         }
       },
-      "isCurrent": {
-        "label": "I currently work here"
-      },
       "startDate": {
-        "label": "Start Date"
+        "label": "Start Date",
+        "required": "Start date is required"
       },
       "endDate": {
         "label": "End Date"
+      },
+      "isCurrent": {
+        "label": "I currently work here"
       }
+    },
+    "loading": "Loading experiences...",
+    "errors": {
+      "loadError": "Error loading experiences"
+    },
+    "empty": {
+      "readOnly": "No work experience added yet",
+      "editable": "No work experience. Start by adding your first position!"
+    },
+    "notifications": {
+      "success": "Success",
+      "error": "Error",
+      "createSuccess": "Experience added successfully",
+      "updateSuccess": "Experience updated successfully",
+      "deleteTitle": "Delete Experience",
+      "deleteMessage": "Are you sure you want to delete this experience?",
+      "deleteSuccessTitle": "Deleted",
+      "deleteSuccess": "Experience deleted successfully",
+      "genericError": "An error occurred. Please try again."
     },
     "deleteConfirmation": "Are you sure you want to delete this experience?"
   },
-  "JobOffersSection": {
+    "JobOffersSection": {
     "titles": {
       "jobOffers": "Job Offers",
       "myJobOffers": "My Job Offers"
@@ -956,7 +1003,8 @@
     "buttons": {
       "newOffer": "New Offer",
       "cancel": "Cancel",
-      "save": "Save"
+      "save": "Save",
+      "saving": "Saving..."
     },
     "card": {
       "defaultTitle": "No title",
@@ -968,6 +1016,10 @@
     },
     "form": {
       "defaultCity": "Cochabamba",
+      "title": {
+        "label": "Title",
+        "placeholder": "Enter offer title"
+      },
       "category": {
         "label": "Category",
         "select": "Select...",
@@ -979,6 +1031,13 @@
           "painting": "Painting"
         }
       },
+      "tags": {
+        "label": "Tags (max 5)",
+        "empty": "No tags selected",
+        "addTag": "Add Tag",
+        "limitReached": "Maximum tags reached (5)",
+        "alreadyAdded": " (already added)"
+      },
       "description": {
         "label": "Description",
         "placeholder": "Describe your service...",
@@ -989,8 +1048,36 @@
       },
       "city": {
         "label": "City"
+      },
+      "contactPhone": {
+        "label": "Contact Phone"
+      },
+      "images": {
+        "label": "Images"
       }
     },
+    "loading": "Loading offers...",
+    "empty": "No offers published yet.",
+    "notifications": {
+      "noUser": "User not identified.",
+      "noImages": "You must upload at least one photo.",
+      "imageLimit": "Limit exceeded",
+      "imageLimitMessage": "You can only upload up to 5 images.",
+      "imageTooBig": "Image too large",
+      "imageSizeMessage": "The image {fileName} exceeds 5MB.",
+      "updated": "Updated",
+      "updateSuccess": "Offer updated successfully.",
+      "published": "Published",
+      "createSuccess": "Offer created successfully.",
+      "error": "Error",
+      "errorMessage": "Error processing the request.",
+      "deleteTitle": "Delete offer?",
+      "deleteMessage": "This action cannot be undone.",
+      "deleted": "Deleted",
+      "deleteSuccess": "Offer deleted.",
+      "deleteError": "Could not delete the offer."
+    },
+    "confirmButton": "Confirm",
     "deleteConfirmation": "Are you sure you want to delete this offer?"
   },
   "PortfolioSection": {
@@ -1031,7 +1118,8 @@
         "placeholder": "Will try to extract automatically"
       }
     },
-    "deleteConfirmation": "Are you sure you want to delete this item?"
+    "deleteConfirmation": "Are you sure you want to delete this item?",
+    "emptyState": "Empty portfolio"
   },
   "RegistroForm": {
     "fields": {

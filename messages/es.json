@@ -494,6 +494,7 @@
   },
   "jobOfferModal": {
     "closeModal": "Cerrar modal",
+    "noImage": "Sin imagen disponible",
     "description": "Descripción",
     "servicesOffered": "Servicios Ofrecidos",
     "gallery": "Galería de Trabajos",
@@ -501,7 +502,10 @@
     "contactInfo": "Información de Contacto",
     "whatsapp": "WhatsApp",
     "city": "Ciudad",
-    "contactButton": "Contactar por WhatsApp"
+    "contactButton": "Contactar por WhatsApp",
+    "contactWhatsApp": "Contactar por WhatsApp",
+    "scheduleAppointment": "Agendar Cita",
+    "share": "Compartir"
   },
   "navbar": {
     "logo": "Logo",
@@ -843,6 +847,7 @@
     }
   },
   "CertificationsSection": {
+    "optional": "opcional",
     "titles": {
       "certifications": "Certificaciones",
       "myCertifications": "Mis Certificaciones"
@@ -850,7 +855,9 @@
     "buttons": {
       "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "delete": "Eliminar"
     },
     "card": {
       "issued": "Emitido",
@@ -892,6 +899,24 @@
         "placeholder": "https://..."
       }
     },
+    "empty": "Sin certificaciones agregadas aún",
+    "loading": "Cargando certificaciones...",
+    "errors": {
+      "noFixerProfile": "Perfil de técnico no encontrado",
+      "saveError": "Error al guardar certificación",
+      "deleteError": "Error al eliminar certificación",
+      "loadError": "Error al cargar certificaciones"
+    },
+    "notifications": {
+      "success": "Éxito",
+      "error": "Error",
+      "createSuccess": "Certificación agregada exitosamente",
+      "updateSuccess": "Certificación actualizada exitosamente",
+      "deleteTitle": "Eliminar Certificación",
+      "deleteMessage": "¿Estás seguro de que deseas eliminar esta certificación?",
+      "deleteSuccessTitle": "Eliminada",
+      "deleteSuccess": "Certificación eliminada exitosamente"
+    },
     "deleteConfirmation": "¿Estás seguro de eliminar esta certificación?"
   },
   "ExperienceSection": {
@@ -900,9 +925,12 @@
       "myExperience": "Mi Experiencia Laboral"
     },
     "buttons": {
-      "addExperience": "Agregar Experiencia",
+      "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "delete": "Eliminar",
+      "addExperience": "Add Experience"  
     },
     "card": {
       "present": "Presente"
@@ -916,6 +944,7 @@
       "newTitle": "Nueva Experiencia"
     },
     "form": {
+      "optional": "(opcional)",
       "jobTitle": {
         "label": "Cargo / Título",
         "placeholder": "Ej: Plomero Senior",
@@ -928,6 +957,8 @@
       },
       "jobType": {
         "label": "Tipo de Empleo",
+        "select": "Selecciona una opción...",
+        "required": "El tipo de empleo es requerido",
         "options": {
           "fullTime": "Tiempo completo",
           "partTime": "Medio tiempo",
@@ -935,19 +966,39 @@
           "freelance": "Freelance"
         }
       },
-      "isCurrent": {
-        "label": "Actualmente trabajo aquí"
-      },
       "startDate": {
-        "label": "Fecha de Inicio"
+        "label": "Fecha de Inicio",
+        "required": "La fecha de inicio es requerida"
       },
       "endDate": {
         "label": "Fecha de Fin"
+      },
+      "isCurrent": {
+        "label": "Actualmente trabajo aquí"
       }
+    },
+    "loading": "Cargando experiencias...",
+    "errors": {
+      "loadError": "Error al cargar experiencias"
+    },
+    "empty": {
+      "readOnly": "Sin experiencia laboral agregada aún",
+      "editable": "Sin experiencia laboral. ¡Comienza agregando tu primer puesto!"
+    },
+    "notifications": {
+      "success": "Éxito",
+      "error": "Error",
+      "createSuccess": "Experiencia agregada exitosamente",
+      "updateSuccess": "Experiencia actualizada exitosamente",
+      "deleteTitle": "Eliminar Experiencia",
+      "deleteMessage": "¿Estás seguro de que deseas eliminar esta experiencia?",
+      "deleteSuccessTitle": "Eliminada",
+      "deleteSuccess": "Experiencia eliminada exitosamente",
+      "genericError": "Ocurrió un error. Por favor intenta de nuevo."
     },
     "deleteConfirmation": "¿Estás seguro de eliminar esta experiencia?"
   },
-  "JobOffersSection": {
+    "JobOffersSection": {
     "titles": {
       "jobOffers": "Ofertas de Trabajo",
       "myJobOffers": "Mis Ofertas de Trabajo"
@@ -955,7 +1006,8 @@
     "buttons": {
       "newOffer": "Nueva Oferta",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando..."
     },
     "card": {
       "defaultTitle": "Sin título",
@@ -967,6 +1019,10 @@
     },
     "form": {
       "defaultCity": "Cochabamba",
+      "title": {
+        "label": "Título",
+        "placeholder": "Ingresa el título de la oferta"
+      },
       "category": {
         "label": "Categoría",
         "select": "Seleccionar...",
@@ -978,6 +1034,13 @@
           "painting": "Pintura"
         }
       },
+      "tags": {
+        "label": "Etiquetas (máximo 5)",
+        "empty": "Sin etiquetas seleccionadas",
+        "addTag": "Agregar Etiqueta",
+        "limitReached": "Máximo de etiquetas alcanzado (5)",
+        "alreadyAdded": " (ya agregada)"
+      },
       "description": {
         "label": "Descripción",
         "placeholder": "Describe tu servicio...",
@@ -988,8 +1051,36 @@
       },
       "city": {
         "label": "Ciudad"
+      },
+      "contactPhone": {
+        "label": "Teléfono de Contacto"
+      },
+      "images": {
+        "label": "Imágenes"
       }
     },
+    "loading": "Cargando ofertas...",
+    "empty": "No hay ofertas publicadas aún.",
+    "notifications": {
+      "noUser": "No se identificó al usuario.",
+      "noImages": "Debes subir al menos una foto.",
+      "imageLimit": "Límite excedido",
+      "imageLimitMessage": "Solo puedes subir hasta 5 imágenes.",
+      "imageTooBig": "Imagen muy pesada",
+      "imageSizeMessage": "La imagen {fileName} excede 5MB.",
+      "updated": "Actualizado",
+      "updateSuccess": "Oferta actualizada correctamente.",
+      "published": "Publicado",
+      "createSuccess": "Oferta creada correctamente.",
+      "error": "Error",
+      "errorMessage": "Error al procesar la solicitud.",
+      "deleteTitle": "¿Eliminar oferta?",
+      "deleteMessage": "Esta acción no se puede deshacer.",
+      "deleted": "Eliminado",
+      "deleteSuccess": "Oferta eliminada.",
+      "deleteError": "No se pudo eliminar la oferta."
+    },
+    "confirmButton": "Confirmar",
     "deleteConfirmation": "¿Estás seguro de eliminar esta oferta?"
   },
   "PortfolioSection": {
@@ -1030,7 +1121,8 @@
         "placeholder": "Se intentará extraer automáticamente"
       }
     },
-    "deleteConfirmation": "¿Estás seguro de eliminar este elemento?"
+    "deleteConfirmation": "¿Estás seguro de eliminar este elemento?",
+    "emptyState": "portfolio vacio"
   },
   "RegistroForm": {
     "fields": {
