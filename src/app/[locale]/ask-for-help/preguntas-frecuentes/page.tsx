@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { FAQSearch } from '@/Components/ask_for_help/FAQSearch';
 import { FAQCategoryFilter } from '@/Components/ask_for_help/FAQCategoryFilter';
 import { FAQList } from '@/Components/ask_for_help/FAQList';
@@ -10,6 +11,7 @@ import { useFAQ } from '@/Components/ask_for_help/useFAQ';
 
 export default function PreguntasFrecuentesPage() {
   const router = useRouter();
+  const t = useTranslations('faq');
 
   const { faqs, loading, error, selectedCategory, searchFAQs, filterByCategory } = useFAQ();
 
@@ -22,17 +24,13 @@ export default function PreguntasFrecuentesPage() {
           <button
             onClick={() => router.back()}
             className='absolute top-6 left-6 text-2xl text-gray-600 hover:text-gray-800 transition'
-            aria-label='Volver atrás'
+            aria-label={t('backButton')}
           >
             ←
           </button>
 
-          <h1 className='text-4xl font-bold text-gray-900 mb-3 text-center'>
-            Preguntas Frecuentes
-          </h1>
-          <p className='text-gray-600 text-lg text-center'>
-            Encuentra respuestas rápidas a las dudas más comunes sobre Servineo
-          </p>
+          <h1 className='text-4xl font-bold text-gray-900 mb-3 text-center'>{t('title')}</h1>
+          <p className='text-gray-600 text-lg text-center'>{t('subtitle')}</p>
         </div>
 
         {/* Content */}
