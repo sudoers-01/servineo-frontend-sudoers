@@ -13,15 +13,15 @@ interface CreatePromoModalProps {
   isEditMode?: boolean;
 }
 
-const CreatePromoModal = ({ 
-  isOpen, 
-  onClose, 
-  onSave, 
-  id, 
+const CreatePromoModal = ({
+  isOpen,
+  onClose,
+  onSave,
+  id,
   fixerId,
   initialTitle = '',
   initialDescription = '',
-  isEditMode = false 
+  isEditMode = false,
 }: CreatePromoModalProps) => {
   const [title, setTitle] = useState<string>(initialTitle);
   const [description, setDescription] = useState<string>(initialDescription);
