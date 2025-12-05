@@ -1327,6 +1327,12 @@
       "twitter": "Visitar X (antes Twitter) de Servineo",
       "copyright": "Créditos y derechos de autor"
     }
+  },
+  "home": {
+    "mapSection": {
+      "title": "Encuentra Servicios Cerca de Ti",
+      "subtitle": "Explora los profesionales disponibles en tu zona"
+    }
   }
 
 }

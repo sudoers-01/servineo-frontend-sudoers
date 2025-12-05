@@ -1328,5 +1328,11 @@
       "twitter": "Visit Servineo X (formerly Twitter)",
       "copyright": "Credits and copyright"
     }
+  },
+  "home": {
+    "mapSection": {
+      "title": "Find Services Near You",
+      "subtitle": "Explore available professionals in your area"
+    }
   }
 }
