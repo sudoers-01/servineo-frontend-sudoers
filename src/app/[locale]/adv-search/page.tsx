@@ -412,6 +412,7 @@ function AdvancedSearchPage() {
                     setSelectedSpecificDate(d ?? null);
                   }}
                   onCalendarToggle={setIsCalendarOpen}
+                  clearSignal={clearSignal}
                 />
               </div>
               <div className='shrink-0 order-1 md:order-2 w-full md:w-auto'>
