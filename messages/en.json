@@ -873,7 +873,7 @@
       "newTitle": "New Certification"
     },
     "form": {
-      "optional": "(optional)",
+      "optional": "optional",
       "name": {
         "label": "Certification Name",
         "placeholder": "Ex: Electrical Technician",
