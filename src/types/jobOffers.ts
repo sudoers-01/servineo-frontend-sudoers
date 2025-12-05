@@ -17,7 +17,7 @@ export interface JobOfferData {
   allImages?: string[];
   completedJobs?: number;
   location?: string[];
-  status?: string;
+  status?: boolean;
   updatedAt?: string | Date;
 }
 

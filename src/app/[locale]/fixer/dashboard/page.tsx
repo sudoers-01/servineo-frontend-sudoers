@@ -23,6 +23,8 @@ import {
   Wrench,
 } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+
 import EstadisticasTrabajos from '@/Components/fixer/Fixer-statistics';
 import { useUpdateDescriptionMutation } from '@/app/redux/services/userApi';
 import { useEffect } from 'react';
@@ -44,7 +46,7 @@ type Tab = 'offers' | 'certs' | 'experience' | 'portfolio' | 'location' | 'estad
 export default function FixerDashboardPage() {
   const { user: reduxUser } = useAppSelector((state) => state.user);
   const user = reduxUser;
-
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState<Tab>('offers');
 
   // Estado para edición de descripción
@@ -127,6 +129,14 @@ export default function FixerDashboardPage() {
               )}
             </div>
             <div className='flex gap-2'>
+              {/* ⭐ NUEVO BOTÓN — AGREGADO EXACTAMENTE AQUÍ ⭐ */}
+              <button
+                onClick={() => router.push('/es/view-rate-jobs')}
+                className='px-4 py-2 bg-primary hover:bg-blue-800 text-white rounded-full text-sm font-medium transition-colors'
+              >
+                Ver trabajos calificados
+              </button>
+
               {!editingDescription ? (
                 <button
                   onClick={() => setEditingDescription(true)}
