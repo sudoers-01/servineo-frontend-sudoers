@@ -385,7 +385,7 @@
     "card2": {
       "name": "Electricity",
       "description": "Electrical installations and repairs"
-    }, 
+    },
     "card3": {
       "name": "Carpentry",
       "description": "Woodwork and furniture projects"
@@ -436,7 +436,6 @@
       "question": "How are payments made?",
       "answer": "Payments are 100% secure through our platform. You only release payment when the work is completed and you are satisfied with the result."
     }
-  }
   },
   "TopMenu": {
     "buttons": {
