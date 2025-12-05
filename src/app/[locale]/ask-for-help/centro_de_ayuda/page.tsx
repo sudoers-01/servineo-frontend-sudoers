@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { Search, HelpCircle, Users } from 'lucide-react';
 
 interface Suggestion {
@@ -12,6 +13,8 @@ interface Suggestion {
 
 const CentroDeAyuda: React.FC = () => {
   const router = useRouter();
+  const t = useTranslations('helpCenter');
+  const locale = useLocale();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
@@ -34,29 +37,32 @@ const CentroDeAyuda: React.FC = () => {
       switch (target) {
         case 'Preguntas Frecuentes sobre Servineo':
         case 'Preguntas Frecuentes (FAQ)':
-          finalUrl = '/ask-for-help/preguntas-frecuentes';
+        case 'Frequently Asked Questions (FAQ)':
+          finalUrl = `/${locale}/ask-for-help/preguntas-frecuentes`;
           break;
         case 'Foro de Usuarios':
-          finalUrl = '/ask-for-help/foro-usuario';
+        case 'User Forum':
+          finalUrl = `/${locale}/ask-for-help/foro-usuario`;
           break;
         case 'Home':
-          finalUrl = '/';
+          finalUrl = `/${locale}`;
           break;
         case 'Perfil':
-          finalUrl = '/perfil';
+        case 'Profile':
+          finalUrl = `/${locale}/perfil`;
           break;
         default:
-          finalUrl = url || `/${target.toLowerCase().replace(/\s/g, '-')}`;
+          finalUrl = url || `/${locale}/${target.toLowerCase().replace(/\s/g, '-')}`;
       }
 
       if (typeof window !== 'undefined') {
         router.push(finalUrl);
       } else {
         console.log(`[REDIRECCIÓN SIMULADA] → ${finalUrl}`);
-        showMessage(`Simulando navegación a: ${finalUrl}`);
+        showMessage(t('messages.navigating', { url: finalUrl }));
       }
     },
-    [router, showMessage],
+    [router, showMessage, locale, t],
   );
 
   /** Ejecuta búsqueda */
@@ -71,7 +77,7 @@ const CentroDeAyuda: React.FC = () => {
 
       if (!query) {
         setIsSearching(false);
-        showMessage('Por favor, ingresa un término de búsqueda.');
+        showMessage(t('messages.emptySearch'));
         return;
       }
 
@@ -79,34 +85,35 @@ const CentroDeAyuda: React.FC = () => {
       setIsSearching(true);
       setIsLoading(true);
 
-      showMessage(`Búsqueda simulada para: “${query}”.`);
+      showMessage(t('messages.searching', { query }));
 
       setTimeout(() => {
         setIsLoading(false);
 
-        if (query.toLowerCase().includes('pago')) {
+        if (query.toLowerCase().includes('pago') || query.toLowerCase().includes('payment')) {
           setSuggestions([
-            { id: 1, title: 'Problemas con mi pago', url: '/ayuda/pago-problemas' },
-            { id: 2, title: 'Métodos de pago aceptados', url: '/ayuda/metodos-pago' },
+            { id: 1, title: t('suggestions.paymentProblems'), url: '/ayuda/pago-problemas' },
+            { id: 2, title: t('suggestions.paymentMethods'), url: '/ayuda/metodos-pago' },
           ]);
         } else if (
           query.toLowerCase().includes('faq') ||
-          query.toLowerCase().includes('pregunta')
+          query.toLowerCase().includes('pregunta') ||
+          query.toLowerCase().includes('question')
         ) {
           setSuggestions([
             {
               id: 99,
-              title: 'Preguntas Frecuentes (FAQ)',
-              url: '/ask-for-help/preguntas-frecuentes',
+              title: t('sections.faq.title'),
+              url: `/${locale}/ask-for-help/preguntas-frecuentes`,
             },
           ]);
         } else {
           setSuggestions([]);
-          showMessage(`No se encontraron resultados para “${query}”.`);
+          showMessage(t('messages.noResults', { query }));
         }
       }, 600);
     },
-    [searchTerm, showMessage],
+    [searchTerm, showMessage, t, locale],
   );
 
   /** Click sobre sugerencia */
@@ -131,18 +138,26 @@ const CentroDeAyuda: React.FC = () => {
     }
 
     const simSuggestions: Suggestion[] = [
-      { id: 10, title: 'Problemas con mi pago', url: '/ayuda/pago-problemas' },
-      { id: 11, title: 'Restablecer contraseña', url: '/ayuda/restablecer' },
-      { id: 12, title: 'Información de facturación', url: '/ayuda/facturacion' },
-      { id: 13, title: 'Contacto de soporte', url: '/ask-for-help/preguntas-frecuentes' },
-      { id: 14, title: 'Preguntas Frecuentes (FAQ)', url: '/ask-for-help/preguntas-frecuentes' },
+      { id: 10, title: t('suggestions.paymentProblems'), url: '/ayuda/pago-problemas' },
+      { id: 11, title: t('suggestions.resetPassword'), url: '/ayuda/restablecer' },
+      { id: 12, title: t('suggestions.billing'), url: '/ayuda/facturacion' },
+      {
+        id: 13,
+        title: t('suggestions.support'),
+        url: `/${locale}/ask-for-help/preguntas-frecuentes`,
+      },
+      {
+        id: 14,
+        title: t('sections.faq.title'),
+        url: `/${locale}/ask-for-help/preguntas-frecuentes`,
+      },
     ];
 
     const filtered = simSuggestions.filter((s) => s.title.toLowerCase().includes(query));
 
     const handler = setTimeout(() => setSuggestions(filtered), 150);
     return () => clearTimeout(handler);
-  }, [searchTerm, isLoading]);
+  }, [searchTerm, isLoading, t, locale]);
 
   /** Control de visibilidad */
   const normalizedQuery = searchTerm.trim().toLowerCase();
@@ -151,15 +166,9 @@ const CentroDeAyuda: React.FC = () => {
     return (
       !isSearching &&
       (normalizedQuery.length === 0 ||
-        ['pre', 'frec', 'faq', 'duda', 'pregunt'].some((k) => normalizedQuery.includes(k)))
-    );
-  }, [normalizedQuery, isSearching]);
-
-  const isPopularVisible = useMemo(() => {
-    return (
-      !isSearching &&
-      (normalizedQuery.length === 0 ||
-        ['popu', 'publica', 'guia', 'articulo', 'arti'].some((k) => normalizedQuery.includes(k)))
+        ['pre', 'frec', 'faq', 'duda', 'pregunt', 'question', 'freq'].some((k) =>
+          normalizedQuery.includes(k),
+        ))
     );
   }, [normalizedQuery, isSearching]);
 
@@ -167,9 +176,17 @@ const CentroDeAyuda: React.FC = () => {
     return (
       !isSearching &&
       (normalizedQuery.length === 0 ||
-        ['foro', 'comunidad', 'usuario', 'usuarios', 'duda', 'ayuda'].some((k) =>
-          normalizedQuery.includes(k),
-        ))
+        [
+          'foro',
+          'comunidad',
+          'usuario',
+          'usuarios',
+          'duda',
+          'ayuda',
+          'forum',
+          'community',
+          'user',
+        ].some((k) => normalizedQuery.includes(k)))
     );
   }, [normalizedQuery, isSearching]);
 
@@ -178,19 +195,15 @@ const CentroDeAyuda: React.FC = () => {
   return (
     <div className='min-h-screen bg-gray-50 py-8 font-sans antialiased'>
       <div className='container mx-auto px-4 max-w-5xl'>
-        {/* HEADER ESTILO FORO USUARIO */}
+        {/* HEADER */}
         <div className='bg-white rounded-xl shadow-lg p-8 mb-8 relative'>
           <div className='flex flex-col items-center text-center'>
-            <h1 className='text-4xl font-bold text-gray-900 mb-3'>Centro de Ayuda</h1>
-
-            <p className='text-gray-600 text-lg max-w-2xl'>
-              Encuentra respuestas rápidas, guías y participa en la comunidad para resolver tus
-              dudas sobre Servineo.
-            </p>
+            <h1 className='text-4xl font-bold text-gray-900 mb-3'>{t('title')}</h1>
+            <p className='text-gray-600 text-lg max-w-2xl'>{t('subtitle')}</p>
           </div>
         </div>
 
-        {/* CONTENIDO PRINCIPAL EN TARJETA */}
+        {/* CONTENIDO PRINCIPAL */}
         <div className='bg-white rounded-xl shadow-lg p-6'>
           {/* Buscador */}
           <section className='relative mb-6'>
@@ -198,7 +211,7 @@ const CentroDeAyuda: React.FC = () => {
               <button
                 className='absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 p-1 rounded-full transition z-20'
                 onClick={() => handleSearchSubmit()}
-                aria-label='Ejecutar búsqueda'
+                aria-label={t('search.button')}
               >
                 {isLoading ? (
                   <svg
@@ -228,7 +241,7 @@ const CentroDeAyuda: React.FC = () => {
 
               <input
                 type='text'
-                placeholder='Buscar ayuda en Servineo...'
+                placeholder={t('search.placeholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 onKeyDown={(e) => {
@@ -269,7 +282,7 @@ const CentroDeAyuda: React.FC = () => {
             {isResultsVisible && (
               <div className='mb-6'>
                 <h2 className='text-2xl font-bold mb-4 text-gray-800'>
-                  Resultados para &quot;{searchTerm}&quot;
+                  {t('results.title', { query: searchTerm })}
                 </h2>
                 {suggestions.length > 0 ? (
                   <div className='space-y-3'>
@@ -287,7 +300,7 @@ const CentroDeAyuda: React.FC = () => {
                 ) : (
                   <div className='text-center p-10 bg-gray-50 rounded-lg text-gray-500'>
                     <Search className='h-8 w-8 mx-auto mb-3' />
-                    <p>No se encontraron resultados.</p>
+                    <p>{t('results.empty')}</p>
                   </div>
                 )}
               </div>
@@ -298,7 +311,7 @@ const CentroDeAyuda: React.FC = () => {
               <div className='space-y-4'>
                 {isFAQVisible && (
                   <button
-                    onClick={() => handleRedirect('Preguntas Frecuentes sobre Servineo')}
+                    onClick={() => handleRedirect(t('sections.faq.title'))}
                     className='w-full flex items-center p-4 bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] duration-200 text-left hover:bg-blue-50'
                   >
                     <div className='p-3 mr-4 rounded-full bg-blue-100 text-blue-600'>
@@ -306,41 +319,35 @@ const CentroDeAyuda: React.FC = () => {
                     </div>
                     <div>
                       <h2 className='text-lg font-semibold text-gray-800'>
-                        Preguntas Frecuentes (FAQ)
+                        {t('sections.faq.title')}
                       </h2>
-                      <p className='text-sm text-gray-500'>
-                        Respuestas rápidas a las dudas comunes.
-                      </p>
+                      <p className='text-sm text-gray-500'>{t('sections.faq.description')}</p>
                     </div>
                   </button>
                 )}
 
                 {isForumVisible && (
                   <button
-                    onClick={() => handleRedirect('Foro de Usuarios')}
+                    onClick={() => handleRedirect(t('sections.forum.title'))}
                     className='w-full flex items-center p-4 bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-lg hover:scale-[1.01] duration-200 text-left hover:bg-blue-50'
                   >
                     <div className='p-3 mr-4 rounded-full bg-blue-100 text-blue-600'>
                       <Users className='h-6 w-6' />
                     </div>
                     <div>
-                      <h2 className='text-lg font-semibold text-gray-800'>Foro de Usuarios</h2>
-                      <p className='text-sm text-gray-500'>
-                        comparte tus dudas y ayuda a otros usuarios
-                      </p>
+                      <h2 className='text-lg font-semibold text-gray-800'>
+                        {t('sections.forum.title')}
+                      </h2>
+                      <p className='text-sm text-gray-500'>{t('sections.forum.description')}</p>
                     </div>
                   </button>
                 )}
 
-                {!isFAQVisible &&
-                  !isPopularVisible &&
-                  !isForumVisible &&
-                  normalizedQuery.length > 0 && (
-                    <p className='text-center text-gray-500 py-4'>
-                      No se encontraron categorías que coincidan con &quot;
-                      {searchTerm}&quot;.
-                    </p>
-                  )}
+                {!isFAQVisible && !isForumVisible && normalizedQuery.length > 0 && (
+                  <p className='text-center text-gray-500 py-4'>
+                    {t('messages.noCategories', { query: searchTerm })}
+                  </p>
+                )}
               </div>
             )}
           </main>

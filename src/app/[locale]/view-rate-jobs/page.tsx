@@ -244,33 +244,36 @@ export default function RatedJobsPage() {
   const [slowLoading, setSlowLoading] = useState<boolean>(false);
   const [currentSort, setCurrentSort] = useState<string>('recent');
 
-  const fetchJobs = useCallback(async (sortParam: string) => {
-    if (!userId) {
-      setError('Usuario no autenticado');
-      return;
-    }
+  const fetchJobs = useCallback(
+    async (sortParam: string) => {
+      if (!userId) {
+        setError('Usuario no autenticado');
+        return;
+      }
 
-    const slowTimer: ReturnType<typeof setTimeout> = setTimeout(() => {
-      setSlowLoading(true);
-    }, 2000);
+      const slowTimer: ReturnType<typeof setTimeout> = setTimeout(() => {
+        setSlowLoading(true);
+      }, 2000);
 
-    setLoading(true);
-    setError(null);
+      setLoading(true);
+      setError(null);
 
-    try {
-      const result = await apiFetch<{ data?: RatedJob[] }>(
-        `api/rated-jobs/user/${userId}?sortBy=${sortParam}`,
-      );
-      setJobs(result.data ?? []);
-    } catch (err) {
-      console.warn('Error fetching jobs:', err);
-      setError('Sin conexión. Intenta de nuevo más tarde');
-    } finally {
-      setLoading(false);
-      clearTimeout(slowTimer);
-      setSlowLoading(false);
-    }
-  }, [userId]);
+      try {
+        const result = await apiFetch<{ data?: RatedJob[] }>(
+          `api/rated-jobs/user/${userId}?sortBy=${sortParam}`,
+        );
+        setJobs(result.data ?? []);
+      } catch (err) {
+        console.warn('Error fetching jobs:', err);
+        setError('Sin conexión. Intenta de nuevo más tarde');
+      } finally {
+        setLoading(false);
+        clearTimeout(slowTimer);
+        setSlowLoading(false);
+      }
+    },
+    [userId],
+  );
 
   useEffect(() => {
     if (userId) {

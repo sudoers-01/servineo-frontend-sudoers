@@ -114,12 +114,10 @@ export function JobOffersSection({
   };
 
   // ⭐ Filtrar según estado real del backend
-  const filteredOffers = (apiOffers || []).filter(
-    (offer) => {
-      const isActive = offer.status ?? false;
-      return filter === 'active' ? isActive : !isActive;
-    },
-  );
+  const filteredOffers = (apiOffers || []).filter((offer) => {
+    const isActive = offer.status ?? false;
+    return filter === 'active' ? isActive : !isActive;
+  });
 
   //CREAR / EDITAR OFERTA
   const onSubmit = async (data: JobOfferFormData) => {

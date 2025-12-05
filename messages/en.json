@@ -1162,5 +1162,177 @@
       "editProfile": "Edit Profile",
       "logout": "Log Out"
     }
+  },
+  "helpCenter": {
+    "title": "Help Center",
+    "subtitle": "Find quick answers, guides and participate in the community to solve your doubts about Servineo.",
+    "search": {
+      "placeholder": "Search for help on Servineo...",
+      "button": "Run search"
+    },
+    "messages": {
+      "emptySearch": "Please enter a search term.",
+      "searching": "Simulated search for: \"{query}\".",
+      "noResults": "No results found for \"{query}\".",
+      "navigating": "Simulating navigation to: {url}",
+      "noCategories": "No categories found matching \"{query}\"."
+    },
+    "suggestions": {
+      "paymentProblems": "Problems with my payment",
+      "paymentMethods": "Accepted payment methods",
+      "resetPassword": "Reset password",
+      "billing": "Billing information",
+      "support": "Support contact"
+    },
+    "sections": {
+      "faq": {
+        "title": "Frequently Asked Questions (FAQ)",
+        "description": "Quick answers to common questions."
+      },
+      "forum": {
+        "title": "User Forum",
+        "description": "Share your questions and help other users"
+      }
+    },
+    "results": {
+      "title": "Results for \"{query}\"",
+      "empty": "No results found."
+    }
+  },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Find quick answers to the most common questions about Servineo",
+    "backButton": "Go back"
+  },
+  "tracking": {
+    "title": "Appointment Tracking",
+    "subtitle": "Activity monitoring and geographic coverage",
+    "filters": {
+      "from": "From",
+      "to": "To"
+    },
+    "map": {
+      "loading": "Loading Map...",
+      "loadingData": "Loading data...",
+      "noAppointments": "No geolocated appointments",
+      "unknown": "Unknown",
+      "client": "Client"
+    },
+    "metrics": {
+      "total": "Total Appointments",
+      "scheduled": "Scheduled Appointments",
+      "cancelled": "Cancelled Appointments"
+    }
+  },
+  "dashboard": {
+    "loading": "Loading statistics...",
+    "error": "Error loading statistics",
+    "periods": {
+      "weekly": "Weekly",
+      "monthly": "Monthly",
+      "yearly": "Yearly"
+    },
+    "periodLabel": "Period",
+    "totalSearches": "Total searches",
+    "noData": "No data available for the selected period",
+    "charts": {
+      "userDistribution": {
+        "title": "User Distribution",
+        "description": "Types of users who performed searches"
+      },
+      "fixerRanges": {
+        "title": "Fixer Name Ranges",
+        "description": "Searches by name letter range"
+      },
+      "cities": {
+        "title": "Cities",
+        "description": "Searches by city"
+      },
+      "jobTypes": {
+        "title": "Job Types",
+        "description": "Searches by job type"
+      },
+      "filterStats": "Filter statistics",
+      "showingTotal": "Showing total searches"
+    }
+  },
+  "adminLogin": {
+    "logo": "SERVINEO",
+    "subtitle": "Admin Login",
+    "welcome": "Welcome back, Admin",
+    "form": {
+      "emailLabel": "Email address",
+      "emailPlaceholder": "admin@servineo.com",
+      "passwordLabel": "Password",
+      "signInButton": "Sign In as Admin",
+      "signingIn": "Signing In...",
+      "or": "or",
+      "googleButton": "Sign in with Google",
+      "connecting": "Connecting..."
+    },
+    "errors": {
+      "googleApiNotAvailable": "Google API not available",
+      "googleClientIdNotConfigured": "Google Client ID not configured",
+      "googleLoginError": "Error with Google Login",
+      "noCredential": "Error: No credential received from Google",
+      "incorrectCredentials": "Incorrect credentials",
+      "serverError": "Server error"
+    }
+  },
+  "footer": {
+    "skipToMain": "Skip to main content",
+    "description": "The leading platform to connect homes with qualified professionals in Cochabamba. Guaranteed quality and reliable service.",
+    "explore": {
+      "title": "Explore SERVINEO",
+      "services": "Services",
+      "offerServices": "Offer your services",
+      "jobOffers": "Job Offers"
+    },
+    "company": {
+      "title": "Company",
+      "aboutUs": "About us",
+      "workWithUs": "Work with us",
+      "testimonials": "Testimonials",
+      "support": "Support",
+      "whyServineo": "Why Servineo?",
+      "howItWorks": "How Servineo works",
+      "restartTour": "View guide again"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacy": "Privacy policy",
+      "terms": "User agreements",
+      "cookies": "Cookie policy"
+    },
+    "contact": {
+      "title": "Contact us",
+      "location": "Location: Cochabamba, Bolivia"
+    },
+    "social": {
+      "title": "Follow us"
+    },
+    "copyright": "© 2024 Servineo. All rights reserved.",
+    "madeWith": "Made with ❤️ in Cochabamba",
+    "operational": "System operational",
+    "ariaLabels": {
+      "footer": "Servineo footer",
+      "footerLinks": "Footer links",
+      "viewLocation": "View location on Google Maps: Cochabamba, Bolivia",
+      "whatsapp": "WhatsApp number",
+      "sendWhatsApp": "Send WhatsApp message to +591 75139742",
+      "email": "Contact email",
+      "sendEmail": "Send email to servineo.serviciostecnicos@gmail.com",
+      "socialMedia": "Servineo social media",
+      "facebook": "Visit Servineo Facebook",
+      "instagram": "Visit Servineo Instagram",
+      "twitter": "Visit Servineo X (formerly Twitter)",
+      "copyright": "Credits and copyright"
+    }
+  },
+  "home": {
+    "mapSection": {
+      "title": "Find Services Near You",
+      "subtitle": "Explore available professionals in your area"
+    }
   }
 }

@@ -191,10 +191,10 @@ export default function PrivacyPage() {
             Si tienes preguntas o deseas ejercer tus derechos, contáctanos:
           </p>
           <a
-            href='mailto:privacidad@servineo.com'
+            href='mailto:servineo.serviciostecnicos@gmail.com'
             className='text-[var(--primary)] font-semibold hover:text-[var(--primary)] transition-colors'
           >
-            privacidad@servineo.com
+            servineo.serviciostecnicos@gmail.com
           </a>
         </div>
       </section>
