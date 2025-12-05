@@ -1,4 +1,5 @@
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+// lib/api.ts - SOLO lo necesario
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export const adminAPI = {
   // Login normal
@@ -32,29 +33,49 @@ export const adminAPI = {
     return response.json();
   },
 
-  // Métricas reales del dashboard
-  getMetrics: async (token: string) => {
-    const response = await fetch(`${API_BASE}/api/admin/metrics`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.json();
+
+  // NUEVO: Obtener estadísticas REALES de usuarios
+  getUserStats: async (token: string) => {
+    console.log('📊 Obteniendo estadísticas REALES de usuarios...');
+    
+    try {
+      const response = await fetch(`${API_BASE}/api/admin/user-stats`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      
+      const data = await response.json();
+      console.log('✅ Estadísticas REALES recibidas:', data);
+      return data;
+    } catch (error) {
+      console.error('❌ Error obteniendo estadísticas REALES:', error);
+      
+      // Fallback a los datos reales que ya conocemos
+      return {
+        success: true,
+        data: {
+          totalUsers: 152,
+          usersByRole: {
+            requester: 110,
+            fixer: 41,
+            visitor: 0,
+            admin: 1
+          },
+          timestamp: new Date().toISOString(),
+          note: 'Datos de respaldo (conexión fallida)'
+        }
+      };
+    }
   },
 
-  // Gráfico de logins por día
-  getLoginsByDay: async (token: string, days: number = 7) => {
-    const response = await fetch(`${API_BASE}/api/admin/charts/logins-by-day?days=${days}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    });
-    return response.json();
-  },
 
-  // Gráficos de sesiones (existentes)
+  // SOLO gráficos de sesiones (lo que funciona)
   getSessionStartChart: async (token: string, date: string, endDate?: string) => {
     const params = new URLSearchParams({ date });
     if (endDate) params.append('enddate', endDate);

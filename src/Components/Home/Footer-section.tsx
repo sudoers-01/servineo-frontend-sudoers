@@ -1,5 +1,7 @@
 'use client';
+
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
@@ -8,12 +10,19 @@ interface FooterSectionProps {
 }
 
 export default function FooterSection({ onRestartTour }: FooterSectionProps = {}) {
+  const router = useRouter();
+  const pathname = usePathname();
   const t = useTranslations('footer');
   const locale = useLocale();
 
   const handleRestartTour = () => {
-    if (onRestartTour) {
-      onRestartTour();
+    // Borrar la flag de que ya vio el tour
+    localStorage.removeItem('servineoTourVisto');
+
+    // Si NO estamos en el home, redirigir primero
+    if (pathname !== '/' && !pathname.endsWith('/es') && !pathname.endsWith('/en')) {
+      // Redirigir al home y la recarga automática activará el tour
+      router.push('/');
     } else {
       localStorage.removeItem('servineoTourVisto');
       window.location.reload();
@@ -52,6 +61,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
         <a href='#main-content' className='sr-only focus:not-sr-only'>
           {t('skipToMain')}
         </a>
+
         <div className='text-center' aria-labelledby='footer-servineo-heading'>
           <h2 id='footer-servineo-heading' className='text-4xl font-bold mb-4 text-[#1AA7ED]'>
             Servineo
@@ -207,8 +217,15 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
               </a>
             </div>
           </div>
+
+          <div className='flex items-center justify-center sm:justify-end gap-2'>
+            <div className='w-2.5 h-2.5 bg-green-500 rounded-full' aria-hidden='true' />
+            <span>Sistema operativo</span>
+          </div>
         </div>
+
         <div className='border-t border-gray-700' role='separator' aria-hidden='true' />
+
         <div
           className='flex flex-col sm:flex-row items-center justify-between gap-4 text-white text-sm pt-8'
           aria-label={t('ariaLabels.copyright')}
