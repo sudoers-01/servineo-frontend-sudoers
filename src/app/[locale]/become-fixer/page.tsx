@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import FixerRegisterForm from '@/Components/fixer/Fixer-register-form';
 import { FixerEnableWizard } from '@/Components/fixer/Filter-eneable-wizard';
-import { Navbar } from '@/Components/Shared/Navbar';
+
 import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
 //import { RootState } from '@/app/redux/store';
@@ -57,7 +57,6 @@ export default function BecomeFixerPage() {
 
   return (
     <div>
-      <Navbar />
       <div className='container mx-auto max-w-4xl p-4'>
         <header className='mb-6 text-center'>
           <h1 className='text-2xl font-bold'>{t('title')}</h1>
