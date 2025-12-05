@@ -855,7 +855,8 @@
     "buttons": {
       "addCertification": "Add Certification",
       "cancel": "Cancel",
-      "save": "Save"
+      "save": "Save",
+      "saving": "Saving..."
     },
     "card": {
       "issued": "Issued",
@@ -897,7 +898,25 @@
         "placeholder": "https://..."
       }
     },
-    "deleteConfirmation": "Are you sure you want to delete this certification?"
+    "deleteConfirmation": "Are you sure you want to delete this certification?",
+    "loading": "Loading certifications...",
+    "errors": {
+      "loadError": "Error loading certifications",
+      "noFixerProfile": "No fixer profile found"
+    },
+    "empty": "No certifications yet. Add your first certification!",
+    "notifications": {
+      "success": "Success",
+      "error": "Error",
+      "createSuccess": "Certification added successfully",
+      "updateSuccess": "Certification updated successfully",
+      "saveError": "Error saving certification",
+      "deleteTitle": "Delete Certification",
+      "deleteMessage": "Are you sure you want to delete this certification?",
+      "deleteSuccessTitle": "Deleted",
+      "deleteSuccess": "Certification deleted successfully",
+      "deleteError": "Error deleting certification"
+    }
   },
   "ExperienceSection": {
     "titles": {

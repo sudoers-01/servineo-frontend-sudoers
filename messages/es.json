@@ -854,7 +854,8 @@
     "buttons": {
       "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando..."
     },
     "card": {
       "issued": "Emitido",
@@ -896,7 +897,25 @@
         "placeholder": "https://..."
       }
     },
-    "deleteConfirmation": "¿Estás seguro de eliminar esta certificación?"
+    "deleteConfirmation": "¿Estás seguro de eliminar esta certificación?",
+    "loading": "Cargando certificaciones...",
+    "errors": {
+      "loadError": "Error al cargar certificaciones",
+      "noFixerProfile": "Perfil de reparador no encontrado"
+    },
+    "empty": "Sin certificaciones aún. ¡Agrega tu primera certificación!",
+    "notifications": {
+      "success": "Éxito",
+      "error": "Error",
+      "createSuccess": "Certificación agregada exitosamente",
+      "updateSuccess": "Certificación actualizada exitosamente",
+      "saveError": "Error al guardar certificación",
+      "deleteTitle": "Eliminar Certificación",
+      "deleteMessage": "¿Estás seguro de que deseas eliminar esta certificación?",
+      "deleteSuccessTitle": "Eliminada",
+      "deleteSuccess": "Certificación eliminada exitosamente",
+      "deleteError": "Error al eliminar certificación"
+    }
   },
   "ExperienceSection": {
     "titles": {
