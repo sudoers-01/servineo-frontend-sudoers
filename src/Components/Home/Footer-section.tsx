@@ -12,19 +12,6 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
   const router = useRouter();
   const pathname = usePathname();
 
-  const handleRestartTour = () => {
-    // Borrar la flag de que ya vio el tour
-    localStorage.removeItem('servineoTourVisto');
-
-    // Si NO estamos en el home, redirigir primero
-    if (pathname !== '/' && !pathname.endsWith('/es') && !pathname.endsWith('/en')) {
-      // Redirigir al home y la recarga automática activará el tour
-      router.push('/');
-    } else {
-      // Si ya estamos en el home, solo recargar
-      window.location.reload();
-    }
-  };
 
   const empresaLinks = [
     { name: 'Sobre nosotros', path: '/info/about' },
@@ -105,14 +92,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
                   </Link>
                 </li>
               ))}
-              <li>
-                <button
-                  onClick={handleRestartTour}
-                  className='footerLink text-left w-full sm:w-auto cursor-pointer hover:text-[#1AA7ED] transition-colors bg-transparent border-none p-0'
-                >
-                  Ver guía nuevamente
-                </button>
-              </li>
+              
             </ul>
           </div>
 

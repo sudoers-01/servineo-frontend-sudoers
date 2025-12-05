@@ -8,6 +8,7 @@ import { FaArrowDown } from 'react-icons/fa6';
 import { Play } from 'lucide-react';
 import * as Popover from '@radix-ui/react-popover';
 import { useTranslations } from 'next-intl';
+import { useRouter, usePathname } from 'next/navigation';
 
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
 const subtitle = 'Estos son los pasos que debe seguir para\npoder usar nuestra plataforma facilmente';
@@ -52,6 +53,22 @@ export const Title = () => {
       //setAudioAllowed(!audioAllowed);
       setPlaying(!playing);
       setShowPauseScreen(!showPauseScreen);
+    }
+  };
+
+  // ... dentro de tu componente ...
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const handleRestartTour = () => {
+    // 1. Borramos la flag del tour visto
+    localStorage.removeItem('servineoTourVisto');
+
+    // 2. La lógica de redirección
+    if (pathname !== '/' && !pathname.endsWith('/es') && !pathname.endsWith('/en')) {
+      router.push('/');
+    } else {
+      window.location.reload();
     }
   };
 
@@ -125,11 +142,15 @@ export const Title = () => {
         </div>
         {/* */}
 
-        <div>
-          <span className='text-white'
-          >
-            {/* añade la redireccion en href para la guia interactiva */}
-            {t("guide")} <Link className='text-ring' href={"/"}> {t("guideLink")} </Link> 
+        <div className='mb-[30px]'>
+          <span className='text-white text-[27px]'>
+            {t("guide")}{" "}
+            <button
+              onClick={handleRestartTour}
+              className='text-white font-bold decoration-2 hover:text-gray-200 bg-transparent border-none cursor-pointer p-0 inline font-inherit'
+            >
+              {t("guideLink")}
+            </button>
           </span>
         </div>
 
