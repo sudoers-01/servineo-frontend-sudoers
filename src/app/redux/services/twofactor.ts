@@ -18,65 +18,82 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   }
 
   const url = `${API_BASE}/api/controlC/2fa${endpoint}`;
-  console.log('🔍 Fetch URL:', url);
 
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const message = errorData.message || `Error ${response.status}`;
-    console.error('❌ Error response:', errorData);
-    throw new Error(message);
-  }
-
-  return response.json();
-}
-
-export async function generateQr() {
+  let data: any = {};
   try {
-    console.log('🔍 Generando QR...');
-    const data = await fetchWithAuth('/generate', {
-      method: 'POST',
-    });
-    console.log('✅ QR generado:', data);
-    return data; // { qrDataUrl, issuer }
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Error al generar código QR';
-    console.error('❌ Error al generar QR:', errorMessage);
-    throw new Error(errorMessage);
+    data = await response.json();
+  } catch {}
+
+  if (!response.ok) {
+    const error: any = new Error(data?.message || `HTTP ${response.status}`);
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
+
+  return data;
 }
 
+// -----------------------------
+// GENERAR QR
+// -----------------------------
+export async function generateQr() {
+  return fetchWithAuth('/generate', { method: 'POST' });
+}
+
+// -----------------------------
+// VERIFICAR TOKEN (AQUÍ ERA EL CAMBIO IMPORTANTE)
+// -----------------------------
 export async function verifyToken(token: string) {
   try {
-    console.log('🔍 Verificando token...');
-    const data = await fetchWithAuth('/verify', {
+    return await fetchWithAuth('/verify', {
       method: 'POST',
       body: JSON.stringify({ token }),
     });
-    console.log('✅ Token verificado:', data);
-    return data; // { recoveryCodes: [...] }
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Código incorrecto o expirado';
-    console.error('❌ Error al verificar token:', errorMessage);
-    throw new Error(errorMessage);
+  } catch (err: any) {
+
+    const status = err?.status;
+    const data = err?.data || {};
+
+    // ------------------------------------------------------
+    // 💥 SI EL BACKEND INDICA BLOQUEO (423)
+    // ------------------------------------------------------
+    if (status === 423) {
+      const e: any = new Error(data.message || "Cuenta bloqueada temporalmente.");
+      e.locked = true;
+      e.lockedUntil = data.lockedUntil;   // ISO string
+      e.retryAfterSeconds = data.retryAfterSeconds;
+      throw e;
+    }
+
+    // ------------------------------------------------------
+    // ❌ TOKEN INCORRECTO, PERO NO BLOQUEADO (400)
+    // Back devuelve:
+    // { message: "Token inválido", attemptsLeft, attempts }
+    // ------------------------------------------------------
+    if (status === 400) {
+      const e: any = new Error(data.message || "Token inválido");
+      e.attemptsLeft = data.attemptsLeft;
+      e.attempts = data.attempts;
+      throw e;
+    }
+
+    // ------------------------------------------------------
+    // ⚠️ Otros errores
+    // ------------------------------------------------------
+    const e: any = new Error(data.message || "Error verificando código");
+    throw e;
   }
 }
 
+// -----------------------------
+// DESHABILITAR 2FA
+// -----------------------------
 export async function disable2fa() {
-  try {
-    console.log('🔍 Deshabilitando 2FA...');
-    const data = await fetchWithAuth('/disable', {
-      method: 'POST',
-    });
-    console.log('✅ 2FA deshabilitado:', data);
-    return data;
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Error al deshabilitar 2FA';
-    console.error('❌ Error al deshabilitar 2FA:', errorMessage);
-    throw new Error(errorMessage);
-  }
+  return fetchWithAuth('/disable', { method: 'POST' });
 }
