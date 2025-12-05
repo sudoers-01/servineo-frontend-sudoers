@@ -172,10 +172,10 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
   /* --------------------------- UI --------------------------- */
 
   return (
-    <form onSubmit={handleSubmit} className='flex flex-col gap-5'>
+    <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
       {/* Nombre y Apellido */}
-      <div className='flex gap-3'>
-        <div className='flex-1'>
+      <div className='flex gap-2'>
+        <div className='flex-1 min-w-0'>
           <label className='block text-sm font-semibold text-gray-600 mb-2'>
             {t('fields.nombre.label')}*
           </label>
@@ -193,7 +193,7 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
           {errors.nombre && <p className='text-red-500 text-xs mt-1'>{errors.nombre}</p>}
         </div>
 
-        <div className='flex-1'>
+        <div className='flex-1 min-w-0'>
           <label className='block text-sm font-semibold text-gray-600 mb-2'>
             {t('fields.apellido.label')}*
           </label>

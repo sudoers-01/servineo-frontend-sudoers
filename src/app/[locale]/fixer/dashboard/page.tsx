@@ -130,12 +130,12 @@ export default function FixerDashboardPage() {
             </div>
             <div className='flex gap-2'>
               {/* ⭐ NUEVO BOTÓN — AGREGADO EXACTAMENTE AQUÍ ⭐ */}
-                <button
-                  onClick={() => router.push('/es/view-rate-jobs')}
-                  className='px-4 py-2 bg-primary hover:bg-blue-800 text-white rounded-full text-sm font-medium transition-colors'
-                >
-                  Ver trabajos calificados
-                </button>
+              <button
+                onClick={() => router.push('/es/view-rate-jobs')}
+                className='px-4 py-2 bg-primary hover:bg-blue-800 text-white rounded-full text-sm font-medium transition-colors'
+              >
+                Ver trabajos calificados
+              </button>
 
               {!editingDescription ? (
                 <button

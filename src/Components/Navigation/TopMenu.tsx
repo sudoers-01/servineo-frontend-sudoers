@@ -405,15 +405,11 @@ export default function TopMenu() {
                 {/* Profile dropdown */}
                 {profileMenuOpen && (
                   <div
-                      ref={dropdownRef}
-                      className={`absolute top-full right-0 mt-2 min-w-[280px] bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-[9999] transition-all duration-200 ${
-                        profileMenuOpen 
-                          ? 'opacity-100 translate-y-0 pointer-events-auto' 
-                          : 'opacity-0 -translate-y-2 pointer-events-none'
-                      }`}
-                      role='dialog'
-                      aria-label='Menu de usuario'
-                    >
+                    ref={dropdownRef}
+                    className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
+                    role='dialog'
+                    aria-label='Menu de usuario'
+                  >
                     <div className='menuHeader'>
                       <strong>Mi cuenta</strong>
                       <button

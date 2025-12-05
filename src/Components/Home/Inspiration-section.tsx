@@ -164,7 +164,7 @@ export default function InspirationSection() {
   }, []);
 
   return (
-    <section className='py-16 px-4 bg-white'>
+    <section id='tour-inspiration-section' className='py-16 px-4 bg-white'>
       <div className='max-w-5xl mx-auto'>
         {/* Header */}
         <div className='text-center mb-12'>
