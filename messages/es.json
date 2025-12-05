@@ -279,7 +279,8 @@
     "perPage": "por página",
     "previous": "Anterior",
     "next": "Siguiente",
-    "showingResults": "Mostrando {start} - {end} de {total} resultados"
+    "showingResults": "Mostrando {start} - {end} de {total} resultados",
+    "page": "Página"
   },
   "sortBy": {
     "featured": "Destacados",
