@@ -40,7 +40,7 @@ function AdvancedSearchPage() {
   const CITIES = DB_VALUES.cities.map((dbValue, index) => ({
     dbValue,
     label: t(
-      `city.options.${['Beni', 'Chuquisaca', 'Cochabamba', 'LaPaz', 'Oruro', 'Pando', 'Potosi', 'Santa Cruz', 'Tarija'][index]}`,
+      `city.options.${['beni', 'chuquisaca', 'cochabamba', 'laPaz', 'oruro', 'pando', 'potosi', 'santaCruz', 'tarija'][index]}`,
     ),
   }));
 
