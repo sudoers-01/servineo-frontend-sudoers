@@ -165,19 +165,21 @@ export function SearchBar({
     600,
   );
 
-  // Manejar cambios en el input
+  // Manejar cambios en el input con límite estricto de 100 caracteres
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
-      let newValue = e.target.value;
+      const newValue = e.target.value;
+
+      // Bloquear si excede los 100 caracteres
       if (newValue.length > 100) {
-        newValue = newValue.slice(0, 100);
         setError('Límite máximo de 100 caracteres.');
-        onChange(newValue);
         return;
       }
+
       onChange(newValue);
       setPreviewValue(null);
       setHighlighted(-1);
+
       const { isValid, error } = validateSearch(newValue);
       setError(isValid ? undefined : error);
     },
@@ -252,6 +254,49 @@ export function SearchBar({
           </button>
         )}
       </div>
+      {/* Input de búsqueda */}
+      <input
+        ref={inputRef}
+        type='text'
+        placeholder={placeholder}
+        value={previewValue ?? value}
+        onChange={handleInputChange}
+        onFocus={() => {
+          setIsFocused(true);
+          setIsOpen(true);
+        }}
+        onBlur={() => {
+          setIsFocused(false);
+          setTimeout(() => {
+            if (!containerRef.current?.contains(document.activeElement)) {
+              setIsOpen(false);
+              setPreviewValue(null);
+            }
+          }, 200);
+        }}
+        onKeyDown={handleKeyDown}
+        disabled={disabled}
+        className={`
+          w-full pl-12 pr-12 py-4 
+          bg-white/90 backdrop-blur-md
+          border-2 rounded-2xl
+          font-medium text-foreground placeholder:text-muted-foreground/60
+          transition-all duration-300 ease-out
+          shadow-lg
+          disabled:opacity-50 disabled:cursor-not-allowed
+          ${error
+            ? 'border-red-500 shadow-[0_0_0_1px_red]'
+            : isFocused
+            ? 'border-primary shadow-[0_0_30px_rgba(59,130,246,0.3)] scale-[1.02] bg-white'
+            : 'border-primary hover:border-blue-300 hover:shadow-[0_0_20px_rgba(59,130,246,0.15)]'}
+          ${disabled ? 'bg-gray-100' : ''}
+        `}
+      />
+
+      {/* Línea de animación en focus */}
+      {isFocused && !disabled && (
+        <div className='absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-transparent via-primary to-transparent animate-pulse' />
+      )}
 
       {/* Dropdown unificado */}
       <SearchDropdown
@@ -286,7 +331,9 @@ export function SearchBar({
       />
 
       {/* Mensaje de error */}
-      {error && <p className='text-red-500 text-sm mt-1'>{error}</p>}
+      <div className='min-h-5 mt-1 pl-4'>
+        {error && <p className='text-red-500 text-sm leading-4 text-left'>{error}</p>}
+      </div>
     </div>
   );
 }
