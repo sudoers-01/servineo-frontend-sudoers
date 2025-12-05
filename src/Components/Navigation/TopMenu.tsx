@@ -3,12 +3,14 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
-import { Menu, X, Wrench, UserCircle, Home, Briefcase, HelpCircle, Wallet, Shield, LogOut, ChevronDown } from 'lucide-react';
+import { Wrench, UserCircle, ClipboardList, HelpCircle, Calendar } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
+import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
-import { IUser } from '@/types/user';
+import type { IUser } from '@/types/user';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface UserState {
   user: IUser | null;
@@ -17,80 +19,259 @@ interface UserState {
 }
 
 interface RootState {
-  user: UserState;
+  user: { user: IUser | null };
 }
 
 export default function TopMenu() {
-  const router = useRouter();
-  const dispatch = useDispatch();
-  
-  const { user, loading } = useSelector((state: RootState) => state.user);
+  const t = useTranslations();
+  const tGlobal = t;
+  const locale = useLocale();
 
-  // Estados de UI
+  const localeDefault = (es: string, en: string) => (locale === 'es' ? es : en);
+
+  const resolveT = (key: string, fallbackKey?: string, fallbackText?: string) => {
+    // Evitar invocar claves namespaced que están provocando MISSING_MESSAGE en runtime.
+    // Usamos primero el fallbackKey (ej. navigation.login) y finalmente el texto por defecto.
+    try {
+      if (fallbackKey) return t(fallbackKey);
+    } catch {}
+    return fallbackText ?? localeDefault('Iniciar Sesión', 'Log in');
+  };
+  const dispatch = useDispatch();
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const user = useSelector((state: RootState) => state.user.user);
+
+  const isAuthenticated = !!user;
+
+  // UI state
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [currentPath, setCurrentPath] = useState<string>(
+    typeof window !== 'undefined' ? window.location.pathname : '',
+  );
+  const [isLogged, setIsLogged] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? Boolean(localStorage.getItem('servineo_token')) : false,
+  );
 
+  // Refs
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLButtonElement | null>(null);
+  const profileMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const profileButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  const goToPaymentCenter = () => {
-    
-    if (user?._id) {
-      router.push(`/payment/centro-de-pagos?fixerId=${user._id}`);
-      setAccountOpen(false);
-      setIsOpen(false);
-    } else {
-      console.error("No se encontró el ID del usuario para ir al centro de pagos");
-    }
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  // Determine if we're in auth flow
+  const isInAuthFlow = () => {
+    if (typeof window === 'undefined') return false;
+    const authRoutes = ['/login', '/signUp'];
+    const isInAuthRoute = authRoutes.some((route) => pathname?.includes(route));
+    const authInProgress = sessionStorage.getItem('auth_in_progress') === 'true';
+    return isInAuthRoute || authInProgress;
+  };
+  const inAuthFlow = isInAuthFlow();
+
+  // NAV items (kept same visual)
+  const navItems =
+    user?.role === 'fixer'
+      ? [
+          { name: 'Servicios', href: '/servicios', icon: <Wrench className='h-5 w-5' /> },
+          {
+            name: 'Ofertas de trabajo',
+            href: '/job-offer-list',
+            icon: <ClipboardList className='h-5 w-5' />,
+          },
+          {
+            name: 'Agenda',
+            href: '/agenda',
+            icon: <Calendar className='h-5 w-5' />,
+          },
+          {
+            name: 'Ayuda',
+            href: '/ask-for-help/centro_de_ayuda',
+            icon: <HelpCircle className='h-5 w-5' />,
+          },
+        ]
+      : [
+          { name: 'Servicios', href: '/servicios', icon: <Wrench className='h-5 w-5' /> },
+          {
+            name: 'Ofertas de trabajo',
+            href: '/job-offer-list',
+            icon: <ClipboardList className='h-5 w-5' />,
+          },
+          {
+            name: 'Ayuda',
+            href: '/ask-for-help/centro_de_ayuda',
+            icon: <HelpCircle className='h-5 w-5' />,
+          },
+        ];
+
+  /* ---------- Helpers ---------- */
+
+  const getPhoto = (u?: IUser | null): string => {
+    if (!u) return '/es/img/icon.png';
+
+    const sources: (string | undefined)[] = [u.photo, u.picture, u.url_photo];
+
+    const valid = sources.find((src) => typeof src === 'string' && src.trim().length > 0);
+
+    return valid ?? '/es/img/icon.png';
   };
 
-  const navItems = [
-    { name: 'Inicio', href: '/', icon: <Home className='h-5 w-5' /> },
-    { name: 'Ofertas de trabajo', href: '/job-offer-list', icon: <Briefcase className='h-5 w-5' /> },
-    { name: 'Ayuda', href: '/ask-for-help/centro_de_ayuda', icon: <HelpCircle className='h-5 w-5' /> },
-  ];
+  const userPhoto = getPhoto(user);
 
-  // Obtener userId desde localStorage
+  /* ---------- Effects (single, non-duplicated) ---------- */
+
+  // scroll header
   useEffect(() => {
-    const token = localStorage.getItem('servineo_user');
-    if (token) {
-      try {
-        const userData = JSON.parse(token);
-        setUserId(userData._id || userData.id);
-      } catch (e) {
-        console.error("Error parsing user token", e);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
+  // set currentPath on mount and when pathname changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') setCurrentPath(window.location.pathname);
+  }, [pathname]);
+
+  // hydrate redux from localStorage (safe)
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    try {
+      const raw = localStorage.getItem('servineo_user');
+      const token = localStorage.getItem('servineo_token');
+
+      if (raw && raw !== 'undefined') {
+        const parsed: IUser = JSON.parse(raw);
+
+        const normalized: IUser = {
+          ...parsed,
+          photo: parsed.photo || parsed.picture || parsed.url_photo || '',
+          picture: parsed.picture || parsed.photo || parsed.url_photo || '',
+          url_photo: parsed.url_photo || parsed.photo || parsed.picture || '',
+        };
+
+        dispatch(setUser(normalized));
+        setIsLogged(Boolean(token));
+        setUserId(normalized._id || normalized.id || null);
+      } else {
+        dispatch(setUser(null));
+        setIsLogged(false);
+        setUserId(null);
       }
+    } catch (e) {
+      localStorage.removeItem('servineo_user');
+      dispatch(setUser(null));
+      setIsLogged(false);
     }
   }, []);
 
-  // Consultar user por ID (RTK Query)
-  const { data: userData } = useGetUserByIdQuery(userId!, {
-    skip: !userId,
-  });
-
-  // Guardar user en redux
+  // listen storage changes (other tabs) & custom event
   useEffect(() => {
-    if (userData) dispatch(setUser(userData));
-  }, [userData, dispatch]);
+    const sync = () => {
+      try {
+        const raw = localStorage.getItem('servineo_user');
+        const token = localStorage.getItem('servineo_token');
 
-  // Scroll y login
+        if (raw && raw !== 'undefined') {
+          const parsed: IUser = JSON.parse(raw);
+
+          const normalized: IUser = {
+            ...parsed,
+            photo: parsed.photo || parsed.picture || parsed.url_photo,
+            picture: parsed.picture || parsed.photo || parsed.url_photo,
+            url_photo: parsed.url_photo || parsed.photo || parsed.picture,
+          };
+
+          dispatch(setUser(normalized));
+          setIsLogged(Boolean(token));
+          setUserId(normalized._id || normalized.id || null);
+        } else {
+          dispatch(setUser(null));
+          setIsLogged(false);
+          setUserId(null);
+        }
+      } catch {
+        dispatch(setUser(null));
+        setIsLogged(false);
+        setUserId(null);
+      }
+    };
+
+    window.addEventListener('storage', sync);
+    window.addEventListener('servineo_user_updated', sync);
+
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('servineo_user_updated', sync);
+    };
+  }, [dispatch]);
+
+  // auto-logout on inactivity (15 minutes)
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const logoutOnIdle = () => {
+      try {
+        const raw = localStorage.getItem('servineo_user');
+        const email = raw ? (JSON.parse(raw)?.email ?? '') : '';
+        if (email) sessionStorage.setItem('prefill_email', email);
+      } catch {}
+      localStorage.removeItem('servineo_token');
+      localStorage.removeItem('servineo_user');
+      dispatch(setUser(null));
+      sessionStorage.setItem('session_expired', '1');
+      const emailParam = sessionStorage.getItem('prefill_email')
+        ? `&email=${encodeURIComponent(sessionStorage.getItem('prefill_email') || '')}`
+        : '';
+      router.push(`/login?expired=1${emailParam}`);
+    };
 
-    const token = localStorage.getItem('servineo_token');
-    setIsLogged(!!token);
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(logoutOnIdle, 15 * 60 * 1000);
+    };
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'] as const;
+    events.forEach((ev) => window.addEventListener(ev, resetTimer));
 
-  // Click fuera del dropdown
+    resetTimer();
+    return () => {
+      if (timer) clearTimeout(timer);
+      events.forEach((ev) => window.removeEventListener(ev, resetTimer));
+    };
+  }, [dispatch, router]);
+
+  // close profile menu on outside click
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (
+        profileMenuOpen &&
+        dropdownRef.current && // ESTE es el ref correcto
+        !dropdownRef.current.contains(e.target as Node) &&
+        !profileButtonRef.current?.contains(e.target as Node)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleOutside);
+    return () => document.removeEventListener('click', handleOutside);
+  }, [profileMenuOpen]);
+
+  // close account dropdown on click outside (mobile)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setAccountOpen(false);
       }
     };
@@ -98,13 +279,20 @@ export default function TopMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem('servineo_token');
-    localStorage.removeItem('servineo_user');
-    window.location.href = '/';
-  };
+  /* ---------- RTK Query: fetch user by ID (if present) ---------- */
+  const { data: fetchedUser } = useGetUserByIdQuery(userId ?? skipToken);
+
+  useEffect(() => {
+    if (fetchedUser) {
+      dispatch(setUser(fetchedUser as IUser));
+      setIsLogged(true);
+    }
+  }, [fetchedUser, dispatch]);
+
+  /* ---------- Handlers ---------- */
 
   const handleLogoClick = () => {
+    if (typeof window === 'undefined') return;
     if (window.location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
@@ -112,153 +300,196 @@ export default function TopMenu() {
     }
   };
 
-  // --- RENDERIZADO ---
+  const doLogout = () => {
+    try {
+      const raw = localStorage.getItem('servineo_user');
+      const email = raw ? (JSON.parse(raw)?.email ?? '') : '';
+      if (email) sessionStorage.setItem('prefill_email', email);
+    } catch {}
+    localStorage.removeItem('servineo_token');
+    localStorage.removeItem('servineo_user');
+    dispatch(setUser(null));
+    setProfileMenuOpen(false);
+    setIsLogged(false);
+    router.push('/');
+  };
 
+  /* ---------- Render ---------- */
   return (
     <>
       {/* DESKTOP HEADER */}
       <header
         className={`hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-white shadow-md' : 'bg-white/10 backdrop-blur-md'
+          scrolled ? 'bg-white shadow-md' : 'bg-white'
         } border-b border-gray-100`}
         role='banner'
       >
-        <div className='w-full max-w-7xl mx-auto px-4 flex items-center justify-between h-16'>
-          
+        <div className='w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20'>
           {/* Logo */}
           <button
             ref={logoRef}
             onClick={handleLogoClick}
-            className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none'
+            className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]'
             aria-label='Ir al inicio'
           >
-            <div className='relative overflow-hidden rounded-full shadow-sm w-10 h-10'>
+            <div className='relative overflow-hidden rounded-full shadow-md'>
               <Image
-                src='/icon.png' 
-                alt='Logo'
-                fill
-                className='object-cover'
+                src='/es/img/icon.png'
+                alt='Logo de Servineo'
+                width={40}
+                height={40}
+                className='transition-transform duration-300 group-hover:scale-110'
               />
             </div>
-            <span className='text-xl font-bold text-blue-600 tracking-tight'>
-              SERVINEO
+            <span
+              className='text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]'
+              style={{ fontFamily: 'var(--font-sans)' }}
+            >
+              Servineo
             </span>
           </button>
 
           {/* Desktop Nav */}
-          <nav className='flex gap-6 items-center'>
+          <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
             {navItems.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className='flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition-colors text-sm'
+                className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
+                  ${currentPath === item.href ? 'text-[var(--color-primary)] after:w-full' : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'}`}
               >
-                {item.icon}
                 {item.name}
               </Link>
             ))}
-            
-            {/* Link extra para Fixers */}
-            {user?.role === 'fixer' && (
-               <Link
-                 href='/fixer/my-offers'
-                 className='flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition-colors text-sm'
-               >
-                 <Briefcase className='h-5 w-5' />
-                 Mis Ofertas
-               </Link>
-            )}
           </nav>
 
-          {/* Desktop Right (Auth & Dropdown) */}
-          <div className='flex items-center gap-4'>
-            {!isLogged ? (
+          {/* Desktop Right */}
+          <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
+            {!isClient ? (
+              <div style={{ width: 100, height: 10 }} />
+            ) : !isLogged ? (
               <>
                 <Link
                   href='/login'
-                  className='text-gray-700 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium transition-colors'
+                  className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
                 >
-                  Iniciar Sesión
+                  {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
                 </Link>
                 <Link
                   href='/signUp'
-                  className='bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-shadow shadow-sm hover:shadow-md'
+                  className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
                 >
-                  Regístrate
+                  {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
                 </Link>
               </>
             ) : (
-              <div className='relative' ref={dropdownRef}>
+              <div className='relative'>
                 <button
-                  onClick={() => setAccountOpen(!accountOpen)}
-                  className='flex items-center gap-2 px-2 py-1 rounded-full border border-transparent hover:border-gray-200 transition-all'
+                  ref={profileButtonRef}
+                  onClick={() => setProfileMenuOpen((v) => !v)}
+                  className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
                 >
-                  <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-300 relative">
-                     <Image 
-                        src={user?.url_photo || '/no-photo.png'} 
-                        alt="Profile" 
-                        fill
-                        className="object-cover"
-                     />
-                  </div>
-                  <span className='text-sm font-medium text-gray-700 hidden xl:block'>
-                    {user?.name?.split(' ')[0]}
+                  <img
+                    src={userPhoto}
+                    alt={user?.name ?? 'Usuario'}
+                    className='w-10 h-10 rounded-full object-cover border'
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
+                    }}
+                  />
+                  <span className='font-medium text-gray-700 hover:text-primary'>
+                    {user?.name ?? fetchedUser?.name ?? 'Usuario'}
                   </span>
-                  <ChevronDown className="h-4 w-4 text-gray-500" />
                 </button>
 
-                {/* DROPDOWN MENU */}
-                {accountOpen && (
-                  <div className='absolute right-0 mt-2 w-64 bg-white shadow-xl border border-gray-100 rounded-xl py-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200'>
-                    
-                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
-                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                            {user?.role === 'fixer' ? 'Cuenta Fixer' : 'Cuenta Cliente'}
-                        </p>
-                        <p className="text-sm text-gray-700 truncate">{user?.email}</p>
+                {/* Profile dropdown */}
+                {profileMenuOpen && (
+                  <div
+                      ref={dropdownRef}
+                      className={`absolute top-full right-0 mt-2 min-w-[280px] bg-white border border-gray-200 rounded-xl shadow-xl p-4 z-[9999] transition-all duration-200 ${
+                        profileMenuOpen 
+                          ? 'opacity-100 translate-y-0 pointer-events-auto' 
+                          : 'opacity-0 -translate-y-2 pointer-events-none'
+                      }`}
+                      role='dialog'
+                      aria-label='Menu de usuario'
+                    >
+                    <div className='menuHeader'>
+                      <strong>Mi cuenta</strong>
+                      <button
+                        className='closeBtn'
+                        onClick={() => setProfileMenuOpen(false)}
+                        aria-label='Cerrar menu'
+                      >
+                        ✕
+                      </button>
                     </div>
 
-                    {/* OPCIONES COMUNES */}
-                    <Link href='/requesterEdit' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
-                        <UserCircle className="h-4 w-4" /> Editar Perfil
-                    </Link>
+                    <img className='profilePreview' src={userPhoto} alt={user?.name ?? 'Usuario'} />
 
-                    {/* OPCIONES CLIENTE */}
-                    {user?.role === 'requester' && (
-                        <Link href='/become-fixer' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
-                            <Wrench className="h-4 w-4" /> Convertirse en Fixer
-                        </Link>
-                    )}
+                    <div className='menuLabel'>
+                      {user?.name ?? fetchedUser?.name ?? 'Sin nombre'}
+                    </div>
+                    <div className='menuLabel'>
+                      {user?.email ?? fetchedUser?.email ?? 'Sin email'}
+                    </div>
+                    <div className='menuLabel'>
+                      {user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}
+                    </div>
 
-                    {/* OPCIONES FIXER (Integradas de tu repo) */}
-                    {user?.role === 'fixer' && (
-                        <>
-                            <Link href='/fixer/dashboard' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
-                                <UserCircle className="h-4 w-4" /> Dashboard
-                            </Link>
-                            
-                            {/* BOTÓN CENTRO DE PAGOS */}
-                            <button 
-                                onClick={goToPaymentCenter}
-                                className='w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'
-                            >
-                                <Wallet className="h-4 w-4" /> Centro de Pagos
-                            </button>
+                    <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
-                            <Link href='/payment/Pagos-Fisico' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
-                                <Shield className="h-4 w-4" /> Confirmar Pagos
-                            </Link>
-                        </>
-                    )}
-
-                    <div className="border-t border-gray-100 mt-2 pt-2">
+                    {user?.role !== 'fixer' && (
+                      <>
                         <button
-                        onClick={logout}
-                        className='w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50'
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProfileMenuOpen(false);
+                            router.push('/requesterEdit/perfil');
+                          }}
+                          className='menuItem'
                         >
-                        <LogOut className="h-4 w-4" /> Cerrar sesión
+                          Editar perfil
                         </button>
-                    </div>
+
+                        <button
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProfileMenuOpen(false);
+                            router.push('/become-fixer');
+                          }}
+                          className='menuItem'
+                        >
+                          Convertirse en Fixer
+                        </button>
+                      </>
+                    )}
+
+                    {user?.role === 'fixer' && (
+                      <>
+                        <Link
+                          href='/fixer/dashboard'
+                          onMouseDown={(e) => e.stopPropagation()}
+                          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
+                        >
+                          <UserCircle className='h-4 w-4' />
+                          Perfil de Fixer
+                        </Link>
+                      </>
+                    )}
+
+                    <button
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        doLogout();
+                      }}
+                      className={`menuItem logoutBtn`}
+                    >
+                      Cerrar sesión
+                    </button>
                   </div>
                 )}
               </div>
@@ -267,98 +498,188 @@ export default function TopMenu() {
         </div>
       </header>
 
-      {/* MOBILE HEADER */}
+      {/* MOBILE/TABLET HEADER */}
       <div className='lg:hidden'>
-        <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
-          
-          <button onClick={handleLogoClick} className='flex items-center gap-2'>
-             <div className='relative w-8 h-8 rounded-full overflow-hidden'>
-                <Image src='/icon.png' alt='Servineo' fill className='object-cover' />
-             </div>
-             <span className='font-bold text-blue-600 text-lg'>SERVINEO</span>
+        {/* Barra superior */}
+        <div className='flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
+          {/* Logo */}
+          <button onClick={handleLogoClick} className='flex items-center gap-2 min-w-0'>
+            <div className='relative overflow-hidden rounded-full shadow-md shrink-0'>
+              <Image src='/es/img/icon.png' alt='Servineo' width={32} height={32} />
+            </div>
+            <span className='text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]'>
+              Servineo
+            </span>
           </button>
 
-          <div className="flex items-center gap-3">
-             {/* Botón menú hamburguesa */}
-             <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="p-2 text-gray-600 rounded-md hover:bg-gray-100 focus:outline-none"
-             >
-                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-             </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu Dropdown */}
-        {isOpen && (
-            <div className="fixed top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-xl z-40 max-h-[80vh] overflow-y-auto">
-                <div className="p-4 space-y-4">
-                    {/* Navegación básica */}
-                    <div className="space-y-2">
-                        {navItems.map((item) => (
-                            <Link 
-                                key={item.name} 
-                                href={item.href}
-                                onClick={() => setIsOpen(false)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 text-gray-700 font-medium"
-                            >
-                                {item.icon} {item.name}
-                            </Link>
-                        ))}
-                    </div>
-
-                    <div className="border-t border-gray-100 pt-4">
-                        {!isLogged ? (
-                            <div className="grid grid-cols-2 gap-3">
-                                <Link href="/login" className="flex justify-center py-2 border border-gray-300 rounded-lg text-gray-700 font-medium">
-                                    Ingresar
-                                </Link>
-                                <Link href="/signUp" className="flex justify-center py-2 bg-blue-600 text-white rounded-lg font-medium">
-                                    Registrarse
-                                </Link>
-                            </div>
-                        ) : (
-                            <div className="space-y-3">
-                                <div className="flex items-center gap-3 px-2">
-                                    <div className="relative w-10 h-10 rounded-full overflow-hidden">
-                                        <Image src={user?.url_photo || '/no-photo.png'} alt="User" fill className="object-cover"/>
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-gray-800">{user?.name}</p>
-                                        <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
-                                    </div>
-                                </div>
-
-                                {user?.role === 'fixer' && (
-                                    <>
-                                        <button 
-                                            onClick={goToPaymentCenter}
-                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-50 text-blue-700 font-medium"
-                                        >
-                                            <Wallet className="h-5 w-5" /> Centro de Pagos
-                                        </button>
-                                        <Link href="/payment/Pagos-Fisico" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 text-gray-700 font-medium">
-                                            <Shield className="h-5 w-5" /> Confirmar Pagos
-                                        </Link>
-                                    </>
-                                )}
-
-                                <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-red-600 font-medium">
-                                    <LogOut className="h-5 w-5" /> Cerrar Sesión
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
+          {/* Auth Buttons */}
+          {!isClient ? (
+            // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
+            <div style={{ width: 100, height: 10 }} />
+          ) : !isLogged ? (
+            <div className='flex items-center gap-2 flex-nowrap'>
+              <Link
+                href='/login'
+                className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+              >
+                {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
+              </Link>
+              <Link
+                href='/signUp'
+                className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+              >
+                {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
+              </Link>
             </div>
-        )}
+          ) : (
+            <>
+              <button
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                ref={profileButtonRef}
+                className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
+              >
+                <img
+                  src={userPhoto}
+                  alt={user?.name ?? 'Usuario'}
+                  className='w-8 h-8 rounded-full object-cover border'
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
+                  }}
+                />
+                <span className='text-gray-700 font-medium'>
+                  {user?.name ?? fetchedUser?.name ?? 'Usuario'}
+                </span>
+              </button>
+              {profileMenuOpen && (
+                <div
+                  ref={dropdownRef}
+                  className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
+                  role='dialog'
+                  aria-label='Menu de usuario'
+                >
+                  <div className='menuHeader'>
+                    <strong>Mi cuenta</strong>
+                    <button
+                      className='closeBtn'
+                      onClick={() => setProfileMenuOpen(false)}
+                      aria-label='Cerrar menu'
+                    >
+                      ✕
+                    </button>
+                  </div>
 
-        {/* Espaciadores */}
-        <div className='h-14' /> 
+                  <img className='profilePreview' src={userPhoto} alt='Foto' />
+
+                  <div className='menuLabel'>{user?.name ?? fetchedUser?.name ?? 'Sin nombre'}</div>
+                  <div className='menuLabel'>
+                    {user?.email ?? fetchedUser?.email ?? 'Sin email'}
+                  </div>
+                  <div className='menuLabel'>
+                    {user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}
+                  </div>
+
+                  <hr style={{ margin: '8px 0', opacity: 0.3 }} />
+
+                  {user?.role !== 'fixer' && (
+                    <>
+                      <button
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProfileMenuOpen(false);
+                          router.push('/requesterEdit/perfil');
+                        }}
+                        className='menuItem'
+                      >
+                        Editar perfil
+                      </button>
+
+                      <button
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProfileMenuOpen(false);
+                          router.push('/become-fixer');
+                        }}
+                        className='menuItem'
+                      >
+                        Convertirse en Fixer
+                      </button>
+                    </>
+                  )}
+
+                  {user?.role === 'fixer' && (
+                    <>
+                      <Link
+                        href='/fixer/dashboard'
+                        className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
+                      >
+                        <UserCircle className='h-4 w-4' />
+                        Perfil de Fixer
+                      </Link>
+                    </>
+                  )}
+
+                  <button
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      doLogout();
+                    }}
+                    className={`menuItem logoutBtn`}
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Dropdown Mobile */}
+          {accountOpen && isLogged && (
+            <div
+              ref={dropdownRef}
+              className='absolute top-16 right-3 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50'
+            >
+              <Link
+                href='/requesterEdit'
+                className='block px-4 py-2 text-gray-700 hover:bg-gray-50'
+              >
+                {t('dropdown.editProfile')}
+              </Link>
+              <button
+                onClick={doLogout}
+                className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
+              >
+                {t('dropdown.logout')}
+              </button>
+            </div>
+          )}
+        </div>
+        {/* Barra inferior fija con iconos */}
+        <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
+          {navItems.map((item) => (
+            <button
+              key={item.name}
+              onClick={() => (window.location.href = item.href)}
+              className={`flex flex-col items-center text-[11px] px-1 py-1 ${
+                currentPath === item.href
+                  ? 'text-[var(--color-primary)]'
+                  : 'text-gray-900 hover:text-[var(--color-primary)]'
+              }`}
+            >
+              {item.icon}
+              <span className='mt-1'>{item.name}</span>
+            </button>
+          ))}
+        </nav>
+        {/* Espaciadores para contenido */}
+        <div className='h-16' /> {/* top */}
+        <div className='h-16' /> {/* bottom */}
       </div>
 
       {/* Spacer Desktop */}
-      <div className='hidden lg:block h-16' />
+      <div className='hidden lg:block h-20' />
     </>
   );
 }
