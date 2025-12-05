@@ -36,7 +36,7 @@ export function SearchBar({
   const pathname = usePathname();
 
   // Estado local
-  const [isFocused, setIsFocused] = useState(false);
+  const [setIsFocused] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [highlighted, setHighlighted] = useState<number>(-1);
   const [longPressedItem, setLongPressedItem] = useState<string | null>(null);
@@ -286,7 +286,9 @@ export function SearchBar({
       />
 
       {/* Mensaje de error */}
-      {error && <p className='text-red-500 text-sm mt-1'>{error}</p>}
+      <div className='min-h-5 mt-1 pl-4'>
+        {error && <p className='text-red-500 text-sm leading-4 text-left'>{error}</p>}
+      </div>
     </div>
   );
 }
