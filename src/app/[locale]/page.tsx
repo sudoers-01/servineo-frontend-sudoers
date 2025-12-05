@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { useTranslations } from 'next-intl';
 import HeroSection from '@/Components/Home/Hero-section';
 import ServicesSection from '@/Components/Home/Services-section';
 import HowItWorksSection from '@/Components/Home/HowItWorks-section';
@@ -22,6 +23,7 @@ interface RootState {
 export default function Home() {
   const { user, loading } = useSelector((state: RootState) => state.user);
   const [authReady, setAuthReady] = useState(false);
+  const t = useTranslations('home');
 
   useEffect(() => {
     if (!loading) setAuthReady(true);
