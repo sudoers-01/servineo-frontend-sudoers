@@ -1161,5 +1161,172 @@
       "editProfile": "Editar perfil",
       "logout": "Cerrar sesión"
     }
+  },
+  "helpCenter": {
+    "title": "Centro de Ayuda",
+    "subtitle": "Encuentra respuestas rápidas, guías y participa en la comunidad para resolver tus dudas sobre Servineo.",
+    "search": {
+      "placeholder": "Buscar ayuda en Servineo...",
+      "button": "Ejecutar búsqueda"
+    },
+    "messages": {
+      "emptySearch": "Por favor, ingresa un término de búsqueda.",
+      "searching": "Búsqueda simulada para: \"{query}\".",
+      "noResults": "No se encontraron resultados para \"{query}\".",
+      "navigating": "Simulando navegación a: {url}",
+      "noCategories": "No se encontraron categorías que coincidan con \"{query}\"."
+    },
+    "suggestions": {
+      "paymentProblems": "Problemas con mi pago",
+      "paymentMethods": "Métodos de pago aceptados",
+      "resetPassword": "Restablecer contraseña",
+      "billing": "Información de facturación",
+      "support": "Contacto de soporte"
+    },
+    "sections": {
+      "faq": {
+        "title": "Preguntas Frecuentes (FAQ)",
+        "description": "Respuestas rápidas a las dudas comunes."
+      },
+      "forum": {
+        "title": "Foro de Usuarios",
+        "description": "Comparte tus dudas y ayuda a otros usuarios"
+      }
+    },
+    "results": {
+      "title": "Resultados para \"{query}\"",
+      "empty": "No se encontraron resultados."
+    }
+  },
+  "faq": {
+    "title": "Preguntas Frecuentes",
+    "subtitle": "Encuentra respuestas rápidas a las dudas más comunes sobre Servineo",
+    "backButton": "Volver atrás"
+  },
+  "tracking": {
+    "title": "Tracking de Citas",
+    "subtitle": "Monitoreo de actividad y cobertura geográfica",
+    "filters": {
+      "from": "Desde",
+      "to": "Hasta"
+    },
+    "map": {
+      "loading": "Cargando Mapa...",
+      "loadingData": "Cargando datos...",
+      "noAppointments": "No hay citas geolocalizadas",
+      "unknown": "Desconocido",
+      "client": "Cliente"
+    },
+    "metrics": {
+      "total": "Total Citas",
+      "scheduled": "Citas Agendadas",
+      "cancelled": "Citas Canceladas"
+    }
+  },
+  "dashboard": {
+    "loading": "Cargando estadísticas...",
+    "error": "Error al cargar las estadísticas",
+    "periods": {
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "yearly": "Anual"
+    },
+    "periodLabel": "Período",
+    "totalSearches": "Total de búsquedas",
+    "noData": "No hay datos disponibles para el período seleccionado",
+    "charts": {
+      "userDistribution": {
+        "title": "Distribución de usuarios",
+        "description": "Tipos de usuarios que realizaron búsquedas"
+      },
+      "fixerRanges": {
+        "title": "Rangos de nombres de fixers",
+        "description": "Búsquedas por rango de letras del nombre"
+      },
+      "cities": {
+        "title": "Ciudades",
+        "description": "Búsquedas por ciudad"
+      },
+      "jobTypes": {
+        "title": "Tipos de trabajo",
+        "description": "Búsquedas por tipo de trabajo"
+      },
+      "filterStats": "Estadísticas de este filtro",
+      "showingTotal": "Mostrando búsquedas totales"
+    }
+  },
+  "adminLogin": {
+    "logo": "SERVINEO",
+    "subtitle": "Admin Login",
+    "welcome": "Bienvenido de nuevo, Admin",
+    "form": {
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "admin@servineo.com",
+      "passwordLabel": "Contraseña",
+      "signInButton": "Iniciar sesión como Admin",
+      "signingIn": "Iniciando sesión...",
+      "or": "o",
+      "googleButton": "Iniciar sesión con Google",
+      "connecting": "Conectando..."
+    },
+    "errors": {
+      "googleApiNotAvailable": "Google API no disponible",
+      "googleClientIdNotConfigured": "Google Client ID no configurado",
+      "googleLoginError": "Error con Google Login",
+      "noCredential": "Error: No se recibió credencial de Google",
+      "incorrectCredentials": "Credenciales incorrectas",
+      "serverError": "Error del servidor"
+    }
+  },
+  "footer": {
+    "skipToMain": "Saltar al contenido principal",
+    "description": "La plataforma líder para conectar hogares con profesionales calificados en Cochabamba. Calidad garantizada y servicio confiable.",
+    "explore": {
+      "title": "Exploremos SERVINEO",
+      "services": "Servicios",
+      "offerServices": "Ofrece tus servicios",
+      "jobOffers": "Ofertas de trabajo"
+    },
+    "company": {
+      "title": "Empresa",
+      "aboutUs": "Sobre nosotros",
+      "workWithUs": "Trabaja con nosotros",
+      "testimonials": "Testimonios",
+      "support": "Apoyo",
+      "whyServineo": "¿Por qué Servineo?",
+      "howItWorks": "Cómo funciona Servineo",
+      "restartTour": "Ver guía nuevamente"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacy": "Política de privacidad",
+      "terms": "Acuerdos de usuario",
+      "cookies": "Política de cookies"
+    },
+    "contact": {
+      "title": "Contáctanos",
+      "location": "Ubicación: Cochabamba, Bolivia"
+    },
+    "social": {
+      "title": "Síguenos"
+    },
+    "copyright": "© 2024 Servineo. Todos los derechos reservados.",
+    "madeWith": "Hecho con ❤️ en Cochabamba",
+    "operational": "Sistema operativo",
+    "ariaLabels": {
+      "footer": "Pie de página de Servineo",
+      "footerLinks": "Enlaces del pie de página",
+      "viewLocation": "Ver ubicación en Google Maps: Cochabamba, Bolivia",
+      "whatsapp": "Número de WhatsApp",
+      "sendWhatsApp": "Enviar mensaje por WhatsApp al +591 75139742",
+      "email": "Correo electrónico de contacto",
+      "sendEmail": "Enviar correo electrónico a servineo.serviciostecnicos@gmail.com",
+      "socialMedia": "Redes sociales de Servineo",
+      "facebook": "Visitar Facebook de Servineo",
+      "instagram": "Visitar Instagram de Servineo",
+      "twitter": "Visitar X (antes Twitter) de Servineo",
+      "copyright": "Créditos y derechos de autor"
+    }
   }
+
 }

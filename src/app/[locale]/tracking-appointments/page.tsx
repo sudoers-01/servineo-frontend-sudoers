@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import dynamic from 'next/dynamic';
+import { useTranslations } from 'next-intl';
 
 import {
   useGetMapLocationsQuery,
@@ -43,12 +44,15 @@ const AdminMap = dynamic(() => import('@/Components/Statistics-panel/admin-map')
   ssr: false,
   loading: () => (
     <div className='h-full w-full bg-gray-100 flex items-center justify-center text-gray-500 animate-pulse'>
-      Cargando Mapa...
+      {/* El texto se traduce en el componente padre */}
+      <span id="map-loading-text"></span>
     </div>
   ),
 });
 
 const StatisticsPage: React.FC = () => {
+  const t = useTranslations('tracking');
+  
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 
@@ -61,6 +65,14 @@ const StatisticsPage: React.FC = () => {
 
   const { data: fixerStats = [] } = useGetFixerStatsQuery();
 
+  // Actualizar el texto del loading después del montaje
+  React.useEffect(() => {
+    const loadingElement = document.getElementById('map-loading-text');
+    if (loadingElement) {
+      loadingElement.textContent = t('map.loading');
+    }
+  }, [t]);
+
   const filteredAppointments = React.useMemo(() => {
     if (!rawMapData) return [];
 
@@ -69,8 +81,8 @@ const StatisticsPage: React.FC = () => {
         .map(
           (app): MappedAppointment => ({
             id: app._id,
-            fixerName: app.fixerName || 'Desconocido',
-            requesterName: app.requesterName || app.current_requester_name || 'Cliente',
+            fixerName: app.fixerName || t('map.unknown'),
+            requesterName: app.requesterName || app.current_requester_name || t('map.client'),
             date: app.date || app.starting_time || '',
             status: app.status || app.schedule_state || 'unknown',
             lat: Number(app.lat),
@@ -90,7 +102,7 @@ const StatisticsPage: React.FC = () => {
           return appointmentDate >= start && appointmentDate <= end;
         })
     );
-  }, [rawMapData, startDate, endDate]);
+  }, [rawMapData, startDate, endDate, t]);
 
   return (
     <div className='w-full min-h-screen bg-gray-50 pb-10'>
@@ -98,13 +110,15 @@ const StatisticsPage: React.FC = () => {
         {/* 1. ENCABEZADO Y FILTROS */}
         <div className='bg-white p-5 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between items-center gap-4'>
           <div>
-            <h1 className='text-2xl font-bold text-gray-800'>Tracking de Citas</h1>
-            <p className='text-gray-500 text-sm'>Monitoreo de actividad y cobertura geográfica</p>
+            <h1 className='text-2xl font-bold text-gray-800'>{t('title')}</h1>
+            <p className='text-gray-500 text-sm'>{t('subtitle')}</p>
           </div>
 
           <div className='flex flex-wrap gap-3 items-end'>
             <div>
-              <label className='text-xs text-gray-500 block mb-1 font-medium'>Desde</label>
+              <label className='text-xs text-gray-500 block mb-1 font-medium'>
+                {t('filters.from')}
+              </label>
               <input
                 type='date'
                 value={startDate}
@@ -113,7 +127,9 @@ const StatisticsPage: React.FC = () => {
               />
             </div>
             <div>
-              <label className='text-xs text-gray-500 block mb-1 font-medium'>Hasta</label>
+              <label className='text-xs text-gray-500 block mb-1 font-medium'>
+                {t('filters.to')}
+              </label>
               <input
                 type='date'
                 value={endDate}
@@ -130,13 +146,13 @@ const StatisticsPage: React.FC = () => {
           <div className='lg:col-span-3 bg-white rounded-xl shadow border border-gray-200 overflow-hidden relative z-0 h-[400px] lg:h-full'>
             {loadingMap ? (
               <div className='h-full w-full flex items-center justify-center text-gray-500'>
-                Cargando datos...
+                {t('map.loadingData')}
               </div>
             ) : filteredAppointments.length > 0 ? (
               <AdminMap appointments={filteredAppointments} />
             ) : (
               <div className='h-full w-full flex flex-col items-center justify-center text-gray-400'>
-                <p>No hay citas geolocalizadas</p>
+                <p>{t('map.noAppointments')}</p>
               </div>
             )}
           </div>

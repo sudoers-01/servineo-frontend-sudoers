@@ -1,6 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import styles from '../styles/admin.module.css';
 import { adminAPI } from '../lib/api';
 
@@ -34,6 +35,9 @@ declare global {
 }
 
 export default function AdminLogin() {
+  const t = useTranslations('adminLogin');
+  const locale = useLocale();
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -53,13 +57,13 @@ export default function AdminLogin() {
       const client = google?.accounts?.oauth2?.initTokenClient;
 
       if (!client) {
-        throw new Error('Google API no disponible');
+        throw new Error(t('errors.googleApiNotAvailable'));
       }
 
       const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
 
       if (!clientId) {
-        throw new Error('Google Client ID no configurado');
+        throw new Error(t('errors.googleClientIdNotConfigured'));
       }
       // Solicitar token
       client({
@@ -68,14 +72,14 @@ export default function AdminLogin() {
         callback: async (response: GoogleTokenResponse) => {
           if (response.error) {
             console.error('Google auth error:', response);
-            alert('Error con Google Login');
+            alert(t('errors.googleLoginError'));
             setGoogleLoading(false);
             return;
           }
 
           if (!response.credential) {
             console.error('No credential received from Google');
-            alert('Error: No se recibió credencial de Google');
+            alert(t('errors.noCredential'));
             setGoogleLoading(false);
             return;
           }
@@ -87,13 +91,13 @@ export default function AdminLogin() {
             if (data.success) {
               localStorage.setItem('adminToken', data.token);
               localStorage.setItem('adminUser', JSON.stringify(data.user));
-              router.push('/es/user-admin/dashboard');
+              router.push(`/${locale}/user-admin/dashboard`);
             } else {
-              alert(data.message || 'Error con Google Login');
+              alert(data.message || t('errors.googleLoginError'));
             }
           } catch (error) {
             console.error('Google login error:', error);
-            alert('Error con Google Login');
+            alert(t('errors.googleLoginError'));
           } finally {
             setGoogleLoading(false);
           }
@@ -101,7 +105,7 @@ export default function AdminLogin() {
       }).requestAccessToken();
     } catch (error) {
       console.error('Google login error:', error);
-      alert('Error con Google Login');
+      alert(t('errors.googleLoginError'));
       setGoogleLoading(false);
     }
   };
@@ -135,13 +139,13 @@ export default function AdminLogin() {
       if (data.success) {
         localStorage.setItem('adminToken', data.token);
         localStorage.setItem('adminUser', JSON.stringify(data.user));
-        router.push('/es/user-admin/dashboard');
+        router.push(`/${locale}/user-admin/dashboard`);
       } else {
-        alert(data.message || 'Credenciales incorrectas');
+        alert(data.message || t('errors.incorrectCredentials'));
       }
     } catch (error) {
       console.error('Login error:', error);
-      alert('Error del servidor');
+      alert(t('errors.serverError'));
     } finally {
       setLoading(false);
     }
@@ -150,26 +154,26 @@ export default function AdminLogin() {
   return (
     <div className={styles.adminLoginContainer}>
       <div className={styles.loginHeader}>
-        <h1 className={styles.logo}>SERVINEO</h1>
-        <p className={styles.subtitle}>Admin Login</p>
-        <h2 className={styles.welcome}>Welcome back, Admin</h2>
+        <h1 className={styles.logo}>{t('logo')}</h1>
+        <p className={styles.subtitle}>{t('subtitle')}</p>
+        <h2 className={styles.welcome}>{t('welcome')}</h2>
       </div>
 
       <form onSubmit={handleLogin} className={styles.loginForm}>
         <div className={styles.inputGroup}>
-          <label htmlFor='email'>Email address</label>
+          <label htmlFor='email'>{t('form.emailLabel')}</label>
           <input
             type='email'
             id='email'
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder='admin@servineo.com'
+            placeholder={t('form.emailPlaceholder')}
             required
           />
         </div>
 
         <div className={styles.inputGroup}>
-          <label htmlFor='password'>Password</label>
+          <label htmlFor='password'>{t('form.passwordLabel')}</label>
           <input
             type='password'
             id='password'
@@ -181,11 +185,11 @@ export default function AdminLogin() {
         </div>
 
         <button type='submit' className={styles.loginButton} disabled={loading}>
-          {loading ? 'Signing In...' : 'Sign In as Admin'}
+          {loading ? t('form.signingIn') : t('form.signInButton')}
         </button>
 
         <div className={styles.divider}>
-          <span>o</span>
+          <span>{t('form.or')}</span>
         </div>
 
         {/*NUEVO: Botón de Google */}
@@ -195,7 +199,7 @@ export default function AdminLogin() {
           className={styles.googleButton}
           disabled={googleLoading}
         >
-          {googleLoading ? 'Connecting...' : 'Sign in with Google'}
+          {googleLoading ? t('form.connecting') : t('form.googleButton')}
         </button>
       </form>
     </div>
