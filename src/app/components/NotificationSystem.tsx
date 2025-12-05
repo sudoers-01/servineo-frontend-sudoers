@@ -108,6 +108,12 @@ interface INotification {
 const NOTIFICATIONS_PER_PAGE = 20;
 const POLLING_INTERVAL = 5000; // 5 segundos para actualizaciones en tiempo real
 const SKELETON_DELAY = 300; // ms antes de mostrar skeleton
+const JOB_OFFERS_ROUTE = '/es/job-offer-list?sort=recent&page=1&limit=10';
+
+const isSaldoNotification = (notification: INotification): boolean => {
+  const tipoLower = notification.tipo?.toLowerCase() ?? '';
+  return tipoLower.includes('saldo');
+};
 
 interface NotificationSystemProps {
   userId?: string;
@@ -343,14 +349,17 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
       }
 
       const data: INotification[] = await response.json();
+      const sanitizedData = userRole === 'requester'
+        ? data.filter((n) => !isSaldoNotification(n) && n.saldo === undefined)
+        : data;
 
       // Aplicar filtro si no es 'todos'
-      let filteredData = data;
+      let filteredData = sanitizedData;
         if (currentFilter !== 'todos' && currentFilter !== 'no_leidas') {
           if (currentFilter === 'ofertas_promociones') {
             // Solo para requester
             if (userRole === 'requester') {
-              filteredData = data.filter((n) => {
+              filteredData = sanitizedData.filter((n) => {
                 if (!n.tipo || typeof n.tipo !== 'string') return false;
                 const tipoLower = n.tipo.trim().toLowerCase();
                 return tipoLower === 'oferta' || tipoLower === 'desconexion 2 dias';
@@ -361,12 +370,12 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
         } else if (currentFilter === 'billetera') {
           // Solo para fixer
           if (userRole === 'fixer') {
-            filteredData = data.filter((n) => n.tipo === 'billetera' || n.saldo !== undefined);
+            filteredData = sanitizedData.filter((n) => n.tipo === 'billetera' || n.saldo !== undefined || isSaldoNotification(n));
           } else {
             filteredData = [];
           }
         } else {
-          filteredData = data.filter((n) => {
+          filteredData = sanitizedData.filter((n) => {
             if (currentFilter === 'citas' && n.appointment_id) return true;
             if (n.notification_type) {
               return n.notification_type === currentFilter;
@@ -390,17 +399,20 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
         const cached = localStorage.getItem('cached_notifications');
         if (cached) {
           try {
-            const cachedData = JSON.parse(cached);
-            let filteredCached = cachedData;
+            const cachedData: INotification[] = JSON.parse(cached);
+            const sanitizedCached = userRole === 'requester'
+              ? cachedData.filter((n: INotification) => !isSaldoNotification(n) && n.saldo === undefined)
+              : cachedData;
+            let filteredCached = sanitizedCached;
             if (currentFilter !== 'todos' && currentFilter !== 'no_leidas') {
-              filteredCached = cachedData.filter((n: INotification) => {
+              filteredCached = sanitizedCached.filter((n: INotification) => {
                 if (currentFilter === 'citas' && n.appointment_id) return true;
                 if (currentFilter === 'ofertas_promociones' && userRole === 'requester') {
                   if (!n.tipo || typeof n.tipo !== 'string') return false;
                   const tipoLower = n.tipo.trim().toLowerCase();
                   return tipoLower === 'oferta' || tipoLower === 'desconexion 2 dias';
                 }
-                if (currentFilter === 'billetera' && userRole === 'fixer') return n.tipo === 'billetera' || n.saldo !== undefined;
+                if (currentFilter === 'billetera' && userRole === 'fixer') return n.tipo === 'billetera' || n.saldo !== undefined || isSaldoNotification(n);
                 if (n.notification_type) {
                   return n.notification_type === currentFilter;
                 }
@@ -453,15 +465,18 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
         }
 
         const data: INotification[] = await response.json();
+        const sanitizedData = userRole === 'requester'
+          ? data.filter((n) => !isSaldoNotification(n) && n.saldo === undefined)
+          : data;
 
-        let filteredData = data;
+        let filteredData = sanitizedData;
         if (currentFilter !== 'todos') {
           if (currentFilter === 'no_leidas') {
-            filteredData = data.filter((n) => 
+            filteredData = sanitizedData.filter((n) => 
               !(n.leido || readNotifications.has(n._id))
             );
           } else {
-            filteredData = data.filter((n) => {
+            filteredData = sanitizedData.filter((n) => {
               if (currentFilter === 'citas' && n.appointment_id) return true;
               if (currentFilter === 'ofertas_promociones' && userRole === 'requester') {
                 if (n.tipo && typeof n.tipo === 'string') {
@@ -470,7 +485,7 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
                 }
               }
               if (currentFilter === 'billetera' && userRole === 'fixer') {
-                return n.tipo === 'billetera' || n.saldo !== undefined;
+                return n.tipo === 'billetera' || n.saldo !== undefined || isSaldoNotification(n);
               }
               if (n.notification_type) {
                 return n.notification_type === currentFilter;
@@ -701,19 +716,19 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
 
     if (notification.tipo && typeof notification.tipo === 'string' && userRole === 'requester') {
       const tipoLower = notification.tipo.trim().toLowerCase();
-                if (tipoLower === 'oferta' || tipoLower === 'desconexion 2 dias' || filter === 'ofertas_promociones') {
-        window.location.href = 'http://localhost:3001/job-offer-list';
+      if (tipoLower === 'oferta' || tipoLower === 'desconexion 2 dias' || filter === 'ofertas_promociones') {
+        router.push(JOB_OFFERS_ROUTE);
         setIsOpen(false);
         return;
       }
     }
     if (filter === 'ofertas_promociones' && userRole === 'requester') {
-      window.location.href = 'http://localhost:3001/job-offer-list';
+      router.push(JOB_OFFERS_ROUTE);
       setIsOpen(false);
       return;
     }
 
-    if ((notification.tipo === 'billetera' || notification.notification_type === 'billetera' || notification.saldo !== undefined) && userRole === 'fixer') {
+    if ((notification.tipo === 'billetera' || notification.notification_type === 'billetera' || notification.saldo !== undefined || isSaldoNotification(notification)) && userRole === 'fixer') {
       router.push('/calendar');
       setIsOpen(false);
       return;
@@ -1042,7 +1057,7 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
                 }
 
                 // Para notificaciones de billetera SOLO SI ES FIXER
-                if ((notification.tipo === 'billetera' || notification.saldo !== undefined) && userRole === 'fixer') {
+                if ((notification.tipo === 'billetera' || notification.saldo !== undefined || isSaldoNotification(notification)) && userRole === 'fixer') {
                   return (
                     <div
                       key={notification._id}
