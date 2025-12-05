@@ -35,12 +35,12 @@ export default function TopMenu() {
     } catch {}
     return fallbackText ?? localeDefault('Iniciar Sesión', 'Log in');
   };
+  
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
 
   const user = useSelector((state: RootState) => state.user.user);
-
   const isAuthenticated = !!user;
 
   // UI state
@@ -78,7 +78,7 @@ export default function TopMenu() {
   };
   const inAuthFlow = isInAuthFlow();
 
-  // NAV items (kept same visual)
+  // NAV items
   const navItems =
     user?.role === 'fixer'
       ? [
@@ -117,31 +117,48 @@ export default function TopMenu() {
 
   const getPhoto = (u?: IUser | null): string => {
     if (!u) return '/es/img/icon.png';
-
     const sources: (string | undefined)[] = [u.photo, u.picture, u.url_photo];
-
     const valid = sources.find((src) => typeof src === 'string' && src.trim().length > 0);
-
     return valid ?? '/es/img/icon.png';
   };
 
   const userPhoto = getPhoto(user);
 
-  /* ---------- Effects (single, non-duplicated) ---------- */
+  const goToCentroDePagos = () => {
+    const id = user?._id || user?.id || userId;
+    if (id) {
+      router.push(`/payment/centro-de-pagos?fixerId=${id}`);
+      setProfileMenuOpen(false);
+      setAccountOpen(false);
+    } else {
+      console.error('No se encontró el ID del fixer para ir al Centro de Pagos');
+    }
+  };
 
-  // scroll header
+  const goToMisTrabajos = () => {
+    router.push('/payment/trabajos');
+    setProfileMenuOpen(false);
+    setAccountOpen(false);
+  };
+
+  const goToConfirmarPagos = () => {
+    router.push('/payment/Pagos-Fisico');
+    setProfileMenuOpen(false);
+    setAccountOpen(false);
+  };
+
+  /* ---------- Effects ---------- */
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll);
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // set currentPath on mount and when pathname changes
   useEffect(() => {
     if (typeof window !== 'undefined') setCurrentPath(window.location.pathname);
   }, [pathname]);
 
-  // hydrate redux from localStorage (safe)
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -174,7 +191,6 @@ export default function TopMenu() {
     }
   }, []);
 
-  // listen storage changes (other tabs) & custom event
   useEffect(() => {
     const sync = () => {
       try {
@@ -215,7 +231,6 @@ export default function TopMenu() {
     };
   }, [dispatch]);
 
-  // auto-logout on inactivity (15 minutes)
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
     const logoutOnIdle = () => {
@@ -249,7 +264,6 @@ export default function TopMenu() {
     };
   }, [dispatch, router]);
 
-  // close profile menu on outside click
   useEffect(() => {
     const handleOutside = (e: MouseEvent) => {
       if (
@@ -266,7 +280,6 @@ export default function TopMenu() {
     return () => document.removeEventListener('click', handleOutside);
   }, [profileMenuOpen]);
 
-  // close account dropdown on click outside (mobile)
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
@@ -277,7 +290,6 @@ export default function TopMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  /* ---------- RTK Query: fetch user by ID (if present) ---------- */
   const { data: fetchedUser } = useGetUserByIdQuery(userId ?? skipToken);
 
   useEffect(() => {
@@ -286,8 +298,6 @@ export default function TopMenu() {
       setIsLogged(true);
     }
   }, [fetchedUser, dispatch]);
-
-  /* ---------- Handlers ---------- */
 
   const handleLogoClick = () => {
     if (typeof window === 'undefined') return;
@@ -323,7 +333,6 @@ export default function TopMenu() {
         role='banner'
       >
         <div className='w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20'>
-          {/* Logo */}
           <button
             ref={logoRef}
             onClick={handleLogoClick}
@@ -347,7 +356,6 @@ export default function TopMenu() {
             </span>
           </button>
 
-          {/* Desktop Nav */}
           <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
             {navItems.map((item) => (
               <Link
@@ -361,7 +369,6 @@ export default function TopMenu() {
             ))}
           </nav>
 
-          {/* Desktop Right */}
           <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
             {!isClient ? (
               <div style={{ width: 100, height: 10 }} />
@@ -400,7 +407,6 @@ export default function TopMenu() {
                   </span>
                 </button>
 
-                {/* Profile dropdown */}
                 {profileMenuOpen && (
                   <div
                     ref={dropdownRef}
@@ -445,15 +451,23 @@ export default function TopMenu() {
                           Perfil de Fixer
                         </Link>
 
-                        <Link
-                          href="/payment/centro-de-pagos"
+                        <button
                           onMouseDown={(e) => e.stopPropagation()}
-                          onClick={() => setProfileMenuOpen(false)}
-                          className='menuItem'
+                          onClick={goToCentroDePagos}
+                          className='menuItem w-full text-left'
                         >
                           <Wallet className='h-4 w-4 inline mr-2' />
                           Centro de Pagos
-                        </Link>
+                        </button>
+
+                        <button
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={goToConfirmarPagos}
+                          className='menuItem w-full text-left'
+                        >
+                          <ClipboardList className='h-4 w-4 inline mr-2' />
+                          Confirmar Pagos
+                        </button>
                       </>
                     ) : (
                       <>
@@ -469,15 +483,14 @@ export default function TopMenu() {
                           Editar perfil
                         </button>
 
-                        <Link
-                          href="/payment/trabajos"
+                        <button
                           onMouseDown={(e) => e.stopPropagation()}
-                          onClick={() => setProfileMenuOpen(false)}
-                          className='menuItem'
+                          onClick={goToMisTrabajos}
+                          className='menuItem w-full text-left'
                         >
                           <Briefcase className='h-4 w-4 inline mr-2' />
                           Mis Trabajos
-                        </Link>
+                        </button>
 
                         <button
                           onMouseDown={(e) => e.stopPropagation()}
@@ -513,9 +526,7 @@ export default function TopMenu() {
 
       {/* MOBILE/TABLET HEADER */}
       <div className='lg:hidden'>
-        {/* Barra superior */}
         <div className='flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
-          {/* Logo */}
           <button onClick={handleLogoClick} className='flex items-center gap-2 min-w-0'>
             <div className='relative overflow-hidden rounded-full shadow-md shrink-0'>
               <Image src='/es/img/icon.png' alt='Servineo' width={32} height={32} />
@@ -525,7 +536,6 @@ export default function TopMenu() {
             </span>
           </button>
 
-          {/* Auth Buttons */}
           {!isClient ? (
             <div style={{ width: 100, height: 10 }} />
           ) : !isLogged ? (
@@ -603,14 +613,21 @@ export default function TopMenu() {
                         Perfil de Fixer
                       </Link>
 
-                      <Link
-                        href="/payment/centro-de-pagos"
-                        onClick={() => setProfileMenuOpen(false)}
-                        className='menuItem'
+                      <button
+                        onClick={goToCentroDePagos}
+                        className='menuItem w-full text-left'
                       >
                         <Wallet className='h-4 w-4 inline mr-2' />
                         Centro de Pagos
-                      </Link>
+                      </button>
+
+                      <button
+                        onClick={goToConfirmarPagos}
+                        className='menuItem w-full text-left'
+                      >
+                        <ClipboardList className='h-4 w-4 inline mr-2' />
+                        Confirmar Pagos
+                      </button>
                     </>
                   ) : (
                     <>
@@ -626,14 +643,13 @@ export default function TopMenu() {
                         Editar perfil
                       </button>
 
-                      <Link
-                        href="/payment/trabajos"
-                        onClick={() => setProfileMenuOpen(false)}
-                        className='menuItem'
+                      <button
+                        onClick={goToMisTrabajos}
+                        className='menuItem w-full text-left'
                       >
                         <Briefcase className='h-4 w-4 inline mr-2' />
                         Mis Trabajos
-                      </Link>
+                      </button>
 
                       <button
                         onMouseDown={(e) => e.stopPropagation()}
@@ -664,7 +680,6 @@ export default function TopMenu() {
             </>
           )}
 
-          {/* Dropdown Mobile */}
           {accountOpen && isLogged && (
             <div
               ref={dropdownRef}
@@ -685,7 +700,7 @@ export default function TopMenu() {
             </div>
           )}
         </div>
-        {/* Barra inferior fija con iconos */}
+
         <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
           {navItems.map((item) => (
             <button
@@ -702,12 +717,11 @@ export default function TopMenu() {
             </button>
           ))}
         </nav>
-        {/* Espaciadores para contenido */}
-        <div className='h-16' /> {/* top */}
-        <div className='h-16' /> {/* bottom */}
+
+        <div className='h-16' />
+        <div className='h-16' />
       </div>
 
-      {/* Spacer Desktop */}
       <div className='hidden lg:block h-20' />
     </>
   );
