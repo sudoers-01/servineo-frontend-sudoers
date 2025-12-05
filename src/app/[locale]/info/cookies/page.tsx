@@ -164,9 +164,6 @@ export default function CookiesPage(): JSX.Element {
             Puedes cambiar tu configuración de cookies en cualquier momento. Al continuar navegando,
             aceptas nuestra política.
           </p>
-          <button className='bg-white text-[var(--primary)] px-8 py-3 rounded-full font-bold text-base hover:bg-[var(--primary)]/10 transition-all duration-300 shadow-lg hover:shadow-xl'>
-            Aceptar y Cerrar
-          </button>
         </div>
       </section>
     </div>

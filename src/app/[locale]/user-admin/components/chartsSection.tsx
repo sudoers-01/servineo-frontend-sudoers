@@ -17,6 +17,8 @@ export default function ChartsSection() {
     end: new Date().toISOString().split('T')[0], // Hoy
   });
 
+  // Carga inicial. Se desactiva exhaustiveness porque `loadCharts` está definida abajo
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     loadCharts();
   }, []);

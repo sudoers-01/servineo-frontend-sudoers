@@ -1,5 +1,4 @@
 import React from 'react';
-import Image from 'next/image';
 
 interface Props {
   number: number;
@@ -11,12 +10,21 @@ interface Props {
 export const PasoCards = ({ number, title, imageUrl, descripcion }: Props) => {
   return (
     <div className='flex flex-col items-center text-center gap-[15px]'>
-      <div className='flex flex-row gap-[8px]'>
-        <strong> {number}. </strong>
-        <strong> {title} </strong>
+      <div className='flex flex-row gap-[8px] items-center'>
+        <strong className='text-2xl text-blue-600 font-bold'> {number}. </strong>
+        <strong className='text-xl font-bold text-gray-800'> {title} </strong>
       </div>
-      <Image className='rounded-lg w-48 h-45' src={imageUrl} width={200} height={200} alt='' />
-      <p className='opacity-[80%]'> {descripcion} </p>
+
+      {/* SOLUCIÓN APLICADA: <img> nativo en lugar de <Image /> */}
+      <img
+        className='rounded-lg w-48 h-45 object-cover shadow-md'
+        src={imageUrl}
+        alt={`Paso ${number}: ${title}`}
+        loading='lazy'
+        decoding='async'
+      />
+
+      <p className='opacity-[80%] text-gray-600 leading-relaxed px-2'> {descripcion} </p>
     </div>
   );
 };

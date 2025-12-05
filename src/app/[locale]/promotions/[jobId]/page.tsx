@@ -138,7 +138,7 @@ export default function JobPromotionsPage() {
                     ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'}
                   `}
                 >
-                  <div 
+                  <div
                     onClick={() => toggleSelection(promo._id)}
                     className='flex-1 min-w-0 pr-4 cursor-pointer'
                   >

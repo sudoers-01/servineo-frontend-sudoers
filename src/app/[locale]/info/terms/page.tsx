@@ -130,10 +130,10 @@ export default function TermsPage() {
           <h3 className='text-lg font-bold text-[var(--primary)] mb-2'>Contacto Legal</h3>
           <p className='text-sm mb-2'>Si tienes preguntas sobre estos términos, contáctanos:</p>
           <a
-            href='mailto:legal@servineo.com'
+            href='mailto:servineo.serviciostecnicos@gmail.com'
             className='text-[var(--primary)] font-semibold hover:text-[var(--primary)] transition-colors'
           >
-            legal@servineo.com
+            servineo.serviciostecnicos@gmail.com
           </a>
         </div>
       </section>

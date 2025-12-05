@@ -1,5 +1,7 @@
 'use client';
+
 import Link from 'next/link';
+import { useRouter, usePathname } from 'next/navigation';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
 interface FooterSectionProps {
@@ -7,12 +9,19 @@ interface FooterSectionProps {
 }
 
 export default function FooterSection({ onRestartTour }: FooterSectionProps = {}) {
+  const router = useRouter();
+  const pathname = usePathname();
+
   const handleRestartTour = () => {
-    if (onRestartTour) {
-      onRestartTour();
+    // Borrar la flag de que ya vio el tour
+    localStorage.removeItem('servineoTourVisto');
+
+    // Si NO estamos en el home, redirigir primero
+    if (pathname !== '/' && !pathname.endsWith('/es') && !pathname.endsWith('/en')) {
+      // Redirigir al home y la recarga automática activará el tour
+      router.push('/');
     } else {
-      // MODIFICACIÓN: Usamos la lógica de recarga forzada que es más segura
-      localStorage.removeItem('servineoTourVisto');
+      // Si ya estamos en el home, solo recargar
       window.location.reload();
     }
   };
@@ -25,11 +34,13 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
     { name: '¿Por qué Servineo?', path: '/por-que-servineo' },
     { name: 'Cómo funciona Servineo', path: '/howUseServineo' },
   ];
+
   const legalLinks = [
     { name: 'Política de privacidad', path: '/info/privacy' },
     { name: 'Acuerdos de usuario', path: '/info/terms' },
     { name: 'Política de cookies', path: '/info/cookies' },
   ];
+
   const exploreLinks = [
     { name: 'Servicios', path: '/servicios' },
     { name: 'Ofrece tus servicios', path: '/info/reparador' },
@@ -47,6 +58,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
         <a href='#main-content' className='sr-only focus:not-sr-only'>
           Saltar al contenido principal
         </a>
+
         <div className='text-center' aria-labelledby='footer-servineo-heading'>
           <h2 id='footer-servineo-heading' className='text-4xl font-bold mb-4 text-[#1AA7ED]'>
             Servineo
@@ -142,6 +154,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
                   Cochabamba, Bolivia
                 </a>
               </div>
+
               <div className='flex items-center' aria-label='Número de WhatsApp'>
                 <Phone className='h-5 w-5 text-blue-400 mr-2' aria-hidden='true' />
                 <a
@@ -154,6 +167,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
                   +591 751-39742
                 </a>
               </div>
+
               <div className='flex items-center' aria-label='Correo electrónico de contacto'>
                 <Mail className='h-5 w-5 text-blue-400 mr-2' aria-hidden='true' />
                 <a
@@ -205,8 +219,15 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
               </a>
             </div>
           </div>
+
+          <div className='flex items-center justify-center sm:justify-end gap-2'>
+            <div className='w-2.5 h-2.5 bg-green-500 rounded-full' aria-hidden='true' />
+            <span>Sistema operativo</span>
+          </div>
         </div>
+
         <div className='border-t border-gray-700' role='separator' aria-hidden='true' />
+
         <div
           className='flex flex-col sm:flex-row items-center justify-between gap-4 text-white text-sm pt-8'
           aria-label='Créditos y derechos de autor'
@@ -214,10 +235,6 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
           <div>© 2024 Servineo. Todos los derechos reservados.</div>
           <div className='flex items-center space-x-4'>
             <span>Hecho con ❤️ en Cochabamba</span>
-            <div className='flex items-center space-x-2'>
-              <div className='w-2.5 h-2.5 bg-green-500 rounded-full' aria-hidden='true' />
-              <span>Sistema operativo</span>
-            </div>
           </div>
         </div>
       </div>

@@ -11,9 +11,7 @@ export const jobOfferSchema = z.object({
     .string()
     .min(20, { message: 'La descripción debe ser detallada (mínimo 20 letras)' }),
   category: z.string().min(1, { message: 'Selecciona una categoría válida' }),
-  price: z
-    .number()
-    .positive({ message: 'El precio debe ser mayor a 0' }),
+  price: z.number().positive({ message: 'El precio debe ser mayor a 0' }),
   city: z.string().min(1, { message: 'Selecciona una ciudad' }),
   contactPhone: z
     .string()
