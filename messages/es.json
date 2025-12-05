@@ -847,6 +847,7 @@
     }
   },
   "CertificationsSection": {
+    "optional": "opcional",
     "titles": {
       "certifications": "Certificaciones",
       "myCertifications": "Mis Certificaciones"
@@ -855,7 +856,8 @@
       "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
       "save": "Guardar",
-      "saving": "Guardando..."
+      "saving": "Guardando...",
+      "delete": "Eliminar"
     },
     "card": {
       "issued": "Emitido",
@@ -927,7 +929,8 @@
       "cancel": "Cancelar",
       "save": "Guardar",
       "saving": "Guardando...",
-      "delete": "Eliminar"
+      "delete": "Eliminar",
+      "addExperience": "Add Experience"  
     },
     "card": {
       "present": "Presente"
