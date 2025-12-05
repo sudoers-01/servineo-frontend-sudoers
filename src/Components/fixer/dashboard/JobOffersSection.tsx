@@ -291,230 +291,237 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
       </div>
 
       {/* Modal Formulario */}
-      <Modal
-        open={isModalOpen}
-        onClose={handleCloseModal}
-        title={editingOffer ? t('modal.editTitle') : t('modal.newTitle')}
-        size='lg'
-        closeOnOverlayClick={!isSubmitting}
-        className='rounded-2xl border-primary border-2'
-      >
-        <Modal.Body>
-          <form id='offerForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
-            {/* Título */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                {t('form.title.label')}
-              </label>
-              <input
-                {...register('title')}
-                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder={t('form.title.placeholder')}
-              />
-              {errors.title && (
-                <p className='text-red-500 text-xs mt-1'>{errors.title.message as string}</p>
+     {/* Modal Formulario */}
+    <Modal
+      open={isModalOpen}
+      onClose={handleCloseModal}
+      size='lg'
+      closeOnOverlayClick={!isSubmitting}
+      className='rounded-2xl border-primary border-2'
+    >
+      {/* ✅ AGREGAR Modal.Header */}
+      <Modal.Header className='text-center text-primary'>
+        {editingOffer ? t('modal.editTitle') : t('modal.newTitle')}
+      </Modal.Header>
+
+      <Modal.Body>
+        <form id='offerForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
+          {/* Título */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              {t('form.title.label')}
+            </label>
+            <input
+              {...register('title')}
+              className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+              placeholder={t('form.title.placeholder')}
+            />
+            {errors.title && (
+              <p className='text-red-500 text-xs mt-1'>{errors.title.message as string}</p>
+            )}
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              {t('form.category.label')}
+            </label>
+            <select
+              {...register('category')}
+              className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
+            >
+              <option value=''>{t('form.category.select')}</option>
+              {jobCategories.map((cat) => (
+                <option key={cat.value} value={cat.value}>
+                  {cat.label}
+                </option>
+              ))}
+            </select>
+            {errors.category && (
+              <p className='text-red-500 text-xs mt-1'>{errors.category.message as string}</p>
+            )}
+          </div>
+
+          {/* Sección de Tags */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              {t('form.tags.label')}
+            </label>
+
+            <div className='flex flex-wrap gap-2 mb-2 min-h-[32px] p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
+              {currentTags.map((tag) => (
+                <span
+                  key={tag}
+                  className='inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border border-blue-200 shadow-sm animate-fade-in'
+                >
+                  {tag}
+                  <button
+                    type='button'
+                    onClick={() => removeTag(tag)}
+                    className='hover:text-red-500 focus:outline-none ml-1 p-0.5 rounded-full hover:bg-white/50 transition-colors'
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+              {currentTags.length === 0 && (
+                <span className='text-xs text-gray-400 italic self-center'>
+                  {t('form.tags.empty')}
+                </span>
               )}
             </div>
 
-            {/* Categoría */}
+            <select
+              onChange={handleAddTag}
+              className='w-full rounded-lg border-primary border focus:outline-none bg-white py-2 px-3 cursor-pointer'
+              disabled={currentTags.length >= 5}
+              defaultValue=''
+            >
+              <option value='' disabled>
+                {currentTags.length >= 5 ? t('form.tags.limitReached') : t('form.tags.addTag')}
+              </option>
+              {jobCategories.map((cat) => (
+                <option
+                  key={cat.value}
+                  value={cat.value}
+                  disabled={currentTags.includes(cat.value)}
+                >
+                  {cat.label} {currentTags.includes(cat.value) ? t('form.tags.alreadyAdded') : ''}
+                </option>
+              ))}
+            </select>
+
+            {errors.tags && (
+              <p className='text-red-500 text-xs mt-1'>{errors.tags.message as string}</p>
+            )}
+          </div>
+
+          {/* Descripción */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              {t('form.description.label')}
+            </label>
+            <textarea
+              {...register('description')}
+              rows={4}
+              className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+              placeholder={t('form.description.placeholder')}
+            />
+            {errors.description && (
+              <p className='text-red-500 text-xs mt-1'>{errors.description.message as string}</p>
+            )}
+          </div>
+
+          {/* Precio y Ciudad */}
+          <div className='grid grid-cols-2 gap-4'>
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                {t('form.category.label')}
+                {t('form.price.label')}
+              </label>
+              <input
+                type='number'
+                {...register('price')}
+                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+              />
+              {errors.price && (
+                <p className='text-red-500 text-xs mt-1'>{errors.price.message as string}</p>
+              )}
+            </div>
+            <div>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {t('form.city.label')}
               </label>
               <select
-                {...register('category')}
+                {...register('city')}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
               >
-                <option value=''>{t('form.category.select')}</option>
-                {jobCategories.map((cat) => (
-                  <option key={cat.value} value={cat.value}>
-                    {cat.label}
+                {boliviaCities.map((city) => (
+                  <option key={city.value} value={city.value}>
+                    {city.label}
                   </option>
                 ))}
               </select>
-              {errors.category && (
-                <p className='text-red-500 text-xs mt-1'>{errors.category.message as string}</p>
+              {errors.city && (
+                <p className='text-red-500 text-xs mt-1'>{errors.city.message as string}</p>
               )}
             </div>
-
-            {/* Sección de Tags */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                {t('form.tags.label')}
-              </label>
-
-              <div className='flex flex-wrap gap-2 mb-2 min-h-[32px] p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
-                {currentTags.map((tag) => (
-                  <span
-                    key={tag}
-                    className='inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-primary border border-blue-200 shadow-sm animate-fade-in'
-                  >
-                    {tag}
-                    <button
-                      type='button'
-                      onClick={() => removeTag(tag)}
-                      className='hover:text-red-500 focus:outline-none ml-1 p-0.5 rounded-full hover:bg-white/50 transition-colors'
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-                {currentTags.length === 0 && (
-                  <span className='text-xs text-gray-400 italic self-center'>
-                    {t('form.tags.empty')}
-                  </span>
-                )}
-              </div>
-
-              <select
-                onChange={handleAddTag}
-                className='w-full rounded-lg border-primary border focus:outline-none bg-white py-2 px-3 cursor-pointer'
-                disabled={currentTags.length >= 5}
-                defaultValue=''
-              >
-                <option value='' disabled>
-                  {currentTags.length >= 5 ? t('form.tags.limitReached') : t('form.tags.addTag')}
-                </option>
-                {jobCategories.map((cat) => (
-                  <option
-                    key={cat.value}
-                    value={cat.value}
-                    disabled={currentTags.includes(cat.value)}
-                  >
-                    {cat.label} {currentTags.includes(cat.value) ? t('form.tags.alreadyAdded') : ''}
-                  </option>
-                ))}
-              </select>
-
-              {errors.tags && (
-                <p className='text-red-500 text-xs mt-1'>{errors.tags.message as string}</p>
-              )}
-            </div>
-
-            {/* Descripción */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                {t('form.description.label')}
-              </label>
-              <textarea
-                {...register('description')}
-                rows={4}
-                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder={t('form.description.placeholder')}
-              />
-              {errors.description && (
-                <p className='text-red-500 text-xs mt-1'>{errors.description.message as string}</p>
-              )}
-            </div>
-
-            {/* Precio y Ciudad */}
-            <div className='grid grid-cols-2 gap-4'>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  {t('form.price.label')}
-                </label>
-                <input
-                  type='number'
-                  {...register('price')}
-                  className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                />
-                {errors.price && (
-                  <p className='text-red-500 text-xs mt-1'>{errors.price.message as string}</p>
-                )}
-              </div>
-              <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>
-                  {t('form.city.label')}
-                </label>
-                <select
-                  {...register('city')}
-                  className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
-                >
-                  {boliviaCities.map((city) => (
-                    <option key={city.value} value={city.value}>
-                      {city.label}
-                    </option>
-                  ))}
-                </select>
-                {errors.city && (
-                  <p className='text-red-500 text-xs mt-1'>{errors.city.message as string}</p>
-                )}
-              </div>
-            </div>
-
-            {/* Teléfono */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>
-                {t('form.contactPhone.label')}
-              </label>
-              <input
-                {...register('contactPhone')}
-                className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-              />
-              {errors.contactPhone && (
-                <p className='text-red-500 text-xs mt-1'>{errors.contactPhone.message as string}</p>
-              )}
-            </div>
-
-            {/* Imágenes */}
-            <div>
-              <label className='block text-sm font-medium text-gray-700 mb-2'>
-                {t('form.images.label')}
-              </label>
-              <div className='grid grid-cols-4 gap-2 mb-2'>
-                {previewUrls.map((url, idx) => (
-                  <div key={idx} className='relative aspect-square group'>
-                    <Image
-                      src={url}
-                      className='w-full h-full object-cover rounded-lg border'
-                      alt='preview'
-                      width={100}
-                      height={100}
-                    />
-                    <button
-                      type='button'
-                      onClick={() => removeImage(idx)}
-                      className='absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
-                ))}
-                {previewUrls.length < 5 && (
-                  <label className='flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:bg-gray-50 transition-colors'>
-                    <Upload className='text-gray-400' />
-                    <input
-                      type='file'
-                      className='hidden'
-                      accept='image/*'
-                      multiple
-                      onChange={handleImageChange}
-                    />
-                  </label>
-                )}
-              </div>
-            </div>
-          </form>
-        </Modal.Body>
-        <Modal.Footer>
-          <div className='flex justify-end gap-2'>
-            <button
-              onClick={handleCloseModal}
-              className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
-            >
-              {t('buttons.cancel')}
-            </button>
-            <PillButton
-              type='submit'
-              form='offerForm'
-              className='bg-primary text-white hover:bg-blue-800'
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? t('buttons.saving') : t('buttons.save')}
-            </PillButton>
           </div>
-        </Modal.Footer>
-      </Modal>
+
+          {/* Teléfono */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-1'>
+              {t('form.contactPhone.label')}
+            </label>
+            <input
+              {...register('contactPhone')}
+              className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
+            />
+            {errors.contactPhone && (
+              <p className='text-red-500 text-xs mt-1'>{errors.contactPhone.message as string}</p>
+            )}
+          </div>
+
+          {/* Imágenes */}
+          <div>
+            <label className='block text-sm font-medium text-gray-700 mb-2'>
+              {t('form.images.label')}
+            </label>
+            <div className='grid grid-cols-4 gap-2 mb-2'>
+              {previewUrls.map((url, idx) => (
+                <div key={idx} className='relative aspect-square group'>
+                  <Image
+                    src={url}
+                    className='w-full h-full object-cover rounded-lg border'
+                    alt='preview'
+                    width={100}
+                    height={100}
+                  />
+                  <button
+                    type='button'
+                    onClick={() => removeImage(idx)}
+                    className='absolute top-1 right-1 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity'
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              ))}
+              {previewUrls.length < 5 && (
+                <label className='flex flex-col items-center justify-center border-2 border-dashed border-gray-300 rounded-lg aspect-square cursor-pointer hover:bg-gray-50 transition-colors'>
+                  <Upload className='text-gray-400' />
+                  <input
+                    type='file'
+                    className='hidden'
+                    accept='image/*'
+                    multiple
+                    onChange={handleImageChange}
+                  />
+                </label>
+              )}
+            </div>
+          </div>
+        </form>
+      </Modal.Body>
+
+      <Modal.Footer>
+        <div className='flex justify-end gap-2'>
+          <button
+            type='button'
+            onClick={handleCloseModal}
+            className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
+          >
+            {t('buttons.cancel')}
+          </button>
+          <PillButton
+            type='submit'
+            form='offerForm'
+            className='bg-primary text-white hover:bg-blue-800'
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? t('buttons.saving') : t('buttons.save')}
+          </PillButton>
+        </div>
+      </Modal.Footer>
+    </Modal>
 
       <NotificationModal
         isOpen={notify.isOpen}
