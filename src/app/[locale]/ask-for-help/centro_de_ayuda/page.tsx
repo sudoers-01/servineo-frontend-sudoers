@@ -141,8 +141,16 @@ const CentroDeAyuda: React.FC = () => {
       { id: 10, title: t('suggestions.paymentProblems'), url: '/ayuda/pago-problemas' },
       { id: 11, title: t('suggestions.resetPassword'), url: '/ayuda/restablecer' },
       { id: 12, title: t('suggestions.billing'), url: '/ayuda/facturacion' },
-      { id: 13, title: t('suggestions.support'), url: `/${locale}/ask-for-help/preguntas-frecuentes` },
-      { id: 14, title: t('sections.faq.title'), url: `/${locale}/ask-for-help/preguntas-frecuentes` },
+      {
+        id: 13,
+        title: t('suggestions.support'),
+        url: `/${locale}/ask-for-help/preguntas-frecuentes`,
+      },
+      {
+        id: 14,
+        title: t('sections.faq.title'),
+        url: `/${locale}/ask-for-help/preguntas-frecuentes`,
+      },
     ];
 
     const filtered = simSuggestions.filter((s) => s.title.toLowerCase().includes(query));
@@ -158,7 +166,9 @@ const CentroDeAyuda: React.FC = () => {
     return (
       !isSearching &&
       (normalizedQuery.length === 0 ||
-        ['pre', 'frec', 'faq', 'duda', 'pregunt', 'question', 'freq'].some((k) => normalizedQuery.includes(k)))
+        ['pre', 'frec', 'faq', 'duda', 'pregunt', 'question', 'freq'].some((k) =>
+          normalizedQuery.includes(k),
+        ))
     );
   }, [normalizedQuery, isSearching]);
 
@@ -166,9 +176,17 @@ const CentroDeAyuda: React.FC = () => {
     return (
       !isSearching &&
       (normalizedQuery.length === 0 ||
-        ['foro', 'comunidad', 'usuario', 'usuarios', 'duda', 'ayuda', 'forum', 'community', 'user'].some((k) =>
-          normalizedQuery.includes(k),
-        ))
+        [
+          'foro',
+          'comunidad',
+          'usuario',
+          'usuarios',
+          'duda',
+          'ayuda',
+          'forum',
+          'community',
+          'user',
+        ].some((k) => normalizedQuery.includes(k)))
     );
   }, [normalizedQuery, isSearching]);
 

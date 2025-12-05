@@ -7,7 +7,7 @@ import { useGetStatisticsQuery } from '@/app/redux/services/dashboardApi';
 
 export default function Page() {
   const t = useTranslations('dashboard');
-  
+
   const [selectedPeriod, setSelectedPeriod] = useState<'semanal' | 'mensual' | 'anual'>('mensual');
 
   // Usar el hook de Redux para obtener los datos
@@ -84,7 +84,9 @@ export default function Page() {
                 ? t('periods.monthly')
                 : t('periods.yearly')}
           </h2>
-          <p className='text-gray-600'>{t('totalSearches')}: {data.count}</p>
+          <p className='text-gray-600'>
+            {t('totalSearches')}: {data.count}
+          </p>
         </div>
       )}
 
@@ -140,9 +142,7 @@ export default function Page() {
 
         {/* Mensaje si no hay datos */}
         {!data && !isLoading && !error && (
-          <div className='text-center text-gray-500'>
-            {t('noData')}
-          </div>
+          <div className='text-center text-gray-500'>{t('noData')}</div>
         )}
       </div>
     </main>

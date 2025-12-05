@@ -56,9 +56,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
           <h2 id='footer-servineo-heading' className='text-4xl font-bold mb-4 text-[#1AA7ED]'>
             Servineo
           </h2>
-          <p className='text-white max-w-3xl mx-auto leading-relaxed text-lg'>
-            {t('description')}
-          </p>
+          <p className='text-white max-w-3xl mx-auto leading-relaxed text-lg'>{t('description')}</p>
         </div>
 
         <div

@@ -29,12 +29,8 @@ export default function PreguntasFrecuentesPage() {
             ←
           </button>
 
-          <h1 className='text-4xl font-bold text-gray-900 mb-3 text-center'>
-            {t('title')}
-          </h1>
-          <p className='text-gray-600 text-lg text-center'>
-            {t('subtitle')}
-          </p>
+          <h1 className='text-4xl font-bold text-gray-900 mb-3 text-center'>{t('title')}</h1>
+          <p className='text-gray-600 text-lg text-center'>{t('subtitle')}</p>
         </div>
 
         {/* Content */}

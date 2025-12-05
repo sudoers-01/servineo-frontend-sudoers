@@ -45,14 +45,14 @@ const AdminMap = dynamic(() => import('@/Components/Statistics-panel/admin-map')
   loading: () => (
     <div className='h-full w-full bg-gray-100 flex items-center justify-center text-gray-500 animate-pulse'>
       {/* El texto se traduce en el componente padre */}
-      <span id="map-loading-text"></span>
+      <span id='map-loading-text'></span>
     </div>
   ),
 });
 
 const StatisticsPage: React.FC = () => {
   const t = useTranslations('tracking');
-  
+
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
 

@@ -37,7 +37,7 @@ declare global {
 export default function AdminLogin() {
   const t = useTranslations('adminLogin');
   const locale = useLocale();
-  
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
