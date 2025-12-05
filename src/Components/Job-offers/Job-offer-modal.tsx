@@ -15,7 +15,7 @@ interface Props {
 
 export function JobOfferModal({ offer, isOpen, onClose }: Props) {
   const tCat = useTranslations('Categories');
-  const t = useTranslations('JobOfferModal');
+  const t = useTranslations('jobOfferModal');
 
   if (!isOpen || !offer) return null;
 
@@ -150,7 +150,7 @@ export function JobOfferModal({ offer, isOpen, onClose }: Props) {
             <div className='space-y-3'>
               <div className='flex items-center gap-2 text-gray-900 font-semibold'>
                 <Tag className='w-4 h-4 text-blue-500' />
-                <h3>{t('services')}</h3>
+                <h3>{t('servicesOffered')}</h3>
               </div>
               <div className='flex flex-wrap gap-2'>
                 {servicesList.map((s, i) => (
