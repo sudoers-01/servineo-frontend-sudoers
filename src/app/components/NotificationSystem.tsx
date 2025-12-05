@@ -393,7 +393,7 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
         !(n.leido || readNotifications.has(n._id))
       ).length;
       setUnreadCount(totalUnreadCount);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error fetching unread count:', err);
       if (typeof window !== 'undefined') {
         const cached = localStorage.getItem('cached_notifications');
@@ -541,8 +541,9 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
         if (typeof window !== 'undefined') {
           localStorage.setItem('cached_notifications', JSON.stringify(paginatedData));
         }
-      } catch (err: any) {
-        setError(err.message || 'Error al cargar notificaciones');
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        setError(message || 'Error al cargar notificaciones');
         console.error('Error fetching notifications:', err);
         
         if (typeof window !== 'undefined') {
@@ -689,7 +690,7 @@ export default function NotificationSystem({ userId, userName, isAuthenticated, 
       if (!response.ok) {
         throw new Error('Error al marcar notificación como leída');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error al marcar notificación como leída:', err);
       if (!isOnline) {
         setPendingSync((prev) => [...prev, notification]);
