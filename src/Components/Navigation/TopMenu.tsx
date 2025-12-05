@@ -355,7 +355,6 @@ export default function TopMenu() {
                 </Link>
               ))}
             </nav>
-          </div>
           <div className='flex items-center gap-3'>
             <NotificationSystem
               userId={userId || undefined}
