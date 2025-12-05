@@ -300,8 +300,8 @@ export function SearchBar({
       />
 
       {/* Mensaje de error */}
-      <div className='min-h-5 mt-1'>
-        {error && <p className='text-red-500 text-sm leading-4'>{error}</p>}
+      <div className='min-h-5 mt-1 pl-4'>
+        {error && <p className='text-red-500 text-sm leading-4 text-left'>{error}</p>}
       </div>
     </div>
   );
