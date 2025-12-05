@@ -3,14 +3,21 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import { Wrench, UserCircle, ClipboardList, HelpCircle, Calendar, Wallet, Briefcase } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
-import type { IUser } from '@/types/user';
-import { useRouter, usePathname } from 'next/navigation';
-import { useTranslations, useLocale } from 'next-intl';
+import { IUser } from '@/types/user';
+import NotificationSystem from '@/app/components/NotificationSystem';
+
+interface UserState {
+  user: IUser | null;
+  isAuthenticated: boolean;
+  loading: boolean;
+}
 
 interface RootState {
   user: { user: IUser | null };
@@ -343,31 +350,21 @@ export default function TopMenu() {
                 href={item.href}
                 className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
                   ${currentPath === item.href ? 'text-[var(--color-primary)] after:w-full' : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'}`}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          <div className='flex items-center gap-8'>
+            <NotificationSystem
+              userId={userId || undefined}
+              userName={user?.name}
+              isAuthenticated={isLogged}
+              userRole={user?.role as 'fixer' | 'requester'}
 
-          <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
-            {!isClient ? (
-              <div style={{ width: 100, height: 10 }} />
-            ) : !isLogged ? (
-              <>
-                <Link
-                  href='/login'
-                  className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
-                >
-                  {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
-                </Link>
-                <Link
-                  href='/signUp'
-                  className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
-                >
-                  {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
-                </Link>
-              </>
-            ) : (
+            />
+
+            {isLogged ? (
               <div className='relative'>
                 <button
                   ref={profileButtonRef}
@@ -499,6 +496,21 @@ export default function TopMenu() {
                   </div>
                 )}
               </div>
+            ) : (
+              <>
+                <Link
+                  href='/login'
+                  className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
+                >
+                  {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
+                </Link>
+                <Link
+                  href='/signUp'
+                  className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
+                >
+                  {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
+                </Link>
+              </>
             )}
           </div>
         </div>
@@ -516,170 +528,38 @@ export default function TopMenu() {
             </span>
           </button>
 
-          {!isClient ? (
-            <div style={{ width: 100, height: 10 }} />
-          ) : !isLogged ? (
-            <div className='flex items-center gap-2 flex-nowrap'>
-              <Link
-                href='/login'
-                className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
-              >
-                {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
-              </Link>
-              <Link
-                href='/signUp'
-                className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
-              >
-                {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
-              </Link>
-            </div>
-          ) : (
-            <>
-              <button
-                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
-                ref={profileButtonRef}
-                className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
-              >
-                <img
-                  src={userPhoto}
-                  alt={user?.name ?? 'Usuario'}
-                  className='w-8 h-8 rounded-full object-cover border'
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
-                  }}
-                />
-                <span className='text-gray-700 font-medium'>
-                  {user?.name ?? fetchedUser?.name ?? 'Usuario'}
-                </span>
-              </button>
-              {profileMenuOpen && (
-                <div
-                  ref={dropdownRef}
-                  className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
-                  role='dialog'
-                  aria-label='Menu de usuario'
+          {/* Auth Buttons */}
+          <div className='flex items-center gap-2 flex-nowrap'>
+            <NotificationSystem 
+              userId={userId || undefined}
+              userName={user?.name}
+              isAuthenticated={isLogged}
+              userRole={user?.role as 'fixer' | 'requester'}
+            />
+            {!isLogged ? (
+              <>
+                <Link
+                  href='/login'
+                  className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
                 >
-                  <div className='menuHeader'>
-                    <strong>Mi cuenta</strong>
-                    <button
-                      className='closeBtn'
-                      onClick={() => setProfileMenuOpen(false)}
-                      aria-label='Cerrar menu'
-                    >
-                      ✕
-                    </button>
-                  </div>
-
-                  <img className='profilePreview' src={userPhoto} alt='Foto' />
-
-                  <div className='menuLabel'>{user?.name ?? fetchedUser?.name ?? 'Sin nombre'}</div>
-                  <div className='menuLabel'>
-                    {user?.email ?? fetchedUser?.email ?? 'Sin email'}
-                  </div>
-                  <div className='menuLabel'>
-                    {user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}
-                  </div>
-
-                  <hr style={{ margin: '8px 0', opacity: 0.3 }} />
-
-                  {user?.role === 'fixer' ? (
-                    <>
-                      <Link
-                        href='/fixer/dashboard'
-                        onClick={() => setProfileMenuOpen(false)}
-                        className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
-                      >
-                        <UserCircle className='h-4 w-4' />
-                        Perfil de Fixer
-                      </Link>
-
-                      <button
-                        onClick={goToCentroDePagos}
-                        className='menuItem w-full text-left'
-                      >
-                        <Wallet className='h-4 w-4 inline mr-2' />
-                        Centro de Pagos
-                      </button>
-
-                      <button
-                        onClick={goToConfirmarPagos}
-                        className='menuItem w-full text-left'
-                      >
-                        <ClipboardList className='h-4 w-4 inline mr-2' />
-                        Confirmar Pagos
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setProfileMenuOpen(false);
-                          router.push('/requesterEdit/perfil');
-                        }}
-                        className='menuItem'
-                      >
-                        Editar perfil
-                      </button>
-
-                      <button
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={goToMisTrabajos}
-                        className='menuItem w-full text-left'
-                      >
-                        <Briefcase className='h-4 w-4 inline mr-2' />
-                        Mis Trabajos
-                      </button>
-
-                      <button
-                        onMouseDown={(e) => e.stopPropagation()}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setProfileMenuOpen(false);
-                          router.push('/become-fixer');
-                        }}
-                        className='menuItem'
-                      >
-                        Convertirse en Fixer
-                      </button>
-                    </>
-                  )}
-
-                  <button
-                    onMouseDown={(e) => e.stopPropagation()}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      doLogout();
-                    }}
-                    className={`menuItem logoutBtn`}
-                  >
-                    Cerrar sesión
-                  </button>
-                </div>
-              )}
-            </>
-          )}
-
-          {accountOpen && isLogged && (
-            <div
-              ref={dropdownRef}
-              className='absolute top-16 right-3 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50'
-            >
-              <Link
-                href='/requesterEdit'
-                className='block px-4 py-2 text-gray-700 hover:bg-gray-50'
-              >
-                {t('dropdown.editProfile')}
-              </Link>
+                  Iniciar sesión
+                </Link>
+                <Link
+                  href='/signUp'
+                  className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
+                >
+                  Registrarse
+                </Link>
+              </>
+            ) : (
               <button
-                onClick={doLogout}
-                className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
+                onClick={() => setAccountOpen(!accountOpen)}
+                className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
               >
-                {t('dropdown.logout')}
+                <span className='text-gray-700 font-medium'>{user?.name}</span>
               </button>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
