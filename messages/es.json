@@ -998,7 +998,7 @@
     },
     "deleteConfirmation": "¿Estás seguro de eliminar esta experiencia?"
   },
-  "JobOffersSection": {
+    "JobOffersSection": {
     "titles": {
       "jobOffers": "Ofertas de Trabajo",
       "myJobOffers": "Mis Ofertas de Trabajo"
@@ -1059,6 +1059,28 @@
         "label": "Imágenes"
       }
     },
+    "loading": "Cargando ofertas...",
+    "empty": "No hay ofertas publicadas aún.",
+    "notifications": {
+      "noUser": "No se identificó al usuario.",
+      "noImages": "Debes subir al menos una foto.",
+      "imageLimit": "Límite excedido",
+      "imageLimitMessage": "Solo puedes subir hasta 5 imágenes.",
+      "imageTooBig": "Imagen muy pesada",
+      "imageSizeMessage": "La imagen {fileName} excede 5MB.",
+      "updated": "Actualizado",
+      "updateSuccess": "Oferta actualizada correctamente.",
+      "published": "Publicado",
+      "createSuccess": "Oferta creada correctamente.",
+      "error": "Error",
+      "errorMessage": "Error al procesar la solicitud.",
+      "deleteTitle": "¿Eliminar oferta?",
+      "deleteMessage": "Esta acción no se puede deshacer.",
+      "deleted": "Eliminado",
+      "deleteSuccess": "Oferta eliminada.",
+      "deleteError": "No se pudo eliminar la oferta."
+    },
+    "confirmButton": "Confirmar",
     "deleteConfirmation": "¿Estás seguro de eliminar esta oferta?"
   },
   "PortfolioSection": {
@@ -1099,7 +1121,8 @@
         "placeholder": "Se intentará extraer automáticamente"
       }
     },
-    "deleteConfirmation": "¿Estás seguro de eliminar este elemento?"
+    "deleteConfirmation": "¿Estás seguro de eliminar este elemento?",
+    "emptyState": "portfolio vacio"
   },
   "RegistroForm": {
     "fields": {

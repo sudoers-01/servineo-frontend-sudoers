@@ -996,7 +996,7 @@
     },
     "deleteConfirmation": "Are you sure you want to delete this experience?"
   },
-  "JobOffersSection": {
+    "JobOffersSection": {
     "titles": {
       "jobOffers": "Job Offers",
       "myJobOffers": "My Job Offers"
@@ -1057,6 +1057,28 @@
         "label": "Images"
       }
     },
+    "loading": "Loading offers...",
+    "empty": "No offers published yet.",
+    "notifications": {
+      "noUser": "User not identified.",
+      "noImages": "You must upload at least one photo.",
+      "imageLimit": "Limit exceeded",
+      "imageLimitMessage": "You can only upload up to 5 images.",
+      "imageTooBig": "Image too large",
+      "imageSizeMessage": "The image {fileName} exceeds 5MB.",
+      "updated": "Updated",
+      "updateSuccess": "Offer updated successfully.",
+      "published": "Published",
+      "createSuccess": "Offer created successfully.",
+      "error": "Error",
+      "errorMessage": "Error processing the request.",
+      "deleteTitle": "Delete offer?",
+      "deleteMessage": "This action cannot be undone.",
+      "deleted": "Deleted",
+      "deleteSuccess": "Offer deleted.",
+      "deleteError": "Could not delete the offer."
+    },
+    "confirmButton": "Confirm",
     "deleteConfirmation": "Are you sure you want to delete this offer?"
   },
   "PortfolioSection": {
@@ -1097,7 +1119,8 @@
         "placeholder": "Will try to extract automatically"
       }
     },
-    "deleteConfirmation": "Are you sure you want to delete this item?"
+    "deleteConfirmation": "Are you sure you want to delete this item?",
+    "emptyState": "Empty portfolio"
   },
   "RegistroForm": {
     "fields": {

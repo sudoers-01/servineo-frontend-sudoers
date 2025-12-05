@@ -235,8 +235,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     rating: offer.rating,
     photos: offer.photos || [],
     allImages: offer.photos || [],
-    imagenUrl: offer.photos?.[0] || '',
-    status: 'active',
+    imagenUrl: offer.photos?.[0] || ''
   });
 
   const isSubmitting = isCreating || isUpdating;
