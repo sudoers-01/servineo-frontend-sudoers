@@ -4,8 +4,8 @@ import '../globals.css';
 import { roboto } from '../fonts';
 import 'leaflet/dist/leaflet.css';
 import { ReduxProvider } from '../redux/ReduxProvider';
-import TopMenu from '@/Components/Navigation/TopMenu';
 import { ReactNode } from 'react';
+import ConditionalTopMenu from './adminStatistic/ConditionalTopMenu';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { TranslationButton } from '@/Components/Shared/TranslationButton';
@@ -72,9 +72,7 @@ export default async function RootLayout({ children, params }: Props) {
             <div className='text-black fixed bottom-7 left-7 z-9999'>
               <BotonesFlotantes />
             </div>
-            <div className=''>
-              <TopMenu />
-            </div>
+            <ConditionalTopMenu />
             {children}
             <TranslationButton />
             <FooterSection />
