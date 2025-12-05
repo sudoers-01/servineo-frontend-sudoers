@@ -1,4 +1,5 @@
 // src/Components/payment/InvoiceList.tsx
+import { useRouter } from 'next/navigation';
 import React, { useState, useEffect, useCallback } from 'react';
 import { 
     ChevronRight, 
@@ -35,18 +36,6 @@ interface AppRouter {
     back: () => void;
 }
 let useRouter: () => AppRouter;
-
-try {
-    // Si estamos en un entorno Next.js
-    import { useRouter } from 'next/navigation';
-} catch (e) {
-    console.warn("Could not import Next.js navigation hooks. Using mock functions.");
-    // Mock para entornos que no sean Next.js (como el ambiente de desarrollo Canvas)
-    useRouter = () => ({ 
-        push: (path: string) => console.log(`[MOCK PUSH] Navegando a: ${path}`),
-        back: () => console.log('[MOCK BACK] Volviendo...'),
-    });
-}
 
 export interface BackendInvoice {
     id: string;
