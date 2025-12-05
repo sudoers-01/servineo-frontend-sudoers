@@ -282,7 +282,6 @@ const jobOffersSlice = createSlice({
       if (restored.preservedTotalRegistros !== undefined) {
         state.preservedTotalRegistros = restored.preservedTotalRegistros;
       }
-
       state.shouldPersist = true;
 
       if (!state.paginaciones['offers']) {

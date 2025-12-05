@@ -96,7 +96,8 @@ export default function CommentsPage() {
           </div>
         ) : data.length === 0 ? (
           <div className='bg-white border border-gray-200 rounded-lg p-8 text-center text-gray-500'>
-            No comments found
+            <p className='text-lg font-medium'>No tiene comentarios</p>
+            <p className='text-sm mt-2'>Aún no hay comentarios para este fijador.</p>
           </div>
         ) : (
           <div className='space-y-4'>

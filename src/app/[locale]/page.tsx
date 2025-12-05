@@ -1,71 +1,77 @@
 'use client';
 
+import { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { useTranslations } from 'next-intl';
 import HeroSection from '@/Components/Home/Hero-section';
 import ServicesSection from '@/Components/Home/Services-section';
 import HowItWorksSection from '@/Components/Home/HowItWorks-section';
 import CTASection from '@/Components/Home/CTA-section';
 import InspirationSection from '@/Components/Home/Inspiration-section';
 import RecentOffersSection from '@/Components/Home/RecentOffer-secction';
-import dynamic from 'next/dynamic';
+import MapSection from '@/Components/Home/MapSection';
+import { IUser } from '@/types/user';
 
-import { useEffect } from 'react';
-//import { useSelector } from 'react-redux';
-//import { IUser } from '@/types/user';
-import { useDispatch } from 'react-redux';
-import { useState } from 'react';
-import { useGetUserByIdQuery } from '../redux/services/userApi';
-import { setUser } from '../redux/slice/userSlice';
-import Map from '../Mapa/Map';
+interface RootState {
+  user: {
+    user: IUser | null;
+    loading: boolean;
+    isAuthenticated: boolean;
+  };
+}
 
 export default function Home() {
-  //const user = useSelector((state: { user: IUser }) => state.user);
-  const dispatch = useDispatch();
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user, loading } = useSelector((state: RootState) => state.user);
+  const [authReady, setAuthReady] = useState(false);
+  const t = useTranslations('home');
 
-  // Obtener userId desde localStorage
   useEffect(() => {
-    const token = localStorage.getItem('servineo_user');
-    if (token) {
-      try {
-        const userData = JSON.parse(token);
-        const id = userData._id || userData.id;
-        setUserId(id);
-      } catch (e) {
-        // Optionally log the error or handle it as needed
-        console.warn('Failed to parse servineo_user from localStorage:', e);
-      }
-    }
-  }, []);
+    if (!loading) setAuthReady(true);
+  }, [loading]);
 
-  // Consultar user por ID
-  const { data: userData } = useGetUserByIdQuery(userId!, {
-    skip: !userId,
-  });
+  if (!authReady) return null;
 
-  // Guardar user en redux
-  useEffect(() => {
-    if (userData) dispatch(setUser(userData));
-  }, [userData, dispatch]);
+  const isFixer = user?.role === 'fixer';
 
   return (
-    <div className='min-h-screen bg-white overflow-x-hidden'>
-      <HeroSection />
-      <section className='py-16 px-4 bg-white'>
+    <div className='min-h-screen bg-white relative'>
+      <div
+        id='tour-start-point'
+        className='absolute top-0 left-0 w-1 h-1 opacity-0 pointer-events-none'
+      />
+
+      {/* Hero cambia según el rol */}
+      <HeroSection isFixer={isFixer} />
+
+      <section className={isFixer ? 'bg-white' : 'py-16 px-4 bg-white'}>
         <div className='max-w-7xl mx-auto'>
-          <h2 className='text-3xl md:text-4xl font-bold text-gray-800 mb-8 text-center'>
-            Encuentra Servicios Cerca de Ti
-            <span className='block text-base md:text-lg font-normal text-gray-600 mt-2 opacity-80'>
-              Explora los profesionales disponibles en tu zona
-            </span>
-          </h2>
-          <Map />
-          <InspirationSection />
+          {/* Mapa e inspiración solo para requesters */}
+          {!isFixer && (
+            <>
+              {/* ✅ USAR MapSection en lugar del código anterior */}
+              <MapSection />
+
+              <InspirationSection />
+            </>
+          )}
           <RecentOffersSection />
         </div>
       </section>
-      <ServicesSection />
-      <HowItWorksSection />
-      <CTASection />
+
+      <ServicesSection
+        showHero={false}
+        showAllServices={false}
+        showCTA={false}
+        title='Servicios Disponibles'
+        subtitle='Encuentra el profesional perfecto para cualquier trabajo en tu hogar'
+      />
+
+      {!isFixer && (
+        <>
+          <HowItWorksSection />
+          <CTASection />
+        </>
+      )}
     </div>
   );
 }

@@ -3,87 +3,266 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Wrench, UserCircle, Home, Briefcase, HelpCircle } from 'lucide-react';
+import { Wrench, UserCircle, ClipboardList, HelpCircle, Calendar, Wallet, Briefcase } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
+import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
-import { IUser } from '@/types/user';
-import { useTranslations } from 'next-intl';
-
-interface UserState {
-  user: IUser | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-}
+import type { IUser } from '@/types/user';
+import { useRouter, usePathname } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 
 interface RootState {
-  user: UserState;
+  user: { user: IUser | null };
 }
 
 export default function TopMenu() {
-  const t = useTranslations('TopMenu');
+  const t = useTranslations();
+  const locale = useLocale();
+
+  const localeDefault = (es: string, en: string) => (locale === 'es' ? es : en);
+
+  const resolveT = (key: string, fallbackKey?: string, fallbackText?: string) => {
+    try {
+      if (fallbackKey) return t(fallbackKey);
+    } catch {}
+    return fallbackText ?? localeDefault('Iniciar Sesión', 'Log in');
+  };
+  
   const dispatch = useDispatch();
-  const { user, loading } = useSelector((state: RootState) => state.user);
+  const router = useRouter();
+  const pathname = usePathname();
 
+  const user = useSelector((state: RootState) => state.user.user);
+
+  // UI state
   const [scrolled, setScrolled] = useState(false);
-  const [isLogged, setIsLogged] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [currentPath, setCurrentPath] = useState<string>(
+    typeof window !== 'undefined' ? window.location.pathname : '',
+  );
+  const [isLogged, setIsLogged] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? Boolean(localStorage.getItem('servineo_token')) : false,
+  );
 
+  // Refs
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLButtonElement | null>(null);
+  const mobileMenuRef = useRef<HTMLDivElement | null>(null);
+  const profileButtonRef = useRef<HTMLButtonElement | null>(null);
+  const [isClient, setIsClient] = useState(false);
 
-  const navItems = [
-    { name: t('nav.home'), href: '/', icon: <Home className='h-5 w-5' /> },
-    { name: t('nav.jobOffers'), href: '/job-offer-list', icon: <Briefcase className='h-5 w-5' /> },
-    {
-      name: t('nav.help'),
-      href: '/ask-for-help/centro_de_ayuda',
-      icon: <HelpCircle className='h-5 w-5' />,
-    },
-  ];
-
-  const [currentPath, setCurrentPath] = useState('');
-
-  // Detectar ruta actual
   useEffect(() => {
-    setCurrentPath(window.location.pathname);
+    setIsClient(true);
   }, []);
 
-  // Obtener userId desde localStorage
-  useEffect(() => {
-    const token = localStorage.getItem('servineo_user');
-    if (token) {
-      const userData = JSON.parse(token);
-      setUserId(userData._id);
+  // NAV items
+  const navItems =
+    user?.role === 'fixer'
+      ? [
+          { name: 'Servicios', href: '/servicios', icon: <Wrench className='h-5 w-5' /> },
+          {
+            name: 'Ofertas de trabajo',
+            href: '/job-offer-list',
+            icon: <ClipboardList className='h-5 w-5' />,
+          },
+          {
+            name: 'Agenda',
+            href: '/agenda',
+            icon: <Calendar className='h-5 w-5' />,
+          },
+          {
+            name: 'Ayuda',
+            href: '/ask-for-help/centro_de_ayuda',
+            icon: <HelpCircle className='h-5 w-5' />,
+          },
+        ]
+      : [
+          { name: 'Servicios', href: '/servicios', icon: <Wrench className='h-5 w-5' /> },
+          {
+            name: 'Ofertas de trabajo',
+            href: '/job-offer-list',
+            icon: <ClipboardList className='h-5 w-5' />,
+          },
+          {
+            name: 'Ayuda',
+            href: '/ask-for-help/centro_de_ayuda',
+            icon: <HelpCircle className='h-5 w-5' />,
+          },
+        ];
+
+  /* ---------- Helpers ---------- */
+
+  const getPhoto = (u?: IUser | null): string => {
+    if (!u) return '/es/img/icon.png';
+    const sources: (string | undefined)[] = [u.photo, u.picture, u.url_photo];
+    const valid = sources.find((src) => typeof src === 'string' && src.trim().length > 0);
+    return valid ?? '/es/img/icon.png';
+  };
+
+  const userPhoto = getPhoto(user);
+
+  const goToCentroDePagos = () => {
+    const id = user?._id || user?.id || userId;
+    if (id) {
+      router.push(`/payment/centro-de-pagos?fixerId=${id}`);
+      setProfileMenuOpen(false);
+      setAccountOpen(false);
+    } else {
+      console.error('No se encontró el ID del fixer para ir al Centro de Pagos');
     }
+  };
+
+  const goToMisTrabajos = () => {
+    router.push('/payment/trabajos');
+    setProfileMenuOpen(false);
+    setAccountOpen(false);
+  };
+
+  const goToConfirmarPagos = () => {
+    router.push('/payment/Pagos-Fisico');
+    setProfileMenuOpen(false);
+    setAccountOpen(false);
+  };
+
+  /* ---------- Effects ---------- */
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', onScroll);
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  // Consultar user por ID
-  const { data: userData } = useGetUserByIdQuery(userId!, {
-    skip: !userId,
-  });
-
-  // Guardar user en redux
   useEffect(() => {
-    if (userData) dispatch(setUser(userData));
-  }, [userData, dispatch]);
+    if (typeof window !== 'undefined') setCurrentPath(window.location.pathname);
+  }, [pathname]);
 
-  // Scroll y login
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
+    if (typeof window === 'undefined') return;
 
-    const token = localStorage.getItem('servineo_token');
-    setIsLogged(!!token);
+    try {
+      const raw = localStorage.getItem('servineo_user');
+      const token = localStorage.getItem('servineo_token');
 
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
+      if (raw && raw !== 'undefined') {
+        const parsed: IUser = JSON.parse(raw);
 
-  // Click fuera del dropdown
+        const normalized: IUser = {
+          ...parsed,
+          photo: parsed.photo || parsed.picture || parsed.url_photo || '',
+          picture: parsed.picture || parsed.photo || parsed.url_photo || '',
+          url_photo: parsed.url_photo || parsed.photo || parsed.picture || '',
+        };
+
+        dispatch(setUser(normalized));
+        setIsLogged(Boolean(token));
+        setUserId(normalized._id || normalized.id || null);
+      } else {
+        dispatch(setUser(null));
+        setIsLogged(false);
+        setUserId(null);
+      }
+    } catch {
+      localStorage.removeItem('servineo_user');
+      dispatch(setUser(null));
+      setIsLogged(false);
+    }
+  }, [dispatch]);
+
+  useEffect(() => {
+    const sync = () => {
+      try {
+        const raw = localStorage.getItem('servineo_user');
+        const token = localStorage.getItem('servineo_token');
+
+        if (raw && raw !== 'undefined') {
+          const parsed: IUser = JSON.parse(raw);
+
+          const normalized: IUser = {
+            ...parsed,
+            photo: parsed.photo || parsed.picture || parsed.url_photo,
+            picture: parsed.picture || parsed.photo || parsed.url_photo,
+            url_photo: parsed.url_photo || parsed.photo || parsed.picture,
+          };
+
+          dispatch(setUser(normalized));
+          setIsLogged(Boolean(token));
+          setUserId(normalized._id || normalized.id || null);
+        } else {
+          dispatch(setUser(null));
+          setIsLogged(false);
+          setUserId(null);
+        }
+      } catch {
+        dispatch(setUser(null));
+        setIsLogged(false);
+        setUserId(null);
+      }
+    };
+
+    window.addEventListener('storage', sync);
+    window.addEventListener('servineo_user_updated', sync);
+
+    return () => {
+      window.removeEventListener('storage', sync);
+      window.removeEventListener('servineo_user_updated', sync);
+    };
+  }, [dispatch]);
+
+  useEffect(() => {
+    let timer: ReturnType<typeof setTimeout> | null = null;
+    const logoutOnIdle = () => {
+      try {
+        const raw = localStorage.getItem('servineo_user');
+        const email = raw ? (JSON.parse(raw)?.email ?? '') : '';
+        if (email) sessionStorage.setItem('prefill_email', email);
+      } catch {}
+      localStorage.removeItem('servineo_token');
+      localStorage.removeItem('servineo_user');
+      dispatch(setUser(null));
+      sessionStorage.setItem('session_expired', '1');
+      const emailParam = sessionStorage.getItem('prefill_email')
+        ? `&email=${encodeURIComponent(sessionStorage.getItem('prefill_email') || '')}`
+        : '';
+      router.push(`/login?expired=1${emailParam}`);
+    };
+
+    const resetTimer = () => {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(logoutOnIdle, 15 * 60 * 1000);
+    };
+
+    const events = ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'] as const;
+    events.forEach((ev) => window.addEventListener(ev, resetTimer));
+
+    resetTimer();
+    return () => {
+      if (timer) clearTimeout(timer);
+      events.forEach((ev) => window.removeEventListener(ev, resetTimer));
+    };
+  }, [dispatch, router]);
+
+  useEffect(() => {
+    const handleOutside = (e: MouseEvent) => {
+      if (
+        profileMenuOpen &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        !profileButtonRef.current?.contains(e.target as Node)
+      ) {
+        setProfileMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('click', handleOutside);
+    return () => document.removeEventListener('click', handleOutside);
+  }, [profileMenuOpen]);
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setAccountOpen(false);
       }
     };
@@ -91,51 +270,39 @@ export default function TopMenu() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const logout = () => {
-    localStorage.removeItem('servineo_token');
-    localStorage.removeItem('servineo_user');
-    window.location.reload();
-  };
+  const { data: fetchedUser } = useGetUserByIdQuery(userId ?? skipToken);
+
+  useEffect(() => {
+    if (fetchedUser) {
+      dispatch(setUser(fetchedUser as IUser));
+      setIsLogged(true);
+    }
+  }, [fetchedUser, dispatch]);
 
   const handleLogoClick = () => {
+    if (typeof window === 'undefined') return;
     if (window.location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      window.location.href = '/';
+      router.push('/');
     }
   };
 
-  // Botón de rol para Desktop
-  const getRoleButton = () => {
-    if (loading || !user) return null;
-    if (!user.role) return null;
-
-    if (user.role === 'requester') {
-      return (
-        <Link
-          href='/become-fixer'
-          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-primary transition-colors'
-        >
-          <Wrench className='h-4 w-4' />
-          {t('buttons.becomeFixer')}
-        </Link>
-      );
-    }
-
-    if (user.role === 'fixer') {
-      return (
-        <Link
-          href='/fixer/dashboard'
-          className='flex items-center gap-2 text-white px-4 py-2 rounded-md text-sm font-medium bg-primary transition-colors'
-        >
-          <UserCircle className='h-4 w-4' />
-          {t('buttons.fixerProfile')}
-        </Link>
-      );
-    }
-    return null;
+  const doLogout = () => {
+    try {
+      const raw = localStorage.getItem('servineo_user');
+      const email = raw ? (JSON.parse(raw)?.email ?? '') : '';
+      if (email) sessionStorage.setItem('prefill_email', email);
+    } catch {}
+    localStorage.removeItem('servineo_token');
+    localStorage.removeItem('servineo_user');
+    dispatch(setUser(null));
+    setProfileMenuOpen(false);
+    setIsLogged(false);
+    router.push('/');
   };
 
+  /* ---------- Render ---------- */
   return (
     <>
       {/* DESKTOP HEADER */}
@@ -145,8 +312,7 @@ export default function TopMenu() {
         } border-b border-gray-100`}
         role='banner'
       >
-        <div className='w-full max-w-8xl mx-auto px-4 flex items-center h-16'>
-          {/* Logo */}
+        <div className='w-full max-w-8xl mx-auto px-4 flex justify-between items-center h-20'>
           <button
             ref={logoRef}
             onClick={handleLogoClick}
@@ -170,68 +336,169 @@ export default function TopMenu() {
             </span>
           </button>
 
-          {/* Desktop Nav */}
-          <div className='flex-1 flex justify-center'>
-            <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
+          <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
                   ${currentPath === item.href ? 'text-[var(--color-primary)] after:w-full' : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'}`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
 
-          {/* Desktop Right */}
-          <div className='flex items-center gap-3'>
-            {!isLogged ? (
+          <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
+            {!isClient ? (
+              <div style={{ width: 100, height: 10 }} />
+            ) : !isLogged ? (
               <>
                 <Link
                   href='/login'
                   className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
                 >
-                  {t('buttons.login')}
+                  {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
                 </Link>
                 <Link
                   href='/signUp'
                   className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
                 >
-                  {t('buttons.register')}
+                  {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
                 </Link>
               </>
             ) : (
-              <>
-                {getRoleButton()}
+              <div className='relative'>
+                <button
+                  ref={profileButtonRef}
+                  onClick={() => setProfileMenuOpen((v) => !v)}
+                  className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
+                >
+                  <img
+                    src={userPhoto}
+                    alt={user?.name ?? 'Usuario'}
+                    className='w-10 h-10 rounded-full object-cover border'
+                    onError={(e) => {
+                      (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
+                    }}
+                  />
+                  <span className='font-medium text-gray-700 hover:text-primary'>
+                    {user?.name ?? fetchedUser?.name ?? 'Usuario'}
+                  </span>
+                </button>
 
-                <div className='relative' ref={dropdownRef}>
-                  <button
-                    onClick={() => setAccountOpen(!accountOpen)}
-                    className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
+                {profileMenuOpen && (
+                  <div
+                    ref={dropdownRef}
+                    className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
+                    role='dialog'
+                    aria-label='Menu de usuario'
                   >
-                    {t('buttons.myAccount')}
-                  </button>
-                  {accountOpen && (
-                    <div className='absolute right-0 mt-2 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50'>
-                      <Link
-                        href='/requesterEdit'
-                        className='block px-4 py-2 text-gray-700 hover:bg-gray-50'
-                      >
-                        {t('dropdown.editProfile')}
-                      </Link>
+                    <div className='menuHeader'>
+                      <strong>Mi cuenta</strong>
                       <button
-                        onClick={logout}
-                        className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
+                        className='closeBtn'
+                        onClick={() => setProfileMenuOpen(false)}
+                        aria-label='Cerrar menu'
                       >
-                        {t('dropdown.logout')}
+                        ✕
                       </button>
                     </div>
-                  )}
-                </div>
-              </>
+
+                    <img className='profilePreview' src={userPhoto} alt={user?.name ?? 'Usuario'} />
+
+                    <div className='menuLabel'>
+                      {user?.name ?? fetchedUser?.name ?? 'Sin nombre'}
+                    </div>
+                    <div className='menuLabel'>
+                      {user?.email ?? fetchedUser?.email ?? 'Sin email'}
+                    </div>
+                    <div className='menuLabel'>
+                      {user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}
+                    </div>
+
+                    <hr style={{ margin: '8px 0', opacity: 0.3 }} />
+
+                    {user?.role === 'fixer' ? (
+                      <>
+                        <Link
+                          href='/fixer/dashboard'
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={() => setProfileMenuOpen(false)}
+                          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
+                        >
+                          <UserCircle className='h-4 w-4' />
+                          Perfil de Fixer
+                        </Link>
+
+                        <button
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={goToCentroDePagos}
+                          className='menuItem w-full text-left'
+                        >
+                          <Wallet className='h-4 w-4 inline mr-2' />
+                          Centro de Pagos
+                        </button>
+
+                        <button
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={goToConfirmarPagos}
+                          className='menuItem w-full text-left'
+                        >
+                          <ClipboardList className='h-4 w-4 inline mr-2' />
+                          Confirmar Pagos
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProfileMenuOpen(false);
+                            router.push('/requesterEdit/perfil');
+                          }}
+                          className='menuItem'
+                        >
+                          Editar perfil
+                        </button>
+
+                        <button
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={goToMisTrabajos}
+                          className='menuItem w-full text-left'
+                        >
+                          <Briefcase className='h-4 w-4 inline mr-2' />
+                          Mis Trabajos
+                        </button>
+
+                        <button
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setProfileMenuOpen(false);
+                            router.push('/become-fixer');
+                          }}
+                          className='menuItem'
+                        >
+                          Convertirse en Fixer
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      onMouseDown={(e) => e.stopPropagation()}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        doLogout();
+                      }}
+                      className={`menuItem logoutBtn`}
+                    >
+                      Cerrar sesión
+                    </button>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -239,9 +506,7 @@ export default function TopMenu() {
 
       {/* MOBILE/TABLET HEADER */}
       <div className='lg:hidden'>
-        {/* Barra superior */}
         <div className='flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
-          {/* Logo */}
           <button onClick={handleLogoClick} className='flex items-center gap-2 min-w-0'>
             <div className='relative overflow-hidden rounded-full shadow-md shrink-0'>
               <Image src='/es/img/icon.png' alt='Servineo' width={32} height={32} />
@@ -251,32 +516,151 @@ export default function TopMenu() {
             </span>
           </button>
 
-          {/* Auth Buttons */}
-          {!isLogged ? (
+          {!isClient ? (
+            <div style={{ width: 100, height: 10 }} />
+          ) : !isLogged ? (
             <div className='flex items-center gap-2 flex-nowrap'>
               <Link
                 href='/login'
                 className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
               >
-                {t('buttons.login')}
+                {resolveT('buttons.login', 'navigation.login', 'Iniciar Sesión')}
               </Link>
               <Link
                 href='/signUp'
                 className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
               >
-                {t('buttons.register')}
+                {resolveT('buttons.register', 'navigation.register', 'Regístrate')}
               </Link>
             </div>
           ) : (
-            <button
-              onClick={() => setAccountOpen(!accountOpen)}
-              className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
-            >
-              <span className='text-gray-700 font-medium'>{user?.name}</span>
-            </button>
+            <>
+              <button
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                ref={profileButtonRef}
+                className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
+              >
+                <img
+                  src={userPhoto}
+                  alt={user?.name ?? 'Usuario'}
+                  className='w-8 h-8 rounded-full object-cover border'
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).src = '/es/img/icon.png';
+                  }}
+                />
+                <span className='text-gray-700 font-medium'>
+                  {user?.name ?? fetchedUser?.name ?? 'Usuario'}
+                </span>
+              </button>
+              {profileMenuOpen && (
+                <div
+                  ref={dropdownRef}
+                  className={`profileMenu ${profileMenuOpen ? 'show' : ''}`}
+                  role='dialog'
+                  aria-label='Menu de usuario'
+                >
+                  <div className='menuHeader'>
+                    <strong>Mi cuenta</strong>
+                    <button
+                      className='closeBtn'
+                      onClick={() => setProfileMenuOpen(false)}
+                      aria-label='Cerrar menu'
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <img className='profilePreview' src={userPhoto} alt='Foto' />
+
+                  <div className='menuLabel'>{user?.name ?? fetchedUser?.name ?? 'Sin nombre'}</div>
+                  <div className='menuLabel'>
+                    {user?.email ?? fetchedUser?.email ?? 'Sin email'}
+                  </div>
+                  <div className='menuLabel'>
+                    {user?.telefono ?? fetchedUser?.telefono ?? 'Sin teléfono'}
+                  </div>
+
+                  <hr style={{ margin: '8px 0', opacity: 0.3 }} />
+
+                  {user?.role === 'fixer' ? (
+                    <>
+                      <Link
+                        href='/fixer/dashboard'
+                        onClick={() => setProfileMenuOpen(false)}
+                        className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
+                      >
+                        <UserCircle className='h-4 w-4' />
+                        Perfil de Fixer
+                      </Link>
+
+                      <button
+                        onClick={goToCentroDePagos}
+                        className='menuItem w-full text-left'
+                      >
+                        <Wallet className='h-4 w-4 inline mr-2' />
+                        Centro de Pagos
+                      </button>
+
+                      <button
+                        onClick={goToConfirmarPagos}
+                        className='menuItem w-full text-left'
+                      >
+                        <ClipboardList className='h-4 w-4 inline mr-2' />
+                        Confirmar Pagos
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProfileMenuOpen(false);
+                          router.push('/requesterEdit/perfil');
+                        }}
+                        className='menuItem'
+                      >
+                        Editar perfil
+                      </button>
+
+                      <button
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={goToMisTrabajos}
+                        className='menuItem w-full text-left'
+                      >
+                        <Briefcase className='h-4 w-4 inline mr-2' />
+                        Mis Trabajos
+                      </button>
+
+                      <button
+                        onMouseDown={(e) => e.stopPropagation()}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setProfileMenuOpen(false);
+                          router.push('/become-fixer');
+                        }}
+                        className='menuItem'
+                      >
+                        Convertirse en Fixer
+                      </button>
+                    </>
+                  )}
+
+                  <button
+                    onMouseDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      doLogout();
+                    }}
+                    className={`menuItem logoutBtn`}
+                  >
+                    Cerrar sesión
+                  </button>
+                </div>
+              )}
+            </>
           )}
 
-          {/* Dropdown Mobile */}
           {accountOpen && isLogged && (
             <div
               ref={dropdownRef}
@@ -289,7 +673,7 @@ export default function TopMenu() {
                 {t('dropdown.editProfile')}
               </Link>
               <button
-                onClick={logout}
+                onClick={doLogout}
                 className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
               >
                 {t('dropdown.logout')}
@@ -297,7 +681,7 @@ export default function TopMenu() {
             </div>
           )}
         </div>
-        {/* Barra inferior fija con iconos */}
+
         <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
           {navItems.map((item) => (
             <button
@@ -314,13 +698,12 @@ export default function TopMenu() {
             </button>
           ))}
         </nav>
-        {/* Espaciadores para contenido */}
-        <div className='h-16' /> {/* top */}
-        <div className='h-16' /> {/* bottom */}
+
+        <div className='h-16' />
+        <div className='h-16' />
       </div>
 
-      {/* Spacer Desktop */}
-      <div className='hidden lg:block h-16' />
+      <div className='hidden lg:block h-20' />
     </>
   );
 }

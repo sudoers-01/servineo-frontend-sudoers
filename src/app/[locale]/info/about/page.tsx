@@ -1,189 +1,191 @@
 'use client';
-import React, { JSX } from 'react';
+import Image from 'next/image';
 
-// Tipos para el componente de sección de política
-type PolicySectionProps = {
-  title: string;
-  content: string[];
-  iconPath: string;
-  // El gradiente ahora solo usará la variable primary
-  gradient: string;
-};
-
-export default function CookiesPage(): JSX.Element {
-  // Componente para una sección de política de cookies
-  const PolicySection: React.FC<PolicySectionProps> = ({ title, content, iconPath, gradient }) => (
-    // Usa bg-background, shadow-lg y border-primary para el estilo de tarjeta
-    <div className='bg-background rounded-xl shadow-lg border border-primary/20 overflow-hidden'>
-      {/* Header de sección con gradiente (usando primary en un gradiente sutil) */}
-      <div className={`bg-gradient-to-r ${gradient} text-white p-4 flex items-center gap-3`}>
-        <div className='w-10 h-10 bg-white/25 rounded-lg flex items-center justify-center flex-shrink-0'>
-          <svg className='w-5 h-5' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-            <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d={iconPath} />
-          </svg>
-        </div>
-        <h3 className='text-lg font-bold'>{title}</h3>
-      </div>
-
-      {/* Contenido de la sección */}
-      <div className='p-5 text-sm text-foreground space-y-3'>
-        {content.map((paragraph, index) => (
-          <p key={index} className='leading-relaxed'>
-            {paragraph}
-          </p>
-        ))}
-      </div>
-    </div>
-  );
-
-  const policySections = [
-    {
-      title: '1. ¿Qué son las Cookies?',
-      // Gradiente de primary a un tono más oscuro de primary (para mantener el estilo)
-      gradient: 'from-primary/90 to-primary',
-      iconPath: 'M5 12h14M12 5l7 7-7 7',
-      content: [
-        'Las cookies son pequeños archivos de texto que se almacenan en tu dispositivo (ordenador, tablet, smartphone) cuando visitas Servineo. Permiten a la aplicación recordar tus acciones y preferencias durante un período de tiempo, facilitando la navegación y personalizando la experiencia.',
-      ],
-    },
-    {
-      title: '2. Tipos de Cookies que Utilizamos',
-      gradient: 'from-primary/90 to-primary',
-      iconPath:
-        'M9.75 17L9 20l-1 1h8l-1-1-3.75-3.75M3 17h18M5 17s2.5-1.5 7-1.5 7 1.5 7 1.5M4 12v3M20 12v3M5 10V8a7 7 0 0114 0v2',
-      content: [
-        'Utilizamos diferentes tipos de cookies para asegurar el correcto funcionamiento de nuestra plataforma de agendamiento y cotización de servicios:',
-      ],
-      details: [
-        {
-          subtitle: '2.1. Cookies Esenciales (Técnicas)',
-          text: 'Son estrictamente necesarias para el funcionamiento de Servineo. Permiten el acceso a zonas seguras, mantener tu sesión activa y habilitar la funcionalidad de video inspección.',
-        },
-        {
-          subtitle: '2.2. Cookies de Funcionalidad o Preferencia',
-          text: 'Permiten recordar información para acceder al servicio con características personalizadas, como idioma o región de acceso.',
-        },
-        {
-          subtitle: '2.3. Cookies de Rendimiento o Análisis',
-          text: 'Nos ayudan a entender cómo interactúas con los calendarios y cotizaciones, permitiéndonos mejorar la experiencia de usuario.',
-        },
-        {
-          subtitle: '2.4. Cookies de Publicidad Comportamental',
-          text: 'Almacenan información sobre tus hábitos de navegación para ofrecerte publicidad de servicios relevantes.',
-        },
-      ],
-    },
-    {
-      title: '3. Cookies de Terceros',
-      gradient: 'from-primary/90 to-primary',
-      iconPath:
-        'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z',
-      content: [
-        'Servineo utiliza servicios de terceros que pueden instalar sus propias cookies, como Google Analytics y redes sociales, para medición y analítica.',
-      ],
-    },
-    {
-      title: '4. Gestión de Cookies',
-      gradient: 'from-primary/90 to-primary',
-      iconPath:
-        'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35-.427.757-.427 1.838 0 2.573 1.543.94 3.31-.826 2.37-2.37a1.724 1.724 0 00-1.065-2.572M10 20l4-4m-4 0l4 4',
-      content: [
-        'Puedes aceptar, rechazar o revocar tu consentimiento sobre el uso de cookies en cualquier momento desde la configuración de tu navegador.',
-        'Si deshabilitas las cookies esenciales, ciertas funciones como el agendamiento o el acceso a tu cuenta podrían dejar de funcionar correctamente.',
-      ],
-    },
-  ];
-
+export default function SobreNosotros() {
   return (
-    // Usa clases de Tailwind mapeadas a variables
-    <div className='bg-background text-foreground min-h-screen font-sans'>
-      {/* Hero Section */}
-      <section className='relative bg-gradient-to-br from-primary/90 to-primary text-white py-12 px-6 md:px-12 overflow-hidden'>
-        <div className='absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full blur-3xl'></div>
-        <div className='absolute bottom-0 left-0 w-60 h-60 bg-primary/25 rounded-full blur-2xl'></div>{' '}
-        {/* Usa primary/25 */}
+    <main className='bg-[var(--background)] text-[var(--foreground)] min-h-screen font-sans'>
+      {/* HERO */}
+      <section className='relative bg-[var(--primary)] text-white py-16 px-6 md:px-12 overflow-hidden'>
+        <div className='absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl' />
+        <div className='absolute bottom-0 left-0 w-64 h-64 bg-[var(--primary)]/20 rounded-full blur-2xl' />
+
         <div className='max-w-5xl mx-auto text-center relative z-10'>
-          <div className='w-16 h-16 bg-white/25 rounded-full flex items-center justify-center mx-auto mb-4'>
-            <svg className='w-8 h-8' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-              />
-            </svg>
-          </div>
-          <h1 className='text-3xl md:text-4xl font-bold mb-3'>Política de Cookies de Servineo</h1>
-          <p className='text-base opacity-90 max-w-2xl mx-auto'>
-            Información detallada sobre cómo usamos cookies para mejorar tu experiencia.
+          <h1 className='text-4xl md:text-5xl font-bold mb-4 leading-tight'>
+            Conectamos personas con soluciones confiables
+          </h1>
+          <p className='text-lg md:text-xl opacity-90 max-w-3xl mx-auto'>
+            En <span className='font-bold'>Servineo</span> combinamos tecnología, confianza y
+            talento profesional para transformar la manera en que las personas contratan servicios
+            en su hogar o negocio.
           </p>
         </div>
       </section>
 
-      {/* Contenido Principal */}
-      <section className='max-w-6xl mx-auto py-10 px-6 md:px-10 space-y-8'>
-        {/* Introducción */}
-        <div className='bg-card p-6 rounded-xl shadow-lg border-l-4 border-primary'>
-          {' '}
-          {/* Usa bg-card y border-primary */}
-          <h2 className='text-2xl font-bold text-primary mb-3'>
-            {' '}
-            {/* Usa text-primary */}
-            Información General
-          </h2>
-          <p className='mb-3 leading-relaxed text-foreground'>
-            Esta política explica cómo Servineo utiliza las cookies y tecnologías similares. Al usar
-            nuestra plataforma, acepta su uso según esta política.
-          </p>
-          <p className='leading-relaxed text-foreground'>
-            Nuestro objetivo es brindarle la mejor experiencia posible, optimizando las funciones
-            mediante el uso responsable de cookies.
-          </p>
+      {/* QUE ES SERVINEO */}
+      <section className='max-w-6xl mx-auto py-14 px-6 md:px-10'>
+        <div className='text-center mb-10'>
+          <h2 className='text-3xl font-bold text-[var(--primary)] mb-2'>¿Qué es Servineo?</h2>
+          <div className='w-20 h-1 bg-[var(--primary)] mx-auto' />
         </div>
 
-        {/* Secciones iteradas */}
-        {policySections.map((section, index) => (
-          <div key={index}>
-            <PolicySection
-              title={section.title}
-              content={section.content}
-              iconPath={section.iconPath}
-              gradient={section.gradient}
+        <div className='grid md:grid-cols-2 gap-10 items-center'>
+          <div>
+            <p className='text-base text-gray-700 leading-relaxed mb-4'>
+              Servineo es una plataforma digital creada para simplificar la búsqueda de servicios
+              técnicos confiables. Conectamos a usuarios con
+              <span className='font-semibold text-[var(--primary)]'>
+                {' '}
+                electricistas, plomeros, cerrajeros, carpinteros, pintores y más
+              </span>
+              , todos previamente evaluados para garantizar seguridad, puntualidad y calidad.
+            </p>
+
+            <p className='text-base text-gray-700 leading-relaxed mb-4'>
+              Nuestra misión es eliminar la incertidumbre al contratar servicios. Ya no necesitas
+              depender de recomendaciones informales ni asumir riesgos: con Servineo encuentras
+              profesionales calificados en pocos minutos, con información clara, valoraciones reales
+              y precios transparentes.
+            </p>
+
+            <p className='text-base text-gray-700 leading-relaxed'>
+              Cada proveedor pasa por un proceso de verificación que valida identidad, experiencia y
+              antecedentes, asegurando que cada servicio contratado cumpla nuestros estándares de
+              excelencia.
+            </p>
+          </div>
+
+          <div className='relative h-[340px]'>
+            <Image
+              src='/imagen1.jpg'
+              alt='Red de profesionales Servineo'
+              fill
+              className='rounded-xl shadow-xl object-cover'
             />
-            {section.details && (
-              // Estilo de subsección: fondo gris claro o muted, borde primario/acento
-              <div className='ml-4 mt-4 space-y-3 p-4 bg-muted rounded-xl border border-primary/50'>
-                {section.details.map((detail, dIndex) => (
-                  <div key={dIndex} className='text-sm text-foreground'>
-                    <p className='font-semibold text-primary'>{detail.subtitle}:</p>{' '}
-                    {/* Usa text-primary */}
-                    <p className='leading-relaxed pl-3 border-l-2 border-primary/50 ml-1'>
-                      {' '}
-                      {/* Usa border-primary/50 */}
-                      {detail.text}
-                    </p>
-                  </div>
-                ))}
-              </div>
-            )}
           </div>
-        ))}
-      </section>
-
-      {/* CTA */}
-      <section className='bg-gradient-to-r from-primary/90 to-primary text-white text-center py-10 px-6 mt-10'>
-        <div className='max-w-4xl mx-auto'>
-          <h3 className='text-2xl font-bold mb-3'>Tu Privacidad es Importante</h3>
-          <p className='text-base leading-relaxed mb-5 opacity-95'>
-            Puedes cambiar tu configuración de cookies en cualquier momento. Al continuar navegando,
-            aceptas nuestra política.
-          </p>
-          {/* Botón CTA con estilo primario inverso */}
-          <button className='bg-white text-primary px-8 py-3 rounded-full font-bold text-base hover:bg-gray-100 transition-all duration-300 shadow-lg hover:shadow-xl'>
-            Aceptar y Cerrar
-          </button>
         </div>
       </section>
-    </div>
+
+      {/* DIFERENCIADORES */}
+      <section className='bg-gray-50 py-14 px-6 md:px-10 relative overflow-hidden'>
+        <div className='absolute inset-0 opacity-5'>
+          <div className='absolute top-10 left-10 w-40 h-40 border-4 border-[var(--primary)] rounded-full' />
+          <div className='absolute bottom-20 right-20 w-32 h-32 border-4 border-[var(--primary)] rounded-lg rotate-45' />
+          <div className='absolute top-1/2 left-1/3 w-24 h-24 bg-[var(--primary)] rounded-full' />
+        </div>
+
+        <div className='max-w-6xl mx-auto relative z-10'>
+          <div className='text-center mb-12'>
+            <h2 className='text-3xl font-bold text-[var(--primary)] mb-2'>
+              Lo que nos hace diferentes
+            </h2>
+            <div className='w-20 h-1 bg-[var(--primary)] mx-auto' />
+          </div>
+
+          <div className='grid md:grid-cols-2 gap-8'>
+            {/* CARD 1 */}
+            <div className='bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-[var(--primary)]'>
+              <div className='flex items-start gap-4'>
+                <div className='w-12 h-12 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white text-xl'>
+                  📅
+                </div>
+
+                <div>
+                  <h3 className='text-xl font-bold text-[var(--primary)] mb-2'>
+                    Agenda inteligente
+                  </h3>
+                  <p className='text-sm text-gray-700 leading-relaxed'>
+                    Visualiza disponibilidad en tiempo real, agenda visitas sin llamadas
+                    innecesarias y recibe confirmaciones automáticas para evitar retrasos o
+                    cancelaciones inesperadas.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 2 */}
+            <div className='bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border-l-4 border-[var(--primary)]'>
+              <div className='flex items-start gap-4'>
+                <div className='w-12 h-12 bg-[var(--primary)] rounded-lg flex items-center justify-center text-white text-xl'>
+                  🎥
+                </div>
+
+                <div>
+                  <h3 className='text-xl font-bold text-[var(--primary)] mb-2'>
+                    Cotización por video
+                  </h3>
+                  <p className='text-sm text-gray-700 leading-relaxed'>
+                    Envía un video breve mostrando el problema y recibe presupuestos personalizados
+                    de profesionales interesados, ahorrando tiempo en visitas innecesarias.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* MISION */}
+      <section className='max-w-6xl mx-auto py-14 px-6 md:px-10'>
+        <div className='grid md:grid-cols-2 gap-10 items-center'>
+          <div>
+            <h2 className='text-2xl font-bold text-[var(--primary)] mb-3'>Nuestra Misión</h2>
+
+            <p className='text-base text-gray-700 leading-relaxed mb-4'>
+              Facilitar el acceso a servicios profesionales confiables mediante una plataforma
+              segura, intuitiva y accesible para todos.
+            </p>
+
+            <p className='text-base text-gray-700 leading-relaxed'>
+              Trabajamos continuamente para mejorar la experiencia tanto del cliente como del
+              proveedor, impulsando una comunidad basada en respeto, responsabilidad y
+              transparencia.
+            </p>
+          </div>
+
+          <div className='relative h-[300px]'>
+            <Image
+              src='/imagen2.jpg'
+              alt='Misión Servineo'
+              fill
+              className='rounded-xl shadow-xl object-cover'
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* VALORES */}
+      <section className='bg-[var(--primary)] text-white py-14 px-6 md:px-10'>
+        <div className='max-w-6xl mx-auto'>
+          <div className='text-center mb-10'>
+            <h2 className='text-3xl font-bold mb-2'>Nuestros Valores</h2>
+            <div className='w-20 h-1 bg-white mx-auto' />
+          </div>
+
+          <div className='grid md:grid-cols-3 gap-8'>
+            <div className='text-center bg-white/10 p-6 rounded-lg'>
+              <h3 className='text-xl font-semibold mb-2'>Confianza</h3>
+              <p className='text-white/90 text-sm leading-relaxed'>
+                Seguridad y transparencia en cada interacción entre clientes y profesionales.
+              </p>
+            </div>
+
+            <div className='text-center bg-white/10 p-6 rounded-lg'>
+              <h3 className='text-xl font-semibold mb-2'>Calidad</h3>
+              <p className='text-white/90 text-sm leading-relaxed'>
+                Seleccionamos expertos comprometidos con la excelencia en cada servicio realizado.
+              </p>
+            </div>
+
+            <div className='text-center bg-white/10 p-6 rounded-lg'>
+              <h3 className='text-xl font-semibold mb-2'>Innovación</h3>
+              <p className='text-white/90 text-sm leading-relaxed'>
+                Utilizamos tecnología para simplificar, agilizar y optimizar la contratación de
+                servicios.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }

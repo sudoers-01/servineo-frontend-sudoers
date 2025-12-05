@@ -1,6 +1,10 @@
 'use client';
 
 export default function SupportPage() {
+  const WHATSAPP_NUMBER = '59175139742';
+  const SUPPORT_EMAIL = 'servineo.serviciostecnicos@gmail.com';
+
+  const HELP_MESSAGE = encodeURIComponent('Hola Servineo, necesito ayuda por favor.');
   const faqs = [
     {
       category: 'Primeros pasos',
@@ -133,7 +137,7 @@ export default function SupportPage() {
   const contactOptions = [
     {
       title: 'Chat en Vivo',
-      description: 'Respuesta inmediata en horario de atención',
+      description: 'Atención directa por WhatsApp',
       icon: (
         <path
           strokeLinecap='round'
@@ -143,11 +147,12 @@ export default function SupportPage() {
         />
       ),
       action: 'Iniciar Chat',
-      color: 'from-[var(--primary)] to-[var(--primary)]',
+      link: `https://wa.me/${WHATSAPP_NUMBER}?text=${HELP_MESSAGE}`,
     },
+
     {
       title: 'Email',
-      description: 'soporte@servineo.com',
+      description: SUPPORT_EMAIL,
       icon: (
         <path
           strokeLinecap='round'
@@ -157,11 +162,12 @@ export default function SupportPage() {
         />
       ),
       action: 'Enviar Email',
-      color: 'from-[var(--primary)] to-[var(--primary)]',
+      link: `mailto:${SUPPORT_EMAIL}?subject=Solicitud de ayuda&body=Hola Servineo,%0A%0ANecesito ayuda con uno de sus servicios.`,
     },
+
     {
       title: 'WhatsApp',
-      description: '+591 123 456 789',
+      description: '+591 751 39742',
       icon: (
         <path
           strokeLinecap='round'
@@ -171,7 +177,7 @@ export default function SupportPage() {
         />
       ),
       action: 'Abrir WhatsApp',
-      color: 'from-[var(--primary)] to-[var(--primary)]',
+      link: `https://wa.me/${WHATSAPP_NUMBER}?text=${HELP_MESSAGE}`,
     },
   ];
 
@@ -260,9 +266,14 @@ export default function SupportPage() {
               </div>
               <h3 className='font-bold text-[var(--foreground)] mb-2 text-base'>{option.title}</h3>
               <p className='text-sm text-gray-600 mb-4'>{option.description}</p>
-              <button className='w-full bg-[var(--primary)] text-white py-2 px-4 rounded-lg text-sm font-semibold hover:shadow-lg transition-all duration-300'>
+              <a
+                href={option.link}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='block w-full bg-[var(--primary)] text-white py-2 px-4 rounded-lg text-sm font-semibold text-center hover:shadow-lg transition-all duration-300'
+              >
                 {option.action}
-              </button>
+              </a>
             </div>
           ))}
         </div>
@@ -321,9 +332,6 @@ export default function SupportPage() {
           <p className='text-base leading-relaxed mb-5 opacity-95'>
             Nuestro equipo está listo para ayudarte. No dudes en contactarnos.
           </p>
-          <button className='bg-[var(--background)] text-[var(--primary)] px-8 py-3 rounded-full font-bold text-base hover:bg-[var(--light-gray)] transition-colors duration-300 shadow-lg hover:shadow-xl'>
-            Hablar con Soporte
-          </button>
         </div>
       </section>
     </main>

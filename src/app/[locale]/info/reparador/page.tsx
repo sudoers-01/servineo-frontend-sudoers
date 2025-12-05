@@ -138,7 +138,7 @@ export default function ParaReparadores() {
           Regístrate en Servineo y empieza a recibir trabajos de manera confiable y profesional.
         </p>
         <Link
-          href='/registro-reparador'
+          href='/signUp'
           className='inline-block bg-[var(--primary)] text-white font-semibold px-6 py-3 rounded-lg shadow-md hover:shadow-xl transition-all duration-300'
         >
           Registrarse
