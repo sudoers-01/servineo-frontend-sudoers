@@ -100,7 +100,7 @@ export default function NotificationModal({
   };
 
   return (
-    <div className='fixed inset-0 z-50 flex items-start justify-center pt-20 px-4 animate-fade-in'>
+    <div className='fixed inset-0 z-50 flex items-start justify-start pt-20 animate-fade-in'>
       {/* Overlay backdrop */}
       <div
         className='fixed inset-0 bg-black/20 backdrop-blur-sm transition-opacity'
@@ -109,7 +109,7 @@ export default function NotificationModal({
       />
 
       <div
-        className={`relative w-full max-w-md bg-white border-2 ${config.borderColor} rounded-2xl shadow-2xl animate-scale-in`}
+        className={`relative w-full max-w-md bg-white border-2 ${config.borderColor} rounded-2xl shadow-2xl animate-scale-in ml-16`}
         role='dialog'
         aria-modal='true'
       >
