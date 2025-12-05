@@ -52,7 +52,7 @@ export default function TrabajosYPagos() {
       if (trabajosData.length === 0) {
         setError('No se encontraron trabajos para este fixer.');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Error completo:', err);
       const errorMessage = err.message || 'Error al cargar trabajos';
       setError(errorMessage);

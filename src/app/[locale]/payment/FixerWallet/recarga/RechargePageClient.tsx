@@ -79,7 +79,7 @@ export default function FixerWalletRecharge({ userid }) {
  const [amountError, setAmountError] = useState('');
 
  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
- let value = e.target.value;
+ const value = e.target.value;
 
  // Permitir solo números y hasta 2 decimales
  if (!/^\d*\.?\d{0,2}$/.test(value)) return;

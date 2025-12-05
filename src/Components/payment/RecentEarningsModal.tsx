@@ -28,7 +28,7 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
     
     if (typeof window !== 'undefined') {
       try {
-        const reduxState = (window as any).__REDUX_DEVTOOLS_EXTENSION__?.store?.getState?.();
+        const reduxState = (window as unknown).__REDUX_DEVTOOLS_EXTENSION__?.store?.getState?.();
         if (reduxState?.fixer?.id || reduxState?.fixer?._id) {
           const id = reduxState.fixer.id || reduxState.fixer._id;
           console.log("✅ fixerId obtenido de Redux:", id);
@@ -119,7 +119,7 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
       console.log("📦 Datos recibidos:", result);
       
       if (result.success && result.data) {
-        const transformedData = result.data.earningsByDay.map((item: any) => ({
+        const transformedData = result.data.earningsByDay.map((item: unknown) => ({
           label: formatDateLabel(item.date),
           value: item.total
         }));
@@ -131,7 +131,7 @@ export default function RecentEarningsModal({ onClose, fixerId: propFixerId }: P
       } else {
         throw new Error("Estructura de datos incorrecta del servidor");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("❌ Error:", err);
       setError(err.message || "Error inesperado al cargar datos");
     } finally {

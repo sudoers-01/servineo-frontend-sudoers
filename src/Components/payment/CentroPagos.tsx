@@ -140,7 +140,7 @@ const CentroDePagos = () => {
       } else {
         throw new Error(result.error || 'Error desconocido');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('❌ Error fetching fixer data:', err);
       setError(err.message || 'Error desconocido');
       

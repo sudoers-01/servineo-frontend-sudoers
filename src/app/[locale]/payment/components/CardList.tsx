@@ -137,7 +137,7 @@ export default function CardList({
 
     // ✅ Llamar al callback real para refrescar trabajos
     onPaymentSuccess?.(); 
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error(err);
     alert(`Error al procesar el pago: ${err.message || 'Error desconocido'}`);
   } finally {

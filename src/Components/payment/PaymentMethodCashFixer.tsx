@@ -135,7 +135,7 @@ export default function PaymentMethodCashFixer({
           amount: { total: trabajo.totalPagar || 0, currency: "BOB" },
         });
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       console.error('❌ Error:', e);
       setMainMessage({ type: 'error', text: e.message });
     } finally {
@@ -257,7 +257,7 @@ export default function PaymentMethodCashFixer({
         setShowSuccessModal(true);
         setCodigoIngresado('');
       }
-    } catch (e: any) {
+    } catch (e: unknown) {
       setMainMessage({ type: 'error', text: e.message });
     } finally {
       setPatching(false);

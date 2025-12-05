@@ -12,19 +12,12 @@ import type { IUser } from '@/types/user';
 import { useRouter, usePathname } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 
-interface UserState {
-  user: IUser | null;
-  isAuthenticated: boolean;
-  loading: boolean;
-}
-
 interface RootState {
   user: { user: IUser | null };
 }
 
 export default function TopMenu() {
   const t = useTranslations();
-  const tGlobal = t;
   const locale = useLocale();
 
   const localeDefault = (es: string, en: string) => (locale === 'es' ? es : en);
@@ -41,10 +34,8 @@ export default function TopMenu() {
   const pathname = usePathname();
 
   const user = useSelector((state: RootState) => state.user.user);
-  const isAuthenticated = !!user;
 
   // UI state
-  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
@@ -59,7 +50,6 @@ export default function TopMenu() {
   // Refs
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLButtonElement | null>(null);
-  const profileMenuRef = useRef<HTMLDivElement | null>(null);
   const mobileMenuRef = useRef<HTMLDivElement | null>(null);
   const profileButtonRef = useRef<HTMLButtonElement | null>(null);
   const [isClient, setIsClient] = useState(false);
@@ -67,16 +57,6 @@ export default function TopMenu() {
   useEffect(() => {
     setIsClient(true);
   }, []);
-
-  // Determine if we're in auth flow
-  const isInAuthFlow = () => {
-    if (typeof window === 'undefined') return false;
-    const authRoutes = ['/login', '/signUp'];
-    const isInAuthRoute = authRoutes.some((route) => pathname?.includes(route));
-    const authInProgress = sessionStorage.getItem('auth_in_progress') === 'true';
-    return isInAuthRoute || authInProgress;
-  };
-  const inAuthFlow = isInAuthFlow();
 
   // NAV items
   const navItems =
@@ -184,12 +164,12 @@ export default function TopMenu() {
         setIsLogged(false);
         setUserId(null);
       }
-    } catch (e) {
+    } catch {
       localStorage.removeItem('servineo_user');
       dispatch(setUser(null));
       setIsLogged(false);
     }
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const sync = () => {
@@ -644,6 +624,7 @@ export default function TopMenu() {
                       </button>
 
                       <button
+                        onMouseDown={(e) => e.stopPropagation()}
                         onClick={goToMisTrabajos}
                         className='menuItem w-full text-left'
                       >

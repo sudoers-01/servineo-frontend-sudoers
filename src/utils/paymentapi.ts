@@ -57,7 +57,7 @@ export const getFixerId = (): string => {
 /**
  * Obtiene el usuario completo desde localStorage
  */
-export const getUser = (): Record<string, any> | null => {
+export const getUser = (): Record<string, unknown> | null => {
   if (typeof window === 'undefined') return null;
   
   try {
@@ -183,7 +183,7 @@ export const fetchFixerJobs = async (
     const data = await res.json();
     console.log(`✅ Datos [${status}]:`, data);
     return data;
-  } catch (error: any) {
+  } catch (error: unknown) {
     if (error.name === 'AbortError') {
       console.error(`⏱️ Timeout en API [${status}]`);
     } else {
@@ -260,7 +260,7 @@ export const fetchAllFixerJobs = async (fixerId: string): Promise<Trabajo[]> => 
 
       console.log('✅ Trabajos mapeados:', mapped);
       return mapped;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Error en fetchAllFixerJobs:', error);
       
       // Si es timeout o error de red, devolver datos de ejemplo

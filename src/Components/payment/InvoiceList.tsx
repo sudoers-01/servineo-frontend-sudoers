@@ -38,7 +38,7 @@ let useRouter: () => AppRouter;
 
 try {
     // Si estamos en un entorno Next.js
-    ({ useRouter } = require('next/navigation'));
+    import { useRouter } from 'next/navigation';
 } catch (e) {
     console.warn("Could not import Next.js navigation hooks. Using mock functions.");
     // Mock para entornos que no sean Next.js (como el ambiente de desarrollo Canvas)

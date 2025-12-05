@@ -76,7 +76,7 @@ export default function FixerWalletHistory() {
       } else {
         throw new Error(result.error || "No se pudieron cargar los datos.");
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setError(err.message || "Un error inesperado ocurrió.");
     } finally {
       setLoading(false);

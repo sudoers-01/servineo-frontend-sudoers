@@ -1,11 +1,28 @@
 import { useEffect, useState } from "react";
 import LoadingFallback from "./LoadingFallback";
-import PaymentMethods from "@/app/[locale]/payment/components/PaymentDemoAdaptado"; // <-- importamos nuestro componente
+import PaymentMethods from "@/app/[locale]/payment/components/PaymentDemoAdaptado";
 
-export default function TrabajosList({ userId }) {
-  const [jobs, setJobs] = useState([]);
+// Define el tipo de Job
+interface Job {
+  _id: string;
+  title: string;
+  description: string;
+  fixerId: string;
+  status: string;
+  type: string;
+  price: number;
+  comment?: string;
+}
+
+// Define el tipo de props
+interface TrabajosListProps {
+  userId: string;
+}
+
+export default function TrabajosList({ userId }: TrabajosListProps) {
+  const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedJob, setSelectedJob] = useState<any | null>(null); // trabajo seleccionado para pagar
+  const [selectedJob, setSelectedJob] = useState<Job | null>(null);
 
   useEffect(() => {
     const fetchJobs = async () => {
@@ -52,22 +69,25 @@ export default function TrabajosList({ userId }) {
             return (
               <li
                 key={job._id}
-                className={`p-5 rounded-2xl border transition shadow-sm hover:shadow-lg ${isPending ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"
-                  }`}
+                className={`p-5 rounded-2xl border transition shadow-sm hover:shadow-lg ${
+                  isPending ? "border-red-300 bg-red-50" : "border-gray-200 bg-white"
+                }`}
               >
                 <h2 className="text-lg font-semibold text-gray-800">{job.title}</h2>
                 <p className="text-gray-600">{job.description}</p>
-                <span className="font-semibold text-gray-700">FixerID:</span>{" "}
-                <p className="text-gray-600">{job.fixerId}</p>
+                <p className="text-gray-600">
+                  <span className="font-semibold text-gray-700">FixerID:</span> {job.fixerId}
+                </p>
                 <p className="mt-1">
                   <span className="font-semibold text-gray-700">Estado:</span>{" "}
                   <span
-                    className={`font-medium ${isPaid
-                      ? "text-green-600"
-                      : isPending
+                    className={`font-medium ${
+                      isPaid
+                        ? "text-green-600"
+                        : isPending
                         ? "text-red-600"
                         : "text-yellow-600"
-                      }`}
+                    }`}
                   >
                     {job.status}
                   </span>
@@ -79,14 +99,14 @@ export default function TrabajosList({ userId }) {
 
                 {job.comment && (
                   <p className="text-sm text-gray-400 mt-1">
-                    Comentario: "{job.comment}"
+                    Comentario: &quot;{job.comment}&quot;
                   </p>
                 )}
 
                 {/* Botón de pagar si está pendiente */}
                 {isPending && (
                   <button
-                    onClick={() => setSelectedJob(job)} // <-- abrimos el modal
+                    onClick={() => setSelectedJob(job)}
                     className="mt-4 px-5 py-2 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600 active:scale-95 transition"
                   >
                     Pagar
@@ -109,11 +129,11 @@ export default function TrabajosList({ userId }) {
           onPaymentSuccess={async () => {
             const res = await fetch(`/api/jobs?userId=${userId}`);
             const data = await res.json();
-            setJobs(data); // actualiza el estado automáticamente
-            setSelectedJob(null); // cierra el modal
+            setJobs(data);
+            setSelectedJob(null);
           }}
         />
       )}
-    </div> // <-- cierra el <div> principal del return
-  ); // <-- cierra el return
-} // <-- cierra la función export default
+    </div>
+  );
+}

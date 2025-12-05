@@ -5,12 +5,11 @@ import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 import PaymentMethodUI from "./PaymentMethodUI";
 import CardList from "./CardList";
-import { createCashPayment } from "../service/payment";
+import { createCashPayment, CreateCashPaymentDTO } from "../service/payment";
 import { useRouter } from "next/navigation";
-import ReCAPTCHA from 'react-google-recaptcha'; // 🔐 Importar ReCAPTCHA
-import { AnimatePresence, motion } from 'framer-motion'; // ✨ Para la animación del modal de QR
+import ReCAPTCHA from 'react-google-recaptcha';
+import { AnimatePresence, motion } from 'framer-motion';
 
-// ⚠️ Asegúrate de que esta clave esté definida en tu archivo .env.local
 const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || ''; 
 
 const stripePromise = loadStripe(
@@ -22,12 +21,25 @@ interface PaymentProps {
     jobId: string;
     requesterId: string;
     fixerId: string;
-    onClose: () => void; // callback para cerrar modal
+    onClose: () => void;
     onPaymentSuccess?: () => void;
 }
 
-// 🆕 Nuevo tipo para manejar el estado del modal de seguridad
 type SecurityModalTarget = 'card' | 'qr' | null;
+
+interface PaymentResponse {
+    message?: string;
+    data?: {
+        id?: string;
+        _id?: string;
+    };
+    payment?: {
+        id?: string;
+        _id?: string;
+    };
+    id?: string;
+    _id?: string;
+}
 
 export default function PaymentMethods({
     amount,
@@ -37,49 +49,41 @@ export default function PaymentMethods({
     onClose,
     onPaymentSuccess,
 }: PaymentProps) {
-    const [showCardPayment, setShowCardPayment] = useState(false);
     const [showCashPayment, setShowCashPayment] = useState(false);
     const [createdPaymentId, setCreatedPaymentId] = useState<string | null>(null);
-    const [securityModalTarget, setSecurityModalTarget] = useState<SecurityModalTarget>(null); // 🆕 Controla qué pago requiere Captcha
-    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null); // 🔐 Estado del token
+    const [securityModalTarget, setSecurityModalTarget] = useState<SecurityModalTarget>(null);
+    const [recaptchaToken, setRecaptchaToken] = useState<string | null>(null);
 
     const router = useRouter();
 
-    // ⊞ Lógica de Redirección a Pago QR (Ahora recibe el token)
     const handleGoToQR = (token: string) => {
-        // ⚠️ Nota: Añadimos el token a la URL para que la página de destino lo envíe al backend /payments/intent
         router.push(
             `/payment/pago-qr?trabajoId=${jobId}&bookingId=TRABAJO-${jobId}&providerId=DEMO-PROVIDER&amount=${amount}&currency=BOB&recaptchaToken=${token}`
         );
     };
     
-    // 🔐 Maneja la obtención del token de reCAPTCHA
     const handleRecaptchaChange = (token: string | null) => {
         setRecaptchaToken(token);
         
-        // Si el token es válido y el objetivo es QR, redirigir inmediatamente
         if (token && securityModalTarget === 'qr') {
             handleGoToQR(token);
-            setSecurityModalTarget(null); // Cerrar modal después de la redirección
+            setSecurityModalTarget(null);
         }
     };
     
-    // 🆕 Lógica para iniciar el flujo de Tarjeta
     const startCardFlow = () => {
-        setRecaptchaToken(null); // Limpiar token anterior
+        setRecaptchaToken(null);
         setSecurityModalTarget('card'); 
-    }
+    };
     
-    // 🆕 Lógica para iniciar el flujo de QR
     const startQrFlow = () => {
-        setRecaptchaToken(null); // Limpiar token anterior
+        setRecaptchaToken(null);
         setSecurityModalTarget('qr'); 
-    }
-
+    };
 
     const handlePayCash = async () => {
         try {
-            const payload = {
+            const payload: CreateCashPaymentDTO = {
                 jobId,
                 requesterId,
                 fixerId,
@@ -87,21 +91,19 @@ export default function PaymentMethods({
                 service_fee: 0,
                 discount: 0,
                 currency: "BOB",
-                paymentMethod: "Efectivo",
+                paymentMethods: "cash",
             };
-            const resp = await createCashPayment(payload as any);
-            const created: any = resp?.data || resp?.payment || resp;
+            
+            const resp = await createCashPayment(payload);
+            const created: PaymentResponse = resp?.data || resp?.payment || resp;
             setCreatedPaymentId(created?.id || created?._id || null);
             setShowCashPayment(true);
-        } catch (e: any) {
-            console.error("Error creando pago en efectivo:", e);
-            alert(e.message || "Error al crear pago en efectivo");
+        } catch (error) {
+            const err = error as Error;
+            console.error("Error creando pago en efectivo:", err);
+            alert(err.message || "Error al crear pago en efectivo");
         }
     };
-    
-    // --------------------------------------------------------
-    // RENDERIZADO PRINCIPAL
-    // --------------------------------------------------------
 
     return (
         <>
@@ -114,7 +116,6 @@ export default function PaymentMethods({
                     onClick={(e) => e.stopPropagation()} 
                     className="bg-white rounded-2xl shadow-2xl w-full max-w-md sm:max-w-lg p-6 relative flex flex-col items-center justify-center gap-6"
                 >
-                    {/* Botón cerrar */}
                     <button
                         onClick={onClose}
                         className="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-3xl font-bold transition-colors"
@@ -126,14 +127,14 @@ export default function PaymentMethods({
 
                     <div className="w-full flex flex-col gap-4">
                         <button
-                            onClick={startCardFlow} // 👈 Inicia flujo de Tarjeta (con seguridad)
+                            onClick={startCardFlow}
                             className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] text-[#F9FAFB] px-6 py-3 rounded-lg flex items-center gap-4 text-xl font-medium justify-center transition-colors"
                         >
                             <span className="text-2xl">💳</span> Tarjeta de Crédito
                         </button>
 
                         <button
-                            onClick={startQrFlow} // 👈 Inicia flujo de QR (con seguridad)
+                            onClick={startQrFlow}
                             className="w-full bg-[#1AA7ED] hover:bg-[#2B6AE0] text-[#F9FAFB] px-6 py-3 rounded-lg flex items-center gap-4 text-xl font-medium justify-center transition-colors"
                         >
                             <span className="text-2xl">⊞</span> Pago QR
@@ -160,10 +161,7 @@ export default function PaymentMethods({
                 />
             )}
             
-            {/* -------------------------------------------------------- */}
-            {/* CARD PAYMENT MODAL (Abre si securityModalTarget es 'card')*/}
-            {/* -------------------------------------------------------- */}
-
+            {/* CARD PAYMENT MODAL */}
             {securityModalTarget === 'card' && (
                 <div className="fixed inset-0 z-[1100] bg-black/60 flex items-center justify-center p-4">
                     <div
@@ -172,7 +170,7 @@ export default function PaymentMethods({
                     >
                         <button
                             onClick={() => {
-                                setSecurityModalTarget(null); // Cierra el modal y restablece el flujo
+                                setSecurityModalTarget(null);
                                 setRecaptchaToken(null);
                             }}
                             className="absolute top-3 right-3 text-gray-600 hover:text-red-500 text-3xl font-bold transition-colors"
@@ -186,7 +184,6 @@ export default function PaymentMethods({
                                     Selecciona tu tarjeta o agrega una nueva
                                 </h2>
                                 
-                                {/* 🔐 Renderizar el componente reCAPTCHA */}
                                 <div className='my-4'>
                                     <p className="text-sm text-gray-600 mb-2">Verificación de seguridad requerida:</p>
                                     <ReCAPTCHA
@@ -195,10 +192,8 @@ export default function PaymentMethods({
                                     />
                                 </div>
                                 
-                                {/* 🔐 Pasar el token al CardList y deshabilitar si no hay token */}
                                 <div className="w-full relative">
                                     {!recaptchaToken && (
-                                        // Este overlay bloquea la interacción con CardList hasta que se complete el Captcha
                                         <div className="absolute inset-0 z-10 bg-white/70 flex items-center justify-center rounded-xl">
                                             <p className="text-lg font-bold text-red-600 p-4 text-center">
                                                 Por favor, completa la verificación de seguridad 👆
@@ -210,9 +205,9 @@ export default function PaymentMethods({
                                         fixerId={fixerId}
                                         jobId={jobId}
                                         amount={amount}
-                                        recaptchaToken={recaptchaToken} // 👈 Pasar el token a CardList
+                                        recaptchaToken={recaptchaToken}
                                         onPaymentSuccess={() => {
-                                            setSecurityModalTarget(null); // Cierra el modal principal de Tarjeta
+                                            setSecurityModalTarget(null);
                                             onPaymentSuccess?.(); 
                                         }}
                                     />
@@ -223,10 +218,7 @@ export default function PaymentMethods({
                 </div>
             )}
             
-            {/* -------------------------------------------------------- */}
-            {/* QR SECURITY MODAL (Abre si securityModalTarget es 'qr') */}
-            {/* -------------------------------------------------------- */}
-
+            {/* QR SECURITY MODAL */}
             <AnimatePresence>
                 {securityModalTarget === 'qr' && (
                      <motion.div

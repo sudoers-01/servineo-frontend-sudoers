@@ -100,7 +100,7 @@ export default function PayWithQr() {
         } else {
           setWarning(null);
         }
-      } catch (e: any) {
+      } catch (e: unknown) {
         console.error("❌ Error creando intent:", e);
         setError(
           e?.message === "SERVER_ERROR"

@@ -26,7 +26,7 @@ type BackendPaymentData = {
     currency?: string;
   };
   currency?: string;
-  [key: string]: any; // Para permitir otras propiedades
+  [key: string]: unknown; // Para permitir otras propiedades
 };
 
 // --- Helper base: SIEMPRE rutas relativas para pasar por el proxy /api ---

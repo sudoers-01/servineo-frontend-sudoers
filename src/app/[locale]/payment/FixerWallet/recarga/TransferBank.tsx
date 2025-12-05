@@ -71,7 +71,7 @@ export default function TransferBank({ fixerId, servineoId, amount }: TransferBa
         });
 
         setTransferStatus(intent.status); // <-- Guardar estado aquí
-      } catch (err: any) {
+      } catch (err: unknown) {
         setError(err.message);
       } finally {
         setLoading(false);

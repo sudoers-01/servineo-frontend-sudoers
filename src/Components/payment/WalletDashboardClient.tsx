@@ -82,7 +82,7 @@ export default function FixerWalletDashboard() {
         throw new Error(result.error || 'No se pudieron cargar los datos.');
       }
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching wallet data:", err);
       setError(err.message || "Un error inesperado ocurrió.");
     } finally {

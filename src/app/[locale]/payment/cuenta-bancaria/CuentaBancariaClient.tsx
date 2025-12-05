@@ -164,7 +164,7 @@ const MiCuentaBancariaPage = () => {
             // 🟢 CORREGIDO: Redirección con ruta completa /payment/...
             router.push(`/payment/cuenta-bancaria?fixerId=${fixerId}&status=success`);
 
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error al eliminar la cuenta:', error);
             setDeleteError(`Error al eliminar la cuenta: ${error.message || 'Error desconocido.'}`);
         } finally {
@@ -240,7 +240,7 @@ const MiCuentaBancariaPage = () => {
             // 🟢 CORREGIDO: Redirección con ruta completa /payment/...
             router.push(`/payment/cuenta-bancaria?fixerId=${fixerId}&status=success`);
             
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error('Error en el flujo de registro:', error);
             setFormError(`Error al procesar la solicitud: ${error.message}`);
         } finally {

@@ -122,7 +122,7 @@ export default function PaymentMethodUI({
         setShowNotification(true);
       }
 
-    } catch (e: any) { // Tipado de 'e' como any
+    } catch (e: unknown) { // Tipado de 'e' como unknown
       console.error("❌ [REQUESTER] Error:", e);
       setErr(e.message || "No se pudo cargar el resumen");
     } finally {
@@ -220,7 +220,7 @@ const handleRegenerateCode = async () => {
     // Mostrar notificación de éxito
     setShowNotification(true);
 
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("❌ [REQUESTER] Error regenerando código:", e);
     setErr(e.message || "Error al regenerar el código");
   } finally {

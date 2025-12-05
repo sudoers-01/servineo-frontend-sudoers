@@ -40,7 +40,7 @@ export interface PaymentResponse {
     remainingAttempts?: number;
     unlocksAt?: string;
     waitMinutes?: number;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
