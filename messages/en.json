@@ -853,9 +853,11 @@
       "myCertifications": "My Certifications"
     },
     "buttons": {
-      "addCertification": "Add Certification",
-      "cancel": "Cancel",
-      "save": "Save"
+    "addCertification": "Add Certification",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete"
     },
     "card": {
       "issued": "Issued",
@@ -871,6 +873,7 @@
       "newTitle": "New Certification"
     },
     "form": {
+      "optional": "(optional)",
       "name": {
         "label": "Certification Name",
         "placeholder": "Ex: Electrical Technician",
@@ -896,6 +899,24 @@
         "label": "Credential URL",
         "placeholder": "https://..."
       }
+    },
+    "empty": "No certifications added yet",
+    "loading": "Loading certifications...",
+    "errors": {
+      "noFixerProfile": "No fixer profile found",
+      "saveError": "Error saving certification",
+      "deleteError": "Error deleting certification",
+      "loadError": "Error loading certifications"
+    },
+    "notifications": {
+      "success": "Success",
+      "error": "Error",
+      "createSuccess": "Certification added successfully",
+      "updateSuccess": "Certification updated successfully",
+      "deleteTitle": "Delete Certification",
+      "deleteMessage": "Are you sure you want to delete this certification?",
+      "deleteSuccessTitle": "Deleted",
+      "deleteSuccess": "Certification deleted successfully"
     },
     "deleteConfirmation": "Are you sure you want to delete this certification?"
   },

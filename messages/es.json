@@ -854,7 +854,8 @@
     "buttons": {
       "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando..."
     },
     "card": {
       "issued": "Emitido",
@@ -896,6 +897,24 @@
         "placeholder": "https://..."
       }
     },
+    "empty": "Sin certificaciones agregadas aún",
+    "loading": "Cargando certificaciones...",
+    "errors": {
+      "noFixerProfile": "Perfil de técnico no encontrado",
+      "saveError": "Error al guardar certificación",
+      "deleteError": "Error al eliminar certificación",
+      "loadError": "Error al cargar certificaciones"
+    },
+    "notifications": {
+      "success": "Éxito",
+      "error": "Error",
+      "createSuccess": "Certificación agregada exitosamente",
+      "updateSuccess": "Certificación actualizada exitosamente",
+      "deleteTitle": "Eliminar Certificación",
+      "deleteMessage": "¿Estás seguro de que deseas eliminar esta certificación?",
+      "deleteSuccessTitle": "Eliminada",
+      "deleteSuccess": "Certificación eliminada exitosamente"
+    },
     "deleteConfirmation": "¿Estás seguro de eliminar esta certificación?"
   },
   "ExperienceSection": {
@@ -904,10 +923,11 @@
       "myExperience": "Mi Experiencia Laboral"
     },
     "buttons": {
-      "addExperience": "Agregar Experiencia",
+      "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
       "save": "Guardar",
-      "saving": "Guardando..."
+      "saving": "Guardando...",
+      "delete": "Eliminar"
     },
     "card": {
       "present": "Presente"
@@ -921,6 +941,7 @@
       "newTitle": "Nueva Experiencia"
     },
     "form": {
+      "optional": "(opcional)",
       "jobTitle": {
         "label": "Cargo / Título",
         "placeholder": "Ej: Plomero Senior",
