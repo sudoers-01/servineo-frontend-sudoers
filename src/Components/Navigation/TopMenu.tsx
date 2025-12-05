@@ -3,12 +3,12 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Wrench, UserCircle, Home, Briefcase, HelpCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Menu, X, Wrench, UserCircle, Home, Briefcase, HelpCircle, Wallet, Shield, LogOut, ChevronDown } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { useDispatch, useSelector } from 'react-redux';
 import { setUser } from '@/app/redux/slice/userSlice';
 import { IUser } from '@/types/user';
-import { useTranslations } from 'next-intl';
 
 interface UserState {
   user: IUser | null;
@@ -21,10 +21,13 @@ interface RootState {
 }
 
 export default function TopMenu() {
-  const t = useTranslations('TopMenu');
+  const router = useRouter();
   const dispatch = useDispatch();
+  
   const { user, loading } = useSelector((state: RootState) => state.user);
 
+  // Estados de UI
+  const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [isLogged, setIsLogged] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
@@ -33,33 +36,37 @@ export default function TopMenu() {
   const dropdownRef = useRef<HTMLDivElement | null>(null);
   const logoRef = useRef<HTMLButtonElement | null>(null);
 
+  const goToPaymentCenter = () => {
+    
+    if (user?._id) {
+      router.push(`/payment/centro-de-pagos?fixerId=${user._id}`);
+      setAccountOpen(false);
+      setIsOpen(false);
+    } else {
+      console.error("No se encontró el ID del usuario para ir al centro de pagos");
+    }
+  };
+
   const navItems = [
-    { name: t('nav.home'), href: '/', icon: <Home className='h-5 w-5' /> },
-    { name: t('nav.jobOffers'), href: '/job-offer-list', icon: <Briefcase className='h-5 w-5' /> },
-    {
-      name: t('nav.help'),
-      href: '/ask-for-help/centro_de_ayuda',
-      icon: <HelpCircle className='h-5 w-5' />,
-    },
+    { name: 'Inicio', href: '/', icon: <Home className='h-5 w-5' /> },
+    { name: 'Ofertas de trabajo', href: '/job-offer-list', icon: <Briefcase className='h-5 w-5' /> },
+    { name: 'Ayuda', href: '/ask-for-help/centro_de_ayuda', icon: <HelpCircle className='h-5 w-5' /> },
   ];
-
-  const [currentPath, setCurrentPath] = useState('');
-
-  // Detectar ruta actual
-  useEffect(() => {
-    setCurrentPath(window.location.pathname);
-  }, []);
 
   // Obtener userId desde localStorage
   useEffect(() => {
     const token = localStorage.getItem('servineo_user');
     if (token) {
-      const userData = JSON.parse(token);
-      setUserId(userData._id);
+      try {
+        const userData = JSON.parse(token);
+        setUserId(userData._id || userData.id);
+      } catch (e) {
+        console.error("Error parsing user token", e);
+      }
     }
   }, []);
 
-  // Consultar user por ID
+  // Consultar user por ID (RTK Query)
   const { data: userData } = useGetUserByIdQuery(userId!, {
     skip: !userId,
   });
@@ -94,229 +101,260 @@ export default function TopMenu() {
   const logout = () => {
     localStorage.removeItem('servineo_token');
     localStorage.removeItem('servineo_user');
-    window.location.reload();
+    window.location.href = '/';
   };
 
   const handleLogoClick = () => {
     if (window.location.pathname === '/') {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } else {
-      window.location.href = '/';
+      router.push('/');
     }
   };
 
-  // Botón de rol para Desktop
-  const getRoleButton = () => {
-    if (loading || !user) return null;
-    if (!user.role) return null;
-
-    if (user.role === 'requester') {
-      return (
-        <Link
-          href='/become-fixer'
-          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium text-primary transition-colors'
-        >
-          <Wrench className='h-4 w-4' />
-          {t('buttons.becomeFixer')}
-        </Link>
-      );
-    }
-
-    if (user.role === 'fixer') {
-      return (
-        <Link
-          href='/fixer/dashboard'
-          className='flex items-center gap-2 text-white px-4 py-2 rounded-md text-sm font-medium bg-primary transition-colors'
-        >
-          <UserCircle className='h-4 w-4' />
-          {t('buttons.fixerProfile')}
-        </Link>
-      );
-    }
-    return null;
-  };
+  // --- RENDERIZADO ---
 
   return (
     <>
       {/* DESKTOP HEADER */}
       <header
         className={`hidden lg:block fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-          scrolled ? 'bg-white shadow-md' : 'bg-white'
+          scrolled ? 'bg-white shadow-md' : 'bg-white/10 backdrop-blur-md'
         } border-b border-gray-100`}
         role='banner'
       >
-        <div className='w-full max-w-8xl mx-auto px-4 flex items-center h-16'>
+        <div className='w-full max-w-7xl mx-auto px-4 flex items-center justify-between h-16'>
+          
           {/* Logo */}
           <button
             ref={logoRef}
             onClick={handleLogoClick}
-            className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[var(--color-primary)]'
+            className='flex items-center gap-2 group transition-transform duration-300 hover:scale-105 focus:outline-none'
             aria-label='Ir al inicio'
           >
-            <div className='relative overflow-hidden rounded-full shadow-md'>
+            <div className='relative overflow-hidden rounded-full shadow-sm w-10 h-10'>
               <Image
-                src='/es/img/icon.png'
-                alt='Logo de Servineo'
-                width={40}
-                height={40}
-                className='transition-transform duration-300 group-hover:scale-110'
+                src='/icon.png' 
+                alt='Logo'
+                fill
+                className='object-cover'
               />
             </div>
-            <span
-              className='text-xl sm:text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)]'
-              style={{ fontFamily: 'var(--font-sans)' }}
-            >
-              Servineo
+            <span className='text-xl font-bold text-blue-600 tracking-tight'>
+              SERVINEO
             </span>
           </button>
 
           {/* Desktop Nav */}
-          <div className='flex-1 flex justify-center'>
-            <nav className='flex gap-6' role='navigation' aria-label='Menú principal'>
-              {navItems.map((item) => (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`font-medium relative after:absolute after:bottom-0 after:left-0 after:h-0.5 after:bg-[var(--color-primary)] after:transition-all
-                  ${currentPath === item.href ? 'text-[var(--color-primary)] after:w-full' : 'text-gray-900 hover:text-[var(--color-primary)] after:w-0 hover:after:w-full'}`}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
+          <nav className='flex gap-6 items-center'>
+            {navItems.map((item) => (
+              <Link
+                key={item.name}
+                href={item.href}
+                className='flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition-colors text-sm'
+              >
+                {item.icon}
+                {item.name}
+              </Link>
+            ))}
+            
+            {/* Link extra para Fixers */}
+            {user?.role === 'fixer' && (
+               <Link
+                 href='/fixer/my-offers'
+                 className='flex items-center gap-2 text-gray-700 hover:text-blue-600 font-medium transition-colors text-sm'
+               >
+                 <Briefcase className='h-5 w-5' />
+                 Mis Ofertas
+               </Link>
+            )}
+          </nav>
 
-          {/* Desktop Right */}
-          <div className='flex items-center gap-3'>
+          {/* Desktop Right (Auth & Dropdown) */}
+          <div className='flex items-center gap-4'>
             {!isLogged ? (
               <>
                 <Link
                   href='/login'
-                  className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
+                  className='text-gray-700 hover:text-blue-600 px-4 py-2 rounded-md text-sm font-medium transition-colors'
                 >
-                  {t('buttons.login')}
+                  Iniciar Sesión
                 </Link>
                 <Link
                   href='/signUp'
-                  className='bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors'
+                  className='bg-blue-600 text-white px-5 py-2 rounded-full text-sm font-medium hover:bg-blue-700 transition-shadow shadow-sm hover:shadow-md'
                 >
-                  {t('buttons.register')}
+                  Regístrate
                 </Link>
               </>
             ) : (
-              <>
-                {getRoleButton()}
+              <div className='relative' ref={dropdownRef}>
+                <button
+                  onClick={() => setAccountOpen(!accountOpen)}
+                  className='flex items-center gap-2 px-2 py-1 rounded-full border border-transparent hover:border-gray-200 transition-all'
+                >
+                  <div className="w-9 h-9 rounded-full overflow-hidden border border-gray-300 relative">
+                     <Image 
+                        src={user?.url_photo || '/no-photo.png'} 
+                        alt="Profile" 
+                        fill
+                        className="object-cover"
+                     />
+                  </div>
+                  <span className='text-sm font-medium text-gray-700 hidden xl:block'>
+                    {user?.name?.split(' ')[0]}
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-gray-500" />
+                </button>
 
-                <div className='relative' ref={dropdownRef}>
-                  <button
-                    onClick={() => setAccountOpen(!accountOpen)}
-                    className='text-gray-700 hover:text-primary px-4 py-2 rounded-md text-sm font-medium transition-colors'
-                  >
-                    {t('buttons.myAccount')}
-                  </button>
-                  {accountOpen && (
-                    <div className='absolute right-0 mt-2 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50'>
-                      <Link
-                        href='/requesterEdit'
-                        className='block px-4 py-2 text-gray-700 hover:bg-gray-50'
-                      >
-                        {t('dropdown.editProfile')}
-                      </Link>
-                      <button
-                        onClick={logout}
-                        className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
-                      >
-                        {t('dropdown.logout')}
-                      </button>
+                {/* DROPDOWN MENU */}
+                {accountOpen && (
+                  <div className='absolute right-0 mt-2 w-64 bg-white shadow-xl border border-gray-100 rounded-xl py-2 z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200'>
+                    
+                    <div className="px-4 py-3 border-b border-gray-100 bg-gray-50/50">
+                        <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+                            {user?.role === 'fixer' ? 'Cuenta Fixer' : 'Cuenta Cliente'}
+                        </p>
+                        <p className="text-sm text-gray-700 truncate">{user?.email}</p>
                     </div>
-                  )}
-                </div>
-              </>
+
+                    {/* OPCIONES COMUNES */}
+                    <Link href='/requesterEdit' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
+                        <UserCircle className="h-4 w-4" /> Editar Perfil
+                    </Link>
+
+                    {/* OPCIONES CLIENTE */}
+                    {user?.role === 'requester' && (
+                        <Link href='/become-fixer' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
+                            <Wrench className="h-4 w-4" /> Convertirse en Fixer
+                        </Link>
+                    )}
+
+                    {/* OPCIONES FIXER (Integradas de tu repo) */}
+                    {user?.role === 'fixer' && (
+                        <>
+                            <Link href='/fixer/dashboard' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
+                                <UserCircle className="h-4 w-4" /> Dashboard
+                            </Link>
+                            
+                            {/* BOTÓN CENTRO DE PAGOS */}
+                            <button 
+                                onClick={goToPaymentCenter}
+                                className='w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                            >
+                                <Wallet className="h-4 w-4" /> Centro de Pagos
+                            </button>
+
+                            <Link href='/payment/Pagos-Fisico' className='flex items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-600'>
+                                <Shield className="h-4 w-4" /> Confirmar Pagos
+                            </Link>
+                        </>
+                    )}
+
+                    <div className="border-t border-gray-100 mt-2 pt-2">
+                        <button
+                        onClick={logout}
+                        className='w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50'
+                        >
+                        <LogOut className="h-4 w-4" /> Cerrar sesión
+                        </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
       </header>
 
-      {/* MOBILE/TABLET HEADER */}
+      {/* MOBILE HEADER */}
       <div className='lg:hidden'>
-        {/* Barra superior */}
-        <div className='flex items-center justify-between px-3 py-4 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
-          {/* Logo */}
-          <button onClick={handleLogoClick} className='flex items-center gap-2 min-w-0'>
-            <div className='relative overflow-hidden rounded-full shadow-md shrink-0'>
-              <Image src='/es/img/icon.png' alt='Servineo' width={32} height={32} />
-            </div>
-            <span className='text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-primary)] truncate max-w-[130px]'>
-              Servineo
-            </span>
+        <div className='flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-white/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50'>
+          
+          <button onClick={handleLogoClick} className='flex items-center gap-2'>
+             <div className='relative w-8 h-8 rounded-full overflow-hidden'>
+                <Image src='/icon.png' alt='Servineo' fill className='object-cover' />
+             </div>
+             <span className='font-bold text-blue-600 text-lg'>SERVINEO</span>
           </button>
 
-          {/* Auth Buttons */}
-          {!isLogged ? (
-            <div className='flex items-center gap-2 flex-nowrap'>
-              <Link
-                href='/login'
-                className='px-3 py-2 rounded-md text-[var(--color-primary)] font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
-              >
-                {t('buttons.login')}
-              </Link>
-              <Link
-                href='/signUp'
-                className='px-3 py-2 rounded-md bg-[var(--color-primary)] text-white font-medium text-[11px] sm:text-sm hover:opacity-90 transition-opacity whitespace-nowrap'
-              >
-                {t('buttons.register')}
-              </Link>
-            </div>
-          ) : (
-            <button
-              onClick={() => setAccountOpen(!accountOpen)}
-              className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
-            >
-              <span className='text-gray-700 font-medium'>{user?.name}</span>
-            </button>
-          )}
-
-          {/* Dropdown Mobile */}
-          {accountOpen && isLogged && (
-            <div
-              ref={dropdownRef}
-              className='absolute top-16 right-3 w-44 bg-white shadow-lg border border-gray-200 rounded-md py-2 z-50'
-            >
-              <Link
-                href='/requesterEdit'
-                className='block px-4 py-2 text-gray-700 hover:bg-gray-50'
-              >
-                {t('dropdown.editProfile')}
-              </Link>
-              <button
-                onClick={logout}
-                className='w-full text-left px-4 py-2 text-red-600 hover:bg-red-50'
-              >
-                {t('dropdown.logout')}
-              </button>
-            </div>
-          )}
+          <div className="flex items-center gap-3">
+             {/* Botón menú hamburguesa */}
+             <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="p-2 text-gray-600 rounded-md hover:bg-gray-100 focus:outline-none"
+             >
+                {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+             </button>
+          </div>
         </div>
-        {/* Barra inferior fija con iconos */}
-        <nav className='fixed bottom-0 left-0 right-0 h-16 border-t border-gray-200 bg-white/95 backdrop-blur-sm flex justify-around items-center z-50'>
-          {navItems.map((item) => (
-            <button
-              key={item.name}
-              onClick={() => (window.location.href = item.href)}
-              className={`flex flex-col items-center text-[11px] px-1 py-1 ${
-                currentPath === item.href
-                  ? 'text-[var(--color-primary)]'
-                  : 'text-gray-900 hover:text-[var(--color-primary)]'
-              }`}
-            >
-              {item.icon}
-              <span className='mt-1'>{item.name}</span>
-            </button>
-          ))}
-        </nav>
-        {/* Espaciadores para contenido */}
-        <div className='h-16' /> {/* top */}
-        <div className='h-16' /> {/* bottom */}
+
+        {/* Mobile Menu Dropdown */}
+        {isOpen && (
+            <div className="fixed top-14 left-0 right-0 bg-white border-b border-gray-200 shadow-xl z-40 max-h-[80vh] overflow-y-auto">
+                <div className="p-4 space-y-4">
+                    {/* Navegación básica */}
+                    <div className="space-y-2">
+                        {navItems.map((item) => (
+                            <Link 
+                                key={item.name} 
+                                href={item.href}
+                                onClick={() => setIsOpen(false)}
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 text-gray-700 font-medium"
+                            >
+                                {item.icon} {item.name}
+                            </Link>
+                        ))}
+                    </div>
+
+                    <div className="border-t border-gray-100 pt-4">
+                        {!isLogged ? (
+                            <div className="grid grid-cols-2 gap-3">
+                                <Link href="/login" className="flex justify-center py-2 border border-gray-300 rounded-lg text-gray-700 font-medium">
+                                    Ingresar
+                                </Link>
+                                <Link href="/signUp" className="flex justify-center py-2 bg-blue-600 text-white rounded-lg font-medium">
+                                    Registrarse
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                <div className="flex items-center gap-3 px-2">
+                                    <div className="relative w-10 h-10 rounded-full overflow-hidden">
+                                        <Image src={user?.url_photo || '/no-photo.png'} alt="User" fill className="object-cover"/>
+                                    </div>
+                                    <div>
+                                        <p className="font-bold text-gray-800">{user?.name}</p>
+                                        <p className="text-xs text-gray-500 capitalize">{user?.role}</p>
+                                    </div>
+                                </div>
+
+                                {user?.role === 'fixer' && (
+                                    <>
+                                        <button 
+                                            onClick={goToPaymentCenter}
+                                            className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-blue-50 text-blue-700 font-medium"
+                                        >
+                                            <Wallet className="h-5 w-5" /> Centro de Pagos
+                                        </button>
+                                        <Link href="/payment/Pagos-Fisico" onClick={() => setIsOpen(false)} className="flex items-center gap-3 px-4 py-3 rounded-lg bg-gray-50 text-gray-700 font-medium">
+                                            <Shield className="h-5 w-5" /> Confirmar Pagos
+                                        </Link>
+                                    </>
+                                )}
+
+                                <button onClick={logout} className="w-full flex items-center gap-3 px-4 py-3 text-red-600 font-medium">
+                                    <LogOut className="h-5 w-5" /> Cerrar Sesión
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+        )}
+
+        {/* Espaciadores */}
+        <div className='h-14' /> 
       </div>
 
       {/* Spacer Desktop */}

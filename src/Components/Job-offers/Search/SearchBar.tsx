@@ -134,7 +134,6 @@ export const SearchBar = ({ onSearch, onFilter }: SearchBarProps) => {
   const applyAutoFilterIfMatch = (searchQuery: string) => {
     const matchedJobType = findMatchingJobType(searchQuery);
     const matchedCity = findMatchingCity(searchQuery);
-
     const newFilters = { ...filtersFromStore };
 
     if (matchedJobType) {

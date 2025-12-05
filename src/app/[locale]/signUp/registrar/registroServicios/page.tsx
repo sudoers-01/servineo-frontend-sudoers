@@ -64,7 +64,6 @@ export default function RegistroForm({ onNotify, captchaValid }: RegistroFormPro
     password: '',
     confirmarPassword: '',
   });
-
   const [errors, setErrors] = useState<Partial<Record<keyof RegistroSchema, string>>>({});
   const [mostrarPassword, setMostrarPassword] = useState(false);
   const [mostrarConfirmarPassword, setMostrarConfirmarPassword] = useState(false);
