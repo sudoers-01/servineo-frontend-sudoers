@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Wrench, UserCircle, ClipboardList, HelpCircle, Calendar } from 'lucide-react';
+import { Wrench, UserCircle, ClipboardList, HelpCircle, Calendar, Wallet, Briefcase } from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
@@ -30,8 +30,6 @@ export default function TopMenu() {
   const localeDefault = (es: string, en: string) => (locale === 'es' ? es : en);
 
   const resolveT = (key: string, fallbackKey?: string, fallbackText?: string) => {
-    // Evitar invocar claves namespaced que están provocando MISSING_MESSAGE en runtime.
-    // Usamos primero el fallbackKey (ej. navigation.login) y finalmente el texto por defecto.
     try {
       if (fallbackKey) return t(fallbackKey);
     } catch {}
@@ -256,7 +254,7 @@ export default function TopMenu() {
     const handleOutside = (e: MouseEvent) => {
       if (
         profileMenuOpen &&
-        dropdownRef.current && // ESTE es el ref correcto
+        dropdownRef.current &&
         !dropdownRef.current.contains(e.target as Node) &&
         !profileButtonRef.current?.contains(e.target as Node)
       ) {
@@ -435,7 +433,29 @@ export default function TopMenu() {
 
                     <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
-                    {user?.role !== 'fixer' && (
+                    {user?.role === 'fixer' ? (
+                      <>
+                        <Link
+                          href='/fixer/dashboard'
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={() => setProfileMenuOpen(false)}
+                          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
+                        >
+                          <UserCircle className='h-4 w-4' />
+                          Perfil de Fixer
+                        </Link>
+
+                        <Link
+                          href="/payment/centro-de-pagos"
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={() => setProfileMenuOpen(false)}
+                          className='menuItem'
+                        >
+                          <Wallet className='h-4 w-4 inline mr-2' />
+                          Centro de Pagos
+                        </Link>
+                      </>
+                    ) : (
                       <>
                         <button
                           onMouseDown={(e) => e.stopPropagation()}
@@ -449,6 +469,16 @@ export default function TopMenu() {
                           Editar perfil
                         </button>
 
+                        <Link
+                          href="/payment/trabajos"
+                          onMouseDown={(e) => e.stopPropagation()}
+                          onClick={() => setProfileMenuOpen(false)}
+                          className='menuItem'
+                        >
+                          <Briefcase className='h-4 w-4 inline mr-2' />
+                          Mis Trabajos
+                        </Link>
+
                         <button
                           onMouseDown={(e) => e.stopPropagation()}
                           onClick={(e) => {
@@ -460,19 +490,6 @@ export default function TopMenu() {
                         >
                           Convertirse en Fixer
                         </button>
-                      </>
-                    )}
-
-                    {user?.role === 'fixer' && (
-                      <>
-                        <Link
-                          href='/fixer/dashboard'
-                          onMouseDown={(e) => e.stopPropagation()}
-                          className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
-                        >
-                          <UserCircle className='h-4 w-4' />
-                          Perfil de Fixer
-                        </Link>
                       </>
                     )}
 
@@ -510,7 +527,6 @@ export default function TopMenu() {
 
           {/* Auth Buttons */}
           {!isClient ? (
-            // Mientras el cliente hidrata, renderiza algo estable para evitar mismatch
             <div style={{ width: 100, height: 10 }} />
           ) : !isLogged ? (
             <div className='flex items-center gap-2 flex-nowrap'>
@@ -576,7 +592,27 @@ export default function TopMenu() {
 
                   <hr style={{ margin: '8px 0', opacity: 0.3 }} />
 
-                  {user?.role !== 'fixer' && (
+                  {user?.role === 'fixer' ? (
+                    <>
+                      <Link
+                        href='/fixer/dashboard'
+                        onClick={() => setProfileMenuOpen(false)}
+                        className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
+                      >
+                        <UserCircle className='h-4 w-4' />
+                        Perfil de Fixer
+                      </Link>
+
+                      <Link
+                        href="/payment/centro-de-pagos"
+                        onClick={() => setProfileMenuOpen(false)}
+                        className='menuItem'
+                      >
+                        <Wallet className='h-4 w-4 inline mr-2' />
+                        Centro de Pagos
+                      </Link>
+                    </>
+                  ) : (
                     <>
                       <button
                         onMouseDown={(e) => e.stopPropagation()}
@@ -590,6 +626,15 @@ export default function TopMenu() {
                         Editar perfil
                       </button>
 
+                      <Link
+                        href="/payment/trabajos"
+                        onClick={() => setProfileMenuOpen(false)}
+                        className='menuItem'
+                      >
+                        <Briefcase className='h-4 w-4 inline mr-2' />
+                        Mis Trabajos
+                      </Link>
+
                       <button
                         onMouseDown={(e) => e.stopPropagation()}
                         onClick={(e) => {
@@ -601,18 +646,6 @@ export default function TopMenu() {
                       >
                         Convertirse en Fixer
                       </button>
-                    </>
-                  )}
-
-                  {user?.role === 'fixer' && (
-                    <>
-                      <Link
-                        href='/fixer/dashboard'
-                        className='flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium bg-[var(--color-primary)] text-white hover:opacity-90 transition-opacity'
-                      >
-                        <UserCircle className='h-4 w-4' />
-                        Perfil de Fixer
-                      </Link>
                     </>
                   )}
 

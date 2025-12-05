@@ -13,10 +13,26 @@ export type UISummary = {
   };
 };
 
+// --- Tipo para los datos que llegan del backend (flexible) ---
+type BackendPaymentData = {
+  id?: string;
+  _id?: string;
+  status?: string;
+  code?: string;
+  expiresAt?: string;
+  total?: number;
+  amount?: {
+    total?: number;
+    currency?: string;
+  };
+  currency?: string;
+  [key: string]: any; // Para permitir otras propiedades
+};
+
 // --- Helper base: SIEMPRE rutas relativas para pasar por el proxy /api ---
-async function apiFetch<T = unknown | null>(
+async function apiFetch<T = unknown>(
   path: string,
-  init?: RequestInit & { json?: unknown | null }
+  init?: RequestInit & { json?: unknown }
 ): Promise<T> {
   const opts: RequestInit = {
     cache: "no-store",
@@ -47,46 +63,59 @@ async function apiFetch<T = unknown | null>(
 }
 
 // --- Normalizador: adapta cualquier backend a UISummary uniforme ---
-function normalizeSummary(d: unknown | null): UISummary {
+function normalizeSummary(d: BackendPaymentData | null | undefined): UISummary {
+  if (!d) {
+    return {
+      id: "",
+      status: "pending" as Status,
+      code: null,
+      expiresAt: null,
+      amount: {
+        total: 0,
+        currency: "BOB",
+      },
+    };
+  }
+
   const total =
-    typeof d?.total === "number"
+    typeof d.total === "number"
       ? d.total
-      : typeof d?.amount?.total === "number"
+      : typeof d.amount?.total === "number"
       ? d.amount.total
-      : NaN;
+      : 0;
 
   return {
-    id: String(d?.id ?? d?._id ?? ""),
-    status: (d?.status ?? "pending") as Status,
-    code: d?.code ?? null,
-    expiresAt: d?.expiresAt ?? null,
+    id: String(d.id ?? d._id ?? ""),
+    status: (d.status ?? "pending") as Status,
+    code: d.code ?? null,
+    expiresAt: d.expiresAt ?? null,
     amount: {
       total,
-      // si el backend no manda currency, por defecto "BOB"
-      currency: d?.amount?.currency ?? d?.currency ?? "BOB",
+      currency: d.amount?.currency ?? d.currency ?? "BOB",
     },
   };
 }
 
 // --- DTO de creación (cash) ---
 export type CreateCashPaymentDTO = {
-  jobId: string;                 // ObjectId válido (24 hex)
-  payerId?: string;              // ObjectId válido (si tu schema lo requiere, envíalo)
+  jobId: string;
+  payerId?: string;
+  requesterId?: string;
+  fixerId?: string;
   subTotal: number;
   service_fee?: number;
   discount?: number;
   currency?: "BOB" | "USD";
-  paymentMethods?: "cash" | "qr" | "card"; // enum EN INGLÉS
-  commissionRate?: number;       // 0..1
+  paymentMethods?: "cash" | "qr" | "card";
+  commissionRate?: number;
 };
 
 // --- POST: crear pago (cash) ---
 export async function createCashPayment(input: CreateCashPaymentDTO) {
   const payload = {
     jobId: input.jobId,
-    // Compat: Backend V4 requiere requesterId y fixerId
-    ...( (input as any).requesterId ? { requesterId: (input as any).requesterId } : {}),
-    ...( (input as any).fixerId ? { fixerId: (input as any).fixerId } : {}),
+    ...(input.requesterId ? { requesterId: input.requesterId } : {}),
+    ...(input.fixerId ? { fixerId: input.fixerId } : {}),
     ...(input.payerId ? { payerId: input.payerId } : {}),
     subTotal: input.subTotal,
     service_fee: input.service_fee ?? 0,
@@ -96,7 +125,7 @@ export async function createCashPayment(input: CreateCashPaymentDTO) {
     commissionRate: input.commissionRate ?? 0.1,
   };
 
-  return apiFetch<{ message: string; data: unknown | null }>(`/lab/payments`, {
+  return apiFetch<{ message: string; data: BackendPaymentData }>(`/lab/payments`, {
     method: "POST",
     json: payload,
   });
@@ -104,19 +133,29 @@ export async function createCashPayment(input: CreateCashPaymentDTO) {
 
 // --- GET: summary por ID ---
 export async function getPaymentSummaryById(id: string): Promise<UISummary> {
-  const r = await apiFetch<{ data: unknown | null }>(`/lab/payments/${id}/summary`);
-  return normalizeSummary(r?.data ?? r);
+  const r = await apiFetch<{ data?: BackendPaymentData } | BackendPaymentData>(`/lab/payments/${id}/summary`);
+  const data = 'data' in r ? r.data : r;
+  return normalizeSummary(data);
 }
 
 // --- GET: último summary por jobId ---
 export async function getLastPaymentSummaryByJob(jobId: string): Promise<UISummary> {
-  const r = await apiFetch<{ data: unknown | null }>(`/lab/payments/by-job/${jobId}/summary`);
-  return normalizeSummary(r?.data ?? r);
+  const r = await apiFetch<{ data?: BackendPaymentData } | BackendPaymentData>(`/lab/payments/by-job/${jobId}/summary`);
+  const data = 'data' in r ? r.data : r;
+  return normalizeSummary(data);
 }
 
 // --- PATCH: confirmar pago ---
 export async function confirmPayment(id: string, code: string) {
-  return apiFetch<{ message: string; data: { id: string; total: number; status: Status; paidAt?: string } }>(
+  return apiFetch<{ 
+    message: string; 
+    data: { 
+      id: string; 
+      total: number; 
+      status: Status; 
+      paidAt?: string 
+    } 
+  }>(
     `/lab/payments/${id}/confirm`,
     { method: "PATCH", json: { code } }
   );
