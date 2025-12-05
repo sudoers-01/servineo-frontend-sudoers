@@ -897,25 +897,25 @@
         "placeholder": "https://..."
       }
     },
-    "deleteConfirmation": "¿Estás seguro de eliminar esta certificación?",
+    "empty": "Sin certificaciones agregadas aún",
     "loading": "Cargando certificaciones...",
     "errors": {
-      "loadError": "Error al cargar certificaciones",
-      "noFixerProfile": "Perfil de reparador no encontrado"
+      "noFixerProfile": "Perfil de técnico no encontrado",
+      "saveError": "Error al guardar certificación",
+      "deleteError": "Error al eliminar certificación",
+      "loadError": "Error al cargar certificaciones"
     },
-    "empty": "Sin certificaciones aún. ¡Agrega tu primera certificación!",
     "notifications": {
       "success": "Éxito",
       "error": "Error",
       "createSuccess": "Certificación agregada exitosamente",
       "updateSuccess": "Certificación actualizada exitosamente",
-      "saveError": "Error al guardar certificación",
       "deleteTitle": "Eliminar Certificación",
       "deleteMessage": "¿Estás seguro de que deseas eliminar esta certificación?",
       "deleteSuccessTitle": "Eliminada",
-      "deleteSuccess": "Certificación eliminada exitosamente",
-      "deleteError": "Error al eliminar certificación"
-    }
+      "deleteSuccess": "Certificación eliminada exitosamente"
+    },
+    "deleteConfirmation": "¿Estás seguro de eliminar esta certificación?"
   },
   "ExperienceSection": {
     "titles": {
@@ -923,10 +923,11 @@
       "myExperience": "Mi Experiencia Laboral"
     },
     "buttons": {
-      "addExperience": "Agregar Experiencia",
+      "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
       "save": "Guardar",
-      "saving": "Guardando..."
+      "saving": "Guardando...",
+      "delete": "Eliminar"
     },
     "card": {
       "present": "Presente"
@@ -940,6 +941,7 @@
       "newTitle": "Nueva Experiencia"
     },
     "form": {
+      "optional": "(opcional)",
       "jobTitle": {
         "label": "Cargo / Título",
         "placeholder": "Ej: Plomero Senior",

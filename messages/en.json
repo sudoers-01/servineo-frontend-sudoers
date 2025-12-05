@@ -853,10 +853,11 @@
       "myCertifications": "My Certifications"
     },
     "buttons": {
-      "addCertification": "Add Certification",
-      "cancel": "Cancel",
-      "save": "Save",
-      "saving": "Saving..."
+    "addCertification": "Add Certification",
+    "cancel": "Cancel",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete"
     },
     "card": {
       "issued": "Issued",
@@ -872,6 +873,7 @@
       "newTitle": "New Certification"
     },
     "form": {
+      "optional": "(optional)",
       "name": {
         "label": "Certification Name",
         "placeholder": "Ex: Electrical Technician",
@@ -898,25 +900,25 @@
         "placeholder": "https://..."
       }
     },
-    "deleteConfirmation": "Are you sure you want to delete this certification?",
+    "empty": "No certifications added yet",
     "loading": "Loading certifications...",
     "errors": {
-      "loadError": "Error loading certifications",
-      "noFixerProfile": "No fixer profile found"
+      "noFixerProfile": "No fixer profile found",
+      "saveError": "Error saving certification",
+      "deleteError": "Error deleting certification",
+      "loadError": "Error loading certifications"
     },
-    "empty": "No certifications yet. Add your first certification!",
     "notifications": {
       "success": "Success",
       "error": "Error",
       "createSuccess": "Certification added successfully",
       "updateSuccess": "Certification updated successfully",
-      "saveError": "Error saving certification",
       "deleteTitle": "Delete Certification",
       "deleteMessage": "Are you sure you want to delete this certification?",
       "deleteSuccessTitle": "Deleted",
-      "deleteSuccess": "Certification deleted successfully",
-      "deleteError": "Error deleting certification"
-    }
+      "deleteSuccess": "Certification deleted successfully"
+    },
+    "deleteConfirmation": "Are you sure you want to delete this certification?"
   },
   "ExperienceSection": {
     "titles": {
