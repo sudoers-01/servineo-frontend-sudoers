@@ -42,6 +42,30 @@ export async function createPromotion(promotion: CreatePromotion): Promise<Promo
   }
 }
 
+export async function updatePromotion(
+  id: string,
+  promotion: { title: string; description: string },
+): Promise<Promotion | null> {
+  try {
+    const response = await fetch(apiUrl(`api/promotions/${id}`), {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(promotion),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Error updating promotion: ${response.status}`);
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Failed to update promotion', error);
+    return null;
+  }
+}
+
 export async function deletePromotion(id: string): Promise<boolean> {
   try {
     const response = await fetch(apiUrl(`api/promotions/${id}`), {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Modal from '@/app/[locale]/profile/[id]/modal-window';
 import { CreatePromotion } from '@/types/promotion';
 
@@ -8,13 +8,33 @@ interface CreatePromoModalProps {
   onSave: (data: CreatePromotion) => Promise<void>;
   id: string;
   fixerId: string;
+  initialTitle?: string;
+  initialDescription?: string;
+  isEditMode?: boolean;
 }
 
-const CreatePromoModal = ({ isOpen, onClose, onSave, id, fixerId }: CreatePromoModalProps) => {
-  const [title, setTitle] = useState<string>('');
-  const [description, setDescription] = useState<string>('');
+const CreatePromoModal = ({ 
+  isOpen, 
+  onClose, 
+  onSave, 
+  id, 
+  fixerId,
+  initialTitle = '',
+  initialDescription = '',
+  isEditMode = false 
+}: CreatePromoModalProps) => {
+  const [title, setTitle] = useState<string>(initialTitle);
+  const [description, setDescription] = useState<string>(initialDescription);
   const [errors, setErrors] = useState<{ title?: string; description?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      setTitle(initialTitle);
+      setDescription(initialDescription);
+      setErrors({});
+    }
+  }, [isOpen, initialTitle, initialDescription]);
 
   const validateForm = (): boolean => {
     const newErrors: { title?: string; description?: string } = {};
@@ -143,7 +163,7 @@ const CreatePromoModal = ({ isOpen, onClose, onSave, id, fixerId }: CreatePromoM
           onClick={handleSave}
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : 'Save promo'}
+          {isSubmitting ? 'Saving...' : isEditMode ? 'Update promo' : 'Save promo'}
         </button>
       </div>
     </Modal>
