@@ -36,7 +36,7 @@ export function SearchBar({
   const pathname = usePathname();
 
   // Estado local
-  const [setIsFocused] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [highlighted, setHighlighted] = useState<number>(-1);
   const [longPressedItem, setLongPressedItem] = useState<string | null>(null);
