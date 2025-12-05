@@ -8,6 +8,7 @@ import DiscordButton from '@/Components/requester/botonRegistro/buttonDiscord';
 import NotificationModal from '@/Components/Modal-notifications';
 import { useTranslations } from 'next-intl';
 export default function SignUp() {
+  const t = useTranslations('SignUpRegister');
   const [captchaValid] = useState(true);
   const [notification, setNotification] = useState({
     isOpen: false,
