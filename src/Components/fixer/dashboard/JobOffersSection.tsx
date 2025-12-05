@@ -10,6 +10,7 @@ import NotificationModal from '@/Components/Modal-notifications';
 import { JobOfferCard } from '@/Components/Job-offers/JobOfferCard';
 import Image from 'next/image';
 import { boliviaCities } from '@/app/lib/validations/Job-offer-Schemas';
+import { useTranslations } from 'next-intl';
 import { useAppSelector } from '@/app/redux/hooks';
 import {
   useGetJobsByFixerQuery,
@@ -35,6 +36,7 @@ interface NotificationState {
 }
 
 export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
+  const t = useTranslations('JobOffersSection');
   const { user } = useAppSelector((state) => state.user);
   const userId = user?._id || '';
 
@@ -60,7 +62,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     handleSubmit,
     reset,
     setValue,
-    watch, // Necesario para ver los tags en tiempo real
+    watch,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(jobOfferSchema),
@@ -71,11 +73,10 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
       title: '',
       description: '',
       category: '',
-      tags: [] as string[], // Array de tags inicial
+      tags: [] as string[],
     },
   });
 
-  // Observamos los tags actuales para dibujarlos
   const currentTags = watch('tags') || [];
 
   const showNotify = (
@@ -87,17 +88,14 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     setNotify({ isOpen: true, type, title, message, onConfirm });
   };
 
-  // === Lógica de Tags ===
   const handleAddTag = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = e.target.value;
     if (!value) return;
 
-    // Evitar duplicados y máximo 5 tags
     if (!currentTags.includes(value) && currentTags.length < 5) {
       setValue('tags', [...currentTags, value], { shouldValidate: true });
     }
 
-    // Resetear el select visualmente para que vuelva a "Seleccionar..."
     e.target.value = '';
   };
 
@@ -106,17 +104,16 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     setValue('tags', newTags, { shouldValidate: true });
   };
 
-  // === Manejo de Imágenes ===
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     if (selectedImages.length + files.length > 5) {
-      showNotify('warning', 'Límite excedido', 'Solo puedes subir hasta 5 imágenes.');
+      showNotify('warning', t('notifications.imageLimit'), t('notifications.imageLimitMessage'));
       return;
     }
     const newFiles: File[] = [];
     files.forEach((file) => {
       if (file.size > 5 * 1024 * 1024) {
-        showNotify('error', 'Imagen muy pesada', `La imagen ${file.name} excede 5MB.`);
+        showNotify('error', t('notifications.imageTooBig'), t('notifications.imageSizeMessage').replace('{fileName}', file.name));
       } else {
         newFiles.push(file);
       }
@@ -134,7 +131,6 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     setPreviewUrls((prev) => prev.filter((_, i) => i !== index));
   };
 
-  // === Handlers Modal ===
   const handleOpenModal = (offer?: IJobOffer) => {
     if (readOnly) return;
 
@@ -146,8 +142,6 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
       setValue('price', offer.price);
       setValue('city', offer.city);
       setValue('contactPhone', offer.contactPhone);
-
-      // Cargar tags: Si tiene tags úsalos, si no, usa la categoría como tag inicial
       setValue('tags', offer.tags && offer.tags.length > 0 ? offer.tags : [offer.category]);
 
       setPreviewUrls(offer.photos || []);
@@ -161,7 +155,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
         category: '',
         city: 'Cochabamba',
         contactPhone: user?.telefono || '',
-        tags: [], // Resetear tags
+        tags: [],
       });
       setPreviewUrls([]);
       setSelectedImages([]);
@@ -177,12 +171,11 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     reset();
   };
 
-  // === Submit (Create/Update) ===
   const onSubmit = async (data: JobOfferFormData) => {
-    if (!user?._id) return showNotify('error', 'Error', 'No se identificó al usuario.');
+    if (!user?._id) return showNotify('error', t('notifications.error'), t('notifications.noUser'));
 
     if (!editingOffer && selectedImages.length === 0) {
-      return showNotify('warning', 'Faltan imágenes', 'Debes subir al menos una foto.');
+      return showNotify('warning', t('notifications.imageLimit'), t('notifications.noImages'));
     }
 
     try {
@@ -195,44 +188,38 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
       formData.append('price', data.price.toString());
       formData.append('city', data.city);
       formData.append('contactPhone', data.contactPhone);
-
-      // --- CAMBIO IMPORTANTE: Enviamos los tags reales ---
       formData.append('tags', JSON.stringify(data.tags));
-      // --------------------------------------------------
-
       formData.append('rating', editingOffer ? editingOffer.rating.toString() : '5');
 
       selectedImages.forEach((file) => formData.append('photos', file));
 
       if (editingOffer) {
         await updateJob({ jobId: editingOffer._id, formData }).unwrap();
-        showNotify('success', 'Actualizado', 'Oferta actualizada correctamente.');
+        showNotify('success', t('notifications.updated'), t('notifications.updateSuccess'));
       } else {
         await createJob(formData).unwrap();
-        showNotify('success', 'Publicado', 'Oferta creada correctamente.');
+        showNotify('success', t('notifications.published'), t('notifications.createSuccess'));
       }
       handleCloseModal();
     } catch (error: unknown) {
       console.error(error);
-      showNotify('error', 'Error', 'Error al procesar la solicitud.');
+      showNotify('error', t('notifications.error'), t('notifications.errorMessage'));
     }
   };
 
-  // === Delete ===
   const confirmDelete = (jobId: string) => {
     if (!userId) return;
-    showNotify('warning', '¿Eliminar oferta?', 'Esta acción no se puede deshacer.', async () => {
+    showNotify('warning', t('notifications.deleteTitle'), t('notifications.deleteMessage'), async () => {
       try {
         await deleteJob({ jobId, fixerId: userId }).unwrap();
-        setTimeout(() => showNotify('success', 'Eliminado', 'Oferta eliminada.'), 300);
+        setTimeout(() => showNotify('success', t('notifications.deleted'), t('notifications.deleteSuccess')), 300);
       } catch (error: unknown) {
-        showNotify('error', 'Error', 'No se pudo eliminar la oferta.');
+        showNotify('error', t('notifications.error'), t('notifications.deleteError'));
         console.error(error);
       }
     });
   };
 
-  // === Mapeo de Datos ===
   const mapToCardData = (offer: IJobOffer): JobOfferData => ({
     _id: offer._id,
     fixerId: offer.fixerId,
@@ -248,13 +235,12 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     rating: offer.rating,
     photos: offer.photos || [],
     allImages: offer.photos || [],
-    imagenUrl: offer.photos?.[0] || '',
-    status: 'active',
+    imagenUrl: offer.photos?.[0] || ''
   });
 
   const isSubmitting = isCreating || isUpdating;
 
-  if (isLoading) return <div className='p-10 text-center animate-pulse'>Cargando ofertas...</div>;
+  if (isLoading) return <div className='p-10 text-center animate-pulse'>{t('loading')}</div>;
 
   return (
     <div className='space-y-6'>
@@ -262,14 +248,15 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
       <div className='flex items-center justify-between'>
         <h2 className='text-xl font-semibold text-gray-900 flex items-center gap-2'>
           <Briefcase className='h-5 w-5 text-blue-600' />
-          {readOnly ? 'Ofertas Disponibles' : 'Mis Servicios'}
+          {readOnly ? t('titles.jobOffers') : t('titles.myJobOffers')}
         </h2>
         {!readOnly && (
           <PillButton
             onClick={() => handleOpenModal()}
             className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
           >
-            <Plus className='h-4 w-4' /> Nueva Oferta
+            <Plus className='h-4 w-4' />
+            {t('buttons.newOffer')}
           </PillButton>
         )}
       </div>
@@ -297,7 +284,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
         ))}
         {(!apiOffers || apiOffers.length === 0) && (
           <div className='col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed'>
-            No hay ofertas publicadas aún.
+            {t('empty')}
           </div>
         )}
       </div>
@@ -311,17 +298,20 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
         className='rounded-2xl border-primary border-2'
       >
         <Modal.Header className='text-center text-primary'>
-          {editingOffer ? 'Editar Oferta' : 'Crear Oferta'}
+          {editingOffer ? t('modal.editTitle') : t('modal.newTitle')}
         </Modal.Header>
+
         <Modal.Body>
           <form id='offerForm' onSubmit={handleSubmit(onSubmit)} className='space-y-4'>
             {/* Título */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Título</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {t('form.title.label')}
+              </label>
               <input
                 {...register('title')}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='Ej: Reparación de fugas'
+                placeholder={t('form.title.placeholder')}
               />
               {errors.title && (
                 <p className='text-red-500 text-xs mt-1'>{errors.title.message as string}</p>
@@ -331,13 +321,13 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
             {/* Categoría */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-1'>
-                Categoría Principal
+                {t('form.category.label')}
               </label>
               <select
                 {...register('category')}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
               >
-                <option value=''>Seleccionar...</option>
+                <option value=''>{t('form.category.select')}</option>
                 {jobCategories.map((cat) => (
                   <option key={cat.value} value={cat.value}>
                     {cat.label}
@@ -349,13 +339,12 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
               )}
             </div>
 
-            {/* === SECCIÓN DE TAGS (Etiquetas) === */}
+            {/* Sección de Tags */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Etiquetas Extra (Máx. 5)
+                {t('form.tags.label')}
               </label>
 
-              {/* Visualización de Tags seleccionados */}
               <div className='flex flex-wrap gap-2 mb-2 min-h-[32px] p-2 bg-gray-50 rounded-lg border border-dashed border-gray-300'>
                 {currentTags.map((tag) => (
                   <span
@@ -374,12 +363,11 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 ))}
                 {currentTags.length === 0 && (
                   <span className='text-xs text-gray-400 italic self-center'>
-                    No hay etiquetas seleccionadas
+                    {t('form.tags.empty')}
                   </span>
                 )}
               </div>
 
-              {/* Select para agregar tags */}
               <select
                 onChange={handleAddTag}
                 className='w-full rounded-lg border-primary border focus:outline-none bg-white py-2 px-3 cursor-pointer'
@@ -387,18 +375,15 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 defaultValue=''
               >
                 <option value='' disabled>
-                  {currentTags.length >= 5
-                    ? 'Límite de 5 etiquetas alcanzado'
-                    : '+ Agregar etiqueta...'}
+                  {currentTags.length >= 5 ? t('form.tags.limitReached') : t('form.tags.addTag')}
                 </option>
                 {jobCategories.map((cat) => (
-                  // Solo mostramos las que no están seleccionadas (opcional)
                   <option
                     key={cat.value}
                     value={cat.value}
                     disabled={currentTags.includes(cat.value)}
                   >
-                    {cat.label} {currentTags.includes(cat.value) ? '(Ya agregado)' : ''}
+                    {cat.label} {currentTags.includes(cat.value) ? t('form.tags.alreadyAdded') : ''}
                   </option>
                 ))}
               </select>
@@ -407,16 +392,17 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 <p className='text-red-500 text-xs mt-1'>{errors.tags.message as string}</p>
               )}
             </div>
-            {/* ================================== */}
 
             {/* Descripción */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Descripción</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {t('form.description.label')}
+              </label>
               <textarea
                 {...register('description')}
                 rows={4}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
-                placeholder='Detalles del servicio...'
+                placeholder={t('form.description.placeholder')}
               />
               {errors.description && (
                 <p className='text-red-500 text-xs mt-1'>{errors.description.message as string}</p>
@@ -426,7 +412,9 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
             {/* Precio y Ciudad */}
             <div className='grid grid-cols-2 gap-4'>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Precio (Bs.)</label>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  {t('form.price.label')}
+                </label>
                 <input
                   type='number'
                   {...register('price')}
@@ -437,7 +425,9 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 )}
               </div>
               <div>
-                <label className='block text-sm font-medium text-gray-700 mb-1'>Ciudad</label>
+                <label className='block text-sm font-medium text-gray-700 mb-1'>
+                  {t('form.city.label')}
+                </label>
                 <select
                   {...register('city')}
                   className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3 bg-white'
@@ -456,7 +446,9 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
 
             {/* Teléfono */}
             <div>
-              <label className='block text-sm font-medium text-gray-700 mb-1'>Celular</label>
+              <label className='block text-sm font-medium text-gray-700 mb-1'>
+                {t('form.contactPhone.label')}
+              </label>
               <input
                 {...register('contactPhone')}
                 className='w-full rounded-lg border-primary border focus:outline-none py-2 px-3'
@@ -469,7 +461,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
             {/* Imágenes */}
             <div>
               <label className='block text-sm font-medium text-gray-700 mb-2'>
-                Imágenes (Máx. 5)
+                {t('form.images.label')}
               </label>
               <div className='grid grid-cols-4 gap-2 mb-2'>
                 {previewUrls.map((url, idx) => (
@@ -506,13 +498,15 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
             </div>
           </form>
         </Modal.Body>
+
         <Modal.Footer>
           <div className='flex justify-end gap-2'>
             <button
+              type='button'
               onClick={handleCloseModal}
               className='border border-primary py-2 px-4 rounded-2xl text-primary hover:text-white hover:bg-primary transition-colors'
             >
-              Cancelar
+              {t('buttons.cancel')}
             </button>
             <PillButton
               type='submit'
@@ -520,7 +514,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
               className='bg-primary text-white hover:bg-blue-800'
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Guardando...' : 'Guardar Oferta'}
+              {isSubmitting ? t('buttons.saving') : t('buttons.save')}
             </PillButton>
           </div>
         </Modal.Footer>
@@ -533,7 +527,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
         title={notify.title}
         message={notify.message}
         onConfirm={notify.onConfirm}
-        confirmText='Confirmar'
+        confirmText={t('confirmButton')}
         autoClose={!notify.onConfirm}
       />
     </div>

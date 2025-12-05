@@ -11,6 +11,7 @@ export interface IJobOffer {
   contactPhone: string;
   photos: string[];
   rating?: number;
+  status?: boolean;
   createdAt?: string;
   updatedAt?: string;
   __v?: number;

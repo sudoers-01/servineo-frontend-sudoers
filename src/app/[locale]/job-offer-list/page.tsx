@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { useLogClickMutation } from '../../redux/services/activityApi';
+import { useLogSearchMutation, useUpdateFiltersMutation } from '../../redux/services/searchApi';
 import {
   SearchBar,
   NoResultsMessage,
@@ -37,7 +39,6 @@ import { JobOffersView, type ViewMode } from '@/Components/Job-offers/JobOffersV
 import { ViewModeToggle } from '@/Components/Job-offers/ViewModeToggle';
 import { useTranslations } from 'next-intl';
 import type { JobOfferData, AdaptedJobOffer } from '@/types/jobOffers';
-import { adaptOfferToModalFormat } from '@/types/jobOffers';
 
 const SCROLL_POSITION_KEY = 'jobOffers_scrollPosition';
 
@@ -56,21 +57,428 @@ export default function JobOffersPage() {
     totalPages,
     registrosPorPagina,
     error: reduxError,
+    filters,
+    rating,
   } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
 
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [userId, setUserId] = useState<string>('');
+  const [userRole, setUserRole] = useState<string>('visitor');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedUser = localStorage.getItem('servineo_user');
+      if (storedUser) {
+        try {
+          const userObj = JSON.parse(storedUser);
+          console.log('User object from localStorage:', userObj);
+          const id = userObj.id || userObj._id || userObj.userId || '';
+          const role = userObj.role || 'visitor';
+          setUserId(id);
+          setUserRole(role);
+          console.log('Extracted user ID:', id, 'Role:', role);
+        } catch (error) {
+          console.error('Error parsing user from localStorage:', error);
+          setUserRole('visitor');
+        }
+      } else {
+        console.warn('No servineo_user found in localStorage');
+        setUserRole('visitor');
+      }
+    }
+  }, []);
+
+  const [logSearch] = useLogSearchMutation();
+  const [updateFilters] = useUpdateFiltersMutation();
+  const [logClick] = useLogClickMutation();
+
+  const previousSearchQueryRef = useRef<string>('');
+  const previousFiltersRef = useRef<FilterState>(filters);
+  const isInitialMountRef = useRef<boolean>(true);
+  const filterCounterRef = useRef<number>(1);
   const stickyRef = useRef<HTMLDivElement | null>(null);
   const scrollRestoredRef = useRef(false);
   const pageBeforeFilter = useRef<number>(1);
   const hasActiveFilters = useRef<boolean>(false);
+
+  // Ref para almacenar el número real de resultados basado en la paginación
+  const actualSearchCountRef = useRef<number>(0);
+
+  // Ref para verificar si ya hemos enviado la búsqueda con el conteo correcto
+  const hasSentSearchRef = useRef<boolean>(false);
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [selectedOffer, setSelectedOffer] = useState<AdaptedJobOffer | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Función para calcular el número de resultados basado en la paginación
+  const calculateSearchCount = useCallback(() => {
+    // El total de useJobOffers ya está filtrado por búsqueda y filtros
+    // Asegurar que no estemos en estado de carga y que total sea un número válido
+    if (!isLoading && typeof total === 'number' && total >= 0) {
+      return total;
+    }
+    return 0;
+  }, [isLoading, total]);
+
+  // Función para convertir "De (A-C)" a "A-C"
+  const formatRangeValue = useCallback((range: string): string => {
+    // Remover "De (" del inicio y ")" del final, luego extraer solo el rango
+    if (range.startsWith('De (')) {
+      return range.replace('De (', '').replace(')', '');
+    }
+    return range;
+  }, []);
+
+  const getFixerNameValue = useCallback((): string => {
+    // Usar filters.range directamente para obtener los rangos aplicados
+    if (!filters.range || filters.range.length === 0) {
+      return 'not_applied';
+    }
+
+    // Convertir cada rango de "De (A-C)" a "A-C" y unirlos
+    const formattedRanges = filters.range.map(formatRangeValue);
+    return formattedRanges.join(', ');
+  }, [filters, formatRangeValue]);
+
+  const getCityValue = useCallback((): string => {
+    if (!filters.city || (Array.isArray(filters.city) && filters.city.length === 0)) {
+      return 'not_applied';
+    }
+    if (Array.isArray(filters.city)) {
+      return filters.city.join(', ');
+    }
+    return filters.city;
+  }, [filters]);
+
+  const getJobTypeValue = useCallback((): string => {
+    if (!filters.category || filters.category.length === 0) {
+      return 'not_applied';
+    }
+    return filters.category.join(', ');
+  }, [filters]);
+
+  const adaptJobOffer = useCallback((offer: JobOfferData): AdaptedJobOffer => {
+    return {
+      _id: offer._id,
+      fixerId: offer.fixerId,
+      name: offer.fixerName,
+      title: offer.title,
+      description: offer.description,
+      tags: offer.tags || [],
+      phone: offer.contactPhone,
+      photos: offer.photos || [],
+      services: offer.category ? [offer.category] : [],
+      price: offer.price,
+      createdAt: offer.createdAt instanceof Date ? offer.createdAt : new Date(offer.createdAt),
+      city: offer.city,
+    };
+  }, []);
+
+  // Función para enviar una búsqueda pendiente
+  const sendPendingSearch = useCallback(async () => {
+    // Verificar que no se haya enviado ya y que haya una query
+    if (!previousSearchQueryRef.current || hasSentSearchRef.current) {
+      return;
+    }
+
+    // Marcar como enviado inmediatamente para evitar duplicados
+    hasSentSearchRef.current = true;
+
+    // Usar el conteo actualizado de resultados desde el ref
+    const searchCount = actualSearchCountRef.current;
+    const query = previousSearchQueryRef.current;
+
+    // Obtener los valores actuales de los filtros en el momento de enviar
+    const fixerNameValue = getFixerNameValue();
+    const cityValue = getCityValue();
+    const jobTypeValue = getJobTypeValue();
+
+    const searchData = {
+      user_type: userRole,
+      search_query: query,
+      search_type: 'search_box',
+      filters: {
+        filter_1: {
+          fixer_name: fixerNameValue,
+          city: cityValue,
+          job_type: jobTypeValue,
+          search_count: searchCount, // Usar el conteo actualizado
+        },
+      },
+    };
+
+    try {
+      console.log('=== REGISTRANDO BÚSQUEDA ===');
+      console.log('Búsqueda:', query);
+      console.log('Filtros aplicados:', {
+        fixer_name: fixerNameValue,
+        city: cityValue,
+        job_type: jobTypeValue,
+      });
+      console.log('Resultados encontrados:', searchCount);
+      console.log('Datos completos:', JSON.stringify(searchData, null, 2));
+      await logSearch(searchData).unwrap();
+      console.log('✓ Búsqueda registrada exitosamente');
+    } catch (error) {
+      console.error('✗ Error al registrar búsqueda:', error);
+      // Si hay error, permitir reintento
+      hasSentSearchRef.current = false;
+    }
+  }, [userRole, logSearch, getFixerNameValue, getCityValue, getJobTypeValue]);
+
+  // Efecto único para registrar la búsqueda cuando los resultados estén listos
   useEffect(() => {
-    // corregir pagina actual si esta fuera del limite
+    // Solo registrar si:
+    // 1. No está cargando
+    // 2. Hay una búsqueda pendiente (previousSearchQueryRef no está vacío)
+    // 3. Aún no se ha enviado (hasSentSearchRef es false)
+    // 4. Los resultados están disponibles (total no es undefined/null)
+    if (
+      !isLoading &&
+      previousSearchQueryRef.current &&
+      !hasSentSearchRef.current &&
+      total !== undefined &&
+      total !== null
+    ) {
+      const currentCount = calculateSearchCount();
+
+      // Actualizar el conteo actual
+      actualSearchCountRef.current = currentCount;
+
+      // Pequeño delay para asegurar que el conteo esté estable
+      const timeoutId = setTimeout(async () => {
+        // Verificar nuevamente que no se haya enviado mientras esperábamos
+        // y que el total siga siendo válido
+        if (
+          !hasSentSearchRef.current &&
+          previousSearchQueryRef.current &&
+          total !== undefined &&
+          total !== null
+        ) {
+          const finalCount = calculateSearchCount();
+          actualSearchCountRef.current = finalCount;
+
+          console.log('Registrando búsqueda - Conteo final:', finalCount, 'Total:', total);
+          await sendPendingSearch();
+        }
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isLoading, calculateSearchCount, total, sendPendingSearch, offers]);
+
+  const handleSearchSubmit = useCallback(
+    (query: string) => {
+      scrollRestoredRef.current = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      // Siempre actualizar la búsqueda, incluso si no cambió, para registrar el clic
+      const trimmedQuery = query.trim();
+      dispatch(setSearch(trimmedQuery));
+      dispatch(resetPagination());
+
+      filterCounterRef.current = 1;
+
+      // Resetear el flag para permitir registrar la búsqueda cuando los resultados estén listos
+      previousSearchQueryRef.current = trimmedQuery;
+      hasSentSearchRef.current = false;
+
+      console.log('Búsqueda iniciada:', trimmedQuery, 'Esperando resultados...');
+      // La búsqueda se registrará automáticamente cuando los resultados estén listos en el useEffect
+    },
+    [dispatch],
+  );
+
+  // Ref para rastrear si hay un cambio de filtros pendiente de registrar
+  const pendingFilterChangeRef = useRef<boolean>(false);
+
+  // Efecto para detectar cambios en filtros
+  useEffect(() => {
+    if (isInitialMountRef.current) {
+      isInitialMountRef.current = false;
+      previousFiltersRef.current = { ...filters };
+      return;
+    }
+
+    const currentFilters = filters as unknown as Record<string, unknown>;
+    const previousFilters = previousFiltersRef.current as unknown as Record<string, unknown>;
+
+    const compareFilterValues = (
+      prev: Record<string, unknown>,
+      curr: Record<string, unknown>,
+      key: string,
+    ) => {
+      const prevValue = prev[key];
+      const currValue = curr[key];
+
+      if (Array.isArray(prevValue) && Array.isArray(currValue)) {
+        return JSON.stringify([...prevValue].sort()) !== JSON.stringify([...currValue].sort());
+      }
+
+      return prevValue !== currValue;
+    };
+
+    // Solo detectar cambios en los filtros relevantes
+    const filterKeys = ['city', 'category', 'range'];
+    const filtersChanged = filterKeys.some((key) =>
+      compareFilterValues(previousFilters, currentFilters, key),
+    );
+
+    if (filtersChanged) {
+      // Actualizar los filtros previos
+      previousFiltersRef.current = { ...filters };
+
+      // Marcar que hay un cambio de filtros pendiente
+      pendingFilterChangeRef.current = true;
+
+      console.log('=== CAMBIO DE FILTROS DETECTADO ===');
+      console.log('Filtros anteriores:', previousFilters);
+      console.log('Filtros nuevos:', currentFilters);
+    }
+  }, [filters]);
+
+  // Efecto separado para enviar los filtros cuando los resultados estén listos
+  useEffect(() => {
+    // Solo proceder si hay un cambio de filtros pendiente
+    if (!pendingFilterChangeRef.current) {
+      return;
+    }
+
+    // Si está cargando, esperar a que termine
+    if (isLoading) {
+      console.log('Esperando a que termine la carga antes de registrar filtros...');
+      return;
+    }
+
+    // Si el total no está disponible, esperar
+    if (total === undefined || total === null) {
+      console.log('Esperando total antes de registrar filtros...', { total });
+      return;
+    }
+
+    // Verificar si hay búsqueda asociada (necesaria para actualizar filtros)
+    const searchQuery = previousSearchQueryRef.current || search || '';
+
+    if (!searchQuery || searchQuery.trim() === '') {
+      console.log('⚠ No hay búsqueda asociada para actualizar filtros');
+      pendingFilterChangeRef.current = false;
+      return;
+    }
+
+    // Usar un delay para asegurar que los datos estén completamente actualizados
+    // después de que termine la carga
+    const timeoutId = setTimeout(async () => {
+      // Verificar nuevamente antes de enviar
+      if (isLoading || total === undefined || total === null) {
+        console.log('Cancelando envío - estado no válido:', { isLoading, total });
+        return;
+      }
+
+      // Marcar como procesado antes de enviar para evitar duplicados
+      pendingFilterChangeRef.current = false;
+
+      filterCounterRef.current++;
+
+      // Calcular el conteo actual basado en el total de resultados
+      // Este total ya refleja los filtros aplicados
+      const searchCount = calculateSearchCount();
+
+      // Obtener los valores de los filtros actuales en el momento exacto de enviar
+      const fixerNameValue = getFixerNameValue();
+      const cityValue = getCityValue();
+      const jobTypeValue = getJobTypeValue();
+
+      console.log('=== REGISTRANDO FILTROS ===');
+      console.log('Búsqueda asociada:', searchQuery);
+      console.log('Filtros aplicados:', {
+        fixer_name: fixerNameValue,
+        city: cityValue,
+        job_type: jobTypeValue,
+      });
+      console.log('Estado actual:', {
+        searchCount,
+        total,
+        isLoading,
+        offersCount: Array.isArray(offers) ? offers.length : 0,
+      });
+
+      const filterData = {
+        filters: {
+          fixer_name: fixerNameValue,
+          city: cityValue,
+          job_type: jobTypeValue,
+          search_count: searchCount, // Registrar el número real de resultados filtrados
+        },
+      };
+
+      try {
+        console.log(
+          `📤 Enviando FILTRO para búsqueda: "${searchQuery}"`,
+          JSON.stringify(filterData, null, 2),
+        );
+
+        await updateFilters(filterData).unwrap();
+        console.log(`✅ Filtro registrado exitosamente. Resultados encontrados: ${searchCount}`);
+      } catch (error) {
+        console.error('❌ Error al registrar filtro:', error);
+        // Reintentar si hay error
+        pendingFilterChangeRef.current = true;
+      }
+    }, 800); // Delay suficiente para asegurar que los resultados estén completamente actualizados
+
+    return () => clearTimeout(timeoutId);
+  }, [
+    filters,
+    search,
+    total,
+    isLoading,
+    offers,
+    updateFilters,
+    calculateSearchCount,
+    getFixerNameValue,
+    getCityValue,
+    getJobTypeValue,
+  ]);
+
+  const handleCardClick = useCallback(
+    async (offer: JobOfferData) => {
+      const adaptedOffer = adaptJobOffer(offer);
+      setSelectedOffer(adaptedOffer);
+      setIsModalOpen(true);
+
+      if (!userId) {
+        console.warn('User ID no disponible, no se registró el click');
+        return;
+      }
+
+      const activityData = {
+        userId: userId,
+        date: new Date().toISOString(),
+        role: userRole,
+        type: 'click',
+        metadata: {
+          button: 'job_offer',
+          jobTitle: adaptedOffer.title || 'Sin título',
+          jobId: adaptedOffer._id,
+        },
+        timestamp: new Date().toISOString(),
+      };
+
+      try {
+        await logClick(activityData).unwrap();
+        console.log('Click registrado:', adaptedOffer.title);
+      } catch (error) {
+        console.error('Error al registrar clic:', error);
+      }
+    },
+    [userId, userRole, logClick, adaptJobOffer],
+  );
+
+  // Resto del código permanece igual...
+  useEffect(() => {
     if (!isLoading && totalPages > 0) {
       const params = new URLSearchParams(window.location.search);
       const pageParam = Number(params.get('page') || 1);
@@ -91,8 +499,6 @@ export default function JobOffersPage() {
     }
   }, [isLoading, totalPages, dispatch]);
 
-  // Limpiar búsqueda si se navega directamente sin parámetros
-  // Pero no limpiar si existe un valor guardado en localStorage (persistencia)
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -106,19 +512,20 @@ export default function JobOffersPage() {
           console.error('Error accessing localStorage:', e);
         }
 
-        if (!hasSavedSearch) dispatch(setSearch(''));
+        if (!hasSavedSearch) {
+          console.log('Navegación directa detectada, limpiando búsqueda guardada');
+          dispatch(setSearch(''));
+          previousSearchQueryRef.current = '';
+        }
       }
     }
   }, [dispatch, search]);
 
-  // Guardar posición del scroll
   useEffect(() => {
     const saveScrollPosition = () => {
       try {
         sessionStorage.setItem(SCROLL_POSITION_KEY, window.scrollY.toString());
-      } catch {
-        // ignorar errores
-      }
+      } catch {}
     };
 
     window.addEventListener('beforeunload', saveScrollPosition);
@@ -127,7 +534,6 @@ export default function JobOffersPage() {
     };
   }, []);
 
-  // Restaurar posición del scroll
   useEffect(() => {
     if (!isLoading && Array.isArray(offers) && offers.length > 0 && !scrollRestoredRef.current) {
       try {
@@ -142,13 +548,10 @@ export default function JobOffersPage() {
             }, 100);
           }
         }
-      } catch {
-        // ignorar errores
-      }
+      } catch {}
     }
   }, [isLoading, offers]);
 
-  // Sticky header
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
@@ -172,12 +575,6 @@ export default function JobOffersPage() {
       window.removeEventListener('resize', update);
       if (mo) mo.disconnect();
     };
-  }, []);
-
-  const handleCardClick = useCallback((offer: JobOfferData) => {
-    const adaptedOffer = adaptOfferToModalFormat(offer);
-    setSelectedOffer(adaptedOffer);
-    setIsModalOpen(true);
   }, []);
 
   const handleCloseModal = useCallback(() => {
@@ -226,16 +623,6 @@ export default function JobOffersPage() {
       window.scrollTo({ top: 0, behavior: 'smooth' });
       const backendSort = getSortValue(option);
       dispatch(setSortBy(backendSort));
-    },
-    [dispatch],
-  );
-
-  const handleSearchSubmit = useCallback(
-    (query: string) => {
-      scrollRestoredRef.current = true;
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      dispatch(setSearch(query));
-      dispatch(resetPagination());
     },
     [dispatch],
   );

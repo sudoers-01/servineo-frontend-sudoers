@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getPromotionsByOfferId, deletePromotion } from '@/services/promotions';
+import { getPromotionsByOfferId, deletePromotion, updatePromotion } from '@/services/promotions';
 import { getJobInfo } from '@/services/job-info';
 import { Promotion } from '@/types/promotion';
+import CreatePromoModal from '@/app/components/fixers/CreatePromoModal';
 
 export default function JobPromotionsPage() {
   const params = useParams();
@@ -18,15 +19,17 @@ export default function JobPromotionsPage() {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [editingPromotion, setEditingPromotion] = useState<Promotion | null>(null);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
       try {
         const jobData = await getJobInfo(jobId);
         if (jobData?.title) setJobTitle(jobData.title);
       } catch (e) {
-        console.warn('No se pudo cargar info del trabajo.');
+        console.warn('No se pudo cargar info del trabajo.', e);
       }
 
       const promosData = await getPromotionsByOfferId(jobId);
@@ -36,16 +39,44 @@ export default function JobPromotionsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [jobId]);
 
   useEffect(() => {
     if (jobId) loadData();
-  }, [jobId]);
+  }, [jobId, loadData]);
 
   const toggleSelection = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
+  };
+
+  const handleEditPromotion = async (promotion: {
+    title: string;
+    description: string;
+    offerId: string;
+    fixerId: string;
+    price: string;
+  }) => {
+    if (!editingPromotion) return;
+
+    try {
+      const result = await updatePromotion(editingPromotion._id, {
+        title: promotion.title,
+        description: promotion.description,
+      });
+
+      if (result) {
+        await loadData();
+        setIsEditModalOpen(false);
+        setEditingPromotion(null);
+      } else {
+        alert('Error al actualizar la promoción');
+      }
+    } catch (error) {
+      console.error('Error updating promotion:', error);
+      alert('Error al actualizar la promoción');
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -59,6 +90,7 @@ export default function JobPromotionsPage() {
       setIsDeleteModalOpen(false);
     } catch (error) {
       alert('Hubo un error al eliminar algunas promociones');
+      console.error('Error deleting promotions:', error);
     } finally {
       setIsDeleting(false);
     }
@@ -101,37 +133,53 @@ export default function JobPromotionsPage() {
               return (
                 <div
                   key={promo._id}
-                  onClick={() => toggleSelection(promo._id)}
                   className={`
-                    group flex items-center justify-between p-4 rounded-xl border cursor-pointer transition-all duration-200
+                    group flex items-center justify-between p-4 rounded-xl border transition-all duration-200
                     ${isSelected ? 'border-blue-500 bg-blue-50' : 'border-gray-300 bg-white hover:border-gray-400'}
                   `}
                 >
-                  <div className='flex-1 min-w-0 pr-4'>
+                  <div
+                    onClick={() => toggleSelection(promo._id)}
+                    className='flex-1 min-w-0 pr-4 cursor-pointer'
+                  >
                     <h3 className='text-base font-bold text-gray-900'>{promo.title}</h3>
                     <p className='text-sm text-gray-600 line-clamp-1'>{promo.description}</p>
                   </div>
 
-                  <div
-                    className={`
-                    w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors shrink-0
-                    ${isSelected ? 'bg-black border-black' : 'bg-white border-gray-400'}
-                  `}
-                  >
-                    {isSelected && (
-                      <svg
-                        width='14'
-                        height='14'
-                        viewBox='0 0 24 24'
-                        fill='none'
-                        stroke='white'
-                        strokeWidth='4'
-                        strokeLinecap='round'
-                        strokeLinejoin='round'
-                      >
-                        <polyline points='20 6 9 17 4 12'></polyline>
-                      </svg>
-                    )}
+                  <div className='flex items-center gap-2 shrink-0'>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setEditingPromotion(promo);
+                        setIsEditModalOpen(true);
+                      }}
+                      className='px-3 py-1.5 text-xs font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors'
+                    >
+                      Editar
+                    </button>
+
+                    <div
+                      onClick={() => toggleSelection(promo._id)}
+                      className={`
+                        w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer
+                        ${isSelected ? 'bg-black border-black' : 'bg-white border-gray-400'}
+                      `}
+                    >
+                      {isSelected && (
+                        <svg
+                          width='14'
+                          height='14'
+                          viewBox='0 0 24 24'
+                          fill='none'
+                          stroke='white'
+                          strokeWidth='4'
+                          strokeLinecap='round'
+                          strokeLinejoin='round'
+                        >
+                          <polyline points='20 6 9 17 4 12'></polyline>
+                        </svg>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
@@ -155,6 +203,20 @@ export default function JobPromotionsPage() {
           </button>
         </div>
       </div>
+
+      <CreatePromoModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingPromotion(null);
+        }}
+        onSave={handleEditPromotion}
+        id={jobId}
+        fixerId={editingPromotion?.fixerId || ''}
+        initialTitle={editingPromotion?.title}
+        initialDescription={editingPromotion?.description}
+        isEditMode={true}
+      />
 
       {isDeleteModalOpen && (
         <div className='fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4'>
@@ -207,3 +269,4 @@ export default function JobPromotionsPage() {
     </div>
   );
 }
+//conclitos resueltos

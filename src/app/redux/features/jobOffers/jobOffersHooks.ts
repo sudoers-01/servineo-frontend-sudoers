@@ -36,7 +36,6 @@ import { sanitizePage } from '@/app/lib/validations/pagination.validator'; //
 /**
  * Hook principal que combina RTK Query con el slice de Redux
  */
-
 export function useJobOffers() {
   const dispatch = useAppDispatch();
   const params = useAppSelector(selectSearchParams);

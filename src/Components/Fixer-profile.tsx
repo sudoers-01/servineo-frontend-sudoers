@@ -1,10 +1,23 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MapPin, Edit, Save, X, Briefcase, MessageSquare, Star, Phone, Mail } from 'lucide-react';
+import {
+  MapPin,
+  Edit,
+  Save,
+  X,
+  Briefcase,
+  MessageSquare,
+  Star,
+  Phone,
+  Mail,
+  Calendar,
+} from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import type { Fixer } from '@/app/lib/mock-data';
 import FixerGraficCard from '@/Components/fixer/Fixer-grafic-card';
+import JobStatistics from '@/Components/fixer/Fixer-statistics';
 
 interface FixerProfileProps {
   fixer: Fixer;
@@ -22,6 +35,8 @@ interface LocationMapProps {
   lat: number;
   lng: number;
 }
+
+// Remove duplicate Window interface declaration to avoid type conflicts
 
 export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -46,6 +61,12 @@ export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
     if (fixer.whatsapp) {
       window.open(`https://wa.me/${fixer.whatsapp.replace(/\D/g, '')}`, '_blank');
     }
+  };
+
+  const handleClickCalendar = () => {
+    sessionStorage.setItem('fixer_id', fixer.id);
+    sessionStorage.setItem('requester_id', 'pupup');
+    sessionStorage.setItem('roluser', 'fixer');
   };
 
   const formattedJoinDate = (() => {
@@ -118,6 +139,16 @@ export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
                   <MessageSquare className='w-4 h-4' />
                   Contactar por WhatsApp
                 </button>
+              )}
+              {isOwner && (
+                <Link
+                  href='../calendar'
+                  onClick={handleClickCalendar}
+                  className='mt-4 px-4 py-2 bg-white text-blue-700 rounded-lg font-medium flex items-center gap-2 mx-auto md:mx-0 hover:bg-gray-50 transition-colors'
+                >
+                  <Calendar className='w-4 h-4' />
+                  Ver Calendario
+                </Link>
               )}
             </div>
           </div>
@@ -268,13 +299,20 @@ export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
             <LocationMap lat={fixer.location.lat} lng={fixer.location.lng} />
           )}
 
-          {/* Tarjeta de estadísticas */}
-          <div className='mt-12'>
-            <FixerGraficCard
-              completedJobs={fixer.completedJobs ?? 0}
-              cancelledJobs={fixer.cancelledJobs ?? 0}
-              monthlyData={fixer.monthlyData}
-            />
+          {/* Estadísticas */}
+          <div className='mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8'>
+            {/* Gráfico de tarjeta de fixer */}
+            <div>
+              <FixerGraficCard
+                completedJobs={fixer.completedJobs ?? 0}
+                cancelledJobs={fixer.cancelledJobs ?? 0}
+                monthlyData={fixer.monthlyData}
+              />
+            </div>
+            {/* Gráfico de estadísticas de trabajos */}
+            <div>
+              <JobStatistics />
+            </div>
           </div>
         </div>
       </div>

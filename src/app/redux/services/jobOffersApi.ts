@@ -77,6 +77,9 @@ export const jobOffersApi = baseApi.injectEndpoints({
         if (params.titleOnly) urlParams.append('titleOnly', 'true');
         if (params.exact) urlParams.append('exact', 'true');
 
+        // Filtrar solo ofertas activas
+        urlParams.append('status', 'true');
+
         urlParams.append('page', String(params.page || 1));
         urlParams.append('limit', String(params.limit || 10));
 
@@ -92,6 +95,7 @@ export const jobOffersApi = baseApi.injectEndpoints({
           sortBy: 'recent',
           page: '1',
           limit: String(limit),
+          status: 'true', // Filtrar solo ofertas activas
         });
         if (category && category !== 'Todos') params.append('category', category);
         return `/devmaster/offers?${params.toString()}`;

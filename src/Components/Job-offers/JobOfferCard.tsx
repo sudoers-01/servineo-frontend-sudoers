@@ -1,7 +1,7 @@
 // src/Components/Job-offers/JobOfferCard.tsx
 'use client';
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useState, useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import {
@@ -17,10 +17,11 @@ import { useTranslations } from 'next-intl';
 import { useImageCarousel } from '@/app/redux/features/jobOffers/useImageCarousel';
 import type { JobOfferData } from '@/types/jobOffers';
 import { SearchHighlight } from '../SearchHighlight';
+import { getPromotionsByOfferId } from '@/services/promotions';
 
 interface JobOfferCardProps {
   offer: JobOfferData;
-  viewMode?: 'grid' | 'list';
+  viewMode?: 'grid' | 'list' | string;
   onClick?: (offer: JobOfferData) => void;
   onEdit?: (offer: JobOfferData) => void;
   onDelete?: (id: string) => void;
@@ -43,6 +44,25 @@ export const JobOfferCard = memo<JobOfferCardProps>(
     const router = useRouter();
     const t = useTranslations('cardJob');
     const tCat = useTranslations('Categories');
+    const [hasPromotions, setHasPromotions] = useState(false);
+    const [loadingPromos, setLoadingPromos] = useState(true);
+
+    // Verificar si la oferta tiene promociones
+    useEffect(() => {
+      const checkPromotions = async () => {
+        try {
+          const promotions = await getPromotionsByOfferId(offer._id);
+          setHasPromotions(Array.isArray(promotions) && promotions.length > 0);
+        } catch (error) {
+          console.warn(`Error checking promotions for offer ${offer._id}:`, error);
+          setHasPromotions(false);
+        } finally {
+          setLoadingPromos(false);
+        }
+      };
+
+      checkPromotions();
+    }, [offer._id]);
 
     // Preparar imágenes
     const images = React.useMemo(() => {
@@ -104,10 +124,15 @@ export const JobOfferCard = memo<JobOfferCardProps>(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         if (offer.fixerId) {
+          // Si quieres mantener el console.log(offer), debes incluir 'offer' en las dependencias.
+          // Si eliminas el console.log, podrías dejar solo [offer.fixerId, router]
+          console.log(offer);
+          console.log('Navigating to fixer with ID:', offer.fixerId);
           router.push(`/fixer/${offer.fixerId}`);
         }
       },
-      [offer.fixerId, router],
+      // CORRECCIÓN: Se agregó 'offer' aquí porque se usa dentro del console.log
+      [offer, router],
     );
 
     const handleCardClick = useCallback(() => {
@@ -211,6 +236,20 @@ export const JobOfferCard = memo<JobOfferCardProps>(
           <MapPin className='w-3.5 h-3.5 text-primary' />
           <span className='text-gray-700'>{offer.city}</span>
         </div>
+
+        {!loadingPromos && hasPromotions && (
+          <div className='absolute left-3 top-12 inline-flex items-center gap-1.5 rounded-full bg-gradient-to-r from-yellow-400 to-yellow-300 px-3 py-1.5 text-xs font-bold shadow-md border border-yellow-500 text-yellow-900 animate-pulse'>
+            <svg
+              className='w-3.5 h-3.5'
+              fill='currentColor'
+              viewBox='0 0 20 20'
+              xmlns='http://www.w3.org/2000/svg'
+            >
+              <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' />
+            </svg>
+            <span>Promoción</span>
+          </div>
+        )}
 
         {viewMode === 'grid' && (
           <div className='absolute right-3 top-3 rounded-lg bg-white/90 backdrop-blur-sm px-3 py-1.5 text-sm font-semibold shadow-sm border border-primary/20'>
