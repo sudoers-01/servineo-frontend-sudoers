@@ -487,6 +487,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
   (prevProps, nextProps) => {
     return (
       prevProps.offer._id === nextProps.offer._id &&
+      prevProps.offer.status === nextProps.offer.status &&
       prevProps.viewMode === nextProps.viewMode &&
       prevProps.searchQuery === nextProps.searchQuery &&
       prevProps.readOnly === nextProps.readOnly &&

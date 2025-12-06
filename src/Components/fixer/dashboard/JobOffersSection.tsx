@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Plus, Briefcase, Upload, X } from 'lucide-react';
+import { Plus, Briefcase, Upload, X, ChevronDown } from 'lucide-react';
 import { PillButton } from '../Pill-button';
 import { Modal } from '@/Components/Modal';
 import NotificationModal from '@/Components/Modal-notifications';
@@ -41,7 +41,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
   const { user } = useAppSelector((state) => state.user);
   const userId = user?._id || '';
 
-  const { data: apiOffers, isLoading } = useGetJobsByFixerQuery(userId, { skip: !userId });
+  const { data: apiOffers, isLoading, refetch } = useGetJobsByFixerQuery(userId, { skip: !userId });
   const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
   const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
   const [deleteJob] = useDeleteJobMutation();
@@ -58,6 +58,8 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     title: '',
     message: '',
   });
+
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
 
   const {
     register,
@@ -246,14 +248,24 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
   const handleToggleActive = async (jobId: string) => {
     try {
       await toggleJobStatus({ jobId }).unwrap();
+      // Refetch para actualizar la lista inmediatamente
+      const result = await refetch();
+      console.log('Refetch result:', result);
       showNotify('success', t('notifications.statusChanged'), t('notifications.statusChangedSuccess'));
     } catch (err) {
-      console.error(err);
+      console.error('Error toggling status:', err);
       showNotify('error', t('notifications.error'), t('notifications.statusChangeError'));
     }
   };
 
   if (isLoading) return <div className='p-10 text-center animate-pulse'>{t('loading')}</div>;
+
+  // Filtrar ofertas según el estado seleccionado
+  const filteredOffers = apiOffers?.filter((offer) => {
+    if (statusFilter === 'all') return true;
+    const isActive = offer.status ?? true;
+    return statusFilter === 'active' ? isActive : !isActive;
+  }) || [];
 
   return (
     <div className='space-y-6'>
@@ -264,19 +276,34 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
           {readOnly ? t('titles.jobOffers') : t('titles.myJobOffers')}
         </h2>
         {!readOnly && (
-          <PillButton
-            onClick={() => handleOpenModal()}
-            className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
-          >
-            <Plus className='h-4 w-4' />
-            {t('buttons.newOffer')}
-          </PillButton>
+          <div className='flex items-center gap-3'>
+            {/* Dropdown de filtros */}
+            <div className='relative'>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'inactive')}
+                className='appearance-none bg-white border border-gray-300 rounded-full px-4 py-2 pr-10 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent cursor-pointer transition-all'
+              >
+                <option value='all'>{t('filters.all')}</option>
+                <option value='active'>{t('filters.active')}</option>
+                <option value='inactive'>{t('filters.inactive')}</option>
+              </select>
+              <ChevronDown className='absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none' />
+            </div>
+            <PillButton
+              onClick={() => handleOpenModal()}
+              className='bg-primary text-white hover:bg-blue-800 flex items-center gap-2'
+            >
+              <Plus className='h-4 w-4' />
+              {t('buttons.newOffer')}
+            </PillButton>
+          </div>
         )}
       </div>
 
       {/* Grid */}
       <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
-        {apiOffers?.map((offer) => (
+        {filteredOffers.map((offer) => (
           <JobOfferCard
             key={offer._id}
             offer={mapToCardData(offer as IJobOffer)}
@@ -296,9 +323,9 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
             className='h-full'
           />
         ))}
-        {(!apiOffers || apiOffers.length === 0) && (
+        {filteredOffers.length === 0 && (
           <div className='col-span-full py-12 text-center text-gray-400 bg-gray-50 rounded-xl border border-dashed'>
-            {t('empty')}
+            {statusFilter === 'all' ? t('empty') : t('filters.noResults')}
           </div>
         )}
       </div>

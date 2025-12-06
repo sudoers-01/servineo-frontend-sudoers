@@ -1084,6 +1084,12 @@
       "statusChangedSuccess": "Estado de la oferta actualizado correctamente.",
       "statusChangeError": "No se pudo cambiar el estado de la oferta."
     },
+    "filters": {
+      "all": "Todas las Ofertas",
+      "active": "Activas",
+      "inactive": "Inactivas",
+      "noResults": "No se encontraron ofertas con este filtro."
+    },
     "confirmButton": "Confirmar",
     "deleteConfirmation": "¿Estás seguro de eliminar esta oferta?"
   },
