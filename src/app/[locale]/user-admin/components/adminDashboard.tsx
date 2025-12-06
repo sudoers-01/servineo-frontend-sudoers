@@ -232,12 +232,7 @@ export default function AdminDashboard() {
 
         <div className={styles.modulesGrid}>
           <button
-            onClick={() =>
-              window.open(
-                'https://servineo.app/es/adminStatistic',
-                '_self',
-              )
-            }
+            onClick={() => window.open('https://servineo.app/es/adminStatistic', '_self')}
             className={styles.moduleButton}
           >
             <div className={styles.moduleIcon}>📊</div>
@@ -253,12 +248,7 @@ export default function AdminDashboard() {
           </button>
 
           <button
-            onClick={() =>
-              window.open(
-                'https://servineo.app/es/tracking-appointments',
-                '_self',
-              )
-            }
+            onClick={() => window.open('https://servineo.app/es/tracking-appointments', '_self')}
             className={styles.moduleButton}
           >
             <div className={styles.moduleIcon}>📍</div>
