@@ -1,18 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-// Eliminé useRouter y usePathname porque ya no se usan y darían error al compilar
 import { useTranslations, useLocale } from 'next-intl';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
-// Eliminé la interfaz FooterSectionProps porque ya no recibimos nada
-
 export default function FooterSection() {
-  // Eliminé router y pathname para que no te salga error de "variables no usadas" en el deploy
   const t = useTranslations('footer');
   const locale = useLocale();
-
-  // Aquí estaba la función handleRestartTour, la eliminé.
 
   const empresaLinks = [
     { name: t('company.aboutUs'), path: `/${locale}/info/about` },
