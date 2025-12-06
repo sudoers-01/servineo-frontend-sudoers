@@ -5,7 +5,9 @@ import { roboto } from '../fonts';
 import 'leaflet/dist/leaflet.css';
 import { Providers } from '../providers';
 import TopMenu from '@/Components/Navigation/TopMenu';
+import { ReduxProvider } from '../redux/ReduxProvider';
 import { ReactNode } from 'react';
+import ConditionalTopMenu from './adminStatistic/ConditionalTopMenu';
 import { notFound } from 'next/navigation';
 import { NextIntlClientProvider } from 'next-intl';
 import { TranslationButton } from '@/Components/Shared/TranslationButton';
@@ -69,9 +71,7 @@ export default async function RootLayout({ children, params }: Props) {
             <div className=''>
               <BotonesFlotantes />
             </div>
-            <div className=''>
-              <TopMenu />
-            </div>
+            <ConditionalTopMenu />
             {children}
             <FooterSection />
           </Providers>
