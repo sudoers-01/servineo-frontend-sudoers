@@ -143,7 +143,7 @@ export const Title = () => {
         {/* */}
 
         <div className='mb-[30px]'>
-          <span className='text-white text-[27px]'>
+          <span className='text-white text-[18px]'>
             {t("guide")}{" "}
             <button
               onClick={handleRestartTour}
