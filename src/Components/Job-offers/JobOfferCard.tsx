@@ -27,6 +27,7 @@ interface JobOfferCardProps {
   onEdit?: (offer: JobOfferData) => void;
   onDelete?: (id: string) => void;
   onToggleActive?: () => void;
+  onCreatePromo?: () => void;
   className?: string;
   searchQuery?: string;
   readOnly?: boolean;
@@ -40,6 +41,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
     onEdit,
     onDelete,
     onToggleActive,
+    onCreatePromo,
     className = '',
     searchQuery = '',
     readOnly = false,
@@ -183,6 +185,17 @@ export const JobOfferCard = memo<JobOfferCardProps>(
         setIsMenuOpen(false);
       },
       [offer._id, locale, router],
+    );
+
+    const handleCreatePromoClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (onCreatePromo) {
+          onCreatePromo();
+          setIsMenuOpen(false);
+        }
+      },
+      [onCreatePromo],
     );
 
     // Close menu when clicking outside
@@ -401,7 +414,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
                       </button>
                       <button
                         onClick={handleViewPromotions}
-                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2'
+                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2 border-b border-gray-100'
                       >
                         <svg
                           className='w-4 h-4'
@@ -413,6 +426,26 @@ export const JobOfferCard = memo<JobOfferCardProps>(
                         </svg>
                         Ver promociones
                       </button>
+                      {onCreatePromo && (
+                        <>
+                          <div className='h-px bg-gray-100' />
+                          <button
+                            onClick={handleCreatePromoClick}
+                            className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2'
+                          >
+                            <svg
+                              className='w-4 h-4'
+                              fill='none'
+                              stroke='currentColor'
+                              viewBox='0 0 24 24'
+                              xmlns='http://www.w3.org/2000/svg'
+                            >
+                              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M12 4v16m8-8H4' />
+                            </svg>
+                            Crear promoción
+                          </button>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

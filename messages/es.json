@@ -1082,7 +1082,10 @@
       "deleteError": "No se pudo eliminar la oferta.",
       "statusChanged": "Estado Cambiado",
       "statusChangedSuccess": "Estado de la oferta actualizado correctamente.",
-      "statusChangeError": "No se pudo cambiar el estado de la oferta."
+      "statusChangeError": "No se pudo cambiar el estado de la oferta.",
+      "promoCreated": "Promoción creada",
+      "promoCreatedSuccess": "Promoción guardada correctamente.",
+      "promoCreateError": "No se pudo crear la promoción."
     },
     "filters": {
       "all": "Todas las Ofertas",

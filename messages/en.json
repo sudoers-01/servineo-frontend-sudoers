@@ -1079,7 +1079,10 @@
       "deleteError": "Could not delete the offer.",
       "statusChanged": "Status Changed",
       "statusChangedSuccess": "Offer status updated successfully.",
-      "statusChangeError": "Could not change the offer status."
+      "statusChangeError": "Could not change the offer status.",
+      "promoCreated": "Promotion created",
+      "promoCreatedSuccess": "Promotion saved successfully.",
+      "promoCreateError": "Could not create the promotion."
     },
     "filters": {
       "all": "All Offers",

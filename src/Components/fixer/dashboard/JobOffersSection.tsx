@@ -19,6 +19,8 @@ import {
   useDeleteJobMutation,
   useToggleJobStatusMutation,
 } from '@/app/redux/services/jobApi';
+import CreatePromoModal from '@/app/components/fixers/CreatePromoModal';
+import { createPromotion } from '@/services/promotions';
 
 import {
   jobOfferSchema,
@@ -60,6 +62,8 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
   });
 
   const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'inactive'>('all');
+  const [isCreatePromoModalOpen, setIsCreatePromoModalOpen] = useState(false);
+  const [selectedOfferId, setSelectedOfferId] = useState<string>('');
 
   const {
     register,
@@ -258,6 +262,38 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     }
   };
 
+  const handleCreatePromo = async (promotion: {
+    title: string;
+    description: string;
+    offerId: string;
+    fixerId: string;
+    price: string;
+  }) => {
+    if (!userId) {
+      showNotify('error', t('notifications.error'), t('notifications.noUser'));
+      return;
+    }
+    try {
+      const result = await createPromotion({
+        title: promotion.title,
+        description: promotion.description,
+        offerId: promotion.offerId,
+        price: promotion.price,
+        fixerId: promotion.fixerId,
+      });
+
+      if (result) {
+        setIsCreatePromoModalOpen(false);
+        setSelectedOfferId('');
+        showNotify('success', t('notifications.promoCreated'), t('notifications.promoCreatedSuccess'));
+        await refetch();
+      }
+    } catch (error) {
+      console.error('Error creating promotion:', error);
+      showNotify('error', t('notifications.error'), t('notifications.promoCreateError'));
+    }
+  };
+
   if (isLoading) return <div className='p-10 text-center animate-pulse'>{t('loading')}</div>;
 
   // Filtrar ofertas según el estado seleccionado
@@ -319,6 +355,14 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
             }
             onDelete={!readOnly ? () => confirmDelete(offer._id!) : undefined}
             onToggleActive={!readOnly ? () => handleToggleActive(offer._id!) : undefined}
+            onCreatePromo={
+              !readOnly
+                ? () => {
+                    setSelectedOfferId(offer._id);
+                    setIsCreatePromoModalOpen(true);
+                  }
+                : undefined
+            }
             readOnly={readOnly}
             className='h-full'
           />
@@ -560,6 +604,19 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
           </div>
         </Modal.Footer>
       </Modal>
+
+      {!readOnly && (
+        <CreatePromoModal
+          isOpen={isCreatePromoModalOpen}
+          onClose={() => {
+            setIsCreatePromoModalOpen(false);
+            setSelectedOfferId('');
+          }}
+          onSave={handleCreatePromo}
+          id={selectedOfferId}
+          fixerId={userId}
+        />
+      )}
 
       <NotificationModal
         isOpen={notify.isOpen}
