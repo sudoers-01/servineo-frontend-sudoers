@@ -1,33 +1,18 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter, usePathname } from 'next/navigation';
+// Eliminé useRouter y usePathname porque ya no se usan y darían error al compilar
 import { useTranslations, useLocale } from 'next-intl';
 import { Facebook, Instagram, Twitter, Mail, Phone, MapPin } from 'lucide-react';
 
-interface FooterSectionProps {
-  onRestartTour?: () => void;
-}
+// Eliminé la interfaz FooterSectionProps porque ya no recibimos nada
 
-export default function FooterSection({ onRestartTour }: FooterSectionProps = {}) {
-  const router = useRouter();
-  const pathname = usePathname();
+export default function FooterSection() {
+  // Eliminé router y pathname para que no te salga error de "variables no usadas" en el deploy
   const t = useTranslations('footer');
   const locale = useLocale();
 
-  const handleRestartTour = () => {
-    // Borrar la flag de que ya vio el tour
-    localStorage.removeItem('servineoTourVisto');
-
-    // Si NO estamos en el home, redirigir primero
-    if (pathname !== '/' && !pathname.endsWith('/es') && !pathname.endsWith('/en')) {
-      // Redirigir al home y la recarga automática activará el tour
-      router.push('/');
-    } else {
-      localStorage.removeItem('servineoTourVisto');
-      window.location.reload();
-    }
-  };
+  // Aquí estaba la función handleRestartTour, la eliminé.
 
   const empresaLinks = [
     { name: t('company.aboutUs'), path: `/${locale}/info/about` },
@@ -105,14 +90,7 @@ export default function FooterSection({ onRestartTour }: FooterSectionProps = {}
                   </Link>
                 </li>
               ))}
-              <li>
-                <button
-                  onClick={handleRestartTour}
-                  className='footerLink text-left w-full sm:w-auto cursor-pointer hover:text-[#1AA7ED] transition-colors bg-transparent border-none p-0'
-                >
-                  {t('company.restartTour')}
-                </button>
-              </li>
+              {/* Aquí eliminé el <li> del botón "Ver guía nuevamente" */}
             </ul>
           </div>
 
