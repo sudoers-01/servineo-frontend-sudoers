@@ -853,11 +853,11 @@
       "myCertifications": "My Certifications"
     },
     "buttons": {
-    "addCertification": "Add Certification",
-    "cancel": "Cancel",
-    "save": "Save",
-    "saving": "Saving...",
-    "delete": "Delete"
+      "addCertification": "Add Certification",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "delete": "Delete"
     },
     "card": {
       "issued": "Issued",
@@ -996,7 +996,7 @@
     },
     "deleteConfirmation": "Are you sure you want to delete this experience?"
   },
-    "JobOffersSection": {
+  "JobOffersSection": {
     "titles": {
       "jobOffers": "Job Offers",
       "myJobOffers": "My Job Offers"
@@ -1439,7 +1439,7 @@
   "HowUseServineoTitle": {
     "title": "How Servineo Works",
     "subtitle": "Those are the steps you should\nfollow to use easily our platform",
-    "guide":"Need a more immersive experience? Try our",
+    "guide": "Need a more immersive experience? Try our",
     "guideLink": "interactive guide",
     "fingOut": "Find out"
   },
@@ -1491,7 +1491,7 @@
     "card2": {
       "name": "Electricity",
       "description": "Electrical installations and repairs"
-    }, 
+    },
     "card3": {
       "name": "Carpentry",
       "description": "Woodwork and furniture projects"

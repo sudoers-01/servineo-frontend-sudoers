@@ -20,8 +20,6 @@ export function getServiceStyle(service: string): ServiceStyle {
   return serviceStyles[service.toLowerCase()] || serviceStyles.otros;
 }
 
-
-
 /*export interface ServiceStyle {
   color: string;
   iconUrl: string;

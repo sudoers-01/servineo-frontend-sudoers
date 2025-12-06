@@ -26,10 +26,8 @@ export function Navbar() {
     <nav className='sticky top-0 z-50 w-full bg-white/80 backdrop-blur-lg border-b border-blue-100 shadow-sm'>
       <div className='container mx-auto px-4'>
         <div className='flex items-center justify-between h-16'>
-
           {/* NAV LINKS distribuidos a lo largo */}
           <div className='flex items-center w-full justify-between'>
-
             <Link
               href={`/${locale}/become-fixer`}
               className={`flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg transition-all duration-300 ${
@@ -65,7 +63,6 @@ export function Navbar() {
               <ClipboardList className='w-4 h-4' />
               <span className='font-medium text-center'>{t('myOffers')}</span>
             </Link>
-
           </div>
         </div>
       </div>

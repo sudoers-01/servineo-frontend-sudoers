@@ -3,7 +3,15 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Wrench, UserCircle, ClipboardList, HelpCircle, Calendar, Wallet, Briefcase } from 'lucide-react';
+import {
+  Wrench,
+  UserCircle,
+  ClipboardList,
+  HelpCircle,
+  Calendar,
+  Wallet,
+  Briefcase,
+} from 'lucide-react';
 import { useGetUserByIdQuery } from '@/app/redux/services/userApi';
 import { skipToken } from '@reduxjs/toolkit/query';
 import { useDispatch, useSelector } from 'react-redux';
@@ -299,20 +307,20 @@ export default function TopMenu() {
   const logout = () => {
     localStorage.removeItem('servineo_token');
     localStorage.removeItem('servineo_user');
-    
+
     try {
       dispatch(resetFilters());
     } catch (e) {
       console.error('Error resetting job offers state on logout', e);
     }
-    
+
     try {
       const path = window.location.pathname;
       window.history.replaceState(null, '', path);
     } catch (e) {
       // ignore
     }
-    
+
     window.location.reload();
   };
 
@@ -339,43 +347,43 @@ export default function TopMenu() {
   /* ---------- Content for Fixer Menu ---------- */
   // Extraemos el contenido del menú fixer para reusarlo en Desktop y Mobile
   const renderFixerMenu = () => (
-  <>
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={() => {
-        setProfileMenuOpen(false);
-        router.push('/fixer/dashboard');
-      }}
-      className="menuItem w-full text-left"
-    >
-      Perfil de Fixer
-    </button>
+    <>
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={() => {
+          setProfileMenuOpen(false);
+          router.push('/fixer/dashboard');
+        }}
+        className='menuItem w-full text-left'
+      >
+        Perfil de Fixer
+      </button>
 
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={goToCentroDePagos}
-      className="menuItem w-full text-left"
-    >
-      Centro de Pagos
-    </button>
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={goToCentroDePagos}
+        className='menuItem w-full text-left'
+      >
+        Centro de Pagos
+      </button>
 
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={goToConfirmarPagos}
-      className="menuItem w-full text-left"
-    >
-      Confirmar Pagos
-    </button>
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={goToConfirmarPagos}
+        className='menuItem w-full text-left'
+      >
+        Confirmar Pagos
+      </button>
 
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={goToMisTrabajos}
-      className="menuItem w-full text-left"
-    >
-      Mis Trabajos
-    </button>
-  </>
-);
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={goToMisTrabajos}
+        className='menuItem w-full text-left'
+      >
+        Mis Trabajos
+      </button>
+    </>
+  );
 
   /* ---------- Render ---------- */
   return (
@@ -598,7 +606,7 @@ export default function TopMenu() {
                   {user?.name ?? fetchedUser?.name ?? 'Usuario'}
                 </span>
               </button>
-              
+
               {/* Profile dropdown Mobile */}
               {profileMenuOpen && (
                 <div

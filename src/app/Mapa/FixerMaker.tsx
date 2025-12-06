@@ -14,8 +14,8 @@ interface FixerMarkerProps {
 const palette = {
   popupBg: '#FFFFFF',
   popupShadow: '0 6px 18px rgba(0,0,0,0.2)',
-  buttonBg: '#2B6AE0',       // color principal para ambos botones
-  buttonHover: '#3B7BDD',    // hover para ambos botones
+  buttonBg: '#2B6AE0', // color principal para ambos botones
+  buttonHover: '#3B7BDD', // hover para ambos botones
   buttonText: '#FFFFFF',
   iconBorderBusy: '#ff4444',
   textColor: '#2B6AE0',
@@ -116,7 +116,9 @@ export default function FixerMarker({ fixer }: FixerMarkerProps) {
             />
 
             <div style={{ flex: 1 }}>
-              <h3 style={{ margin: 0, color: palette.textColor, fontSize: '15px', fontWeight: 700 }}>
+              <h3
+                style={{ margin: 0, color: palette.textColor, fontSize: '15px', fontWeight: 700 }}
+              >
                 {fixer.servicio}
               </h3>
               <span style={{ fontSize: '13px', color: palette.textColor }}>

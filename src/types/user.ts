@@ -4,7 +4,7 @@ export interface IUser {
   name: string;
   email: string;
   url_photo?: string;
-  photo?: string;  
+  photo?: string;
   picture?: string;
   role: 'requester' | 'fixer' | 'admin';
 
