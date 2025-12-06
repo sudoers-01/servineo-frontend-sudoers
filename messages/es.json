@@ -931,7 +931,7 @@
       "save": "Guardar",
       "saving": "Guardando...",
       "delete": "Eliminar",
-      "addExperience": "Add Experience"  
+      "addExperience": "Add Experience"
     },
     "card": {
       "present": "Presente"
@@ -999,7 +999,7 @@
     },
     "deleteConfirmation": "¿Estás seguro de eliminar esta experiencia?"
   },
-    "JobOffersSection": {
+  "JobOffersSection": {
     "titles": {
       "jobOffers": "Ofertas de Trabajo",
       "myJobOffers": "Mis Ofertas de Trabajo"
@@ -1442,7 +1442,7 @@
   "HowUseServineoTitle": {
     "title": "Cómo funciona Servineo",
     "subtitle": "Estos son los pasos que debe seguir para\npoder usar nuestra plataforma facilmente",
-    "guide":"¿Necesitas una experiancia mas inmersiva? prueba nuestra",
+    "guide": "¿Necesitas una experiancia mas inmersiva? prueba nuestra",
     "guideLink": "guia interactiva",
     "fingOut": "Descúbrelo"
   },
@@ -1494,7 +1494,7 @@
     "card2": {
       "name": "Electricidad",
       "description": "Instalaciones y reparaciones eléctricas"
-    }, 
+    },
     "card3": {
       "name": "Carpintería",
       "description": "Trabajos en madera y muebles"
@@ -1527,21 +1527,21 @@
     "title": "Preguntas Frecuentes",
     "section1": {
       "question": "¿Cómo funciona Servineo?",
-      "answer":"Servineo conecta hogares con profesionales calificados en Cochabamba. Publica tu necesidad, recibe cotizaciones de fixers verificados y elige al mejor para el trabajo."
+      "answer": "Servineo conecta hogares con profesionales calificados en Cochabamba. Publica tu necesidad, recibe cotizaciones de fixers verificados y elige al mejor para el trabajo."
     },
     "section2": {
       "question": "¿Qué tipos de servicios ofrecen?",
-      "answer":"Ofrecemos plomería, electricidad, carpintería, pintura, limpieza, jardinería, soldadura, albañilería y muchos servicios más para el hogar."
+      "answer": "Ofrecemos plomería, electricidad, carpintería, pintura, limpieza, jardinería, soldadura, albañilería y muchos servicios más para el hogar."
     },
-    "section3":{
+    "section3": {
       "question": "¿Cómo se verifican los fixers?",
       "answer": "Todos nuestros fixers pasan por un proceso de verificación que incluye revisión de documentos, entrevistas y evaluación de experiencia previa."
     },
-    "section4":{
+    "section4": {
       "question": "¿Qué garantía ofrecen?",
       "answer": "Ofrecemos garantía de 30 días en todos los trabajos realizados. Si no estás satisfecho, nuestro equipo de soporte te ayudará a resolver cualquier problema."
     },
-    "section5":{
+    "section5": {
       "question": "¿Cómo se realizan los pagos?",
       "answer": "Los pagos son 100% seguros a través de nuestra plataforma. Solo liberas el pago cuando el trabajo esté completado y estés satisfecho con el resultado."
     }
