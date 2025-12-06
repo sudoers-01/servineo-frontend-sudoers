@@ -11,11 +11,11 @@ import { useTranslations } from 'next-intl';
 import { useRouter, usePathname } from 'next/navigation';
 
 const ReactPlayer = dynamic(() => import('react-player'), { ssr: false });
-const subtitle = 'Estos son los pasos que debe seguir para\npoder usar nuestra plataforma facilmente';
+const subtitle =
+  'Estos son los pasos que debe seguir para\npoder usar nuestra plataforma facilmente';
 
 export const Title = () => {
-
-  const t = useTranslations("HowUseServineoTitle");
+  const t = useTranslations('HowUseServineoTitle');
 
   const [playing, setPlaying] = useState(false);
   const [audioAllowed, setAudioAllowed] = useState(false);
@@ -76,11 +76,11 @@ export const Title = () => {
     <div>
       <div className='flex flex-col items-center min-h-screen gap-[10px] bg-gradient-to-b from-[#2B6AE0] to-[#2B31E0]'>
         <div>
-          <h1 className='text-center text-[60px] text-white mt-[40px]'> { t("title") } </h1>
+          <h1 className='text-center text-[60px] text-white mt-[40px]'> {t('title')} </h1>
         </div>
 
         <div>
-          <h3 className='text-white mb-[24px] whitespace-pre-line'> {t("subtitle")} </h3>
+          <h3 className='text-white mb-[24px] whitespace-pre-line'> {t('subtitle')} </h3>
         </div>
 
         {/*popover*/}
@@ -144,18 +144,18 @@ export const Title = () => {
 
         <div className='mb-[30px]'>
           <span className='text-white text-[18px]'>
-            {t("guide")}{" "}
+            {t('guide')}{' '}
             <button
               onClick={handleRestartTour}
               className='text-white font-bold decoration-2 hover:text-gray-200 bg-transparent border-none cursor-pointer p-0 inline font-inherit'
             >
-              {t("guideLink")}
+              {t('guideLink')}
             </button>
           </span>
         </div>
 
         <div className='flex flex-col items-center mb-[30px] text-[25px] gap-[10px]'>
-          <span className='text-white'> {t("fingOut")} </span>
+          <span className='text-white'> {t('fingOut')} </span>
           <FaArrowDown
             className='animate__animated animate__shakeY animate__slower animate__infinite'
             color='white'
