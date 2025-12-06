@@ -337,45 +337,48 @@ export default function TopMenu() {
   if (!isClient) return null;
 
   /* ---------- Content for Fixer Menu ---------- */
-  // Extraemos el contenido del menú fixer para reusarlo en Desktop y Mobile
   const renderFixerMenu = () => (
-  <>
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={() => {
-        setProfileMenuOpen(false);
-        router.push('/fixer/dashboard');
-      }}
-      className="menuItem w-full text-left"
-    >
-      Perfil de Fixer
-    </button>
+    <>
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={() => {
+          setProfileMenuOpen(false);
+          router.push('/fixer/dashboard');
+        }}
+        className="menuItem w-full text-left flex items-center gap-2"
+      >
+        <UserCircle className="h-4 w-4" />
+        Perfil de Fixer
+      </button>
 
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={goToCentroDePagos}
-      className="menuItem w-full text-left"
-    >
-      Centro de Pagos
-    </button>
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={goToCentroDePagos}
+        className="menuItem w-full text-left flex items-center gap-2"
+      >
+        <Wallet className="h-4 w-4" />
+        Centro de Pagos
+      </button>
 
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={goToConfirmarPagos}
-      className="menuItem w-full text-left"
-    >
-      Confirmar Pagos
-    </button>
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={goToConfirmarPagos}
+        className="menuItem w-full text-left flex items-center gap-2"
+      >
+        <ClipboardList className="h-4 w-4" />
+        Confirmar Pagos
+      </button>
 
-    <button
-      onMouseDown={(e) => e.stopPropagation()}
-      onClick={goToMisTrabajos}
-      className="menuItem w-full text-left"
-    >
-      Mis Trabajos
-    </button>
-  </>
-);
+      <button
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={goToMisTrabajos}
+        className="menuItem w-full text-left flex items-center gap-2"
+      >
+        <Briefcase className="h-4 w-4" />
+        Mis Trabajos
+      </button>
+    </>
+  );
 
   /* ---------- Render ---------- */
   return (
@@ -428,6 +431,17 @@ export default function TopMenu() {
 
           {/* Desktop Right */}
           <div className='flex items-center gap-4' id='tour-auth-buttons-desktop'>
+            
+            {/* Notification System Desktop */}
+            <div className="hidden lg:block">
+              <NotificationSystem
+                  userId={userId || undefined}
+                  userName={user?.name}
+                  isAuthenticated={isLogged}
+                  userRole={user?.role as 'fixer' | 'requester'}
+              />
+            </div>
+
             {!isClient ? (
               <div style={{ width: 100, height: 10 }} />
             ) : !isLogged ? (
@@ -450,7 +464,7 @@ export default function TopMenu() {
                 <button
                   ref={profileButtonRef}
                   onClick={() => setProfileMenuOpen((v) => !v)}
-                  className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
+                  className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
                 >
                   <img
                     src={userPhoto}
@@ -580,11 +594,23 @@ export default function TopMenu() {
               </Link>
             </div>
           ) : (
-            <>
+            <div className="flex items-center gap-2">
+              
+              {/* NOTIFICACIONES MÓVIL */}
+              <div className="block">
+                <NotificationSystem
+                  userId={userId || undefined}
+                  userName={user?.name}
+                  isAuthenticated={isLogged}
+                  userRole={user?.role as 'fixer' | 'requester'}
+                />
+              </div>
+
+              {/* Botón de perfil sin margen negativo */}
               <button
                 onClick={() => setProfileMenuOpen(!profileMenuOpen)}
                 ref={profileButtonRef}
-                className='flex items-center gap-2 cursor-pointer ml-[-20px] px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
+                className='flex items-center gap-2 cursor-pointer px-3 py-1 border border-gray-300 bg-white rounded-xl transition'
               >
                 <img
                   src={userPhoto}
@@ -658,7 +684,7 @@ export default function TopMenu() {
                     </>
                   )}
 
-                  {/* MENÚ FIXER MOBILE */}
+                  {/* MENÚ FIXER MOBILE (Reutilizado) */}
                   {user?.role === 'fixer' && renderFixerMenu()}
 
                   <button
@@ -673,10 +699,10 @@ export default function TopMenu() {
                   </button>
                 </div>
               )}
-            </>
+            </div>
           )}
 
-          {/* Dropdown Mobile Secondary (Optional, depends on if accountOpen is used elsewhere) */}
+          {/* Dropdown Mobile Secondary (Optional) */}
           {accountOpen && isLogged && (
             <div
               ref={dropdownRef}
