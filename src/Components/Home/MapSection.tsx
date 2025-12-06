@@ -17,8 +17,11 @@ export default function MapSection() {
       <div className='max-w-7xl mx-auto'>
         <div className='text-center mb-8'>
           <h2 className='text-3xl md:text-4xl font-bold text-gray-800 mb-4'>
-            Encuentra Servicios Cerca de Ti
+            Encuentra Servicios Cerca de Ti 
           </h2>
+             <p className='text-gray-600 text-lg md:text-xl'>
+  Conecta rápidamente con profesionales y servicios en tu zona
+</p>
         </div>
 
         {/* Contenedor del mapa */}
