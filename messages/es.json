@@ -1079,7 +1079,10 @@
       "deleteMessage": "Esta acción no se puede deshacer.",
       "deleted": "Eliminado",
       "deleteSuccess": "Oferta eliminada.",
-      "deleteError": "No se pudo eliminar la oferta."
+      "deleteError": "No se pudo eliminar la oferta.",
+      "statusChanged": "Estado Cambiado",
+      "statusChangedSuccess": "Estado de la oferta actualizado correctamente.",
+      "statusChangeError": "No se pudo cambiar el estado de la oferta."
     },
     "confirmButton": "Confirmar",
     "deleteConfirmation": "¿Estás seguro de eliminar esta oferta?"

@@ -17,6 +17,7 @@ import {
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
+  useToggleJobStatusMutation,
 } from '@/app/redux/services/jobApi';
 
 import {
@@ -44,6 +45,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
   const [createJob, { isLoading: isCreating }] = useCreateJobMutation();
   const [updateJob, { isLoading: isUpdating }] = useUpdateJobMutation();
   const [deleteJob] = useDeleteJobMutation();
+  const [toggleJobStatus] = useToggleJobStatusMutation();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingOffer, setEditingOffer] = useState<IJobOffer | null>(null);
@@ -235,10 +237,21 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
     rating: offer.rating,
     photos: offer.photos || [],
     allImages: offer.photos || [],
-    imagenUrl: offer.photos?.[0] || ''
+    imagenUrl: offer.photos?.[0] || '',
+    status: offer.status ?? true
   });
 
   const isSubmitting = isCreating || isUpdating;
+
+  const handleToggleActive = async (jobId: string) => {
+    try {
+      await toggleJobStatus({ jobId }).unwrap();
+      showNotify('success', t('notifications.statusChanged'), t('notifications.statusChangedSuccess'));
+    } catch (err) {
+      console.error(err);
+      showNotify('error', t('notifications.error'), t('notifications.statusChangeError'));
+    }
+  };
 
   if (isLoading) return <div className='p-10 text-center animate-pulse'>{t('loading')}</div>;
 
@@ -278,6 +291,7 @@ export function JobOffersSection({ readOnly = false }: { readOnly?: boolean }) {
                 : undefined
             }
             onDelete={!readOnly ? () => confirmDelete(offer._id!) : undefined}
+            onToggleActive={!readOnly ? () => handleToggleActive(offer._id!) : undefined}
             readOnly={readOnly}
             className='h-full'
           />

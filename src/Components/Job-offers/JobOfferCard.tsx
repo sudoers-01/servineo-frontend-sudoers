@@ -12,6 +12,7 @@ import {
   ChevronRight,
   Edit2,
   Trash2,
+  MoreVertical,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useImageCarousel } from '@/app/redux/features/jobOffers/useImageCarousel';
@@ -25,6 +26,7 @@ interface JobOfferCardProps {
   onClick?: (offer: JobOfferData) => void;
   onEdit?: (offer: JobOfferData) => void;
   onDelete?: (id: string) => void;
+  onToggleActive?: () => void;
   className?: string;
   searchQuery?: string;
   readOnly?: boolean;
@@ -37,6 +39,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
     onClick,
     onEdit,
     onDelete,
+    onToggleActive,
     className = '',
     searchQuery = '',
     readOnly = false,
@@ -46,6 +49,7 @@ export const JobOfferCard = memo<JobOfferCardProps>(
     const tCat = useTranslations('Categories');
     const [hasPromotions, setHasPromotions] = useState(false);
     const [loadingPromos, setLoadingPromos] = useState(true);
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     // Verificar si la oferta tiene promociones
     useEffect(() => {
@@ -154,6 +158,34 @@ export const JobOfferCard = memo<JobOfferCardProps>(
       },
       [onDelete, offer._id],
     );
+
+    const handleToggleMenu = useCallback((e: React.MouseEvent) => {
+      e.stopPropagation();
+      setIsMenuOpen((prev) => !prev);
+    }, []);
+
+    const handleToggleActiveClick = useCallback(
+      (e: React.MouseEvent) => {
+        e.stopPropagation();
+        if (onToggleActive) {
+          onToggleActive();
+          setIsMenuOpen(false);
+        }
+      },
+      [onToggleActive],
+    );
+
+    // Close menu when clicking outside
+    useEffect(() => {
+      const handleClickOutside = () => {
+        if (isMenuOpen) setIsMenuOpen(false);
+      };
+      
+      if (isMenuOpen) {
+        document.addEventListener('click', handleClickOutside);
+        return () => document.removeEventListener('click', handleClickOutside);
+      }
+    }, [isMenuOpen]);
 
     const isDashboardMode = !!onEdit || !!onDelete;
     const totalImages = images.length;
@@ -301,25 +333,67 @@ export const JobOfferCard = memo<JobOfferCardProps>(
     const renderFooter = () => {
       if (isDashboardMode && !readOnly) {
         return (
-          <div className='border-t border-gray-100 p-3 flex items-center justify-end gap-2 bg-gray-50/50'>
-            {onEdit && (
-              <button
-                onClick={handleEditClick}
-                className='p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors'
-                title='Editar'
+          <div className='border-t border-gray-100 p-3 flex items-center justify-between bg-gray-50/50'>
+            {/* Status Badge */}
+            <div className='flex items-center gap-2'>
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                  offer.status
+                    ? 'bg-green-100 text-green-700 border border-green-200'
+                    : 'bg-gray-100 text-gray-600 border border-gray-200'
+                }`}
               >
-                <Edit2 className='w-4 h-4' />
-              </button>
-            )}
-            {onDelete && (
-              <button
-                onClick={handleDeleteClick}
-                className='p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors'
-                title='Eliminar'
-              >
-                <Trash2 className='w-4 h-4' />
-              </button>
-            )}
+                {offer.status ? 'Activo' : 'Inactivo'}
+              </span>
+            </div>
+
+            {/* Actions Menu */}
+            <div className='flex items-center gap-2'>
+              {onEdit && (
+                <button
+                  onClick={handleEditClick}
+                  className='p-2 text-blue-600 hover:bg-blue-50 rounded-full transition-colors'
+                  title='Editar'
+                >
+                  <Edit2 className='w-4 h-4' />
+                </button>
+              )}
+              {onDelete && (
+                <button
+                  onClick={handleDeleteClick}
+                  className='p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors'
+                  title='Eliminar'
+                >
+                  <Trash2 className='w-4 h-4' />
+                </button>
+              )}
+              {onToggleActive && (
+                <div className='relative'>
+                  <button
+                    onClick={handleToggleMenu}
+                    className='p-2 text-gray-600 hover:bg-gray-100 rounded-full transition-colors'
+                    title='Más opciones'
+                  >
+                    <MoreVertical className='w-4 h-4' />
+                  </button>
+                  
+                  {/* Dropdown Menu */}
+                  {isMenuOpen && (
+                    <div className='absolute right-0 bottom-full mb-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50'>
+                      <button
+                        onClick={handleToggleActiveClick}
+                        className='w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-2'
+                      >
+                        <div
+                          className={`w-2 h-2 rounded-full ${offer.status ? 'bg-gray-400' : 'bg-green-500'}`}
+                        />
+                        {offer.status ? 'Desactivar oferta' : 'Activar oferta'}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         );
       }
