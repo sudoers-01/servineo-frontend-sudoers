@@ -58,6 +58,7 @@ export default function JobOffersPage() {
     registrosPorPagina,
     error: reduxError,
     filters,
+    rating,
   } = useAppSelector((state) => state.jobOfert);
 
   useSyncUrlParams();
@@ -115,30 +116,32 @@ export default function JobOffersPage() {
   // Función para calcular el número de resultados basado en la paginación
   const calculateSearchCount = useCallback(() => {
     // El total de useJobOffers ya está filtrado por búsqueda y filtros
-    if (!isLoading && total !== undefined && total !== null) {
+    // Asegurar que no estemos en estado de carga y que total sea un número válido
+    if (!isLoading && typeof total === 'number' && total >= 0) {
       return total;
     }
     return 0;
   }, [isLoading, total]);
 
-  const getFixerNameValue = useCallback((): string => {
-    const filterObj = filters as unknown as Record<string, unknown>;
-    const fixerNameFilter = filterObj.fixerName || filterObj.fixer_name || filterObj.fixerNames;
+  // Función para convertir "De (A-C)" a "A-C"
+  const formatRangeValue = useCallback((range: string): string => {
+    // Remover "De (" del inicio y ")" del final, luego extraer solo el rango
+    if (range.startsWith('De (')) {
+      return range.replace('De (', '').replace(')', '');
+    }
+    return range;
+  }, []);
 
-    if (
-      !fixerNameFilter ||
-      (Array.isArray(fixerNameFilter) && fixerNameFilter.length === 0) ||
-      fixerNameFilter === ''
-    ) {
+  const getFixerNameValue = useCallback((): string => {
+    // Usar filters.range directamente para obtener los rangos aplicados
+    if (!filters.range || filters.range.length === 0) {
       return 'not_applied';
     }
 
-    if (Array.isArray(fixerNameFilter)) {
-      return fixerNameFilter.join(', ');
-    }
-
-    return fixerNameFilter.toString();
-  }, [filters]);
+    // Convertir cada rango de "De (A-C)" a "A-C" y unirlos
+    const formattedRanges = filters.range.map(formatRangeValue);
+    return formattedRanges.join(', ');
+  }, [filters, formatRangeValue]);
 
   const getCityValue = useCallback((): string => {
     if (!filters.city || (Array.isArray(filters.city) && filters.city.length === 0)) {
@@ -176,12 +179,22 @@ export default function JobOffersPage() {
 
   // Función para enviar una búsqueda pendiente
   const sendPendingSearch = useCallback(async () => {
-    if (!previousSearchQueryRef.current || previousSearchQueryRef.current.trim().length === 0) {
+    // Verificar que no se haya enviado ya y que haya una query
+    if (!previousSearchQueryRef.current || hasSentSearchRef.current) {
       return;
     }
 
+    // Marcar como enviado inmediatamente para evitar duplicados
+    hasSentSearchRef.current = true;
+
+    // Usar el conteo actualizado de resultados desde el ref
     const searchCount = actualSearchCountRef.current;
     const query = previousSearchQueryRef.current;
+
+    // Obtener los valores actuales de los filtros en el momento de enviar
+    const fixerNameValue = getFixerNameValue();
+    const cityValue = getCityValue();
+    const jobTypeValue = getJobTypeValue();
 
     const searchData = {
       user_type: userRole,
@@ -189,86 +202,103 @@ export default function JobOffersPage() {
       search_type: 'search_box',
       filters: {
         filter_1: {
-          fixer_name: getFixerNameValue(),
-          city: getCityValue(),
-          job_type: getJobTypeValue(),
-          search_count: searchCount,
+          fixer_name: fixerNameValue,
+          city: cityValue,
+          job_type: jobTypeValue,
+          search_count: searchCount, // Usar el conteo actualizado
         },
       },
     };
 
     try {
-      console.log('Enviando BÚSQUEDA PENDIENTE al backend:', JSON.stringify(searchData, null, 2));
+      console.log('=== REGISTRANDO BÚSQUEDA ===');
+      console.log('Búsqueda:', query);
+      console.log('Filtros aplicados:', {
+        fixer_name: fixerNameValue,
+        city: cityValue,
+        job_type: jobTypeValue,
+      });
+      console.log('Resultados encontrados:', searchCount);
+      console.log('Datos completos:', JSON.stringify(searchData, null, 2));
       await logSearch(searchData).unwrap();
-      console.log('Búsqueda registrada exitosamente:', query, 'Resultados:', searchCount);
-      hasSentSearchRef.current = true;
+      console.log('✓ Búsqueda registrada exitosamente');
     } catch (error) {
-      console.error('Error al registrar búsqueda pendiente:', error);
+      console.error('✗ Error al registrar búsqueda:', error);
+      // Si hay error, permitir reintento
+      hasSentSearchRef.current = false;
     }
   }, [userRole, logSearch, getFixerNameValue, getCityValue, getJobTypeValue]);
 
-  // Actualizar el conteo cuando cambian los resultados
+  // Efecto único para registrar la búsqueda cuando los resultados estén listos
   useEffect(() => {
-    const currentCount = calculateSearchCount();
-    if (currentCount !== actualSearchCountRef.current) {
-      console.log('Actualizando conteo de resultados:', {
-        anterior: actualSearchCountRef.current,
-        nuevo: currentCount,
-        total: total,
-        isLoading: isLoading,
-      });
+    // Solo registrar si:
+    // 1. No está cargando
+    // 2. Hay una búsqueda pendiente (previousSearchQueryRef no está vacío)
+    // 3. Aún no se ha enviado (hasSentSearchRef es false)
+    // 4. Los resultados están disponibles (total no es undefined/null)
+    if (
+      !isLoading &&
+      previousSearchQueryRef.current &&
+      !hasSentSearchRef.current &&
+      total !== undefined &&
+      total !== null
+    ) {
+      const currentCount = calculateSearchCount();
+
+      // Actualizar el conteo actual
       actualSearchCountRef.current = currentCount;
 
-      // Si hay una búsqueda pendiente y ya tenemos el conteo correcto, enviarla
-      if (
-        hasSentSearchRef.current === false &&
-        previousSearchQueryRef.current &&
-        currentCount > 0
-      ) {
-        sendPendingSearch();
-      }
+      // Pequeño delay para asegurar que el conteo esté estable
+      const timeoutId = setTimeout(async () => {
+        // Verificar nuevamente que no se haya enviado mientras esperábamos
+        // y que el total siga siendo válido
+        if (
+          !hasSentSearchRef.current &&
+          previousSearchQueryRef.current &&
+          total !== undefined &&
+          total !== null
+        ) {
+          const finalCount = calculateSearchCount();
+          actualSearchCountRef.current = finalCount;
+
+          console.log('Registrando búsqueda - Conteo final:', finalCount, 'Total:', total);
+          await sendPendingSearch();
+        }
+      }, 500);
+
+      return () => clearTimeout(timeoutId);
     }
-  }, [calculateSearchCount, total, isLoading, sendPendingSearch]);
+  }, [isLoading, calculateSearchCount, total, sendPendingSearch, offers]);
 
   const handleSearchSubmit = useCallback(
-    async (query: string) => {
+    (query: string) => {
       scrollRestoredRef.current = true;
       window.scrollTo({ top: 0, behavior: 'smooth' });
-      dispatch(setSearch(query));
+
+      // Siempre actualizar la búsqueda, incluso si no cambió, para registrar el clic
+      const trimmedQuery = query.trim();
+      dispatch(setSearch(trimmedQuery));
       dispatch(resetPagination());
 
       filterCounterRef.current = 1;
-      previousSearchQueryRef.current = query;
-      hasSentSearchRef.current = false; // Resetear el flag
 
-      console.log('Búsqueda iniciada:', query, 'Esperando resultados...');
+      // Resetear el flag para permitir registrar la búsqueda cuando los resultados estén listos
+      previousSearchQueryRef.current = trimmedQuery;
+      hasSentSearchRef.current = false;
 
-      // Esperar un tiempo razonable para que se carguen los resultados
-      const timeoutId = setTimeout(async () => {
-        const searchCount = calculateSearchCount();
-        console.log('Después de timeout - Conteo calculado:', searchCount, 'Total:', total);
-
-        // Si ya tenemos resultados, enviar inmediatamente
-        if (searchCount > 0 && query === previousSearchQueryRef.current) {
-          await sendPendingSearch();
-        }
-        // Si no tenemos resultados aún, waitForResults se encargará más tarde
-      }, 800);
-
-      return () => clearTimeout(timeoutId);
+      console.log('Búsqueda iniciada:', trimmedQuery, 'Esperando resultados...');
+      // La búsqueda se registrará automáticamente cuando los resultados estén listos en el useEffect
     },
-    [dispatch, calculateSearchCount, total, sendPendingSearch],
+    [dispatch],
   );
+
+  // Ref para rastrear si hay un cambio de filtros pendiente de registrar
+  const pendingFilterChangeRef = useRef<boolean>(false);
 
   // Efecto para detectar cambios en filtros
   useEffect(() => {
     if (isInitialMountRef.current) {
       isInitialMountRef.current = false;
-      previousFiltersRef.current = { ...filters };
-      return;
-    }
-
-    if (!previousSearchQueryRef.current) {
       previousFiltersRef.current = { ...filters };
       return;
     }
@@ -291,50 +321,122 @@ export default function JobOffersPage() {
       return prevValue !== currValue;
     };
 
-    const filterKeys = ['city', 'category', 'range', 'fixerName', 'fixer_name', 'fixerNames'];
-
+    // Solo detectar cambios en los filtros relevantes
+    const filterKeys = ['city', 'category', 'range'];
     const filtersChanged = filterKeys.some((key) =>
       compareFilterValues(previousFilters, currentFilters, key),
     );
 
-    if (filtersChanged && previousSearchQueryRef.current) {
+    if (filtersChanged) {
+      // Actualizar los filtros previos
       previousFiltersRef.current = { ...filters };
 
-      // Esperar a que los resultados se actualicen con los nuevos filtros
-      const timeoutId = setTimeout(async () => {
-        filterCounterRef.current++;
+      // Marcar que hay un cambio de filtros pendiente
+      pendingFilterChangeRef.current = true;
 
-        const searchCount = calculateSearchCount();
-        console.log('Después de cambiar filtros - Conteo:', searchCount, 'Total:', total);
-
-        const filterData = {
-          filters: {
-            fixer_name: getFixerNameValue(),
-            city: getCityValue(),
-            job_type: getJobTypeValue(),
-            search_count: searchCount,
-          },
-        };
-
-        try {
-          console.log(
-            `Enviando FILTRO para búsqueda: "${previousSearchQueryRef.current}"`,
-            JSON.stringify(filterData, null, 2),
-          );
-
-          await updateFilters(filterData).unwrap();
-          console.log(`Filtro registrado exitosamente. Resultados: ${searchCount}`);
-        } catch (error) {
-          console.error('Error al registrar filtro:', error);
-        }
-      }, 800);
-
-      return () => clearTimeout(timeoutId);
+      console.log('=== CAMBIO DE FILTROS DETECTADO ===');
+      console.log('Filtros anteriores:', previousFilters);
+      console.log('Filtros nuevos:', currentFilters);
     }
+  }, [filters]);
+
+  // Efecto separado para enviar los filtros cuando los resultados estén listos
+  useEffect(() => {
+    // Solo proceder si hay un cambio de filtros pendiente
+    if (!pendingFilterChangeRef.current) {
+      return;
+    }
+
+    // Si está cargando, esperar a que termine
+    if (isLoading) {
+      console.log('Esperando a que termine la carga antes de registrar filtros...');
+      return;
+    }
+
+    // Si el total no está disponible, esperar
+    if (total === undefined || total === null) {
+      console.log('Esperando total antes de registrar filtros...', { total });
+      return;
+    }
+
+    // Verificar si hay búsqueda asociada (necesaria para actualizar filtros)
+    const searchQuery = previousSearchQueryRef.current || search || '';
+
+    if (!searchQuery || searchQuery.trim() === '') {
+      console.log('⚠ No hay búsqueda asociada para actualizar filtros');
+      pendingFilterChangeRef.current = false;
+      return;
+    }
+
+    // Usar un delay para asegurar que los datos estén completamente actualizados
+    // después de que termine la carga
+    const timeoutId = setTimeout(async () => {
+      // Verificar nuevamente antes de enviar
+      if (isLoading || total === undefined || total === null) {
+        console.log('Cancelando envío - estado no válido:', { isLoading, total });
+        return;
+      }
+
+      // Marcar como procesado antes de enviar para evitar duplicados
+      pendingFilterChangeRef.current = false;
+
+      filterCounterRef.current++;
+
+      // Calcular el conteo actual basado en el total de resultados
+      // Este total ya refleja los filtros aplicados
+      const searchCount = calculateSearchCount();
+
+      // Obtener los valores de los filtros actuales en el momento exacto de enviar
+      const fixerNameValue = getFixerNameValue();
+      const cityValue = getCityValue();
+      const jobTypeValue = getJobTypeValue();
+
+      console.log('=== REGISTRANDO FILTROS ===');
+      console.log('Búsqueda asociada:', searchQuery);
+      console.log('Filtros aplicados:', {
+        fixer_name: fixerNameValue,
+        city: cityValue,
+        job_type: jobTypeValue,
+      });
+      console.log('Estado actual:', {
+        searchCount,
+        total,
+        isLoading,
+        offersCount: Array.isArray(offers) ? offers.length : 0,
+      });
+
+      const filterData = {
+        filters: {
+          fixer_name: fixerNameValue,
+          city: cityValue,
+          job_type: jobTypeValue,
+          search_count: searchCount, // Registrar el número real de resultados filtrados
+        },
+      };
+
+      try {
+        console.log(
+          `📤 Enviando FILTRO para búsqueda: "${searchQuery}"`,
+          JSON.stringify(filterData, null, 2),
+        );
+
+        await updateFilters(filterData).unwrap();
+        console.log(`✅ Filtro registrado exitosamente. Resultados encontrados: ${searchCount}`);
+      } catch (error) {
+        console.error('❌ Error al registrar filtro:', error);
+        // Reintentar si hay error
+        pendingFilterChangeRef.current = true;
+      }
+    }, 800); // Delay suficiente para asegurar que los resultados estén completamente actualizados
+
+    return () => clearTimeout(timeoutId);
   }, [
     filters,
-    updateFilters,
+    search,
     total,
+    isLoading,
+    offers,
+    updateFilters,
     calculateSearchCount,
     getFixerNameValue,
     getCityValue,
@@ -374,21 +476,6 @@ export default function JobOffersPage() {
     },
     [userId, userRole, logClick, adaptJobOffer],
   );
-
-  // Efecto para asegurar que la búsqueda se envíe cuando los resultados estén listos
-  useEffect(() => {
-    if (!isLoading && previousSearchQueryRef.current && !hasSentSearchRef.current) {
-      const searchCount = calculateSearchCount();
-      if (searchCount > 0) {
-        // Pequeño delay para asegurar que todo esté estable
-        const timeoutId = setTimeout(() => {
-          sendPendingSearch();
-        }, 300);
-
-        return () => clearTimeout(timeoutId);
-      }
-    }
-  }, [isLoading, calculateSearchCount, sendPendingSearch]);
 
   // Resto del código permanece igual...
   useEffect(() => {
@@ -535,7 +622,9 @@ export default function JobOffersPage() {
       scrollRestoredRef.current = true;
       window.scrollTo({ top: 0, behavior: 'smooth' });
       const backendSort = getSortValue(option);
+      // Cuando se cambia el orden, resetear la paginación a la página 1
       dispatch(setSortBy(backendSort));
+      dispatch(resetPagination());
     },
     [dispatch],
   );

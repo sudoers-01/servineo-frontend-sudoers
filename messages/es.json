@@ -279,7 +279,8 @@
     "perPage": "por página",
     "previous": "Anterior",
     "next": "Siguiente",
-    "showingResults": "Mostrando {start} - {end} de {total} resultados"
+    "showingResults": "Mostrando {start} - {end} de {total} resultados",
+    "page": "Página"
   },
   "sortBy": {
     "featured": "Destacados",
@@ -494,6 +495,7 @@
   },
   "jobOfferModal": {
     "closeModal": "Cerrar modal",
+    "noImage": "Sin imagen disponible",
     "description": "Descripción",
     "servicesOffered": "Servicios Ofrecidos",
     "gallery": "Galería de Trabajos",
@@ -501,7 +503,10 @@
     "contactInfo": "Información de Contacto",
     "whatsapp": "WhatsApp",
     "city": "Ciudad",
-    "contactButton": "Contactar por WhatsApp"
+    "contactButton": "Contactar por WhatsApp",
+    "contactWhatsApp": "Contactar por WhatsApp",
+    "scheduleAppointment": "Agendar Cita",
+    "share": "Compartir"
   },
   "navbar": {
     "logo": "Logo",
@@ -843,6 +848,7 @@
     }
   },
   "CertificationsSection": {
+    "optional": "opcional",
     "titles": {
       "certifications": "Certificaciones",
       "myCertifications": "Mis Certificaciones"
@@ -850,7 +856,9 @@
     "buttons": {
       "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "delete": "Eliminar"
     },
     "card": {
       "issued": "Emitido",
@@ -892,6 +900,24 @@
         "placeholder": "https://..."
       }
     },
+    "empty": "Sin certificaciones agregadas aún",
+    "loading": "Cargando certificaciones...",
+    "errors": {
+      "noFixerProfile": "Perfil de técnico no encontrado",
+      "saveError": "Error al guardar certificación",
+      "deleteError": "Error al eliminar certificación",
+      "loadError": "Error al cargar certificaciones"
+    },
+    "notifications": {
+      "success": "Éxito",
+      "error": "Error",
+      "createSuccess": "Certificación agregada exitosamente",
+      "updateSuccess": "Certificación actualizada exitosamente",
+      "deleteTitle": "Eliminar Certificación",
+      "deleteMessage": "¿Estás seguro de que deseas eliminar esta certificación?",
+      "deleteSuccessTitle": "Eliminada",
+      "deleteSuccess": "Certificación eliminada exitosamente"
+    },
     "deleteConfirmation": "¿Estás seguro de eliminar esta certificación?"
   },
   "ExperienceSection": {
@@ -900,9 +926,12 @@
       "myExperience": "Mi Experiencia Laboral"
     },
     "buttons": {
-      "addExperience": "Agregar Experiencia",
+      "addCertification": "Agregar Certificación",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "delete": "Eliminar",
+      "addExperience": "Add Experience"  
     },
     "card": {
       "present": "Presente"
@@ -916,6 +945,7 @@
       "newTitle": "Nueva Experiencia"
     },
     "form": {
+      "optional": "(opcional)",
       "jobTitle": {
         "label": "Cargo / Título",
         "placeholder": "Ej: Plomero Senior",
@@ -928,6 +958,8 @@
       },
       "jobType": {
         "label": "Tipo de Empleo",
+        "select": "Selecciona una opción...",
+        "required": "El tipo de empleo es requerido",
         "options": {
           "fullTime": "Tiempo completo",
           "partTime": "Medio tiempo",
@@ -935,19 +967,39 @@
           "freelance": "Freelance"
         }
       },
-      "isCurrent": {
-        "label": "Actualmente trabajo aquí"
-      },
       "startDate": {
-        "label": "Fecha de Inicio"
+        "label": "Fecha de Inicio",
+        "required": "La fecha de inicio es requerida"
       },
       "endDate": {
         "label": "Fecha de Fin"
+      },
+      "isCurrent": {
+        "label": "Actualmente trabajo aquí"
       }
+    },
+    "loading": "Cargando experiencias...",
+    "errors": {
+      "loadError": "Error al cargar experiencias"
+    },
+    "empty": {
+      "readOnly": "Sin experiencia laboral agregada aún",
+      "editable": "Sin experiencia laboral. ¡Comienza agregando tu primer puesto!"
+    },
+    "notifications": {
+      "success": "Éxito",
+      "error": "Error",
+      "createSuccess": "Experiencia agregada exitosamente",
+      "updateSuccess": "Experiencia actualizada exitosamente",
+      "deleteTitle": "Eliminar Experiencia",
+      "deleteMessage": "¿Estás seguro de que deseas eliminar esta experiencia?",
+      "deleteSuccessTitle": "Eliminada",
+      "deleteSuccess": "Experiencia eliminada exitosamente",
+      "genericError": "Ocurrió un error. Por favor intenta de nuevo."
     },
     "deleteConfirmation": "¿Estás seguro de eliminar esta experiencia?"
   },
-  "JobOffersSection": {
+    "JobOffersSection": {
     "titles": {
       "jobOffers": "Ofertas de Trabajo",
       "myJobOffers": "Mis Ofertas de Trabajo"
@@ -955,7 +1007,8 @@
     "buttons": {
       "newOffer": "Nueva Oferta",
       "cancel": "Cancelar",
-      "save": "Guardar"
+      "save": "Guardar",
+      "saving": "Guardando..."
     },
     "card": {
       "defaultTitle": "Sin título",
@@ -967,6 +1020,10 @@
     },
     "form": {
       "defaultCity": "Cochabamba",
+      "title": {
+        "label": "Título",
+        "placeholder": "Ingresa el título de la oferta"
+      },
       "category": {
         "label": "Categoría",
         "select": "Seleccionar...",
@@ -978,6 +1035,13 @@
           "painting": "Pintura"
         }
       },
+      "tags": {
+        "label": "Etiquetas (máximo 5)",
+        "empty": "Sin etiquetas seleccionadas",
+        "addTag": "Agregar Etiqueta",
+        "limitReached": "Máximo de etiquetas alcanzado (5)",
+        "alreadyAdded": " (ya agregada)"
+      },
       "description": {
         "label": "Descripción",
         "placeholder": "Describe tu servicio...",
@@ -988,8 +1052,36 @@
       },
       "city": {
         "label": "Ciudad"
+      },
+      "contactPhone": {
+        "label": "Teléfono de Contacto"
+      },
+      "images": {
+        "label": "Imágenes"
       }
     },
+    "loading": "Cargando ofertas...",
+    "empty": "No hay ofertas publicadas aún.",
+    "notifications": {
+      "noUser": "No se identificó al usuario.",
+      "noImages": "Debes subir al menos una foto.",
+      "imageLimit": "Límite excedido",
+      "imageLimitMessage": "Solo puedes subir hasta 5 imágenes.",
+      "imageTooBig": "Imagen muy pesada",
+      "imageSizeMessage": "La imagen {fileName} excede 5MB.",
+      "updated": "Actualizado",
+      "updateSuccess": "Oferta actualizada correctamente.",
+      "published": "Publicado",
+      "createSuccess": "Oferta creada correctamente.",
+      "error": "Error",
+      "errorMessage": "Error al procesar la solicitud.",
+      "deleteTitle": "¿Eliminar oferta?",
+      "deleteMessage": "Esta acción no se puede deshacer.",
+      "deleted": "Eliminado",
+      "deleteSuccess": "Oferta eliminada.",
+      "deleteError": "No se pudo eliminar la oferta."
+    },
+    "confirmButton": "Confirmar",
     "deleteConfirmation": "¿Estás seguro de eliminar esta oferta?"
   },
   "PortfolioSection": {
@@ -1030,7 +1122,8 @@
         "placeholder": "Se intentará extraer automáticamente"
       }
     },
-    "deleteConfirmation": "¿Estás seguro de eliminar este elemento?"
+    "deleteConfirmation": "¿Estás seguro de eliminar este elemento?",
+    "emptyState": "portfolio vacio"
   },
   "RegistroForm": {
     "fields": {
@@ -1162,111 +1255,176 @@
       "logout": "Cerrar sesión"
     }
   },
-  "HowUseServineoTitle": {
-    "title": "Cómo funciona Servineo",
-    "subtitle": "Estos son los pasos que debe seguir para\npoder usar nuestra plataforma facilmente",
-    "guide": "¿Necesitas una experiencia mas inmersiva? prueba nuestra",
-    "guideLink": "guia interactiva",
-    "fingOut": "Descubre nuestro consejos"
-  },
-  "Pasos": {
-    "title": "Sigue estos pasos para contratar",
-    "subtitle": "Encuentra el fixer que tenga las habilidades que necesitas,\npuedes empezar con estos pasos",
-    "step1": {
-      "title": "Navega y busca",
-      "description": "Explora nuestros servicios utilizando la barra de búsqueda, filtros por categorías y palabras claves para encontrar lo que buscas."
+  "helpCenter": {
+    "title": "Centro de Ayuda",
+    "subtitle": "Encuentra respuestas rápidas, guías y participa en la comunidad para resolver tus dudas sobre Servineo.",
+    "search": {
+      "placeholder": "Buscar ayuda en Servineo...",
+      "button": "Ejecutar búsqueda"
     },
-    "step2": {
-      "title": "Contacta",
-      "description": "Comunícate con el fixer directamente mediante su número telefónico para poder saber más sobre el servicio o coordinar el trabajo."
+    "messages": {
+      "emptySearch": "Por favor, ingresa un término de búsqueda.",
+      "searching": "Búsqueda simulada para: \"{query}\".",
+      "noResults": "No se encontraron resultados para \"{query}\".",
+      "navigating": "Simulando navegación a: {url}",
+      "noCategories": "No se encontraron categorías que coincidan con \"{query}\"."
     },
-    "step3": {
-      "title": "Coordina tu servicio",
-      "description": "Coordina con tu fixer para que el servicio sea lo que tu busca y elige una oferta antes de enviar los datos necesitados por el fixer."
+    "suggestions": {
+      "paymentProblems": "Problemas con mi pago",
+      "paymentMethods": "Métodos de pago aceptados",
+      "resetPassword": "Restablecer contraseña",
+      "billing": "Información de facturación",
+      "support": "Contacto de soporte"
     },
-    "step4": {
-      "title": "Aprueba y contacta",
-      "description": "Recibe el servicio y deja tus comentarios sobre la calidad del servicio."
+    "sections": {
+      "faq": {
+        "title": "Preguntas Frecuentes (FAQ)",
+        "description": "Respuestas rápidas a las dudas comunes."
+      },
+      "forum": {
+        "title": "Foro de Usuarios",
+        "description": "Comparte tus dudas y ayuda a otros usuarios"
+      }
     },
-    "button": "Ver servicios"
-  },
-  "Consejos": {
-    "title": "Consejos para un mejor uso",
-    "subtitle": "Perfecciona tu uso sobre la plataforma,\naqui tenemos algunos consejos",
-    "tip1": {
-      "title": "Filtros",
-      "description": "Aplica los filtros de búsqueda, palabras claves o consulta nuestro mapa si hay fixers cercanos a tu ubicación."
-    },
-    "tip2": {
-      "title": "Calificaciones y reseñas",
-      "description": "Consulta las calificaciones y opiniones de otras personas para saber mas sobre el desempeño de cierto fixer."
-    },
-    "tip3": {
-      "title": "Comunicación",
-      "description": "Comunícate con el fixer para tener más detalles del servicio y aclarar las dudas que tengas."
+    "results": {
+      "title": "Resultados para \"{query}\"",
+      "empty": "No se encontraron resultados."
     }
   },
-  "CategoriasPopulares": {
-    "title": "Categorías Populares",
-    "subtitle": "¿No sabes por donde comenzar?",
-    "subtitle2": "Explora nuestras categorías más populares",
-    "card1": {
-      "name": "Plomería",
-      "description": "Reparaciones e instalaciones de fontanería"
-    },
-    "card2": {
-      "name": "Electricidad",
-      "description": "Instalaciones y reparaciones eléctricas"
-    }, 
-    "card3": {
-      "name": "Carpintería",
-      "description": "Trabajos en madera y muebles"
-    },
-    "card4": {
-      "name": "Limpieza",
-      "description": "Servicios de limpieza profesional"
-    },
-    "card5": {
-      "name": "Jardinería",
-      "description": "Cuidado y mantenimiento de jardines"
-    },
-    "card6": {
-      "name": "Pintura",
-      "description": "Servicios de pintura residencial"
-    },
-    "card7": {
-      "name": "Mudanzas",
-      "description": "Servicios de mudanza y transporte"
-    },
-    "card8": {
-      "name": "Tecnología",
-      "description": "Reparación de equipos tecnológicos"
-    },
-    "demand": "de demanda",
-    "button": "Ver profesionales",
-    "button2": "Ver todas las categorias"
-  },
-  "Accordion": {
+  "faq": {
     "title": "Preguntas Frecuentes",
-    "section1": {
-      "question": "¿Cómo funciona Servineo?",
-      "answer":"Servineo conecta hogares con profesionales calificados en Cochabamba. Publica tu necesidad, recibe cotizaciones de fixers verificados y elige al mejor para el trabajo."
+    "subtitle": "Encuentra respuestas rápidas a las dudas más comunes sobre Servineo",
+    "backButton": "Volver atrás"
+  },
+  "tracking": {
+    "title": "Tracking de Citas",
+    "subtitle": "Monitoreo de actividad y cobertura geográfica",
+    "filters": {
+      "from": "Desde",
+      "to": "Hasta"
     },
-    "section2": {
-      "question": "¿Qué tipos de servicios ofrecen?",
-      "answer":"Ofrecemos plomería, electricidad, carpintería, pintura, limpieza, jardinería, soldadura, albañilería y muchos servicios más para el hogar."
+    "map": {
+      "loading": "Cargando Mapa...",
+      "loadingData": "Cargando datos...",
+      "noAppointments": "No hay citas geolocalizadas",
+      "unknown": "Desconocido",
+      "client": "Cliente"
     },
-    "section3":{
-      "question": "¿Cómo se verifican los fixers?",
-      "answer": "Todos nuestros fixers pasan por un proceso de verificación que incluye revisión de documentos, entrevistas y evaluación de experiencia previa."
+    "metrics": {
+      "total": "Total Citas",
+      "scheduled": "Citas Agendadas",
+      "cancelled": "Citas Canceladas"
+    }
+  },
+  "dashboard": {
+    "loading": "Cargando estadísticas...",
+    "error": "Error al cargar las estadísticas",
+    "periods": {
+      "weekly": "Semanal",
+      "monthly": "Mensual",
+      "yearly": "Anual"
     },
-    "section4":{
-      "question": "¿Qué garantía ofrecen?",
-      "answer": "Ofrecemos garantía de 30 días en todos los trabajos realizados. Si no estás satisfecho, nuestro equipo de soporte te ayudará a resolver cualquier problema."
+    "periodLabel": "Período",
+    "totalSearches": "Total de búsquedas",
+    "noData": "No hay datos disponibles para el período seleccionado",
+    "charts": {
+      "userDistribution": {
+        "title": "Distribución de usuarios",
+        "description": "Tipos de usuarios que realizaron búsquedas"
+      },
+      "fixerRanges": {
+        "title": "Rangos de nombres de fixers",
+        "description": "Búsquedas por rango de letras del nombre"
+      },
+      "cities": {
+        "title": "Ciudades",
+        "description": "Búsquedas por ciudad"
+      },
+      "jobTypes": {
+        "title": "Tipos de trabajo",
+        "description": "Búsquedas por tipo de trabajo"
+      },
+      "filterStats": "Estadísticas de este filtro",
+      "showingTotal": "Mostrando búsquedas totales"
+    }
+  },
+  "adminLogin": {
+    "logo": "SERVINEO",
+    "subtitle": "Admin Login",
+    "welcome": "Bienvenido de nuevo, Admin",
+    "form": {
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "admin@servineo.com",
+      "passwordLabel": "Contraseña",
+      "signInButton": "Iniciar sesión como Admin",
+      "signingIn": "Iniciando sesión...",
+      "or": "o",
+      "googleButton": "Iniciar sesión con Google",
+      "connecting": "Conectando..."
     },
-    "section5":{
-      "question": "¿Cómo se realizan los pagos?",
-      "answer": "Los pagos son 100% seguros a través de nuestra plataforma. Solo liberas el pago cuando el trabajo esté completado y estés satisfecho con el resultado."
+    "errors": {
+      "googleApiNotAvailable": "Google API no disponible",
+      "googleClientIdNotConfigured": "Google Client ID no configurado",
+      "googleLoginError": "Error con Google Login",
+      "noCredential": "Error: No se recibió credencial de Google",
+      "incorrectCredentials": "Credenciales incorrectas",
+      "serverError": "Error del servidor"
+    }
+  },
+  "footer": {
+    "skipToMain": "Saltar al contenido principal",
+    "description": "La plataforma líder para conectar hogares con profesionales calificados en Cochabamba. Calidad garantizada y servicio confiable.",
+    "explore": {
+      "title": "Exploremos SERVINEO",
+      "services": "Servicios",
+      "offerServices": "Ofrece tus servicios",
+      "jobOffers": "Ofertas de trabajo"
+    },
+    "company": {
+      "title": "Empresa",
+      "aboutUs": "Sobre nosotros",
+      "workWithUs": "Trabaja con nosotros",
+      "testimonials": "Testimonios",
+      "support": "Apoyo",
+      "whyServineo": "¿Por qué Servineo?",
+      "howItWorks": "Cómo funciona Servineo",
+      "restartTour": "Ver guía nuevamente"
+    },
+    "legal": {
+      "title": "Legal",
+      "privacy": "Política de privacidad",
+      "terms": "Acuerdos de usuario",
+      "cookies": "Política de cookies"
+    },
+    "contact": {
+      "title": "Contáctanos",
+      "location": "Ubicación: Cochabamba, Bolivia"
+    },
+    "social": {
+      "title": "Síguenos"
+    },
+    "copyright": "© 2024 Servineo. Todos los derechos reservados.",
+    "madeWith": "Hecho con ❤️ en Cochabamba",
+    "operational": "Sistema operativo",
+    "ariaLabels": {
+      "footer": "Pie de página de Servineo",
+      "footerLinks": "Enlaces del pie de página",
+      "viewLocation": "Ver ubicación en Google Maps: Cochabamba, Bolivia",
+      "whatsapp": "Número de WhatsApp",
+      "sendWhatsApp": "Enviar mensaje por WhatsApp al +591 75139742",
+      "email": "Correo electrónico de contacto",
+      "sendEmail": "Enviar correo electrónico a servineo.serviciostecnicos@gmail.com",
+      "socialMedia": "Redes sociales de Servineo",
+      "facebook": "Visitar Facebook de Servineo",
+      "instagram": "Visitar Instagram de Servineo",
+      "twitter": "Visitar X (antes Twitter) de Servineo",
+      "copyright": "Créditos y derechos de autor"
+    }
+  },
+  "home": {
+    "mapSection": {
+      "title": "Encuentra Servicios Cerca de Ti",
+      "subtitle": "Explora los profesionales disponibles en tu zona"
     }
   }
 }

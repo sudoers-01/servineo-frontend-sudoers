@@ -309,7 +309,6 @@ export function FixerProfile({ fixer, isOwner = false }: FixerProfileProps) {
                 monthlyData={fixer.monthlyData}
               />
             </div>
-
             {/* Gráfico de estadísticas de trabajos */}
             <div>
               <JobStatistics />

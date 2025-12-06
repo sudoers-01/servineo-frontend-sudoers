@@ -1,3 +1,4 @@
+// src/app/redux/services/twofactor.ts
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 function getAuthToken(): string | null {
@@ -5,7 +6,20 @@ function getAuthToken(): string | null {
   return localStorage.getItem('servineo_token');
 }
 
-async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+type ApiResponse = Record<string, unknown>;
+
+type ApiError = Error & {
+  status?: number;
+  data?: ApiResponse;
+  // campos adicionales que usamos más abajo
+  locked?: boolean;
+  lockedUntil?: string;
+  retryAfterSeconds?: number;
+  attemptsLeft?: number;
+  attempts?: number;
+};
+
+async function fetchWithAuth(endpoint: string, options: RequestInit = {}): Promise<ApiResponse> {
   const token = getAuthToken();
 
   const headers: Record<string, string> = {
@@ -18,65 +32,87 @@ async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
   }
 
   const url = `${API_BASE}/api/controlC/2fa${endpoint}`;
-  console.log('🔍 Fetch URL:', url);
 
   const response = await fetch(url, {
     ...options,
     headers,
   });
 
+  let data: ApiResponse = {};
+  try {
+    // intentamos parsear JSON; si no hay body válido, dejamos {}
+    // (algunos endpoints pueden no devolver JSON)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    data = (await response.json()) as ApiResponse;
+  } catch {
+    // ignoramos fallo en parseo — mantenemos data = {}
+  }
+
   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const message = errorData.message || `Error ${response.status}`;
-    console.error('❌ Error response:', errorData);
-    throw new Error(message);
+    const error = new Error((data?.message as string) || `HTTP ${response.status}`) as ApiError;
+    error.status = response.status;
+    error.data = data;
+    throw error;
   }
 
-  return response.json();
+  return data;
 }
 
-export async function generateQr() {
-  try {
-    console.log('🔍 Generando QR...');
-    const data = await fetchWithAuth('/generate', {
-      method: 'POST',
-    });
-    console.log('✅ QR generado:', data);
-    return data; // { qrDataUrl, issuer }
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Error al generar código QR';
-    console.error('❌ Error al generar QR:', errorMessage);
-    throw new Error(errorMessage);
-  }
+// -----------------------------
+// GENERAR QR
+// -----------------------------
+export async function generateQr(): Promise<ApiResponse> {
+  return fetchWithAuth('/generate', { method: 'POST' });
 }
 
-export async function verifyToken(token: string) {
+// -----------------------------
+// VERIFICAR TOKEN (AQUÍ ERA EL CAMBIO IMPORTANTE)
+// -----------------------------
+export async function verifyToken(token: string): Promise<ApiResponse> {
   try {
-    console.log('🔍 Verificando token...');
-    const data = await fetchWithAuth('/verify', {
+    return await fetchWithAuth('/verify', {
       method: 'POST',
       body: JSON.stringify({ token }),
     });
-    console.log('✅ Token verificado:', data);
-    return data; // { recoveryCodes: [...] }
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Código incorrecto o expirado';
-    console.error('❌ Error al verificar token:', errorMessage);
-    throw new Error(errorMessage);
+  } catch (err: unknown) {
+    const apiErr = err as ApiError;
+    const status = apiErr?.status;
+    const data = (apiErr?.data as ApiResponse) ?? {};
+
+    // ------------------------------------------------------
+    // 💥 SI EL BACKEND INDICA BLOQUEO (423)
+    // ------------------------------------------------------
+    if (status === 423) {
+      const e = new Error((data?.message as string) || 'Cuenta bloqueada temporalmente.') as ApiError;
+      e.locked = true;
+      e.lockedUntil = (data?.lockedUntil as string) ?? undefined;
+      e.retryAfterSeconds = (data?.retryAfterSeconds as number) ?? undefined;
+      throw e;
+    }
+
+    // ------------------------------------------------------
+    // ❌ TOKEN INCORRECTO, PERO NO BLOQUEADO (400)
+    // Back devuelve:
+    // { message: "Token inválido", attemptsLeft, attempts }
+    // ------------------------------------------------------
+    if (status === 400) {
+      const e = new Error((data?.message as string) || 'Token inválido') as ApiError;
+      e.attemptsLeft = (data?.attemptsLeft as number) ?? undefined;
+      e.attempts = (data?.attempts as number) ?? undefined;
+      throw e;
+    }
+
+    // ------------------------------------------------------
+    // ⚠️ Otros errores
+    // ------------------------------------------------------
+    const e = new Error((data?.message as string) || 'Error verificando código') as ApiError;
+    throw e;
   }
 }
 
-export async function disable2fa() {
-  try {
-    console.log('🔍 Deshabilitando 2FA...');
-    const data = await fetchWithAuth('/disable', {
-      method: 'POST',
-    });
-    console.log('✅ 2FA deshabilitado:', data);
-    return data;
-  } catch (err) {
-    const errorMessage = err instanceof Error ? err.message : 'Error al deshabilitar 2FA';
-    console.error('❌ Error al deshabilitar 2FA:', errorMessage);
-    throw new Error(errorMessage);
-  }
+// -----------------------------
+// DESHABILITAR 2FA
+// -----------------------------
+export async function disable2fa(): Promise<ApiResponse> {
+  return fetchWithAuth('/disable', { method: 'POST' });
 }
